@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LibJpeg.NET</RootNamespace>
+    <AssemblyName>LibJpeg.NET</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="JHUFF_TBL.cs" />
+    <Compile Include="jpeg_color_converter.cs" />
+    <Compile Include="jpeg_common_struct.cs" />
+    <Compile Include="jpeg_component_info.cs" />
+    <Compile Include="jpeg_compress_struct.cs" />
+    <Compile Include="jpeg_comp_master.cs" />
+    <Compile Include="jpeg_c_coef_controller.cs" />
+    <Compile Include="jpeg_c_main_controller.cs" />
+    <Compile Include="jpeg_c_prep_controller.cs" />
+    <Compile Include="jpeg_destination_mgr.cs" />
+    <Compile Include="jpeg_downsampler.cs" />
+    <Compile Include="jpeg_entropy_encoder.cs" />
+    <Compile Include="jpeg_error_mgr.cs" />
+    <Compile Include="jpeg_forward_dct.cs" />
+    <Compile Include="jpeg_marker_writer.cs" />
+    <Compile Include="jpeg_progress_mgr.cs" />
+    <Compile Include="jpeg_scan_info.cs" />
+    <Compile Include="JQUANT_TBL.cs" />
+    <Compile Include="jvirt_barray_control.cs" />
+    <Compile Include="jvirt_sarray_control.cs" />
+    <Compile Include="J_COLOR_SPACE.cs" />
+    <Compile Include="J_DCT_METHOD.cs" />
+    <Compile Include="J_MESSAGE_CODE.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
