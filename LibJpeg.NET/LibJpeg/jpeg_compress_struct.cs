@@ -1379,7 +1379,7 @@ namespace LibJpeg.NET
             if (nsymbols < 1 || nsymbols> 256)
                 ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
-            //memcpy((void *) htblptr.huffval, (const void *) val, nsymbols * sizeof(UINT8));
+            //memcpy((void *) htblptr.huffval, (const void *) val, nsymbols * sizeof(byte));
 
             /* Initialize sent_table false so table will be written to JPEG file. */
             htblptr.sent_table = false;

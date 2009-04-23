@@ -1,4 +1,13 @@
-﻿using System;
+﻿/* Copyright (C) 2008-2009, Bit Miracle
+ * http://www.bitmiracle.com
+ * 
+ * Copyright (C) 1994-1996, Thomas G. Lane.
+ * This file is part of the Independent JPEG Group's software.
+ * For conditions of distribution and use, see the accompanying README file.
+ *
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -67,5 +76,21 @@ namespace LibJpeg.NET
 
         // a tad under 64K to prevent overflows
         public const int JPEG_MAX_DIMENSION = 65500;
+
+        public const int MAXJSAMPLE = 255;
+        public const int CENTERJSAMPLE = 128;
+
+        // Ordering of RGB data in scanlines passed to or from the application.
+        // RESTRICTIONS:
+        // 1. These macros only affect RGB<=>YCbCr color conversion, so they are not
+        // useful if you are using JPEG color spaces other than YCbCr or grayscale.
+        // 2. The color quantizer modules will not behave desirably if RGB_PIXELSIZE
+        // is not 3 (they don't understand about dummy color components!).  So you
+        // can't use color quantization if you change that value.
+        public const int RGB_RED = 0;   /* Offset of Red in an RGB scanline element */
+        public const int RGB_GREEN = 1;   /* Offset of Green */
+        public const int RGB_BLUE = 2;   /* Offset of Blue */
+        public const int RGB_PIXELSIZE = 3;   /* JSAMPLEs per RGB scanline element */
+
     }
 }

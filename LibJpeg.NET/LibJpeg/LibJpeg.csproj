@@ -37,8 +37,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="ComponentBuffer.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="JBLOCK.cs" />
     <Compile Include="JHUFF_TBL.cs" />
+    <Compile Include="JpegUtils.cs" />
     <Compile Include="jpeg_color_converter.cs" />
     <Compile Include="jpeg_common_struct.cs" />
     <Compile Include="jpeg_component_info.cs" />
@@ -52,12 +55,14 @@
     <Compile Include="jpeg_entropy_encoder.cs" />
     <Compile Include="jpeg_error_mgr.cs" />
     <Compile Include="jpeg_forward_dct.cs" />
+    <Compile Include="JPEG_MARKER.cs" />
     <Compile Include="jpeg_marker_writer.cs" />
     <Compile Include="jpeg_progress_mgr.cs" />
     <Compile Include="jpeg_scan_info.cs" />
     <Compile Include="JQUANT_TBL.cs" />
     <Compile Include="jvirt_barray_control.cs" />
     <Compile Include="jvirt_sarray_control.cs" />
+    <Compile Include="J_BUF_MODE.cs" />
     <Compile Include="J_COLOR_SPACE.cs" />
     <Compile Include="J_DCT_METHOD.cs" />
     <Compile Include="J_MESSAGE_CODE.cs" />
