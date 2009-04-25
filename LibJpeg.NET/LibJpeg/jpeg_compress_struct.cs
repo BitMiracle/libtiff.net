@@ -885,7 +885,7 @@ namespace LibJpeg.NET
                 num_lines = rows_left;
 
             uint row_ctr = 0;
-            m_main.process_data(scanlines, row_ctr, num_lines);
+            m_main.process_data(scanlines, ref row_ctr, num_lines);
             m_next_scanline += row_ctr;
             return row_ctr;
         }

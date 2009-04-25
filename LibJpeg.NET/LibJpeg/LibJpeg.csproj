@@ -66,6 +66,8 @@
     <Compile Include="J_COLOR_SPACE.cs" />
     <Compile Include="J_DCT_METHOD.cs" />
     <Compile Include="J_MESSAGE_CODE.cs" />
+    <Compile Include="my_destination_mgr.cs" />
+    <Compile Include="phuff_entropy_encoder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
