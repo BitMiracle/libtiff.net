@@ -109,7 +109,7 @@ namespace LibJpeg.NET
             * this lets us detect duplicate VAL entries here, and later
             * allows emit_bits to detect any attempt to emit such symbols.
             */
-            //memset((void *) dtbl.ehufsi, 0, sizeof(dtbl.ehufsi));
+            Array.Clear(dtbl.ehufsi, 0, dtbl.ehufsi.Length);
 
             /* This is also a convenient place to check for out-of-range
             * and duplicated VAL entries.  We allow 0..255 for AC symbols

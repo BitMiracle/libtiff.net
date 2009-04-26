@@ -113,10 +113,8 @@ namespace LibJpeg.NET
 
         public static void jcopy_sample_rows(byte[][] input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, uint num_cols)
         {
-            uint count = (uint) (num_cols * sizeof(byte));
-
-            //for (int row = 0; row < num_rows; row++)
-            //    memcpy((void *)output_array[dest_row + row], (const void *)input_array[source_row + row], count);
+            for (int row = 0; row < num_rows; row++)
+                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
 
         /// <summary>

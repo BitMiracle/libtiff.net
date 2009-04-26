@@ -51,7 +51,7 @@ namespace LibJpeg.NET
 
         private bool m_gather_statistics;
 
-        private savable_state m_saved;        /* Bit buffer & DC state at start of MCU */
+        private savable_state m_saved = new savable_state();        /* Bit buffer & DC state at start of MCU */
 
         /* These fields are NOT loaded into local working state. */
         private uint m_restarts_to_go;    /* MCUs left in this restart interval */

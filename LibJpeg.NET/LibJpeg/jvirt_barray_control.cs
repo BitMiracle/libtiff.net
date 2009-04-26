@@ -56,9 +56,12 @@ namespace LibJpeg.NET
             if (end_row > m_rows_in_array || m_mem_buffer == null)
                 m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
 
-            /* Return address of proper part of the buffer */
-            //return m_mem_buffer + start_row;
-            return null;
+            /* Return proper part of the buffer */
+            JBLOCK[][] ret = new JBLOCK[num_rows][];
+            for (int i = 0; i < num_rows; i++)
+                ret[i] = m_mem_buffer[start_row + i];
+
+            return ret;
         }
     }
 }

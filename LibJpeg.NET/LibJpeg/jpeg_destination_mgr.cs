@@ -19,6 +19,7 @@ namespace LibJpeg.NET
     public abstract class jpeg_destination_mgr
     {
         private byte[] m_next_output_byte;   /* => next byte to write in buffer */
+        private int m_position;
         private int m_free_in_buffer;  /* # of byte spaces remaining in buffer */
 
         public abstract void init_destination();
@@ -30,7 +31,9 @@ namespace LibJpeg.NET
         /// </summary>
         public virtual bool emit_byte(int val)
         {
-            //*m_next_output_byte++ = (JOCTET)val;
+            m_next_output_byte[m_position] = (byte)val;
+            m_position++;
+
             if (--m_free_in_buffer == 0)
             {
                 if (!empty_output_buffer())
@@ -44,6 +47,7 @@ namespace LibJpeg.NET
         {
             m_next_output_byte = buffer;
             m_free_in_buffer = size;
+            m_position = 0;
         }
 
         protected int freeInBuffer()

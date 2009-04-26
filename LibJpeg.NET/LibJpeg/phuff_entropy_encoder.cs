@@ -155,7 +155,7 @@ namespace LibJpeg.NET
                     if (m_count_ptrs[tbl] == null)
                         m_count_ptrs[tbl] = new long[257];
 
-                    //memset((void*)m_count_ptrs[tbl], 0, 257 * sizeof(long));
+                    Array.Clear(m_count_ptrs[tbl], 0, 257);
                 }
                 else
                 {

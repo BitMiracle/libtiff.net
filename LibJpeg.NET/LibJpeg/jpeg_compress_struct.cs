@@ -747,6 +747,8 @@ namespace LibJpeg.NET
             {
                 m_script_space_size = Math.Max(nscans, 10);
                 m_script_space = new jpeg_scan_info[m_script_space_size];
+                for (int i = 0; i < m_script_space_size; i++)
+                    m_script_space[i] = new jpeg_scan_info();
             }
 
             m_scan_info = m_script_space;
