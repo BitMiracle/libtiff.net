@@ -1366,7 +1366,7 @@ namespace LibJpeg.NET
                 htblptr = new JHUFF_TBL();
 
             /* Copy the number-of-symbols-of-each-code-length counts */
-            //memcpy((void *) htblptr.bits, (const void *) bits, sizeof(htblptr.bits));
+            Array.Copy(bits, htblptr.bits,htblptr.bits.Length);
 
             /* Validate the counts.  We do this here mainly so we can copy the right
             * number of symbols from the val[] array, without risking marching off
@@ -1379,7 +1379,7 @@ namespace LibJpeg.NET
             if (nsymbols < 1 || nsymbols> 256)
                 ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
-            //memcpy((void *) htblptr.huffval, (const void *) val, nsymbols * sizeof(byte));
+            Array.Copy(val, htblptr.huffval, nsymbols);
 
             /* Initialize sent_table false so table will be written to JPEG file. */
             htblptr.sent_table = false;

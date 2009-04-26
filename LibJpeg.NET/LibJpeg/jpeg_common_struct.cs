@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
 
 namespace LibJpeg.NET
 {
@@ -79,6 +80,28 @@ namespace LibJpeg.NET
                 result[i] = new byte[samplesPerRow];
 
             return result;
+        }
+
+        public static string Version
+        {
+            get
+            {
+                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+                string versionString = version.Major.ToString() + "." + version.Minor.ToString();
+
+                versionString += "." + version.MajorRevision.ToString();
+                versionString += "." + version.MinorRevision.ToString();
+
+                return versionString;
+            }
+        }
+
+        public static string Copyright
+        {
+            get
+            {
+                return "Copyright (C) 2008-2009, Bit Miracle";
+            }
         }
 
         // Generic versions of jpeg_abort and jpeg_destroy that work on either
