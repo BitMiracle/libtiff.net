@@ -51,7 +51,7 @@ namespace LibJpeg.NET
         private int m_put_bits;           /* # of bits now in it */
 
         /* Coding status for DC components */
-        private int[] m_last_dc_val = new int[MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
+        private int[] m_last_dc_val = new int[Constants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
 
         /* Coding status for AC components */
         private int m_ac_tbl_no;      /* the table number of the single component */
@@ -67,17 +67,17 @@ namespace LibJpeg.NET
         * Since any one scan codes only DC or only AC, we only need one set
         * of tables, not one for DC and one for AC.
         */
-        private c_derived_tbl[] m_derived_tbls = new c_derived_tbl[NUM_HUFF_TBLS];
+        private c_derived_tbl[] m_derived_tbls = new c_derived_tbl[Constants.NUM_HUFF_TBLS];
 
         /* Statistics tables for optimization; again, one set is enough */
-        private long[][] m_count_ptrs = new long[NUM_HUFF_TBLS][];
+        private long[][] m_count_ptrs = new long[Constants.NUM_HUFF_TBLS][];
 
         public phuff_entropy_encoder(jpeg_compress_struct cinfo)
         {
             m_cinfo = cinfo;
 
             /* Mark tables unallocated */
-            for (int i = 0; i < NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < Constants.NUM_HUFF_TBLS; i++)
             {
                 m_derived_tbls[i] = null;
                 m_count_ptrs[i] = null;
@@ -147,7 +147,7 @@ namespace LibJpeg.NET
                 {
                     /* Check for invalid table index */
                     /* (make_c_derived_tbl does this in the other path) */
-                    if (tbl < 0 || tbl >= NUM_HUFF_TBLS)
+                    if (tbl < 0 || tbl >= Constants.NUM_HUFF_TBLS)
                         m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tbl);
 
                     /* Allocate and zero the statistics tables */
@@ -155,13 +155,13 @@ namespace LibJpeg.NET
                     if (m_count_ptrs[tbl] == null)
                         m_count_ptrs[tbl] = new long[257];
 
-                    memset((void*)m_count_ptrs[tbl], 0, 257 * sizeof(long));
+                    //memset((void*)m_count_ptrs[tbl], 0, 257 * sizeof(long));
                 }
                 else
                 {
                     /* Compute derived values for Huffman table */
                     /* We may do this more than once for a table, but it's not expensive */
-                    jpeg_make_c_derived_tbl(is_DC_band, tbl, m_derived_tbls[tbl]);
+                    jpeg_make_c_derived_tbl(is_DC_band, tbl, ref m_derived_tbls[tbl]);
                 }
             }
 
@@ -211,7 +211,7 @@ namespace LibJpeg.NET
         private bool encode_mcu_DC_first(JBLOCK[][] MCU_data)
         {
             /* Emit restart marker if needed */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                     emit_restart(m_next_restart_num);
@@ -244,7 +244,7 @@ namespace LibJpeg.NET
 
                 /* Find the number of bits needed for the magnitude of the coefficient */
                 int nbits = 0;
-                while (temp)
+                while (temp != 0)
                 {
                     nbits++;
                     temp >>= 1;
@@ -261,15 +261,15 @@ namespace LibJpeg.NET
 
                 /* Emit that number of bits of the value, if positive, */
                 /* or the complement of its magnitude, if negative. */
-                if (nbits)
+                if (nbits != 0)
                 {
                     /* emit_bits rejects calls with size 0 */
-                    emit_bits((unsigned int) temp2, nbits);
+                    emit_bits((uint) temp2, nbits);
                 }
             }
 
             /* Update restart-interval state too */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -291,7 +291,7 @@ namespace LibJpeg.NET
         private bool encode_mcu_AC_first(JBLOCK[][] MCU_data)
         {
             /* Emit restart marker if needed */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                     emit_restart(m_next_restart_num);
@@ -302,7 +302,7 @@ namespace LibJpeg.NET
             int r = 0;
             for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
             {
-                int temp = MCU_data[0][0][JpegUtils::jpeg_natural_order[k]];
+                int temp = MCU_data[0][0][JpegUtils.jpeg_natural_order[k]];
                 if (temp == 0)
                 {
                     r++;
@@ -348,7 +348,7 @@ namespace LibJpeg.NET
 
                 /* Find the number of bits needed for the magnitude of the coefficient */
                 int nbits = 1;          /* there must be at least one 1 bit */
-                while ((temp >>= 1))
+                while ((temp >>= 1) != 0)
                     nbits++;
 
                 /* Check for out-of-range coefficient values */
@@ -360,7 +360,7 @@ namespace LibJpeg.NET
 
                 /* Emit that number of bits of the value, if positive, */
                 /* or the complement of its magnitude, if negative. */
-                emit_bits((unsigned int) temp2, nbits);
+                emit_bits((uint) temp2, nbits);
 
                 r = 0;          /* reset zero run length */
             }
@@ -374,7 +374,7 @@ namespace LibJpeg.NET
             }
 
             /* Update restart-interval state too */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -396,7 +396,7 @@ namespace LibJpeg.NET
         private bool encode_mcu_DC_refine(JBLOCK[][] MCU_data)
         {
             /* Emit restart marker if needed */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                     emit_restart(m_next_restart_num);
@@ -407,11 +407,11 @@ namespace LibJpeg.NET
             {
                 /* We simply emit the Al'th bit of the DC coefficient value. */
                 int temp = MCU_data[blkn][0][0];
-                emit_bits((unsigned int) (temp >> m_cinfo.m_Al), 1);
+                emit_bits((uint) (temp >> m_cinfo.m_Al), 1);
             }
 
             /* Update restart-interval state too */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -431,7 +431,7 @@ namespace LibJpeg.NET
         private bool encode_mcu_AC_refine(JBLOCK[][] MCU_data)
         {
             /* Emit restart marker if needed */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                     emit_restart(m_next_restart_num);
@@ -443,10 +443,10 @@ namespace LibJpeg.NET
              * coefficients' absolute values and the EOB position.
              */
             int EOB = 0;
-            int absvalues[DCTSIZE2];
+            int[] absvalues = new int[Constants.DCTSIZE2];
             for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
             {
-                int temp = MCU_data[0][0][JpegUtils::jpeg_natural_order[k]];
+                int temp = MCU_data[0][0][JpegUtils.jpeg_natural_order[k]];
 
                 /* We must apply the point transform by Al.  For AC coefficients this
                  * is an integer division with rounding towards 0.  To do this portably
@@ -468,8 +468,8 @@ namespace LibJpeg.NET
             /* Encode the AC coefficients per section G.1.2.3, fig. G.7 */
 
             int r = 0;          /* r = run length of zeros */
-            unsigned int BR = 0;         /* BR = count of buffered bits added now */
-            int bitBufferOffset = m_BE; /* Append bits to buffer */
+            uint BR = 0;         /* BR = count of buffered bits added now */
+            int bitBufferOffset = (int)m_BE; /* Append bits to buffer */
 
             for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
             {
@@ -516,8 +516,8 @@ namespace LibJpeg.NET
                 emit_symbol(m_ac_tbl_no, (r << 4) + 1);
 
                 /* Emit output bit for newly-nonzero coef */
-                temp = (MCU_data[0][0][JpegUtils::jpeg_natural_order[k]] < 0) ? 0 : 1;
-                emit_bits((unsigned int) temp, 1);
+                temp = (MCU_data[0][0][JpegUtils.jpeg_natural_order[k]] < 0) ? 0 : 1;
+                emit_bits((uint) temp, 1);
 
                 /* Emit buffered correction bits that must be associated with this code */
                 emit_buffered_bits(bitBufferOffset, BR);
@@ -536,12 +536,12 @@ namespace LibJpeg.NET
                  * 1. overflow of the EOB counter;
                  * 2. overflow of the correction bit buffer during the next MCU.
                  */
-                if (m_EOBRUN == 0x7FFF || m_BE > (MAX_CORR_BITS - DCTSIZE2 + 1))
+                if (m_EOBRUN == 0x7FFF || m_BE > (MAX_CORR_BITS - Constants.DCTSIZE2 + 1))
                     emit_eobrun();
             }
 
             /* Update restart-interval state too */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -576,8 +576,8 @@ namespace LibJpeg.NET
             /* It's important not to apply jpeg_gen_optimal_table more than once
              * per table, because it clobbers the input frequency counts!
              */
-            bool did[NUM_HUFF_TBLS];
-            memset((void *) did, 0, sizeof(did));
+            bool[] did = new bool [Constants.NUM_HUFF_TBLS];
+            //memset((void *) did, 0, sizeof(did));
 
             bool is_DC_band = (m_cinfo.m_Ss == 0);
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
@@ -595,7 +595,7 @@ namespace LibJpeg.NET
                 
                 if (!did[tbl])
                 {
-                    JHUFF_TBL* htblptr = null;
+                    JHUFF_TBL htblptr = null;
                     if (is_DC_band)
                     {
                         if (m_cinfo.m_dc_huff_tbl_ptrs[tbl] == null)
@@ -640,7 +640,7 @@ namespace LibJpeg.NET
         {
             // Emit some bits, unless we are in gather mode
             /* This routine is heavily used, so it's worth coding tightly. */
-            INT32 local_put_buffer = (INT32)code;
+            int local_put_buffer = (int)code;
 
             /* if size is 0, caller used an invalid Huffman table entry */
             if (size == 0)
@@ -652,7 +652,7 @@ namespace LibJpeg.NET
                 return;
             }
 
-            local_put_buffer &= (((INT32)1) << size) - 1; /* mask off any extra bits in code */
+            local_put_buffer &= (((int)1) << size) - 1; /* mask off any extra bits in code */
 
             m_put_bits += size;       /* new number of bits in buffer */
 
@@ -702,8 +702,8 @@ namespace LibJpeg.NET
                 return;
             }
 
-            for (unsigned int i = 0; i < nbits; i++)
-                emit_bits((unsigned int)m_bit_buffer[offset + i], 1);
+            for (uint i = 0; i < nbits; i++)
+                emit_bits((uint)m_bit_buffer[offset + i], 1);
         }
 
         // Emit any pending EOBRUN symbol.
@@ -712,9 +712,9 @@ namespace LibJpeg.NET
             if (m_EOBRUN > 0)
             {
                 /* if there is any pending EOBRUN */
-                int temp = m_EOBRUN;
+                int temp = (int)m_EOBRUN;
                 int nbits = 0;
-                while ((temp >>= 1))
+                while ((temp >>= 1) != 0)
                     nbits++;
 
                 /* safety check: shouldn't happen given limited correction-bit buffer */
@@ -722,7 +722,7 @@ namespace LibJpeg.NET
                     m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE);
 
                 emit_symbol(m_ac_tbl_no, nbits << 4);
-                if (nbits)
+                if (nbits != 0)
                     emit_bits(m_EOBRUN, nbits);
 
                 m_EOBRUN = 0;
@@ -742,7 +742,7 @@ namespace LibJpeg.NET
             {
                 flush_bits();
                 emit_byte(0xFF);
-                emit_byte(M_RST0 + restart_num);
+                emit_byte((int)(JPEG_MARKER.M_RST0 + restart_num));
             }
 
             if (m_cinfo.m_Ss == 0)
@@ -760,8 +760,8 @@ namespace LibJpeg.NET
         }
 
         /// <summary>
-        /// IRIGHT_SHIFT is like RIGHT_SHIFT, but works on int rather than INT32.
-        /// We assume that int right shift is unsigned if INT32 right shift is,
+        /// IRIGHT_SHIFT is like RIGHT_SHIFT, but works on int rather than int.
+        /// We assume that int right shift is unsigned if int right shift is,
         /// which should be safe.
         /// </summary>
         private static int IRIGHT_SHIFT(int x, int shft)

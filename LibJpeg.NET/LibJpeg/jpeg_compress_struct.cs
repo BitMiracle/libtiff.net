@@ -953,7 +953,7 @@ namespace LibJpeg.NET
         /// were requested from this compression object's memory manager, they
         /// typically will be realized during this routine and filled afterwards.
         /// </summary>
-        public void jpeg_write_coefficients(jvirt_barray_control[][] coef_arrays)
+        public void jpeg_write_coefficients(jvirt_barray_control[] coef_arrays)
         {
             if (m_global_state != JpegState.CSTATE_START)
                 ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
@@ -1088,7 +1088,7 @@ namespace LibJpeg.NET
         /// <summary>
         /// Master selection of compression modules for transcoding.
         /// </summary>
-        private void transencode_master_selection(jvirt_barray_control[][] coef_arrays)
+        private void transencode_master_selection(jvirt_barray_control[] coef_arrays)
         {
             /* Although we don't actually use input_components for transcoding, 
              * jcmaster.c's initial_setup will complain if input_components is 0.
