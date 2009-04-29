@@ -35,7 +35,11 @@ namespace LibJpeg.NET
 
             m_mem_buffer = new JBLOCK[m_rows_in_array][];
             for (int i = 0; i < (int)m_rows_in_array; i++)
+            {
                 m_mem_buffer[i] = new JBLOCK[m_blocksperrow];
+                for (int j = 0; j < m_blocksperrow; j++)
+                    m_mem_buffer[i][j] = new JBLOCK();
+            }
 
             //if (pre_zero)
             //{

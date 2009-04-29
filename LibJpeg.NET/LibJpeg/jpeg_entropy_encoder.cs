@@ -165,8 +165,6 @@ namespace LibJpeg.NET
             long v;
 
             /* This algorithm is explained in section K.2 of the JPEG standard */
-            //memset((void *) bits, 0, sizeof(bits));
-            //memset((void *) codesize, 0, sizeof(codesize));
             for (i = 0; i < 257; i++)
                 others[i] = -1;     /* init links to empty */
 
@@ -279,7 +277,7 @@ namespace LibJpeg.NET
             bits[i]--;
 
             /* Return final symbol counts (only for lengths 0..16) */
-            //memcpy((void *) htbl.bits, (const void *) bits, sizeof(htbl.bits));
+            Array.Copy(bits, htbl.bits, htbl.bits.Length);
 
             /* Return a list of the symbols sorted by code length */
             /* It's not real clear to me why we don't need to consider the codelength

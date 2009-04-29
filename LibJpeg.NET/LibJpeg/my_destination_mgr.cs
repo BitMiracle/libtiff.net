@@ -94,20 +94,23 @@ namespace LibJpeg.NET
         /// </summary>
         public override void term_destination()
         {
-            uint datacount = (uint)(OUTPUT_BUF_SIZE - freeInBuffer());
+            int datacount = OUTPUT_BUF_SIZE - freeInBuffer();
 
             /* Write any data remaining in the buffer */
             if (datacount > 0)
             {
-                //if (fwrite((const void *) m_buffer, 1, datacount, m_outfile) != datacount)
-                //    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
+                try
+                {
+                    m_outfile.Write(m_buffer, 0, datacount);
+                }
+                catch (Exception e)
+                {
+                    m_cinfo.TRACEMSS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
+                }
             }
 
-            //fflush(m_outfile);
-
-            ///* Make sure we wrote the output file OK */
-            //if (ferror(m_outfile))
-            //    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
+            m_outfile.Flush();
         }
     }
 }

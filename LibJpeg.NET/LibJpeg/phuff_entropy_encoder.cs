@@ -577,7 +577,6 @@ namespace LibJpeg.NET
              * per table, because it clobbers the input frequency counts!
              */
             bool[] did = new bool [Constants.NUM_HUFF_TBLS];
-            //memset((void *) did, 0, sizeof(did));
 
             bool is_DC_band = (m_cinfo.m_Ss == 0);
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
