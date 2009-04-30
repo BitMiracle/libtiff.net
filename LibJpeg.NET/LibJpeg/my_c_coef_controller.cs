@@ -278,7 +278,7 @@ namespace LibJpeg.NET
                     if (ndummy > 0)
                     {
                         /* Create dummy blocks at the right edge of the image. */
-                        //memset((void*)buffer[block_row][blocks_across].data, 0, /*ndummy **/ (sizeof(short) * Constants.DCTSIZE2));
+                        Array.Clear(buffer[block_row][blocks_across].data, 0, buffer[block_row][blocks_across].data.Length);
 
                         short lastDC = buffer[block_row][blocks_across - 1][0];
                         for (int bi = 0; bi < ndummy; bi++)
@@ -297,7 +297,8 @@ namespace LibJpeg.NET
                     uint MCUs_across = (uint)(blocks_across / h_samp_factor);
                     for (int block_row = block_rows; block_row < componentInfo.v_samp_factor; block_row++)
                     {
-                        //memset((void*)buffer[block_row], 0, blocks_across * (sizeof(short) * Constants.DCTSIZE2));
+                        for (int i = 0; i < blocks_across; i++)
+                            Array.Clear(buffer[block_row][i].data, 0, buffer[block_row][i].data.Length);
 
                         int thisOffset = 0;
                         int lastOffset = 0;

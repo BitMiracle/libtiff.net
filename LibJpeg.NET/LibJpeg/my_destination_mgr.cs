@@ -77,8 +77,15 @@ namespace LibJpeg.NET
         /// </summary>
         public override bool empty_output_buffer()
         {
-            //if (fwrite((const void *) m_buffer, 1, OUTPUT_BUF_SIZE, m_outfile) != (uint) OUTPUT_BUF_SIZE)
-            //    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
+            try
+            {
+                m_outfile.Write(m_buffer, 0, OUTPUT_BUF_SIZE);
+            }
+            catch (Exception e)
+            {
+                m_cinfo.TRACEMSS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
+            }
 
             initInternalBuffer(m_buffer, OUTPUT_BUF_SIZE);
             return true;

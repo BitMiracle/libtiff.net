@@ -105,11 +105,12 @@ namespace LibJpeg.NET
                     if (m_dc_count_ptrs[dctbl] == null)
                         m_dc_count_ptrs[dctbl] = new long[257];
 
-                    //memset((void*)m_dc_count_ptrs[dctbl], 0, 257 * sizeof(long));
+                    Array.Clear(m_dc_count_ptrs[dctbl], 0, m_dc_count_ptrs[dctbl].Length);
+
                     if (m_ac_count_ptrs[actbl] == null)
                         m_ac_count_ptrs[actbl] = new long[257];
 
-                    //memset((void*)m_ac_count_ptrs[actbl], 0, 257 * sizeof(long));
+                    Array.Clear(m_ac_count_ptrs[actbl], 0, m_ac_count_ptrs[actbl].Length);
                 }
                 else
                 {
@@ -261,10 +262,7 @@ namespace LibJpeg.NET
              * per table, because it clobbers the input frequency counts!
              */
             bool[] did_dc = new bool [Constants.NUM_HUFF_TBLS];
-            //memset((void *) did_dc, 0, sizeof(did_dc));
-
             bool[] did_ac = new bool[Constants.NUM_HUFF_TBLS];
-            //memset((void *) did_ac, 0, sizeof(did_ac));
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
