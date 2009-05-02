@@ -70,7 +70,14 @@ namespace LibJpeg.NET
                 /* We only need a single-MCU buffer. */
                 JBLOCK[] buffer = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU];
                 for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
-                    m_MCU_buffer[i] = new JBLOCK[] { buffer[i] };
+                    buffer[i] = new JBLOCK();
+
+                for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
+                {
+                    m_MCU_buffer[i] = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU - i];
+                    for (int j = i; j < Constants.C_MAX_BLOCKS_IN_MCU; j++)
+                        m_MCU_buffer[i][j - i] = buffer[j];
+                }
 
                 /* flag for no virtual arrays */
                 m_whole_image[0] = null;
@@ -171,7 +178,8 @@ namespace LibJpeg.NET
                                 if (blockcnt < componentInfo.MCU_width)
                                 {
                                     /* Create some dummy blocks at the right edge of the image. */
-                                    //memset((void*)m_MCU_buffer[blkn + blockcnt], 0, (componentInfo.MCU_width - blockcnt) * (sizeof(short) * Constants.DCTSIZE2));
+                                    for (int i = 0; i < (componentInfo.MCU_width - blockcnt); i++)
+                                        Array.Clear(m_MCU_buffer[blkn + blockcnt][i].data, 0, m_MCU_buffer[blkn + blockcnt][i].data.Length);
 
                                     for (int bi = blockcnt; bi < componentInfo.MCU_width; bi++)
                                         m_MCU_buffer[blkn + bi][0][0] = m_MCU_buffer[blkn + bi - 1][0][0];
@@ -180,7 +188,9 @@ namespace LibJpeg.NET
                             else
                             {
                                 /* Create a row of dummy blocks at the bottom of the image. */
-                                //memset((void*)m_MCU_buffer[blkn], 0, componentInfo.MCU_width * (sizeof(short) * Constants.DCTSIZE2));
+                                for (int i = 0; i < componentInfo.MCU_width; i++)
+                                    Array.Clear(m_MCU_buffer[blkn][i].data, 0, m_MCU_buffer[blkn][i].data.Length);
+
                                 for (int bi = 0; bi < componentInfo.MCU_width; bi++)
                                     m_MCU_buffer[blkn + bi][0][0] = m_MCU_buffer[blkn - 1][0][0];
                             }
@@ -354,11 +364,19 @@ namespace LibJpeg.NET
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
-                        uint start_col = (uint)(MCU_col_num * componentInfo.MCU_width);
+                        int start_col = (int)(MCU_col_num * componentInfo.MCU_width);
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
                             for (int xindex = 0; xindex < componentInfo.MCU_width; xindex++)
-                                m_MCU_buffer[blkn++] = new JBLOCK[] { buffer[ci][yindex + yoffset][(int)(start_col + xindex)] };
+                            {
+                                int bufLength = buffer[ci][yindex + yoffset].Length;
+                                int start = start_col + xindex;
+                                m_MCU_buffer[blkn] = new JBLOCK[bufLength - start];
+                                for (int j = start; j < bufLength; j++)
+                                    m_MCU_buffer[blkn][j - start] = buffer[ci][yindex + yoffset][j];
+
+                                blkn++;
+                            }
                         }
                     }
 
