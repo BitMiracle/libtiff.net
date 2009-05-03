@@ -46,7 +46,7 @@ namespace LibJpeg.NET
 
             public int put_buffer;       /* current bit-accumulation buffer */
             public int put_bits;           /* # of bits now in it */
-            public int[] last_dc_val = new int[Constants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
+            public int[] last_dc_val = new int[JpegConstants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
         }
 
         private bool m_gather_statistics;
@@ -58,19 +58,19 @@ namespace LibJpeg.NET
         private int m_next_restart_num;       /* next restart number to write (0-7) */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
-        private c_derived_tbl[] m_dc_derived_tbls = new c_derived_tbl[Constants.NUM_HUFF_TBLS];
-        private c_derived_tbl[] m_ac_derived_tbls = new c_derived_tbl[Constants.NUM_HUFF_TBLS];
+        private c_derived_tbl[] m_dc_derived_tbls = new c_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
+        private c_derived_tbl[] m_ac_derived_tbls = new c_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
 
         /* Statistics tables for optimization */
-        private long[][] m_dc_count_ptrs = new long[Constants.NUM_HUFF_TBLS][];
-        private long[][] m_ac_count_ptrs = new long[Constants.NUM_HUFF_TBLS][];
+        private long[][] m_dc_count_ptrs = new long[JpegConstants.NUM_HUFF_TBLS][];
+        private long[][] m_ac_count_ptrs = new long[JpegConstants.NUM_HUFF_TBLS][];
 
         public huff_entropy_encoder(jpeg_compress_struct cinfo)
         {
             m_cinfo = cinfo;
 
             /* Mark tables unallocated */
-            for (int i = 0; i < Constants.NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
             {
                 m_dc_derived_tbls[i] = m_ac_derived_tbls[i] = null;
                 m_dc_count_ptrs[i] = m_ac_count_ptrs[i] = null;
@@ -94,10 +94,10 @@ namespace LibJpeg.NET
                 {
                     /* Check for invalid table indexes */
                     /* (make_c_derived_tbl does this in the other path) */
-                    if (dctbl < 0 || dctbl >= Constants.NUM_HUFF_TBLS)
+                    if (dctbl < 0 || dctbl >= JpegConstants.NUM_HUFF_TBLS)
                         m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, dctbl);
 
-                    if (actbl < 0 || actbl >= Constants.NUM_HUFF_TBLS)
+                    if (actbl < 0 || actbl >= JpegConstants.NUM_HUFF_TBLS)
                         m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, actbl);
 
                     /* Allocate and zero the statistics tables */
@@ -261,8 +261,8 @@ namespace LibJpeg.NET
             /* It's important not to apply jpeg_gen_optimal_table more than once
              * per table, because it clobbers the input frequency counts!
              */
-            bool[] did_dc = new bool [Constants.NUM_HUFF_TBLS];
-            bool[] did_ac = new bool[Constants.NUM_HUFF_TBLS];
+            bool[] did_dc = new bool [JpegConstants.NUM_HUFF_TBLS];
+            bool[] did_ac = new bool[JpegConstants.NUM_HUFF_TBLS];
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
@@ -333,7 +333,7 @@ namespace LibJpeg.NET
 
             /* Encode the AC coefficients per section F.1.2.2 */
             int r = 0;          /* r = run length of zeros */
-            for (int k = 1; k < Constants.DCTSIZE2; k++)
+            for (int k = 1; k < JpegConstants.DCTSIZE2; k++)
             {
                 temp = block[JpegUtils.jpeg_natural_order[k]];
                 if (temp == 0)
@@ -427,7 +427,7 @@ namespace LibJpeg.NET
 
             /* Encode the AC coefficients per section F.1.2.2 */
             int r = 0;          /* r = run length of zeros */
-            for (int k = 1; k < Constants.DCTSIZE2; k++)
+            for (int k = 1; k < JpegConstants.DCTSIZE2; k++)
             {
                 temp = block[JpegUtils.jpeg_natural_order[k]];
                 if (temp == 0)

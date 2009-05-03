@@ -116,19 +116,19 @@ namespace LibJpeg.NET
         public int m_num_components;     /* # of color components in JPEG image */
         public J_COLOR_SPACE m_jpeg_color_space; /* colorspace of JPEG image */
 
-        public jpeg_component_info[] m_comp_info;
+        internal jpeg_component_info[] m_comp_info;
         /* comp_info[i] describes component that appears i'th in SOF */
 
-        public JQUANT_TBL[] m_quant_tbl_ptrs = new JQUANT_TBL[Constants.NUM_QUANT_TBLS];
+        internal JQUANT_TBL[] m_quant_tbl_ptrs = new JQUANT_TBL[JpegConstants.NUM_QUANT_TBLS];
         /* ptrs to coefficient quantization tables, or null if not defined */
 
-        public JHUFF_TBL[] m_dc_huff_tbl_ptrs = new JHUFF_TBL[Constants.NUM_HUFF_TBLS];
-        public JHUFF_TBL[] m_ac_huff_tbl_ptrs = new JHUFF_TBL[Constants.NUM_HUFF_TBLS];
+        internal JHUFF_TBL[] m_dc_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
+        internal JHUFF_TBL[] m_ac_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
 
         /* ptrs to Huffman coding tables, or null if not defined */
 
         public int m_num_scans;      /* # of entries in scan_info array */
-        public jpeg_scan_info[] m_scan_info; /* script for multi-scan file, or null */
+        internal jpeg_scan_info[] m_scan_info; /* script for multi-scan file, or null */
         /* The default value of scan_info is null, which causes a single-scan
          * sequential JPEG file to be emitted.  To create a multi-scan file,
          * set num_scans and scan_info to point to an array of scan definitions.
@@ -177,11 +177,11 @@ namespace LibJpeg.NET
         /*
          * These fields are computed during compression startup
          */
-        public bool m_progressive_mode;  /* true if scan script uses progressive mode */
-        public int m_max_h_samp_factor;  /* largest h_samp_factor */
-        public int m_max_v_samp_factor;  /* largest v_samp_factor */
+        internal bool m_progressive_mode;  /* true if scan script uses progressive mode */
+        internal int m_max_h_samp_factor;  /* largest h_samp_factor */
+        internal int m_max_v_samp_factor;  /* largest v_samp_factor */
 
-        public uint m_total_iMCU_rows; /* # of iMCU rows to be input to coef ctlr */
+        internal uint m_total_iMCU_rows; /* # of iMCU rows to be input to coef ctlr */
         /* The coefficient controller receives data in units of MCU rows as defined
          * for fully interleaved scans (whether the JPEG file is interleaved or not).
          * There are v_samp_factor * DCTSIZE sample rows of each component in an
@@ -192,37 +192,38 @@ namespace LibJpeg.NET
          * These fields are valid during any one scan.
          * They describe the components and MCUs actually appearing in the scan.
          */
-        public int m_comps_in_scan;      /* # of JPEG components in this scan */
-        public int[] m_cur_comp_info = new int[Constants.MAX_COMPS_IN_SCAN];
+        internal int m_comps_in_scan;      /* # of JPEG components in this scan */
+        internal int[] m_cur_comp_info = new int[JpegConstants.MAX_COMPS_IN_SCAN];
         /* *cur_comp_info[i] is index of m_comp_info that describes component that appears i'th in SOS */
 
-        public uint m_MCUs_per_row;    /* # of MCUs across the image */
-        public uint m_MCU_rows_in_scan;    /* # of MCU rows in the image */
+        internal uint m_MCUs_per_row;    /* # of MCUs across the image */
+        internal uint m_MCU_rows_in_scan;    /* # of MCU rows in the image */
 
-        public int m_blocks_in_MCU;      /* # of DCT blocks per MCU */
-        public int[] m_MCU_membership = new int[Constants.C_MAX_BLOCKS_IN_MCU];
+        internal int m_blocks_in_MCU;      /* # of DCT blocks per MCU */
+        internal int[] m_MCU_membership = new int[JpegConstants.C_MAX_BLOCKS_IN_MCU];
         /* MCU_membership[i] is index in cur_comp_info of component owning */
         /* i'th block in an MCU */
 
-        public int m_Ss;
-        public int m_Se;
-        public int m_Ah;
-        public int m_Al;     /* progressive JPEG parameters for scan */
+        /* progressive JPEG parameters for scan */
+        internal int m_Ss;
+        internal int m_Se;
+        internal int m_Ah;
+        internal int m_Al;
 
         /*
          * Links to compression subobjects (methods and private variables of modules)
          */
-        public jpeg_comp_master m_master;
-        public jpeg_c_main_controller m_main;
-        public jpeg_c_prep_controller m_prep;
-        public jpeg_c_coef_controller m_coef;
-        public jpeg_marker_writer m_marker;
-        public jpeg_color_converter m_cconvert;
-        public jpeg_downsampler m_downsample;
-        public jpeg_forward_dct m_fdct;
-        public jpeg_entropy_encoder m_entropy;
-        public jpeg_scan_info[] m_script_space; /* workspace for jpeg_simple_progression */
-        public int m_script_space_size;
+        internal jpeg_comp_master m_master;
+        internal jpeg_c_main_controller m_main;
+        internal jpeg_c_prep_controller m_prep;
+        internal jpeg_c_coef_controller m_coef;
+        internal jpeg_marker_writer m_marker;
+        internal jpeg_color_converter m_cconvert;
+        internal jpeg_downsampler m_downsample;
+        internal jpeg_forward_dct m_fdct;
+        internal jpeg_entropy_encoder m_entropy;
+        internal jpeg_scan_info[] m_script_space; /* workspace for jpeg_simple_progression */
+        internal int m_script_space_size;
 
         public jpeg_compress_struct()
         {
@@ -267,13 +268,13 @@ namespace LibJpeg.NET
         /// otherwise unsuppress.</param>
         public void jpeg_suppress_tables(bool suppress)
         {
-            for (int i = 0; i < Constants.NUM_QUANT_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
             {
                 if (m_quant_tbl_ptrs[i] != null)
                     m_quant_tbl_ptrs[i].sent_table = suppress;
             }
 
-            for (int i = 0; i < Constants.NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
             {
                 if (m_dc_huff_tbl_ptrs[i] != null)
                     m_dc_huff_tbl_ptrs[i].sent_table = suppress;
@@ -434,11 +435,11 @@ namespace LibJpeg.NET
             * multiple images at same param settings.
             */
             if (m_comp_info == null)
-                m_comp_info = new jpeg_component_info[Constants.MAX_COMPONENTS];
+                m_comp_info = new jpeg_component_info[JpegConstants.MAX_COMPONENTS];
 
             /* Initialize everything not dependent on the color space */
 
-            m_data_precision = Constants.BITS_IN_JSAMPLE;
+            m_data_precision = JpegConstants.BITS_IN_JSAMPLE;
 
             /* Set up two quantization tables using default quality of 75 */
             jpeg_set_quality(75, true);
@@ -471,7 +472,7 @@ namespace LibJpeg.NET
             m_smoothing_factor = 0;
 
             /* DCT algorithm preference */
-            m_dct_method = Constants.JDCT_DEFAULT;
+            m_dct_method = JpegConstants.JDCT_DEFAULT;
 
             /* No restart markers */
             m_restart_interval = 0;
@@ -560,8 +561,8 @@ namespace LibJpeg.NET
                     break;
                 case J_COLOR_SPACE.JCS_UNKNOWN:
                     m_num_components = m_input_components;
-                    if (m_num_components < 1 || m_num_components > Constants.MAX_COMPONENTS)
-                        ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, Constants.MAX_COMPONENTS);
+                    if (m_num_components < 1 || m_num_components > JpegConstants.MAX_COMPONENTS)
+                        ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
                     for (ci = 0; ci < m_num_components; ci++)
                     {
                         jpeg_set_colorspace_SET_COMP(ci, ci, 1, 1, 0, 0, 0);
@@ -647,13 +648,13 @@ namespace LibJpeg.NET
             if (m_global_state != JpegState.CSTATE_START)
                 ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
-            if (which_tbl < 0 || which_tbl >= Constants.NUM_QUANT_TBLS)
+            if (which_tbl < 0 || which_tbl >= JpegConstants.NUM_QUANT_TBLS)
                 ERREXIT1((int)J_MESSAGE_CODE.JERR_DQT_INDEX, which_tbl);
 
             if (m_quant_tbl_ptrs[which_tbl] == null)
                 m_quant_tbl_ptrs[which_tbl] = new JQUANT_TBL();
 
-            for (int i = 0; i < Constants.DCTSIZE2; i++)
+            for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
             {
                 long temp = ((long)basic_table[i] * scale_factor + 50L) / 100L;
 
@@ -724,7 +725,7 @@ namespace LibJpeg.NET
             else
             {
                 /* All-purpose script for other color spaces. */
-                if (m_num_components > Constants.MAX_COMPS_IN_SCAN)
+                if (m_num_components > JpegConstants.MAX_COMPS_IN_SCAN)
                 {
                     /* 2 DC + 4 AC scans per component */
                     nscans = 6 * m_num_components;
@@ -926,7 +927,7 @@ namespace LibJpeg.NET
                 m_master.pass_startup();
 
             /* Verify that at least one iMCU row has been passed. */
-            uint lines_per_iMCU_row = (uint)(m_max_v_samp_factor * Constants.DCTSIZE);
+            uint lines_per_iMCU_row = (uint)(m_max_v_samp_factor * JpegConstants.DCTSIZE);
             if (num_lines < lines_per_iMCU_row)
                 ERREXIT((int)J_MESSAGE_CODE.JERR_BUFFER_SIZE);
 
@@ -989,10 +990,10 @@ namespace LibJpeg.NET
             m_dest = null;
             m_comp_info = null;
 
-            for (int i = 0; i < Constants.NUM_QUANT_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
                 m_quant_tbl_ptrs[i] = null;
 
-            for (int i = 0; i < Constants.NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
             {
                 m_dc_huff_tbl_ptrs[i] = null;
                 m_ac_huff_tbl_ptrs[i] = null;
@@ -1127,8 +1128,8 @@ namespace LibJpeg.NET
                 ERREXIT((int)J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
 
             /* Make sure image isn't bigger than I can handle */
-            if ((long) m_image_height > (long) Constants.JPEG_MAX_DIMENSION || (long) m_image_width > (long) Constants.JPEG_MAX_DIMENSION)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int) Constants.JPEG_MAX_DIMENSION);
+            if ((long) m_image_height > (long) JpegConstants.JPEG_MAX_DIMENSION || (long) m_image_width > (long) JpegConstants.JPEG_MAX_DIMENSION)
+                ERREXIT1((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int) JpegConstants.JPEG_MAX_DIMENSION);
 
             /* Width of an input scanline must be representable as uint. */
             long samplesperrow = (long) m_image_width * (long) m_input_components;
@@ -1137,20 +1138,20 @@ namespace LibJpeg.NET
                 ERREXIT((int)J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
 
             /* For now, precision must match compiled-in value... */
-            if (m_data_precision != Constants.BITS_IN_JSAMPLE)
+            if (m_data_precision != JpegConstants.BITS_IN_JSAMPLE)
                 ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_PRECISION, m_data_precision);
 
             /* Check that number of components won't exceed internal array sizes */
-            if (m_num_components > Constants.MAX_COMPONENTS)
-                ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, Constants.MAX_COMPONENTS);
+            if (m_num_components > JpegConstants.MAX_COMPONENTS)
+                ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
 
             /* Compute maximum sampling factors; check factor validity */
             m_max_h_samp_factor = 1;
             m_max_v_samp_factor = 1;
             for (int ci = 0; ci < m_num_components; ci++)
             {
-                if (m_comp_info[ci].h_samp_factor <= 0 || m_comp_info[ci].h_samp_factor > Constants.MAX_SAMP_FACTOR ||
-                    m_comp_info[ci].v_samp_factor <= 0 || m_comp_info[ci].v_samp_factor > Constants.MAX_SAMP_FACTOR)
+                if (m_comp_info[ci].h_samp_factor <= 0 || m_comp_info[ci].h_samp_factor > JpegConstants.MAX_SAMP_FACTOR ||
+                    m_comp_info[ci].v_samp_factor <= 0 || m_comp_info[ci].v_samp_factor > JpegConstants.MAX_SAMP_FACTOR)
                 {
                     ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_SAMPLING);
                 }
@@ -1166,13 +1167,13 @@ namespace LibJpeg.NET
                 m_comp_info[ci].component_index = ci;
 
                 /* For compression, we never do DCT scaling. */
-                m_comp_info[ci].DCT_scaled_size = Constants.DCTSIZE;
+                m_comp_info[ci].DCT_scaled_size = JpegConstants.DCTSIZE;
 
                 /* Size in DCT blocks */
                 m_comp_info[ci].width_in_blocks = (uint) JpegUtils.jdiv_round_up(
-                    (long)m_image_width * (long)m_comp_info[ci].h_samp_factor, (long)(m_max_h_samp_factor * Constants.DCTSIZE));
+                    (long)m_image_width * (long)m_comp_info[ci].h_samp_factor, (long)(m_max_h_samp_factor * JpegConstants.DCTSIZE));
                 m_comp_info[ci].height_in_blocks = (uint) JpegUtils.jdiv_round_up(
-                    (long)m_image_height * (long)m_comp_info[ci].v_samp_factor, (long)(m_max_v_samp_factor * Constants.DCTSIZE));
+                    (long)m_image_height * (long)m_comp_info[ci].v_samp_factor, (long)(m_max_v_samp_factor * JpegConstants.DCTSIZE));
 
                 /* Size in samples */
                 m_comp_info[ci].downsampled_width = (uint) JpegUtils.jdiv_round_up(
@@ -1187,7 +1188,7 @@ namespace LibJpeg.NET
             /* Compute number of fully interleaved MCU rows (number of times that
             * main controller will call coefficient controller).
             */
-            m_total_iMCU_rows = (uint) JpegUtils.jdiv_round_up((long) m_image_height, (long) (m_max_v_samp_factor * Constants.DCTSIZE));
+            m_total_iMCU_rows = (uint) JpegUtils.jdiv_round_up((long) m_image_height, (long) (m_max_v_samp_factor * JpegConstants.DCTSIZE));
         }
 
         /// <summary>
@@ -1202,19 +1203,19 @@ namespace LibJpeg.NET
             /* For sequential JPEG, all scans must have Ss=0, Se=DCTSIZE2-1;
             * for progressive JPEG, no scan can have this.
             */
-            int[][] last_bitpos = new int [Constants.MAX_COMPONENTS][];
-            for (int i = 0; i < Constants.MAX_COMPONENTS; i++)
-                last_bitpos[i] = new int[Constants.DCTSIZE2];
+            int[][] last_bitpos = new int [JpegConstants.MAX_COMPONENTS][];
+            for (int i = 0; i < JpegConstants.MAX_COMPONENTS; i++)
+                last_bitpos[i] = new int[JpegConstants.DCTSIZE2];
 
-            bool[] component_sent = new bool [Constants.MAX_COMPONENTS];
+            bool[] component_sent = new bool [JpegConstants.MAX_COMPONENTS];
 
             /* -1 until that coefficient has been seen; then last Al for it */
-            if (m_scan_info[0].Ss != 0 || m_scan_info[0].Se != Constants.DCTSIZE2 - 1)
+            if (m_scan_info[0].Ss != 0 || m_scan_info[0].Se != JpegConstants.DCTSIZE2 - 1)
             {
                 m_progressive_mode = true;
                 for (int ci = 0; ci < m_num_components; ci++)
                 {
-                    for (int coefi = 0; coefi < Constants.DCTSIZE2; coefi++)
+                    for (int coefi = 0; coefi < JpegConstants.DCTSIZE2; coefi++)
                         last_bitpos[ci][coefi] = -1;
                 }
             }
@@ -1231,8 +1232,8 @@ namespace LibJpeg.NET
 
                 /* Validate component indexes */
                 int ncomps = scanInfo.comps_in_scan;
-                if (ncomps <= 0 || ncomps > Constants.MAX_COMPS_IN_SCAN)
-                    ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, ncomps, Constants.MAX_COMPS_IN_SCAN);
+                if (ncomps <= 0 || ncomps > JpegConstants.MAX_COMPS_IN_SCAN)
+                    ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, ncomps, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 for (int ci = 0; ci < ncomps; ci++)
                 {
@@ -1260,7 +1261,7 @@ namespace LibJpeg.NET
                     * which might cause problems for some decoders.
                     */
                     const int MAX_AH_AL = 10;
-                    if (Ss < 0 || Ss >= Constants.DCTSIZE2 || Se < Ss || Se >= Constants.DCTSIZE2 ||
+                    if (Ss < 0 || Ss >= JpegConstants.DCTSIZE2 || Se < Ss || Se >= JpegConstants.DCTSIZE2 ||
                         Ah < 0 || Ah > MAX_AH_AL || Al < 0 || Al > MAX_AH_AL)
                     {
                         ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
@@ -1305,7 +1306,7 @@ namespace LibJpeg.NET
                 else
                 {
                     /* For sequential JPEG, all progression parameters must be these: */
-                    if (Ss != 0 || Se != Constants.DCTSIZE2 - 1 || Ah != 0 || Al != 0)
+                    if (Ss != 0 || Se != JpegConstants.DCTSIZE2 - 1 || Ah != 0 || Al != 0)
                         ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
 
                     /* Make sure components are not sent twice */
@@ -1406,7 +1407,7 @@ namespace LibJpeg.NET
         /// </summary>
         private void fill_dc_scans(ref int scanIndex, int ncomps, int Ah, int Al)
         {
-            if (ncomps <= Constants.MAX_COMPS_IN_SCAN)
+            if (ncomps <= JpegConstants.MAX_COMPS_IN_SCAN)
             {
                 /* Single interleaved DC scan */
                 m_script_space[scanIndex].comps_in_scan = ncomps;

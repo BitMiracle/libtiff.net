@@ -57,7 +57,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// Downsampling
     /// </summary>
-    public class jpeg_downsampler
+    class jpeg_downsampler
     {
         private enum downSampleMethod
         {
@@ -70,7 +70,7 @@ namespace LibJpeg.NET
         };
 
         /* Downsamplers, one per component */
-        private downSampleMethod[] m_downSamplers = new downSampleMethod[Constants.MAX_COMPONENTS];
+        private downSampleMethod[] m_downSamplers = new downSampleMethod[JpegConstants.MAX_COMPONENTS];
 
         private jpeg_compress_struct m_cinfo;
         private bool m_need_context_rows; /* true if need rows above & below */
@@ -191,7 +191,7 @@ namespace LibJpeg.NET
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * Constants.DCTSIZE;
+            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             int h_expand = m_cinfo.m_max_h_samp_factor / m_cinfo.m_comp_info[componentIndex].h_samp_factor;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, (uint)(output_cols * h_expand));
 
@@ -228,7 +228,7 @@ namespace LibJpeg.NET
             JpegUtils.jcopy_sample_rows(input_data, startInputRow, output_data, startOutRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width);
 
             /* Edge-expand */
-            expand_right_edge(output_data, startOutRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, m_cinfo.m_comp_info[componentIndex].width_in_blocks * Constants.DCTSIZE);
+            expand_right_edge(output_data, startOutRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE);
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace LibJpeg.NET
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * Constants.DCTSIZE;
+            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * 2);
 
             for (int outrow = 0; outrow < m_cinfo.m_comp_info[componentIndex].v_samp_factor; outrow++)
@@ -279,7 +279,7 @@ namespace LibJpeg.NET
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * Constants.DCTSIZE;
+            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * 2);
 
             int inrow = 0;
@@ -315,7 +315,7 @@ namespace LibJpeg.NET
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * Constants.DCTSIZE;
+            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow - 1, m_cinfo.m_max_v_samp_factor + 2, m_cinfo.m_image_width, output_cols * 2);
 
             /* We don't bother to form the individual "smoothed" input pixel values;
@@ -451,7 +451,7 @@ namespace LibJpeg.NET
      * by the standard loop.  Special-casing padded output would be more
      * efficient.
      */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * Constants.DCTSIZE;
+            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow - 1, m_cinfo.m_max_v_samp_factor + 2, m_cinfo.m_image_width, output_cols);
 
             /* Each of the eight neighbor pixels contributes a fraction SF to the

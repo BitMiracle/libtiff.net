@@ -22,7 +22,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// Main buffer control (downsampled-data buffer)
     /// </summary>
-    public class jpeg_c_main_controller
+    class jpeg_c_main_controller
     {
         private jpeg_compress_struct m_cinfo;
 
@@ -35,7 +35,7 @@ namespace LibJpeg.NET
         * (we allocate one for each component).  In the full-image case, this
         * points to the currently accessible strips of the virtual arrays.
         */
-        private byte[][][] m_buffer = new byte[Constants.MAX_COMPONENTS][][];
+        private byte[][][] m_buffer = new byte[JpegConstants.MAX_COMPONENTS][][];
 
         public jpeg_c_main_controller(jpeg_compress_struct cinfo)
         {
@@ -44,8 +44,8 @@ namespace LibJpeg.NET
             /* Allocate a strip buffer for each component */
             for (int ci = 0; ci < cinfo.m_num_components; ci++)
             {
-                m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(cinfo.m_comp_info[ci].width_in_blocks * Constants.DCTSIZE,
-                    (uint)(cinfo.m_comp_info[ci].v_samp_factor * Constants.DCTSIZE));
+                m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE,
+                    (uint)(cinfo.m_comp_info[ci].v_samp_factor * JpegConstants.DCTSIZE));
             }
         }
 
@@ -75,14 +75,14 @@ namespace LibJpeg.NET
             while (m_cur_iMCU_row < m_cinfo.m_total_iMCU_rows)
             {
                 /* Read input data if we haven't filled the main buffer yet */
-                if (m_rowgroup_ctr < Constants.DCTSIZE)
-                    m_cinfo.m_prep.pre_process_data(input_buf, ref in_row_ctr, in_rows_avail, m_buffer, ref m_rowgroup_ctr, (uint)Constants.DCTSIZE);
+                if (m_rowgroup_ctr < JpegConstants.DCTSIZE)
+                    m_cinfo.m_prep.pre_process_data(input_buf, ref in_row_ctr, in_rows_avail, m_buffer, ref m_rowgroup_ctr, (uint)JpegConstants.DCTSIZE);
 
                 /* If we don't have a full iMCU row buffered, return to application for
                  * more data.  Note that preprocessor will always pad to fill the iMCU row
                  * at the bottom of the image.
                  */
-                if (m_rowgroup_ctr != Constants.DCTSIZE)
+                if (m_rowgroup_ctr != JpegConstants.DCTSIZE)
                     return;
 
                 /* Send the completed row to the compressor */

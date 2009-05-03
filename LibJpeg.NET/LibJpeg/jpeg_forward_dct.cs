@@ -35,7 +35,7 @@ namespace LibJpeg.NET
     /// 
     /// Each IDCT routine has its own ideas about the best dct_table element type.
     /// </summary>
-    public class jpeg_forward_dct
+    class jpeg_forward_dct
     {
         private const int FAST_INTEGER_CONST_BITS = 8;
 
@@ -117,10 +117,10 @@ namespace LibJpeg.NET
         * entries, because of scaling (especially for an unnormalized DCT).
         * Each table is given in normal array order.
         */
-        private int[][] m_divisors = new int [Constants.NUM_QUANT_TBLS][];
+        private int[][] m_divisors = new int [JpegConstants.NUM_QUANT_TBLS][];
 
         /* Same as above for the floating-point case. */
-        private float[][] m_float_divisors = new float[Constants.NUM_QUANT_TBLS][];
+        private float[][] m_float_divisors = new float[JpegConstants.NUM_QUANT_TBLS][];
 
         public jpeg_forward_dct(jpeg_compress_struct cinfo)
         {
@@ -145,7 +145,7 @@ namespace LibJpeg.NET
             }
 
             /* Mark divisor tables unallocated */
-            for (int i = 0; i < Constants.NUM_QUANT_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
             {
                 m_divisors[i] = null;
                 m_float_divisors[i] = null;
@@ -167,7 +167,7 @@ namespace LibJpeg.NET
                 int qtblno = m_cinfo.m_comp_info[ci].quant_tbl_no;
 
                 /* Make sure specified quantization table is present */
-                if (qtblno < 0 || qtblno >= Constants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
+                if (qtblno < 0 || qtblno >= JpegConstants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
                     m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
 
                 JQUANT_TBL qtbl = m_cinfo.m_quant_tbl_ptrs[qtblno];
@@ -181,31 +181,31 @@ namespace LibJpeg.NET
                      * coefficients multiplied by 8 (to counteract scaling).
                      */
                     if (m_divisors[qtblno] == null)
-                        m_divisors[qtblno] = new int [Constants.DCTSIZE2];
+                        m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
 
-                    for (int i = 0; i < Constants.DCTSIZE2; i++)
+                    for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                         m_divisors[qtblno][i] = ((int) qtbl.quantval[i]) << 3;
 
                     break;
                 case J_DCT_METHOD.JDCT_IFAST:
                     {
                         if (m_divisors[qtblno] == null)
-                            m_divisors[qtblno] = new int [Constants.DCTSIZE2];
+                            m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
 
-                        for (int i = 0; i < Constants.DCTSIZE2; i++)
+                        for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                             m_divisors[qtblno][i] = JpegUtils.DESCALE((int) qtbl.quantval[i] * (int) aanscales[i], CONST_BITS - 3);
                     }
                     break;
                 case J_DCT_METHOD.JDCT_FLOAT:
                     {
                         if (m_float_divisors[qtblno] == null)
-                            m_float_divisors[qtblno] = new float [Constants.DCTSIZE2];
+                            m_float_divisors[qtblno] = new float [JpegConstants.DCTSIZE2];
 
                         float[] fdtbl = m_float_divisors[qtblno];
                         int i = 0;
-                        for (int row = 0; row < Constants.DCTSIZE; row++)
+                        for (int row = 0; row < JpegConstants.DCTSIZE; row++)
                         {
-                            for (int col = 0; col < Constants.DCTSIZE; col++)
+                            for (int col = 0; col < JpegConstants.DCTSIZE; col++)
                             {
                                 fdtbl[i] = (float)(1.0 / (((double) qtbl.quantval[i] * aanscalefactor[row] * aanscalefactor[col] * 8.0)));
                                 i++;
@@ -239,16 +239,16 @@ namespace LibJpeg.NET
         private void forwardDCTImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, uint start_row, uint start_col, uint num_blocks)
         {
             /* This routine is heavily used, so it's worth coding it tightly. */
-            int[] workspace = new int [Constants.DCTSIZE2];    /* work area for FDCT subroutine */
-            for (uint bi = 0; bi < num_blocks; bi++, start_col += Constants.DCTSIZE)
+            int[] workspace = new int [JpegConstants.DCTSIZE2];    /* work area for FDCT subroutine */
+            for (uint bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
             {
                 /* Load data into workspace, applying unsigned->signed conversion */
                 int workspaceIndex = 0;
-                for (int elemr = 0; elemr < Constants.DCTSIZE; elemr++)
+                for (int elemr = 0; elemr < JpegConstants.DCTSIZE; elemr++)
                 {
-                    for (int column = 0; column < Constants.DCTSIZE; column++)
+                    for (int column = 0; column < JpegConstants.DCTSIZE; column++)
                     {
-                        workspace[workspaceIndex] = (int)sample_data[start_row + elemr][start_col + column] - Constants.CENTERJSAMPLE;
+                        workspace[workspaceIndex] = (int)sample_data[start_row + elemr][start_col + column] - JpegConstants.CENTERJSAMPLE;
                         workspaceIndex++;
                     }
                 }
@@ -260,7 +260,7 @@ namespace LibJpeg.NET
                     jpeg_fdct_ifast(workspace);
 
                 /* Quantize/descale the coefficients, and store into coef_blocks[] */
-                for (int i = 0; i < Constants.DCTSIZE2; i++)
+                for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
                     int qval = m_divisors[quant_tbl_no][i];
                     int temp = workspace[i];
@@ -296,16 +296,16 @@ namespace LibJpeg.NET
         private void forwardDCTFloatImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, uint start_row, uint start_col, uint num_blocks)
         {
             /* This routine is heavily used, so it's worth coding it tightly. */
-            float[] workspace = new float [Constants.DCTSIZE2]; /* work area for FDCT subroutine */
-            for (uint bi = 0; bi < num_blocks; bi++, start_col += Constants.DCTSIZE)
+            float[] workspace = new float [JpegConstants.DCTSIZE2]; /* work area for FDCT subroutine */
+            for (uint bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
             {
                 /* Load data into workspace, applying unsigned->signed conversion */
                 int workspaceIndex = 0;
-                for (int elemr = 0; elemr < Constants.DCTSIZE; elemr++)
+                for (int elemr = 0; elemr < JpegConstants.DCTSIZE; elemr++)
                 {
-                    for (int column = 0; column < Constants.DCTSIZE; column++)
+                    for (int column = 0; column < JpegConstants.DCTSIZE; column++)
                     {
-                        workspace[workspaceIndex] = (float) ((int)sample_data[start_row + elemr][start_col + column] - Constants.CENTERJSAMPLE);
+                        workspace[workspaceIndex] = (float) ((int)sample_data[start_row + elemr][start_col + column] - JpegConstants.CENTERJSAMPLE);
                         workspaceIndex++;
                     }
                 }
@@ -314,7 +314,7 @@ namespace LibJpeg.NET
                 jpeg_fdct_float(workspace);
 
                 /* Quantize/descale the coefficients, and store into coef_blocks[] */
-                for (int i = 0; i < Constants.DCTSIZE2; i++)
+                for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
                     /* Apply the quantization and scaling factor */
                     float temp = workspace[i] * m_float_divisors[quant_tbl_no][i];
@@ -366,7 +366,7 @@ namespace LibJpeg.NET
         {
             /* Pass 1: process rows. */
             int dataIndex = 0;
-            for (int ctr = Constants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
             {
                 float tmp0 = data[dataIndex + 0] + data[dataIndex + 7];
                 float tmp7 = data[dataIndex + 0] - data[dataIndex + 7];
@@ -411,22 +411,22 @@ namespace LibJpeg.NET
                 data[dataIndex + 1] = z11 + z4;
                 data[dataIndex + 7] = z11 - z4;
 
-                dataIndex += Constants.DCTSIZE;     /* advance pointer to next row */
+                dataIndex += JpegConstants.DCTSIZE;     /* advance pointer to next row */
             }
 
             /* Pass 2: process columns. */
 
             dataIndex = 0;
-            for (int ctr = Constants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
             {
-                float tmp0 = data[dataIndex + Constants.DCTSIZE * 0] + data[dataIndex + Constants.DCTSIZE * 7];
-                float tmp7 = data[dataIndex + Constants.DCTSIZE * 0] - data[dataIndex + Constants.DCTSIZE * 7];
-                float tmp1 = data[dataIndex + Constants.DCTSIZE * 1] + data[dataIndex + Constants.DCTSIZE * 6];
-                float tmp6 = data[dataIndex + Constants.DCTSIZE * 1] - data[dataIndex + Constants.DCTSIZE * 6];
-                float tmp2 = data[dataIndex + Constants.DCTSIZE * 2] + data[dataIndex + Constants.DCTSIZE * 5];
-                float tmp5 = data[dataIndex + Constants.DCTSIZE * 2] - data[dataIndex + Constants.DCTSIZE * 5];
-                float tmp3 = data[dataIndex + Constants.DCTSIZE * 3] + data[dataIndex + Constants.DCTSIZE * 4];
-                float tmp4 = data[dataIndex + Constants.DCTSIZE * 3] - data[dataIndex + Constants.DCTSIZE * 4];
+                float tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] + data[dataIndex + JpegConstants.DCTSIZE * 7];
+                float tmp7 = data[dataIndex + JpegConstants.DCTSIZE * 0] - data[dataIndex + JpegConstants.DCTSIZE * 7];
+                float tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] + data[dataIndex + JpegConstants.DCTSIZE * 6];
+                float tmp6 = data[dataIndex + JpegConstants.DCTSIZE * 1] - data[dataIndex + JpegConstants.DCTSIZE * 6];
+                float tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] + data[dataIndex + JpegConstants.DCTSIZE * 5];
+                float tmp5 = data[dataIndex + JpegConstants.DCTSIZE * 2] - data[dataIndex + JpegConstants.DCTSIZE * 5];
+                float tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] + data[dataIndex + JpegConstants.DCTSIZE * 4];
+                float tmp4 = data[dataIndex + JpegConstants.DCTSIZE * 3] - data[dataIndex + JpegConstants.DCTSIZE * 4];
 
                 /* Even part */
 
@@ -435,12 +435,12 @@ namespace LibJpeg.NET
                 float tmp11 = tmp1 + tmp2;
                 float tmp12 = tmp1 - tmp2;
 
-                data[dataIndex + Constants.DCTSIZE * 0] = tmp10 + tmp11; /* phase 3 */
-                data[dataIndex + Constants.DCTSIZE * 4] = tmp10 - tmp11;
+                data[dataIndex + JpegConstants.DCTSIZE * 0] = tmp10 + tmp11; /* phase 3 */
+                data[dataIndex + JpegConstants.DCTSIZE * 4] = tmp10 - tmp11;
 
                 float z1 = (tmp12 + tmp13) * ((float)0.707106781); /* c4 */
-                data[dataIndex + Constants.DCTSIZE * 2] = tmp13 + z1; /* phase 5 */
-                data[dataIndex + Constants.DCTSIZE * 6] = tmp13 - z1;
+                data[dataIndex + JpegConstants.DCTSIZE * 2] = tmp13 + z1; /* phase 5 */
+                data[dataIndex + JpegConstants.DCTSIZE * 6] = tmp13 - z1;
 
                 /* Odd part */
 
@@ -457,10 +457,10 @@ namespace LibJpeg.NET
                 float z11 = tmp7 + z3;        /* phase 5 */
                 float z13 = tmp7 - z3;
 
-                data[dataIndex + Constants.DCTSIZE * 5] = z13 + z2; /* phase 6 */
-                data[dataIndex + Constants.DCTSIZE * 3] = z13 - z2;
-                data[dataIndex + Constants.DCTSIZE * 1] = z11 + z4;
-                data[dataIndex + Constants.DCTSIZE * 7] = z11 - z4;
+                data[dataIndex + JpegConstants.DCTSIZE * 5] = z13 + z2; /* phase 6 */
+                data[dataIndex + JpegConstants.DCTSIZE * 3] = z13 - z2;
+                data[dataIndex + JpegConstants.DCTSIZE * 1] = z11 + z4;
+                data[dataIndex + JpegConstants.DCTSIZE * 7] = z11 - z4;
 
                 dataIndex++;          /* advance pointer to next column */
             }
@@ -514,7 +514,7 @@ namespace LibJpeg.NET
         {
             /* Pass 1: process rows. */
             int dataIndex = 0;
-            for (int ctr = Constants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
             {
                 int tmp0 = data[dataIndex + 0] + data[dataIndex + 7];
                 int tmp7 = data[dataIndex + 0] - data[dataIndex + 7];
@@ -559,22 +559,22 @@ namespace LibJpeg.NET
                 data[dataIndex + 1] = z11 + z4;
                 data[dataIndex + 7] = z11 - z4;
 
-                dataIndex += Constants.DCTSIZE;     /* advance pointer to next row */
+                dataIndex += JpegConstants.DCTSIZE;     /* advance pointer to next row */
             }
 
             /* Pass 2: process columns. */
 
             dataIndex = 0;
-            for (int ctr = Constants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
             {
-                int tmp0 = data[dataIndex + Constants.DCTSIZE * 0] + data[dataIndex + Constants.DCTSIZE * 7];
-                int tmp7 = data[dataIndex + Constants.DCTSIZE * 0] - data[dataIndex + Constants.DCTSIZE * 7];
-                int tmp1 = data[dataIndex + Constants.DCTSIZE * 1] + data[dataIndex + Constants.DCTSIZE * 6];
-                int tmp6 = data[dataIndex + Constants.DCTSIZE * 1] - data[dataIndex + Constants.DCTSIZE * 6];
-                int tmp2 = data[dataIndex + Constants.DCTSIZE * 2] + data[dataIndex + Constants.DCTSIZE * 5];
-                int tmp5 = data[dataIndex + Constants.DCTSIZE * 2] - data[dataIndex + Constants.DCTSIZE * 5];
-                int tmp3 = data[dataIndex + Constants.DCTSIZE * 3] + data[dataIndex + Constants.DCTSIZE * 4];
-                int tmp4 = data[dataIndex + Constants.DCTSIZE * 3] - data[dataIndex + Constants.DCTSIZE * 4];
+                int tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] + data[dataIndex + JpegConstants.DCTSIZE * 7];
+                int tmp7 = data[dataIndex + JpegConstants.DCTSIZE * 0] - data[dataIndex + JpegConstants.DCTSIZE * 7];
+                int tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] + data[dataIndex + JpegConstants.DCTSIZE * 6];
+                int tmp6 = data[dataIndex + JpegConstants.DCTSIZE * 1] - data[dataIndex + JpegConstants.DCTSIZE * 6];
+                int tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] + data[dataIndex + JpegConstants.DCTSIZE * 5];
+                int tmp5 = data[dataIndex + JpegConstants.DCTSIZE * 2] - data[dataIndex + JpegConstants.DCTSIZE * 5];
+                int tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] + data[dataIndex + JpegConstants.DCTSIZE * 4];
+                int tmp4 = data[dataIndex + JpegConstants.DCTSIZE * 3] - data[dataIndex + JpegConstants.DCTSIZE * 4];
 
                 /* Even part */
 
@@ -583,12 +583,12 @@ namespace LibJpeg.NET
                 int tmp11 = tmp1 + tmp2;
                 int tmp12 = tmp1 - tmp2;
 
-                data[dataIndex + Constants.DCTSIZE * 0] = tmp10 + tmp11; /* phase 3 */
-                data[dataIndex + Constants.DCTSIZE * 4] = tmp10 - tmp11;
+                data[dataIndex + JpegConstants.DCTSIZE * 0] = tmp10 + tmp11; /* phase 3 */
+                data[dataIndex + JpegConstants.DCTSIZE * 4] = tmp10 - tmp11;
 
                 int z1 = FAST_INTEGER_MULTIPLY(tmp12 + tmp13, FAST_INTEGER_FIX_0_707106781); /* c4 */
-                data[dataIndex + Constants.DCTSIZE * 2] = tmp13 + z1; /* phase 5 */
-                data[dataIndex + Constants.DCTSIZE * 6] = tmp13 - z1;
+                data[dataIndex + JpegConstants.DCTSIZE * 2] = tmp13 + z1; /* phase 5 */
+                data[dataIndex + JpegConstants.DCTSIZE * 6] = tmp13 - z1;
 
                 /* Odd part */
 
@@ -605,10 +605,10 @@ namespace LibJpeg.NET
                 int z11 = tmp7 + z3;        /* phase 5 */
                 int z13 = tmp7 - z3;
 
-                data[dataIndex + Constants.DCTSIZE * 5] = z13 + z2; /* phase 6 */
-                data[dataIndex + Constants.DCTSIZE * 3] = z13 - z2;
-                data[dataIndex + Constants.DCTSIZE * 1] = z11 + z4;
-                data[dataIndex + Constants.DCTSIZE * 7] = z11 - z4;
+                data[dataIndex + JpegConstants.DCTSIZE * 5] = z13 + z2; /* phase 6 */
+                data[dataIndex + JpegConstants.DCTSIZE * 3] = z13 - z2;
+                data[dataIndex + JpegConstants.DCTSIZE * 1] = z11 + z4;
+                data[dataIndex + JpegConstants.DCTSIZE * 7] = z11 - z4;
 
                 dataIndex++;          /* advance pointer to next column */
             }
@@ -673,7 +673,7 @@ namespace LibJpeg.NET
             /* Note results are scaled up by sqrt(8) compared to a true DCT; */
             /* furthermore, we scale the results by 2**SLOW_INTEGER_PASS1_BITS. */
             int dataIndex = 0;
-            for (int ctr = Constants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
             {
                 int tmp0 = data[dataIndex + 0] + data[dataIndex + 7];
                 int tmp7 = data[dataIndex + 0] - data[dataIndex + 7];
@@ -730,7 +730,7 @@ namespace LibJpeg.NET
                 data[dataIndex + 3] = JpegUtils.DESCALE(tmp6 + z2 + z3, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
                 data[dataIndex + 1] = JpegUtils.DESCALE(tmp7 + z1 + z4, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
 
-                dataIndex += Constants.DCTSIZE;     /* advance pointer to next row */
+                dataIndex += JpegConstants.DCTSIZE;     /* advance pointer to next row */
             }
 
             /* Pass 2: process columns.
@@ -739,16 +739,16 @@ namespace LibJpeg.NET
             */
 
             dataIndex = 0;
-            for (int ctr = Constants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
             {
-                int tmp0 = data[dataIndex + Constants.DCTSIZE * 0] + data[dataIndex + Constants.DCTSIZE * 7];
-                int tmp7 = data[dataIndex + Constants.DCTSIZE * 0] - data[dataIndex + Constants.DCTSIZE * 7];
-                int tmp1 = data[dataIndex + Constants.DCTSIZE * 1] + data[dataIndex + Constants.DCTSIZE * 6];
-                int tmp6 = data[dataIndex + Constants.DCTSIZE * 1] - data[dataIndex + Constants.DCTSIZE * 6];
-                int tmp2 = data[dataIndex + Constants.DCTSIZE * 2] + data[dataIndex + Constants.DCTSIZE * 5];
-                int tmp5 = data[dataIndex + Constants.DCTSIZE * 2] - data[dataIndex + Constants.DCTSIZE * 5];
-                int tmp3 = data[dataIndex + Constants.DCTSIZE * 3] + data[dataIndex + Constants.DCTSIZE * 4];
-                int tmp4 = data[dataIndex + Constants.DCTSIZE * 3] - data[dataIndex + Constants.DCTSIZE * 4];
+                int tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] + data[dataIndex + JpegConstants.DCTSIZE * 7];
+                int tmp7 = data[dataIndex + JpegConstants.DCTSIZE * 0] - data[dataIndex + JpegConstants.DCTSIZE * 7];
+                int tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] + data[dataIndex + JpegConstants.DCTSIZE * 6];
+                int tmp6 = data[dataIndex + JpegConstants.DCTSIZE * 1] - data[dataIndex + JpegConstants.DCTSIZE * 6];
+                int tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] + data[dataIndex + JpegConstants.DCTSIZE * 5];
+                int tmp5 = data[dataIndex + JpegConstants.DCTSIZE * 2] - data[dataIndex + JpegConstants.DCTSIZE * 5];
+                int tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] + data[dataIndex + JpegConstants.DCTSIZE * 4];
+                int tmp4 = data[dataIndex + JpegConstants.DCTSIZE * 3] - data[dataIndex + JpegConstants.DCTSIZE * 4];
 
                 /* Even part per LL&M figure 1 --- note that published figure is faulty;
                 * rotator "sqrt(2)*c1" should be "sqrt(2)*c6".
@@ -759,13 +759,13 @@ namespace LibJpeg.NET
                 int tmp11 = tmp1 + tmp2;
                 int tmp12 = tmp1 - tmp2;
 
-                data[dataIndex + Constants.DCTSIZE * 0] = JpegUtils.DESCALE(tmp10 + tmp11, SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + Constants.DCTSIZE * 4] = JpegUtils.DESCALE(tmp10 - tmp11, SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 0] = JpegUtils.DESCALE(tmp10 + tmp11, SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 4] = JpegUtils.DESCALE(tmp10 - tmp11, SLOW_INTEGER_PASS1_BITS);
 
                 int z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_0_541196100;
-                data[dataIndex + Constants.DCTSIZE * 2] = JpegUtils.DESCALE(z1 + tmp13 * SLOW_INTEGER_FIX_0_765366865,
+                data[dataIndex + JpegConstants.DCTSIZE * 2] = JpegUtils.DESCALE(z1 + tmp13 * SLOW_INTEGER_FIX_0_765366865,
                                                           SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + Constants.DCTSIZE * 6] = JpegUtils.DESCALE(z1 + tmp12 * (-SLOW_INTEGER_FIX_1_847759065),
+                data[dataIndex + JpegConstants.DCTSIZE * 6] = JpegUtils.DESCALE(z1 + tmp12 * (-SLOW_INTEGER_FIX_1_847759065),
                                                           SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
 
                 /* Odd part per figure 8 --- note paper omits factor of sqrt(2).
@@ -791,10 +791,10 @@ namespace LibJpeg.NET
                 z3 += z5;
                 z4 += z5;
 
-                data[dataIndex + Constants.DCTSIZE * 7] = JpegUtils.DESCALE(tmp4 + z1 + z3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + Constants.DCTSIZE * 5] = JpegUtils.DESCALE(tmp5 + z2 + z4, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + Constants.DCTSIZE * 3] = JpegUtils.DESCALE(tmp6 + z2 + z3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + Constants.DCTSIZE * 1] = JpegUtils.DESCALE(tmp7 + z1 + z4, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 7] = JpegUtils.DESCALE(tmp4 + z1 + z3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 5] = JpegUtils.DESCALE(tmp5 + z2 + z4, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 3] = JpegUtils.DESCALE(tmp6 + z2 + z3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 1] = JpegUtils.DESCALE(tmp7 + z1 + z4, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
 
                 dataIndex++;          /* advance pointer to next column */
             }

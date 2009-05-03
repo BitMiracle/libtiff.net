@@ -18,7 +18,7 @@ namespace LibJpeg.NET
     /// </summary>
     public class JBLOCK
     {
-        public short[] data = new short[Constants.DCTSIZE2];
+        public short[] data = new short[JpegConstants.DCTSIZE2];
 
         public short this[int i]
         {

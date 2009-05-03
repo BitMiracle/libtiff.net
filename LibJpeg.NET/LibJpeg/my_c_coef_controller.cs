@@ -44,10 +44,10 @@ namespace LibJpeg.NET
         * In multi-pass modes, this array points to the current MCU's blocks
         * within the virtual arrays.
         */
-        private JBLOCK[][] m_MCU_buffer = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU][];
+        private JBLOCK[][] m_MCU_buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU][];
 
         /* In multi-pass modes, we need a virtual block array for each component. */
-        private jvirt_barray_control[] m_whole_image = new jvirt_barray_control[Constants.MAX_COMPONENTS];
+        private jvirt_barray_control[] m_whole_image = new jvirt_barray_control[JpegConstants.MAX_COMPONENTS];
 
         public my_c_coef_controller(jpeg_compress_struct cinfo, bool need_full_buffer)
         {
@@ -68,14 +68,14 @@ namespace LibJpeg.NET
             else
             {
                 /* We only need a single-MCU buffer. */
-                JBLOCK[] buffer = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU];
-                for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
+                JBLOCK[] buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU];
+                for (int i = 0; i < JpegConstants.C_MAX_BLOCKS_IN_MCU; i++)
                     buffer[i] = new JBLOCK();
 
-                for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
+                for (int i = 0; i < JpegConstants.C_MAX_BLOCKS_IN_MCU; i++)
                 {
-                    m_MCU_buffer[i] = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU - i];
-                    for (int j = i; j < Constants.C_MAX_BLOCKS_IN_MCU; j++)
+                    m_MCU_buffer[i] = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU - i];
+                    for (int j = i; j < JpegConstants.C_MAX_BLOCKS_IN_MCU; j++)
                         m_MCU_buffer[i][j - i] = buffer[j];
                 }
 
@@ -166,7 +166,7 @@ namespace LibJpeg.NET
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                         int blockcnt = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
                         uint xpos = (uint)(MCU_col_num * componentInfo.MCU_sample_width);
-                        uint ypos = (uint)(yoffset * Constants.DCTSIZE);
+                        uint ypos = (uint)(yoffset * JpegConstants.DCTSIZE);
 
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
@@ -196,7 +196,7 @@ namespace LibJpeg.NET
                             }
 
                             blkn += componentInfo.MCU_width;
-                            ypos += Constants.DCTSIZE;
+                            ypos += JpegConstants.DCTSIZE;
                         }
                     }
 
@@ -283,7 +283,7 @@ namespace LibJpeg.NET
                 for (int block_row = 0; block_row < block_rows; block_row++)
                 {
                     m_cinfo.m_fdct.forward_DCT(componentInfo.quant_tbl_no, input_buf[ci],
-                        buffer[block_row], (uint)(block_row * Constants.DCTSIZE), (uint)0, blocks_across);
+                        buffer[block_row], (uint)(block_row * JpegConstants.DCTSIZE), (uint)0, blocks_across);
 
                     if (ndummy > 0)
                     {
@@ -346,7 +346,7 @@ namespace LibJpeg.NET
              * NB: during first pass, this is safe only because the buffers will
              * already be aligned properly, so jmemmgr.c won't need to do any I/O.
              */
-            JBLOCK[][][] buffer = new JBLOCK[Constants.MAX_COMPS_IN_SCAN][][];
+            JBLOCK[][][] buffer = new JBLOCK[JpegConstants.MAX_COMPS_IN_SCAN][][];
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];

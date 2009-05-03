@@ -39,7 +39,7 @@ namespace LibJpeg.NET
         private jvirt_barray_control[] m_whole_image;
 
         /* Workspace for constructing dummy blocks at right/bottom edges. */
-        private JBLOCK[][] m_dummy_buffer = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU][];
+        private JBLOCK[][] m_dummy_buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU][];
 
         /// <summary>
         /// Initialize coefficient buffer controller.
@@ -56,14 +56,14 @@ namespace LibJpeg.NET
             m_whole_image = coef_arrays;
 
             /* Allocate and pre-zero space for dummy DCT blocks. */
-            JBLOCK[] buffer = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU];
-            for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
+            JBLOCK[] buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU];
+            for (int i = 0; i < JpegConstants.C_MAX_BLOCKS_IN_MCU; i++)
                 buffer[i] = new JBLOCK();
 
-            for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
+            for (int i = 0; i < JpegConstants.C_MAX_BLOCKS_IN_MCU; i++)
             {
-                m_dummy_buffer[i] = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU - i];
-                for (int j = i; j < Constants.C_MAX_BLOCKS_IN_MCU; j++)
+                m_dummy_buffer[i] = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU - i];
+                for (int j = i; j < JpegConstants.C_MAX_BLOCKS_IN_MCU; j++)
                     m_dummy_buffer[i][j - i] = buffer[j];
             }
         }
@@ -92,7 +92,7 @@ namespace LibJpeg.NET
         public virtual bool compress_data(byte[][][] input_buf)
         {
             /* Align the virtual buffers for the components used in this scan. */
-            JBLOCK[][][] buffer = new JBLOCK[Constants.MAX_COMPS_IN_SCAN][][];
+            JBLOCK[][][] buffer = new JBLOCK[JpegConstants.MAX_COMPS_IN_SCAN][][];
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
@@ -103,7 +103,7 @@ namespace LibJpeg.NET
             /* Loop to process one whole iMCU row */
             uint last_MCU_col = m_cinfo.m_MCUs_per_row - 1;
             uint last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
-            JBLOCK[][] MCU_buffer = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU][];
+            JBLOCK[][] MCU_buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU][];
             for (int yoffset = m_MCU_vert_offset; yoffset < m_MCU_rows_per_iMCU_row; yoffset++)
             {
                 for (uint MCU_col_num = m_mcu_ctr; MCU_col_num < m_cinfo.m_MCUs_per_row; MCU_col_num++)

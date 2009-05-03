@@ -16,7 +16,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// Huffman coding tables.
     /// </summary>
-    public class JHUFF_TBL
+    class JHUFF_TBL
     {
         public JHUFF_TBL()
         {

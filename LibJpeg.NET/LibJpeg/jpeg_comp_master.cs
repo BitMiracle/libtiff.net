@@ -16,7 +16,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// Master control module
     /// </summary>
-    public class jpeg_comp_master
+    class jpeg_comp_master
     {
         private enum c_pass_type
         {
@@ -264,15 +264,15 @@ namespace LibJpeg.NET
             else
             {
                 /* Prepare for single sequential-JPEG scan containing all components */
-                if (m_cinfo.m_num_components > Constants.MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, Constants.MAX_COMPS_IN_SCAN);
+                if (m_cinfo.m_num_components > JpegConstants.MAX_COMPS_IN_SCAN)
+                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 m_cinfo.m_comps_in_scan = m_cinfo.m_num_components;
                 for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                     m_cinfo.m_cur_comp_info[ci] = ci;
 
                 m_cinfo.m_Ss = 0;
-                m_cinfo.m_Se = Constants.DCTSIZE2 - 1;
+                m_cinfo.m_Se = JpegConstants.DCTSIZE2 - 1;
                 m_cinfo.m_Ah = 0;
                 m_cinfo.m_Al = 0;
             }
@@ -297,7 +297,7 @@ namespace LibJpeg.NET
                 m_cinfo.m_comp_info[compIndex].MCU_width = 1;
                 m_cinfo.m_comp_info[compIndex].MCU_height = 1;
                 m_cinfo.m_comp_info[compIndex].MCU_blocks = 1;
-                m_cinfo.m_comp_info[compIndex].MCU_sample_width = Constants.DCTSIZE;
+                m_cinfo.m_comp_info[compIndex].MCU_sample_width = JpegConstants.DCTSIZE;
                 m_cinfo.m_comp_info[compIndex].last_col_width = 1;
                 
                 /* For noninterleaved scans, it is convenient to define last_row_height
@@ -315,15 +315,15 @@ namespace LibJpeg.NET
             else
             {
                 /* Interleaved (multi-component) scan */
-                if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > Constants.MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, Constants.MAX_COMPS_IN_SCAN);
+                if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > JpegConstants.MAX_COMPS_IN_SCAN)
+                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 /* Overall image size in MCUs */
                 m_cinfo.m_MCUs_per_row = (uint) JpegUtils.jdiv_round_up((long) m_cinfo.m_image_width,
-                                                                              (long) (m_cinfo.m_max_h_samp_factor * Constants.DCTSIZE));
+                                                                              (long) (m_cinfo.m_max_h_samp_factor * JpegConstants.DCTSIZE));
                 m_cinfo.m_MCU_rows_in_scan = (uint)
                                             JpegUtils.jdiv_round_up((long) m_cinfo.m_image_height,
-                                                                                  (long) (m_cinfo.m_max_v_samp_factor * Constants.DCTSIZE));
+                                                                                  (long) (m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE));
 
                 m_cinfo.m_blocks_in_MCU = 0;
 
@@ -335,7 +335,7 @@ namespace LibJpeg.NET
                     m_cinfo.m_comp_info[compIndex].MCU_width = m_cinfo.m_comp_info[compIndex].h_samp_factor;
                     m_cinfo.m_comp_info[compIndex].MCU_height = m_cinfo.m_comp_info[compIndex].v_samp_factor;
                     m_cinfo.m_comp_info[compIndex].MCU_blocks = m_cinfo.m_comp_info[compIndex].MCU_width * m_cinfo.m_comp_info[compIndex].MCU_height;
-                    m_cinfo.m_comp_info[compIndex].MCU_sample_width = m_cinfo.m_comp_info[compIndex].MCU_width * Constants.DCTSIZE;
+                    m_cinfo.m_comp_info[compIndex].MCU_sample_width = m_cinfo.m_comp_info[compIndex].MCU_width * JpegConstants.DCTSIZE;
                     
                     /* Figure number of non-dummy blocks in last MCU column & row */
                     int tmp = (int) (m_cinfo.m_comp_info[compIndex].width_in_blocks % m_cinfo.m_comp_info[compIndex].MCU_width);
@@ -350,7 +350,7 @@ namespace LibJpeg.NET
                     
                     /* Prepare array describing MCU composition */
                     int mcublks = m_cinfo.m_comp_info[compIndex].MCU_blocks;
-                    if (m_cinfo.m_blocks_in_MCU + mcublks > Constants.C_MAX_BLOCKS_IN_MCU)
+                    if (m_cinfo.m_blocks_in_MCU + mcublks > JpegConstants.C_MAX_BLOCKS_IN_MCU)
                         m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_MCU_SIZE);
                     
                     while (mcublks-- > 0)

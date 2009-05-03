@@ -13,7 +13,7 @@ using System.Text;
 
 namespace LibJpeg.NET
 {
-    public enum J_BUF_MODE
+    enum J_BUF_MODE
     {
         /* Operating modes for buffer controllers */
         JBUF_PASS_THRU,

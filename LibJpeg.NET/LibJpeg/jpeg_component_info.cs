@@ -16,7 +16,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// Basic info about one component (color channel).
     /// </summary>
-    public struct jpeg_component_info
+    struct jpeg_component_info
     {
         /* These values are fixed over the whole image. */
         /* For compression, they must be supplied by parameter setup; */

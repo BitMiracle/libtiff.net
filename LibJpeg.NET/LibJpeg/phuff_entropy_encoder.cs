@@ -51,7 +51,7 @@ namespace LibJpeg.NET
         private int m_put_bits;           /* # of bits now in it */
 
         /* Coding status for DC components */
-        private int[] m_last_dc_val = new int[Constants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
+        private int[] m_last_dc_val = new int[JpegConstants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
 
         /* Coding status for AC components */
         private int m_ac_tbl_no;      /* the table number of the single component */
@@ -67,17 +67,17 @@ namespace LibJpeg.NET
         * Since any one scan codes only DC or only AC, we only need one set
         * of tables, not one for DC and one for AC.
         */
-        private c_derived_tbl[] m_derived_tbls = new c_derived_tbl[Constants.NUM_HUFF_TBLS];
+        private c_derived_tbl[] m_derived_tbls = new c_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
 
         /* Statistics tables for optimization; again, one set is enough */
-        private long[][] m_count_ptrs = new long[Constants.NUM_HUFF_TBLS][];
+        private long[][] m_count_ptrs = new long[JpegConstants.NUM_HUFF_TBLS][];
 
         public phuff_entropy_encoder(jpeg_compress_struct cinfo)
         {
             m_cinfo = cinfo;
 
             /* Mark tables unallocated */
-            for (int i = 0; i < Constants.NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
             {
                 m_derived_tbls[i] = null;
                 m_count_ptrs[i] = null;
@@ -147,7 +147,7 @@ namespace LibJpeg.NET
                 {
                     /* Check for invalid table index */
                     /* (make_c_derived_tbl does this in the other path) */
-                    if (tbl < 0 || tbl >= Constants.NUM_HUFF_TBLS)
+                    if (tbl < 0 || tbl >= JpegConstants.NUM_HUFF_TBLS)
                         m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tbl);
 
                     /* Allocate and zero the statistics tables */
@@ -443,7 +443,7 @@ namespace LibJpeg.NET
              * coefficients' absolute values and the EOB position.
              */
             int EOB = 0;
-            int[] absvalues = new int[Constants.DCTSIZE2];
+            int[] absvalues = new int[JpegConstants.DCTSIZE2];
             for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
             {
                 int temp = MCU_data[0][0][JpegUtils.jpeg_natural_order[k]];
@@ -536,7 +536,7 @@ namespace LibJpeg.NET
                  * 1. overflow of the EOB counter;
                  * 2. overflow of the correction bit buffer during the next MCU.
                  */
-                if (m_EOBRUN == 0x7FFF || m_BE > (MAX_CORR_BITS - Constants.DCTSIZE2 + 1))
+                if (m_EOBRUN == 0x7FFF || m_BE > (MAX_CORR_BITS - JpegConstants.DCTSIZE2 + 1))
                     emit_eobrun();
             }
 
@@ -576,7 +576,7 @@ namespace LibJpeg.NET
             /* It's important not to apply jpeg_gen_optimal_table more than once
              * per table, because it clobbers the input frequency counts!
              */
-            bool[] did = new bool [Constants.NUM_HUFF_TBLS];
+            bool[] did = new bool [JpegConstants.NUM_HUFF_TBLS];
 
             bool is_DC_band = (m_cinfo.m_Ss == 0);
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)

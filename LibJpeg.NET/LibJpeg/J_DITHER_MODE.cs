@@ -14,11 +14,12 @@ using System.Text;
 namespace LibJpeg.NET
 {
     /// <summary>
-    /// Coefficient buffer control
+    /// Dithering options for decompression.
     /// </summary>
-    interface jpeg_c_coef_controller
+    public enum J_DITHER_MODE
     {
-        void start_pass(J_BUF_MODE pass_mode);
-        bool compress_data(byte[][][] input_buf);
+        JDITHER_NONE, /* no dithering */
+        JDITHER_ORDERED, /* simple ordered dither */
+        JDITHER_FS /* Floyd-Steinberg error diffusion dither */
     }
 }

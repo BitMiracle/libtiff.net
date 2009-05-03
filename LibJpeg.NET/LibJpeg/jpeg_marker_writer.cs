@@ -20,7 +20,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// Marker writing
     /// </summary>
-    public class jpeg_marker_writer
+    class jpeg_marker_writer
     {
         private jpeg_compress_struct m_cinfo;
         private uint m_last_restart_interval; /* last DRI value emitted; 0 after SOI */
@@ -176,13 +176,13 @@ namespace LibJpeg.NET
         {
             emit_marker(JPEG_MARKER.M_SOI);
 
-            for (int i = 0; i < Constants.NUM_QUANT_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
             {
                 if (m_cinfo.m_quant_tbl_ptrs[i] != null)
                     emit_dqt(i);
             }
 
-            for (int i = 0; i < Constants.NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
             {
                 if (m_cinfo.m_dc_huff_tbl_ptrs[i] != null)
                     emit_dht(i, false);
@@ -410,7 +410,7 @@ namespace LibJpeg.NET
                 m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, index);
 
             int prec = 0;
-            for (int i = 0; i < Constants.DCTSIZE2; i++)
+            for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
             {
                 if (qtbl.quantval[i] > 255)
                     prec = 1;
@@ -420,11 +420,11 @@ namespace LibJpeg.NET
             {
                 emit_marker(JPEG_MARKER.M_DQT);
 
-                emit_2bytes(prec != 0 ? Constants.DCTSIZE2 * 2 + 1 + 2 : Constants.DCTSIZE2 + 1 + 2);
+                emit_2bytes(prec != 0 ? JpegConstants.DCTSIZE2 * 2 + 1 + 2 : JpegConstants.DCTSIZE2 + 1 + 2);
 
                 emit_byte(index + (prec << 4));
 
-                for (int i = 0; i < Constants.DCTSIZE2; i++)
+                for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
                     /* The table entries must be emitted in zigzag order. */
                     uint qval = qtbl.quantval[JpegUtils.jpeg_natural_order[i]];

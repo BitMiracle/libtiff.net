@@ -20,10 +20,10 @@ namespace LibJpeg.NET
     /// <summary>
     /// Colorspace conversion
     /// </summary>
-    public class jpeg_color_converter
+    class jpeg_color_converter
     {
         private const int SCALEBITS = 16;  /* speediest right-shift on some machines */
-        private const int CBCR_OFFSET = ((int) Constants.CENTERJSAMPLE << SCALEBITS);
+        private const int CBCR_OFFSET = ((int) JpegConstants.CENTERJSAMPLE << SCALEBITS);
         private const int ONE_HALF = ((int)1 << (SCALEBITS - 1));
 
         // We allocate one big table and divide it up into eight parts, instead of
@@ -31,15 +31,15 @@ namespace LibJpeg.NET
         // address, which can be held in a register in the inner loops on many
         // machines (more than can hold all eight addresses, anyway).
         private const int R_Y_OFF = 0;           /* offset to R => Y section */
-        private const int G_Y_OFF = (1*(Constants.MAXJSAMPLE+1));  /* offset to G => Y section */
-        private const int B_Y_OFF = (2*(Constants.MAXJSAMPLE+1));  /* etc. */
-        private const int R_CB_OFF = (3*(Constants.MAXJSAMPLE+1));
-        private const int G_CB_OFF = (4*(Constants.MAXJSAMPLE+1));
-        private const int B_CB_OFF = (5*(Constants.MAXJSAMPLE+1));
+        private const int G_Y_OFF = (1*(JpegConstants.MAXJSAMPLE+1));  /* offset to G => Y section */
+        private const int B_Y_OFF = (2*(JpegConstants.MAXJSAMPLE+1));  /* etc. */
+        private const int R_CB_OFF = (3*(JpegConstants.MAXJSAMPLE+1));
+        private const int G_CB_OFF = (4*(JpegConstants.MAXJSAMPLE+1));
+        private const int B_CB_OFF = (5*(JpegConstants.MAXJSAMPLE+1));
         private const int R_CR_OFF = B_CB_OFF;        /* B=>Cb, R=>Cr are the same */
-        private const int G_CR_OFF = (6*(Constants.MAXJSAMPLE+1));
-        private const int B_CR_OFF = (7*(Constants.MAXJSAMPLE+1));
-        private const int TABLE_SIZE = (8 * (Constants.MAXJSAMPLE + 1));
+        private const int G_CR_OFF = (6*(JpegConstants.MAXJSAMPLE+1));
+        private const int B_CR_OFF = (7*(JpegConstants.MAXJSAMPLE+1));
+        private const int TABLE_SIZE = (8 * (JpegConstants.MAXJSAMPLE + 1));
 
         private jpeg_compress_struct m_cinfo;
 
@@ -204,7 +204,7 @@ namespace LibJpeg.NET
             /* Allocate and fill in the conversion tables. */
             m_rgb_ycc_tab = new int[TABLE_SIZE];
 
-            for (int i = 0; i <= Constants.MAXJSAMPLE; i++)
+            for (int i = 0; i <= JpegConstants.MAXJSAMPLE; i++)
             {
                 m_rgb_ycc_tab[i + R_Y_OFF] = FIX(0.29900) * i;
                 m_rgb_ycc_tab[i + G_Y_OFF] = FIX(0.58700) * i;
@@ -269,10 +269,10 @@ namespace LibJpeg.NET
                 int columnOffset = 0;
                 for (uint col = 0; col < num_cols; col++)
                 {
-                    int r = input_buf[input_row + row][columnOffset + Constants.RGB_RED];
-                    int g = input_buf[input_row + row][columnOffset + Constants.RGB_GREEN];
-                    int b = input_buf[input_row + row][columnOffset + Constants.RGB_BLUE];
-                    columnOffset += Constants.RGB_PIXELSIZE;
+                    int r = input_buf[input_row + row][columnOffset + JpegConstants.RGB_RED];
+                    int g = input_buf[input_row + row][columnOffset + JpegConstants.RGB_GREEN];
+                    int b = input_buf[input_row + row][columnOffset + JpegConstants.RGB_BLUE];
+                    columnOffset += JpegConstants.RGB_PIXELSIZE;
 
                     /* If the inputs are 0..MAXJSAMPLE, the outputs of these equations
                      * must be too; we do not need an explicit range-limiting operation.
@@ -305,10 +305,10 @@ namespace LibJpeg.NET
                 int columnOffset = 0;
                 for (uint col = 0; col < num_cols; col++)
                 {
-                    int r = input_buf[input_row + row][columnOffset + Constants.RGB_RED];
-                    int g = input_buf[input_row + row][columnOffset + Constants.RGB_GREEN];
-                    int b = input_buf[input_row + row][columnOffset + Constants.RGB_BLUE];
-                    columnOffset += Constants.RGB_PIXELSIZE;
+                    int r = input_buf[input_row + row][columnOffset + JpegConstants.RGB_RED];
+                    int g = input_buf[input_row + row][columnOffset + JpegConstants.RGB_GREEN];
+                    int b = input_buf[input_row + row][columnOffset + JpegConstants.RGB_BLUE];
+                    columnOffset += JpegConstants.RGB_PIXELSIZE;
 
                     /* Y */
                     output_buf[0][output_row][col] = (byte)((m_rgb_ycc_tab[r + R_Y_OFF] + m_rgb_ycc_tab[g + G_Y_OFF] + m_rgb_ycc_tab[b + B_Y_OFF]) >> SCALEBITS);
@@ -333,9 +333,9 @@ namespace LibJpeg.NET
                 int columnOffset = 0;
                 for (uint col = 0; col < num_cols; col++)
                 {
-                    int r = Constants.MAXJSAMPLE - input_buf[input_row + row][columnOffset];
-                    int g = Constants.MAXJSAMPLE - input_buf[input_row + row][columnOffset + 1];
-                    int b = Constants.MAXJSAMPLE - input_buf[input_row + row][columnOffset + 2];
+                    int r = JpegConstants.MAXJSAMPLE - input_buf[input_row + row][columnOffset];
+                    int g = JpegConstants.MAXJSAMPLE - input_buf[input_row + row][columnOffset + 1];
+                    int b = JpegConstants.MAXJSAMPLE - input_buf[input_row + row][columnOffset + 2];
 
                     /* K passes through as-is */
                     /* don't need GETJSAMPLE here */

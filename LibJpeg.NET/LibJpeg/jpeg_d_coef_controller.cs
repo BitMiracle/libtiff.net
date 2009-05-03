@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LibJpeg.NET
 {
-    public class Class1
+    class jpeg_d_coef_controller
     {
     }
 }

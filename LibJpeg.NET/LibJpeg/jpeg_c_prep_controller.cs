@@ -42,14 +42,14 @@ namespace LibJpeg.NET
     /// by pointer hacking as is done in jdmainct.c, but it doesn't seem worth the
     /// trouble on the compression side.
     /// </summary>
-    public class jpeg_c_prep_controller
+    class jpeg_c_prep_controller
     {
         private jpeg_compress_struct m_cinfo;
 
         /* Downsampling input buffer.  This buffer holds color-converted data
         * until we have enough to do a downsample step.
         */
-        private byte[][][] m_color_buf = new byte[Constants.MAX_COMPONENTS][][];
+        private byte[][][] m_color_buf = new byte[JpegConstants.MAX_COMPONENTS][][];
 
         private uint m_rows_to_go;  /* counts rows remaining in source image */
         private int m_next_buf_row;       /* index of next row to store in color_buf */
@@ -76,7 +76,7 @@ namespace LibJpeg.NET
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_color_buf[ci] = jpeg_compress_struct.AllocJpegSamples(
-                        (uint)(((long)cinfo.m_comp_info[ci].width_in_blocks * Constants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.m_comp_info[ci].h_samp_factor),
+                        (uint)(((long)cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.m_comp_info[ci].h_samp_factor),
                         (uint)cinfo.m_max_v_samp_factor);
                 }
             }
@@ -121,7 +121,7 @@ namespace LibJpeg.NET
             int rgroup_height = m_cinfo.m_max_v_samp_factor;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                uint samplesPerRow = (uint)(((long)m_cinfo.m_comp_info[ci].width_in_blocks * Constants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.m_comp_info[ci].h_samp_factor);
+                uint samplesPerRow = (uint)(((long)m_cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.m_comp_info[ci].h_samp_factor);
 
                 byte[][] fake_buffer = new byte[5 * rgroup_height][];
                 for (int i = 0; i < 5 * rgroup_height; i++)
@@ -194,7 +194,7 @@ namespace LibJpeg.NET
                     for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
-                        expand_bottom_edge(output_buf[ci], componentInfo.width_in_blocks * Constants.DCTSIZE,
+                        expand_bottom_edge(output_buf[ci], componentInfo.width_in_blocks * JpegConstants.DCTSIZE,
                             (int)(out_row_group_ctr * componentInfo.v_samp_factor),
                             (int)(out_row_groups_avail * componentInfo.v_samp_factor));
                     }

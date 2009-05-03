@@ -16,7 +16,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// Entropy encoding
     /// </summary>
-    public abstract class jpeg_entropy_encoder
+    abstract class jpeg_entropy_encoder
     {
         /* Derived data constructed for each Huffman table */
         protected class c_derived_tbl
@@ -52,7 +52,7 @@ namespace LibJpeg.NET
             */
 
             /* Find the input Huffman table */
-            if (tblno < 0 || tblno >= Constants.NUM_HUFF_TBLS)
+            if (tblno < 0 || tblno >= JpegConstants.NUM_HUFF_TBLS)
                 m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
 
             JHUFF_TBL htbl = isDC ? m_cinfo.m_dc_huff_tbl_ptrs[tblno] : m_cinfo.m_ac_huff_tbl_ptrs[tblno];

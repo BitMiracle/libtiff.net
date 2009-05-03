@@ -16,7 +16,7 @@ namespace LibJpeg.NET
     /// <summary>
     /// JPEG marker codes
     /// </summary>
-    enum JPEG_MARKER
+    public enum JPEG_MARKER
     {
         M_SOF0 = 0xc0,
         M_SOF1 = 0xc1,
