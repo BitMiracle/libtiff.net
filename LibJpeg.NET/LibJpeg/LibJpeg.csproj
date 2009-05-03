@@ -83,6 +83,7 @@
     <Compile Include="J_MESSAGE_CODE.cs" />
     <Compile Include="my_c_coef_controller.cs" />
     <Compile Include="my_destination_mgr.cs" />
+    <Compile Include="my_source_mgr.cs" />
     <Compile Include="my_trans_c_coef_controller.cs" />
     <Compile Include="phuff_entropy_encoder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

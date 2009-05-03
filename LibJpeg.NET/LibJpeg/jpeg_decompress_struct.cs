@@ -437,7 +437,7 @@ namespace LibJpeg.NET
 
             /* Process some data */
             uint row_ctr = 0;
-            m_main.process_data(scanlines, row_ctr, max_lines);
+            m_main.process_data(scanlines, ref row_ctr, max_lines);
             m_output_scanline += row_ctr;
             return row_ctr;
         }
