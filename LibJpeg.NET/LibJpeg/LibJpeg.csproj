@@ -40,7 +40,7 @@
     <Compile Include="jpeg_color_quantizer.cs" />
     <Compile Include="jpeg_d_post_controller.cs" />
     <Compile Include="ComponentBuffer.cs" />
-    <Compile Include="Constants.cs" />
+    <Compile Include="JpegConstants.cs" />
     <Compile Include="huff_entropy_encoder.cs" />
     <Compile Include="JBLOCK.cs" />
     <Compile Include="JHUFF_TBL.cs" />

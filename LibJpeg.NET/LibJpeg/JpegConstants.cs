@@ -45,6 +45,9 @@ namespace LibJpeg.NET
         // sometimes emits noncompliant files doesn't mean you should too.
         public const int C_MAX_BLOCKS_IN_MCU = 10;
 
+        /* decompressor's limit on blocks per MCU */
+        public const int D_MAX_BLOCKS_IN_MCU = 10;
+        
         // JPEG limit on sampling factors
         public const int MAX_SAMP_FACTOR = 4;
 
