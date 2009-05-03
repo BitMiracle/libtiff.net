@@ -57,10 +57,14 @@ namespace LibJpeg.NET
 
             /* Allocate and pre-zero space for dummy DCT blocks. */
             JBLOCK[] buffer = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU];
-            //memset((void*)buffer, 0, Constants.C_MAX_BLOCKS_IN_MCU * (sizeof(short) * Constants.DCTSIZE2));
+            for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
+                buffer[i] = new JBLOCK();
+
             for (int i = 0; i < Constants.C_MAX_BLOCKS_IN_MCU; i++)
             {
-                m_dummy_buffer[i] = new JBLOCK[] { buffer[i] };
+                m_dummy_buffer[i] = new JBLOCK[Constants.C_MAX_BLOCKS_IN_MCU - i];
+                for (int j = i; j < Constants.C_MAX_BLOCKS_IN_MCU; j++)
+                    m_dummy_buffer[i][j - i] = buffer[j];
             }
         }
 
@@ -109,7 +113,7 @@ namespace LibJpeg.NET
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
-                        uint start_col = (uint)(MCU_col_num * componentInfo.MCU_width);
+                        int start_col = (int)(MCU_col_num * componentInfo.MCU_width);
                         int blockcnt = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
@@ -118,7 +122,15 @@ namespace LibJpeg.NET
                             {
                                 /* Fill in pointers to real blocks in this row */
                                 for (xindex = 0; xindex < blockcnt; xindex++)
-                                    MCU_buffer[blkn++] = new JBLOCK[] { buffer[ci][yindex + yoffset][(int)(start_col + xindex)] };
+                                {
+                                    int bufLength = buffer[ci][yindex + yoffset].Length;
+                                    int start = start_col + xindex;
+                                    MCU_buffer[blkn] = new JBLOCK[bufLength - start];
+                                    for (int j = start; j < bufLength; j++)
+                                        MCU_buffer[blkn][j - start] = buffer[ci][yindex + yoffset][j];
+
+                                    blkn++;
+                                }
                             }
                             else
                             {

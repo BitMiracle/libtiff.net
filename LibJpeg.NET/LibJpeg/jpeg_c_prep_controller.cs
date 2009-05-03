@@ -134,7 +134,8 @@ namespace LibJpeg.NET
                 byte[][] true_buffer = jpeg_common_struct.AllocJpegSamples(samplesPerRow, (uint)(3 * rgroup_height));
 
                 /* Copy true buffer row pointers into the middle of the fake row array */
-                //memcpy((void *) (fake_buffer[rgroup_height]), (const void *) true_buffer, 3 * rgroup_height * sizeof(byte *));
+                for (int  i = 0; i < 3 * rgroup_height; i++)
+                    fake_buffer[rgroup_height + i] = true_buffer[i];
                 
                 /* Fill in the above and below wraparound pointers */
                 for (int i = 0; i < rgroup_height; i++)
