@@ -60,8 +60,8 @@ namespace LibJpeg.NET
                 /* Final pass of 2-pass quantization */
                 m_is_dummy_pass = false;
                 m_cinfo.m_cquantize.start_pass(false);
-                m_cinfo.m_post.start_pass(JBUF_CRANK_DEST);
-                m_cinfo.m_main.start_pass(JBUF_CRANK_DEST);
+                m_cinfo.m_post.start_pass(J_BUF_MODE.JBUF_CRANK_DEST);
+                m_cinfo.m_main.start_pass(J_BUF_MODE.JBUF_CRANK_DEST);
             }
             else
             {
@@ -89,8 +89,8 @@ namespace LibJpeg.NET
                     if (m_cinfo.m_quantize_colors)
                         m_cinfo.m_cquantize.start_pass(m_is_dummy_pass);
 
-                    m_cinfo.m_post.start_pass((m_is_dummy_pass ? JBUF_SAVE_AND_PASS : JBUF_PASS_THRU));
-                    m_cinfo.m_main.start_pass(JBUF_PASS_THRU);
+                    m_cinfo.m_post.start_pass((m_is_dummy_pass ? J_BUF_MODE.JBUF_SAVE_AND_PASS : J_BUF_MODE.JBUF_PASS_THRU));
+                    m_cinfo.m_main.start_pass(J_BUF_MODE.JBUF_PASS_THRU);
                 }
             }
 
@@ -140,9 +140,9 @@ namespace LibJpeg.NET
             m_cinfo.jpeg_calc_output_dimensions();
             prepare_range_limit_table();
 
-            /* Width of an output scanline must be representable as JDIMENSION. */
+            /* Width of an output scanline must be representable as uint. */
             long samplesperrow = (long)m_cinfo.m_output_width * (long)m_cinfo.m_out_color_components;
-            JDIMENSION jd_samplesperrow = (JDIMENSION)samplesperrow;
+            uint jd_samplesperrow = (uint)samplesperrow;
             if ((long)jd_samplesperrow != samplesperrow)
                 m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
 
@@ -309,29 +309,29 @@ namespace LibJpeg.NET
         /// </summary>
         private void prepare_range_limit_table()
         {
-            JSAMPLE* table = new JSAMPLE[5 * (MAXJSAMPLE + 1) + CENTERJSAMPLE];
+            byte[] table = new byte[5 * (JpegConstants.MAXJSAMPLE + 1) + JpegConstants.CENTERJSAMPLE];
 
             /* allow negative subscripts of simple table */
-            int tableOffset = MAXJSAMPLE + 1;
+            int tableOffset = JpegConstants.MAXJSAMPLE + 1;
             m_cinfo.m_sample_range_limit = table;
             m_cinfo.m_sampleRangeLimitOffset = tableOffset;
 
             /* First segment of "simple" table: limit[x] = 0 for x < 0 */
-            memset((void *)table, 0, (MAXJSAMPLE + 1) * sizeof(JSAMPLE));
+            //memset((void *)table, 0, (JpegConstants.MAXJSAMPLE + 1) * sizeof(byte));
 
             /* Main part of "simple" table: limit[x] = x */
-            for (int i = 0; i <= MAXJSAMPLE; i++)
-                table[tableOffset + i] = (JSAMPLE) i;
+            for (int i = 0; i <= JpegConstants.MAXJSAMPLE; i++)
+                table[tableOffset + i] = (byte) i;
 
-            tableOffset += CENTERJSAMPLE; /* Point to where post-IDCT table starts */
+            tableOffset += JpegConstants.CENTERJSAMPLE; /* Point to where post-IDCT table starts */
 
             /* End of simple table, rest of first half of post-IDCT table */
-            for (int i = CENTERJSAMPLE; i < 2 * (MAXJSAMPLE + 1); i++)
-                table[tableOffset + i] = MAXJSAMPLE;
+            for (int i = JpegConstants.CENTERJSAMPLE; i < 2 * (JpegConstants.MAXJSAMPLE + 1); i++)
+                table[tableOffset + i] = JpegConstants.MAXJSAMPLE;
 
             /* Second half of post-IDCT table */
-            memset((void *) (table + tableOffset + (2 * (MAXJSAMPLE + 1))), 0, (2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE) * sizeof(JSAMPLE));
-            memcpy((void *) (table + tableOffset + (4 * (MAXJSAMPLE + 1) - CENTERJSAMPLE)), (const void *) m_cinfo.m_sample_range_limit, CENTERJSAMPLE * sizeof(JSAMPLE));
+            //memset((void *) (table + tableOffset + (2 * (JpegConstants.MAXJSAMPLE + 1))), 0, (2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE) * sizeof(JSAMPLE));
+            //memcpy((void *) (table + tableOffset + (4 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE)), (const void *) m_cinfo.m_sample_range_limit, JpegConstants.CENTERJSAMPLE * sizeof(byte));
         }
     }
 }

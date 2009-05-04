@@ -13,7 +13,7 @@
  * are sufficient for most applications, some will want to use a different
  * destination manager.
  * IMPORTANT: we assume that fwrite() will correctly transcribe an array of
- * JOCTETs into 8-bit-wide elements on external storage.  If char is wider
+ * bytes into 8-bit-wide elements on external storage.  If char is wider
  * than 8 bits on your machine, you may need to do some tweaking.
  */
 

@@ -527,7 +527,7 @@ namespace LibJpeg.NET
             }
 
             /* Decompress directly into user's buffer. */
-            if (!m_coef.decompress_data(cb))
+            if (m_coef.decompress_data(cb) == ReadResult.JPEG_SUSPENDED)
             {
                 /* suspension forced, can do nothing more */
                 return 0;
@@ -647,7 +647,7 @@ namespace LibJpeg.NET
                     break;
                 case JpegState.DSTATE_READY:
                     /* Can't advance past first SOS until start_decompress is called */
-                    retcode = JpegState.JPEG_REACHED_SOS;
+                    retcode = ReadResult.JPEG_REACHED_SOS;
                     break;
                 case JpegState.DSTATE_PRELOAD:
                 case JpegState.DSTATE_PRESCAN:
@@ -660,6 +660,7 @@ namespace LibJpeg.NET
                     break;
                 default:
                     ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                    break;
             }
             return retcode;
         }
@@ -1134,7 +1135,7 @@ namespace LibJpeg.NET
 
                     /* Process some data */
                     last_scanline = m_output_scanline;
-                    m_main.process_data(null, m_output_scanline, 0);
+                    m_main.process_data(null, ref m_output_scanline, 0);
                     if (m_output_scanline == last_scanline)
                     {
                         /* No progress made, must suspend */

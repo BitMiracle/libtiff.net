@@ -76,6 +76,6 @@ namespace LibJpeg.NET
          * See jdinput.c comments about the need for this information.
          * This field is currently used only for decompression.
          */
-        //internal JQUANT_TBL quant_table;
+        internal JQUANT_TBL quant_table;
     }
 }

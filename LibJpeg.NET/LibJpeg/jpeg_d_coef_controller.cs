@@ -71,10 +71,10 @@ namespace LibJpeg.NET
         * In multi-pass modes, this array points to the current MCU's blocks
         * within the virtual arrays; it is used only by the input side.
         */
-        private JBLOCK[] m_MCU_buffer = new JBLOCK[D_MAX_BLOCKS_IN_MCU];
+        private JBLOCK[] m_MCU_buffer = new JBLOCK[JpegConstants.D_MAX_BLOCKS_IN_MCU];
 
         /* In multi-pass modes, we need a virtual block array for each component. */
-        private jvirt_barray_control[] m_whole_image = new jvirt_barray_control[MAX_COMPONENTS];
+        private jvirt_barray_control[] m_whole_image = new jvirt_barray_control[JpegConstants.MAX_COMPONENTS];
         private jvirt_barray_control[] m_coef_arrays;
 
         /* When doing block smoothing, we latch coefficient Al values here */
@@ -94,23 +94,25 @@ namespace LibJpeg.NET
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_whole_image[ci] = new jvirt_barray_control(cinfo, true,
-                        JpegUtils::jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor), 
-                        JpegUtils::jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
+                        (uint)JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor), 
+                        (uint)JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
                 }
 
                 m_useDummyConsumeData = false;
-                m_decompressor = Ordinary;
+                m_decompressor = DecompressorType.Ordinary;
                 m_coef_arrays = m_whole_image; /* link to virtual arrays */
             }
             else
             {
                 /* We only need a single-MCU buffer. */
-                JBLOCK* buffer = new JBLOCK[D_MAX_BLOCKS_IN_MCU];
-                for (int i = 0; i < D_MAX_BLOCKS_IN_MCU; i++)
-                    m_MCU_buffer[i] = &buffer[i];
+                JBLOCK[] buffer = new JBLOCK[JpegConstants.D_MAX_BLOCKS_IN_MCU];
+                for (int i = 0; i < JpegConstants.D_MAX_BLOCKS_IN_MCU; i++)
+                {
+                    m_MCU_buffer[i] = buffer[i];
+                }
 
                 m_useDummyConsumeData = true;
-                m_decompressor = OnePass;
+                m_decompressor = DecompressorType.OnePass;
                 m_coef_arrays = null; /* flag for no virtual arrays */
             }
         }
@@ -134,16 +136,16 @@ namespace LibJpeg.NET
             if (m_useDummyConsumeData)
                 return ReadResult.JPEG_SUSPENDED;  /* Always indicate nothing was done */
 
-            JBLOCK** buffer[MAX_COMPS_IN_SCAN];
+            JBLOCK[][][] buffer = new JBLOCK[JpegConstants.MAX_COMPS_IN_SCAN][][];
 
             /* Align the virtual buffers for the components used in this scan. */
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
                 
                 buffer[ci] = m_whole_image[componentInfo.component_index].access_virt_barray(
-                    m_cinfo.m_input_iMCU_row * componentInfo.v_samp_factor,
-                    (JDIMENSION)componentInfo.v_samp_factor);
+                    (uint)(m_cinfo.m_input_iMCU_row * componentInfo.v_samp_factor),
+                    (uint)componentInfo.v_samp_factor);
 
                 /* Note: entropy decoder expects buffer to be zeroed,
                  * but this is handled automatically by the memory manager
@@ -154,19 +156,19 @@ namespace LibJpeg.NET
             /* Loop to process one whole iMCU row */
             for (int yoffset = m_MCU_vert_offset; yoffset < m_MCU_rows_per_iMCU_row; yoffset++)
             {
-                for (JDIMENSION MCU_col_num = m_MCU_ctr; MCU_col_num < m_cinfo.m_MCUs_per_row; MCU_col_num++)
+                for (uint MCU_col_num = m_MCU_ctr; MCU_col_num < m_cinfo.m_MCUs_per_row; MCU_col_num++)
                 {
                     /* Construct list of pointers to DCT blocks belonging to this MCU */
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
-                        JDIMENSION start_col = MCU_col_num * componentInfo.MCU_width;
+                        jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
+                        uint start_col = (uint)(MCU_col_num * componentInfo.MCU_width);
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
                             for (int xindex = 0; xindex < componentInfo.MCU_width; xindex++)
                             {
-                                m_MCU_buffer[blkn] = &buffer[ci][yindex + yoffset][start_col + xindex];
+                                m_MCU_buffer[blkn] = buffer[ci][yindex + yoffset][start_col + xindex];
                                 blkn++;
                             }
                         }
@@ -208,25 +210,25 @@ namespace LibJpeg.NET
             if (m_coef_arrays != null)
             {
                 if (m_cinfo.m_do_block_smoothing && smoothing_ok())
-                    m_decompressor = Smooth;
+                    m_decompressor = DecompressorType.Smooth;
                 else
-                    m_decompressor = Ordinary;
+                    m_decompressor = DecompressorType.Ordinary;
             }
 
             m_cinfo.m_output_iMCU_row = 0;
         }
 
-        public int decompress_data(ComponentBuffer output_buf)
+        public ReadResult decompress_data(ComponentBuffer[] output_buf)
         {
             switch (m_decompressor)
             {
-                case Ordinary:
+                case DecompressorType.Ordinary:
                     return decompress_data_ordinary(output_buf);
 
-                case Smooth:
+                case DecompressorType.Smooth:
                     return decompress_smooth_data(output_buf);
 
-                case OnePass:
+                case DecompressorType.OnePass:
                     return decompress_onepass(output_buf);
             }
 
@@ -249,15 +251,15 @@ namespace LibJpeg.NET
         /// NB: output_buf contains a plane for each component in image,
         /// which we index according to the component's SOF position.
         /// </summary>
-        private int decompress_onepass(ComponentBuffer output_buf)
+        private ReadResult decompress_onepass(ComponentBuffer output_buf)
         {
-            JDIMENSION last_MCU_col = m_cinfo.m_MCUs_per_row - 1;
-            JDIMENSION last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
+            uint last_MCU_col = m_cinfo.m_MCUs_per_row - 1;
+            uint last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
 
             /* Loop to process as much as one whole iMCU row */
             for (int yoffset = m_MCU_vert_offset; yoffset < m_MCU_rows_per_iMCU_row; yoffset++)
             {
-                for (JDIMENSION MCU_col_num = m_MCU_ctr; MCU_col_num <= last_MCU_col; MCU_col_num++)
+                for (uint MCU_col_num = m_MCU_ctr; MCU_col_num <= last_MCU_col; MCU_col_num++)
                 {
                     /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
                     memset((void*)m_MCU_buffer[0], 0, m_cinfo.m_blocks_in_MCU * (sizeof(JCOEF) * DCTSIZE2));
@@ -278,7 +280,7 @@ namespace LibJpeg.NET
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
+                        jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
 
                         /* Don't bother to IDCT an uninteresting component. */
                         if (!componentInfo.component_needed)
@@ -289,12 +291,12 @@ namespace LibJpeg.NET
 
                         int useful_width = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
                         int outputIndex = yoffset * componentInfo.DCT_scaled_size;
-                        JDIMENSION start_col = MCU_col_num * componentInfo.MCU_sample_width;
+                        uint start_col = MCU_col_num * componentInfo.MCU_sample_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
                             if (m_cinfo.m_input_iMCU_row < last_iMCU_row || yoffset + yindex < componentInfo.last_row_height)
                             {
-                                JDIMENSION output_col = start_col;
+                                uint output_col = start_col;
                                 for (int xindex = 0; xindex < useful_width; xindex++)
                                 {
                                     m_cinfo.m_idct.inverse(componentInfo.component_index,
@@ -336,7 +338,7 @@ namespace LibJpeg.NET
         /// 
         /// NB: output_buf contains a plane for each component in image.
         /// </summary>
-        private int decompress_data_ordinary(ComponentBuffer output_buf)
+        private ReadResult decompress_data_ordinary(ComponentBuffer output_buf)
         {
             /* Force some input to be done if we are getting ahead of the input. */
             while (m_cinfo.m_input_scan_number < m_cinfo.m_output_scan_number ||
@@ -347,7 +349,7 @@ namespace LibJpeg.NET
                     return ReadResult.JPEG_SUSPENDED;
             }
 
-            JDIMENSION last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
+            uint last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
 
             /* OK, output from the virtual arrays. */
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
@@ -361,7 +363,7 @@ namespace LibJpeg.NET
                 /* Align the virtual buffer for this component. */
                 JBLOCK** buffer = m_whole_image[ci].access_virt_barray(
                     m_cinfo.m_output_iMCU_row * componentInfo.v_samp_factor,
-                    (JDIMENSION)componentInfo.v_samp_factor);
+                    (uint)componentInfo.v_samp_factor);
 
                 /* Count non-dummy DCT block rows in this iMCU row. */
                 int block_rows;
@@ -379,8 +381,8 @@ namespace LibJpeg.NET
                 int rowIndex = 0;
                 for (int block_row = 0; block_row < block_rows; block_row++)
                 {
-                    JDIMENSION output_col = 0;
-                    for (JDIMENSION block_num = 0; block_num < componentInfo.width_in_blocks; block_num++)
+                    uint output_col = 0;
+                    for (uint block_num = 0; block_num < componentInfo.width_in_blocks; block_num++)
                     {
                         m_cinfo.m_idct.inverse(componentInfo.component_index,
                             (JCOEF*)buffer[block_row][block_num].data, output_buf[ci], rowIndex, output_col);
@@ -402,7 +404,7 @@ namespace LibJpeg.NET
         /// <summary>
         /// Variant of decompress_data for use when doing block smoothing.
         /// </summary>
-        private int decompress_smooth_data(ComponentBuffer output_buf)
+        private ReadResult decompress_smooth_data(ComponentBuffer output_buf)
         {
             /* Force some input to be done if we are getting ahead of the input. */
             while (m_cinfo.m_input_scan_number <= m_cinfo.m_output_scan_number && !m_cinfo.m_inputctl.EOIReached())
@@ -414,7 +416,7 @@ namespace LibJpeg.NET
                      * we want it to keep one row ahead so that next block row's DC
                      * values are up to date.
                      */
-                    JDIMENSION delta = (m_cinfo.m_Ss == 0) ? 1 : 0;
+                    uint delta = (m_cinfo.m_Ss == 0) ? 1 : 0;
                     if (m_cinfo.m_input_iMCU_row > m_cinfo.m_output_iMCU_row + delta)
                         break;
                 }
@@ -423,7 +425,7 @@ namespace LibJpeg.NET
                     return ReadResult.JPEG_SUSPENDED;
             }
 
-            JDIMENSION last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
+            uint last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
 
             /* OK, output from the virtual arrays. */
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
@@ -461,13 +463,13 @@ namespace LibJpeg.NET
                 if (m_cinfo.m_output_iMCU_row > 0)
                 {
                     access_rows += componentInfo.v_samp_factor; /* prior iMCU row too */
-                    buffer = m_whole_image[ci].access_virt_barray((m_cinfo.m_output_iMCU_row - 1) * componentInfo.v_samp_factor, (JDIMENSION) access_rows);
+                    buffer = m_whole_image[ci].access_virt_barray((m_cinfo.m_output_iMCU_row - 1) * componentInfo.v_samp_factor, (uint) access_rows);
                     bufferRowOffset = componentInfo.v_samp_factor; /* point to current iMCU row */
                     first_row = false;
                 }
                 else
                 {
-                    buffer = m_whole_image[ci].access_virt_barray((JDIMENSION) 0, (JDIMENSION) access_rows);
+                    buffer = m_whole_image[ci].access_virt_barray((uint) 0, (uint) access_rows);
                     first_row = true;
                 }
 
@@ -513,13 +515,13 @@ namespace LibJpeg.NET
                     int DC8 = DC7;
                     int DC9 = DC7;
 
-                    JDIMENSION output_col = 0;
-                    JDIMENSION last_block_column = componentInfo.width_in_blocks - 1;
-                    for (JDIMENSION block_num = 0; block_num <= last_block_column; block_num++)
+                    uint output_col = 0;
+                    uint last_block_column = componentInfo.width_in_blocks - 1;
+                    for (uint block_num = 0; block_num <= last_block_column; block_num++)
                     {
                         /* Fetch current DCT block into workspace so we can modify it. */
                         JBLOCK workspace;
-                        JpegUtils::jcopy_block_row(buffer[bufferIndex], (JBLOCK *) &workspace, (JDIMENSION) 1);
+                        JpegUtils.jcopy_block_row(buffer[bufferIndex], (JBLOCK *) &workspace, (uint) 1);
 
                         /* Update DC values */
                         if (block_num < last_block_column)
@@ -693,7 +695,7 @@ namespace LibJpeg.NET
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* All components' quantization values must already be latched. */
-                JQUANT_TBL* qtable = m_cinfo.m_comp_info[ci].quant_table;
+                JQUANT_TBL qtable = m_cinfo.m_comp_info[ci].quant_table;
                 if (qtable == null)
                     return false;
 

@@ -185,20 +185,20 @@ namespace LibJpeg.NET
         private void initial_setup()
         {
             /* Make sure image isn't bigger than I can handle */
-            if ((long) m_cinfo.m_image_height > (long) JPEG_MAX_DIMENSION ||
-                (long) m_cinfo.m_image_width > (long) JPEG_MAX_DIMENSION)
+            if ((long) m_cinfo.m_image_height > (long) JpegConstants.JPEG_MAX_DIMENSION ||
+                (long) m_cinfo.m_image_width > (long) JpegConstants.JPEG_MAX_DIMENSION)
             {
-                m_cinfo.ERREXIT1(JERR_IMAGE_TOO_BIG, (uint) JPEG_MAX_DIMENSION);
+                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int)JpegConstants.JPEG_MAX_DIMENSION);
 
             }
 
             /* For now, precision must match compiled-in value... */
-            if (m_cinfo.m_data_precision != BITS_IN_JSAMPLE)
-                m_cinfo.ERREXIT1(JERR_BAD_PRECISION, m_cinfo.m_data_precision);
+            if (m_cinfo.m_data_precision != JpegConstants.BITS_IN_JSAMPLE)
+                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_PRECISION, m_cinfo.m_data_precision);
 
             /* Check that number of components won't exceed internal array sizes */
-            if (m_cinfo.m_num_components > MAX_COMPONENTS)
-                m_cinfo.ERREXIT2(JERR_COMPONENT_COUNT, m_cinfo.m_num_components, MAX_COMPONENTS);
+            if (m_cinfo.m_num_components > JpegConstants.MAX_COMPONENTS)
+                m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
 
             /* Compute maximum sampling factors; check factor validity */
             m_cinfo.m_max_h_samp_factor = 1;
@@ -206,46 +206,46 @@ namespace LibJpeg.NET
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                if (m_cinfo.m_comp_info[ci].h_samp_factor <= 0 || m_cinfo.m_comp_info[ci].h_samp_factor > MAX_SAMP_FACTOR ||
-                    m_cinfo.m_comp_info[ci].v_samp_factor <= 0 || m_cinfo.m_comp_info[ci].v_samp_factor > MAX_SAMP_FACTOR)
+                if (m_cinfo.m_comp_info[ci].h_samp_factor <= 0 || m_cinfo.m_comp_info[ci].h_samp_factor > JpegConstants.MAX_SAMP_FACTOR ||
+                    m_cinfo.m_comp_info[ci].v_samp_factor <= 0 || m_cinfo.m_comp_info[ci].v_samp_factor > JpegConstants.MAX_SAMP_FACTOR)
                 {
-                    m_cinfo.ERREXIT((int)JERR_BAD_SAMPLING);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_SAMPLING);
                 }
 
-                m_cinfo.m_max_h_samp_factor = MAX(m_cinfo.m_max_h_samp_factor, m_cinfo.m_comp_info[ci].h_samp_factor);
-                m_cinfo.m_max_v_samp_factor = MAX(m_cinfo.m_max_v_samp_factor, m_cinfo.m_comp_info[ci].v_samp_factor);
+                m_cinfo.m_max_h_samp_factor = Math.Max(m_cinfo.m_max_h_samp_factor, m_cinfo.m_comp_info[ci].h_samp_factor);
+                m_cinfo.m_max_v_samp_factor = Math.Max(m_cinfo.m_max_v_samp_factor, m_cinfo.m_comp_info[ci].v_samp_factor);
             }
 
             /* We initialize DCT_scaled_size and min_DCT_scaled_size to DCTSIZE.
              * In the full decompressor, this will be overridden by jdmaster.c;
              * but in the transcoder, jdmaster.c is not used, so we must do it here.
              */
-            m_cinfo.m_min_DCT_scaled_size = DCTSIZE;
+            m_cinfo.m_min_DCT_scaled_size = JpegConstants.DCTSIZE;
 
             /* Compute dimensions of components */
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                m_cinfo.m_comp_info[ci].DCT_scaled_size = DCTSIZE;
+                m_cinfo.m_comp_info[ci].DCT_scaled_size = JpegConstants.DCTSIZE;
                 
                 /* Size in DCT blocks */
-                m_cinfo.m_comp_info[ci].width_in_blocks = (JDIMENSION)JpegUtils::jdiv_round_up(
+                m_cinfo.m_comp_info[ci].width_in_blocks = (uint)JpegUtils.jdiv_round_up(
                     (long)m_cinfo.m_image_width * (long)m_cinfo.m_comp_info[ci].h_samp_factor,
-                    (long)(m_cinfo.m_max_h_samp_factor * DCTSIZE));
+                    (long)(m_cinfo.m_max_h_samp_factor * JpegConstants.DCTSIZE));
 
-                m_cinfo.m_comp_info[ci].height_in_blocks = (JDIMENSION)JpegUtils::jdiv_round_up(
+                m_cinfo.m_comp_info[ci].height_in_blocks = (uint)JpegUtils.jdiv_round_up(
                     (long)m_cinfo.m_image_height * (long)m_cinfo.m_comp_info[ci].v_samp_factor,
-                    (long)(m_cinfo.m_max_v_samp_factor * DCTSIZE));
+                    (long)(m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE));
 
                 /* downsampled_width and downsampled_height will also be overridden by
                  * jdmaster.c if we are doing full decompression.  The transcoder library
                  * doesn't use these values, but the calling application might.
                  */
                 /* Size in samples */
-                m_cinfo.m_comp_info[ci].downsampled_width = (JDIMENSION)JpegUtils::jdiv_round_up(
+                m_cinfo.m_comp_info[ci].downsampled_width = (uint)JpegUtils.jdiv_round_up(
                     (long)m_cinfo.m_image_width * (long)m_cinfo.m_comp_info[ci].h_samp_factor,
                     (long)m_cinfo.m_max_h_samp_factor);
 
-                m_cinfo.m_comp_info[ci].downsampled_height = (JDIMENSION)JpegUtils::jdiv_round_up(
+                m_cinfo.m_comp_info[ci].downsampled_height = (uint)JpegUtils.jdiv_round_up(
                     (long)m_cinfo.m_image_height * (long)m_cinfo.m_comp_info[ci].v_samp_factor,
                     (long)m_cinfo.m_max_v_samp_factor);
 
@@ -257,8 +257,8 @@ namespace LibJpeg.NET
             }
 
             /* Compute number of fully interleaved MCU rows. */
-            m_cinfo.m_total_iMCU_rows = (JDIMENSION) JpegUtils::jdiv_round_up(
-                (long) m_cinfo.m_image_height, (long) (m_cinfo.m_max_v_samp_factor * DCTSIZE));
+            m_cinfo.m_total_iMCU_rows = (uint) JpegUtils.jdiv_round_up(
+                (long) m_cinfo.m_image_height, (long) (m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE));
 
             /* Decide whether file contains multiple scans */
             if (m_cinfo.m_comps_in_scan < m_cinfo.m_num_components || m_cinfo.m_progressive_mode)
@@ -291,7 +291,7 @@ namespace LibJpeg.NET
         {
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
                 
                 /* No work if we already saved Q-table for this component */
                 if (componentInfo.quant_table != null)
@@ -299,12 +299,12 @@ namespace LibJpeg.NET
                 
                 /* Make sure specified quantization table is present */
                 int qtblno = componentInfo.quant_tbl_no;
-                if (qtblno < 0 || qtblno >= NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
-                    m_cinfo.ERREXIT1(JERR_NO_QUANT_TABLE, qtblno);
+                if (qtblno < 0 || qtblno >= JpegConstants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
+                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
                 
                 /* OK, save away the quantization table */
-                JQUANT_TBL* qtbl = new JQUANT_TBL();
-                memcpy((void *) qtbl, (const void *) m_cinfo.m_quant_tbl_ptrs[qtblno], sizeof(JQUANT_TBL));
+                JQUANT_TBL qtbl = new JQUANT_TBL();
+                //memcpy((void *) qtbl, (const void *) m_cinfo.m_quant_tbl_ptrs[qtblno], sizeof(JQUANT_TBL));
                 componentInfo.quant_table = qtbl;
             }
         }
@@ -318,7 +318,7 @@ namespace LibJpeg.NET
             if (m_cinfo.m_comps_in_scan == 1)
             {
                 /* Noninterleaved (single-component) scan */
-                jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[0];
+                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[0];
 
                 /* Overall image size in MCUs */
                 m_cinfo.m_MCUs_per_row = componentInfo.width_in_blocks;
@@ -346,21 +346,21 @@ namespace LibJpeg.NET
             else
             {
                 /* Interleaved (multi-component) scan */
-                if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT2(JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, MAX_COMPS_IN_SCAN);
+                if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > JpegConstants.MAX_COMPS_IN_SCAN)
+                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 /* Overall image size in MCUs */
-                m_cinfo.m_MCUs_per_row = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long) m_cinfo.m_image_width, (long) (m_cinfo.m_max_h_samp_factor * DCTSIZE));
+                m_cinfo.m_MCUs_per_row = (uint)JpegUtils.jdiv_round_up(
+                    (long) m_cinfo.m_image_width, (long) (m_cinfo.m_max_h_samp_factor * JpegConstants.DCTSIZE));
 
-                m_cinfo.m_MCU_rows_in_scan = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long) m_cinfo.m_image_height, (long) (m_cinfo.m_max_v_samp_factor * DCTSIZE));
+                m_cinfo.m_MCU_rows_in_scan = (uint)JpegUtils.jdiv_round_up(
+                    (long) m_cinfo.m_image_height, (long) (m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE));
 
                 m_cinfo.m_blocks_in_MCU = 0;
 
                 for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                 {
-                    jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
+                    jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
 
                     /* Sampling factors give # of blocks of component in each MCU */
                     componentInfo.MCU_width = componentInfo.h_samp_factor;
@@ -381,8 +381,8 @@ namespace LibJpeg.NET
                     
                     /* Prepare array describing MCU composition */
                     int mcublks = componentInfo.MCU_blocks;
-                    if (m_cinfo.m_blocks_in_MCU + mcublks > D_MAX_BLOCKS_IN_MCU)
-                        m_cinfo.ERREXIT((int)JERR_BAD_MCU_SIZE);
+                    if (m_cinfo.m_blocks_in_MCU + mcublks > JpegConstants.D_MAX_BLOCKS_IN_MCU)
+                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_MCU_SIZE);
                     
                     while (mcublks-- > 0)
                     {

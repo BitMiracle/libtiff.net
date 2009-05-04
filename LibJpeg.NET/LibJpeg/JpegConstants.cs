@@ -95,5 +95,6 @@ namespace LibJpeg.NET
         public const int RGB_BLUE = 2;   /* Offset of Blue */
         public const int RGB_PIXELSIZE = 3;   /* JSAMPLEs per RGB scanline element */
 
+        public const int HUFF_LOOKAHEAD = 8;   /* # of bits of lookahead */
     }
 }

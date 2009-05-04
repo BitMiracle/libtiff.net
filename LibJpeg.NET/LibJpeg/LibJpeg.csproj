@@ -36,6 +36,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="bitread_perm_state.cs" />
+    <Compile Include="bitread_working_state.cs" />
+    <Compile Include="d_derived_tbl.cs" />
     <Compile Include="jpeg_color_deconverter.cs" />
     <Compile Include="jpeg_color_quantizer.cs" />
     <Compile Include="jpeg_d_post_controller.cs" />
