@@ -87,7 +87,7 @@ namespace LibJpeg.NET
         /// The data is obtained from the virtual arrays and fed to the entropy coder.
         /// Returns true if the iMCU row is completed, false if suspended.
         /// 
-        /// NB: input_buf is ignored; it is likely to be a NULL pointer.
+        /// NB: input_buf is ignored; it is likely to be a null pointer.
         /// </summary>
         public virtual bool compress_data(byte[][][] input_buf)
         {

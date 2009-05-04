@@ -18,7 +18,7 @@ namespace LibJpeg.NET
     /// </summary>
     class jpeg_marker_struct
     {
-        jpeg_marker_struct next;   /* next in list, or NULL */
+        jpeg_marker_struct next;   /* next in list, or null */
         byte marker;           /* marker code: JPEG_COM, or JPEG_APP0+n */
         uint original_length;   /* # bytes of data in the file */
         uint data_length;   /* # bytes of data saved at data[] */

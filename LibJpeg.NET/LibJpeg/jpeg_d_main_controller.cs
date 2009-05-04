@@ -153,23 +153,23 @@ namespace LibJpeg.NET
             /* Allocate the workspace.
             * ngroups is the number of row groups we need.
             */
-            int ngroups = cinfo->m_min_DCT_scaled_size;
-            if (cinfo->m_upsample->NeedContextRows())
+            int ngroups = cinfo.m_min_DCT_scaled_size;
+            if (cinfo.m_upsample.NeedContextRows())
             {
-                if (cinfo->m_min_DCT_scaled_size < 2) /* unsupported, see comments above */
-                    cinfo->ERREXIT(JERR_NOTIMPL);
+                if (cinfo.m_min_DCT_scaled_size < 2) /* unsupported, see comments above */
+                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
 
                 alloc_funny_pointers(); /* Alloc space for xbuffer[] lists */
-                ngroups = cinfo->m_min_DCT_scaled_size + 2;
+                ngroups = cinfo.m_min_DCT_scaled_size + 2;
             }
 
-            for (int ci = 0; ci < cinfo->m_num_components; ci++)
+            for (int ci = 0; ci < cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (cinfo->m_comp_info[ci].v_samp_factor * cinfo->m_comp_info[ci].DCT_scaled_size) / cinfo->m_min_DCT_scaled_size;
+                int rgroup = (cinfo.m_comp_info[ci].v_samp_factor * cinfo.m_comp_info[ci].DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
 
-                m_buffer[ci] = cinfo->AllocJpegSamples(
-                    cinfo->m_comp_info[ci].width_in_blocks * cinfo->m_comp_info[ci].DCT_scaled_size,
+                m_buffer[ci] = cinfo.AllocJpegSamples(
+                    cinfo.m_comp_info[ci].width_in_blocks * cinfo.m_comp_info[ci].DCT_scaled_size,
                     (JDIMENSION)(rgroup * ngroups));
             }
         }
@@ -182,7 +182,7 @@ namespace LibJpeg.NET
             switch (pass_mode)
             {
                 case JBUF_PASS_THRU:
-                    if (m_cinfo->m_upsample->NeedContextRows())
+                    if (m_cinfo.m_upsample.NeedContextRows())
                     {
                         m_dataProcessor = context_main;
                         make_funny_pointers(); /* Create the xbuffer[] lists */
@@ -203,7 +203,7 @@ namespace LibJpeg.NET
                     m_dataProcessor = crank_post;
                     break;
                 default:
-                    m_cinfo->ERREXIT(JERR_BAD_BUFFER_MODE);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
                     break;
             }
         }
@@ -225,7 +225,7 @@ namespace LibJpeg.NET
                     break;
 
                 default:
-                    m_cinfo->ERREXIT(JERR_NOTIMPL);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
                     break;
             }
         }
@@ -238,12 +238,12 @@ namespace LibJpeg.NET
         {
             ComponentBuffer cb[MAX_COMPONENTS];
             for (int i = 0; i < MAX_COMPONENTS; i++)
-                cb[i].SetBuffer(m_buffer[i], NULL, 0);
+                cb[i].SetBuffer(m_buffer[i], null, 0);
 
             /* Read input data if we haven't filled the main buffer yet */
             if (!m_buffer_full)
             {
-                if (!m_cinfo->m_coef->decompress_data(cb))
+                if (!m_cinfo.m_coef.decompress_data(cb))
                 {
                     /* suspension forced, can do nothing more */
                     return;
@@ -254,7 +254,7 @@ namespace LibJpeg.NET
             }
 
             /* There are always min_DCT_scaled_size row groups in an iMCU row. */
-            JDIMENSION rowgroups_avail = (JDIMENSION) m_cinfo->m_min_DCT_scaled_size;
+            JDIMENSION rowgroups_avail = (JDIMENSION) m_cinfo.m_min_DCT_scaled_size;
 
             /* Note: at the bottom of the image, we may pass extra garbage row groups
              * to the postprocessor.  The postprocessor has to check for bottom
@@ -262,7 +262,7 @@ namespace LibJpeg.NET
              */
 
             /* Feed the postprocessor */
-            m_cinfo->m_post->post_process_data(cb, m_rowgroup_ctr, rowgroups_avail, output_buf, out_row_ctr, out_rows_avail);
+            m_cinfo.m_post.post_process_data(cb, m_rowgroup_ctr, rowgroups_avail, output_buf, out_row_ctr, out_rows_avail);
 
             /* Has postprocessor consumed all the data yet? If so, mark buffer empty */
             if (m_rowgroup_ctr >= rowgroups_avail)
@@ -278,14 +278,14 @@ namespace LibJpeg.NET
         /// </summary>
         private void process_data_context_main(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
         {
-            ComponentBuffer* cb = new ComponentBuffer[m_cinfo->m_num_components];
-            for (int i = 0; i < m_cinfo->m_num_components; i++)
+            ComponentBuffer* cb = new ComponentBuffer[m_cinfo.m_num_components];
+            for (int i = 0; i < m_cinfo.m_num_components; i++)
                 cb[i].SetBuffer(m_buffer[i], m_funnyIndices[m_whichFunny][i], m_funnyOffsets[i]);
 
             /* Read input data if we haven't filled the main buffer yet */
             if (!m_buffer_full)
             {
-                if (!m_cinfo->m_coef->decompress_data(cb))
+                if (!m_cinfo.m_coef.decompress_data(cb))
                 {
                     /* suspension forced, can do nothing more */
                     delete[] cb;
@@ -310,7 +310,7 @@ namespace LibJpeg.NET
             if (m_context_state == CTX_POSTPONED_ROW)
             {
                 /* Call postprocessor using previously set pointers for postponed row */
-                m_cinfo->m_post->post_process_data(cb, m_rowgroup_ctr,
+                m_cinfo.m_post.post_process_data(cb, m_rowgroup_ctr,
                     m_rowgroups_avail, output_buf, out_row_ctr, out_rows_avail);
 
                 if (m_rowgroup_ctr < m_rowgroups_avail)
@@ -334,12 +334,12 @@ namespace LibJpeg.NET
             {
                 /* Prepare to process first M-1 row groups of this iMCU row */
                 m_rowgroup_ctr = 0;
-                m_rowgroups_avail = (JDIMENSION)(m_cinfo->m_min_DCT_scaled_size - 1);
+                m_rowgroups_avail = (JDIMENSION)(m_cinfo.m_min_DCT_scaled_size - 1);
 
                 /* Check for bottom of image: if so, tweak pointers to "duplicate"
                  * the last sample row, and adjust rowgroups_avail to ignore padding rows.
                  */
-                if (m_iMCU_row_ctr == m_cinfo->m_total_iMCU_rows)
+                if (m_iMCU_row_ctr == m_cinfo.m_total_iMCU_rows)
                     set_bottom_pointers();
 
                 m_context_state = CTX_PROCESS_IMCU;
@@ -348,7 +348,7 @@ namespace LibJpeg.NET
             if (m_context_state == CTX_PROCESS_IMCU)
             {
                 /* Call postprocessor using previously set pointers */
-                m_cinfo->m_post->post_process_data(cb, m_rowgroup_ctr,
+                m_cinfo.m_post.post_process_data(cb, m_rowgroup_ctr,
                     m_rowgroups_avail, output_buf, out_row_ctr, out_rows_avail);
 
                 if (m_rowgroup_ctr < m_rowgroups_avail)
@@ -368,8 +368,8 @@ namespace LibJpeg.NET
 
                 /* Still need to process last row group of this iMCU row, */
                 /* which is saved at index M+1 of the other xbuffer */
-                m_rowgroup_ctr = (JDIMENSION)(m_cinfo->m_min_DCT_scaled_size + 1);
-                m_rowgroups_avail = (JDIMENSION)(m_cinfo->m_min_DCT_scaled_size + 2);
+                m_rowgroup_ctr = (JDIMENSION)(m_cinfo.m_min_DCT_scaled_size + 1);
+                m_rowgroups_avail = (JDIMENSION)(m_cinfo.m_min_DCT_scaled_size + 2);
                 m_context_state = CTX_POSTPONED_ROW;
             }
 
@@ -384,7 +384,7 @@ namespace LibJpeg.NET
         private void process_data_crank_post(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
         {
             JDIMENSION dummy;
-            m_cinfo->m_post->post_process_data(NULL, dummy, (JDIMENSION)0, output_buf, out_row_ctr, out_rows_avail);
+            m_cinfo.m_post.post_process_data(null, dummy, (JDIMENSION)0, output_buf, out_row_ctr, out_rows_avail);
         }
 
         /// <summary>
@@ -393,11 +393,11 @@ namespace LibJpeg.NET
         /// </summary>
         private void alloc_funny_pointers()
         {
-            int M = m_cinfo->m_min_DCT_scaled_size;
-            for (int ci = 0; ci < m_cinfo->m_num_components; ci++)
+            int M = m_cinfo.m_min_DCT_scaled_size;
+            for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo->m_comp_info[ci].v_samp_factor * m_cinfo->m_comp_info[ci].DCT_scaled_size) / m_cinfo->m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
 
                 /* Get space for pointer lists --- M+4 row groups in each list.
                  */
@@ -409,18 +409,18 @@ namespace LibJpeg.NET
 
         /// <summary>
         /// Create the funny pointer lists discussed in the comments above.
-        /// The actual workspace is already allocated (in main->buffer),
+        /// The actual workspace is already allocated (in main.buffer),
         /// and the space for the pointer lists is allocated too.
         /// This routine just fills in the curiously ordered lists.
         /// This will be repeated at the beginning of each pass.
         /// </summary>
         private void make_funny_pointers()
         {
-            int M = m_cinfo->m_min_DCT_scaled_size;
-            for (int ci = 0; ci < m_cinfo->m_num_components; ci++)
+            int M = m_cinfo.m_min_DCT_scaled_size;
+            for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo->m_comp_info[ci].v_samp_factor * m_cinfo->m_comp_info[ci].DCT_scaled_size) / m_cinfo->m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
 
                 int* ind0 = m_funnyIndices[0][ci];
                 int* ind1 = m_funnyIndices[1][ci];
@@ -455,11 +455,11 @@ namespace LibJpeg.NET
         /// </summary>
         private void set_wraparound_pointers()
         {
-            int M = m_cinfo->m_min_DCT_scaled_size;
-            for (int ci = 0; ci < m_cinfo->m_num_components; ci++)
+            int M = m_cinfo.m_min_DCT_scaled_size;
+            for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo->m_comp_info[ci].v_samp_factor * m_cinfo->m_comp_info[ci].DCT_scaled_size) / m_cinfo->m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
 
                 int* ind0 = m_funnyIndices[0][ci];
                 int* ind1 = m_funnyIndices[1][ci];
@@ -482,14 +482,14 @@ namespace LibJpeg.NET
         /// </summary>
         private void set_bottom_pointers()
         {
-            for (int ci = 0; ci < m_cinfo->m_num_components; ci++)
+            for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* Count sample rows in one iMCU row and in one row group */
-                int iMCUheight = m_cinfo->m_comp_info[ci].v_samp_factor * m_cinfo->m_comp_info[ci].DCT_scaled_size;
-                int rgroup = iMCUheight / m_cinfo->m_min_DCT_scaled_size;
+                int iMCUheight = m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size;
+                int rgroup = iMCUheight / m_cinfo.m_min_DCT_scaled_size;
 
                 /* Count nondummy sample rows remaining for this component */
-                int rows_left = (int)(m_cinfo->m_comp_info[ci].downsampled_height % (JDIMENSION)iMCUheight);
+                int rows_left = (int)(m_cinfo.m_comp_info[ci].downsampled_height % (JDIMENSION)iMCUheight);
                 if (rows_left == 0)
                     rows_left = iMCUheight;
 

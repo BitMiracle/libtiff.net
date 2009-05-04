@@ -59,52 +59,52 @@ namespace LibJpeg.NET
             {
                 /* Final pass of 2-pass quantization */
                 m_is_dummy_pass = false;
-                m_cinfo->m_cquantize->start_pass(false);
-                m_cinfo->m_post->start_pass(JBUF_CRANK_DEST);
-                m_cinfo->m_main->start_pass(JBUF_CRANK_DEST);
+                m_cinfo.m_cquantize.start_pass(false);
+                m_cinfo.m_post.start_pass(JBUF_CRANK_DEST);
+                m_cinfo.m_main.start_pass(JBUF_CRANK_DEST);
             }
             else
             {
-                if (m_cinfo->m_quantize_colors && m_cinfo->m_colormap == NULL)
+                if (m_cinfo.m_quantize_colors && m_cinfo.m_colormap == null)
                 {
                     /* Select new quantization method */
-                    if (m_cinfo->m_two_pass_quantize && m_cinfo->m_enable_2pass_quant)
+                    if (m_cinfo.m_two_pass_quantize && m_cinfo.m_enable_2pass_quant)
                     {
-                        m_cinfo->m_cquantize = m_quantizer_2pass;
+                        m_cinfo.m_cquantize = m_quantizer_2pass;
                         m_is_dummy_pass = true;
                     }
-                    else if (m_cinfo->m_enable_1pass_quant)
-                        m_cinfo->m_cquantize = m_quantizer_1pass;
+                    else if (m_cinfo.m_enable_1pass_quant)
+                        m_cinfo.m_cquantize = m_quantizer_1pass;
                     else
-                        m_cinfo->ERREXIT(JERR_MODE_CHANGE);
+                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_MODE_CHANGE);
                 }
 
-                m_cinfo->m_idct->start_pass();
-                m_cinfo->m_coef->start_output_pass();
+                m_cinfo.m_idct.start_pass();
+                m_cinfo.m_coef.start_output_pass();
 
-                if (!m_cinfo->m_raw_data_out)
+                if (!m_cinfo.m_raw_data_out)
                 {
-                    m_cinfo->m_upsample->start_pass();
+                    m_cinfo.m_upsample.start_pass();
 
-                    if (m_cinfo->m_quantize_colors)
-                        m_cinfo->m_cquantize->start_pass(m_is_dummy_pass);
+                    if (m_cinfo.m_quantize_colors)
+                        m_cinfo.m_cquantize.start_pass(m_is_dummy_pass);
 
-                    m_cinfo->m_post->start_pass((m_is_dummy_pass ? JBUF_SAVE_AND_PASS : JBUF_PASS_THRU));
-                    m_cinfo->m_main->start_pass(JBUF_PASS_THRU);
+                    m_cinfo.m_post.start_pass((m_is_dummy_pass ? JBUF_SAVE_AND_PASS : JBUF_PASS_THRU));
+                    m_cinfo.m_main.start_pass(JBUF_PASS_THRU);
                 }
             }
 
             /* Set up progress monitor's pass info if present */
-            if (m_cinfo->m_progress != NULL)
+            if (m_cinfo.m_progress != null)
             {
-                m_cinfo->m_progress->m_completed_passes = m_pass_number;
-                m_cinfo->m_progress->m_total_passes = m_pass_number + (m_is_dummy_pass ? 2 : 1);
+                m_cinfo.m_progress.m_completed_passes = m_pass_number;
+                m_cinfo.m_progress.m_total_passes = m_pass_number + (m_is_dummy_pass ? 2 : 1);
 
                 /* In buffered-image mode, we assume one more output pass if EOI not
                  * yet reached, but no more passes if EOI has been reached.
                  */
-                if (m_cinfo->m_buffered_image && !m_cinfo->m_inputctl->EOIReached())
-                    m_cinfo->m_progress->m_total_passes += (m_cinfo->m_enable_2pass_quant ? 2 : 1);
+                if (m_cinfo.m_buffered_image && !m_cinfo.m_inputctl.EOIReached())
+                    m_cinfo.m_progress.m_total_passes += (m_cinfo.m_enable_2pass_quant ? 2 : 1);
             }
         }
 
@@ -113,8 +113,8 @@ namespace LibJpeg.NET
         /// </summary>
         public void finish_output_pass()
         {
-            if (m_cinfo->m_quantize_colors)
-                m_cinfo->m_cquantize->finish_pass();
+            if (m_cinfo.m_quantize_colors)
+                m_cinfo.m_cquantize.finish_pass();
 
             m_pass_number++;
         }
@@ -137,62 +137,62 @@ namespace LibJpeg.NET
         private void master_selection()
         {
             /* Initialize dimensions and other stuff */
-            m_cinfo->jpeg_calc_output_dimensions();
+            m_cinfo.jpeg_calc_output_dimensions();
             prepare_range_limit_table();
 
             /* Width of an output scanline must be representable as JDIMENSION. */
-            long samplesperrow = (long)m_cinfo->m_output_width * (long)m_cinfo->m_out_color_components;
+            long samplesperrow = (long)m_cinfo.m_output_width * (long)m_cinfo.m_out_color_components;
             JDIMENSION jd_samplesperrow = (JDIMENSION)samplesperrow;
             if ((long)jd_samplesperrow != samplesperrow)
-                m_cinfo->ERREXIT(JERR_WIDTH_OVERFLOW);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
 
             /* Initialize my private state */
             m_pass_number = 0;
-            m_using_merged_upsample = m_cinfo->use_merged_upsample();
+            m_using_merged_upsample = m_cinfo.use_merged_upsample();
 
             /* Color quantizer selection */
-            m_quantizer_1pass = NULL;
-            m_quantizer_2pass = NULL;
+            m_quantizer_1pass = null;
+            m_quantizer_2pass = null;
 
             /* No mode changes if not using buffered-image mode. */
-            if (!m_cinfo->m_quantize_colors || !m_cinfo->m_buffered_image)
+            if (!m_cinfo.m_quantize_colors || !m_cinfo.m_buffered_image)
             {
-                m_cinfo->m_enable_1pass_quant = false;
-                m_cinfo->m_enable_external_quant = false;
-                m_cinfo->m_enable_2pass_quant = false;
+                m_cinfo.m_enable_1pass_quant = false;
+                m_cinfo.m_enable_external_quant = false;
+                m_cinfo.m_enable_2pass_quant = false;
             }
 
-            if (m_cinfo->m_quantize_colors)
+            if (m_cinfo.m_quantize_colors)
             {
-                if (m_cinfo->m_raw_data_out)
-                    m_cinfo->ERREXIT(JERR_NOTIMPL);
+                if (m_cinfo.m_raw_data_out)
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
 
                 /* 2-pass quantizer only works in 3-component color space. */
-                if (m_cinfo->m_out_color_components != 3)
+                if (m_cinfo.m_out_color_components != 3)
                 {
-                    m_cinfo->m_enable_1pass_quant = true;
-                    m_cinfo->m_enable_external_quant = false;
-                    m_cinfo->m_enable_2pass_quant = false;
-                    m_cinfo->m_colormap = NULL;
+                    m_cinfo.m_enable_1pass_quant = true;
+                    m_cinfo.m_enable_external_quant = false;
+                    m_cinfo.m_enable_2pass_quant = false;
+                    m_cinfo.m_colormap = null;
                 }
-                else if (m_cinfo->m_colormap != NULL)
-                    m_cinfo->m_enable_external_quant = true;
-                else if (m_cinfo->m_two_pass_quantize)
-                    m_cinfo->m_enable_2pass_quant = true;
+                else if (m_cinfo.m_colormap != null)
+                    m_cinfo.m_enable_external_quant = true;
+                else if (m_cinfo.m_two_pass_quantize)
+                    m_cinfo.m_enable_2pass_quant = true;
                 else
-                    m_cinfo->m_enable_1pass_quant = true;
+                    m_cinfo.m_enable_1pass_quant = true;
 
-                if (m_cinfo->m_enable_1pass_quant)
+                if (m_cinfo.m_enable_1pass_quant)
                 {
-                    m_cinfo->m_cquantize = new my_1pass_cquantizer(m_cinfo);
-                    m_quantizer_1pass = m_cinfo->m_cquantize;
+                    m_cinfo.m_cquantize = new my_1pass_cquantizer(m_cinfo);
+                    m_quantizer_1pass = m_cinfo.m_cquantize;
                 }
 
                 /* We use the 2-pass code to map to external colormaps. */
-                if (m_cinfo->m_enable_2pass_quant || m_cinfo->m_enable_external_quant)
+                if (m_cinfo.m_enable_2pass_quant || m_cinfo.m_enable_external_quant)
                 {
-                    m_cinfo->m_cquantize = new my_2pass_cquantizer(m_cinfo);
-                    m_quantizer_2pass = m_cinfo->m_cquantize;
+                    m_cinfo.m_cquantize = new my_2pass_cquantizer(m_cinfo);
+                    m_quantizer_2pass = m_cinfo.m_cquantize;
                 }
                 /* If both quantizers are initialized, the 2-pass one is left active;
                  * this is necessary for starting with quantization to an external map.
@@ -200,63 +200,63 @@ namespace LibJpeg.NET
             }
 
             /* Post-processing: in particular, color conversion first */
-            if (!m_cinfo->m_raw_data_out)
+            if (!m_cinfo.m_raw_data_out)
             {
                 if (m_using_merged_upsample)
                 {
                     /* does color conversion too */
-                    m_cinfo->m_upsample = new my_merged_upsampler(m_cinfo);
+                    m_cinfo.m_upsample = new my_merged_upsampler(m_cinfo);
                 }
                 else
                 {
-                    m_cinfo->m_cconvert = new jpeg_color_deconverter(m_cinfo);
-                    m_cinfo->m_upsample = new my_upsampler(m_cinfo);
+                    m_cinfo.m_cconvert = new jpeg_color_deconverter(m_cinfo);
+                    m_cinfo.m_upsample = new my_upsampler(m_cinfo);
                 }
 
-                m_cinfo->m_post = new jpeg_d_post_controller(m_cinfo, m_cinfo->m_enable_2pass_quant);
+                m_cinfo.m_post = new jpeg_d_post_controller(m_cinfo, m_cinfo.m_enable_2pass_quant);
             }
 
             /* Inverse DCT */
-            m_cinfo->m_idct = new jpeg_inverse_dct(m_cinfo);
+            m_cinfo.m_idct = new jpeg_inverse_dct(m_cinfo);
 
-            if (m_cinfo->m_progressive_mode)
-                m_cinfo->m_entropy = new phuff_entropy_decoder(m_cinfo);
+            if (m_cinfo.m_progressive_mode)
+                m_cinfo.m_entropy = new phuff_entropy_decoder(m_cinfo);
             else
-                m_cinfo->m_entropy = new huff_entropy_decoder(m_cinfo);
+                m_cinfo.m_entropy = new huff_entropy_decoder(m_cinfo);
 
             /* Initialize principal buffer controllers. */
-            bool use_c_buffer = m_cinfo->m_inputctl->HasMultipleScans() || m_cinfo->m_buffered_image;
-            m_cinfo->m_coef = new jpeg_d_coef_controller(m_cinfo, use_c_buffer);
+            bool use_c_buffer = m_cinfo.m_inputctl.HasMultipleScans() || m_cinfo.m_buffered_image;
+            m_cinfo.m_coef = new jpeg_d_coef_controller(m_cinfo, use_c_buffer);
 
-            if (!m_cinfo->m_raw_data_out)
-                m_cinfo->m_main = new jpeg_d_main_controller(m_cinfo);
+            if (!m_cinfo.m_raw_data_out)
+                m_cinfo.m_main = new jpeg_d_main_controller(m_cinfo);
 
             /* Initialize input side of decompressor to consume first scan. */
-            m_cinfo->m_inputctl->start_input_pass();
+            m_cinfo.m_inputctl.start_input_pass();
 
             /* If jpeg_start_decompress will read the whole file, initialize
              * progress monitoring appropriately.  The input step is counted
              * as one pass.
              */
-            if (m_cinfo->m_progress != NULL && !m_cinfo->m_buffered_image && m_cinfo->m_inputctl->HasMultipleScans())
+            if (m_cinfo.m_progress != null && !m_cinfo.m_buffered_image && m_cinfo.m_inputctl.HasMultipleScans())
             {
                 /* Estimate number of scans to set pass_limit. */
                 int nscans;
-                if (m_cinfo->m_progressive_mode)
+                if (m_cinfo.m_progressive_mode)
                 {
                     /* Arbitrarily estimate 2 interleaved DC scans + 3 AC scans/component. */
-                    nscans = 2 + 3 * m_cinfo->m_num_components;
+                    nscans = 2 + 3 * m_cinfo.m_num_components;
                 }
                 else
                 {
                     /* For a non progressive multiscan file, estimate 1 scan per component. */
-                    nscans = m_cinfo->m_num_components;
+                    nscans = m_cinfo.m_num_components;
                 }
 
-                m_cinfo->m_progress->m_pass_counter = 0L;
-                m_cinfo->m_progress->m_pass_limit = (long)m_cinfo->m_total_iMCU_rows * nscans;
-                m_cinfo->m_progress->m_completed_passes = 0;
-                m_cinfo->m_progress->m_total_passes = (m_cinfo->m_enable_2pass_quant ? 3 : 2);
+                m_cinfo.m_progress.m_pass_counter = 0L;
+                m_cinfo.m_progress.m_pass_limit = (long)m_cinfo.m_total_iMCU_rows * nscans;
+                m_cinfo.m_progress.m_completed_passes = 0;
+                m_cinfo.m_progress.m_total_passes = (m_cinfo.m_enable_2pass_quant ? 3 : 2);
 
                 /* Count the input pass as done */
                 m_pass_number++;
@@ -313,8 +313,8 @@ namespace LibJpeg.NET
 
             /* allow negative subscripts of simple table */
             int tableOffset = MAXJSAMPLE + 1;
-            m_cinfo->m_sample_range_limit = table;
-            m_cinfo->m_sampleRangeLimitOffset = tableOffset;
+            m_cinfo.m_sample_range_limit = table;
+            m_cinfo.m_sampleRangeLimitOffset = tableOffset;
 
             /* First segment of "simple" table: limit[x] = 0 for x < 0 */
             memset((void *)table, 0, (MAXJSAMPLE + 1) * sizeof(JSAMPLE));
@@ -331,7 +331,7 @@ namespace LibJpeg.NET
 
             /* Second half of post-IDCT table */
             memset((void *) (table + tableOffset + (2 * (MAXJSAMPLE + 1))), 0, (2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE) * sizeof(JSAMPLE));
-            memcpy((void *) (table + tableOffset + (4 * (MAXJSAMPLE + 1) - CENTERJSAMPLE)), (const void *) m_cinfo->m_sample_range_limit, CENTERJSAMPLE * sizeof(JSAMPLE));
+            memcpy((void *) (table + tableOffset + (4 * (MAXJSAMPLE + 1) - CENTERJSAMPLE)), (const void *) m_cinfo.m_sample_range_limit, CENTERJSAMPLE * sizeof(JSAMPLE));
         }
     }
 }

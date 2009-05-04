@@ -51,7 +51,7 @@ namespace LibJpeg.NET
         public ReadResult consume_input()
         {
             if (m_consumeData)
-                return m_cinfo->m_coef->consume_data();
+                return m_cinfo.m_coef.consume_data();
 
             return consume_markers();
         }
@@ -67,11 +67,11 @@ namespace LibJpeg.NET
             m_inheaders = true;
 
             /* Reset other modules */
-            m_cinfo->m_err->reset_error_mgr();
-            m_cinfo->m_marker->reset_marker_reader();
+            m_cinfo.m_err.reset_error_mgr();
+            m_cinfo.m_marker.reset_marker_reader();
 
             /* Reset progression state -- would be cleaner if entropy decoder did this */
-            m_cinfo->m_coef_bits = NULL;
+            m_cinfo.m_coef_bits = null;
         }
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace LibJpeg.NET
         {
             per_scan_setup();
             latch_quant_tables();
-            m_cinfo->m_entropy->start_pass();
-            m_cinfo->m_coef->start_input_pass();
+            m_cinfo.m_entropy.start_pass();
+            m_cinfo.m_coef.start_input_pass();
             m_consumeData = true;
         }
 
@@ -123,13 +123,13 @@ namespace LibJpeg.NET
             ReadResult val;
 
             if (m_eoi_reached) /* After hitting EOI, read no further */
-                return JPEG_REACHED_EOI;
+                return ReadResult.JPEG_REACHED_EOI;
 
-            val = m_cinfo->m_marker->read_markers();
+            val = m_cinfo.m_marker.read_markers();
 
             switch (val)
             {
-                case JPEG_REACHED_SOS:
+                case ReadResult.JPEG_REACHED_SOS:
                     /* Found SOS */
                     if (m_inheaders)
                     {
@@ -147,31 +147,31 @@ namespace LibJpeg.NET
                         if (!m_has_multiple_scans)
                         {
                             /* Oops, I wasn't expecting this! */
-                            m_cinfo->ERREXIT(JERR_EOI_EXPECTED);
+                            m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_EOI_EXPECTED);
                         }
 
-                        m_cinfo->m_inputctl->start_input_pass();
+                        m_cinfo.m_inputctl.start_input_pass();
                     }
                     break;
-                case JPEG_REACHED_EOI:
+                case ReadResult.JPEG_REACHED_EOI:
                     /* Found EOI */
                     m_eoi_reached = true;
                     if (m_inheaders)
                     {
                         /* Tables-only datastream, apparently */
-                        if (m_cinfo->m_marker->SawSOF())
-                            m_cinfo->ERREXIT(JERR_SOF_NO_SOS);
+                        if (m_cinfo.m_marker.SawSOF())
+                            m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_SOF_NO_SOS);
                     }
                     else
                     {
                         /* Prevent infinite loop in coef ctlr's decompress_data routine
                          * if user set output_scan_number larger than number of scans.
                          */
-                        if (m_cinfo->m_output_scan_number > m_cinfo->m_input_scan_number)
-                            m_cinfo->m_output_scan_number = m_cinfo->m_input_scan_number;
+                        if (m_cinfo.m_output_scan_number > m_cinfo.m_input_scan_number)
+                            m_cinfo.m_output_scan_number = m_cinfo.m_input_scan_number;
                     }
                     break;
-                case JPEG_SUSPENDED:
+                case ReadResult.JPEG_SUSPENDED:
                     break;
             }
 
@@ -185,86 +185,86 @@ namespace LibJpeg.NET
         private void initial_setup()
         {
             /* Make sure image isn't bigger than I can handle */
-            if ((long) m_cinfo->m_image_height > (long) JPEG_MAX_DIMENSION ||
-                (long) m_cinfo->m_image_width > (long) JPEG_MAX_DIMENSION)
+            if ((long) m_cinfo.m_image_height > (long) JPEG_MAX_DIMENSION ||
+                (long) m_cinfo.m_image_width > (long) JPEG_MAX_DIMENSION)
             {
-                m_cinfo->ERREXIT1(JERR_IMAGE_TOO_BIG, (unsigned int) JPEG_MAX_DIMENSION);
+                m_cinfo.ERREXIT1(JERR_IMAGE_TOO_BIG, (uint) JPEG_MAX_DIMENSION);
 
             }
 
             /* For now, precision must match compiled-in value... */
-            if (m_cinfo->m_data_precision != BITS_IN_JSAMPLE)
-                m_cinfo->ERREXIT1(JERR_BAD_PRECISION, m_cinfo->m_data_precision);
+            if (m_cinfo.m_data_precision != BITS_IN_JSAMPLE)
+                m_cinfo.ERREXIT1(JERR_BAD_PRECISION, m_cinfo.m_data_precision);
 
             /* Check that number of components won't exceed internal array sizes */
-            if (m_cinfo->m_num_components > MAX_COMPONENTS)
-                m_cinfo->ERREXIT2(JERR_COMPONENT_COUNT, m_cinfo->m_num_components, MAX_COMPONENTS);
+            if (m_cinfo.m_num_components > MAX_COMPONENTS)
+                m_cinfo.ERREXIT2(JERR_COMPONENT_COUNT, m_cinfo.m_num_components, MAX_COMPONENTS);
 
             /* Compute maximum sampling factors; check factor validity */
-            m_cinfo->m_max_h_samp_factor = 1;
-            m_cinfo->m_max_v_samp_factor = 1;
+            m_cinfo.m_max_h_samp_factor = 1;
+            m_cinfo.m_max_v_samp_factor = 1;
 
-            for (int ci = 0; ci < m_cinfo->m_num_components; ci++)
+            for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                if (m_cinfo->m_comp_info[ci].h_samp_factor <= 0 || m_cinfo->m_comp_info[ci].h_samp_factor > MAX_SAMP_FACTOR ||
-                    m_cinfo->m_comp_info[ci].v_samp_factor <= 0 || m_cinfo->m_comp_info[ci].v_samp_factor > MAX_SAMP_FACTOR)
+                if (m_cinfo.m_comp_info[ci].h_samp_factor <= 0 || m_cinfo.m_comp_info[ci].h_samp_factor > MAX_SAMP_FACTOR ||
+                    m_cinfo.m_comp_info[ci].v_samp_factor <= 0 || m_cinfo.m_comp_info[ci].v_samp_factor > MAX_SAMP_FACTOR)
                 {
-                    m_cinfo->ERREXIT(JERR_BAD_SAMPLING);
+                    m_cinfo.ERREXIT((int)JERR_BAD_SAMPLING);
                 }
 
-                m_cinfo->m_max_h_samp_factor = MAX(m_cinfo->m_max_h_samp_factor, m_cinfo->m_comp_info[ci].h_samp_factor);
-                m_cinfo->m_max_v_samp_factor = MAX(m_cinfo->m_max_v_samp_factor, m_cinfo->m_comp_info[ci].v_samp_factor);
+                m_cinfo.m_max_h_samp_factor = MAX(m_cinfo.m_max_h_samp_factor, m_cinfo.m_comp_info[ci].h_samp_factor);
+                m_cinfo.m_max_v_samp_factor = MAX(m_cinfo.m_max_v_samp_factor, m_cinfo.m_comp_info[ci].v_samp_factor);
             }
 
             /* We initialize DCT_scaled_size and min_DCT_scaled_size to DCTSIZE.
              * In the full decompressor, this will be overridden by jdmaster.c;
              * but in the transcoder, jdmaster.c is not used, so we must do it here.
              */
-            m_cinfo->m_min_DCT_scaled_size = DCTSIZE;
+            m_cinfo.m_min_DCT_scaled_size = DCTSIZE;
 
             /* Compute dimensions of components */
-            for (int ci = 0; ci < m_cinfo->m_num_components; ci++)
+            for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                m_cinfo->m_comp_info[ci].DCT_scaled_size = DCTSIZE;
+                m_cinfo.m_comp_info[ci].DCT_scaled_size = DCTSIZE;
                 
                 /* Size in DCT blocks */
-                m_cinfo->m_comp_info[ci].width_in_blocks = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long)m_cinfo->m_image_width * (long)m_cinfo->m_comp_info[ci].h_samp_factor,
-                    (long)(m_cinfo->m_max_h_samp_factor * DCTSIZE));
+                m_cinfo.m_comp_info[ci].width_in_blocks = (JDIMENSION)JpegUtils::jdiv_round_up(
+                    (long)m_cinfo.m_image_width * (long)m_cinfo.m_comp_info[ci].h_samp_factor,
+                    (long)(m_cinfo.m_max_h_samp_factor * DCTSIZE));
 
-                m_cinfo->m_comp_info[ci].height_in_blocks = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long)m_cinfo->m_image_height * (long)m_cinfo->m_comp_info[ci].v_samp_factor,
-                    (long)(m_cinfo->m_max_v_samp_factor * DCTSIZE));
+                m_cinfo.m_comp_info[ci].height_in_blocks = (JDIMENSION)JpegUtils::jdiv_round_up(
+                    (long)m_cinfo.m_image_height * (long)m_cinfo.m_comp_info[ci].v_samp_factor,
+                    (long)(m_cinfo.m_max_v_samp_factor * DCTSIZE));
 
                 /* downsampled_width and downsampled_height will also be overridden by
                  * jdmaster.c if we are doing full decompression.  The transcoder library
                  * doesn't use these values, but the calling application might.
                  */
                 /* Size in samples */
-                m_cinfo->m_comp_info[ci].downsampled_width = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long)m_cinfo->m_image_width * (long)m_cinfo->m_comp_info[ci].h_samp_factor,
-                    (long)m_cinfo->m_max_h_samp_factor);
+                m_cinfo.m_comp_info[ci].downsampled_width = (JDIMENSION)JpegUtils::jdiv_round_up(
+                    (long)m_cinfo.m_image_width * (long)m_cinfo.m_comp_info[ci].h_samp_factor,
+                    (long)m_cinfo.m_max_h_samp_factor);
 
-                m_cinfo->m_comp_info[ci].downsampled_height = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long)m_cinfo->m_image_height * (long)m_cinfo->m_comp_info[ci].v_samp_factor,
-                    (long)m_cinfo->m_max_v_samp_factor);
+                m_cinfo.m_comp_info[ci].downsampled_height = (JDIMENSION)JpegUtils::jdiv_round_up(
+                    (long)m_cinfo.m_image_height * (long)m_cinfo.m_comp_info[ci].v_samp_factor,
+                    (long)m_cinfo.m_max_v_samp_factor);
 
                 /* Mark component needed, until color conversion says otherwise */
-                m_cinfo->m_comp_info[ci].component_needed = true;
+                m_cinfo.m_comp_info[ci].component_needed = true;
                 
                 /* Mark no quantization table yet saved for component */
-                m_cinfo->m_comp_info[ci].quant_table = NULL;
+                m_cinfo.m_comp_info[ci].quant_table = null;
             }
 
             /* Compute number of fully interleaved MCU rows. */
-            m_cinfo->m_total_iMCU_rows = (JDIMENSION) JpegUtils::jdiv_round_up(
-                (long) m_cinfo->m_image_height, (long) (m_cinfo->m_max_v_samp_factor * DCTSIZE));
+            m_cinfo.m_total_iMCU_rows = (JDIMENSION) JpegUtils::jdiv_round_up(
+                (long) m_cinfo.m_image_height, (long) (m_cinfo.m_max_v_samp_factor * DCTSIZE));
 
             /* Decide whether file contains multiple scans */
-            if (m_cinfo->m_comps_in_scan < m_cinfo->m_num_components || m_cinfo->m_progressive_mode)
-                m_cinfo->m_inputctl->m_has_multiple_scans = true;
+            if (m_cinfo.m_comps_in_scan < m_cinfo.m_num_components || m_cinfo.m_progressive_mode)
+                m_cinfo.m_inputctl.m_has_multiple_scans = true;
             else
-                m_cinfo->m_inputctl->m_has_multiple_scans = false;
+                m_cinfo.m_inputctl.m_has_multiple_scans = false;
         }
 
         /// <summary>
@@ -289,104 +289,104 @@ namespace LibJpeg.NET
         /// </summary>
         private void latch_quant_tables()
         {
-            for (int ci = 0; ci < m_cinfo->m_comps_in_scan; ci++)
+            for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info* componentInfo = m_cinfo->m_cur_comp_info[ci];
+                jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
                 
                 /* No work if we already saved Q-table for this component */
-                if (componentInfo->quant_table != NULL)
+                if (componentInfo.quant_table != null)
                     continue;
                 
                 /* Make sure specified quantization table is present */
-                int qtblno = componentInfo->quant_tbl_no;
-                if (qtblno < 0 || qtblno >= NUM_QUANT_TBLS || m_cinfo->m_quant_tbl_ptrs[qtblno] == NULL)
-                    m_cinfo->ERREXIT1(JERR_NO_QUANT_TABLE, qtblno);
+                int qtblno = componentInfo.quant_tbl_no;
+                if (qtblno < 0 || qtblno >= NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
+                    m_cinfo.ERREXIT1(JERR_NO_QUANT_TABLE, qtblno);
                 
                 /* OK, save away the quantization table */
                 JQUANT_TBL* qtbl = new JQUANT_TBL();
-                memcpy((void *) qtbl, (const void *) m_cinfo->m_quant_tbl_ptrs[qtblno], sizeof(JQUANT_TBL));
-                componentInfo->quant_table = qtbl;
+                memcpy((void *) qtbl, (const void *) m_cinfo.m_quant_tbl_ptrs[qtblno], sizeof(JQUANT_TBL));
+                componentInfo.quant_table = qtbl;
             }
         }
 
         /// <summary>
         /// Do computations that are needed before processing a JPEG scan
-        /// cinfo->comps_in_scan and cinfo->cur_comp_info[] were set from SOS marker
+        /// cinfo.comps_in_scan and cinfo.cur_comp_info[] were set from SOS marker
         /// </summary>
         private void per_scan_setup()
         {
-            if (m_cinfo->m_comps_in_scan == 1)
+            if (m_cinfo.m_comps_in_scan == 1)
             {
                 /* Noninterleaved (single-component) scan */
-                jpeg_component_info* componentInfo = m_cinfo->m_cur_comp_info[0];
+                jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[0];
 
                 /* Overall image size in MCUs */
-                m_cinfo->m_MCUs_per_row = componentInfo->width_in_blocks;
-                m_cinfo->m_MCU_rows_in_scan = componentInfo->height_in_blocks;
+                m_cinfo.m_MCUs_per_row = componentInfo.width_in_blocks;
+                m_cinfo.m_MCU_rows_in_scan = componentInfo.height_in_blocks;
 
                 /* For noninterleaved scan, always one block per MCU */
-                componentInfo->MCU_width = 1;
-                componentInfo->MCU_height = 1;
-                componentInfo->MCU_blocks = 1;
-                componentInfo->MCU_sample_width = componentInfo->DCT_scaled_size;
-                componentInfo->last_col_width = 1;
+                componentInfo.MCU_width = 1;
+                componentInfo.MCU_height = 1;
+                componentInfo.MCU_blocks = 1;
+                componentInfo.MCU_sample_width = componentInfo.DCT_scaled_size;
+                componentInfo.last_col_width = 1;
 
                 /* For noninterleaved scans, it is convenient to define last_row_height
                  * as the number of block rows present in the last iMCU row.
                  */
-                int tmp = (int) (componentInfo->height_in_blocks % componentInfo->v_samp_factor);
+                int tmp = (int) (componentInfo.height_in_blocks % componentInfo.v_samp_factor);
                 if (tmp == 0)
-                    tmp = componentInfo->v_samp_factor;
-                componentInfo->last_row_height = tmp;
+                    tmp = componentInfo.v_samp_factor;
+                componentInfo.last_row_height = tmp;
 
                 /* Prepare array describing MCU composition */
-                m_cinfo->m_blocks_in_MCU = 1;
-                m_cinfo->m_MCU_membership[0] = 0;
+                m_cinfo.m_blocks_in_MCU = 1;
+                m_cinfo.m_MCU_membership[0] = 0;
             }
             else
             {
                 /* Interleaved (multi-component) scan */
-                if (m_cinfo->m_comps_in_scan <= 0 || m_cinfo->m_comps_in_scan > MAX_COMPS_IN_SCAN)
-                    m_cinfo->ERREXIT2(JERR_COMPONENT_COUNT, m_cinfo->m_comps_in_scan, MAX_COMPS_IN_SCAN);
+                if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > MAX_COMPS_IN_SCAN)
+                    m_cinfo.ERREXIT2(JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, MAX_COMPS_IN_SCAN);
 
                 /* Overall image size in MCUs */
-                m_cinfo->m_MCUs_per_row = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long) m_cinfo->m_image_width, (long) (m_cinfo->m_max_h_samp_factor * DCTSIZE));
+                m_cinfo.m_MCUs_per_row = (JDIMENSION)JpegUtils::jdiv_round_up(
+                    (long) m_cinfo.m_image_width, (long) (m_cinfo.m_max_h_samp_factor * DCTSIZE));
 
-                m_cinfo->m_MCU_rows_in_scan = (JDIMENSION)JpegUtils::jdiv_round_up(
-                    (long) m_cinfo->m_image_height, (long) (m_cinfo->m_max_v_samp_factor * DCTSIZE));
+                m_cinfo.m_MCU_rows_in_scan = (JDIMENSION)JpegUtils::jdiv_round_up(
+                    (long) m_cinfo.m_image_height, (long) (m_cinfo.m_max_v_samp_factor * DCTSIZE));
 
-                m_cinfo->m_blocks_in_MCU = 0;
+                m_cinfo.m_blocks_in_MCU = 0;
 
-                for (int ci = 0; ci < m_cinfo->m_comps_in_scan; ci++)
+                for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                 {
-                    jpeg_component_info* componentInfo = m_cinfo->m_cur_comp_info[ci];
+                    jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
 
                     /* Sampling factors give # of blocks of component in each MCU */
-                    componentInfo->MCU_width = componentInfo->h_samp_factor;
-                    componentInfo->MCU_height = componentInfo->v_samp_factor;
-                    componentInfo->MCU_blocks = componentInfo->MCU_width * componentInfo->MCU_height;
-                    componentInfo->MCU_sample_width = componentInfo->MCU_width * componentInfo->DCT_scaled_size;
+                    componentInfo.MCU_width = componentInfo.h_samp_factor;
+                    componentInfo.MCU_height = componentInfo.v_samp_factor;
+                    componentInfo.MCU_blocks = componentInfo.MCU_width * componentInfo.MCU_height;
+                    componentInfo.MCU_sample_width = componentInfo.MCU_width * componentInfo.DCT_scaled_size;
                     
                     /* Figure number of non-dummy blocks in last MCU column & row */
-                    int tmp = (int) (componentInfo->width_in_blocks % componentInfo->MCU_width);
+                    int tmp = (int) (componentInfo.width_in_blocks % componentInfo.MCU_width);
                     if (tmp == 0)
-                        tmp = componentInfo->MCU_width;
-                    componentInfo->last_col_width = tmp;
+                        tmp = componentInfo.MCU_width;
+                    componentInfo.last_col_width = tmp;
                     
-                    tmp = (int) (componentInfo->height_in_blocks % componentInfo->MCU_height);
+                    tmp = (int) (componentInfo.height_in_blocks % componentInfo.MCU_height);
                     if (tmp == 0)
-                        tmp = componentInfo->MCU_height;
-                    componentInfo->last_row_height = tmp;
+                        tmp = componentInfo.MCU_height;
+                    componentInfo.last_row_height = tmp;
                     
                     /* Prepare array describing MCU composition */
-                    int mcublks = componentInfo->MCU_blocks;
-                    if (m_cinfo->m_blocks_in_MCU + mcublks > D_MAX_BLOCKS_IN_MCU)
-                        m_cinfo->ERREXIT(JERR_BAD_MCU_SIZE);
+                    int mcublks = componentInfo.MCU_blocks;
+                    if (m_cinfo.m_blocks_in_MCU + mcublks > D_MAX_BLOCKS_IN_MCU)
+                        m_cinfo.ERREXIT((int)JERR_BAD_MCU_SIZE);
                     
                     while (mcublks-- > 0)
                     {
-                        m_cinfo->m_MCU_membership[m_cinfo->m_blocks_in_MCU++] = ci;
+                        m_cinfo.m_MCU_membership[m_cinfo.m_blocks_in_MCU++] = ci;
                     }
                 }
             }
