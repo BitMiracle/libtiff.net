@@ -384,7 +384,7 @@ namespace LibJpeg.NET
             /* Choose processor routine to use.
              * APP0/APP14 have special requirements.
              */
-            jpeg_marker_parser_method processor;
+            jpeg_decompress_struct.jpeg_marker_parser_method processor;
             if (length_limit != 0)
             {
                 processor = save_marker;

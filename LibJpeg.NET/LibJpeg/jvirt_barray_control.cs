@@ -44,7 +44,7 @@ namespace LibJpeg.NET
             //if (pre_zero)
             //{
             //    for (int i = 0; i < (int)m_rows_in_array; i++)
-            //        memset((void*)m_mem_buffer[i], 0, m_blocksperrow * (sizeof(JCOEF) * DCTSIZE2));
+            //        memset((void*)m_mem_buffer[i], 0, m_blocksperrow * (sizeof(short) * JpegConstants.DCTSIZE2));
             //}
         }
 

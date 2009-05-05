@@ -39,6 +39,7 @@
     <Compile Include="bitread_perm_state.cs" />
     <Compile Include="bitread_working_state.cs" />
     <Compile Include="d_derived_tbl.cs" />
+    <Compile Include="huff_entropy_decoder.cs" />
     <Compile Include="jpeg_color_deconverter.cs" />
     <Compile Include="jpeg_color_quantizer.cs" />
     <Compile Include="jpeg_d_post_controller.cs" />
@@ -84,10 +85,15 @@
     <Compile Include="J_DCT_METHOD.cs" />
     <Compile Include="J_DITHER_MODE.cs" />
     <Compile Include="J_MESSAGE_CODE.cs" />
+    <Compile Include="my_1pass_cquantizer.cs" />
+    <Compile Include="my_2pass_cquantizer.cs" />
     <Compile Include="my_c_coef_controller.cs" />
     <Compile Include="my_destination_mgr.cs" />
+    <Compile Include="my_merged_upsampler.cs" />
     <Compile Include="my_source_mgr.cs" />
     <Compile Include="my_trans_c_coef_controller.cs" />
+    <Compile Include="my_upsampler.cs" />
+    <Compile Include="phuff_entropy_decoder.cs" />
     <Compile Include="phuff_entropy_encoder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadResult.cs" />

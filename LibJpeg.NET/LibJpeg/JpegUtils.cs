@@ -122,7 +122,7 @@ namespace LibJpeg.NET
         /// </summary>
         public static void jcopy_block_row(JBLOCK[] input_row, JBLOCK[] output_row, uint num_blocks)
         {
-            //memcpy((void *) output_row, (const void *) input_row, num_blocks * (DCTSIZE2 * sizeof(JCOEF)));
+            //memcpy((void *) output_row, (const void *) input_row, num_blocks * (JpegConstants.DCTSIZE2 * sizeof(short)));
         }
     }
 }

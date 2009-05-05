@@ -262,7 +262,7 @@ namespace LibJpeg.NET
                 for (uint MCU_col_num = m_MCU_ctr; MCU_col_num <= last_MCU_col; MCU_col_num++)
                 {
                     /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
-                    memset((void*)m_MCU_buffer[0], 0, m_cinfo.m_blocks_in_MCU * (sizeof(JCOEF) * DCTSIZE2));
+                    memset((void*)m_MCU_buffer[0], 0, m_cinfo.m_blocks_in_MCU * (sizeof(short) * JpegConstants.DCTSIZE2));
 
                     if (!m_cinfo.m_entropy.decode_mcu(m_MCU_buffer))
                     {
@@ -300,7 +300,7 @@ namespace LibJpeg.NET
                                 for (int xindex = 0; xindex < useful_width; xindex++)
                                 {
                                     m_cinfo.m_idct.inverse(componentInfo.component_index,
-                                        (JCOEF*)m_MCU_buffer[blkn + xindex], output_buf[componentInfo.component_index],
+                                        (short*)m_MCU_buffer[blkn + xindex], output_buf[componentInfo.component_index],
                                         outputIndex, output_col);
 
                                     output_col += componentInfo.DCT_scaled_size;
@@ -385,7 +385,7 @@ namespace LibJpeg.NET
                     for (uint block_num = 0; block_num < componentInfo.width_in_blocks; block_num++)
                     {
                         m_cinfo.m_idct.inverse(componentInfo.component_index,
-                            (JCOEF*)buffer[block_row][block_num].data, output_buf[ci], rowIndex, output_col);
+                            (short*)buffer[block_row][block_num].data, output_buf[ci], rowIndex, output_col);
 
                         output_col += componentInfo.DCT_scaled_size;
                     }
@@ -554,7 +554,7 @@ namespace LibJpeg.NET
                                     pred = (1 << Al) - 1;
                                 pred = -pred;
                             }
-                            workspace[1] = (JCOEF) pred;
+                            workspace[1] = (short) pred;
                         }
 
                         /* AC10 */
@@ -576,7 +576,7 @@ namespace LibJpeg.NET
                                     pred = (1 << Al) - 1;
                                 pred = -pred;
                             }
-                            workspace[8] = (JCOEF) pred;
+                            workspace[8] = (short) pred;
                         }
 
                         /* AC20 */
@@ -598,7 +598,7 @@ namespace LibJpeg.NET
                                     pred = (1 << Al) - 1;
                                 pred = -pred;
                             }
-                            workspace[16] = (JCOEF) pred;
+                            workspace[16] = (short) pred;
                         }
 
                         /* AC11 */
@@ -620,7 +620,7 @@ namespace LibJpeg.NET
                                     pred = (1 << Al) - 1;
                                 pred = -pred;
                             }
-                            workspace[9] = (JCOEF) pred;
+                            workspace[9] = (short) pred;
                         }
 
                         /* AC02 */
@@ -642,12 +642,12 @@ namespace LibJpeg.NET
                                     pred = (1 << Al) - 1;
                                 pred = -pred;
                             }
-                            workspace[2] = (JCOEF) pred;
+                            workspace[2] = (short) pred;
                         }
 
                         /* OK, do the IDCT */
                         m_cinfo.m_idct.inverse(componentInfo.component_index, 
-                            (JCOEF *) workspace.data, output_buf[outputIndex], 0, output_col);
+                            (short *) workspace.data, output_buf[outputIndex], 0, output_col);
                         
                         /* Advance for next column */
                         DC1 = DC2; 

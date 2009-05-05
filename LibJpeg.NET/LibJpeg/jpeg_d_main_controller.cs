@@ -264,7 +264,7 @@ namespace LibJpeg.NET
              */
 
             /* Feed the postprocessor */
-            m_cinfo.m_post.post_process_data(cb, m_rowgroup_ctr, rowgroups_avail, output_buf, out_row_ctr, out_rows_avail);
+            m_cinfo.m_post.post_process_data(cb, ref m_rowgroup_ctr, rowgroups_avail, output_buf, ref out_row_ctr, out_rows_avail);
 
             /* Has postprocessor consumed all the data yet? If so, mark buffer empty */
             if (m_rowgroup_ctr >= rowgroups_avail)
@@ -313,8 +313,8 @@ namespace LibJpeg.NET
             if (m_context_state == CTX_POSTPONED_ROW)
             {
                 /* Call postprocessor using previously set pointers for postponed row */
-                m_cinfo.m_post.post_process_data(cb, m_rowgroup_ctr,
-                    m_rowgroups_avail, output_buf, out_row_ctr, out_rows_avail);
+                m_cinfo.m_post.post_process_data(cb, ref m_rowgroup_ctr,
+                    m_rowgroups_avail, output_buf, ref out_row_ctr, out_rows_avail);
 
                 if (m_rowgroup_ctr < m_rowgroups_avail)
                 {
@@ -349,8 +349,8 @@ namespace LibJpeg.NET
             if (m_context_state == CTX_PROCESS_IMCU)
             {
                 /* Call postprocessor using previously set pointers */
-                m_cinfo.m_post.post_process_data(cb, m_rowgroup_ctr,
-                    m_rowgroups_avail, output_buf, out_row_ctr, out_rows_avail);
+                m_cinfo.m_post.post_process_data(cb, ref m_rowgroup_ctr,
+                    m_rowgroups_avail, output_buf, ref out_row_ctr, out_rows_avail);
 
                 if (m_rowgroup_ctr < m_rowgroups_avail)
                 {
@@ -381,8 +381,8 @@ namespace LibJpeg.NET
         /// </summary>
         private void process_data_crank_post(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
         {
-            uint dummy;
-            m_cinfo.m_post.post_process_data(null, dummy, (uint)0, output_buf, out_row_ctr, out_rows_avail);
+            uint dummy = 0;
+            m_cinfo.m_post.post_process_data(null, ref dummy, (uint)0, output_buf, ref out_row_ctr, out_rows_avail);
         }
 
         /// <summary>
