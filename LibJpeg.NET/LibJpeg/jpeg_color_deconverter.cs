@@ -55,19 +55,19 @@ namespace LibJpeg.NET
             /* Make sure num_components agrees with jpeg_color_space */
             switch (cinfo.m_jpeg_color_space)
             {
-                case JCS_GRAYSCALE:
+                case J_COLOR_SPACE.JCS_GRAYSCALE:
                     if (cinfo.m_num_components != 1)
                         cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
 
-                case JCS_RGB:
-                case JCS_YCbCr:
+                case J_COLOR_SPACE.JCS_RGB:
+                case J_COLOR_SPACE.JCS_YCbCr:
                     if (cinfo.m_num_components != 3)
                         cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
 
-                case JCS_CMYK:
-                case JCS_YCCK:
+                case J_COLOR_SPACE.JCS_CMYK:
+                case J_COLOR_SPACE.JCS_YCCK:
                     if (cinfo.m_num_components != 4)
                         cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
@@ -86,11 +86,11 @@ namespace LibJpeg.NET
 
             switch (cinfo.m_out_color_space)
             {
-                case JCS_GRAYSCALE:
+                case J_COLOR_SPACE.JCS_GRAYSCALE:
                     cinfo.m_out_color_components = 1;
-                    if (cinfo.m_jpeg_color_space == JCS_GRAYSCALE || cinfo.m_jpeg_color_space == JCS_YCbCr)
+                    if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_GRAYSCALE || cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr)
                     {
-                        m_converter = grayscale_converter;
+                        m_converter = ColorConverter.grayscale_converter;
                         /* For color->grayscale conversion, only the Y (0) component is needed */
                         for (int ci = 1; ci < cinfo.m_num_components; ci++)
                             cinfo.m_comp_info[ci].component_needed = false;
@@ -99,30 +99,30 @@ namespace LibJpeg.NET
                         cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
-                case JCS_RGB:
-                    cinfo.m_out_color_components = RGB_PIXELSIZE;
-                    if (cinfo.m_jpeg_color_space == JCS_YCbCr)
+                case J_COLOR_SPACE.JCS_RGB:
+                    cinfo.m_out_color_components = JpegConstants.RGB_PIXELSIZE;
+                    if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr)
                     {
-                        m_converter = ycc_rgb_converter;
+                        m_converter = ColorConverter.ycc_rgb_converter;
                         build_ycc_rgb_table();
                     }
-                    else if (cinfo.m_jpeg_color_space == JCS_GRAYSCALE)
-                        m_converter = gray_rgb_converter;
-                    else if (cinfo.m_jpeg_color_space == JCS_RGB)
-                        m_converter = null_converter;
+                    else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_GRAYSCALE)
+                        m_converter = ColorConverter.gray_rgb_converter;
+                    else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_RGB)
+                        m_converter = ColorConverter.null_converter;
                     else
                         cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
-                case JCS_CMYK:
+                case J_COLOR_SPACE.JCS_CMYK:
                     cinfo.m_out_color_components = 4;
-                    if (cinfo.m_jpeg_color_space == JCS_YCCK)
+                    if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_YCCK)
                     {
-                        m_converter = ycck_cmyk_converter;
+                        m_converter = ColorConverter.ycck_cmyk_converter;
                         build_ycc_rgb_table();
                     }
-                    else if (cinfo.m_jpeg_color_space == JCS_CMYK)
-                        m_converter = null_converter;
+                    else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_CMYK)
+                        m_converter = ColorConverter.null_converter;
                     else
                         cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
@@ -132,7 +132,7 @@ namespace LibJpeg.NET
                     if (cinfo.m_out_color_space == cinfo.m_jpeg_color_space)
                     {
                         cinfo.m_out_color_components = cinfo.m_num_components;
-                        m_converter = null_converter;
+                        m_converter = ColorConverter.null_converter;
                     }
                     else
                     {
@@ -164,19 +164,19 @@ namespace LibJpeg.NET
 
             switch (m_converter)
             {
-                case grayscale_converter:
+                case ColorConverter.grayscale_converter:
                     grayscale_convert(input_buf, input_row, output_buf, output_row, num_rows);
                     break;
-                case ycc_rgb_converter:
+                case ColorConverter.ycc_rgb_converter:
                     ycc_rgb_convert(input_buf, input_row, output_buf, output_row, num_rows);
                     break;
-                case gray_rgb_converter:
+                case ColorConverter.gray_rgb_converter:
                     gray_rgb_convert(input_buf, input_row, output_buf, output_row, num_rows);
                     break;
-                case null_converter:
+                case ColorConverter.null_converter:
                     null_convert(input_buf, input_row, output_buf, output_row, num_rows);
                     break;
-                case ycck_cmyk_converter:
+                case ColorConverter.ycck_cmyk_converter:
                     ycck_cmyk_convert(input_buf, input_row, output_buf, output_row, num_rows);
                     break;
                 default:
@@ -219,12 +219,12 @@ namespace LibJpeg.NET
         /// </summary>
         private void build_ycc_rgb_table()
         {
-            m_Cr_r_tab = new int [MAXJSAMPLE + 1];
-            m_Cb_b_tab = new int [MAXJSAMPLE + 1];
-            m_Cr_g_tab = new INT32[MAXJSAMPLE + 1];
-            m_Cb_g_tab = new INT32[MAXJSAMPLE + 1];
+            m_Cr_r_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cb_b_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cr_g_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cb_g_tab = new int[JpegConstants.MAXJSAMPLE + 1];
 
-            for (int i = 0, x = -CENTERJSAMPLE; i <= MAXJSAMPLE; i++, x++)
+            for (int i = 0, x = -JpegConstants.CENTERJSAMPLE; i <= JpegConstants.MAXJSAMPLE; i++, x++)
             {
                 /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
@@ -249,7 +249,7 @@ namespace LibJpeg.NET
             int component1RowOffset = m_perComponentOffsets[1];
             int component2RowOffset = m_perComponentOffsets[2];
 
-            byte* limit = m_cinfo.m_sample_range_limit;
+            byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             for (int row = 0; row < num_rows; row++)
@@ -257,15 +257,15 @@ namespace LibJpeg.NET
                 int columnOffset = 0;
                 for (uint col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    int y = input_buf[0][input_row + component0RowOffset][col];
-                    int cb = input_buf[1][input_row + component1RowOffset][col];
-                    int cr = input_buf[2][input_row + component2RowOffset][col];
+                    int y = input_buf[0][(int)(input_row + component0RowOffset)][col];
+                    int cb = input_buf[1][(int)(input_row + component1RowOffset)][col];
+                    int cr = input_buf[2][(int)(input_row + component2RowOffset)][col];
 
                     /* Range-limiting is essential due to noise introduced by DCT losses. */
-                    output_buf[output_row + row][columnOffset + RGB_RED] = limit[limitOffset + y + m_Cr_r_tab[cr]];
-                    output_buf[output_row + row][columnOffset + RGB_GREEN] = limit[limitOffset + y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS)];
-                    output_buf[output_row + row][columnOffset + RGB_BLUE] = limit[limitOffset + y + m_Cb_b_tab[cb]];
-                    columnOffset += RGB_PIXELSIZE;
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = limit[limitOffset + y + m_Cr_r_tab[cr]];
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = limit[limitOffset + y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS)];
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = limit[limitOffset + y + m_Cb_b_tab[cb]];
+                    columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
 
                 input_row++;
@@ -287,7 +287,7 @@ namespace LibJpeg.NET
             int component2RowOffset = m_perComponentOffsets[2];
             int component3RowOffset = m_perComponentOffsets[3];
 
-            byte* limit = m_cinfo.m_sample_range_limit;
+            byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             uint num_cols = m_cinfo.m_output_width;
@@ -296,18 +296,18 @@ namespace LibJpeg.NET
                 int columnOffset = 0;
                 for (uint col = 0; col < num_cols; col++)
                 {
-                    int y = input_buf[0][input_row + component0RowOffset][col];
-                    int cb = input_buf[1][input_row + component1RowOffset][col];
-                    int cr = input_buf[2][input_row + component2RowOffset][col];
+                    int y = input_buf[0][(int)(input_row + component0RowOffset)][col];
+                    int cb = input_buf[1][(int)(input_row + component1RowOffset)][col];
+                    int cr = input_buf[2][(int)(input_row + component2RowOffset)][col];
 
                     /* Range-limiting is essential due to noise introduced by DCT losses. */
-                    output_buf[output_row + row][columnOffset] = limit[limitOffset + MAXJSAMPLE - (y + m_Cr_r_tab[cr])]; /* red */
-                    output_buf[output_row + row][columnOffset + 1] = limit[limitOffset + MAXJSAMPLE - (y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS))]; /* green */
-                    output_buf[output_row + row][columnOffset + 2] = limit[limitOffset + MAXJSAMPLE - (y + m_Cb_b_tab[cb])]; /* blue */
+                    output_buf[output_row + row][columnOffset] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cr_r_tab[cr])]; /* red */
+                    output_buf[output_row + row][columnOffset + 1] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS))]; /* green */
+                    output_buf[output_row + row][columnOffset + 2] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cb_b_tab[cb])]; /* blue */
                     
                     /* K passes through unchanged */
                     /* don't need GETJSAMPLE here */
-                    output_buf[output_row + row][columnOffset + 3] = input_buf[3][input_row + component3RowOffset][col];
+                    output_buf[output_row + row][columnOffset + 3] = input_buf[3][(int)(input_row + component3RowOffset)][col];
                     columnOffset += 4;
                 }
 
@@ -333,10 +333,10 @@ namespace LibJpeg.NET
                 for (uint col = 0; col < num_cols; col++)
                 {
                     /* We can dispense with GETJSAMPLE() here */
-                    output_buf[output_row + row][columnOffset + RGB_RED] = input_buf[0][input_row + component0RowOffset][col];
-                    output_buf[output_row + row][columnOffset + RGB_GREEN] = input_buf[0][input_row + component1RowOffset][col];
-                    output_buf[output_row + row][columnOffset + RGB_BLUE] = input_buf[0][input_row + component2RowOffset][col];
-                    columnOffset += RGB_PIXELSIZE;
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = input_buf[0][(int)(input_row + component0RowOffset)][col];
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = input_buf[0][(int)(input_row + component1RowOffset)][col];
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = input_buf[0][(int)(input_row + component2RowOffset)][col];
+                    columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
 
                 input_row++;
@@ -350,7 +350,7 @@ namespace LibJpeg.NET
         /// </summary>
         private void grayscale_convert(ComponentBuffer[] input_buf, uint input_row, byte[][] output_buf, uint output_row, int num_rows)
         {
-            JpegUtils.jcopy_sample_rows(input_buf[0], (int) input_row + m_perComponentOffsets[0], output_buf, output_row, num_rows, m_cinfo.m_output_width);
+            JpegUtils.jcopy_sample_rows(input_buf[0], (int) input_row + m_perComponentOffsets[0], output_buf, (int)output_row, num_rows, m_cinfo.m_output_width);
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace LibJpeg.NET
                     for (uint count = m_cinfo.m_output_width; count > 0; count--)
                     {
                         /* needn't bother with GETJSAMPLE() here */
-                        output_buf[output_row + row][ci + componentOffset] = input_buf[ci][input_row + perComponentOffset][columnIndex];
+                        output_buf[output_row + row][ci + componentOffset] = input_buf[ci][(int)(input_row + perComponentOffset)][columnIndex];
                         componentOffset += m_cinfo.m_num_components;
                         columnIndex++;
                     }
@@ -382,7 +382,7 @@ namespace LibJpeg.NET
 
         private static int FIX(double x)
         {
-            return ((INT32)((x) * (1L << SCALEBITS) + 0.5));
+            return ((int)((x) * (1L << SCALEBITS) + 0.5));
         }
     }
 }

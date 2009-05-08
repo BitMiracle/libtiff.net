@@ -105,51 +105,51 @@ namespace LibJpeg.NET
                 if (!componentInfo.component_needed)
                 {
                     /* Don't bother to upsample an uninteresting component. */
-                    m_upsampleMethods[ci] = noop_upsampler;
+                    m_upsampleMethods[ci] = ComponentUpsampler.noop_upsampler;
                     need_buffer = false;
                 }
                 else if (h_in_group == h_out_group && v_in_group == v_out_group)
                 {
                     /* Fullsize components can be processed without any work. */
-                    m_upsampleMethods[ci] = fullsize_upsampler;
+                    m_upsampleMethods[ci] = ComponentUpsampler.fullsize_upsampler;
                     need_buffer = false;
                 }
                 else if (h_in_group * 2 == h_out_group && v_in_group == v_out_group)
                 {
                     /* Special cases for 2h1v upsampling */
                     if (do_fancy && componentInfo.downsampled_width > 2)
-                        m_upsampleMethods[ci] = h2v1_fancy_upsampler;
+                        m_upsampleMethods[ci] = ComponentUpsampler.h2v1_fancy_upsampler;
                     else
-                        m_upsampleMethods[ci] = h2v1_upsampler;
+                        m_upsampleMethods[ci] = ComponentUpsampler.h2v1_upsampler;
                 }
                 else if (h_in_group * 2 == h_out_group && v_in_group * 2 == v_out_group)
                 {
                     /* Special cases for 2h2v upsampling */
                     if (do_fancy && componentInfo.downsampled_width > 2)
                     {
-                        m_upsampleMethods[ci] = h2v2_fancy_upsampler;
+                        m_upsampleMethods[ci] = ComponentUpsampler.h2v2_fancy_upsampler;
                         m_need_context_rows = true;
                     }
                     else
                     {
-                        m_upsampleMethods[ci] = h2v2_upsampler;
+                        m_upsampleMethods[ci] = ComponentUpsampler.h2v2_upsampler;
                     }
                 }
                 else if ((h_out_group % h_in_group) == 0 && (v_out_group % v_in_group) == 0)
                 {
                     /* Generic integral-factors upsampling method */
-                    m_upsampleMethods[ci] = int_upsampler;
-                    m_h_expand[ci] = (UINT8) (h_out_group / h_in_group);
-                    m_v_expand[ci] = (UINT8) (v_out_group / v_in_group);
+                    m_upsampleMethods[ci] = ComponentUpsampler.int_upsampler;
+                    m_h_expand[ci] = (byte) (h_out_group / h_in_group);
+                    m_v_expand[ci] = (byte) (v_out_group / v_in_group);
                 }
                 else
                     cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FRACT_SAMPLE_NOTIMPL);
 
                 if (need_buffer)
                 {
-                    ComponentBuffer cb;
-                    cb.SetBuffer(jpeg_common_struct.AllocJpegSamples(JpegUtils.jround_up(cinfo.m_output_width, 
-                        cinfo.m_max_h_samp_factor), cinfo.m_max_v_samp_factor), null, 0);
+                    ComponentBuffer cb = new ComponentBuffer();
+                    cb.SetBuffer(jpeg_common_struct.AllocJpegSamples((uint)JpegUtils.jround_up(cinfo.m_output_width, 
+                        cinfo.m_max_h_samp_factor), (uint)cinfo.m_max_v_samp_factor), null, 0);
 
                     m_color_buf[ci] = cb;
                 }
@@ -177,8 +177,6 @@ namespace LibJpeg.NET
         /// </summary>
         public override void upsample(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, uint in_row_groups_avail, byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
         {
-            in_row_groups_avail;
-
             /* Fill the conversion buffer, if it's empty */
             if (m_next_row_out >= m_cinfo.m_max_v_samp_factor)
             {
@@ -188,8 +186,8 @@ namespace LibJpeg.NET
 
                     /* Invoke per-component upsample method.*/
                     m_currentComponent = ci;
-                    m_upsampleRowOffset = in_row_group_ctr * m_rowgroup_height[ci];
-                    upsampleComponent(input_buf[ci]);
+                    m_upsampleRowOffset = (int)(in_row_group_ctr * m_rowgroup_height[ci]);
+                    upsampleComponent(ref input_buf[ci]);
                 }
 
                 m_next_row_out = 0;
@@ -198,7 +196,7 @@ namespace LibJpeg.NET
             /* Color-convert and emit rows */
 
             /* How many we have in the buffer: */
-            JDIMENSION num_rows = (JDIMENSION)(m_cinfo.m_max_v_samp_factor - m_next_row_out);
+            uint num_rows = (uint)(m_cinfo.m_max_v_samp_factor - m_next_row_out);
 
             /* Not more than the distance to the end of the image.  Need this test
              * in case the image height is not a multiple of max_v_samp_factor:
@@ -211,12 +209,12 @@ namespace LibJpeg.NET
             if (num_rows > out_rows_avail)
                 num_rows = out_rows_avail;
 
-            m_cinfo.m_cconvert.color_convert(m_color_buf, m_perComponentOffsets, (JDIMENSION)m_next_row_out, output_buf, out_row_ctr, (int)num_rows);
+            m_cinfo.m_cconvert.color_convert(m_color_buf, m_perComponentOffsets, (uint)m_next_row_out, output_buf, out_row_ctr, (int)num_rows);
 
             /* Adjust counts */
             out_row_ctr += num_rows;
             m_rows_to_go -= num_rows;
-            m_next_row_out += num_rows;
+            m_next_row_out += (int)num_rows;
 
             /* When the buffer is emptied, declare this input row group consumed */
             if (m_next_row_out >= m_cinfo.m_max_v_samp_factor)
@@ -227,26 +225,26 @@ namespace LibJpeg.NET
         {
             switch (m_upsampleMethods[m_currentComponent])
             {
-                case noop_upsampler:
+                case ComponentUpsampler.noop_upsampler:
                     noop_upsample();
                     break;
-                case fullsize_upsampler:
-                    fullsize_upsample(input_data);
+                case ComponentUpsampler.fullsize_upsampler:
+                    fullsize_upsample(ref input_data);
                     break;
-                case h2v1_fancy_upsampler:
-                    h2v1_fancy_upsample(m_cinfo.m_comp_info[m_currentComponent].downsampled_width, input_data);
+                case ComponentUpsampler.h2v1_fancy_upsampler:
+                    h2v1_fancy_upsample(m_cinfo.m_comp_info[m_currentComponent].downsampled_width, ref input_data);
                     break;
-                case h2v1_upsampler:
-                    h2v1_upsample(input_data);
+                case ComponentUpsampler.h2v1_upsampler:
+                    h2v1_upsample(ref input_data);
                     break;
-                case h2v2_fancy_upsampler:
-                    h2v2_fancy_upsample(m_cinfo.m_comp_info[m_currentComponent].downsampled_width, input_data);
+                case ComponentUpsampler.h2v2_fancy_upsampler:
+                    h2v2_fancy_upsample(m_cinfo.m_comp_info[m_currentComponent].downsampled_width, ref input_data);
                     break;
-                case h2v2_upsampler:
-                    h2v2_upsample(input_data);
+                case ComponentUpsampler.h2v2_upsampler:
+                    h2v2_upsample(ref input_data);
                     break;
-                case int_upsampler:
-                    int_upsample(input_data);
+                case ComponentUpsampler.int_upsampler:
+                    int_upsample(ref input_data);
                     break;
                 default:
                     m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
@@ -309,29 +307,29 @@ namespace LibJpeg.NET
                 int invalue = input_data[row][inIndex];
                 inIndex++;
 
-                output_data[inrow][outIndex] = (JSAMPLE)invalue;
+                output_data[inrow][outIndex] = (byte)invalue;
                 outIndex++;
-                output_data[inrow][outIndex] = (JSAMPLE)((invalue * 3 + (int)input_data[row][inIndex] + 2) >> 2);
+                output_data[inrow][outIndex] = (byte)((invalue * 3 + (int)input_data[row][inIndex] + 2) >> 2);
                 outIndex++;
 
-                for (JDIMENSION colctr = downsampled_width - 2; colctr > 0; colctr--)
+                for (uint colctr = downsampled_width - 2; colctr > 0; colctr--)
                 {
                     /* General case: 3/4 * nearer pixel + 1/4 * further pixel */
                     invalue = (int)input_data[row][inIndex] * 3;
                     inIndex++;
 
-                    output_data[inrow][outIndex] = (JSAMPLE)((invalue + (int)input_data[row][inIndex - 2] + 1) >> 2);
+                    output_data[inrow][outIndex] = (byte)((invalue + (int)input_data[row][inIndex - 2] + 1) >> 2);
                     outIndex++;
 
-                    output_data[inrow][outIndex] = (JSAMPLE)((invalue + (int)input_data[row][inIndex] + 2) >> 2);
+                    output_data[inrow][outIndex] = (byte)((invalue + (int)input_data[row][inIndex] + 2) >> 2);
                     outIndex++;
                 }
 
                 /* Special case for last column */
                 invalue = input_data[row][inIndex];
-                output_data[inrow][outIndex] = (JSAMPLE)((invalue * 3 + (int)input_data[row][inIndex - 1] + 1) >> 2);
+                output_data[inrow][outIndex] = (byte)((invalue * 3 + (int)input_data[row][inIndex - 1] + 1) >> 2);
                 outIndex++;
-                output_data[inrow][outIndex] = (JSAMPLE)invalue;
+                output_data[inrow][outIndex] = (byte)invalue;
                 outIndex++;
             }
         }
@@ -349,9 +347,9 @@ namespace LibJpeg.NET
                 int row = m_upsampleRowOffset + inrow;
                 int outIndex = 0;
 
-                for (JDIMENSION col = 0; col < m_cinfo.m_output_width; col++)
+                for (uint col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    JSAMPLE invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
+                    byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
                     output_data[inrow][outIndex] = invalue;
                     outIndex++;
                     output_data[inrow][outIndex] = invalue;
@@ -407,16 +405,16 @@ namespace LibJpeg.NET
                     inIndex0++;
                     inIndex1++;
 
-                    output_data[row][outIndex] = (JSAMPLE)((thiscolsum * 4 + 8) >> 4);
+                    output_data[row][outIndex] = (byte)((thiscolsum * 4 + 8) >> 4);
                     outIndex++;
 
-                    output_data[row][outIndex] = (JSAMPLE)((thiscolsum * 3 + nextcolsum + 7) >> 4);
+                    output_data[row][outIndex] = (byte)((thiscolsum * 3 + nextcolsum + 7) >> 4);
                     outIndex++;
 
                     int lastcolsum = thiscolsum;
                     thiscolsum = nextcolsum;
 
-                    for (JDIMENSION colctr = downsampled_width - 2; colctr > 0; colctr--)
+                    for (uint colctr = downsampled_width - 2; colctr > 0; colctr--)
                     {
                         /* General case: 3/4 * nearer pixel + 1/4 * further pixel in each */
                         /* dimension, thus 9/16, 3/16, 3/16, 1/16 overall */
@@ -424,10 +422,10 @@ namespace LibJpeg.NET
                         inIndex0++;
                         inIndex1++;
 
-                        output_data[row][outIndex] = (JSAMPLE)((thiscolsum * 3 + lastcolsum + 8) >> 4);
+                        output_data[row][outIndex] = (byte)((thiscolsum * 3 + lastcolsum + 8) >> 4);
                         outIndex++;
 
-                        output_data[row][outIndex] = (JSAMPLE)((thiscolsum * 3 + nextcolsum + 7) >> 4);
+                        output_data[row][outIndex] = (byte)((thiscolsum * 3 + nextcolsum + 7) >> 4);
                         outIndex++;
 
                         lastcolsum = thiscolsum;
@@ -435,9 +433,9 @@ namespace LibJpeg.NET
                     }
 
                     /* Special case for last column */
-                    output_data[row][outIndex] = (JSAMPLE)((thiscolsum * 3 + lastcolsum + 8) >> 4);
+                    output_data[row][outIndex] = (byte)((thiscolsum * 3 + lastcolsum + 8) >> 4);
                     outIndex++;
-                    output_data[row][outIndex] = (JSAMPLE)((thiscolsum * 4 + 7) >> 4);
+                    output_data[row][outIndex] = (byte)((thiscolsum * 4 + 7) >> 4);
                     outIndex++;
                 }
 
@@ -460,9 +458,9 @@ namespace LibJpeg.NET
                 int row = m_upsampleRowOffset + inrow;
                 int outIndex = 0;
 
-                for (JDIMENSION col = 0; col < m_cinfo.m_output_width; col++)
+                for (uint col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    JSAMPLE invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
+                    byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
                     output_data[outrow][outIndex] = invalue;
                     outIndex++;
                     output_data[outrow][outIndex] = invalue;
@@ -497,9 +495,9 @@ namespace LibJpeg.NET
             {
                 /* Generate one output row with proper horizontal expansion */
                 int row = m_upsampleRowOffset + inrow;
-                for (JDIMENSION col = 0; col < m_cinfo.m_output_width; col++)
+                for (uint col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    JSAMPLE invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
+                    byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
                     int outIndex = 0;
                     for (int h = h_expand; h > 0; h--)
                     {

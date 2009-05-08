@@ -193,6 +193,12 @@ namespace LibJpeg.NET
         /// </summary>
         public virtual bool GetTwoBytes(out int V)
         {
+            // remove this
+            V = 0;
+
+
+
+
             if (!MakeByteAvailable())
                 return false;
 
@@ -213,6 +219,12 @@ namespace LibJpeg.NET
         /// </summary>
         public virtual bool GetByte(out int V)
         {
+            // remove this
+            V = 0;
+
+
+
+
             if (!MakeByteAvailable())
                 return false;
 

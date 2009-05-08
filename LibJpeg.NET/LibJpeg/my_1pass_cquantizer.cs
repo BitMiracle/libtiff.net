@@ -100,6 +100,7 @@ namespace LibJpeg.NET
             quantize_fs_dither_quantizer
         }
 
+        private static int[] RGB_order = { JpegConstants.RGB_GREEN, JpegConstants.RGB_RED, JpegConstants.RGB_BLUE };
         private const int MAX_Q_COMPS = 4; /* max components I can handle */
     
         private const int ODITHER_SIZE = 16; /* dimension of dither matrix */
@@ -173,8 +174,8 @@ namespace LibJpeg.NET
                 cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_COMPONENTS, MAX_Q_COMPS);
 
             /* Make sure colormap indexes can be represented by JSAMPLEs */
-            if (cinfo.m_desired_number_of_colors > (MAXJSAMPLE + 1))
-                cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXJSAMPLE + 1);
+            if (cinfo.m_desired_number_of_colors > (JpegConstants.MAXJSAMPLE + 1))
+                cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, JpegConstants.MAXJSAMPLE + 1);
 
             /* Create the colormap and color index table. */
             create_colormap();
@@ -186,7 +187,7 @@ namespace LibJpeg.NET
             * mode in a later pass, we will allocate the space then, and will
             * possibly overrun the max_memory_to_use setting.
             */
-            if (cinfo.m_dither_mode == JDITHER_FS)
+            if (cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_FS)
                 alloc_fs_workspace();
         }
 
@@ -195,8 +196,6 @@ namespace LibJpeg.NET
         /// </summary>
         public virtual void start_pass(bool is_pre_scan)
         {
-            is_pre_scan;
-
             /* Install my colormap. */
             m_cinfo.m_colormap = m_sv_colormap;
             m_cinfo.m_actual_number_of_colors = m_sv_actual;
@@ -204,18 +203,18 @@ namespace LibJpeg.NET
             /* Initialize for desired dithering mode. */
             switch (m_cinfo.m_dither_mode)
             {
-                case JDITHER_NONE:
+                case J_DITHER_MODE.JDITHER_NONE:
                     if (m_cinfo.m_out_color_components == 3)
-                        m_quantizer = color_quantizer3;
+                        m_quantizer = QuantizerType.color_quantizer3;
                     else
-                        m_quantizer = color_quantizer;
+                        m_quantizer = QuantizerType.color_quantizer;
 
                     break;
-                case JDITHER_ORDERED:
+                case J_DITHER_MODE.JDITHER_ORDERED:
                     if (m_cinfo.m_out_color_components == 3)
-                        m_quantizer = quantize3_ord_dither_quantizer;
+                        m_quantizer = QuantizerType.quantize3_ord_dither_quantizer;
                     else
-                        m_quantizer = quantize3_ord_dither_quantizer;
+                        m_quantizer = QuantizerType.quantize3_ord_dither_quantizer;
 
                     /* initialize state for ordered dither */
                     m_row_index = 0;
@@ -232,9 +231,9 @@ namespace LibJpeg.NET
                         create_odither_tables();
 
                     break;
-                case JDITHER_FS:
+                case J_DITHER_MODE.JDITHER_FS:
                     {
-                        m_quantizer = quantize_fs_dither_quantizer;
+                        m_quantizer = QuantizerType.quantize_fs_dither_quantizer;
 
                         /* initialize state for F-S dither */
                         m_on_odd_row = false;
@@ -244,9 +243,9 @@ namespace LibJpeg.NET
                             alloc_fs_workspace();
 
                         /* Initialize the propagated errors to zero. */
-                        size_t arraysize = (size_t)((m_cinfo.m_output_width + 2) * sizeof(short));
-                        for (int i = 0; i < m_cinfo.m_out_color_components; i++)
-                            memset((void*)m_fserrors[i], 0, arraysize);
+                        uint arraysize = (uint)((m_cinfo.m_output_width + 2) * sizeof(short));
+                        //for (int i = 0; i < m_cinfo.m_out_color_components; i++)
+                        //    memset((void*)m_fserrors[i], 0, arraysize);
 
                         break;
                     }
@@ -260,23 +259,24 @@ namespace LibJpeg.NET
         {
             switch (m_quantizer)
             {
-                case color_quantizer3:
+                case QuantizerType.color_quantizer3:
                     quantize3(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
-                case color_quantizer:
+                case QuantizerType.color_quantizer:
                     quantize(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
-                case quantize3_ord_dither_quantizer:
+                case QuantizerType.quantize3_ord_dither_quantizer:
                     quantize3_ord_dither(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
-                case quantize_ord_dither_quantizer:
+                case QuantizerType.quantize_ord_dither_quantizer:
                     quantize_ord_dither(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
-                case quantize_fs_dither_quantizer:
+                case QuantizerType.quantize_fs_dither_quantizer:
                     quantize_fs_dither(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
                 default:
                     m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    break;
             }
         }
 
@@ -308,10 +308,10 @@ namespace LibJpeg.NET
             for (int row = 0; row < num_rows; row++)
             {
                 int inIndex = 0;
-                int inRow = in_row + row;
+                int inRow = (int)(in_row + row);
 
                 int outIndex = 0;
-                int outRow = out_row + row;
+                int outRow = (int)(out_row + row);
 
                 for (uint col = m_cinfo.m_output_width; col > 0; col--)
                 {
@@ -322,7 +322,7 @@ namespace LibJpeg.NET
                         inIndex++;
                     }
 
-                    output_buf[outRow][outIndex] = (JSAMPLE)pixcode;
+                    output_buf[outRow][outIndex] = (byte)pixcode;
                     outIndex++;
                 }
             }
@@ -339,10 +339,10 @@ namespace LibJpeg.NET
             for (int row = 0; row < num_rows; row++)
             {
                 int inIndex = 0;
-                int inRow = in_row + row;
+                int inRow = (int)(in_row + row);
 
                 int outIndex = 0;
-                int outRow = out_row + row;
+                int outRow = (int)(out_row + row);
 
                 for (uint col = width; col > 0; col--)
                 {
@@ -355,7 +355,7 @@ namespace LibJpeg.NET
                     pixcode += m_colorindex[2][(int)input_buf[inRow][inIndex]];
                     inIndex++;
 
-                    output_buf[outRow][outIndex] = (JSAMPLE)pixcode;
+                    output_buf[outRow][outIndex] = (byte)pixcode;
                     outIndex++;
                 }
             }
@@ -373,13 +373,13 @@ namespace LibJpeg.NET
             for (int row = 0; row < num_rows; row++)
             {
                 /* Initialize output values to 0 so can process components separately */
-                memset((void*)output_buf[out_row + row], 0, width * sizeof(JSAMPLE));
+                //memset((void*)output_buf[out_row + row], 0, width * sizeof(byte));
                 int row_index = m_row_index;
                 for (int ci = 0; ci < nc; ci++)
                 {
                     int inputIndex = ci;
                     int outIndex = 0;
-                    int outRow = out_row + row;
+                    int outRow = (int)(out_row + row);
 
                     int col_index = 0;
                     for (uint col = width; col > 0; col--)
@@ -415,11 +415,11 @@ namespace LibJpeg.NET
             for (int row = 0; row < num_rows; row++)
             {
                 int row_index = m_row_index;
-                int inRow = in_row + row;
+                int inRow = (int)(in_row + row);
                 int inIndex = 0;
 
                 int outIndex = 0;
-                int outRow = out_row + row;
+                int outRow = (int)(out_row + row);
 
                 int col_index = 0;
                 for (uint col = width; col > 0; col--)
@@ -433,7 +433,7 @@ namespace LibJpeg.NET
                     pixcode += m_colorindex[2][(int)input_buf[inRow][inIndex] + m_odither[2][row_index][col_index]];
                     inIndex++;
 
-                    output_buf[outRow][outIndex] = (JSAMPLE)pixcode;
+                    output_buf[outRow][outIndex] = (byte)pixcode;
                     outIndex++;
 
                     col_index = (col_index + 1) & ODITHER_MASK;
@@ -453,31 +453,31 @@ namespace LibJpeg.NET
             int nc = m_cinfo.m_out_color_components;
             uint width = m_cinfo.m_output_width;
 
-            JSAMPLE* limit = m_cinfo.m_sample_range_limit;
+            byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             for (int row = 0; row < num_rows; row++)
             {
                 /* Initialize output values to 0 so can process components separately */
-                memset((void *) output_buf[out_row + row], 0, width * sizeof(JSAMPLE));
+                //memset((void*)output_buf[out_row + row], 0, width * sizeof(byte));
 
                 for (int ci = 0; ci < nc; ci++)
                 {
-                    int inRow = in_row + row;
+                    int inRow = (int)(in_row + row);
                     int inIndex = ci;
 
                     int outIndex = 0;
-                    int outRow = out_row + row;
+                    int outRow = (int)(out_row + row);
 
                     int errorIndex = 0;
                     int dir;            /* 1 for left-to-right, -1 for right-to-left */
                     if (m_on_odd_row)
                     {
                         /* work right to left in this row */
-                        inIndex += (width - 1) * nc; /* so point to rightmost pixel */
-                        outIndex += width - 1;
+                        inIndex += (int)((width - 1) * nc); /* so point to rightmost pixel */
+                        outIndex += (int)(width - 1);
                         dir = -1;
-                        errorIndex = (width + 1); /* => entry after last column */
+                        errorIndex = (int)(width + 1); /* => entry after last column */
                     }
                     else
                     {
@@ -514,7 +514,7 @@ namespace LibJpeg.NET
 
                         /* Select output value, accumulate into output code for this pixel */
                         int pixcode = m_colorindex[ci][cur];
-                        output_buf[outRow][outIndex] += (JSAMPLE) pixcode;
+                        output_buf[outRow][outIndex] += (byte)pixcode;
                         
                         /* Compute actual representation error at this pixel */
                         /* Note: we can do this even though we don't have the final */
@@ -564,14 +564,14 @@ namespace LibJpeg.NET
 
             /* Report selected color counts */
             if (m_cinfo.m_out_color_components == 3)
-                m_cinfo.TRACEMS4(1, JTRC_QUANT_3_NCOLORS, total_colors, m_Ncolors[0], m_Ncolors[1], m_Ncolors[2]);
+                m_cinfo.TRACEMS4(1, (int)J_MESSAGE_CODE.JTRC_QUANT_3_NCOLORS, total_colors, m_Ncolors[0], m_Ncolors[1], m_Ncolors[2]);
             else
-                m_cinfo.TRACEMS1(1, JTRC_QUANT_NCOLORS, total_colors);
+                m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_QUANT_NCOLORS, total_colors);
 
             /* Allocate and fill in the colormap. */
             /* The colors are ordered in the map in standard row-major order, */
             /* i.e. rightmost (highest-indexed) color changes most rapidly. */
-            JSAMPLE** colormap = jpeg_common_struct.AllocJpegSamples((uint)total_colors, (uint)m_cinfo.m_out_color_components);
+            byte[][] colormap = jpeg_common_struct.AllocJpegSamples((uint)total_colors, (uint)m_cinfo.m_out_color_components);
 
             /* blksize is number of adjacent repeated entries for a component */
             /* blkdist is distance between groups of identical entries for a component */
@@ -591,7 +591,7 @@ namespace LibJpeg.NET
                     {
                         /* fill in blksize entries beginning at ptr */
                         for (int k = 0; k < blksize; k++)
-                            colormap[i][ptr + k] = (JSAMPLE)val;
+                            colormap[i][ptr + k] = (byte)val;
                     }
                 }
 
@@ -617,9 +617,9 @@ namespace LibJpeg.NET
              * flag whether it was done in case user changes dithering mode.
              */
             int pad;
-            if (m_cinfo.m_dither_mode == JDITHER_ORDERED)
+            if (m_cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_ORDERED)
             {
-                pad = MAXJSAMPLE * 2;
+                pad = JpegConstants.MAXJSAMPLE * 2;
                 m_is_padded = true;
             }
             else
@@ -628,8 +628,7 @@ namespace LibJpeg.NET
                 m_is_padded = false;
             }
 
-            m_colorindex = jpeg_common_struct.AllocJpegSamples((uint)(MAXJSAMPLE + 1 + pad),
-                                                     (uint)m_cinfo.m_out_color_components);
+            m_colorindex = jpeg_common_struct.AllocJpegSamples((uint)(JpegConstants.MAXJSAMPLE + 1 + pad), (uint)m_cinfo.m_out_color_components);
 
             /* blksize is number of adjacent repeated entries for a component */
             int blksize = m_sv_actual;
@@ -640,14 +639,14 @@ namespace LibJpeg.NET
                 blksize = blksize / nci;
 
                 /* adjust colorindex pointers to provide padding at negative indexes. */
-                if (pad)
-                    m_colorindex[i] += MAXJSAMPLE;
+                //if (pad != 0)
+                //    m_colorindex[i] += JpegConstants.MAXJSAMPLE;
 
                 /* in loop, val = index of current output value, */
                 /* and k = largest j that maps to current val */
                 int val = 0;
                 int k = largest_input_value(0, nci - 1);
-                for (int j = 0; j <= MAXJSAMPLE; j++)
+                for (int j = 0; j <= JpegConstants.MAXJSAMPLE; j++)
                 {
                     while (j > k)
                     {
@@ -656,16 +655,16 @@ namespace LibJpeg.NET
                     }
 
                     /* premultiply so that no multiplication needed in main processing */
-                    m_colorindex[i][j] = (JSAMPLE)(val * blksize);
+                    m_colorindex[i][j] = (byte)(val * blksize);
                 }
 
                 /* Pad at both ends if necessary */
-                if (pad)
+                if (pad != 0)
                 {
-                    for (int j = 1; j <= MAXJSAMPLE; j++)
+                    for (int j = 1; j <= JpegConstants.MAXJSAMPLE; j++)
                     {
                         m_colorindex[i][-j] = m_colorindex[i][0];
-                        m_colorindex[i][MAXJSAMPLE + j] = m_colorindex[i][MAXJSAMPLE];
+                        m_colorindex[i][JpegConstants.MAXJSAMPLE + j] = m_colorindex[i][JpegConstants.MAXJSAMPLE];
                     }
                 }
             }
@@ -733,7 +732,7 @@ namespace LibJpeg.NET
         private int largest_input_value(int j, int maxj)
         {
             /* Breakpoints are halfway between values returned by output_value */
-            return (int)(((int)(2 * j + 1) * MAXJSAMPLE + maxj) / (2 * maxj));
+            return (int)(((int)(2 * j + 1) * JpegConstants.MAXJSAMPLE + maxj) / (2 * maxj));
         }
 
         /// <summary>
@@ -747,7 +746,7 @@ namespace LibJpeg.NET
              * (Forcing the upper and lower values to the limits ensures that
              * dithering can't produce a color outside the selected gamut.)
              */
-            return (int)(((int)j * MAXJSAMPLE + maxj / 2) / maxj);
+            return (int)(((int)j * JpegConstants.MAXJSAMPLE + maxj / 2) / maxj);
         }
 
         /// <summary>
@@ -795,13 +794,12 @@ namespace LibJpeg.NET
              * In RGB colorspace, try to increment G first, then R, then B.
              */
             bool changed = false;
-            static const int RGB_order[3] = { RGB_GREEN, RGB_RED, RGB_BLUE };
             do
             {
                 changed = false;
                 for (int i = 0; i < nc; i++)
                 {
-                    int j = (m_cinfo.m_out_color_space == JCS_RGB ? RGB_order[i] : i);
+                    int j = (m_cinfo.m_out_color_space == J_COLOR_SPACE.JCS_RGB ? RGB_order[i] : i);
                     /* calculate new total_colors if Ncolors[j] is incremented */
                     temp = total_colors / Ncolors[j];
                     temp *= Ncolors[j] + 1; /* done in long arith to avoid oflo */
@@ -825,7 +823,7 @@ namespace LibJpeg.NET
         /// </summary>
         private int[][] make_odither_array(int ncolors)
         {
-            int** odither = new int*[ODITHER_SIZE];
+            int[][] odither = new int[ODITHER_SIZE][];
             for (int i = 0; i < ODITHER_SIZE; i++)
                 odither[i] = new int[ODITHER_SIZE];
 
@@ -839,7 +837,7 @@ namespace LibJpeg.NET
             {
                 for (int k = 0; k < ODITHER_SIZE; k++)
                 {
-                    int num = ((int)(ODITHER_CELLS - 1 - 2 * ((int)base_dither_matrix[j][k]))) * MAXJSAMPLE;
+                    int num = ((int)(ODITHER_CELLS - 1 - 2 * ((int)base_dither_matrix[j][k]))) * JpegConstants.MAXJSAMPLE;
 
                     /* Ensure round towards zero despite C's lack of consistency
                      * about rounding negative values in integer division...

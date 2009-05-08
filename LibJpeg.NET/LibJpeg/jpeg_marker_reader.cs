@@ -217,12 +217,12 @@ namespace LibJpeg.NET
                     case JPEG_MARKER.M_APP13:
                     case JPEG_MARKER.M_APP14:
                     case JPEG_MARKER.M_APP15:
-                        if (!(*(m_cinfo.m_marker).m_process_APPn[m_cinfo.m_unread_marker - (int)JPEG_MARKER.M_APP0])(m_cinfo))
+                        if (!m_cinfo.m_marker.m_process_APPn[m_cinfo.m_unread_marker - (int)JPEG_MARKER.M_APP0](m_cinfo))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
                     case JPEG_MARKER.M_COM:
-                        if (!(*(m_cinfo.m_marker).m_process_COM)(m_cinfo))
+                        if (!m_cinfo.m_marker.m_process_COM(m_cinfo))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
@@ -503,7 +503,7 @@ namespace LibJpeg.NET
                 /* resume reading a marker */
                 bytes_read = cinfo.m_marker.m_bytes_read;
                 data_length = cur_marker.data_length;
-                data = cur_marker.data + bytes_read;
+                //data = cur_marker.data + bytes_read;
             }
 
             while (bytes_read < data_length)
@@ -944,20 +944,20 @@ namespace LibJpeg.NET
             }
 
             /* Collect the additional scan parameters Ss, Se, Ah/Al. */
-            int c;
-            if (!m_cinfo.m_src.GetByte(out c))
+            int temp;
+            if (!m_cinfo.m_src.GetByte(out temp))
                 return false;
 
-            m_cinfo.m_Ss = c;
-            if (!m_cinfo.m_src.GetByte(out c))
+            m_cinfo.m_Ss = temp;
+            if (!m_cinfo.m_src.GetByte(out temp))
                 return false;
 
-            m_cinfo.m_Se = c;
-            if (!m_cinfo.m_src.GetByte(out c))
+            m_cinfo.m_Se = temp;
+            if (!m_cinfo.m_src.GetByte(out temp))
                 return false;
 
-            m_cinfo.m_Ah = (c >> 4) & 15;
-            m_cinfo.m_Al = (c) & 15;
+            m_cinfo.m_Ah = (temp >> 4) & 15;
+            m_cinfo.m_Al = (temp) & 15;
 
             m_cinfo.TRACEMS4(1, (int)J_MESSAGE_CODE.JTRC_SOS_PARAMS, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
 

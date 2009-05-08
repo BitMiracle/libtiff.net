@@ -35,7 +35,7 @@ namespace LibJpeg.NET
         {
             //savable_state operator=(savable_state src);
             public uint EOBRUN;            /* remaining EOBs in EOBRUN */
-            public int[] last_dc_val = new int[MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
+            public int[] last_dc_val = new int[JpegConstants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
         }
 
         private enum MCUDecoder
@@ -58,20 +58,20 @@ namespace LibJpeg.NET
         private uint m_restarts_to_go;    /* MCUs left in this restart interval */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
-        private d_derived_tbl[][] m_derived_tbls = new d_derived_tbl[NUM_HUFF_TBLS][];
+        private d_derived_tbl[] m_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
 
-        private d_derived_tbl[] m_ac_derived_tbl; /* active table during an AC scan */
+        private d_derived_tbl m_ac_derived_tbl; /* active table during an AC scan */
 
         public phuff_entropy_decoder(jpeg_decompress_struct cinfo)
         {
             m_cinfo = cinfo;
 
             /* Mark derived tables unallocated */
-            for (int i = 0; i < NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
                 m_derived_tbls[i] = null;
 
             /* Create progression status table */
-            cinfo.m_coef_bits = new int*[cinfo.m_num_components];
+            cinfo.m_coef_bits = new int[cinfo.m_num_components][];
             for (int i = 0; i < cinfo.m_num_components; i++)
                 cinfo.m_coef_bits[i] = new int[JpegConstants.DCTSIZE2];
 
@@ -130,7 +130,7 @@ namespace LibJpeg.NET
              * overflows in the IDCT math.  But we won't crash.
              */
             if (bad)
-                m_cinfo.ERREXIT4(JERR_BAD_PROGRESSION, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
+                m_cinfo.ERREXIT4((int)J_MESSAGE_CODE.JERR_BAD_PROGRESSION, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
 
             /* Update progression status, and verify that scan order is legal.
              * Note that inter-scan inconsistencies are treated as warnings
@@ -140,7 +140,7 @@ namespace LibJpeg.NET
             {
                 int cindex = m_cinfo.m_cur_comp_info[ci].component_index;
                 if (!is_DC_band && m_cinfo.m_coef_bits[cindex][0] < 0) /* AC without prior DC scan */
-                    m_cinfo.WARNMS2(JWRN_BOGUS_PROGRESSION, cindex, 0);
+                    m_cinfo.WARNMS2((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, 0);
 
                 for (int coefi = m_cinfo.m_Ss; coefi <= m_cinfo.m_Se; coefi++)
                 {
@@ -149,7 +149,7 @@ namespace LibJpeg.NET
                         expected = 0;
 
                     if (m_cinfo.m_Ah != expected)
-                        m_cinfo.WARNMS2(JWRN_BOGUS_PROGRESSION, cindex, coefi);
+                        m_cinfo.WARNMS2((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, coefi);
 
                     m_cinfo.m_coef_bits[cindex][coefi] = m_cinfo.m_Al;
                 }
@@ -159,21 +159,21 @@ namespace LibJpeg.NET
             if (m_cinfo.m_Ah == 0)
             {
                 if (is_DC_band)
-                    m_decoder = mcu_DC_first_decoder;
+                    m_decoder = MCUDecoder.mcu_DC_first_decoder;
                 else
-                    m_decoder = mcu_AC_first_decoder;
+                    m_decoder = MCUDecoder.mcu_AC_first_decoder;
             }
             else
             {
                 if (is_DC_band)
-                    m_decoder = mcu_DC_refine_decoder;
+                    m_decoder = MCUDecoder.mcu_DC_refine_decoder;
                 else
-                    m_decoder = mcu_AC_refine_decoder;
+                    m_decoder = MCUDecoder.mcu_AC_refine_decoder;
             }
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info* componentInfo = m_cinfo.m_cur_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
                 /* Make sure requested tables are present, and compute derived tables.
                  * We may build same derived table more than once, but it's not expensive.
                  */
@@ -182,12 +182,12 @@ namespace LibJpeg.NET
                     if (m_cinfo.m_Ah == 0)
                     {
                         /* DC refinement needs no table */
-                        jpeg_make_d_derived_tbl(true, componentInfo.dc_tbl_no, m_derived_tbls[componentInfo.dc_tbl_no]);
+                        jpeg_make_d_derived_tbl(true, componentInfo.dc_tbl_no, ref m_derived_tbls[componentInfo.dc_tbl_no]);
                     }
                 }
                 else
                 {
-                    jpeg_make_d_derived_tbl(false, componentInfo.ac_tbl_no, m_derived_tbls[componentInfo.ac_tbl_no]);
+                    jpeg_make_d_derived_tbl(false, componentInfo.ac_tbl_no, ref m_derived_tbls[componentInfo.ac_tbl_no]);
 
                     /* remember the single active table */
                     m_ac_derived_tbl = m_derived_tbls[componentInfo.ac_tbl_no];
@@ -213,13 +213,13 @@ namespace LibJpeg.NET
         {
             switch (m_decoder)
             {
-                case mcu_DC_first_decoder:
+                case MCUDecoder.mcu_DC_first_decoder:
                     return decode_mcu_DC_first(MCU_data);
-                case mcu_AC_first_decoder:
+                case MCUDecoder.mcu_AC_first_decoder:
                     return decode_mcu_AC_first(MCU_data);
-                case mcu_DC_refine_decoder:
+                case MCUDecoder.mcu_DC_refine_decoder:
                     return decode_mcu_DC_refine(MCU_data);
-                case mcu_AC_refine_decoder:
+                case MCUDecoder.mcu_AC_refine_decoder:
                     return decode_mcu_AC_refine(MCU_data);
             }
 
@@ -251,7 +251,7 @@ namespace LibJpeg.NET
         private bool decode_mcu_DC_first(JBLOCK[][] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -266,10 +266,10 @@ namespace LibJpeg.NET
             if (!m_insufficient_data)
             {
                 /* Load up working state */
-                INT32 get_buffer;
+                int get_buffer;
                 int bits_left;
-                bitread_working_state br_state;
-                BITREAD_LOAD_STATE(m_bitstate, get_buffer, bits_left, br_state);
+                bitread_working_state br_state = new bitread_working_state();
+                BITREAD_LOAD_STATE(ref m_bitstate, out get_buffer, out bits_left, ref br_state);
                 savable_state state = m_saved;
 
                 /* Outer loop handles each block in the MCU */
@@ -281,15 +281,15 @@ namespace LibJpeg.NET
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     int s;
-                    if (!HUFF_DECODE(s, &br_state, m_derived_tbls[m_cinfo.m_cur_comp_info[ci].dc_tbl_no], get_buffer, bits_left))
+                    if (!HUFF_DECODE(out s, br_state, m_derived_tbls[m_cinfo.m_cur_comp_info[ci].dc_tbl_no], ref get_buffer, ref bits_left))
                         return false;
 
-                    if (s)
+                    if (s != 0)
                     {
-                        if (!CHECK_BIT_BUFFER(&br_state, s, get_buffer, bits_left))
+                        if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
                             return false;
 
-                        int r = GET_BITS(s, get_buffer, bits_left);
+                        int r = GET_BITS(s, get_buffer, ref bits_left);
                         s = HUFF_EXTEND(r, s);
                     }
 
@@ -298,11 +298,11 @@ namespace LibJpeg.NET
                     state.last_dc_val[ci] = s;
 
                     /* Scale and output the coefficient (assumes jpeg_natural_order[0]=0) */
-                    MCU_data[blkn][0][0] = (JCOEF)(s << m_cinfo.m_Al);
+                    MCU_data[blkn][0][0] = (short)(s << m_cinfo.m_Al);
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(m_bitstate, get_buffer, bits_left);
+                BITREAD_SAVE_STATE(ref m_bitstate, ref get_buffer, ref bits_left);
                 m_saved = state;
             }
 
@@ -319,7 +319,7 @@ namespace LibJpeg.NET
         private bool decode_mcu_AC_first(JBLOCK[][] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -336,7 +336,7 @@ namespace LibJpeg.NET
                 /* Load up working state.
                  * We can avoid loading/saving bitread state if in an EOB run.
                  */
-                unsigned int EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
+                uint EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
 
                 /* There is always only one block per MCU */
 
@@ -348,31 +348,31 @@ namespace LibJpeg.NET
                 }
                 else
                 {
-                    INT32 get_buffer;
+                    int get_buffer;
                     int bits_left;
-                    bitread_working_state br_state;
-                    BITREAD_LOAD_STATE(m_bitstate, get_buffer, bits_left, br_state);
+                    bitread_working_state br_state = new bitread_working_state();
+                    BITREAD_LOAD_STATE(ref m_bitstate, out get_buffer, out bits_left, ref br_state);
 
                     for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
                     {
                         int s;
-                        if (!HUFF_DECODE(s, &br_state, m_ac_derived_tbl, get_buffer, bits_left))
+                        if (!HUFF_DECODE(out s, br_state, m_ac_derived_tbl, ref get_buffer, ref bits_left))
                             return false;
 
                         int r = s >> 4;
                         s &= 15;
-                        if (s)
+                        if (s != 0)
                         {
                             k += r;
 
-                            if (!CHECK_BIT_BUFFER(&br_state, s, get_buffer, bits_left))
+                            if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
                                 return false;
 
-                            r = GET_BITS(s, get_buffer, bits_left);
+                            r = GET_BITS(s, get_buffer, ref bits_left);
                             s = HUFF_EXTEND(r, s);
 
                             /* Scale and output coefficient in natural (dezigzagged) order */
-                            MCU_data[0][0][JpegUtils.jpeg_natural_order[k]] = (JCOEF) (s << m_cinfo.m_Al);
+                            MCU_data[0][0][JpegUtils.jpeg_natural_order[k]] = (short) (s << m_cinfo.m_Al);
                         }
                         else
                         {
@@ -384,15 +384,15 @@ namespace LibJpeg.NET
                             else
                             {
                                 /* EOBr, run length is 2^r + appended bits */
-                                EOBRUN = 1 << r;
-                                if (r)
+                                EOBRUN = (uint)(1 << r);
+                                if (r != 0)
                                 {
                                     /* EOBr, r > 0 */
-                                    if (!CHECK_BIT_BUFFER(&br_state, r, get_buffer, bits_left))
+                                    if (!CHECK_BIT_BUFFER(br_state, r, ref get_buffer, ref bits_left))
                                         return false;
 
-                                    r = GET_BITS(r, get_buffer, bits_left);
-                                    EOBRUN += r;
+                                    r = GET_BITS(r, get_buffer, ref bits_left);
+                                    EOBRUN += (uint)r;
                                 }
 
                                 EOBRUN--;       /* this band is processed at this moment */
@@ -401,7 +401,7 @@ namespace LibJpeg.NET
                         }
                     }
 
-                    BITREAD_SAVE_STATE(m_bitstate, get_buffer, bits_left);
+                    BITREAD_SAVE_STATE(ref m_bitstate, ref get_buffer, ref bits_left);
                 }
 
                 /* Completed MCU, so update state */
@@ -422,7 +422,7 @@ namespace LibJpeg.NET
         private bool decode_mcu_DC_refine(JBLOCK[][] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -436,30 +436,30 @@ namespace LibJpeg.NET
              */
 
             /* Load up working state */
-            INT32 get_buffer;
+            int get_buffer;
             int bits_left;
-            bitread_working_state br_state;
-            BITREAD_LOAD_STATE(m_bitstate, get_buffer, bits_left, br_state);
+            bitread_working_state br_state = new bitread_working_state();
+            BITREAD_LOAD_STATE(ref m_bitstate, out get_buffer, out bits_left, ref br_state);
 
             /* Outer loop handles each block in the MCU */
 
             for (int blkn = 0; blkn < m_cinfo.m_blocks_in_MCU; blkn++)
             {
                 /* Encoded data is simply the next bit of the two's-complement DC value */
-                if (!CHECK_BIT_BUFFER(&br_state, 1, get_buffer, bits_left))
+                if (!CHECK_BIT_BUFFER(br_state, 1, ref get_buffer, ref bits_left))
                     return false;
 
-                if (GET_BITS(1, get_buffer, bits_left))
+                if (GET_BITS(1, get_buffer, ref bits_left) != 0)
                 {
                     /* 1 in the bit position being coded */
-                    MCU_data[blkn][0][0] |= 1 << m_cinfo.m_Al;
+                    MCU_data[blkn][0][0] |= (short)(1 << m_cinfo.m_Al);
                 }
 
                 /* Note: since we use |=, repeating the assignment later is safe */
             }
 
             /* Completed MCU, so update state */
-            BITREAD_SAVE_STATE(m_bitstate, get_buffer, bits_left);
+            BITREAD_SAVE_STATE(ref m_bitstate, ref get_buffer, ref bits_left);
 
             /* Account for restart interval (no-op if not using restarts) */
             m_restarts_to_go--;
@@ -474,7 +474,7 @@ namespace LibJpeg.NET
             int m1 = (-1) << m_cinfo.m_Al; /* -1 in the bit position being coded */
 
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -488,11 +488,11 @@ namespace LibJpeg.NET
             if (!m_insufficient_data)
             {
                 /* Load up working state */
-                INT32 get_buffer;
+                int get_buffer;
                 int bits_left;
-                bitread_working_state br_state;
-                BITREAD_LOAD_STATE(m_bitstate, get_buffer, bits_left, br_state);
-                unsigned int EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
+                bitread_working_state br_state = new bitread_working_state();
+                BITREAD_LOAD_STATE(ref m_bitstate, out get_buffer, out bits_left, ref br_state);
+                uint EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
 
                 /* If we are forced to suspend, we must undo the assignments to any newly
                  * nonzero coefficients in the block, because otherwise we'd get confused
@@ -501,7 +501,7 @@ namespace LibJpeg.NET
                  * instead, we can test the current bit to see if we already did it.
                  */
                 int num_newnz = 0;
-                int newnz_pos[DCTSIZE2];
+                int[] newnz_pos = new int[JpegConstants.DCTSIZE2];
 
                 /* initialize coefficient loop counter to start of band */
                 int k = m_cinfo.m_Ss;
@@ -511,7 +511,7 @@ namespace LibJpeg.NET
                     for (; k <= m_cinfo.m_Se; k++)
                     {
                         int s;
-                        if (!HUFF_DECODE(s, &br_state, m_ac_derived_tbl, get_buffer, bits_left))
+                        if (!HUFF_DECODE(out s, br_state, m_ac_derived_tbl, ref get_buffer, ref bits_left))
                         {
                             undo_decode_mcu_AC_refine(MCU_data[0], newnz_pos, num_newnz);
                             return false;
@@ -519,21 +519,21 @@ namespace LibJpeg.NET
 
                         int r = s >> 4;
                         s &= 15;
-                        if (s)
+                        if (s != 0)
                         {
                             if (s != 1)
                             {
                                 /* size of new coef should always be 1 */
-                                m_cinfo.WARNMS(JWRN_HUFF_BAD_CODE);
+                                m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
                             }
 
-                            if (!CHECK_BIT_BUFFER(&br_state, 1, get_buffer, bits_left))
+                            if (!CHECK_BIT_BUFFER(br_state, 1, ref get_buffer, ref bits_left))
                             {
                                 undo_decode_mcu_AC_refine(MCU_data[0], newnz_pos, num_newnz);
                                 return false;
                             }
 
-                            if (GET_BITS(1, get_buffer, bits_left))
+                            if (GET_BITS(1, get_buffer, ref bits_left) != 0)
                             {
                                 /* newly nonzero coef is positive */
                                 s = p1;
@@ -548,17 +548,17 @@ namespace LibJpeg.NET
                         {
                             if (r != 15)
                             {
-                                EOBRUN = 1 << r;    /* EOBr, run length is 2^r + appended bits */
-                                if (r)
+                                EOBRUN = (uint)(1 << r);    /* EOBr, run length is 2^r + appended bits */
+                                if (r != 0)
                                 {
-                                    if (!CHECK_BIT_BUFFER(&br_state, r, get_buffer, bits_left))
+                                    if (!CHECK_BIT_BUFFER(br_state, r, ref get_buffer, ref bits_left))
                                     {
                                         undo_decode_mcu_AC_refine(MCU_data[0], newnz_pos, num_newnz);
                                         return false;
                                     }
 
-                                    r = GET_BITS(r, get_buffer, bits_left);
-                                    EOBRUN += r;
+                                    r = GET_BITS(r, get_buffer, ref bits_left);
+                                    EOBRUN += (uint)r;
                                 }
                                 break;      /* rest of block is handled by EOB logic */
                             }
@@ -571,24 +571,24 @@ namespace LibJpeg.NET
                         do
                         {
                             int blockIndex = JpegUtils.jpeg_natural_order[k];
-                            JCOEF thiscoef = MCU_data[0][0][blockIndex];
+                            short thiscoef = MCU_data[0][0][blockIndex];
                             if (thiscoef != 0)
                             {
-                                if (!CHECK_BIT_BUFFER(&br_state, 1, get_buffer, bits_left))
+                                if (!CHECK_BIT_BUFFER(br_state, 1, ref get_buffer, ref bits_left))
                                 {
                                     undo_decode_mcu_AC_refine(MCU_data[0], newnz_pos, num_newnz);
                                     return false;
                                 }
 
-                                if (GET_BITS(1, get_buffer, bits_left))
+                                if (GET_BITS(1, get_buffer, ref bits_left) != 0)
                                 {
                                     if ((thiscoef & p1) == 0)
                                     {
                                         /* do nothing if already set it */
                                         if (thiscoef >= 0)
-                                            MCU_data[0][0][blockIndex] += (JCOEF)p1;
+                                            MCU_data[0][0][blockIndex] += (short)p1;
                                         else
-                                            MCU_data[0][0][blockIndex] += (JCOEF)m1;
+                                            MCU_data[0][0][blockIndex] += (short)m1;
                                     }
                                 }
                             }
@@ -602,12 +602,12 @@ namespace LibJpeg.NET
                         }
                         while (k <= m_cinfo.m_Se);
 
-                        if (s)
+                        if (s != 0)
                         {
                             int pos = JpegUtils.jpeg_natural_order[k];
                             
                             /* Output newly nonzero coefficient */
-                            MCU_data[0][0][pos] = (JCOEF) s;
+                            MCU_data[0][0][pos] = (short) s;
 
                             /* Remember its position in case we have to suspend */
                             newnz_pos[num_newnz++] = pos;
@@ -625,24 +625,24 @@ namespace LibJpeg.NET
                     for (; k <= m_cinfo.m_Se; k++)
                     {
                         int blockIndex = JpegUtils.jpeg_natural_order[k];
-                        JCOEF thiscoef = MCU_data[0][0][blockIndex];
+                        short thiscoef = MCU_data[0][0][blockIndex];
                         if (thiscoef != 0)
                         {
-                            if (!CHECK_BIT_BUFFER(&br_state, 1, get_buffer, bits_left))
+                            if (!CHECK_BIT_BUFFER(br_state, 1, ref get_buffer, ref bits_left))
                             {
                                 undo_decode_mcu_AC_refine(MCU_data[0], newnz_pos, num_newnz);
                                 return false;
                             }
 
-                            if (GET_BITS(1, get_buffer, bits_left))
+                            if (GET_BITS(1, get_buffer, ref bits_left) != 0)
                             {
                                 if ((thiscoef & p1) == 0)
                                 {
                                     /* do nothing if already changed it */
                                     if (thiscoef >= 0)
-                                        MCU_data[0][0][blockIndex] += (JCOEF)p1;
+                                        MCU_data[0][0][blockIndex] += (short)p1;
                                     else
-                                        MCU_data[0][0][blockIndex] += (JCOEF)m1;
+                                        MCU_data[0][0][blockIndex] += (short)m1;
                                 }
                             }
                         }
@@ -653,7 +653,7 @@ namespace LibJpeg.NET
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(m_bitstate, get_buffer, bits_left);
+                BITREAD_SAVE_STATE(ref m_bitstate, ref get_buffer, ref bits_left);
                 m_saved.EOBRUN = EOBRUN; /* only part of saved state we need */
             }
 
@@ -671,7 +671,7 @@ namespace LibJpeg.NET
         {
             /* Throw away any unused bits remaining in bit buffer; */
             /* include any full bytes in next_marker's count of discarded bytes */
-            m_cinfo.m_marker.SkipBytes(m_bitstate.bits_left / 8);
+            m_cinfo.m_marker.SkipBytes((uint)(m_bitstate.bits_left / 8));
             m_bitstate.bits_left = 0;
 
             /* Advance past the RSTn marker */
@@ -706,7 +706,7 @@ namespace LibJpeg.NET
         {
             /* Re-zero any output coefficients that we made newly nonzero */
             while (num_newnz > 0)
-                (*block)[newnz_pos[--num_newnz]] = 0;
+                block[0][newnz_pos[--num_newnz]] = 0;
         }
     }
 }

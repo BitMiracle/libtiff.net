@@ -72,7 +72,7 @@ namespace LibJpeg.NET
             m_cinfo = cinfo;
             m_need_context_rows = false;
 
-            m_out_row_width = cinfo.m_output_width * cinfo.m_out_color_components;
+            m_out_row_width = (uint)(cinfo.m_output_width * cinfo.m_out_color_components);
 
             if (cinfo.m_max_v_samp_factor == 2)
             {
@@ -104,12 +104,10 @@ namespace LibJpeg.NET
 
         public override void upsample(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, uint in_row_groups_avail, byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
         {
-            in_row_groups_avail;
-
             if (m_use_2v_upsample)
-                merged_2v_upsample(input_buf, in_row_group_ctr, output_buf, out_row_ctr, out_rows_avail);
+                merged_2v_upsample(input_buf, ref in_row_group_ctr, output_buf, ref out_row_ctr, out_rows_avail);
             else
-                merged_1v_upsample(input_buf, in_row_group_ctr, output_buf, out_row_ctr);
+                merged_1v_upsample(input_buf, ref in_row_group_ctr, output_buf, ref out_row_ctr);
         }
 
         /// <summary>
@@ -120,7 +118,7 @@ namespace LibJpeg.NET
         private void merged_1v_upsample(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, byte[][] output_buf, ref uint out_row_ctr)
         {
             /* Just do the upsampling. */
-            h2v1_merged_upsample(input_buf, in_row_group_ctr, output_buf, out_row_ctr);
+            h2v1_merged_upsample(input_buf, in_row_group_ctr, output_buf, (int)out_row_ctr);
 
             /* Adjust counts */
             out_row_ctr++;
@@ -138,7 +136,9 @@ namespace LibJpeg.NET
             if (m_spare_full)
             {
                 /* If we have a spare row saved from a previous cycle, just return it. */
-                JpegUtils.jcopy_sample_rows(&m_spare_row, 0, output_buf, out_row_ctr, 1, m_out_row_width);
+                byte[][] temp = new byte[1][];
+                temp[0] = m_spare_row;
+                JpegUtils.jcopy_sample_rows(temp, 0, output_buf, (int)out_row_ctr, 1, m_out_row_width);
                 num_rows = 1;
                 m_spare_full = false;
             }
@@ -157,7 +157,7 @@ namespace LibJpeg.NET
                     num_rows = out_rows_avail;
                 
                 /* Create output pointer array for upsampler. */
-                byte* work_ptrs[2];
+                byte[][] work_ptrs = new byte[2][];
                 work_ptrs[0] = output_buf[out_row_ctr];
                 if (num_rows > 1)
                 {
@@ -201,17 +201,17 @@ namespace LibJpeg.NET
             int inputIndex2 = 0;
             int outputIndex = 0;
 
-            byte* limit = m_cinfo.m_sample_range_limit;
+            byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             /* Loop for each pair of output pixels */
             for (uint col = m_cinfo.m_output_width >> 1; col > 0; col--)
             {
                 /* Do the chroma part of the calculation */
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
+                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
                 inputIndex1++;
 
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
+                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
                 inputIndex2++;
 
                 int cred = m_Cr_r_tab[cr];
@@ -219,36 +219,36 @@ namespace LibJpeg.NET
                 int cblue = m_Cb_b_tab[cb];
 
                 /* Fetch 2 Y values and emit 2 pixels */
-                int y = input_buf[0][in_row_group_ctr][inputIndex0];
+                int y = input_buf[0][(int)in_row_group_ctr][inputIndex0];
                 inputIndex0++;
 
-                output_buf[outRow][outputIndex + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[outRow][outputIndex + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[outRow][outputIndex + RGB_BLUE] = limit[limitOffset + y + cblue];
-                outputIndex += RGB_PIXELSIZE;
+                output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[outRow][outputIndex + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[outRow][outputIndex + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
+                outputIndex += JpegConstants.RGB_PIXELSIZE;
                 
-                y = input_buf[0][in_row_group_ctr][inputIndex0];
+                y = input_buf[0][(int)in_row_group_ctr][inputIndex0];
                 inputIndex0++;
 
-                output_buf[outRow][outputIndex + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[outRow][outputIndex + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[outRow][outputIndex + RGB_BLUE] = limit[limitOffset + y + cblue];
-                outputIndex += RGB_PIXELSIZE;
+                output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[outRow][outputIndex + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[outRow][outputIndex + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
+                outputIndex += JpegConstants.RGB_PIXELSIZE;
             }
 
             /* If image width is odd, do the last output column separately */
-            if (m_cinfo.m_output_width & 1)
+            if ((m_cinfo.m_output_width & 1) != 0)
             {
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
+                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
+                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
                 int cred = m_Cr_r_tab[cr];
                 int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
                 int cblue = m_Cb_b_tab[cb];
                 
-                int y = input_buf[0][in_row_group_ctr][inputIndex0];
-                output_buf[outRow][outputIndex + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[outRow][outputIndex + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[outRow][outputIndex + RGB_BLUE] = limit[limitOffset + y + cblue];
+                int y = input_buf[0][(int)in_row_group_ctr][inputIndex0];
+                output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[outRow][outputIndex + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[outRow][outputIndex + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
             }
         }
 
@@ -257,10 +257,10 @@ namespace LibJpeg.NET
         /// </summary>
         private void h2v2_merged_upsample(ComponentBuffer[] input_buf, uint in_row_group_ctr, byte[][] output_buf)
         {
-            int inputRow00 = in_row_group_ctr * 2;
+            int inputRow00 = (int)(in_row_group_ctr * 2);
             int inputIndex00 = 0;
 
-            int inputRow01 = in_row_group_ctr * 2 + 1;
+            int inputRow01 = (int)(in_row_group_ctr * 2 + 1);
             int inputIndex01 = 0;
 
             int inputIndex1 = 0;
@@ -269,17 +269,17 @@ namespace LibJpeg.NET
             int outIndex0 = 0;
             int outIndex1 = 0;
 
-            byte* limit = m_cinfo.m_sample_range_limit;
+            byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             /* Loop for each group of output pixels */
             for (uint col = m_cinfo.m_output_width >> 1; col > 0; col--)
             {
                 /* Do the chroma part of the calculation */
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
+                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
                 inputIndex1++;
 
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
+                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
                 inputIndex2++;
 
                 int cred = m_Cr_r_tab[cr];
@@ -290,54 +290,54 @@ namespace LibJpeg.NET
                 int y = input_buf[0][inputRow00][inputIndex00];
                 inputIndex00++;
 
-                output_buf[0][outIndex0 + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[0][outIndex0 + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[0][outIndex0 + RGB_BLUE] = limit[limitOffset + y + cblue];
-                outIndex0 += RGB_PIXELSIZE;
+                output_buf[0][outIndex0 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[0][outIndex0 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[0][outIndex0 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
+                outIndex0 += JpegConstants.RGB_PIXELSIZE;
                 
                 y = input_buf[0][inputRow00][inputIndex00];
                 inputIndex00++;
 
-                output_buf[0][outIndex0 + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[0][outIndex0 + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[0][outIndex0 + RGB_BLUE] = limit[limitOffset + y + cblue];
-                outIndex0 += RGB_PIXELSIZE;
+                output_buf[0][outIndex0 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[0][outIndex0 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[0][outIndex0 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
+                outIndex0 += JpegConstants.RGB_PIXELSIZE;
                 
                 y = input_buf[0][inputRow01][inputIndex01];
                 inputIndex01++;
 
-                output_buf[1][outIndex1 + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[1][outIndex1 + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[1][outIndex1 + RGB_BLUE] = limit[limitOffset + y + cblue];
-                outIndex1 += RGB_PIXELSIZE;
+                output_buf[1][outIndex1 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[1][outIndex1 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[1][outIndex1 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
+                outIndex1 += JpegConstants.RGB_PIXELSIZE;
                 
                 y = input_buf[0][inputRow01][inputIndex01];
                 inputIndex01++;
 
-                output_buf[1][outIndex1 + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[1][outIndex1 + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[1][outIndex1 + RGB_BLUE] = limit[limitOffset + y + cblue];
-                outIndex1 += RGB_PIXELSIZE;
+                output_buf[1][outIndex1 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[1][outIndex1 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[1][outIndex1 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
+                outIndex1 += JpegConstants.RGB_PIXELSIZE;
             }
 
             /* If image width is odd, do the last output column separately */
-            if (m_cinfo.m_output_width & 1)
+            if ((m_cinfo.m_output_width & 1) != 0)
             {
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
+                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
+                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
                 int cred = m_Cr_r_tab[cr];
                 int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
                 int cblue = m_Cb_b_tab[cb];
 
                 int y = input_buf[0][inputRow00][inputIndex00];
-                output_buf[0][outIndex0 + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[0][outIndex0 + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[0][outIndex0 + RGB_BLUE] = limit[limitOffset + y + cblue];
+                output_buf[0][outIndex0 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[0][outIndex0 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[0][outIndex0 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
                 
                 y = input_buf[0][inputRow01][inputIndex01];
-                output_buf[1][outIndex1 + RGB_RED] = limit[limitOffset + y + cred];
-                output_buf[1][outIndex1 + RGB_GREEN] = limit[limitOffset + y + cgreen];
-                output_buf[1][outIndex1 + RGB_BLUE] = limit[limitOffset + y + cblue];
+                output_buf[1][outIndex1 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
+                output_buf[1][outIndex1 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
+                output_buf[1][outIndex1 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
             }
         }
 
@@ -347,12 +347,12 @@ namespace LibJpeg.NET
         /// </summary>
         private void build_ycc_rgb_table()
         {
-            m_Cr_r_tab = new int [MAXJSAMPLE + 1];
-            m_Cb_b_tab = new int [MAXJSAMPLE + 1];
-            m_Cr_g_tab = new int[MAXJSAMPLE + 1];
-            m_Cb_g_tab = new int[MAXJSAMPLE + 1];
+            m_Cr_r_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cb_b_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cr_g_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cb_g_tab = new int[JpegConstants.MAXJSAMPLE + 1];
 
-            for (int i = 0, x = -CENTERJSAMPLE; i <= MAXJSAMPLE; i++, x++)
+            for (int i = 0, x = -JpegConstants.CENTERJSAMPLE; i <= JpegConstants.MAXJSAMPLE; i++, x++)
             {
                 /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */

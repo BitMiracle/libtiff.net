@@ -34,7 +34,7 @@ namespace LibJpeg.NET
         private class savable_state
         {
             //savable_state operator=(savable_state src);
-            public int[] last_dc_val = new int[MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
+            public int[] last_dc_val = new int[JpegConstants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
         }
 
         /* These fields are loaded into local variables at start of each MCU.
@@ -47,25 +47,25 @@ namespace LibJpeg.NET
         private uint m_restarts_to_go;    /* MCUs left in this restart interval */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
-        private d_derived_tbl[][] m_dc_derived_tbls = new d_derived_tbl[NUM_HUFF_TBLS][];
-        private d_derived_tbl[][] m_ac_derived_tbls = new d_derived_tbl[NUM_HUFF_TBLS][];
+        private d_derived_tbl[] m_dc_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
+        private d_derived_tbl[] m_ac_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
 
         /* Precalculated info set up by start_pass for use in decode_mcu: */
 
         /* Pointers to derived tables to be used for each block within an MCU */
-        private d_derived_tbl[][] m_dc_cur_tbls = new d_derived_tbl[D_MAX_BLOCKS_IN_MCU][];
-        private d_derived_tbl[][] m_ac_cur_tbls = new d_derived_tbl[D_MAX_BLOCKS_IN_MCU][];
+        private d_derived_tbl[] m_dc_cur_tbls = new d_derived_tbl[JpegConstants.D_MAX_BLOCKS_IN_MCU];
+        private d_derived_tbl[] m_ac_cur_tbls = new d_derived_tbl[JpegConstants.D_MAX_BLOCKS_IN_MCU];
 
         /* Whether we care about the DC and AC coefficient values for each block */
-        private bool[] m_dc_needed = new bool [D_MAX_BLOCKS_IN_MCU];
-        private bool[] m_ac_needed = new bool [D_MAX_BLOCKS_IN_MCU];
+        private bool[] m_dc_needed = new bool[JpegConstants.D_MAX_BLOCKS_IN_MCU];
+        private bool[] m_ac_needed = new bool[JpegConstants.D_MAX_BLOCKS_IN_MCU];
 
         public huff_entropy_decoder(jpeg_decompress_struct cinfo)
         {
             m_cinfo = cinfo;
 
             /* Mark tables unallocated */
-            for (int i = 0; i < NUM_HUFF_TBLS; i++)
+            for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
                 m_dc_derived_tbls[i] = m_ac_derived_tbls[i] = null;
         }
 
@@ -79,7 +79,7 @@ namespace LibJpeg.NET
              * there are some baseline files out there with all zeroes in these bytes.
              */
             if (m_cinfo.m_Ss != 0 || m_cinfo.m_Se != JpegConstants.DCTSIZE2 - 1 || m_cinfo.m_Ah != 0 || m_cinfo.m_Al != 0)
-                m_cinfo.WARNMS(JWRN_NOT_SEQUENTIAL);
+                m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_NOT_SEQUENTIAL);
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
@@ -88,8 +88,8 @@ namespace LibJpeg.NET
 
                 /* Compute derived values for Huffman tables */
                 /* We may do this more than once for a table, but it's not expensive */
-                jpeg_make_d_derived_tbl(true, dctbl, m_dc_derived_tbls[dctbl]);
-                jpeg_make_d_derived_tbl(false, actbl, m_ac_derived_tbls[actbl]);
+                jpeg_make_d_derived_tbl(true, dctbl, ref m_dc_derived_tbls[dctbl]);
+                jpeg_make_d_derived_tbl(false, actbl, ref m_ac_derived_tbls[actbl]);
 
                 /* Initialize DC predictions to 0 */
                 m_saved.last_dc_val[ci] = 0;
@@ -143,7 +143,7 @@ namespace LibJpeg.NET
         public override bool decode_mcu(JBLOCK[][] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval)
+            if (m_cinfo.m_restart_interval != 0)
             {
                 if (m_restarts_to_go == 0)
                 {
@@ -158,10 +158,10 @@ namespace LibJpeg.NET
             if (!m_insufficient_data)
             {
                 /* Load up working state */
-                INT32 get_buffer;
+                int get_buffer;
                 int bits_left;
-                bitread_working_state br_state;
-                BITREAD_LOAD_STATE(m_bitstate, get_buffer, bits_left, br_state);
+                bitread_working_state br_state = new bitread_working_state();
+                BITREAD_LOAD_STATE(ref m_bitstate, out get_buffer, out bits_left, ref br_state);
                 savable_state state = m_saved;
 
                 /* Outer loop handles each block in the MCU */
@@ -172,15 +172,15 @@ namespace LibJpeg.NET
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     int s;
-                    if (!HUFF_DECODE(s, &br_state, m_dc_cur_tbls[blkn], get_buffer, bits_left))
+                    if (!HUFF_DECODE(out s, br_state, m_dc_cur_tbls[blkn], ref get_buffer, ref bits_left))
                         return false;
 
-                    if (s)
+                    if (s != 0)
                     {
-                        if (!CHECK_BIT_BUFFER(&br_state, s, get_buffer, bits_left))
+                        if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
                             return false;
 
-                        int r = GET_BITS(s, get_buffer, bits_left);
+                        int r = GET_BITS(s, get_buffer, ref bits_left);
                         s = HUFF_EXTEND(r, s);
                     }
 
@@ -192,7 +192,7 @@ namespace LibJpeg.NET
                         state.last_dc_val[ci] = s;
 
                         /* Output the DC coefficient (assumes jpeg_natural_order[0] = 0) */
-                        MCU_data[blkn][0][0] = (JCOEF) s;
+                        MCU_data[blkn][0][0] = (short) s;
                     }
 
                     if (m_ac_needed[blkn])
@@ -201,25 +201,25 @@ namespace LibJpeg.NET
                         /* Since zeroes are skipped, output area must be cleared beforehand */
                         for (int k = 1; k < JpegConstants.DCTSIZE2; k++)
                         {
-                            if (!HUFF_DECODE(s, &br_state, m_ac_cur_tbls[blkn], get_buffer, bits_left))
+                            if (!HUFF_DECODE(out s, br_state, m_ac_cur_tbls[blkn], ref get_buffer, ref bits_left))
                                 return false;
 
                             int r = s >> 4;
                             s &= 15;
 
-                            if (s)
+                            if (s != 0)
                             {
                                 k += r;
-                                if (!CHECK_BIT_BUFFER(&br_state, s, get_buffer, bits_left))
+                                if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
                                     return false;
-                                r = GET_BITS(s, get_buffer, bits_left);
+                                r = GET_BITS(s, get_buffer, ref bits_left);
                                 s = HUFF_EXTEND(r, s);
                         
                                 /* Output coefficient in natural (dezigzagged) order.
                                    * Note: the extra entries in jpeg_natural_order[] will save us
                                    * if k >= DCTSIZE2, which could happen if the data is corrupted.
                                    */
-                                MCU_data[blkn][0][JpegUtils.jpeg_natural_order[k]] = (JCOEF) s;
+                                MCU_data[blkn][0][JpegUtils.jpeg_natural_order[k]] = (short) s;
                             }
                             else
                             {
@@ -236,19 +236,19 @@ namespace LibJpeg.NET
                         /* In this path we just discard the values */
                         for (int k = 1; k < JpegConstants.DCTSIZE2; k++)
                         {
-                            if (!HUFF_DECODE(s, &br_state, m_ac_cur_tbls[blkn], get_buffer, bits_left))
+                            if (!HUFF_DECODE(out s, br_state, m_ac_cur_tbls[blkn], ref get_buffer, ref bits_left))
                                 return false;
 
                             int r = s >> 4;
                             s &= 15;
 
-                            if (s)
+                            if (s != 0)
                             {
                                 k += r;
-                                if (!CHECK_BIT_BUFFER(&br_state, s, get_buffer, bits_left))
+                                if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
                                     return false;
 
-                                DROP_BITS(s, bits_left);
+                                DROP_BITS(s, ref bits_left);
                             }
                             else
                             {
@@ -262,7 +262,7 @@ namespace LibJpeg.NET
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(m_bitstate, get_buffer, bits_left);
+                BITREAD_SAVE_STATE(ref m_bitstate, ref get_buffer, ref bits_left);
                 m_saved = state;
             }
 
@@ -281,7 +281,7 @@ namespace LibJpeg.NET
         {
             /* Throw away any unused bits remaining in bit buffer; */
             /* include any full bytes in next_marker's count of discarded bytes */
-            m_cinfo.m_marker.SkipBytes(m_bitstate.bits_left / 8);
+            m_cinfo.m_marker.SkipBytes((uint)(m_bitstate.bits_left / 8));
             m_bitstate.bits_left = 0;
 
             /* Advance past the RSTn marker */

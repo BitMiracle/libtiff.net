@@ -121,13 +121,16 @@ namespace LibJpeg.NET
         private struct box
         {
             /* The bounds of the box (inclusive); expressed as histogram indexes */
-            int c0min, c0max;
-            int c1min, c1max;
-            int c2min, c2max;
+            public int c0min;
+            public int c0max;
+            public int c1min;
+            public int c1max;
+            public int c2min;
+            public int c2max;
             /* The volume (actually 2-norm) of the box */
-            int volume;
+            public int volume;
             /* The number of nonzero histogram cells within this box */
-            long colorcount;
+            public long colorcount;
         }
 
         private enum QuantizerType
@@ -208,9 +211,9 @@ namespace LibJpeg.NET
                 cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
 
             /* Allocate the histogram/inverse colormap storage */
-            m_histogram = new UINT16*[HIST_C0_ELEMS];
+            m_histogram = new ushort[HIST_C0_ELEMS][];
             for (int i = 0; i < HIST_C0_ELEMS; i++)
-                m_histogram[i] = new UINT16[HIST_C1_ELEMS * HIST_C2_ELEMS];
+                m_histogram[i] = new ushort[HIST_C1_ELEMS * HIST_C2_ELEMS];
 
             m_needs_zeroed = true; /* histogram is garbage now */
 
@@ -239,17 +242,17 @@ namespace LibJpeg.NET
 
             /* Only F-S dithering or no dithering is supported. */
             /* If user asks for ordered dither, give him F-S. */
-            if (cinfo.m_dither_mode != JDITHER_NONE)
-                cinfo.m_dither_mode = JDITHER_FS;
+            if (cinfo.m_dither_mode != J_DITHER_MODE.JDITHER_NONE)
+                cinfo.m_dither_mode = J_DITHER_MODE.JDITHER_FS;
 
             /* Allocate Floyd-Steinberg workspace if necessary.
             * This isn't really needed until pass 2, but again it is FAR storage.
             * Although we will cope with a later change in dither_mode,
             * we do not promise to honor max_memory_to_use if dither_mode changes.
             */
-            if (cinfo.m_dither_mode == JDITHER_FS)
+            if (cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_FS)
             {
-                m_fserrors = new INT16[(cinfo.m_output_width + 2) * 3];
+                m_fserrors = new short[(cinfo.m_output_width + 2) * 3];
 
                 /* Might as well create the error-limiting table too. */
                 init_error_limit();
@@ -263,23 +266,23 @@ namespace LibJpeg.NET
         {
             /* Only F-S dithering or no dithering is supported. */
             /* If user asks for ordered dither, give him F-S. */
-            if (m_cinfo.m_dither_mode != JDITHER_NONE)
-                m_cinfo.m_dither_mode = JDITHER_FS;
+            if (m_cinfo.m_dither_mode != J_DITHER_MODE.JDITHER_NONE)
+                m_cinfo.m_dither_mode = J_DITHER_MODE.JDITHER_FS;
 
             if (is_pre_scan)
             {
                 /* Set up method pointers */
-                m_quantizer = prescan_quantizer;
+                m_quantizer = QuantizerType.prescan_quantizer;
                 m_useFinishPass1 = true;
                 m_needs_zeroed = true; /* Always zero histogram */
             }
             else
             {
                 /* Set up method pointers */
-                if (m_cinfo.m_dither_mode == JDITHER_FS)
-                    m_quantizer = pass2_fs_dither_quantizer;
+                if (m_cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_FS)
+                    m_quantizer = QuantizerType.pass2_fs_dither_quantizer;
                 else
-                    m_quantizer = pass2_no_dither_quantizer;
+                    m_quantizer = QuantizerType.pass2_no_dither_quantizer;
 
                 m_useFinishPass1 = false;
 
@@ -291,16 +294,16 @@ namespace LibJpeg.NET
                 if (i > MAXNUMCOLORS)
                     m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
 
-                if (m_cinfo.m_dither_mode == JDITHER_FS)
+                if (m_cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_FS)
                 {
-                    size_t arraysize = (size_t)((m_cinfo.m_output_width + 2) * (3 * sizeof(INT16)));
+                    uint arraysize = (uint)((m_cinfo.m_output_width + 2) * (3 * sizeof(short)));
 
                     /* Allocate Floyd-Steinberg workspace if we didn't already. */
                     if (m_fserrors == null)
-                        m_fserrors = new INT16[arraysize / sizeof(INT16)];
+                        m_fserrors = new short[arraysize / sizeof(short)];
 
                     /* Initialize the propagated errors to zero. */
-                    memset((void*)m_fserrors, 0, arraysize);
+                    //memset((void*)m_fserrors, 0, arraysize);
 
                     /* Make the error-limit table if we didn't already. */
                     if (m_error_limiter == null)
@@ -314,7 +317,7 @@ namespace LibJpeg.NET
             if (m_needs_zeroed)
             {
                 for (int i = 0; i < HIST_C0_ELEMS; i++)
-                    memset((void*)m_histogram[i], 0, HIST_C1_ELEMS * HIST_C2_ELEMS * sizeof(UINT16));
+                    //memset((void*)m_histogram[i], 0, HIST_C1_ELEMS * HIST_C2_ELEMS * sizeof(ushort));
 
                 m_needs_zeroed = false;
             }
@@ -324,13 +327,13 @@ namespace LibJpeg.NET
         {
             switch (m_quantizer)
             {
-                case prescan_quantizer:
+                case QuantizerType.prescan_quantizer:
                     prescan_quantize(input_buf, in_row, num_rows);
                     break;
-                case pass2_fs_dither_quantizer:
+                case QuantizerType.pass2_fs_dither_quantizer:
                     pass2_fs_dither(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
-                case pass2_no_dither_quantizer:
+                case QuantizerType.pass2_no_dither_quantizer:
                     pass2_no_dither(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
                 default:
@@ -389,7 +392,7 @@ namespace LibJpeg.NET
         /// </summary>
         private void pass2_fs_dither(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
         {
-            JSAMPLE* limit = m_cinfo.m_sample_range_limit;
+            byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             for (int row = 0; row < num_rows; row++)
@@ -402,11 +405,11 @@ namespace LibJpeg.NET
                 if (m_on_odd_row)
                 {
                     /* work right to left in this row */
-                    inputPixelIndex += (m_cinfo.m_output_width - 1) * 3;   /* so point to rightmost pixel */
-                    outputPixelIndex += m_cinfo.m_output_width - 1;
+                    inputPixelIndex += (int)((m_cinfo.m_output_width - 1) * 3);   /* so point to rightmost pixel */
+                    outputPixelIndex += (int)(m_cinfo.m_output_width - 1);
                     dir = -1;
                     dir3 = -3;
-                    errorIndex = (m_cinfo.m_output_width + 1) * 3; /* => entry after last column */
+                    errorIndex = (int)((m_cinfo.m_output_width + 1) * 3); /* => entry after last column */
                     m_on_odd_row = false; /* flip for next time */
                 }
                 else
@@ -450,9 +453,9 @@ namespace LibJpeg.NET
                     /* Limit the error using transfer function set by init_error_limit.
                      * See comments with init_error_limit for rationale.
                      */
-                    cur0 = m_error_limiter[MAXJSAMPLE + cur0];
-                    cur1 = m_error_limiter[MAXJSAMPLE + cur1];
-                    cur2 = m_error_limiter[MAXJSAMPLE + cur2];
+                    cur0 = m_error_limiter[JpegConstants.MAXJSAMPLE + cur0];
+                    cur1 = m_error_limiter[JpegConstants.MAXJSAMPLE + cur1];
+                    cur2 = m_error_limiter[JpegConstants.MAXJSAMPLE + cur2];
                     
                     /* Form pixel value + error, and range-limit to 0..MAXJSAMPLE.
                      * The maximum error is +- MAXJSAMPLE (or less with error limiting);
@@ -490,7 +493,7 @@ namespace LibJpeg.NET
                     int bnexterr = cur0;    /* Process component 0 */
                     int delta = cur0 * 2;
                     cur0 += delta;      /* form error * 3 */
-                    m_fserrors[errorIndex] = (INT16) (bpreverr0 + cur0);
+                    m_fserrors[errorIndex] = (short) (bpreverr0 + cur0);
                     cur0 += delta;      /* form error * 5 */
                     bpreverr0 = belowerr0 + cur0;
                     belowerr0 = bnexterr;
@@ -498,7 +501,7 @@ namespace LibJpeg.NET
                     bnexterr = cur1;    /* Process component 1 */
                     delta = cur1 * 2;
                     cur1 += delta;      /* form error * 3 */
-                    m_fserrors[errorIndex + 1] = (INT16) (bpreverr1 + cur1);
+                    m_fserrors[errorIndex + 1] = (short) (bpreverr1 + cur1);
                     cur1 += delta;      /* form error * 5 */
                     bpreverr1 = belowerr1 + cur1;
                     belowerr1 = bnexterr;
@@ -506,7 +509,7 @@ namespace LibJpeg.NET
                     bnexterr = cur2;    /* Process component 2 */
                     delta = cur2 * 2;
                     cur2 += delta;      /* form error * 3 */
-                    m_fserrors[errorIndex + 2] = (INT16) (bpreverr2 + cur2);
+                    m_fserrors[errorIndex + 2] = (short) (bpreverr2 + cur2);
                     cur2 += delta;      /* form error * 5 */
                     bpreverr2 = belowerr2 + cur2;
                     belowerr2 = bnexterr;
@@ -525,9 +528,9 @@ namespace LibJpeg.NET
                  * final fserrors[] entry.  Note we need not unload belowerrN because
                  * it is for the dummy column before or after the actual array.
                  */
-                m_fserrors[errorIndex] = (INT16) bpreverr0; /* unload prev errs into array */
-                m_fserrors[errorIndex + 1] = (INT16) bpreverr1;
-                m_fserrors[errorIndex + 2] = (INT16) bpreverr2;
+                m_fserrors[errorIndex] = (short) bpreverr0; /* unload prev errs into array */
+                m_fserrors[errorIndex + 1] = (short) bpreverr1;
+                m_fserrors[errorIndex + 2] = (short) bpreverr2;
             }
         }
 
@@ -539,19 +542,20 @@ namespace LibJpeg.NET
         {
             for (int row = 0; row < num_rows; row++)
             {
-                int inIndex = row + in_row;
+                int inRow = (int)(row + in_row);
+                int inIndex = 0;
                 int outIndex = 0;
-                int outRow = out_row + row;
+                int outRow = (int)(out_row + row);
                 for (uint col = m_cinfo.m_output_width; col > 0; col--)
                 {
                     /* get pixel value and index into the cache */
-                    int c0 = (int)input_buf[inIndex] >> C0_SHIFT;
+                    int c0 = (int)input_buf[inRow][inIndex] >> C0_SHIFT;
                     inIndex++;
 
-                    int c1 = (int)input_buf[inIndex] >> C1_SHIFT;
+                    int c1 = (int)input_buf[inRow][inIndex] >> C1_SHIFT;
                     inIndex++;
 
-                    int c2 = (int)input_buf[inIndex] >> C2_SHIFT;
+                    int c2 = (int)input_buf[inRow][inIndex] >> C2_SHIFT;
                     inIndex++;
 
                     int hRow = c0;
@@ -563,7 +567,7 @@ namespace LibJpeg.NET
                         fill_inverse_cmap(c0, c1, c2);
 
                     /* Now emit the colormap index for this cell */
-                    output_buf[outRow][outIndex] = (byte)m_histogram[hRow][hColumn] - 1;
+                    output_buf[outRow][outIndex] = (byte)(m_histogram[hRow][hColumn] - 1);
                     outIndex++;
                 }
             }
@@ -626,16 +630,16 @@ namespace LibJpeg.NET
         private void select_colors(int desired_colors)
         {
             /* Allocate workspace for box list */
-            box* boxlist = new box[desired_colors];
+            box[] boxlist = new box[desired_colors];
 
             /* Initialize one box containing whole space */
             int numboxes = 1;
             boxlist[0].c0min = 0;
-            boxlist[0].c0max = MAXJSAMPLE >> C0_SHIFT;
+            boxlist[0].c0max = JpegConstants.MAXJSAMPLE >> C0_SHIFT;
             boxlist[0].c1min = 0;
-            boxlist[0].c1max = MAXJSAMPLE >> C1_SHIFT;
+            boxlist[0].c1max = JpegConstants.MAXJSAMPLE >> C1_SHIFT;
             boxlist[0].c2min = 0;
-            boxlist[0].c2max = MAXJSAMPLE >> C2_SHIFT;
+            boxlist[0].c2max = JpegConstants.MAXJSAMPLE >> C2_SHIFT;
 
             /* Shrink it to actually-used volume and set its statistics */
             update_box(boxlist, 0);
@@ -648,8 +652,7 @@ namespace LibJpeg.NET
                 compute_color(boxlist, i, i);
 
             m_cinfo.m_actual_number_of_colors = numboxes;
-            m_cinfo.TRACEMS1(1, JTRC_QUANT_SELECTED, numboxes);
-            delete boxlist;
+            m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_QUANT_SELECTED, numboxes);
         }
 
         /// <summary>
@@ -1006,33 +1009,33 @@ namespace LibJpeg.NET
         /// </summary>
         private void init_error_limit()
         {
-            m_error_limiter = new int [MAXJSAMPLE * 2 + 1];
-            int tableOffset = MAXJSAMPLE;
-            
-            const int STEPSIZE = ((MAXJSAMPLE + 1) / 16);
+            m_error_limiter = new int [JpegConstants.MAXJSAMPLE * 2 + 1];
+            int tableOffset = JpegConstants.MAXJSAMPLE;
+
+            const int STEPSIZE = ((JpegConstants.MAXJSAMPLE + 1) / 16);
 
             /* Map errors 1:1 up to +- MAXJSAMPLE/16 */
-            int out = 0;
-            int in = 0;
-            for (; in < STEPSIZE; in++, out++)
+            int output = 0;
+            int input = 0;
+            for (; input < STEPSIZE; input++, output++)
             {
-                m_error_limiter[tableOffset + in] = out; 
-                m_error_limiter[tableOffset - in] = -out;
+                m_error_limiter[tableOffset + input] = output; 
+                m_error_limiter[tableOffset - input] = -output;
             }
 
             /* Map errors 1:2 up to +- 3*MAXJSAMPLE/16 */
-            for (; in < STEPSIZE*3; in++)
+            for (; input < STEPSIZE*3; input++)
             {
-                m_error_limiter[tableOffset + in] = out; 
-                m_error_limiter[tableOffset - in] = -out;
-                out += (in&1) ? 1 : 0;
+                m_error_limiter[tableOffset + input] = output; 
+                m_error_limiter[tableOffset - input] = -output;
+                output += (input & 1) != 0 ? 1 : 0;
             }
 
-            /* Clamp the rest to final out value (which is (MAXJSAMPLE+1)/8) */
-            for (; in <= MAXJSAMPLE; in++)
+            /* Clamp the rest to final output value (which is (MAXJSAMPLE+1)/8) */
+            for (; input <= JpegConstants.MAXJSAMPLE; input++)
             {
-                m_error_limiter[tableOffset + in] = out; 
-                m_error_limiter[tableOffset - in] = -out;
+                m_error_limiter[tableOffset + input] = output; 
+                m_error_limiter[tableOffset - input] = -output;
             }
         }
 
@@ -1131,8 +1134,8 @@ namespace LibJpeg.NET
              * We save the minimum distance for each color in mindist[];
              * only the smallest maximum distance is of interest.
              */
-            int minmaxdist = 0x7FFFFFFFL;
-            int mindist[MAXNUMCOLORS];    /* min distance to colormap entry i */
+            int minmaxdist = (int)0x7FFFFFFFL;
+            int[] mindist = new int[MAXNUMCOLORS];    /* min distance to colormap entry i */
 
             for (int i = 0; i < m_cinfo.m_actual_number_of_colors; i++)
             {
@@ -1265,13 +1268,13 @@ namespace LibJpeg.NET
             const int STEP_C2 = ((1 << C2_SHIFT) * B_SCALE);
 
             /* This array holds the distance to the nearest-so-far color for each cell */
-            int bestdist[BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS];
+            int[] bestdist = new int[BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS];
 
             /* Initialize best-distance for each cell of the update box */
             int bestIndex = 0;
             for (int i = BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS - 1; i >= 0; i--)
             {
-                bestdist[bestIndex] = 0x7FFFFFFFL;
+                bestdist[bestIndex] = (int)0x7FFFFFFFL;
                 bestIndex++;
             }
 
@@ -1358,12 +1361,12 @@ namespace LibJpeg.NET
              * for the nearest entry to some cell in the update box.
              */
             /* This array lists the candidate colormap indexes. */
-            byte colorlist[MAXNUMCOLORS];
+            byte[] colorlist = new byte[MAXNUMCOLORS];
             int numcolors = find_nearby_colors(minc0, minc1, minc2, colorlist);
 
             /* Determine the actually nearest colors. */
             /* This array holds the actually closest colormap index for each cell. */
-            byte bestcolor[BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS];
+            byte[] bestcolor = new byte[BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS];
             find_best_colors(minc0, minc1, minc2, numcolors, colorlist, bestcolor);
 
             /* Save the best color numbers (plus 1) in the main cache array */
@@ -1378,7 +1381,7 @@ namespace LibJpeg.NET
                     int histogramIndex = (c1 + ic1) * HIST_C2_ELEMS + c2;
                     for (int ic2 = 0; ic2 < BOX_C2_ELEMS; ic2++)
                     {
-                        m_histogram[c0 + ic0][histogramIndex] = (UINT16) ((int)bestcolor[bestcolorIndex] + 1);
+                        m_histogram[c0 + ic0][histogramIndex] = (ushort) ((int)bestcolor[bestcolorIndex] + 1);
                         histogramIndex++;
                         bestcolorIndex++;
                     }

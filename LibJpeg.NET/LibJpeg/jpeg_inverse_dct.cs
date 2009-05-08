@@ -546,7 +546,7 @@ namespace LibJpeg.NET
 
             workspaceIndex = 0;
             byte[] limit = m_cinfo.m_sample_range_limit;
-            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + CENTERJSAMPLE;
+            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + JpegConstants.CENTERJSAMPLE;
 
             for (int ctr = 0; ctr < JpegConstants.DCTSIZE; ctr++)
             {
@@ -557,7 +557,7 @@ namespace LibJpeg.NET
                 * test takes more time than it's worth.  In that case this section
                 * may be commented out.
                 */
-                int currentOutRow = output_row + ctr;
+                int currentOutRow = (int)(output_row + ctr);
                 if (workspace[workspaceIndex + 1] == 0 &&
                     workspace[workspaceIndex + 2] == 0 &&
                     workspace[workspaceIndex + 3] == 0 &&
@@ -567,7 +567,7 @@ namespace LibJpeg.NET
                     workspace[workspaceIndex + 7] == 0)
                 {
                     /* AC terms all zero */
-                    JSAMPLE dcval = limit[limitOffset + JpegUtils.DESCALE((int) workspace[workspaceIndex + 0], SLOW_INTEGER_PASS1_BITS + 3) & RANGE_MASK];
+                    byte dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], SLOW_INTEGER_PASS1_BITS + 3) & RANGE_MASK];
 
                     m_componentBuffer[currentOutRow][output_col + 0] = dcval;
                     m_componentBuffer[currentOutRow][output_col + 1] = dcval;
@@ -714,14 +714,14 @@ namespace LibJpeg.NET
         private void jpeg_idct_ifast(int component_index, short[] coef_block, uint output_row, uint output_col)
         {
             /* buffers data between passes */
-            int workspace[JpegConstants.DCTSIZE2];
+            int[] workspace = new int[JpegConstants.DCTSIZE2];
 
             /* Pass 1: process columns from input, store into work array. */
 
             int coefBlockIndex = 0;
             int workspaceIndex = 0;
 
-            int* quantTable = m_dctTables[component_index].int_array;
+            int[] quantTable = m_dctTables[component_index].int_array;
             int quantTableIndex = 0;
 
             for (int ctr = JpegConstants.DCTSIZE; ctr > 0; ctr--)
@@ -832,12 +832,12 @@ namespace LibJpeg.NET
             /* and also undo the FAST_INTEGER_PASS1_BITS scaling. */
 
             workspaceIndex = 0;
-            JSAMPLE* limit = m_cinfo.m_sample_range_limit;
-            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + CENTERJSAMPLE;
+            byte[] limit = m_cinfo.m_sample_range_limit;
+            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + JpegConstants.CENTERJSAMPLE;
 
             for (int ctr = 0; ctr < JpegConstants.DCTSIZE; ctr++)
             {
-                int currentOutRow = output_row + ctr;
+                int currentOutRow = (int)(output_row + ctr);
 
                 /* Rows of zeroes can be exploited in the same way as we did with columns.
                 * However, the column calculation has created many nonzero AC terms, so
@@ -856,7 +856,7 @@ namespace LibJpeg.NET
                     workspace[workspaceIndex + 7] == 0)
                 {
                     /* AC terms all zero */
-                    JSAMPLE dcval = limit[limitOffset + FAST_INTEGER_IDESCALE(workspace[workspaceIndex + 0], FAST_INTEGER_PASS1_BITS + 3) & RANGE_MASK];
+                    byte dcval = limit[limitOffset + FAST_INTEGER_IDESCALE(workspace[workspaceIndex + 0], FAST_INTEGER_PASS1_BITS + 3) & RANGE_MASK];
 
                     m_componentBuffer[currentOutRow][output_col + 0] = dcval;
                     m_componentBuffer[currentOutRow][output_col + 1] = dcval;
@@ -998,14 +998,14 @@ namespace LibJpeg.NET
         private void jpeg_idct_float(int component_index, short[] coef_block, uint output_row, uint output_col)
         {
             /* buffers data between passes */
-            float workspace[JpegConstants.DCTSIZE2];
+            float[] workspace = new float[JpegConstants.DCTSIZE2];
 
             /* Pass 1: process columns from input, store into work array. */
 
             int coefBlockIndex = 0;
             int workspaceIndex = 0;
 
-            float* quantTable = m_dctTables[component_index].float_array;
+            float[] quantTable = m_dctTables[component_index].float_array;
             int quantTableIndex = 0;
 
             for (int ctr = JpegConstants.DCTSIZE; ctr > 0; ctr--)
@@ -1112,8 +1112,8 @@ namespace LibJpeg.NET
             /* Pass 2: process rows from work array, store into output array. */
             /* Note that we must descale the results by a factor of 8 == 2**3. */
             workspaceIndex = 0;
-            JSAMPLE* limit = m_cinfo.m_sample_range_limit;
-            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + CENTERJSAMPLE;
+            byte[] limit = m_cinfo.m_sample_range_limit;
+            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + JpegConstants.CENTERJSAMPLE;
 
             for (int ctr = 0; ctr < JpegConstants.DCTSIZE; ctr++)
             {
@@ -1155,7 +1155,7 @@ namespace LibJpeg.NET
                 float tmp4 = tmp10 + tmp5;
 
                 /* Final output stage: scale down by a factor of 8 and range-limit */
-                int currentOutRow = output_row + ctr;
+                int currentOutRow = (int)(output_row + ctr);
                 m_componentBuffer[currentOutRow][output_col + 0] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp0 + tmp7), 3) & RANGE_MASK];
                 m_componentBuffer[currentOutRow][output_col + 7] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp0 - tmp7), 3) & RANGE_MASK];
                 m_componentBuffer[currentOutRow][output_col + 1] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp1 + tmp6), 3) & RANGE_MASK];
@@ -1199,13 +1199,13 @@ namespace LibJpeg.NET
         private void jpeg_idct_4x4(int component_index, short[] coef_block, uint output_row, uint output_col)
         {
             /* buffers data between passes */
-            int workspace[JpegConstants.DCTSIZE * 4];
+            int[] workspace = new int[JpegConstants.DCTSIZE * 4];
 
             /* Pass 1: process columns from input, store into work array. */
             int coefBlockIndex = 0;
             int workspaceIndex = 0;
 
-            int* quantTable = m_dctTables[component_index].int_array;
+            int[] quantTable = m_dctTables[component_index].int_array;
             int quantTableIndex = 0;
 
             for (int ctr = JpegConstants.DCTSIZE; ctr > 0; coefBlockIndex++, quantTableIndex++, workspaceIndex++, ctr--)
@@ -1279,13 +1279,13 @@ namespace LibJpeg.NET
             }
 
             /* Pass 2: process 4 rows from work array, store into output array. */
-            JSAMPLE* limit = m_cinfo.m_sample_range_limit;
-            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + CENTERJSAMPLE;
+            byte[] limit = m_cinfo.m_sample_range_limit;
+            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + JpegConstants.CENTERJSAMPLE;
 
             workspaceIndex = 0;
             for (int ctr = 0; ctr < 4; ctr++)
             {
-                int currentOutRow = output_row + ctr;
+                int currentOutRow = (int)(output_row + ctr);
                 /* It's not clear whether a zero row test is worthwhile here ... */
 
                 if (workspace[workspaceIndex + 1] == 0 && 
@@ -1296,7 +1296,7 @@ namespace LibJpeg.NET
                     workspace[workspaceIndex + 7] == 0)
                 {
                     /* AC terms all zero */
-                    JSAMPLE dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
+                    byte dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
 
                     m_componentBuffer[currentOutRow][output_col + 0] = dcval;
                     m_componentBuffer[currentOutRow][output_col + 1] = dcval;
@@ -1351,13 +1351,13 @@ namespace LibJpeg.NET
         private void jpeg_idct_2x2(int component_index, short[] coef_block, uint output_row, uint output_col)
         {
             /* buffers data between passes */
-            int workspace[JpegConstants.DCTSIZE * 2];
+            int[] workspace = new int[JpegConstants.DCTSIZE * 2];
 
             /* Pass 1: process columns from input, store into work array. */
             int coefBlockIndex = 0;
             int workspaceIndex = 0;
 
-            int* quantTable = m_dctTables[component_index].int_array;
+            int[] quantTable = m_dctTables[component_index].int_array;
             int quantTableIndex = 0;
 
             for (int ctr = JpegConstants.DCTSIZE; ctr > 0; coefBlockIndex++, quantTableIndex++, workspaceIndex++, ctr--)
@@ -1410,12 +1410,12 @@ namespace LibJpeg.NET
 
             /* Pass 2: process 2 rows from work array, store into output array. */
             workspaceIndex = 0;
-            JSAMPLE* limit = m_cinfo.m_sample_range_limit;
-            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + CENTERJSAMPLE;
+            byte[] limit = m_cinfo.m_sample_range_limit;
+            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + JpegConstants.CENTERJSAMPLE;
 
             for (int ctr = 0; ctr < 2; ctr++)
             {
-                int currentOutRow = output_row + ctr;
+                int currentOutRow = (int)(output_row + ctr);
                 /* It's not clear whether a zero row test is worthwhile here ... */
 
                 if (workspace[workspaceIndex + 1] == 0 && 
@@ -1424,7 +1424,7 @@ namespace LibJpeg.NET
                     workspace[workspaceIndex + 7] == 0)
                 {
                     /* AC terms all zero */
-                    JSAMPLE dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
+                    byte dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
 
                     m_componentBuffer[currentOutRow][output_col + 0] = dcval;
                     m_componentBuffer[currentOutRow][output_col + 1] = dcval;
@@ -1462,14 +1462,14 @@ namespace LibJpeg.NET
             /* We hardly need an inverse DCT routine for this: just take the
             * average pixel value, which is one-eighth of the DC coefficient.
             */
-            int* quantptr = m_dctTables[component_index].int_array;
+            int[] quantptr = m_dctTables[component_index].int_array;
             int dcval = REDUCED_DEQUANTIZE(coef_block[0], quantptr[0]);
             dcval = JpegUtils.DESCALE((int) dcval, 3);
 
-            JSAMPLE* limit = m_cinfo.m_sample_range_limit;
-            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + CENTERJSAMPLE;
+            byte[] limit = m_cinfo.m_sample_range_limit;
+            int limitOffset = m_cinfo.m_sampleRangeLimitOffset + JpegConstants.CENTERJSAMPLE;
 
-            m_componentBuffer[output_row + 0][output_col] = limit[limitOffset + dcval & RANGE_MASK];
+            m_componentBuffer[(int)(output_row + 0)][output_col] = limit[limitOffset + dcval & RANGE_MASK];
         }
 
         /// <summary>
