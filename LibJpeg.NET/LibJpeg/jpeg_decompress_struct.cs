@@ -152,9 +152,9 @@ namespace LibJpeg.NET
         /* Data copied from JFIF marker; only valid if saw_JFIF_marker is true: */
         internal byte m_JFIF_major_version;   /* JFIF version number */
         internal byte m_JFIF_minor_version;
-        internal byte m_density_unit;     /* JFIF code for pixel size units */
-        internal ushort m_X_density;       /* Horizontal pixel density */
-        internal ushort m_Y_density;       /* Vertical pixel density */
+        public byte m_density_unit;     /* JFIF code for pixel size units */
+        public ushort m_X_density;       /* Horizontal pixel density */
+        public ushort m_Y_density;       /* Vertical pixel density */
         internal bool m_saw_Adobe_marker;  /* true iff an Adobe APP14 marker was found */
         internal byte m_Adobe_transform;  /* Color transform code from Adobe marker */
 
@@ -217,7 +217,7 @@ namespace LibJpeg.NET
          * It is either zero or the code of a JPEG marker that has been
          * read from the data source, but has not yet been processed.
          */
-        internal int m_unread_marker;
+        public int m_unread_marker;
 
         /*
          * Links to decompression subobjects (methods, private variables of modules)
