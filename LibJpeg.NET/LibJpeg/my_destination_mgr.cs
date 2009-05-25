@@ -83,7 +83,7 @@ namespace LibJpeg.NET
             }
             catch (Exception e)
             {
-                m_cinfo.TRACEMSS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_cinfo.TRACEMS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
                 m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
@@ -112,7 +112,7 @@ namespace LibJpeg.NET
                 }
                 catch (Exception e)
                 {
-                    m_cinfo.TRACEMSS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                    m_cinfo.TRACEMS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
                     m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
                 }
             }

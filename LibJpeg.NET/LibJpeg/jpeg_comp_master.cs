@@ -265,7 +265,7 @@ namespace LibJpeg.NET
             {
                 /* Prepare for single sequential-JPEG scan containing all components */
                 if (m_cinfo.m_num_components > JpegConstants.MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPS_IN_SCAN);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 m_cinfo.m_comps_in_scan = m_cinfo.m_num_components;
                 for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
@@ -316,7 +316,7 @@ namespace LibJpeg.NET
             {
                 /* Interleaved (multi-component) scan */
                 if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > JpegConstants.MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 /* Overall image size in MCUs */
                 m_cinfo.m_MCUs_per_row = (uint) JpegUtils.jdiv_round_up((long) m_cinfo.m_image_width,

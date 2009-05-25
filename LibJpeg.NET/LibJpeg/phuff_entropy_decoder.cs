@@ -130,7 +130,7 @@ namespace LibJpeg.NET
              * overflows in the IDCT math.  But we won't crash.
              */
             if (bad)
-                m_cinfo.ERREXIT4((int)J_MESSAGE_CODE.JERR_BAD_PROGRESSION, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROGRESSION, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
 
             /* Update progression status, and verify that scan order is legal.
              * Note that inter-scan inconsistencies are treated as warnings
@@ -140,7 +140,7 @@ namespace LibJpeg.NET
             {
                 int cindex = m_cinfo.m_cur_comp_info[ci].component_index;
                 if (!is_DC_band && m_cinfo.m_coef_bits[cindex][0] < 0) /* AC without prior DC scan */
-                    m_cinfo.WARNMS2((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, 0);
+                    m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, 0);
 
                 for (int coefi = m_cinfo.m_Ss; coefi <= m_cinfo.m_Se; coefi++)
                 {
@@ -149,7 +149,7 @@ namespace LibJpeg.NET
                         expected = 0;
 
                     if (m_cinfo.m_Ah != expected)
-                        m_cinfo.WARNMS2((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, coefi);
+                        m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, coefi);
 
                     m_cinfo.m_coef_bits[cindex][coefi] = m_cinfo.m_Al;
                 }

@@ -283,6 +283,7 @@ namespace LibJpeg.NET
             ComponentBuffer[] cb = new ComponentBuffer[m_cinfo.m_num_components];
             for (int i = 0; i < m_cinfo.m_num_components; i++)
             {
+                cb[i] = new ComponentBuffer();
                 cb[i].SetBuffer(m_buffer[i], m_funnyIndices[m_whichFunny][i], m_funnyOffsets[i]);
             }
 

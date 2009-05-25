@@ -36,7 +36,7 @@ namespace LibJpeg.NET
         private FileStream m_infile;       /* source stream */
         private byte[] m_buffer;     /* start of buffer */
         private bool m_start_of_file; /* have we gotten any data yet? */
-
+        
         /// <summary>
         /// Initialize source - called by jpeg_read_header
         /// before any data is actually read.
@@ -96,8 +96,7 @@ namespace LibJpeg.NET
         /// </summary>
         public override bool fill_input_buffer()
         {
-            int nbytes = 0;
-            //fread((void*)m_buffer, 1, INPUT_BUF_SIZE, m_infile);
+            int nbytes = m_infile.Read(m_buffer, 0, INPUT_BUF_SIZE);
             if (nbytes <= 0)
             {
                 if (m_start_of_file) /* Treat empty input file as fatal error */

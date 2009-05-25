@@ -191,7 +191,6 @@ namespace LibJpeg.NET
             {
                 /* Allocate and pre-zero a multiplier table for each component */
                 m_dctTables[ci] = new multiplier_table();
-                //memset((void*)m_dctTables[ci], 0, sizeof(multiplier_table));
 
                 /* Mark multiplier table not yet set up for any method */
                 m_cur_method[ci] = -1;
@@ -247,7 +246,7 @@ namespace LibJpeg.NET
                         }
                         break;
                     default:
-                        m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_DCTSIZE, componentInfo.DCT_scaled_size);
+                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCTSIZE, componentInfo.DCT_scaled_size);
                         break;
                 }
 

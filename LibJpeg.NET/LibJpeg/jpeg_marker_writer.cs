@@ -286,7 +286,7 @@ namespace LibJpeg.NET
 
             /* Make sure image isn't bigger than SOF field can handle */
             if ((long) m_cinfo.m_image_height > 65535L || (long) m_cinfo.m_image_width > 65535L)
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int)65535);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int)65535);
 
             emit_byte(m_cinfo.m_data_precision);
             emit_2bytes((int) m_cinfo.m_image_height);
@@ -375,7 +375,7 @@ namespace LibJpeg.NET
             }
 
             if (htbl == null)
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, index);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, index);
 
             if (!htbl.sent_table)
             {
@@ -407,7 +407,7 @@ namespace LibJpeg.NET
         {
             JQUANT_TBL qtbl = m_cinfo.m_quant_tbl_ptrs[index];
             if (qtbl == null)
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, index);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, index);
 
             int prec = 0;
             for (int i = 0; i < JpegConstants.DCTSIZE2; i++)

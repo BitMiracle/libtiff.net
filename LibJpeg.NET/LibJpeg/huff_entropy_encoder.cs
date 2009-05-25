@@ -95,10 +95,10 @@ namespace LibJpeg.NET
                     /* Check for invalid table indexes */
                     /* (make_c_derived_tbl does this in the other path) */
                     if (dctbl < 0 || dctbl >= JpegConstants.NUM_HUFF_TBLS)
-                        m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, dctbl);
+                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, dctbl);
 
                     if (actbl < 0 || actbl >= JpegConstants.NUM_HUFF_TBLS)
-                        m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, actbl);
+                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, actbl);
 
                     /* Allocate and zero the statistics tables */
                     /* Note that jpeg_gen_optimal_table expects 257 entries in each table! */

@@ -123,7 +123,7 @@ namespace LibJpeg.NET
                 /* Try to keep application from accessing now-deleted marker list.
                  * A bit kludgy to do it here, but this is the most central place.
                  */
-                //((jpeg_decompress_struct)this).m_marker_list = null;
+                ((jpeg_decompress_struct)this).m_marker_list = null;
             }
             else
             {
@@ -151,44 +151,10 @@ namespace LibJpeg.NET
             m_err.error_exit();
         }
 
-        public void ERREXIT1(int code, int p1)
+        public void ERREXIT(int code, params object[] args)
         {
             m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.error_exit();
-        }
-
-        public void ERREXIT2(int code, int p1, int p2)
-        {
-            m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.m_msg_parm.i[1] = p2;
-            m_err.error_exit();
-        }
-
-        public void ERREXIT3(int code, int p1, int p2, int p3)
-        {
-            m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.m_msg_parm.i[1] = p2;
-            m_err.m_msg_parm.i[2] = p3;
-            m_err.error_exit();
-        }
-
-        public void ERREXIT4(int code, int p1, int p2, int p3, int p4)
-        {
-            m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.m_msg_parm.i[1] = p2;
-            m_err.m_msg_parm.i[2] = p3;
-            m_err.m_msg_parm.i[3] = p4;
-            m_err.error_exit();
-        }
-
-        public void ERREXITS(int code, string str)
-        {
-            m_err.m_msg_code = code;
-            m_err.m_msg_parm.s = str;
+            m_err.m_msg_parm = args;
             m_err.error_exit();
         }
 
@@ -200,18 +166,10 @@ namespace LibJpeg.NET
             m_err.emit_message(-1);
         }
 
-        public void WARNMS1(int code, int p1)
+        public void WARNMS(int code, params object[] args)
         {
             m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.emit_message(-1);
-        }
-
-        public void WARNMS2(int code, int p1, int p2)
-        {
-            m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.m_msg_parm.i[1] = p2;
+            m_err.m_msg_parm = args;
             m_err.emit_message(-1);
         }
 
@@ -223,77 +181,10 @@ namespace LibJpeg.NET
             m_err.emit_message(lvl);
         }
 
-        public void TRACEMS1(int lvl, int code, int p1)
+        public void TRACEMS(int lvl, int code, params object[] args)
         {
             m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.emit_message(lvl);
-        }
-
-        public void TRACEMS2(int lvl, int code, int p1, int p2)
-        {
-            m_err.m_msg_code = code;
-            m_err.m_msg_parm.i[0] = p1;
-            m_err.m_msg_parm.i[1] = p2;
-            m_err.emit_message(lvl);
-        }
-
-        public void TRACEMS3(int lvl, int code, int p1, int p2, int p3)
-        {
-            int[] _mp = m_err.m_msg_parm.i;
-            _mp[0] = p1;
-            _mp[1] = p2;
-            _mp[2] = p3;
-
-            m_err.m_msg_code = code;
-            m_err.emit_message(lvl);
-        }
-
-        public void TRACEMS4(int lvl, int code, int p1, int p2, int p3, int p4)
-        {
-            int[] _mp = m_err.m_msg_parm.i;
-            _mp[0] = p1;
-            _mp[1] = p2;
-            _mp[2] = p3;
-            _mp[3] = p4;
-
-            m_err.m_msg_code = code;
-            m_err.emit_message(lvl);
-        }
-
-        public void TRACEMS5(int lvl, int code, int p1, int p2, int p3, int p4, int p5)
-        {
-            int[] _mp = m_err.m_msg_parm.i;
-            _mp[0] = p1;
-            _mp[1] = p2;
-            _mp[2] = p3;
-            _mp[3] = p4;
-            _mp[4] = p5;
-
-            m_err.m_msg_code = code;
-            m_err.emit_message(lvl);
-        }
-
-        public void TRACEMS8(int lvl, int code, int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8)
-        {
-            int[] _mp = m_err.m_msg_parm.i;
-            _mp[0] = p1;
-            _mp[1] = p2;
-            _mp[2] = p3;
-            _mp[3] = p4;
-            _mp[4] = p5;
-            _mp[5] = p6;
-            _mp[6] = p7;
-            _mp[7] = p8;
-
-            m_err.m_msg_code = code;
-            m_err.emit_message(lvl);
-        }
-
-        public void TRACEMSS(int lvl, int code, string str)
-        {
-            m_err.m_msg_code = code;
-            m_err.m_msg_parm.s = str;
+            m_err.m_msg_parm = args;
             m_err.emit_message(lvl);
         }
     }

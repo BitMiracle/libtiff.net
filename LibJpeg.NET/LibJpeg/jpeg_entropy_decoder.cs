@@ -113,11 +113,11 @@ namespace LibJpeg.NET
 
             /* Find the input Huffman table */
             if (tblno < 0 || tblno >= JpegConstants.NUM_HUFF_TBLS)
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
 
             JHUFF_TBL htbl = isDC ? m_cinfo.m_dc_huff_tbl_ptrs[tblno] : m_cinfo.m_ac_huff_tbl_ptrs[tblno];
             if (htbl == null)
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
 
             /* Allocate a workspace if we haven't already done so. */
             if (dtbl == null)
@@ -194,8 +194,7 @@ namespace LibJpeg.NET
             * with that code.
             */
 
-            //memset((void *) dtbl.look_nbits, 0, sizeof(dtbl.look_nbits));
-
+            Array.Clear(dtbl.look_nbits, 0, dtbl.look_nbits.Length);
             p = 0;
             for (int l = 1; l <= JpegConstants.HUFF_LOOKAHEAD; l++)
             {

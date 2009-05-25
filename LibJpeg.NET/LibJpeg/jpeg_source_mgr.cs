@@ -20,6 +20,7 @@ namespace LibJpeg.NET
     {
         private byte[] m_next_input_byte;
         private int m_bytes_in_buffer; /* # of bytes remaining (unread) in buffer */
+        private int m_position;
 
         public abstract void init_source();
         public abstract bool fill_input_buffer();
@@ -28,6 +29,7 @@ namespace LibJpeg.NET
         {
             m_bytes_in_buffer = size;
             m_next_input_byte = buffer;
+            m_position = 0;
         }
 
         /// <summary>
@@ -58,7 +60,7 @@ namespace LibJpeg.NET
                     */
                 }
 
-                //m_next_input_byte += (uint)num_bytes;
+                m_position += num_bytes;
                 m_bytes_in_buffer -= num_bytes;
             }
         }
@@ -116,7 +118,7 @@ namespace LibJpeg.NET
         public virtual bool resync_to_restart(jpeg_decompress_struct cinfo, int desired)
         {
             /* Always put up a warning. */
-            cinfo.WARNMS2((int)J_MESSAGE_CODE.JWRN_MUST_RESYNC, cinfo.m_unread_marker, desired);
+            cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_MUST_RESYNC, cinfo.m_unread_marker, desired);
 
             /* Outer loop handles repeated decision after scanning forward. */
             int action = 1;
@@ -154,7 +156,7 @@ namespace LibJpeg.NET
                     }
                 }
 
-                cinfo.TRACEMS2(4, (int)J_MESSAGE_CODE.JTRC_RECOVERY_ACTION, cinfo.m_unread_marker, action);
+                cinfo.TRACEMS(4, (int)J_MESSAGE_CODE.JTRC_RECOVERY_ACTION, cinfo.m_unread_marker, action);
 
                 switch (action)
                 {
@@ -193,23 +195,22 @@ namespace LibJpeg.NET
         /// </summary>
         public virtual bool GetTwoBytes(out int V)
         {
-            // remove this
-            V = 0;
+            if (!MakeByteAvailable())
+            {
+                V = 0;
+                return false;
+            }
 
-
-
+            m_bytes_in_buffer--;
+            V = (int)(((uint) m_next_input_byte[m_position]) << 8);
+            m_position++;
 
             if (!MakeByteAvailable())
                 return false;
 
             m_bytes_in_buffer--;
-            //V = ((uint) *m_next_input_byte++) << 8;
-
-            if (!MakeByteAvailable())
-                return false;
-
-            m_bytes_in_buffer--;
-            //V += *m_next_input_byte++;
+            V += m_next_input_byte[m_position];
+            m_position++;
             return true;
         }
 
@@ -219,17 +220,15 @@ namespace LibJpeg.NET
         /// </summary>
         public virtual bool GetByte(out int V)
         {
-            // remove this
-            V = 0;
-
-
-
-
             if (!MakeByteAvailable())
+            {
+                V = 0;
                 return false;
+            }
 
             m_bytes_in_buffer--;
-            //V = *m_next_input_byte++;
+            V = m_next_input_byte[m_position];
+            m_position++;
             return true;
         }
 
@@ -241,8 +240,8 @@ namespace LibJpeg.NET
 
             for (int i = 0; i < avail; i++)
             {
-                //dest[i] = *m_next_input_byte;
-                //m_next_input_byte++;
+                dest[i] = m_next_input_byte[m_position];
+                m_position++;
                 m_bytes_in_buffer--;
             }
 

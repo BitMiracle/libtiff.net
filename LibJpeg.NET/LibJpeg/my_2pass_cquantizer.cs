@@ -228,11 +228,11 @@ namespace LibJpeg.NET
 
                 /* Lower bound on # of colors ... somewhat arbitrary as long as > 0 */
                 if (desired_local < 8)
-                    cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 8);
+                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 8);
 
                 /* Make sure colormap indexes can be represented by JSAMPLEs */
                 if (desired_local > MAXNUMCOLORS)
-                    cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
+                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
 
                 m_sv_colormap = jpeg_common_struct.AllocJpegSamples((uint)desired_local, (uint)3);
                 m_desired = desired_local;
@@ -289,10 +289,10 @@ namespace LibJpeg.NET
                 /* Make sure color count is acceptable */
                 int i = m_cinfo.m_actual_number_of_colors;
                 if (i < 1)
-                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 1);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 1);
 
                 if (i > MAXNUMCOLORS)
-                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
 
                 if (m_cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_FS)
                 {
@@ -652,7 +652,7 @@ namespace LibJpeg.NET
                 compute_color(boxlist, i, i);
 
             m_cinfo.m_actual_number_of_colors = numboxes;
-            m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_QUANT_SELECTED, numboxes);
+            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_QUANT_SELECTED, numboxes);
         }
 
         /// <summary>

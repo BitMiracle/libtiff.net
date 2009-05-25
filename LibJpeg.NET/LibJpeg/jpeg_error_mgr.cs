@@ -26,15 +26,8 @@ namespace LibJpeg.NET
     public class jpeg_error_mgr
     {
         // The message ID code and any parameters are saved in fields below. 
-        // A message can have one string parameter or up to 8 int parameters.
-
-        internal class MessageData
-        {
-            public int[] i = new int[8];
-            public string s;
-        }
-
-        public int m_msg_code;
+        internal int m_msg_code;
+        internal object[] m_msg_parm = null;
 
         // max msg_level that will be displayed
         public int m_trace_level;
@@ -49,8 +42,6 @@ namespace LibJpeg.NET
         /// end of processing.
         /// </summary>
         public long m_num_warnings;
-
-        internal MessageData m_msg_parm = new MessageData();
 
         public jpeg_error_mgr()
         {
@@ -140,42 +131,15 @@ namespace LibJpeg.NET
         /// <param name="buffer">The buffer.</param>
         public virtual string format_message()
         {
-            string msgtext = null;
-            string msgptr;
-            //char ch;
-            //bool isstring;
-
-            /* Look up message string in proper table */
-            msgtext = GetMessageText(m_msg_code);
-
-            /* Defend against bogus message number */
+            string msgtext = GetMessageText(m_msg_code);
             if (msgtext == null)
             {
-                m_msg_parm.i[0] = m_msg_code;
+                m_msg_parm = new object[] { m_msg_code };
                 msgtext = GetMessageText(0);
             }
 
-            /* Check for string parameter, as indicated by %s in the message text */
-            //isstring = false;
-            msgptr = msgtext;
-            //while ((ch = *msgptr++) != '\0')
-            //{
-            //    if (ch == '%')
-            //    {
-            //        if (*msgptr == 's')
-            //            isstring = true;
-            //        break;
-            //    }
-            //}
-
-            ///* Format the message into the passed buffer */
-            //if (isstring)
-            //    sprintf(buffer, msgtext, m_msg_parm.s);
-            //else
-            //    sprintf(buffer, msgtext, m_msg_parm.i[0], m_msg_parm.i[1], m_msg_parm.i[2], m_msg_parm.i[3], m_msg_parm.i[4],
-            //            m_msg_parm.i[5], m_msg_parm.i[6], m_msg_parm.i[7]);
-
-            return null;
+            /* Format the message into the passed buffer */
+            return string.Format(msgtext, m_msg_parm);
         }
 
         /// <summary>
@@ -201,7 +165,7 @@ namespace LibJpeg.NET
             {
                 default:
                 case J_MESSAGE_CODE.JMSG_NOMESSAGE:
-                    return "Bogus message code %d";
+                    return "Bogus message code {0}";
 
                 /* For maintenance convenience, list is alphabetical by message code name */
                 case J_MESSAGE_CODE.JERR_ARITH_NOTIMPL:
@@ -209,11 +173,11 @@ namespace LibJpeg.NET
                 case J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE:
                     return "Bogus buffer control mode";
                 case J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID:
-                    return "Invalid component ID %d in SOS";
+                    return "Invalid component ID {0} in SOS";
                 case J_MESSAGE_CODE.JERR_BAD_DCT_COEF:
                     return "DCT coefficient out of range";
                 case J_MESSAGE_CODE.JERR_BAD_DCTSIZE:
-                    return "IDCT output block size %d not supported";
+                    return "IDCT output block size {0} not supported";
                 case J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE:
                     return "Bogus Huffman table definition";
                 case J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE:
@@ -225,17 +189,17 @@ namespace LibJpeg.NET
                 case J_MESSAGE_CODE.JERR_BAD_MCU_SIZE:
                     return "Sampling factors too large for interleaved scan";
                 case J_MESSAGE_CODE.JERR_BAD_PRECISION:
-                    return "Unsupported JPEG data precision %d";
+                    return "Unsupported JPEG data precision {0}";
                 case J_MESSAGE_CODE.JERR_BAD_PROGRESSION:
-                    return "Invalid progressive parameters Ss=%d Se=%d Ah=%d Al=%d";
+                    return "Invalid progressive parameters Ss={0} Se={1} Ah={2} Al={3}";
                 case J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT:
-                    return "Invalid progressive parameters at scan script entry %d";
+                    return "Invalid progressive parameters at scan script entry {0}";
                 case J_MESSAGE_CODE.JERR_BAD_SAMPLING:
                     return "Bogus sampling factors";
                 case J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT:
-                    return "Invalid scan script at entry %d";
+                    return "Invalid scan script at entry {0}";
                 case J_MESSAGE_CODE.JERR_BAD_STATE:
-                    return "Improper call to JPEG library in state %d";
+                    return "Improper call to JPEG library in state {0}";
                 case J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS:
                     return "Bogus virtual array access";
                 case J_MESSAGE_CODE.JERR_BUFFER_SIZE:
@@ -245,13 +209,13 @@ namespace LibJpeg.NET
                 case J_MESSAGE_CODE.JERR_CCIR601_NOTIMPL:
                     return "CCIR601 sampling not implemented yet";
                 case J_MESSAGE_CODE.JERR_COMPONENT_COUNT:
-                    return "Too many color components: %d, max %d";
+                    return "Too many color components: {0}, max {1}";
                 case J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL:
                     return "Unsupported color conversion request";
                 case J_MESSAGE_CODE.JERR_DHT_INDEX:
-                    return "Bogus DHT index %d";
+                    return "Bogus DHT index {0}";
                 case J_MESSAGE_CODE.JERR_DQT_INDEX:
-                    return "Bogus DQT index %d";
+                    return "Bogus DQT index {0}";
                 case J_MESSAGE_CODE.JERR_EMPTY_IMAGE:
                     return "Empty JPEG image (DNL not supported)";
                 case J_MESSAGE_CODE.JERR_EOI_EXPECTED:
@@ -265,13 +229,13 @@ namespace LibJpeg.NET
                 case J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE:
                     return "Missing Huffman code table entry";
                 case J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG:
-                    return "Maximum supported image dimension is %u pixels";
+                    return "Maximum supported image dimension is {0} pixels";
                 case J_MESSAGE_CODE.JERR_INPUT_EMPTY:
                     return "Empty input file";
                 case J_MESSAGE_CODE.JERR_INPUT_EOF:
                     return "Premature end of input file";
                 case J_MESSAGE_CODE.JERR_MISMATCHED_QUANT_TABLE:
-                    return "Cannot transcode due to multiple use of quantization table %d";
+                    return "Cannot transcode due to multiple use of quantization table {0}";
                 case J_MESSAGE_CODE.JERR_MISSING_DATA:
                     return "Scan script does not transmit all data";
                 case J_MESSAGE_CODE.JERR_MODE_CHANGE:
@@ -281,27 +245,27 @@ namespace LibJpeg.NET
                 case J_MESSAGE_CODE.JERR_NOT_COMPILED:
                     return "Requested feature was omitted at compile time";
                 case J_MESSAGE_CODE.JERR_NO_HUFF_TABLE:
-                    return "Huffman table 0x%02x was not defined";
+                    return "Huffman table 0x{0:X2} was not defined";
                 case J_MESSAGE_CODE.JERR_NO_IMAGE:
                     return "JPEG datastream contains no image";
                 case J_MESSAGE_CODE.JERR_NO_QUANT_TABLE:
-                    return "Quantization table 0x%02x was not defined";
+                    return "Quantization table 0x{0:X2} was not defined";
                 case J_MESSAGE_CODE.JERR_NO_SOI:
-                    return "Not a JPEG file: starts with 0x%02x 0x%02x";
+                    return "Not a JPEG file: starts with 0x{0:X2} 0x{1:X2}";
                 case J_MESSAGE_CODE.JERR_OUT_OF_MEMORY:
-                    return "Insufficient memory (case %d)";
+                    return "Insufficient memory (case {0})";
                 case J_MESSAGE_CODE.JERR_QUANT_COMPONENTS:
-                    return "Cannot quantize more than %d color components";
+                    return "Cannot quantize more than {0} color components";
                 case J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS:
-                    return "Cannot quantize to fewer than %d colors";
+                    return "Cannot quantize to fewer than {0} colors";
                 case J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS:
-                    return "Cannot quantize to more than %d colors";
+                    return "Cannot quantize to more than {0} colors";
                 case J_MESSAGE_CODE.JERR_SOF_DUPLICATE:
                     return "Invalid JPEG file structure: two SOF markers";
                 case J_MESSAGE_CODE.JERR_SOF_NO_SOS:
                     return "Invalid JPEG file structure: missing SOS marker";
                 case J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED:
-                    return "Unsupported JPEG process: SOF type 0x%02x";
+                    return "Unsupported JPEG process: SOF type 0x{0:X2}";
                 case J_MESSAGE_CODE.JERR_SOI_DUPLICATE:
                     return "Invalid JPEG file structure: two SOI markers";
                 case J_MESSAGE_CODE.JERR_SOS_NO_SOF:
@@ -309,89 +273,89 @@ namespace LibJpeg.NET
                 case J_MESSAGE_CODE.JERR_TOO_LITTLE_DATA:
                     return "Application transferred too few scanlines";
                 case J_MESSAGE_CODE.JERR_UNKNOWN_MARKER:
-                    return "Unsupported marker type 0x%02x";
+                    return "Unsupported marker type 0x{0:X2}";
                 case J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW:
                     return "Image too wide for this implementation";
                 case J_MESSAGE_CODE.JTRC_16BIT_TABLES:
                     return "Caution: quantization tables are too coarse for baseline JPEG";
                 case J_MESSAGE_CODE.JTRC_ADOBE:
-                    return "Adobe APP14 marker: version %d, flags 0x%04x 0x%04x, transform %d";
+                    return "Adobe APP14 marker: version {0}, flags 0x{1:X4} 0x{2:X4}, transform {3}";
                 case J_MESSAGE_CODE.JTRC_APP0:
-                    return "Unknown APP0 marker (not JFIF), length %u";
+                    return "Unknown APP0 marker (not JFIF), length {0}";
                 case J_MESSAGE_CODE.JTRC_APP14:
-                    return "Unknown APP14 marker (not Adobe), length %u";
+                    return "Unknown APP14 marker (not Adobe), length {0}";
                 case J_MESSAGE_CODE.JTRC_DHT:
-                    return "Define Huffman Table 0x%02x";
+                    return "Define Huffman Table 0x{0:X2}";
                 case J_MESSAGE_CODE.JTRC_DQT:
-                    return "Define Quantization Table %d  precision %d";
+                    return "Define Quantization Table {0} precision {1}";
                 case J_MESSAGE_CODE.JTRC_DRI:
-                    return "Define Restart Interval %u";
+                    return "Define Restart Interval {0}";
                 case J_MESSAGE_CODE.JTRC_EOI:
                     return "End Of Image";
                 case J_MESSAGE_CODE.JTRC_HUFFBITS:
-                    return "        %3d %3d %3d %3d %3d %3d %3d %3d";
+                    return "        {0:D3} {1:D3} {2:D3} {3:D3} {4:D3} {5:D3} {6:D3} {7:D3}";
                 case J_MESSAGE_CODE.JTRC_JFIF:
-                    return "JFIF APP0 marker: version %d.%02d, density %dx%d  %d";
+                    return "JFIF APP0 marker: version {0}.{1:D2}, density {2}x{3}  {4}";
                 case J_MESSAGE_CODE.JTRC_JFIF_BADTHUMBNAILSIZE:
-                    return "Warning: thumbnail image size does not match data length %u";
+                    return "Warning: thumbnail image size does not match data length {0}";
                 case J_MESSAGE_CODE.JTRC_JFIF_EXTENSION:
-                    return "JFIF extension marker: type 0x%02x, length %u";
+                    return "JFIF extension marker: type 0x{0:X2}, length {1}";
                 case J_MESSAGE_CODE.JTRC_JFIF_THUMBNAIL:
-                    return "    with %d x %d thumbnail image";
+                    return "    with {0} x {1} thumbnail image";
                 case J_MESSAGE_CODE.JTRC_MISC_MARKER:
-                    return "Miscellaneous marker 0x%02x, length %u";
+                    return "Miscellaneous marker 0x{0:X2}, length {1}";
                 case J_MESSAGE_CODE.JTRC_PARMLESS_MARKER:
-                    return "Unexpected marker 0x%02x";
+                    return "Unexpected marker 0x{0:X2}";
                 case J_MESSAGE_CODE.JTRC_QUANTVALS:
-                    return "        %4u %4u %4u %4u %4u %4u %4u %4u";
+                    return "        {0:D4} {1:D4} {2:D4} {3:D4} {4:D4} {5:D4} {6:D4} {7:D4}";
                 case J_MESSAGE_CODE.JTRC_QUANT_3_NCOLORS:
-                    return "Quantizing to %d = %d*%d*%d colors";
+                    return "Quantizing to {0} = {1}*{2}*{3} colors";
                 case J_MESSAGE_CODE.JTRC_QUANT_NCOLORS:
-                    return "Quantizing to %d colors";
+                    return "Quantizing to {0} colors";
                 case J_MESSAGE_CODE.JTRC_QUANT_SELECTED:
-                    return "Selected %d colors for quantization";
+                    return "Selected {0} colors for quantization";
                 case J_MESSAGE_CODE.JTRC_RECOVERY_ACTION:
-                    return "At marker 0x%02x, recovery action %d";
+                    return "At marker 0x{0:X2}, recovery action {1}";
                 case J_MESSAGE_CODE.JTRC_RST:
-                    return "RST%d";
+                    return "RST{0}";
                 case J_MESSAGE_CODE.JTRC_SMOOTH_NOTIMPL:
                     return "Smoothing not supported with nonstandard sampling ratios";
                 case J_MESSAGE_CODE.JTRC_SOF:
-                    return "Start Of Frame 0x%02x: width=%u, height=%u, components=%d";
+                    return "Start Of Frame 0x{0:X2}: width={1}, height={2}, components={3}";
                 case J_MESSAGE_CODE.JTRC_SOF_COMPONENT:
-                    return "    Component %d: %dhx%dv q=%d";
+                    return "    Component {0}: {1}hx{2}v q={3}";
                 case J_MESSAGE_CODE.JTRC_SOI:
                     return "Start of Image";
                 case J_MESSAGE_CODE.JTRC_SOS:
-                    return "Start Of Scan: %d components";
+                    return "Start Of Scan: {0} components";
                 case J_MESSAGE_CODE.JTRC_SOS_COMPONENT:
-                    return "    Component %d: dc=%d ac=%d";
+                    return "    Component {0}: dc={1} ac={2}";
                 case J_MESSAGE_CODE.JTRC_SOS_PARAMS:
-                    return "  Ss=%d, Se=%d, Ah=%d, Al=%d";
+                    return "  Ss={0}, Se={1}, Ah={2}, Al={3}";
                 case J_MESSAGE_CODE.JTRC_THUMB_JPEG:
-                    return "JFIF extension marker: JPEG-compressed thumbnail image, length %u";
+                    return "JFIF extension marker: JPEG-compressed thumbnail image, length {0}";
                 case J_MESSAGE_CODE.JTRC_THUMB_PALETTE:
-                    return "JFIF extension marker: palette thumbnail image, length %u";
+                    return "JFIF extension marker: palette thumbnail image, length {0}";
                 case J_MESSAGE_CODE.JTRC_THUMB_RGB:
-                    return "JFIF extension marker: RGB thumbnail image, length %u";
+                    return "JFIF extension marker: RGB thumbnail image, length {0}";
                 case J_MESSAGE_CODE.JTRC_UNKNOWN_IDS:
-                    return "Unrecognized component IDs %d %d %d, assuming YCbCr";
+                    return "Unrecognized component IDs {0} {1} {2}, assuming YCbCr";
                 case J_MESSAGE_CODE.JWRN_ADOBE_XFORM:
-                    return "Unknown Adobe color transform code %d";
+                    return "Unknown Adobe color transform code {0}";
                 case J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION:
-                    return "Inconsistent progression sequence for component %d coefficient %d";
+                    return "Inconsistent progression sequence for component {0} coefficient {1}";
                 case J_MESSAGE_CODE.JWRN_EXTRANEOUS_DATA:
-                    return "Corrupt JPEG data: %u extraneous bytes before marker 0x%02x";
+                    return "Corrupt JPEG data: {0} extraneous bytes before marker 0x{1:X2}";
                 case J_MESSAGE_CODE.JWRN_HIT_MARKER:
                     return "Corrupt JPEG data: premature end of data segment";
                 case J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE:
                     return "Corrupt JPEG data: bad Huffman code";
                 case J_MESSAGE_CODE.JWRN_JFIF_MAJOR:
-                    return "Warning: unknown JFIF revision number %d.%02d";
+                    return "Warning: unknown JFIF revision number {0}.{1:D2}";
                 case J_MESSAGE_CODE.JWRN_JPEG_EOF:
                     return "Premature end of JPEG file";
                 case J_MESSAGE_CODE.JWRN_MUST_RESYNC:
-                    return "Corrupt JPEG data: found marker 0x%02x instead of RST%d";
+                    return "Corrupt JPEG data: found marker 0x{0:X2} instead of RST{1}";
                 case J_MESSAGE_CODE.JWRN_NOT_SEQUENTIAL:
                     return "Invalid SOS parameters for sequential JPEG";
                 case J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA:

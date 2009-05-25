@@ -167,7 +167,7 @@ namespace LibJpeg.NET
                     /* Differential progressive, arithmetic */
                     case JPEG_MARKER.M_SOF15:
                         /* Differential lossless, arithmetic */
-                        m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED, m_cinfo.m_unread_marker);
+                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED, m_cinfo.m_unread_marker);
                         break;
 
                     case JPEG_MARKER.M_SOS:
@@ -236,7 +236,7 @@ namespace LibJpeg.NET
                     case JPEG_MARKER.M_RST6:
                     case JPEG_MARKER.M_RST7:
                     case JPEG_MARKER.M_TEM:
-                        m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_PARMLESS_MARKER, m_cinfo.m_unread_marker);
+                        m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_PARMLESS_MARKER, m_cinfo.m_unread_marker);
                         break;
 
                     case JPEG_MARKER.M_DNL:
@@ -252,7 +252,7 @@ namespace LibJpeg.NET
                          * Once the JPEG 3 version-number marker is well defined, this code
                          * ought to change!
                          */
-                        m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, m_cinfo.m_unread_marker);
+                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, m_cinfo.m_unread_marker);
                         break;
                 }
 
@@ -287,7 +287,7 @@ namespace LibJpeg.NET
             if (m_cinfo.m_unread_marker == ((int)JPEG_MARKER.M_RST0 + m_cinfo.m_marker.m_next_restart_num))
             {
                 /* Normal case --- swallow the marker and let entropy decoder continue */
-                m_cinfo.TRACEMS1(3, (int)J_MESSAGE_CODE.JTRC_RST, m_cinfo.m_marker.m_next_restart_num);
+                m_cinfo.TRACEMS(3, (int)J_MESSAGE_CODE.JTRC_RST, m_cinfo.m_marker.m_next_restart_num);
                 m_cinfo.m_unread_marker = 0;
             }
             else
@@ -358,7 +358,7 @@ namespace LibJpeg.NET
 
             if (m_cinfo.m_marker.m_discarded_bytes != 0)
             {
-                m_cinfo.WARNMS2((int)J_MESSAGE_CODE.JWRN_EXTRANEOUS_DATA, (int)m_cinfo.m_marker.m_discarded_bytes, c);
+                m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_EXTRANEOUS_DATA, (int)m_cinfo.m_marker.m_discarded_bytes, c);
                 m_cinfo.m_marker.m_discarded_bytes = 0;
             }
 
@@ -376,7 +376,7 @@ namespace LibJpeg.NET
             else if (marker_code >= (int)JPEG_MARKER.M_APP0 && marker_code <= (int)JPEG_MARKER.M_APP15)
                 m_process_APPn[marker_code - (int)JPEG_MARKER.M_APP0] = routine;
             else
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
         }
 
         public void jpeg_save_markers(int marker_code, uint length_limit)
@@ -413,7 +413,7 @@ namespace LibJpeg.NET
                 m_length_limit_APPn[marker_code - (int)JPEG_MARKER.M_APP0] = length_limit;
             }
             else
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
         }
 
         /* State of marker reader, applications
@@ -555,7 +555,7 @@ namespace LibJpeg.NET
                 examine_app14(cinfo, data, data_length, length);
                 break;
             default:
-                cinfo.TRACEMS2(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int) (data_length + length));
+                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int) (data_length + length));
                 break;
             }
 
@@ -577,7 +577,7 @@ namespace LibJpeg.NET
 
             length -= 2;
 
-            cinfo.TRACEMS2(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int)length);
+            cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int)length);
 
             if (length > 0)
                 cinfo.m_src.skip_input_data(length);
@@ -626,7 +626,7 @@ namespace LibJpeg.NET
                 break;
             default:
                 /* can't get here unless jpeg_save_markers chooses wrong processor */
-                cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, cinfo.m_unread_marker);
+                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, cinfo.m_unread_marker);
                 break;
             }
 
@@ -675,19 +675,19 @@ namespace LibJpeg.NET
                  * Minor version should be 0..2, but process anyway if newer.
                  */
                 if (cinfo.m_JFIF_major_version != 1)
-                    cinfo.WARNMS2((int)J_MESSAGE_CODE.JWRN_JFIF_MAJOR, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version);
+                    cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_JFIF_MAJOR, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version);
 
                 /* Generate trace messages */
-                cinfo.TRACEMS5(1, (int)J_MESSAGE_CODE.JTRC_JFIF, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version, cinfo.m_X_density,
+                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version, cinfo.m_X_density,
                                 cinfo.m_Y_density, cinfo.m_density_unit);
 
                 /* Validate thumbnail dimensions and issue appropriate messages */
                 if ((data[12] | data[13]) != 0)
-                    cinfo.TRACEMS2(1, (int)J_MESSAGE_CODE.JTRC_JFIF_THUMBNAIL, data[12], data[13]);
+                    cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF_THUMBNAIL, data[12], data[13]);
 
                 totallen -= APP0_DATA_LEN;
                 if (totallen != ((int)data[12] * (int)data[13] * (int)3))
-                    cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_JFIF_BADTHUMBNAILSIZE, (int)totallen);
+                    cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF_BADTHUMBNAILSIZE, (int)totallen);
             }
             else if (datalen >= 6 && data[0] == 0x4A && data[1] == 0x46 && data[2] == 0x58 && data[3] == 0x58 && data[4] == 0)
             {
@@ -698,23 +698,23 @@ namespace LibJpeg.NET
                 switch (data[5])
                 {
                     case 0x10:
-                        cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_THUMB_JPEG, (int)totallen);
+                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_THUMB_JPEG, (int)totallen);
                         break;
                     case 0x11:
-                        cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_THUMB_PALETTE, (int)totallen);
+                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_THUMB_PALETTE, (int)totallen);
                         break;
                     case 0x13:
-                        cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_THUMB_RGB, (int)totallen);
+                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_THUMB_RGB, (int)totallen);
                         break;
                     default:
-                        cinfo.TRACEMS2(1, (int)J_MESSAGE_CODE.JTRC_JFIF_EXTENSION, data[5], (int)totallen);
+                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF_EXTENSION, data[5], (int)totallen);
                         break;
                 }
             }
             else
             {
                 /* Start of APP0 does not match "JFIF" or "JFXX", or too short */
-                cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_APP0, (int)totallen);
+                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_APP0, (int)totallen);
             }
         }
 
@@ -737,14 +737,14 @@ namespace LibJpeg.NET
                 int flags0 = (data[7] << 8) + data[8];
                 int flags1 = (data[9] << 8) + data[10];
                 int transform = data[11];
-                cinfo.TRACEMS4(1, (int)J_MESSAGE_CODE.JTRC_ADOBE, version, flags0, flags1, transform);
+                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_ADOBE, version, flags0, flags1, transform);
                 cinfo.m_saw_Adobe_marker = true;
                 cinfo.m_Adobe_transform = (byte) transform;
             }
             else
             {
                 /* Start of APP14 does not match "Adobe", or too short */
-                cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_APP14, (int) (datalen + remaining));
+                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_APP14, (int) (datalen + remaining));
             }
         }
 
@@ -839,7 +839,7 @@ namespace LibJpeg.NET
 
             length -= 8;
 
-            m_cinfo.TRACEMS4(1, (int)J_MESSAGE_CODE.JTRC_SOF, m_cinfo.m_unread_marker, (int)m_cinfo.m_image_width, (int)m_cinfo.m_image_height,
+            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOF, m_cinfo.m_unread_marker, (int)m_cinfo.m_image_width, (int)m_cinfo.m_image_height,
                               m_cinfo.m_num_components);
 
             if (m_cinfo.m_marker.m_saw_SOF)
@@ -875,7 +875,7 @@ namespace LibJpeg.NET
                 if (!m_cinfo.m_src.GetByte(out m_cinfo.m_comp_info[ci].quant_tbl_no))
                     return false;
 
-                m_cinfo.TRACEMS4(1, (int)J_MESSAGE_CODE.JTRC_SOF_COMPONENT, m_cinfo.m_comp_info[ci].component_id,
+                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOF_COMPONENT, m_cinfo.m_comp_info[ci].component_id,
                     m_cinfo.m_comp_info[ci].h_samp_factor, m_cinfo.m_comp_info[ci].v_samp_factor,
                     m_cinfo.m_comp_info[ci].quant_tbl_no);
             }
@@ -901,7 +901,7 @@ namespace LibJpeg.NET
             if (!m_cinfo.m_src.GetByte(out n))
                 return false;
 
-            m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_SOS, n);
+            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOS, n);
 
             if (length != (n * 2 + 6) || n < 1 || n > JpegConstants.MAX_COMPS_IN_SCAN)
                 m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_LENGTH);
@@ -933,13 +933,13 @@ namespace LibJpeg.NET
                 }
 
                 if (!idFound)
-                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, cc);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, cc);
 
                 m_cinfo.m_cur_comp_info[i] = m_cinfo.m_comp_info[foundIndex];
                 m_cinfo.m_comp_info[foundIndex].dc_tbl_no = (c >> 4) & 15;
                 m_cinfo.m_comp_info[foundIndex].ac_tbl_no = (c) & 15;
 
-                m_cinfo.TRACEMS3(1, (int)J_MESSAGE_CODE.JTRC_SOS_COMPONENT, cc,
+                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOS_COMPONENT, cc,
                     m_cinfo.m_comp_info[foundIndex].dc_tbl_no, m_cinfo.m_comp_info[foundIndex].ac_tbl_no);
             }
 
@@ -959,7 +959,7 @@ namespace LibJpeg.NET
             m_cinfo.m_Ah = (temp >> 4) & 15;
             m_cinfo.m_Al = (temp) & 15;
 
-            m_cinfo.TRACEMS4(1, (int)J_MESSAGE_CODE.JTRC_SOS_PARAMS, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
+            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOS_PARAMS, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
 
             /* Prepare to scan data & restart markers */
             m_cinfo.m_marker.m_next_restart_num = 0;
@@ -988,7 +988,7 @@ namespace LibJpeg.NET
                 if (!m_cinfo.m_src.GetByte(out index))
                     return false;
 
-                m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_DHT, index);
+                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_DHT, index);
 
                 bits[0] = 0;
                 int count = 0;
@@ -1004,8 +1004,8 @@ namespace LibJpeg.NET
 
                 length -= 1 + 16;
 
-                m_cinfo.TRACEMS8(2, (int)J_MESSAGE_CODE.JTRC_HUFFBITS, bits[1], bits[2], bits[3], bits[4], bits[5], bits[6], bits[7], bits[8]);
-                m_cinfo.TRACEMS8(2, (int)J_MESSAGE_CODE.JTRC_HUFFBITS, bits[9], bits[10], bits[11], bits[12], bits[13], bits[14], bits[15], bits[16]);
+                m_cinfo.TRACEMS(2, (int)J_MESSAGE_CODE.JTRC_HUFFBITS, bits[1], bits[2], bits[3], bits[4], bits[5], bits[6], bits[7], bits[8]);
+                m_cinfo.TRACEMS(2, (int)J_MESSAGE_CODE.JTRC_HUFFBITS, bits[9], bits[10], bits[11], bits[12], bits[13], bits[14], bits[15], bits[16]);
 
                 /* Here we just do minimal validation of the counts to avoid walking
                  * off the end of our table space.  jdhuff.c will check more carefully.
@@ -1044,10 +1044,10 @@ namespace LibJpeg.NET
                 }
 
                 if (index < 0 || index >= JpegConstants.NUM_HUFF_TBLS)
-                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_DHT_INDEX, index);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_DHT_INDEX, index);
 
-                //memcpy((void *) htblptr.bits, (const void *) bits, sizeof(htblptr.bits));
-                //memcpy((void *) htblptr.huffval, (const void *) huffval, sizeof(htblptr.huffval));
+                Array.Copy(bits, htblptr.bits, htblptr.bits.Length);
+                Array.Copy(huffval, htblptr.huffval, htblptr.huffval.Length);
             }
 
             if (length != 0)
@@ -1075,10 +1075,10 @@ namespace LibJpeg.NET
                 int prec = n >> 4;
                 n &= 0x0F;
 
-                m_cinfo.TRACEMS2(1, (int)J_MESSAGE_CODE.JTRC_DQT, n, prec);
+                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_DQT, n, prec);
 
                 if (n >= JpegConstants.NUM_QUANT_TBLS)
-                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_DQT_INDEX, n);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_DQT_INDEX, n);
 
                 if (m_cinfo.m_quant_tbl_ptrs[n] == null)
                     m_cinfo.m_quant_tbl_ptrs[n] = new JQUANT_TBL();
@@ -1113,7 +1113,7 @@ namespace LibJpeg.NET
                 {
                     for (int i = 0; i < JpegConstants.DCTSIZE2; i += 8)
                     {
-                        m_cinfo.TRACEMS8(2, (int)J_MESSAGE_CODE.JTRC_QUANTVALS, quant_ptr.quantval[i], 
+                        m_cinfo.TRACEMS(2, (int)J_MESSAGE_CODE.JTRC_QUANTVALS, quant_ptr.quantval[i], 
                             quant_ptr.quantval[i + 1], quant_ptr.quantval[i + 2], 
                             quant_ptr.quantval[i + 3], quant_ptr.quantval[i + 4],
                             quant_ptr.quantval[i + 5], quant_ptr.quantval[i + 6], quant_ptr.quantval[i + 7]);
@@ -1148,7 +1148,7 @@ namespace LibJpeg.NET
                 return false;
             
             int tmp = temp;
-            m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_DRI, tmp);
+            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_DRI, tmp);
             m_cinfo.m_restart_interval = (uint)tmp;
 
             return true;
@@ -1172,7 +1172,7 @@ namespace LibJpeg.NET
                 return false;
 
             if (c != 0xFF || c2 != (int)JPEG_MARKER.M_SOI)
-                m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_NO_SOI, c, c2);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_SOI, c, c2);
 
             m_cinfo.m_unread_marker = c2;
             return true;

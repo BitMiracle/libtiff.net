@@ -171,11 +171,11 @@ namespace LibJpeg.NET
 
             /* Make sure my internal arrays won't overflow */
             if (cinfo.m_out_color_components > MAX_Q_COMPS)
-                cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_COMPONENTS, MAX_Q_COMPS);
+                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_COMPONENTS, MAX_Q_COMPS);
 
             /* Make sure colormap indexes can be represented by JSAMPLEs */
             if (cinfo.m_desired_number_of_colors > (JpegConstants.MAXJSAMPLE + 1))
-                cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, JpegConstants.MAXJSAMPLE + 1);
+                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, JpegConstants.MAXJSAMPLE + 1);
 
             /* Create the colormap and color index table. */
             create_colormap();
@@ -564,9 +564,9 @@ namespace LibJpeg.NET
 
             /* Report selected color counts */
             if (m_cinfo.m_out_color_components == 3)
-                m_cinfo.TRACEMS4(1, (int)J_MESSAGE_CODE.JTRC_QUANT_3_NCOLORS, total_colors, m_Ncolors[0], m_Ncolors[1], m_Ncolors[2]);
+                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_QUANT_3_NCOLORS, total_colors, m_Ncolors[0], m_Ncolors[1], m_Ncolors[2]);
             else
-                m_cinfo.TRACEMS1(1, (int)J_MESSAGE_CODE.JTRC_QUANT_NCOLORS, total_colors);
+                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_QUANT_NCOLORS, total_colors);
 
             /* Allocate and fill in the colormap. */
             /* The colors are ordered in the map in standard row-major order, */
@@ -777,7 +777,7 @@ namespace LibJpeg.NET
 
             /* Must have at least 2 color values per component */
             if (iroot < 2)
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, (int) temp);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, (int) temp);
 
             /* Initialize to iroot color values for each component */
             int total_colors = 1;

@@ -188,17 +188,17 @@ namespace LibJpeg.NET
             if ((long) m_cinfo.m_image_height > (long) JpegConstants.JPEG_MAX_DIMENSION ||
                 (long) m_cinfo.m_image_width > (long) JpegConstants.JPEG_MAX_DIMENSION)
             {
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int)JpegConstants.JPEG_MAX_DIMENSION);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int)JpegConstants.JPEG_MAX_DIMENSION);
 
             }
 
             /* For now, precision must match compiled-in value... */
             if (m_cinfo.m_data_precision != JpegConstants.BITS_IN_JSAMPLE)
-                m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_PRECISION, m_cinfo.m_data_precision);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PRECISION, m_cinfo.m_data_precision);
 
             /* Check that number of components won't exceed internal array sizes */
             if (m_cinfo.m_num_components > JpegConstants.MAX_COMPONENTS)
-                m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
+                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
 
             /* Compute maximum sampling factors; check factor validity */
             m_cinfo.m_max_h_samp_factor = 1;
@@ -300,11 +300,12 @@ namespace LibJpeg.NET
                 /* Make sure specified quantization table is present */
                 int qtblno = componentInfo.quant_tbl_no;
                 if (qtblno < 0 || qtblno >= JpegConstants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
-                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
                 
                 /* OK, save away the quantization table */
                 JQUANT_TBL qtbl = new JQUANT_TBL();
-                //memcpy((void *) qtbl, (const void *) m_cinfo.m_quant_tbl_ptrs[qtblno], sizeof(JQUANT_TBL));
+                Array.Copy(m_cinfo.m_quant_tbl_ptrs[qtblno].quantval, qtbl.quantval, qtbl.quantval.Length);
+                qtbl.sent_table = m_cinfo.m_quant_tbl_ptrs[qtblno].sent_table;
                 componentInfo.quant_table = qtbl;
             }
         }
@@ -347,7 +348,7 @@ namespace LibJpeg.NET
             {
                 /* Interleaved (multi-component) scan */
                 if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > JpegConstants.MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 /* Overall image size in MCUs */
                 m_cinfo.m_MCUs_per_row = (uint)JpegUtils.jdiv_round_up(

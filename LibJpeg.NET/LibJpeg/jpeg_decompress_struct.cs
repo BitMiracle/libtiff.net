@@ -308,7 +308,7 @@ namespace LibJpeg.NET
         public ReadResult jpeg_read_header(bool require_image)
         {
             if (m_global_state != JpegState.DSTATE_START && m_global_state != JpegState.DSTATE_INHEADER)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             ReadResult retcode = jpeg_consume_input();
 
@@ -398,7 +398,7 @@ namespace LibJpeg.NET
                 m_output_scan_number = m_input_scan_number;
             }
             else if (m_global_state != JpegState.DSTATE_PRESCAN)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Perform any dummy output passes, and set up for the final pass */
             return output_pass_setup();
@@ -419,7 +419,7 @@ namespace LibJpeg.NET
         public uint jpeg_read_scanlines(byte[][] scanlines, uint max_lines)
         {
             if (m_global_state != JpegState.DSTATE_SCANNING)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (m_output_scanline >= m_output_height)
             {
@@ -469,7 +469,7 @@ namespace LibJpeg.NET
             else if (m_global_state != JpegState.DSTATE_STOPPING)
             {
                 /* STOPPING = repeat call after a suspension, anything else is error */
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
             }
 
             /* Read until EOI */
@@ -498,7 +498,7 @@ namespace LibJpeg.NET
         public uint jpeg_read_raw_data(byte[][][] data, uint max_lines)
         {
             if (m_global_state != JpegState.DSTATE_RAW_OK)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (m_output_scanline >= m_output_height)
             {
@@ -548,7 +548,7 @@ namespace LibJpeg.NET
         {
             /* Only valid after jpeg_read_header completes */
             if (m_global_state < JpegState.DSTATE_READY || m_global_state > JpegState.DSTATE_STOPPING)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             return m_inputctl.HasMultipleScans();
         }
@@ -559,7 +559,7 @@ namespace LibJpeg.NET
         public bool jpeg_start_output(int scan_number)
         {
             if (m_global_state != JpegState.DSTATE_BUFIMAGE && m_global_state != JpegState.DSTATE_PRESCAN)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Limit scan number to valid range */
             if (scan_number <= 0)
@@ -591,7 +591,7 @@ namespace LibJpeg.NET
             else if (m_global_state != JpegState.DSTATE_BUFPOST)
             {
                 /* BUFPOST = repeat call after a suspension, anything else is error */
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
             }
 
             /* Read markers looking for SOS or EOI */
@@ -615,7 +615,7 @@ namespace LibJpeg.NET
         {
             /* Check for valid jpeg object */
             if (m_global_state < JpegState.DSTATE_START || m_global_state > JpegState.DSTATE_STOPPING)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             return m_inputctl.EOIReached();
         }
@@ -659,7 +659,7 @@ namespace LibJpeg.NET
                     retcode = m_inputctl.consume_input();
                     break;
                 default:
-                    ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                    ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
                     break;
             }
             return retcode;
@@ -678,7 +678,7 @@ namespace LibJpeg.NET
             // Do computations that are needed before master selection phase
             /* Prevent application from calling me at wrong times */
             if (m_global_state != JpegState.DSTATE_READY)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Compute actual output image dimensions and DCT scaling choices. */
             if (m_scale_num * 8 <= m_scale_denom)
@@ -847,7 +847,7 @@ namespace LibJpeg.NET
                 return m_coef.GetCoefArrays();
 
             /* Oops, improper usage */
-            ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+            ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
             /* keep compiler happy */
             return null;
         }
@@ -862,7 +862,7 @@ namespace LibJpeg.NET
         {
             /* Safety check to ensure start_compress not called yet. */
             if (dstinfo.m_global_state != JpegState.CSTATE_START)
-                ERREXIT1((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)dstinfo.m_global_state);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)dstinfo.m_global_state);
 
             /* Copy fundamental image dimensions */
             dstinfo.m_image_width = m_image_width;
@@ -898,7 +898,7 @@ namespace LibJpeg.NET
             */
             dstinfo.m_num_components = m_num_components;
             if (dstinfo.m_num_components < 1 || dstinfo.m_num_components> JpegConstants.MAX_COMPONENTS)
-                ERREXIT2((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, dstinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
+                ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, dstinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
 
             for (int ci = 0; ci < dstinfo.m_num_components; ci++)
             {
@@ -913,7 +913,7 @@ namespace LibJpeg.NET
                 */
                 int tblno = dstinfo.m_comp_info[ci].quant_tbl_no;
                 if (tblno < 0 || tblno >= JpegConstants.NUM_QUANT_TBLS || m_quant_tbl_ptrs[tblno] == null)
-                    ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
+                    ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
 
                 JQUANT_TBL c_quant = m_comp_info[ci].quant_table;
                 if (c_quant != null)
@@ -922,7 +922,7 @@ namespace LibJpeg.NET
                     for (int coefi = 0; coefi < JpegConstants.DCTSIZE2; coefi++)
                     {
                         if (c_quant.quantval[coefi] != slot_quant.quantval[coefi])
-                            ERREXIT1((int)J_MESSAGE_CODE.JERR_MISMATCHED_QUANT_TABLE, tblno);
+                            ERREXIT((int)J_MESSAGE_CODE.JERR_MISMATCHED_QUANT_TABLE, tblno);
                     }
                 }
                 /* Note: we do not copy the source's Huffman table assignments;
@@ -1188,7 +1188,7 @@ namespace LibJpeg.NET
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
                                 break;
                             default:
-                                WARNMS1((int)J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
+                                WARNMS((int)J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr; /* assume it's YCbCr */
                                 break;
                         }
@@ -1212,7 +1212,7 @@ namespace LibJpeg.NET
                         }
                         else
                         {
-                            TRACEMS3(1, (int)J_MESSAGE_CODE.JTRC_UNKNOWN_IDS, cid0, cid1, cid2);
+                            TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_UNKNOWN_IDS, cid0, cid1, cid2);
                             /* assume it's YCbCr */
                             m_jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
                         }
@@ -1233,7 +1233,7 @@ namespace LibJpeg.NET
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCCK;
                                 break;
                             default:
-                                WARNMS1((int)J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
+                                WARNMS((int)J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
                                 /* assume it's YCCK */
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCCK;
                                 break;

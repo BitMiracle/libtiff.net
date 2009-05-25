@@ -108,6 +108,7 @@ namespace LibJpeg.NET
                 JBLOCK[] buffer = new JBLOCK[JpegConstants.D_MAX_BLOCKS_IN_MCU];
                 for (int i = 0; i < JpegConstants.D_MAX_BLOCKS_IN_MCU; i++)
                 {
+                    buffer[i] = new JBLOCK();
                     m_MCU_buffer[i] = buffer[i];
                 }
 
@@ -264,8 +265,10 @@ namespace LibJpeg.NET
                 for (uint MCU_col_num = m_MCU_ctr; MCU_col_num <= last_MCU_col; MCU_col_num++)
                 {
                     /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
+                    for (int i = 0; i < m_cinfo.m_blocks_in_MCU; i++)
+                        Array.Clear(m_MCU_buffer[i].data, 0, m_MCU_buffer[i].data.Length);
                     //memset((void*)m_MCU_buffer[0], 0, m_cinfo.m_blocks_in_MCU * (sizeof(short) * JpegConstants.DCTSIZE2));
-
+                    
                     JBLOCK[][] temp = new JBLOCK[1][];
                     temp[0] = m_MCU_buffer;
                     if (!m_cinfo.m_entropy.decode_mcu(temp))

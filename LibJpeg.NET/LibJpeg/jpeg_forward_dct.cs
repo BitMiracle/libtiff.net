@@ -168,7 +168,7 @@ namespace LibJpeg.NET
 
                 /* Make sure specified quantization table is present */
                 if (qtblno < 0 || qtblno >= JpegConstants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
-                    m_cinfo.ERREXIT1((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
+                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
 
                 JQUANT_TBL qtbl = m_cinfo.m_quant_tbl_ptrs[qtblno];
 

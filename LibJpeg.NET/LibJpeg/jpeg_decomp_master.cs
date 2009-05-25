@@ -317,7 +317,7 @@ namespace LibJpeg.NET
             m_cinfo.m_sampleRangeLimitOffset = tableOffset;
 
             /* First segment of "simple" table: limit[x] = 0 for x < 0 */
-            //memset((void *)table, 0, (JpegConstants.MAXJSAMPLE + 1) * sizeof(byte));
+            Array.Clear(table, 0, JpegConstants.MAXJSAMPLE + 1);
 
             /* Main part of "simple" table: limit[x] = x */
             for (int i = 0; i <= JpegConstants.MAXJSAMPLE; i++)
@@ -330,8 +330,8 @@ namespace LibJpeg.NET
                 table[tableOffset + i] = JpegConstants.MAXJSAMPLE;
 
             /* Second half of post-IDCT table */
-            //memset((void *) (table + tableOffset + (2 * (JpegConstants.MAXJSAMPLE + 1))), 0, (2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE) * sizeof(JSAMPLE));
-            //memcpy((void *) (table + tableOffset + (4 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE)), (const void *) m_cinfo.m_sample_range_limit, JpegConstants.CENTERJSAMPLE * sizeof(byte));
+            Array.Clear(table, tableOffset + (2 * (JpegConstants.MAXJSAMPLE + 1)), 2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE);
+            Array.Copy(m_cinfo.m_sample_range_limit, 0, table, tableOffset + 4 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE, JpegConstants.CENTERJSAMPLE);
         }
     }
 }

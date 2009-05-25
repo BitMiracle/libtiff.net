@@ -41,7 +41,7 @@ namespace LibJpeg.NET
         * In case of suspension, we exit WITHOUT updating them.
         */
         private bitread_perm_state m_bitstate;    /* Bit buffer at start of MCU */
-        private savable_state m_saved;        /* Other state at start of MCU */
+        private savable_state m_saved = new savable_state();        /* Other state at start of MCU */
 
         /* These fields are NOT loaded into local working state. */
         private uint m_restarts_to_go;    /* MCUs left in this restart interval */
