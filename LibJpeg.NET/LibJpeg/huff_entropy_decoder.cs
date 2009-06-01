@@ -35,6 +35,11 @@ namespace LibJpeg.NET
         {
             //savable_state operator=(savable_state src);
             public int[] last_dc_val = new int[JpegConstants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
+
+            public void Assign(savable_state ss)
+            {
+                Array.Copy(ss.last_dc_val, last_dc_val, last_dc_val.Length);
+            }
         }
 
         /* These fields are loaded into local variables at start of each MCU.
@@ -164,7 +169,8 @@ namespace LibJpeg.NET
                 int bits_left;
                 bitread_working_state br_state = new bitread_working_state();
                 BITREAD_LOAD_STATE(ref m_bitstate, out get_buffer, out bits_left, ref br_state);
-                savable_state state = m_saved;
+                savable_state state = new savable_state();
+                state.Assign(m_saved);
 
                 /* Outer loop handles each block in the MCU */
 

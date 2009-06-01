@@ -251,7 +251,7 @@ namespace LibJpeg.NET
         {
             if (bits_left < nbits)
             {
-                if (!jpeg_fill_bit_buffer(state, get_buffer, bits_left, nbits))
+                if (!jpeg_fill_bit_buffer(ref state, get_buffer, bits_left, nbits))
                     return false;
 
                 get_buffer = state.get_buffer;
@@ -277,7 +277,7 @@ namespace LibJpeg.NET
         }
 
         /* Load up the bit buffer to a depth of at least nbits */
-        protected static bool jpeg_fill_bit_buffer(bitread_working_state state, int get_buffer, int bits_left, int nbits)
+        protected static bool jpeg_fill_bit_buffer(ref bitread_working_state state, int get_buffer, int bits_left, int nbits)
         {
             /* Attempt to load at least MIN_GET_BITS bits into get_buffer. */
             /* (It is assumed that no request will be for more than that many bits.) */
@@ -392,7 +392,7 @@ namespace LibJpeg.NET
 
             if (bits_left < JpegConstants.HUFF_LOOKAHEAD)
             {
-                if (!jpeg_fill_bit_buffer(state, get_buffer, bits_left, 0))
+                if (!jpeg_fill_bit_buffer(ref state, get_buffer, bits_left, 0))
                 {
                     result = -1;
                     return false;

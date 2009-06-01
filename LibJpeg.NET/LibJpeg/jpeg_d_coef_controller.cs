@@ -267,7 +267,6 @@ namespace LibJpeg.NET
                     /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
                     for (int i = 0; i < m_cinfo.m_blocks_in_MCU; i++)
                         Array.Clear(m_MCU_buffer[i].data, 0, m_MCU_buffer[i].data.Length);
-                    //memset((void*)m_MCU_buffer[0], 0, m_cinfo.m_blocks_in_MCU * (sizeof(short) * JpegConstants.DCTSIZE2));
                     
                     JBLOCK[][] temp = new JBLOCK[1][];
                     temp[0] = m_MCU_buffer;
