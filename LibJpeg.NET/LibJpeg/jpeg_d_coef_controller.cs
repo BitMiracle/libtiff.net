@@ -176,9 +176,9 @@ namespace LibJpeg.NET
                     }
 
                     /* Try to fetch the MCU. */
-                    JBLOCK[][] temp = new JBLOCK[1][];
-                    temp[0] = m_MCU_buffer;
-                    if (!m_cinfo.m_entropy.decode_mcu(temp))
+                    //JBLOCK[][] temp = new JBLOCK[1][];
+                    //temp[0] = m_MCU_buffer;
+                    if (!m_cinfo.m_entropy.decode_mcu(m_MCU_buffer))
                     {
                         /* Suspension forced; update state counters and exit */
                         m_MCU_vert_offset = yoffset;
@@ -268,9 +268,9 @@ namespace LibJpeg.NET
                     for (int i = 0; i < m_cinfo.m_blocks_in_MCU; i++)
                         Array.Clear(m_MCU_buffer[i].data, 0, m_MCU_buffer[i].data.Length);
                     
-                    JBLOCK[][] temp = new JBLOCK[1][];
-                    temp[0] = m_MCU_buffer;
-                    if (!m_cinfo.m_entropy.decode_mcu(temp))
+                    //JBLOCK[][] temp = new JBLOCK[1][];
+                    //temp[0] = m_MCU_buffer;
+                    if (!m_cinfo.m_entropy.decode_mcu(m_MCU_buffer))
                     {
                         /* Suspension forced; update state counters and exit */
                         m_MCU_vert_offset = yoffset;

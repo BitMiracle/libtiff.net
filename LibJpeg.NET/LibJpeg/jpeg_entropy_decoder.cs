@@ -81,7 +81,7 @@ namespace LibJpeg.NET
         protected bool m_insufficient_data; /* set true after emitting warning */
 
         public abstract void start_pass();
-        public abstract bool decode_mcu(JBLOCK[][] MCU_data);
+        public abstract bool decode_mcu(JBLOCK[] MCU_data);
 
         protected static int HUFF_EXTEND(int x, int s)
         {
@@ -247,7 +247,7 @@ namespace LibJpeg.NET
         * is evaluated multiple times.
         */
 
-        protected static bool CHECK_BIT_BUFFER(bitread_working_state state, int nbits, ref int get_buffer, ref int bits_left)
+        protected static bool CHECK_BIT_BUFFER(ref bitread_working_state state, int nbits, ref int get_buffer, ref int bits_left)
         {
             if (bits_left < nbits)
             {
@@ -420,7 +420,7 @@ namespace LibJpeg.NET
                 nb = JpegConstants.HUFF_LOOKAHEAD + 1;
             }
 
-            if ((result = jpeg_huff_decode(state, get_buffer, bits_left, htbl, nb)) < 0)
+            if ((result = jpeg_huff_decode(ref state, get_buffer, bits_left, htbl, nb)) < 0)
                 return false;
 
             get_buffer = state.get_buffer;
@@ -430,12 +430,12 @@ namespace LibJpeg.NET
         }
 
         /* Out-of-line case for Huffman code fetching */
-        protected static int jpeg_huff_decode(bitread_working_state state, int get_buffer, int bits_left, d_derived_tbl htbl, int min_bits)
+        protected static int jpeg_huff_decode(ref bitread_working_state state, int get_buffer, int bits_left, d_derived_tbl htbl, int min_bits)
         {
             /* HUFF_DECODE has determined that the code is at least min_bits */
             /* bits long, so fetch that many bits in one swoop. */
             int l = min_bits;
-            if (!CHECK_BIT_BUFFER(state, l, ref get_buffer, ref bits_left))
+            if (!CHECK_BIT_BUFFER(ref state, l, ref get_buffer, ref bits_left))
                 return -1;
 
             int code = GET_BITS(l, get_buffer, ref bits_left);
@@ -446,7 +446,7 @@ namespace LibJpeg.NET
             while (code > htbl.maxcode[l])
             {
                 code <<= 1;
-                if (!CHECK_BIT_BUFFER(state, 1, ref get_buffer, ref bits_left))
+                if (!CHECK_BIT_BUFFER(ref state, 1, ref get_buffer, ref bits_left))
                     return -1;
 
                 code |= GET_BITS(1, get_buffer, ref bits_left);

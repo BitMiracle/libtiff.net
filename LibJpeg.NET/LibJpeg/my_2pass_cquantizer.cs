@@ -296,14 +296,17 @@ namespace LibJpeg.NET
 
                 if (m_cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_FS)
                 {
-                    uint arraysize = (uint)((m_cinfo.m_output_width + 2) * (3 * sizeof(short)));
-
                     /* Allocate Floyd-Steinberg workspace if we didn't already. */
                     if (m_fserrors == null)
-                        m_fserrors = new short[arraysize / sizeof(short)];
-
-                    /* Initialize the propagated errors to zero. */
-                    //memset((void*)m_fserrors, 0, arraysize);
+                    {
+                        uint arraysize = (uint)((m_cinfo.m_output_width + 2) * 3);
+                        m_fserrors = new short[arraysize];
+                    }
+                    else
+                    {
+                        /* Initialize the propagated errors to zero. */
+                        Array.Clear(m_fserrors, 0, m_fserrors.Length);
+                    }
 
                     /* Make the error-limit table if we didn't already. */
                     if (m_error_limiter == null)
@@ -317,7 +320,7 @@ namespace LibJpeg.NET
             if (m_needs_zeroed)
             {
                 for (int i = 0; i < HIST_C0_ELEMS; i++)
-                    //memset((void*)m_histogram[i], 0, HIST_C1_ELEMS * HIST_C2_ELEMS * sizeof(ushort));
+                    Array.Clear(m_histogram[i], 0, m_histogram[i].Length);
 
                 m_needs_zeroed = false;
             }

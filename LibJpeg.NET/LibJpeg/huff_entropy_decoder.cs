@@ -147,7 +147,7 @@ namespace LibJpeg.NET
         /// coefficients may already have been assigned.  This is harmless for
         /// this module, since we'll just re-assign them on the next call.)
         /// </summary>
-        public override bool decode_mcu(JBLOCK[][] MCU_data)
+        public override bool decode_mcu(JBLOCK[] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
             if (m_cinfo.m_restart_interval != 0)
@@ -185,7 +185,7 @@ namespace LibJpeg.NET
 
                     if (s != 0)
                     {
-                        if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
+                        if (!CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left))
                             return false;
 
                         int r = GET_BITS(s, get_buffer, ref bits_left);
@@ -200,7 +200,7 @@ namespace LibJpeg.NET
                         state.last_dc_val[ci] = s;
 
                         /* Output the DC coefficient (assumes jpeg_natural_order[0] = 0) */
-                        MCU_data[blkn][0][0] = (short) s;
+                        MCU_data[blkn][0] = (short) s;
                     }
 
                     if (m_ac_needed[blkn])
@@ -218,7 +218,7 @@ namespace LibJpeg.NET
                             if (s != 0)
                             {
                                 k += r;
-                                if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
+                                if (!CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left))
                                     return false;
                                 r = GET_BITS(s, get_buffer, ref bits_left);
                                 s = HUFF_EXTEND(r, s);
@@ -227,7 +227,7 @@ namespace LibJpeg.NET
                                    * Note: the extra entries in jpeg_natural_order[] will save us
                                    * if k >= DCTSIZE2, which could happen if the data is corrupted.
                                    */
-                                MCU_data[blkn][0][JpegUtils.jpeg_natural_order[k]] = (short) s;
+                                MCU_data[blkn][JpegUtils.jpeg_natural_order[k]] = (short) s;
                             }
                             else
                             {
@@ -253,7 +253,7 @@ namespace LibJpeg.NET
                             if (s != 0)
                             {
                                 k += r;
-                                if (!CHECK_BIT_BUFFER(br_state, s, ref get_buffer, ref bits_left))
+                                if (!CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left))
                                     return false;
 
                                 DROP_BITS(s, ref bits_left);

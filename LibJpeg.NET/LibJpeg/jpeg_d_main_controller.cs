@@ -239,6 +239,7 @@ namespace LibJpeg.NET
             ComponentBuffer[] cb = new ComponentBuffer[JpegConstants.MAX_COMPONENTS];
             for (int i = 0; i < JpegConstants.MAX_COMPONENTS; i++)
             {
+                cb[i] = new ComponentBuffer();
                 cb[i].SetBuffer(m_buffer[i], null, 0);
             }
 
