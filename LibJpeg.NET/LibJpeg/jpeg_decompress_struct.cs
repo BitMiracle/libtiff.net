@@ -196,7 +196,7 @@ namespace LibJpeg.NET
          * Note that the decompressor output side must not use these fields.
          */
         internal int m_comps_in_scan;      /* # of JPEG components in this scan */
-        internal jpeg_component_info[] m_cur_comp_info = new jpeg_component_info[JpegConstants.MAX_COMPS_IN_SCAN];
+        internal int[] m_cur_comp_info = new int[JpegConstants.MAX_COMPS_IN_SCAN];
         /* *cur_comp_info[i] describes component that appears i'th in SOS */
 
         internal uint m_MCUs_per_row;    /* # of MCUs across the image */

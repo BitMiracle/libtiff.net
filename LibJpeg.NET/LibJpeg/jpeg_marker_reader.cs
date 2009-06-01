@@ -935,7 +935,7 @@ namespace LibJpeg.NET
                 if (!idFound)
                     m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, cc);
 
-                m_cinfo.m_cur_comp_info[i] = m_cinfo.m_comp_info[foundIndex];
+                m_cinfo.m_cur_comp_info[i] = foundIndex;
                 m_cinfo.m_comp_info[foundIndex].dc_tbl_no = (c >> 4) & 15;
                 m_cinfo.m_comp_info[foundIndex].ac_tbl_no = (c) & 15;
 

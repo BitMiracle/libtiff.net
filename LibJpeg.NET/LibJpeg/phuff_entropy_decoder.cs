@@ -138,7 +138,7 @@ namespace LibJpeg.NET
              */
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                int cindex = m_cinfo.m_cur_comp_info[ci].component_index;
+                int cindex = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].component_index;
                 if (!is_DC_band && m_cinfo.m_coef_bits[cindex][0] < 0) /* AC without prior DC scan */
                     m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, 0);
 
@@ -173,7 +173,7 @@ namespace LibJpeg.NET
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                 /* Make sure requested tables are present, and compute derived tables.
                  * We may build same derived table more than once, but it's not expensive.
                  */
@@ -281,7 +281,7 @@ namespace LibJpeg.NET
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     int s;
-                    if (!HUFF_DECODE(out s, br_state, m_derived_tbls[m_cinfo.m_cur_comp_info[ci].dc_tbl_no], ref get_buffer, ref bits_left))
+                    if (!HUFF_DECODE(out s, br_state, m_derived_tbls[m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no], ref get_buffer, ref bits_left))
                         return false;
 
                     if (s != 0)

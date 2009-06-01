@@ -142,7 +142,7 @@ namespace LibJpeg.NET
             /* Align the virtual buffers for the components used in this scan. */
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                 
                 buffer[ci] = m_whole_image[componentInfo.component_index].access_virt_barray(
                     (uint)(m_cinfo.m_input_iMCU_row * componentInfo.v_samp_factor),
@@ -163,7 +163,7 @@ namespace LibJpeg.NET
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
+                        jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                         uint start_col = (uint)(MCU_col_num * componentInfo.MCU_width);
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
@@ -287,7 +287,7 @@ namespace LibJpeg.NET
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
+                        jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
 
                         /* Don't bother to IDCT an uninteresting component. */
                         if (!componentInfo.component_needed)
@@ -747,10 +747,12 @@ namespace LibJpeg.NET
             }
             else
             {
+                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]];
+
                 if (m_cinfo.m_input_iMCU_row < (m_cinfo.m_total_iMCU_rows - 1))
-                    m_MCU_rows_per_iMCU_row = m_cinfo.m_cur_comp_info[0].v_samp_factor;
+                    m_MCU_rows_per_iMCU_row = componentInfo.v_samp_factor;
                 else
-                    m_MCU_rows_per_iMCU_row = m_cinfo.m_cur_comp_info[0].last_row_height;
+                    m_MCU_rows_per_iMCU_row = componentInfo.last_row_height;
             }
 
             m_MCU_ctr = 0;

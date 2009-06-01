@@ -291,7 +291,7 @@ namespace LibJpeg.NET
         {
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                 
                 /* No work if we already saved Q-table for this component */
                 if (componentInfo.quant_table != null)
@@ -307,6 +307,7 @@ namespace LibJpeg.NET
                 Array.Copy(m_cinfo.m_quant_tbl_ptrs[qtblno].quantval, qtbl.quantval, qtbl.quantval.Length);
                 qtbl.sent_table = m_cinfo.m_quant_tbl_ptrs[qtblno].sent_table;
                 componentInfo.quant_table = qtbl;
+                m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;
             }
         }
 
@@ -319,7 +320,7 @@ namespace LibJpeg.NET
             if (m_cinfo.m_comps_in_scan == 1)
             {
                 /* Noninterleaved (single-component) scan */
-                jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[0];
+                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]];
 
                 /* Overall image size in MCUs */
                 m_cinfo.m_MCUs_per_row = componentInfo.width_in_blocks;
@@ -339,6 +340,7 @@ namespace LibJpeg.NET
                 if (tmp == 0)
                     tmp = componentInfo.v_samp_factor;
                 componentInfo.last_row_height = tmp;
+                m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]] = componentInfo;
 
                 /* Prepare array describing MCU composition */
                 m_cinfo.m_blocks_in_MCU = 1;
@@ -361,7 +363,7 @@ namespace LibJpeg.NET
 
                 for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                 {
-                    jpeg_component_info componentInfo = m_cinfo.m_cur_comp_info[ci];
+                    jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
 
                     /* Sampling factors give # of blocks of component in each MCU */
                     componentInfo.MCU_width = componentInfo.h_samp_factor;
@@ -384,11 +386,11 @@ namespace LibJpeg.NET
                     int mcublks = componentInfo.MCU_blocks;
                     if (m_cinfo.m_blocks_in_MCU + mcublks > JpegConstants.D_MAX_BLOCKS_IN_MCU)
                         m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_MCU_SIZE);
-                    
+
+                    m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;
+
                     while (mcublks-- > 0)
-                    {
                         m_cinfo.m_MCU_membership[m_cinfo.m_blocks_in_MCU++] = ci;
-                    }
                 }
             }
         }

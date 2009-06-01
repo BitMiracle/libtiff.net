@@ -77,5 +77,29 @@ namespace LibJpeg.NET
          * This field is currently used only for decompression.
          */
         internal JQUANT_TBL quant_table;
+
+        internal void Assign(jpeg_component_info ci)
+        {
+            component_id = ci.component_id;
+            component_index = ci.component_index;
+            h_samp_factor = ci.h_samp_factor;
+            v_samp_factor = ci.v_samp_factor;
+            quant_tbl_no = ci.quant_tbl_no;
+            dc_tbl_no = ci.dc_tbl_no;
+            ac_tbl_no = ci.ac_tbl_no;
+            width_in_blocks = ci.width_in_blocks;
+            height_in_blocks = ci.height_in_blocks;
+            DCT_scaled_size = ci.DCT_scaled_size;
+            downsampled_width = ci.downsampled_width;
+            downsampled_height = ci.downsampled_height;
+            component_needed = ci.component_needed;
+            MCU_width = ci.MCU_width;
+            MCU_height = ci.MCU_height;
+            MCU_blocks = ci.MCU_blocks;
+            MCU_sample_width = ci.MCU_sample_width;
+            last_col_width = ci.last_col_width;
+            last_row_height = ci.last_row_height;
+            quant_table = ci.quant_table;
+        }
     }
 }
