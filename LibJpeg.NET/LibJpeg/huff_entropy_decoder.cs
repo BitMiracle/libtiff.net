@@ -168,7 +168,7 @@ namespace LibJpeg.NET
                 int get_buffer;
                 int bits_left;
                 bitread_working_state br_state = new bitread_working_state();
-                BITREAD_LOAD_STATE(ref m_bitstate, out get_buffer, out bits_left, ref br_state);
+                BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
                 savable_state state = new savable_state();
                 state.Assign(m_saved);
 
@@ -180,7 +180,7 @@ namespace LibJpeg.NET
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     int s;
-                    if (!HUFF_DECODE(out s, br_state, m_dc_cur_tbls[blkn], ref get_buffer, ref bits_left))
+                    if (!HUFF_DECODE(out s, ref br_state, m_dc_cur_tbls[blkn], ref get_buffer, ref bits_left))
                         return false;
 
                     if (s != 0)
@@ -209,7 +209,7 @@ namespace LibJpeg.NET
                         /* Since zeroes are skipped, output area must be cleared beforehand */
                         for (int k = 1; k < JpegConstants.DCTSIZE2; k++)
                         {
-                            if (!HUFF_DECODE(out s, br_state, m_ac_cur_tbls[blkn], ref get_buffer, ref bits_left))
+                            if (!HUFF_DECODE(out s, ref br_state, m_ac_cur_tbls[blkn], ref get_buffer, ref bits_left))
                                 return false;
 
                             int r = s >> 4;
@@ -244,7 +244,7 @@ namespace LibJpeg.NET
                         /* In this path we just discard the values */
                         for (int k = 1; k < JpegConstants.DCTSIZE2; k++)
                         {
-                            if (!HUFF_DECODE(out s, br_state, m_ac_cur_tbls[blkn], ref get_buffer, ref bits_left))
+                            if (!HUFF_DECODE(out s, ref br_state, m_ac_cur_tbls[blkn], ref get_buffer, ref bits_left))
                                 return false;
 
                             int r = s >> 4;
@@ -270,8 +270,8 @@ namespace LibJpeg.NET
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(ref m_bitstate, ref get_buffer, ref bits_left);
-                m_saved = state;
+                BITREAD_SAVE_STATE(ref m_bitstate, get_buffer, bits_left);
+                m_saved.Assign(state);
             }
 
             /* Account for restart interval (no-op if not using restarts) */

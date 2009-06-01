@@ -142,6 +142,8 @@ namespace LibJpeg.NET
         private int m_sv_actual;		/* number of entries in use */
 
         private byte[][] m_colorindex;	/* Precomputed mapping for speed */
+        private int[] m_colorindexOffset;
+
         /* colorindex[i][j] = index of color closest to pixel value j in component i,
         * premultiplied as described above.  Since colormap indexes must fit into
         * bytes, the entries of this array will too.
@@ -243,9 +245,9 @@ namespace LibJpeg.NET
                             alloc_fs_workspace();
 
                         /* Initialize the propagated errors to zero. */
-                        uint arraysize = (uint)((m_cinfo.m_output_width + 2) * sizeof(short));
-                        //for (int i = 0; i < m_cinfo.m_out_color_components; i++)
-                        //    memset((void*)m_fserrors[i], 0, arraysize);
+                        int arraysize = (int)(m_cinfo.m_output_width + 2);
+                        for (int i = 0; i < m_cinfo.m_out_color_components; i++)
+                            Array.Clear(m_fserrors[i], 0, arraysize);
 
                         break;
                     }
@@ -318,7 +320,7 @@ namespace LibJpeg.NET
                     int pixcode = 0;
                     for (int ci = 0; ci < nc; ci++)
                     {
-                        pixcode += m_colorindex[ci][(int)input_buf[inRow][inIndex]];
+                        pixcode += m_colorindex[ci][m_colorindexOffset[ci] + (int)input_buf[inRow][inIndex]];
                         inIndex++;
                     }
 
@@ -346,13 +348,13 @@ namespace LibJpeg.NET
 
                 for (uint col = width; col > 0; col--)
                 {
-                    int pixcode = m_colorindex[0][(int)input_buf[inRow][inIndex]];
+                    int pixcode = m_colorindex[0][m_colorindexOffset[0] + (int)input_buf[inRow][inIndex]];
                     inIndex++;
 
-                    pixcode += m_colorindex[1][(int)input_buf[inRow][inIndex]];
+                    pixcode += m_colorindex[1][m_colorindexOffset[1] + (int)input_buf[inRow][inIndex]];
                     inIndex++;
 
-                    pixcode += m_colorindex[2][(int)input_buf[inRow][inIndex]];
+                    pixcode += m_colorindex[2][m_colorindexOffset[2] + (int)input_buf[inRow][inIndex]];
                     inIndex++;
 
                     output_buf[outRow][outIndex] = (byte)pixcode;
@@ -373,7 +375,8 @@ namespace LibJpeg.NET
             for (int row = 0; row < num_rows; row++)
             {
                 /* Initialize output values to 0 so can process components separately */
-                //memset((void*)output_buf[out_row + row], 0, width * sizeof(byte));
+                Array.Clear(output_buf[out_row + row], 0, (int)width);
+
                 int row_index = m_row_index;
                 for (int ci = 0; ci < nc; ci++)
                 {
@@ -391,7 +394,7 @@ namespace LibJpeg.NET
                          * inputs.  The maximum dither is +- MAXJSAMPLE; this sets the
                          * required amount of padding.
                          */
-                        output_buf[outRow][outIndex] += m_colorindex[ci][(int)input_buf[in_row + row][inputIndex] + m_odither[ci][row_index][col_index]];
+                        output_buf[outRow][outIndex] += m_colorindex[ci][m_colorindexOffset[ci] + (int)input_buf[in_row + row][inputIndex] + m_odither[ci][row_index][col_index]];
                         inputIndex += nc;
                         outIndex++;
                         col_index = (col_index + 1) & ODITHER_MASK;
@@ -424,13 +427,13 @@ namespace LibJpeg.NET
                 int col_index = 0;
                 for (uint col = width; col > 0; col--)
                 {
-                    int pixcode = m_colorindex[0][(int)input_buf[inRow][inIndex] + m_odither[0][row_index][col_index]];
+                    int pixcode = m_colorindex[0][m_colorindexOffset[0] + (int)input_buf[inRow][inIndex] + m_odither[0][row_index][col_index]];
                     inIndex++;
 
-                    pixcode += m_colorindex[1][(int)input_buf[inRow][inIndex] + m_odither[1][row_index][col_index]];
+                    pixcode += m_colorindex[1][m_colorindexOffset[1] + (int)input_buf[inRow][inIndex] + m_odither[1][row_index][col_index]];
                     inIndex++;
 
-                    pixcode += m_colorindex[2][(int)input_buf[inRow][inIndex] + m_odither[2][row_index][col_index]];
+                    pixcode += m_colorindex[2][m_colorindexOffset[2] + (int)input_buf[inRow][inIndex] + m_odither[2][row_index][col_index]];
                     inIndex++;
 
                     output_buf[outRow][outIndex] = (byte)pixcode;
@@ -459,7 +462,7 @@ namespace LibJpeg.NET
             for (int row = 0; row < num_rows; row++)
             {
                 /* Initialize output values to 0 so can process components separately */
-                //memset((void*)output_buf[out_row + row], 0, width * sizeof(byte));
+                Array.Clear(output_buf[out_row + row], 0, (int)width);
 
                 for (int ci = 0; ci < nc; ci++)
                 {
@@ -513,7 +516,7 @@ namespace LibJpeg.NET
                         cur = limit[limitOffset + cur];
 
                         /* Select output value, accumulate into output code for this pixel */
-                        int pixcode = m_colorindex[ci][cur];
+                        int pixcode = m_colorindex[ci][m_colorindexOffset[ci] + cur];
                         output_buf[outRow][outIndex] += (byte)pixcode;
                         
                         /* Compute actual representation error at this pixel */
@@ -629,6 +632,7 @@ namespace LibJpeg.NET
             }
 
             m_colorindex = jpeg_common_struct.AllocJpegSamples((uint)(JpegConstants.MAXJSAMPLE + 1 + pad), (uint)m_cinfo.m_out_color_components);
+            m_colorindexOffset = new int[m_cinfo.m_out_color_components];
 
             /* blksize is number of adjacent repeated entries for a component */
             int blksize = m_sv_actual;
@@ -639,8 +643,8 @@ namespace LibJpeg.NET
                 blksize = blksize / nci;
 
                 /* adjust colorindex pointers to provide padding at negative indexes. */
-                //if (pad != 0)
-                //    m_colorindex[i] += JpegConstants.MAXJSAMPLE;
+                if (pad != 0)
+                    m_colorindexOffset[i] += JpegConstants.MAXJSAMPLE;
 
                 /* in loop, val = index of current output value, */
                 /* and k = largest j that maps to current val */
@@ -655,7 +659,7 @@ namespace LibJpeg.NET
                     }
 
                     /* premultiply so that no multiplication needed in main processing */
-                    m_colorindex[i][j] = (byte)(val * blksize);
+                    m_colorindex[i][m_colorindexOffset[i] + j] = (byte)(val * blksize);
                 }
 
                 /* Pad at both ends if necessary */
@@ -663,8 +667,8 @@ namespace LibJpeg.NET
                 {
                     for (int j = 1; j <= JpegConstants.MAXJSAMPLE; j++)
                     {
-                        m_colorindex[i][-j] = m_colorindex[i][0];
-                        m_colorindex[i][JpegConstants.MAXJSAMPLE + j] = m_colorindex[i][JpegConstants.MAXJSAMPLE];
+                        m_colorindex[i][m_colorindexOffset[i] + -j] = m_colorindex[i][m_colorindexOffset[i]];
+                        m_colorindex[i][m_colorindexOffset[i] + JpegConstants.MAXJSAMPLE + j] = m_colorindex[i][m_colorindexOffset[i] + JpegConstants.MAXJSAMPLE];
                     }
                 }
             }

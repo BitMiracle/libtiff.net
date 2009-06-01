@@ -88,14 +88,14 @@ namespace LibJpeg.NET
             return ((x) < extend_test[s] ? (x) + extend_offset[s] : (x));
         }
 
-        protected void BITREAD_LOAD_STATE(ref bitread_perm_state bitstate, out int get_buffer, out int bits_left, ref bitread_working_state br_state)
+        protected void BITREAD_LOAD_STATE(bitread_perm_state bitstate, out int get_buffer, out int bits_left, ref bitread_working_state br_state)
         {
             br_state.cinfo = m_cinfo;
             get_buffer = bitstate.get_buffer;
             bits_left = bitstate.bits_left;
         }
 
-        protected void BITREAD_SAVE_STATE(ref bitread_perm_state bitstate, ref int get_buffer, ref int bits_left)
+        protected void BITREAD_SAVE_STATE(ref bitread_perm_state bitstate, int get_buffer, int bits_left)
         {
             bitstate.get_buffer = get_buffer;
             bitstate.bits_left = bits_left;
@@ -385,7 +385,7 @@ namespace LibJpeg.NET
         *    more than HUFF_LOOKAHEAD bits long.
         * 3. jpeg_huff_decode returns -1 if forced to suspend.
         */
-        protected static bool HUFF_DECODE(out int result, bitread_working_state state, d_derived_tbl htbl, ref int get_buffer, ref int bits_left)
+        protected static bool HUFF_DECODE(out int result, ref bitread_working_state state, d_derived_tbl htbl, ref int get_buffer, ref int bits_left)
         {
             int nb = 0;
             bool doSlow = false;

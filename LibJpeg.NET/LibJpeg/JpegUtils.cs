@@ -97,32 +97,20 @@ namespace LibJpeg.NET
         /// </summary>
         public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, uint num_cols)
         {
-            uint count = (uint) (num_cols * sizeof(byte));
-
-            //for (int row = 0; row < num_rows; row++)
-            //    memcpy((void *)output_array[dest_row + row], (const void *)input_array[source_row + row], count);
+            for (int row = 0; row < num_rows; row++)
+                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
 
         public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, ComponentBuffer output_array, int dest_row, int num_rows, uint num_cols)
         {
-            uint count = (uint) (num_cols * sizeof(byte));
-
-            //for (int row = 0; row < num_rows; row++)
-            //    memcpy((void *)output_array[dest_row + row], (const void *)input_array[source_row + row], count);
+            for (int row = 0; row < num_rows; row++)
+                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
 
         public static void jcopy_sample_rows(byte[][] input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, uint num_cols)
         {
             for (int row = 0; row < num_rows; row++)
                 Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
-        }
-
-        /// <summary>
-        /// Copy a row of coefficient blocks from one place to another.
-        /// </summary>
-        public static void jcopy_block_row(JBLOCK[] input_row, JBLOCK[] output_row, uint num_blocks)
-        {
-            //memcpy((void *) output_row, (const void *) input_row, num_blocks * (JpegConstants.DCTSIZE2 * sizeof(short)));
         }
     }
 }

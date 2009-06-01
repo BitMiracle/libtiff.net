@@ -79,11 +79,13 @@ namespace LibJpeg.NET
 
         /* When doing block smoothing, we latch coefficient Al values here */
         private int[] m_coef_bits_latch;
+        private int m_coef_bits_savedOffset;
 
         public jpeg_d_coef_controller(jpeg_decompress_struct cinfo, bool need_full_buffer)
         {
             m_cinfo = cinfo;
             m_coef_bits_latch = null;
+            m_coef_bits_savedOffset = 0;
 
             /* Create the coefficient buffer. */
             if (need_full_buffer)
@@ -176,8 +178,6 @@ namespace LibJpeg.NET
                     }
 
                     /* Try to fetch the MCU. */
-                    //JBLOCK[][] temp = new JBLOCK[1][];
-                    //temp[0] = m_MCU_buffer;
                     if (!m_cinfo.m_entropy.decode_mcu(m_MCU_buffer))
                     {
                         /* Suspension forced; update state counters and exit */
@@ -268,8 +268,6 @@ namespace LibJpeg.NET
                     for (int i = 0; i < m_cinfo.m_blocks_in_MCU; i++)
                         Array.Clear(m_MCU_buffer[i].data, 0, m_MCU_buffer[i].data.Length);
                     
-                    //JBLOCK[][] temp = new JBLOCK[1][];
-                    //temp[0] = m_MCU_buffer;
                     if (!m_cinfo.m_entropy.decode_mcu(m_MCU_buffer))
                     {
                         /* Suspension forced; update state counters and exit */
@@ -527,8 +525,7 @@ namespace LibJpeg.NET
                     {
                         /* Fetch current DCT block into workspace so we can modify it. */
                         JBLOCK workspace = new JBLOCK();
-                        JBLOCK[] temp = new JBLOCK [] { workspace };
-                        JpegUtils.jcopy_block_row(buffer[bufferIndex], temp, (uint) 1);
+                        Array.Copy(buffer[bufferIndex][0].data, workspace.data, workspace.data.Length);
 
                         /* Update DC values */
                         if (block_num < last_block_column)
@@ -543,7 +540,7 @@ namespace LibJpeg.NET
                          * and is not known to be fully accurate.
                          */
                         /* AC01 */
-                        int Al = m_coef_bits_latch[coefBitsOffset + 1];
+                        int Al = m_coef_bits_latch[m_coef_bits_savedOffset + coefBitsOffset + 1];
                         if (Al != 0 && workspace[1] == 0)
                         {
                             int pred;
@@ -565,7 +562,7 @@ namespace LibJpeg.NET
                         }
 
                         /* AC10 */
-                        Al = m_coef_bits_latch[coefBitsOffset + 2];
+                        Al = m_coef_bits_latch[m_coef_bits_savedOffset + coefBitsOffset + 2];
                         if (Al != 0 && workspace[8] == 0)
                         {
                             int pred;
@@ -587,7 +584,7 @@ namespace LibJpeg.NET
                         }
 
                         /* AC20 */
-                        Al = m_coef_bits_latch[coefBitsOffset + 3];
+                        Al = m_coef_bits_latch[m_coef_bits_savedOffset + coefBitsOffset + 3];
                         if (Al != 0 && workspace[16] == 0)
                         {
                             int pred;
@@ -609,7 +606,7 @@ namespace LibJpeg.NET
                         }
 
                         /* AC11 */
-                        Al = m_coef_bits_latch[coefBitsOffset + 4];
+                        Al = m_coef_bits_latch[m_coef_bits_savedOffset + coefBitsOffset + 4];
                         if (Al != 0 && workspace[9] == 0)
                         {
                             int pred;
@@ -631,7 +628,7 @@ namespace LibJpeg.NET
                         }
 
                         /* AC02 */
-                        Al = m_coef_bits_latch[coefBitsOffset + 5];
+                        Al = m_coef_bits_latch[m_coef_bits_savedOffset + coefBitsOffset + 5];
                         if (Al != 0 && workspace[2] == 0)
                         {
                             int pred;
@@ -695,7 +692,10 @@ namespace LibJpeg.NET
 
             /* Allocate latch area if not already done */
             if (m_coef_bits_latch == null)
+            {
                 m_coef_bits_latch = new int[m_cinfo.m_num_components * SAVED_COEFS];
+                m_coef_bits_savedOffset = 0;
+            }
 
             bool smoothing_useful = false;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
@@ -720,12 +720,12 @@ namespace LibJpeg.NET
                 /* Block smoothing is helpful if some AC coefficients remain inaccurate. */
                 for (int coefi = 1; coefi <= 5; coefi++)
                 {
-                    m_coef_bits_latch[coefi] = m_cinfo.m_coef_bits[ci][coefi];
+                    m_coef_bits_latch[m_coef_bits_savedOffset + coefi] = m_cinfo.m_coef_bits[ci][coefi];
                     if (m_cinfo.m_coef_bits[ci][coefi] != 0)
                         smoothing_useful = true;
                 }
 
-                //m_coef_bits_latch += SAVED_COEFS;
+                m_coef_bits_savedOffset += SAVED_COEFS;
             }
 
             return smoothing_useful;
