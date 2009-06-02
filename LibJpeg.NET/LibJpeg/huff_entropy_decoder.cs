@@ -33,7 +33,6 @@ namespace LibJpeg.NET
     {
         private class savable_state
         {
-            //savable_state operator=(savable_state src);
             public int[] last_dc_val = new int[JpegConstants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
 
             public void Assign(savable_state ss)

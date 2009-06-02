@@ -111,6 +111,9 @@ namespace LibJpeg.NET
                 for (int i = 0; i < JpegConstants.D_MAX_BLOCKS_IN_MCU; i++)
                 {
                     buffer[i] = new JBLOCK();
+                    for (int ii = 0; ii < buffer[i].data.Length; ii++)
+                        buffer[i].data[ii] = -12851;
+
                     m_MCU_buffer[i] = buffer[i];
                 }
 

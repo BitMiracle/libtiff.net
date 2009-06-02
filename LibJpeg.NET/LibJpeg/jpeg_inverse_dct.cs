@@ -953,7 +953,7 @@ namespace LibJpeg.NET
 
         private static int FAST_INTEGER_IDESCALE(int x, int n)
         {
-#if !USE_ACCURATE_ROUNDING
+#if USE_ACCURATE_ROUNDING
             return ((int) FAST_INTEGER_IRIGHT_SHIFT((x) + (1 << ((n) - 1)), n));
 #else
             return ((int) FAST_INTEGER_IRIGHT_SHIFT(x, n));
