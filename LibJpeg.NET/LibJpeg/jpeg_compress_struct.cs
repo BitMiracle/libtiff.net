@@ -1373,7 +1373,7 @@ namespace LibJpeg.NET
 
             /* Validate the counts.  We do this here mainly so we can copy the right
             * number of symbols from the val[] array, without risking marching off
-            * the end of memory.  jchuff.c will do a more thorough test later.
+            * the end of memory. huff_entropy_encoder will do a more thorough test later.
             */
             int nsymbols = 0;
             for (int len = 1; len <= 16; len++)

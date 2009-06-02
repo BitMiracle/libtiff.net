@@ -14,7 +14,7 @@
  *
  * Most of the complexity here is associated with buffering input rows
  * as required by the downsampler.  See the comments at the head of
- * jcsample.c for the downsampler's needs.
+ * my_downsampler for the downsampler's needs.
  */
 
 using System;

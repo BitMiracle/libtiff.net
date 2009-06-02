@@ -79,7 +79,7 @@ namespace LibJpeg.NET
             if (cinfo.m_CCIR601_sampling)    /* this isn't supported */
                 cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CCIR601_NOTIMPL);
 
-            /* jdmainct.c doesn't support context rows when min_DCT_scaled_size = 1,
+            /* jpeg_d_main_controller doesn't support context rows when min_DCT_scaled_size = 1,
             * so don't ask for it.
             */
             bool do_fancy = cinfo.m_do_fancy_upsampling && cinfo.m_min_DCT_scaled_size > 1;

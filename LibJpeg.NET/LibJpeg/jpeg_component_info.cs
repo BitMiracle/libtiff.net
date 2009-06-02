@@ -73,7 +73,7 @@ namespace LibJpeg.NET
         internal int last_row_height;        /* # of non-dummy blocks down in last MCU */
 
         /* Saved quantization table for component; null if none yet saved.
-         * See jdinput.c comments about the need for this information.
+         * See jpeg_input_controller comments about the need for this information.
          * This field is currently used only for decompression.
          */
         internal JQUANT_TBL quant_table;

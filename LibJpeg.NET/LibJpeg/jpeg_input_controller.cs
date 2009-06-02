@@ -136,9 +136,8 @@ namespace LibJpeg.NET
                         /* 1st SOS */
                         initial_setup();
                         m_inheaders = false;
-                        /* Note: start_input_pass must be called by jdmaster.c
-                         * before any more input can be consumed.  jdapimin.c is
-                         * responsible for enforcing this sequencing.
+                        /* Note: start_input_pass must be called by jpeg_decomp_master
+                         * before any more input can be consumed.
                          */
                     }
                     else
@@ -217,8 +216,8 @@ namespace LibJpeg.NET
             }
 
             /* We initialize DCT_scaled_size and min_DCT_scaled_size to DCTSIZE.
-             * In the full decompressor, this will be overridden by jdmaster.c;
-             * but in the transcoder, jdmaster.c is not used, so we must do it here.
+             * In the full decompressor, this will be overridden jpeg_decomp_master;
+             * but in the transcoder, jpeg_decomp_master is not used, so we must do it here.
              */
             m_cinfo.m_min_DCT_scaled_size = JpegConstants.DCTSIZE;
 
@@ -237,7 +236,7 @@ namespace LibJpeg.NET
                     (long)(m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE));
 
                 /* downsampled_width and downsampled_height will also be overridden by
-                 * jdmaster.c if we are doing full decompression.  The transcoder library
+                 * jpeg_decomp_master if we are doing full decompression.  The transcoder library
                  * doesn't use these values, but the calling application might.
                  */
                 /* Size in samples */

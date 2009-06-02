@@ -455,6 +455,7 @@ namespace LibJpeg.NET
             int length = 0;
             uint bytes_read;
             uint data_length;
+            int dataOffset = 0;
 
             if (cur_marker == null)
             {
@@ -503,8 +504,13 @@ namespace LibJpeg.NET
                 /* resume reading a marker */
                 bytes_read = cinfo.m_marker.m_bytes_read;
                 data_length = cur_marker.data_length;
-                //data = cur_marker.data + bytes_read;
+                data = cur_marker.data;
+                dataOffset = (int)bytes_read;
             }
+
+            byte[] tempData = null;
+            if (data_length != 0)
+                tempData = new byte[data.Length];
 
             while (bytes_read < data_length)
             {
@@ -516,7 +522,9 @@ namespace LibJpeg.NET
                     return false;
 
                 /* Copy bytes with reasonable rapidity */
-                bytes_read += (uint)cinfo.m_src.GetBytes(data, (int)(data_length - bytes_read));
+                uint read = (uint)cinfo.m_src.GetBytes(tempData, (int)(data_length - bytes_read));
+                Array.Copy(tempData, 0, data, dataOffset, (int)(data_length - bytes_read));
+                bytes_read += read;
             }
 
             /* Done reading what we want to read */
@@ -539,24 +547,32 @@ namespace LibJpeg.NET
 
                 /* Reset pointer & calc remaining data length */
                 data = cur_marker.data;
+                dataOffset = 0;
                 length = (int)(cur_marker.original_length - data_length);
             }
 
             /* Reset to initial state for next marker */
             cinfo.m_marker.m_cur_marker = null;
 
+            JPEG_MARKER currentMarker = (JPEG_MARKER)cinfo.m_unread_marker;
+            if (data_length != 0 && (currentMarker == JPEG_MARKER.M_APP0 || currentMarker == JPEG_MARKER.M_APP14))
+            {
+                tempData = new byte[data.Length];
+                Array.Copy(data, dataOffset, tempData, 0, data.Length - dataOffset);
+            }
+
             /* Process the marker if interesting; else just make a generic trace msg */
             switch ((JPEG_MARKER)cinfo.m_unread_marker)
             {
-            case JPEG_MARKER.M_APP0:
-                examine_app0(cinfo, data, data_length, length);
-                break;
-            case JPEG_MARKER.M_APP14:
-                examine_app14(cinfo, data, data_length, length);
-                break;
-            default:
-                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int) (data_length + length));
-                break;
+                case JPEG_MARKER.M_APP0:
+                    examine_app0(cinfo, tempData, data_length, length);
+                    break;
+                case JPEG_MARKER.M_APP14:
+                    examine_app14(cinfo, tempData, data_length, length);
+                    break;
+                default:
+                    cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int) (data_length + length));
+                    break;
             }
 
             /* skip any remaining data -- could be lots */
@@ -1008,7 +1024,7 @@ namespace LibJpeg.NET
                 m_cinfo.TRACEMS(2, (int)J_MESSAGE_CODE.JTRC_HUFFBITS, bits[9], bits[10], bits[11], bits[12], bits[13], bits[14], bits[15], bits[16]);
 
                 /* Here we just do minimal validation of the counts to avoid walking
-                 * off the end of our table space.  jdhuff.c will check more carefully.
+                 * off the end of our table space. huff_entropy_decoder will check more carefully.
                  */
                 if (count > 256 || ((int) count) > length)
                     m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);

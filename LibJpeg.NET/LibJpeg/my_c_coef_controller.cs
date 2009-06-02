@@ -343,8 +343,6 @@ namespace LibJpeg.NET
         private bool compressOutput()
         {
             /* Align the virtual buffers for the components used in this scan.
-             * NB: during first pass, this is safe only because the buffers will
-             * already be aligned properly, so jmemmgr.c won't need to do any I/O.
              */
             JBLOCK[][][] buffer = new JBLOCK[JpegConstants.MAX_COMPS_IN_SCAN][][];
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)

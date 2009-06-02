@@ -995,7 +995,7 @@ namespace LibJpeg.NET
             if (m_do_fancy_upsampling || m_CCIR601_sampling)
                 return false;
 
-            /* jdmerge.c only supports YCC=>RGB color conversion */
+            /* my_upsampler only supports YCC=>RGB color conversion */
             if (m_jpeg_color_space != J_COLOR_SPACE.JCS_YCbCr || m_num_components != 3 ||
                 m_out_color_space != J_COLOR_SPACE.JCS_RGB || m_out_color_components != JpegConstants.RGB_PIXELSIZE)
             {

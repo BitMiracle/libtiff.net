@@ -10,7 +10,6 @@
 /*
  * This file contains library routines for transcoding compression,
  * that is, writing raw DCT coefficient arrays to an output JPEG file.
- * The routines in jcapimin.c will also be needed by a transcoder.
  */
 
 using System;
