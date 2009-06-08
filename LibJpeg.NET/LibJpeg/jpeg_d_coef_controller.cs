@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     /// <summary>
     /// Coefficient buffer control

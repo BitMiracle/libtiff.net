@@ -39,7 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     class my_merged_upsampler : jpeg_upsampler
     {

@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     /// <summary>
     ///  Common fields between JPEG compression and decompression master structs.

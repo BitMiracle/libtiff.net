@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     // Progress monitor object
     public abstract class jpeg_progress_mgr

@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     /// <summary>
     /// The main purpose of 1-pass quantization is to provide a fast, if not very

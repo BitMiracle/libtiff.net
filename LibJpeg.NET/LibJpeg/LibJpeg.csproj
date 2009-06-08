@@ -8,7 +8,7 @@
     <ProjectGuid>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LibJpeg.NET</RootNamespace>
+    <RootNamespace>LibJpeg</RootNamespace>
     <AssemblyName>LibJpeg.NET</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     /// <summary>
     /// Master record for a compression instance

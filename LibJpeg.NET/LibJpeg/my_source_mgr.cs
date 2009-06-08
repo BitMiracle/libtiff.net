@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     /// <summary>
     /// Expanded data source object for stdio input

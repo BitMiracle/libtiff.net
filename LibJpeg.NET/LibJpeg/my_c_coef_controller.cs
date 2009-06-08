@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.NET
+namespace LibJpeg.Classic
 {
     class my_c_coef_controller : jpeg_c_coef_controller
     {
