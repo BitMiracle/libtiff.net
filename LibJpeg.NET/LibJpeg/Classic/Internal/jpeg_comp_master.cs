@@ -92,7 +92,7 @@ namespace LibJpeg.Classic.Internal
                     prepare_for_output_pass();
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                     break;
             }
 
@@ -265,7 +265,7 @@ namespace LibJpeg.Classic.Internal
             {
                 /* Prepare for single sequential-JPEG scan containing all components */
                 if (m_cinfo.m_num_components > JpegConstants.MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPS_IN_SCAN);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_num_components, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 m_cinfo.m_comps_in_scan = m_cinfo.m_num_components;
                 for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
@@ -303,7 +303,7 @@ namespace LibJpeg.Classic.Internal
                 /* For noninterleaved scans, it is convenient to define last_row_height
                 * as the number of block rows present in the last iMCU row.
                 */
-                int tmp = (int)(m_cinfo.m_comp_info[compIndex].height_in_blocks % m_cinfo.m_comp_info[compIndex].v_samp_factor);
+                int tmp = m_cinfo.m_comp_info[compIndex].height_in_blocks % m_cinfo.m_comp_info[compIndex].v_samp_factor;
                 if (tmp == 0)
                     tmp = m_cinfo.m_comp_info[compIndex].v_samp_factor;
                 m_cinfo.m_comp_info[compIndex].last_row_height = tmp;
@@ -316,14 +316,14 @@ namespace LibJpeg.Classic.Internal
             {
                 /* Interleaved (multi-component) scan */
                 if (m_cinfo.m_comps_in_scan <= 0 || m_cinfo.m_comps_in_scan > JpegConstants.MAX_COMPS_IN_SCAN)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 /* Overall image size in MCUs */
-                m_cinfo.m_MCUs_per_row = (uint) JpegUtils.jdiv_round_up((long) m_cinfo.m_image_width,
-                                                                              (long) (m_cinfo.m_max_h_samp_factor * JpegConstants.DCTSIZE));
-                m_cinfo.m_MCU_rows_in_scan = (uint)
-                                            JpegUtils.jdiv_round_up((long) m_cinfo.m_image_height,
-                                                                                  (long) (m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE));
+                m_cinfo.m_MCUs_per_row = JpegUtils.jdiv_round_up(
+                    m_cinfo.m_image_width, m_cinfo.m_max_h_samp_factor * JpegConstants.DCTSIZE);
+
+                m_cinfo.m_MCU_rows_in_scan = JpegUtils.jdiv_round_up(m_cinfo.m_image_height,
+                    m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE);
 
                 m_cinfo.m_blocks_in_MCU = 0;
 
@@ -338,12 +338,12 @@ namespace LibJpeg.Classic.Internal
                     m_cinfo.m_comp_info[compIndex].MCU_sample_width = m_cinfo.m_comp_info[compIndex].MCU_width * JpegConstants.DCTSIZE;
                     
                     /* Figure number of non-dummy blocks in last MCU column & row */
-                    int tmp = (int) (m_cinfo.m_comp_info[compIndex].width_in_blocks % m_cinfo.m_comp_info[compIndex].MCU_width);
+                    int tmp = m_cinfo.m_comp_info[compIndex].width_in_blocks % m_cinfo.m_comp_info[compIndex].MCU_width;
                     if (tmp == 0)
                         tmp = m_cinfo.m_comp_info[compIndex].MCU_width;
                     m_cinfo.m_comp_info[compIndex].last_col_width = tmp;
 
-                    tmp = (int) (m_cinfo.m_comp_info[compIndex].height_in_blocks % m_cinfo.m_comp_info[compIndex].MCU_height);
+                    tmp = m_cinfo.m_comp_info[compIndex].height_in_blocks % m_cinfo.m_comp_info[compIndex].MCU_height;
                     if (tmp == 0)
                         tmp = m_cinfo.m_comp_info[compIndex].MCU_height;
                     m_cinfo.m_comp_info[compIndex].last_row_height = tmp;
@@ -351,7 +351,7 @@ namespace LibJpeg.Classic.Internal
                     /* Prepare array describing MCU composition */
                     int mcublks = m_cinfo.m_comp_info[compIndex].MCU_blocks;
                     if (m_cinfo.m_blocks_in_MCU + mcublks > JpegConstants.C_MAX_BLOCKS_IN_MCU)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_MCU_SIZE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_MCU_SIZE);
                     
                     while (mcublks-- > 0)
                         m_cinfo.m_MCU_membership[m_cinfo.m_blocks_in_MCU++] = ci;
@@ -362,8 +362,8 @@ namespace LibJpeg.Classic.Internal
             /* Note that count must fit in 16 bits, so we provide limiting. */
             if (m_cinfo.m_restart_in_rows > 0)
             {
-                long nominal = (long) m_cinfo.m_restart_in_rows * (long) m_cinfo.m_MCUs_per_row;
-                m_cinfo.m_restart_interval = (uint) Math.Min(nominal, 65535L);
+                int nominal = m_cinfo.m_restart_in_rows * m_cinfo.m_MCUs_per_row;
+                m_cinfo.m_restart_interval = Math.Min(nominal, 65535);
             }
         }
     }

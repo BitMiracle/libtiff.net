@@ -100,9 +100,9 @@ namespace LibJpeg.Classic.Internal
             if (nbytes <= 0)
             {
                 if (m_start_of_file) /* Treat empty input file as fatal error */
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_INPUT_EMPTY);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_INPUT_EMPTY);
 
-                m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_JPEG_EOF);
+                m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_JPEG_EOF);
                 /* Insert a fake EOI marker */
                 m_buffer[0] = (byte)0xFF;
                 m_buffer[1] = (byte)JPEG_MARKER.M_EOI;

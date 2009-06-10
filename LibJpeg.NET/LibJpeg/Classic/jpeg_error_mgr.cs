@@ -30,7 +30,7 @@ namespace LibJpeg.Classic
         internal object[] m_msg_parm = null;
 
         internal int m_trace_level;
-        internal long m_num_warnings;
+        internal int m_num_warnings;
 
         // max msg_level that will be displayed
         public int Trace_level
@@ -48,7 +48,7 @@ namespace LibJpeg.Classic
         /// can check for bad data by seeing if num_warnings is nonzero at the
         /// end of processing.
         /// </summary>
-        public long Num_warnings
+        public int Num_warnings
         {
             get { return m_num_warnings; }
         }

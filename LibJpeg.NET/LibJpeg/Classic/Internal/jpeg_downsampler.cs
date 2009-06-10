@@ -81,7 +81,7 @@ namespace LibJpeg.Classic.Internal
             m_need_context_rows = false;
 
             if (cinfo.m_CCIR601_sampling)
-                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CCIR601_NOTIMPL);
+                cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CCIR601_NOTIMPL);
 
             /* Verify we can handle the sampling factors, and set up method pointers */
             bool smoothok = true;
@@ -128,11 +128,11 @@ namespace LibJpeg.Classic.Internal
                     m_downSamplers[ci] = downSampleMethod.int_downsampler;
                 }
                 else
-                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FRACT_SAMPLE_NOTIMPL);
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FRACT_SAMPLE_NOTIMPL);
             }
 
             if (cinfo.m_smoothing_factor != 0 && !smoothok)
-                cinfo.TRACEMS(0, (int)J_MESSAGE_CODE.JTRC_SMOOTH_NOTIMPL);
+                cinfo.TRACEMS(0, J_MESSAGE_CODE.JTRC_SMOOTH_NOTIMPL);
         }
 
         /// <summary>
@@ -140,35 +140,35 @@ namespace LibJpeg.Classic.Internal
         /// 
         /// In this version we simply downsample each component independently.
         /// </summary>
-        public void downsample(byte[][][] input_buf, uint in_row_index, byte[][][] output_buf, uint out_row_group_index)
+        public void downsample(byte[][][] input_buf, int in_row_index, byte[][][] output_buf, int out_row_group_index)
         {
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                int outIndex = (int)(out_row_group_index * m_cinfo.m_comp_info[ci].v_samp_factor);
+                int outIndex = out_row_group_index * m_cinfo.m_comp_info[ci].v_samp_factor;
                 switch (m_downSamplers[ci])
                 {
                     case downSampleMethod.fullsize_smooth_downsampler:
-                        fullsize_smooth_downsample(ci, input_buf[ci], (int)in_row_index, output_buf[ci], outIndex);
+                        fullsize_smooth_downsample(ci, input_buf[ci], in_row_index, output_buf[ci], outIndex);
                         break;
 
                     case downSampleMethod.fullsize_downsampler:
-                        fullsize_downsample(ci, input_buf[ci], (int)in_row_index, output_buf[ci], outIndex);
+                        fullsize_downsample(ci, input_buf[ci], in_row_index, output_buf[ci], outIndex);
                         break;
 
                     case downSampleMethod.h2v1_downsampler:
-                        h2v1_downsample(ci, input_buf[ci], (int)in_row_index, output_buf[ci], outIndex);
+                        h2v1_downsample(ci, input_buf[ci], in_row_index, output_buf[ci], outIndex);
                         break;
 
                     case downSampleMethod.h2v2_smooth_downsampler:
-                        h2v2_smooth_downsample(ci, input_buf[ci], (int)in_row_index, output_buf[ci], outIndex);
+                        h2v2_smooth_downsample(ci, input_buf[ci], in_row_index, output_buf[ci], outIndex);
                         break;
 
                     case downSampleMethod.h2v2_downsampler:
-                        h2v2_downsample(ci, input_buf[ci], (int)in_row_index, output_buf[ci], outIndex);
+                        h2v2_downsample(ci, input_buf[ci], in_row_index, output_buf[ci], outIndex);
                         break;
 
                     case downSampleMethod.int_downsampler:
-                        int_downsample(ci, input_buf[ci], (int)in_row_index, output_buf[ci], outIndex);
+                        int_downsample(ci, input_buf[ci], in_row_index, output_buf[ci], outIndex);
                         break;
                 };
             }
@@ -191,9 +191,9 @@ namespace LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             int h_expand = m_cinfo.m_max_h_samp_factor / m_cinfo.m_comp_info[componentIndex].h_samp_factor;
-            expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, (uint)(output_cols * h_expand));
+            expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * h_expand);
 
             int v_expand = m_cinfo.m_max_v_samp_factor / m_cinfo.m_comp_info[componentIndex].v_samp_factor;
             int numpix = h_expand * v_expand;
@@ -201,13 +201,13 @@ namespace LibJpeg.Classic.Internal
             int inrow = 0;
             for (int outrow = 0; outrow < m_cinfo.m_comp_info[componentIndex].v_samp_factor; outrow++)
             {
-                for (uint outcol = 0, outcol_h = 0; outcol < output_cols; outcol++, outcol_h += (uint)h_expand)
+                for (int outcol = 0, outcol_h = 0; outcol < output_cols; outcol++, outcol_h += h_expand)
                 {
                     int outvalue = 0;
                     for (int v = 0; v < v_expand; v++)
                     {
                         for (int h = 0; h < h_expand; h++)
-                            outvalue += (int)input_data[startInputRow + inrow + v][outcol_h + h];
+                            outvalue += input_data[startInputRow + inrow + v][outcol_h + h];
                     }
 
                     output_data[startOutRow + outrow][outcol] = (byte)((outvalue + numpix2) / numpix);
@@ -248,7 +248,7 @@ namespace LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * 2);
 
             for (int outrow = 0; outrow < m_cinfo.m_comp_info[componentIndex].v_samp_factor; outrow++)
@@ -256,10 +256,10 @@ namespace LibJpeg.Classic.Internal
                 /* bias = 0,1,0,1,... for successive samples */
                 int bias = 0;
                 int inputColumn = 0;
-                for (uint outcol = 0; outcol < output_cols; outcol++)
+                for (int outcol = 0; outcol < output_cols; outcol++)
                 {
-                    output_data[startOutRow + outrow][outcol] = (byte)((
-                        (int)input_data[startInputRow + outrow][inputColumn] +
+                    output_data[startOutRow + outrow][outcol] = (byte)(
+                        ((int)input_data[startInputRow + outrow][inputColumn] +
                         (int)input_data[startInputRow + outrow][inputColumn + 1] + bias) >> 1);
 
                     bias ^= 1;      /* 0=>1, 1=>0 */
@@ -279,7 +279,7 @@ namespace LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * 2);
 
             int inrow = 0;
@@ -288,7 +288,7 @@ namespace LibJpeg.Classic.Internal
                 /* bias = 1,2,1,2,... for successive samples */
                 int bias = 1;
                 int inputColumn = 0;
-                for (uint outcol = 0; outcol < output_cols; outcol++)
+                for (int outcol = 0; outcol < output_cols; outcol++)
                 {
                     output_data[startOutRow + outrow][outcol] = (byte)((
                         (int)input_data[startInputRow + inrow][inputColumn] +
@@ -315,7 +315,7 @@ namespace LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow - 1, m_cinfo.m_max_v_samp_factor + 2, m_cinfo.m_image_width, output_cols * 2);
 
             /* We don't bother to form the individual "smoothed" input pixel values;
@@ -372,7 +372,7 @@ namespace LibJpeg.Classic.Internal
                 aboveIndex += 2;
                 belowIndex += 2;
 
-                for (uint colctr = output_cols - 2; colctr > 0; colctr--)
+                for (int colctr = output_cols - 2; colctr > 0; colctr--)
                 {
                     /* sum of pixels directly mapped to this output element */
                     membersum = input_data[startInputRow + inrow][inIndex0] +
@@ -451,7 +451,7 @@ namespace LibJpeg.Classic.Internal
      * by the standard loop.  Special-casing padded output would be more
      * efficient.
      */
-            uint output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow - 1, m_cinfo.m_max_v_samp_factor + 2, m_cinfo.m_image_width, output_cols);
 
             /* Each of the eight neighbor pixels contributes a fraction SF to the
@@ -460,7 +460,7 @@ namespace LibJpeg.Classic.Internal
              * Also recall that SF = smoothing_factor / 1024.
              */
 
-            int memberscale = (int)(65536L - m_cinfo.m_smoothing_factor * 512L); /* scaled 1-8*SF */
+            int memberscale = 65536 - m_cinfo.m_smoothing_factor * 512; /* scaled 1-8*SF */
             int neighscale = m_cinfo.m_smoothing_factor * 64; /* scaled SF */
 
             for (int outrow = 0; outrow < m_cinfo.m_comp_info[componentIndex].v_samp_factor; outrow++)
@@ -494,7 +494,7 @@ namespace LibJpeg.Classic.Internal
                 int lastcolsum = colsum;
                 colsum = nextcolsum;
 
-                for (uint colctr = output_cols - 2; colctr > 0; colctr--)
+                for (int colctr = output_cols - 2; colctr > 0; colctr--)
                 {
                     membersum = input_data[startInputRow + outrow][inIndex];
 
@@ -528,9 +528,9 @@ namespace LibJpeg.Classic.Internal
         /// Expand a component horizontally from width input_cols to width output_cols,
         /// by duplicating the rightmost samples.
         /// </summary>
-        private void expand_right_edge(byte[][] image_data, int startInputRow, int num_rows, uint input_cols, uint output_cols)
+        private void expand_right_edge(byte[][] image_data, int startInputRow, int num_rows, int input_cols, int output_cols)
         {
-            int numcols = (int)(output_cols - input_cols);
+            int numcols = output_cols - input_cols;
             if (numcols > 0)
             {
                 for (int row = startInputRow; row < (startInputRow + num_rows); row++)

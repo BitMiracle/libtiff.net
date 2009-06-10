@@ -60,7 +60,7 @@ namespace LibJpeg.Classic.Internal
         private int m_upsampleRowOffset;
         
         private int m_next_row_out;       /* counts rows emitted from color_buf */
-        private uint m_rows_to_go;  /* counts rows remaining in image */
+        private int m_rows_to_go;  /* counts rows remaining in image */
 
         /* Height of an input row group for each component. */
         private int[] m_rowgroup_height = new int[JpegConstants.MAX_COMPONENTS];
@@ -77,7 +77,7 @@ namespace LibJpeg.Classic.Internal
             m_need_context_rows = false; /* until we find out differently */
 
             if (cinfo.m_CCIR601_sampling)    /* this isn't supported */
-                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CCIR601_NOTIMPL);
+                cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CCIR601_NOTIMPL);
 
             /* jpeg_d_main_controller doesn't support context rows when min_DCT_scaled_size = 1,
             * so don't ask for it.
@@ -143,13 +143,13 @@ namespace LibJpeg.Classic.Internal
                     m_v_expand[ci] = (byte) (v_out_group / v_in_group);
                 }
                 else
-                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FRACT_SAMPLE_NOTIMPL);
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FRACT_SAMPLE_NOTIMPL);
 
                 if (need_buffer)
                 {
                     ComponentBuffer cb = new ComponentBuffer();
-                    cb.SetBuffer(jpeg_common_struct.AllocJpegSamples((uint)JpegUtils.jround_up(cinfo.m_output_width, 
-                        cinfo.m_max_h_samp_factor), (uint)cinfo.m_max_v_samp_factor), null, 0);
+                    cb.SetBuffer(jpeg_common_struct.AllocJpegSamples(JpegUtils.jround_up(cinfo.m_output_width, 
+                        cinfo.m_max_h_samp_factor), cinfo.m_max_v_samp_factor), null, 0);
 
                     m_color_buf[ci] = cb;
                 }
@@ -175,7 +175,7 @@ namespace LibJpeg.Classic.Internal
         /// We upsample one row group into the conversion buffer, then apply
         /// color conversion a row at a time.
         /// </summary>
-        public override void upsample(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, uint in_row_groups_avail, byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        public override void upsample(ComponentBuffer[] input_buf, ref int in_row_group_ctr, int in_row_groups_avail, byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
             /* Fill the conversion buffer, if it's empty */
             if (m_next_row_out >= m_cinfo.m_max_v_samp_factor)
@@ -186,7 +186,7 @@ namespace LibJpeg.Classic.Internal
 
                     /* Invoke per-component upsample method.*/
                     m_currentComponent = ci;
-                    m_upsampleRowOffset = (int)(in_row_group_ctr * m_rowgroup_height[ci]);
+                    m_upsampleRowOffset = in_row_group_ctr * m_rowgroup_height[ci];
                     upsampleComponent(ref input_buf[ci]);
                 }
 
@@ -196,7 +196,7 @@ namespace LibJpeg.Classic.Internal
             /* Color-convert and emit rows */
 
             /* How many we have in the buffer: */
-            uint num_rows = (uint)(m_cinfo.m_max_v_samp_factor - m_next_row_out);
+            int num_rows = m_cinfo.m_max_v_samp_factor - m_next_row_out;
 
             /* Not more than the distance to the end of the image.  Need this test
              * in case the image height is not a multiple of max_v_samp_factor:
@@ -209,12 +209,12 @@ namespace LibJpeg.Classic.Internal
             if (num_rows > out_rows_avail)
                 num_rows = out_rows_avail;
 
-            m_cinfo.m_cconvert.color_convert(m_color_buf, m_perComponentOffsets, (uint)m_next_row_out, output_buf, out_row_ctr, (int)num_rows);
+            m_cinfo.m_cconvert.color_convert(m_color_buf, m_perComponentOffsets, m_next_row_out, output_buf, out_row_ctr, num_rows);
 
             /* Adjust counts */
             out_row_ctr += num_rows;
             m_rows_to_go -= num_rows;
-            m_next_row_out += (int)num_rows;
+            m_next_row_out += num_rows;
 
             /* When the buffer is emptied, declare this input row group consumed */
             if (m_next_row_out >= m_cinfo.m_max_v_samp_factor)
@@ -247,7 +247,7 @@ namespace LibJpeg.Classic.Internal
                     int_upsample(ref input_data);
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
                     break;
             }
         }
@@ -292,7 +292,7 @@ namespace LibJpeg.Classic.Internal
         /// Instead, this code is arranged so that 0.5 will be rounded up or down at
         /// alternate pixel locations (a simple ordered dither pattern).
         /// </summary>
-        private void h2v1_fancy_upsample(uint downsampled_width, ref ComponentBuffer input_data)
+        private void h2v1_fancy_upsample(int downsampled_width, ref ComponentBuffer input_data)
         {
             ComponentBuffer output_data = m_color_buf[m_currentComponent];
 
@@ -312,7 +312,7 @@ namespace LibJpeg.Classic.Internal
                 output_data[inrow][outIndex] = (byte)((invalue * 3 + (int)input_data[row][inIndex] + 2) >> 2);
                 outIndex++;
 
-                for (uint colctr = downsampled_width - 2; colctr > 0; colctr--)
+                for (int colctr = downsampled_width - 2; colctr > 0; colctr--)
                 {
                     /* General case: 3/4 * nearer pixel + 1/4 * further pixel */
                     invalue = (int)input_data[row][inIndex] * 3;
@@ -347,7 +347,7 @@ namespace LibJpeg.Classic.Internal
                 int row = m_upsampleRowOffset + inrow;
                 int outIndex = 0;
 
-                for (uint col = 0; col < m_cinfo.m_output_width; col++)
+                for (int col = 0; col < m_cinfo.m_output_width; col++)
                 {
                     byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
                     output_data[inrow][outIndex] = invalue;
@@ -365,7 +365,7 @@ namespace LibJpeg.Classic.Internal
         /// It is OK for us to reference the adjacent input rows because we demanded
         /// context from the main buffer controller (see initialization code).
         /// </summary>
-        private void h2v2_fancy_upsample(uint downsampled_width, ref ComponentBuffer input_data)
+        private void h2v2_fancy_upsample(int downsampled_width, ref ComponentBuffer input_data)
         {
             ComponentBuffer output_data = m_color_buf[m_currentComponent];
 
@@ -414,7 +414,7 @@ namespace LibJpeg.Classic.Internal
                     int lastcolsum = thiscolsum;
                     thiscolsum = nextcolsum;
 
-                    for (uint colctr = downsampled_width - 2; colctr > 0; colctr--)
+                    for (int colctr = downsampled_width - 2; colctr > 0; colctr--)
                     {
                         /* General case: 3/4 * nearer pixel + 1/4 * further pixel in each */
                         /* dimension, thus 9/16, 3/16, 3/16, 1/16 overall */
@@ -458,7 +458,7 @@ namespace LibJpeg.Classic.Internal
                 int row = m_upsampleRowOffset + inrow;
                 int outIndex = 0;
 
-                for (uint col = 0; col < m_cinfo.m_output_width; col++)
+                for (int col = 0; col < m_cinfo.m_output_width; col++)
                 {
                     byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
                     output_data[outrow][outIndex] = invalue;
@@ -495,7 +495,7 @@ namespace LibJpeg.Classic.Internal
             {
                 /* Generate one output row with proper horizontal expansion */
                 int row = m_upsampleRowOffset + inrow;
-                for (uint col = 0; col < m_cinfo.m_output_width; col++)
+                for (int col = 0; col < m_cinfo.m_output_width; col++)
                 {
                     byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
                     int outIndex = 0;

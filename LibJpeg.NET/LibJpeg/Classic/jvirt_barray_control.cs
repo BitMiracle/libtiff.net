@@ -22,11 +22,11 @@ namespace LibJpeg.Classic
     {
         private jpeg_common_struct m_cinfo;
         private JBLOCK[][] m_mem_buffer;    /* => the in-memory buffer */
-        private uint m_rows_in_array;   /* total virtual array height */
-        private uint m_blocksperrow;    /* width of array (and of memory buffer) */
+        private int m_rows_in_array;   /* total virtual array height */
+        private int m_blocksperrow;    /* width of array (and of memory buffer) */
 
         // Request a virtual 2-D coefficient-block array
-        public jvirt_barray_control(jpeg_common_struct cinfo, bool pre_zero, uint blocksperrow, uint numrows)
+        public jvirt_barray_control(jpeg_common_struct cinfo, bool pre_zero, int blocksperrow, int numrows)
         {
             m_cinfo = cinfo;
             m_mem_buffer = null;  /* marks array not yet realized */
@@ -34,7 +34,7 @@ namespace LibJpeg.Classic
             m_blocksperrow = blocksperrow;
 
             m_mem_buffer = new JBLOCK[m_rows_in_array][];
-            for (int i = 0; i < (int)m_rows_in_array; i++)
+            for (int i = 0; i < m_rows_in_array; i++)
             {
                 m_mem_buffer[i] = new JBLOCK[m_blocksperrow];
                 for (int j = 0; j < m_blocksperrow; j++)
@@ -46,13 +46,13 @@ namespace LibJpeg.Classic
         /// Access the part of a virtual block array starting at start_row
         /// and extending for num_rows rows.
         /// </summary>
-        public JBLOCK[][] access_virt_barray(uint start_row, uint num_rows)
+        public JBLOCK[][] access_virt_barray(int start_row, int num_rows)
         {
-            uint end_row = start_row + num_rows;
+            int end_row = start_row + num_rows;
 
             /* debugging check */
             if (end_row > m_rows_in_array || m_mem_buffer == null)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
 
             /* Return proper part of the buffer */
             JBLOCK[][] ret = new JBLOCK[num_rows][];

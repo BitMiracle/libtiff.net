@@ -25,7 +25,7 @@ namespace LibJpeg.Classic
          * The spec says that the values given produce "good" quality, and
          * when divided by 2, "very good" quality.
          */
-        private static uint[] std_luminance_quant_tbl = { 
+        private static int[] std_luminance_quant_tbl = { 
             16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26,
             58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56, 14, 17,
             22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109,
@@ -33,7 +33,7 @@ namespace LibJpeg.Classic
             78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112,
             100, 103, 99 };
 
-        private static uint[] std_chrominance_quant_tbl = {
+        private static int[] std_chrominance_quant_tbl = {
             17, 18, 24, 47, 99, 99, 99, 99, 18, 21, 26, 66,
             99, 99, 99, 99, 24, 26, 56, 99, 99, 99, 99, 99,
             47, 66, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
@@ -95,8 +95,8 @@ namespace LibJpeg.Classic
         /* Destination for compressed data */
         internal jpeg_destination_mgr m_dest;
 
-        internal uint m_image_width; /* input image width */
-        internal uint m_image_height;    /* input image height */
+        internal int m_image_width; /* input image width */
+        internal int m_image_height;    /* input image height */
         internal int m_input_components;       /* # of color components in input image */
         internal J_COLOR_SPACE m_in_color_space;   /* colorspace of input image */
 
@@ -129,19 +129,19 @@ namespace LibJpeg.Classic
         internal int m_smoothing_factor;       /* 1..100, or 0 for no input smoothing */
         internal J_DCT_METHOD m_dct_method;    /* DCT algorithm selector */
 
-        internal uint m_restart_interval; /* MCUs per restart, or 0 for no restart */
+        internal int m_restart_interval; /* MCUs per restart, or 0 for no restart */
         internal int m_restart_in_rows;        /* if > 0, MCU rows per restart interval */
 
         internal bool m_write_JFIF_header; /* should a JFIF marker be written? */
         internal byte m_JFIF_major_version;   /* What to write for the JFIF version number */
         internal byte m_JFIF_minor_version;
-
+        
         internal byte m_density_unit;     /* JFIF code for pixel size units */
-        internal UInt16 m_X_density;       /* Horizontal pixel density */
-        internal UInt16 m_Y_density;       /* Vertical pixel density */
+        internal short m_X_density;       /* Horizontal pixel density */
+        internal short m_Y_density;       /* Vertical pixel density */
         internal bool m_write_Adobe_marker;    /* should an Adobe marker be written? */
 
-        internal uint m_next_scanline;   /* 0 .. image_height-1  */
+        internal int m_next_scanline;   /* 0 .. image_height-1  */
 
         /* Remaining fields are known throughout compressor, but generally
          * should not be touched by a surrounding application.
@@ -154,7 +154,7 @@ namespace LibJpeg.Classic
         internal int m_max_h_samp_factor;  /* largest h_samp_factor */
         internal int m_max_v_samp_factor;  /* largest v_samp_factor */
 
-        internal uint m_total_iMCU_rows; /* # of iMCU rows to be input to coef ctlr */
+        internal int m_total_iMCU_rows; /* # of iMCU rows to be input to coef ctlr */
         /* The coefficient controller receives data in units of MCU rows as defined
          * for fully interleaved scans (whether the JPEG file is interleaved or not).
          * There are v_samp_factor * DCTSIZE sample rows of each component in an
@@ -169,8 +169,8 @@ namespace LibJpeg.Classic
         internal int[] m_cur_comp_info = new int[JpegConstants.MAX_COMPS_IN_SCAN];
         /* *cur_comp_info[i] is index of m_comp_info that describes component that appears i'th in SOS */
 
-        internal uint m_MCUs_per_row;    /* # of MCUs across the image */
-        internal uint m_MCU_rows_in_scan;    /* # of MCU rows in the image */
+        internal int m_MCUs_per_row;    /* # of MCUs across the image */
+        internal int m_MCU_rows_in_scan;    /* # of MCU rows in the image */
 
         internal int m_blocks_in_MCU;      /* # of DCT blocks per MCU */
         internal int[] m_MCU_membership = new int[JpegConstants.C_MAX_BLOCKS_IN_MCU];
@@ -211,14 +211,14 @@ namespace LibJpeg.Classic
          */
 
         // input image width
-        public uint Image_width
+        public int Image_width
         {
             get { return m_image_width; }
             set { m_image_width = value; }
         }
 
         // input image height
-        public uint Image_height
+        public int Image_height
         {
             get { return m_image_height; }
             set { m_image_height = value; }
@@ -309,7 +309,7 @@ namespace LibJpeg.Classic
          */
         
         // MCUs per restart, or 0 for no restart
-        public uint Restart_interval
+        public int Restart_interval
         {
             get { return m_restart_interval; }
             set { m_restart_interval = value; }
@@ -357,14 +357,14 @@ namespace LibJpeg.Classic
         }
         
         // Horizontal pixel density
-        public System.UInt16 X_density
+        public short X_density
         {
             get { return m_X_density; }
             set { m_X_density = value; }
         }
         
         // Vertical pixel density
-        public System.UInt16 Y_density
+        public short Y_density
         {
             get { return m_Y_density; }
             set { m_Y_density = value; }
@@ -383,7 +383,7 @@ namespace LibJpeg.Classic
          */
 
         // 0 .. image_height-1
-        public uint Next_scanline
+        public int Next_scanline
         {
             get { return m_next_scanline; }
         }
@@ -455,17 +455,17 @@ namespace LibJpeg.Classic
         /// </summary>
         public void jpeg_finish_compress()
         {
-            uint iMCU_row;
+            int iMCU_row;
 
             if (m_global_state == JpegState.CSTATE_SCANNING || m_global_state == JpegState.CSTATE_RAW_OK)
             {
                 /* Terminate first pass */
                 if (m_next_scanline < m_image_height)
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_TOO_LITTLE_DATA);
+                    ERREXIT(J_MESSAGE_CODE.JERR_TOO_LITTLE_DATA);
                 m_master.finish_pass();
             }
             else if (m_global_state != JpegState.CSTATE_WRCOEFS)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Perform any remaining passes */
             while (!m_master.IsLastPass())
@@ -475,8 +475,8 @@ namespace LibJpeg.Classic
                 {
                     if (m_progress != null)
                     {
-                        m_progress.m_pass_counter = (long)iMCU_row;
-                        m_progress.m_pass_limit = (long)m_total_iMCU_rows;
+                        m_progress.m_pass_counter = iMCU_row;
+                        m_progress.m_pass_limit = m_total_iMCU_rows;
                         m_progress.progress_monitor();
                     }
 
@@ -484,7 +484,7 @@ namespace LibJpeg.Classic
                     * all work is being done from the coefficient buffer.
                     */
                     if (!m_coef.compress_data(null))
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_CANT_SUSPEND);
+                        ERREXIT(J_MESSAGE_CODE.JERR_CANT_SUSPEND);
                 }
 
                 m_master.finish_pass();
@@ -505,21 +505,21 @@ namespace LibJpeg.Classic
         /// Must be called after jpeg_start_compress() and before first call to 
         /// jpeg_write_scanlines() or jpeg_write_raw_data().
         /// </summary>
-        public void jpeg_write_marker(int marker, byte[] data, uint datalen)
+        public void jpeg_write_marker(int marker, byte[] data, int datalen)
         {
             if (m_next_scanline != 0 || (m_global_state != JpegState.CSTATE_SCANNING && m_global_state != JpegState.CSTATE_RAW_OK && m_global_state != JpegState.CSTATE_WRCOEFS))
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             m_marker.write_marker_header(marker, datalen);
 
-            for (uint i = 0; i < datalen; i++)
+            for (int i = 0; i < datalen; i++)
                 m_marker.write_marker_byte(data[i]);
         }
 
-        public void jpeg_write_m_header(int marker, uint datalen)
+        public void jpeg_write_m_header(int marker, int datalen)
         {
             if (m_next_scanline != 0 || (m_global_state != JpegState.CSTATE_SCANNING && m_global_state != JpegState.CSTATE_RAW_OK && m_global_state != JpegState.CSTATE_WRCOEFS))
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             m_marker.write_marker_header(marker, datalen);
         }
@@ -551,7 +551,7 @@ namespace LibJpeg.Classic
         public void jpeg_write_tables()
         {
             if (m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* (Re)initialize error mgr and destination modules */
             m_err.reset_error_mgr();
@@ -591,7 +591,7 @@ namespace LibJpeg.Classic
         {
             /* Safety check to ensure start_compress not called yet. */
             if (m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Allocate comp_info array large enough for maximum component count.
             * Array is made permanent in case application wants to compress
@@ -671,7 +671,7 @@ namespace LibJpeg.Classic
 
             /* Safety check to ensure start_compress not called yet. */
             if (m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* For all colorspaces, we use Q and Huff tables 0 for luminance components,
             * tables 1 for chrominance components.
@@ -725,14 +725,14 @@ namespace LibJpeg.Classic
                 case J_COLOR_SPACE.JCS_UNKNOWN:
                     m_num_components = m_input_components;
                     if (m_num_components < 1 || m_num_components > JpegConstants.MAX_COMPONENTS)
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
+                        ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
                     for (ci = 0; ci < m_num_components; ci++)
                     {
                         jpeg_set_colorspace_SET_COMP(ci, ci, 1, 1, 0, 0, 0);
                     }
                     break;
                 default:
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                    ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
             }
         }
@@ -763,7 +763,7 @@ namespace LibJpeg.Classic
                     jpeg_set_colorspace(J_COLOR_SPACE.JCS_UNKNOWN);
                     break;
                 default:
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
+                    ERREXIT(J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
                     break;
             }
         }
@@ -805,35 +805,35 @@ namespace LibJpeg.Classic
         /// If force_baseline is true, the computed quantization table entries
         /// are limited to 1..255 for JPEG baseline compatibility.
         /// </summary>
-        public void jpeg_add_quant_table(int which_tbl, uint[] basic_table, int scale_factor, bool force_baseline)
+        public void jpeg_add_quant_table(int which_tbl, int[] basic_table, int scale_factor, bool force_baseline)
         {
             /* Safety check to ensure start_compress not called yet. */
             if (m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (which_tbl < 0 || which_tbl >= JpegConstants.NUM_QUANT_TBLS)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_DQT_INDEX, which_tbl);
+                ERREXIT(J_MESSAGE_CODE.JERR_DQT_INDEX, which_tbl);
 
             if (m_quant_tbl_ptrs[which_tbl] == null)
                 m_quant_tbl_ptrs[which_tbl] = new JQUANT_TBL();
 
             for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
             {
-                long temp = ((long)basic_table[i] * scale_factor + 50L) / 100L;
+                int temp = (basic_table[i] * scale_factor + 50) / 100;
 
                 /* limit the values to the valid range */
-                if (temp <= 0L)
-                    temp = 1L;
+                if (temp <= 0)
+                    temp = 1;
 
                 /* max quantizer needed for 12 bits */
-                if (temp > 32767L)
-                    temp = 32767L;
+                if (temp > 32767)
+                    temp = 32767;
 
                 /* limit to baseline range if requested */
-                if (force_baseline && temp > 255L)
-                    temp = 255L;
+                if (force_baseline && temp > 255)
+                    temp = 255;
                 
-                m_quant_tbl_ptrs[which_tbl].quantval[i] = (UInt16)temp;
+                m_quant_tbl_ptrs[which_tbl].quantval[i] = (short)temp;
             }
 
             /* Initialize sent_table false so table will be written to JPEG file. */
@@ -876,7 +876,7 @@ namespace LibJpeg.Classic
         {
             /* Safety check to ensure start_compress not called yet. */
             if (m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Figure space needed for script.  Calculation must match code below! */
             int nscans;
@@ -985,7 +985,7 @@ namespace LibJpeg.Classic
         public void jpeg_start_compress(bool write_all_tables)
         {
             if (m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (write_all_tables)
                 jpeg_suppress_tables(false); /* mark all tables to be written */
@@ -1021,19 +1021,19 @@ namespace LibJpeg.Classic
         /// so that the application need not adjust num_lines for end-of-image
         /// when using a multiple-scanline buffer.
         /// </summary>
-        public uint jpeg_write_scanlines(byte[][] scanlines, uint num_lines)
+        public int jpeg_write_scanlines(byte[][] scanlines, int num_lines)
         {
             if (m_global_state != JpegState.CSTATE_SCANNING)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (m_next_scanline >= m_image_height)
-                WARNMS((int)J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
+                WARNMS(J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
 
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = (long)m_next_scanline;
-                m_progress.m_pass_limit = (long)m_image_height;
+                m_progress.m_pass_counter = m_next_scanline;
+                m_progress.m_pass_limit = m_image_height;
                 m_progress.progress_monitor();
             }
 
@@ -1046,11 +1046,11 @@ namespace LibJpeg.Classic
                 m_master.pass_startup();
 
             /* Ignore any extra scanlines at bottom of image. */
-            uint rows_left = m_image_height - m_next_scanline;
+            int rows_left = m_image_height - m_next_scanline;
             if (num_lines > rows_left)
                 num_lines = rows_left;
 
-            uint row_ctr = 0;
+            int row_ctr = 0;
             m_main.process_data(scanlines, ref row_ctr, num_lines);
             m_next_scanline += row_ctr;
             return row_ctr;
@@ -1062,22 +1062,22 @@ namespace LibJpeg.Classic
         /// Processes exactly one iMCU row per call, unless suspended.
         /// Replaces jpeg_write_scanlines when writing raw downsampled data.
         /// </summary>
-        public uint jpeg_write_raw_data(byte[][][] data, uint num_lines)
+        public int jpeg_write_raw_data(byte[][][] data, int num_lines)
         {
             if (m_global_state != JpegState.CSTATE_RAW_OK)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (m_next_scanline >= m_image_height)
             {
-                WARNMS((int)J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
+                WARNMS(J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
                 return 0;
             }
 
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = (long)m_next_scanline;
-                m_progress.m_pass_limit = (long)m_image_height;
+                m_progress.m_pass_counter = m_next_scanline;
+                m_progress.m_pass_limit = m_image_height;
                 m_progress.progress_monitor();
             }
 
@@ -1090,9 +1090,9 @@ namespace LibJpeg.Classic
                 m_master.pass_startup();
 
             /* Verify that at least one iMCU row has been passed. */
-            uint lines_per_iMCU_row = (uint)(m_max_v_samp_factor * JpegConstants.DCTSIZE);
+            int lines_per_iMCU_row = m_max_v_samp_factor * JpegConstants.DCTSIZE;
             if (num_lines < lines_per_iMCU_row)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BUFFER_SIZE);
+                ERREXIT(J_MESSAGE_CODE.JERR_BUFFER_SIZE);
 
             /* Directly compress the row. */
             if (!m_coef.compress_data(data))
@@ -1122,7 +1122,7 @@ namespace LibJpeg.Classic
         public void jpeg_write_coefficients(jvirt_barray_control[] coef_arrays)
         {
             if (m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Mark all tables to be written */
             jpeg_suppress_tables(false);
@@ -1246,7 +1246,7 @@ namespace LibJpeg.Classic
             * may be of a different size.
             */
             if (need_full_buffer)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
             else
                 m_main = new jpeg_c_main_controller(this);
         }
@@ -1288,25 +1288,25 @@ namespace LibJpeg.Classic
         {
             /* Sanity check on image dimensions */
             if (m_image_height <= 0 || m_image_width <= 0 || m_num_components <= 0 || m_input_components <= 0)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
+                ERREXIT(J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
 
             /* Make sure image isn't bigger than I can handle */
-            if ((long) m_image_height > (long) JpegConstants.JPEG_MAX_DIMENSION || (long) m_image_width > (long) JpegConstants.JPEG_MAX_DIMENSION)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int) JpegConstants.JPEG_MAX_DIMENSION);
+            if (m_image_height > JpegConstants.JPEG_MAX_DIMENSION || m_image_width > JpegConstants.JPEG_MAX_DIMENSION)
+                ERREXIT(J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int) JpegConstants.JPEG_MAX_DIMENSION);
 
-            /* Width of an input scanline must be representable as uint. */
-            long samplesperrow = (long) m_image_width * (long) m_input_components;
-            uint jd_samplesperrow = (uint) samplesperrow;
-            if ((long) jd_samplesperrow != samplesperrow)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
+            /* Width of an input scanline must be representable as int. */
+            long samplesperrow = m_image_width * m_input_components;
+            int jd_samplesperrow = (int)samplesperrow;
+            if ((long)jd_samplesperrow != samplesperrow)
+                ERREXIT(J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
 
             /* For now, precision must match compiled-in value... */
             if (m_data_precision != JpegConstants.BITS_IN_JSAMPLE)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PRECISION, m_data_precision);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_PRECISION, m_data_precision);
 
             /* Check that number of components won't exceed internal array sizes */
             if (m_num_components > JpegConstants.MAX_COMPONENTS)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
+                ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
 
             /* Compute maximum sampling factors; check factor validity */
             m_max_h_samp_factor = 1;
@@ -1316,7 +1316,7 @@ namespace LibJpeg.Classic
                 if (m_comp_info[ci].h_samp_factor <= 0 || m_comp_info[ci].h_samp_factor > JpegConstants.MAX_SAMP_FACTOR ||
                     m_comp_info[ci].v_samp_factor <= 0 || m_comp_info[ci].v_samp_factor > JpegConstants.MAX_SAMP_FACTOR)
                 {
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_SAMPLING);
+                    ERREXIT(J_MESSAGE_CODE.JERR_BAD_SAMPLING);
                 }
 
                 m_max_h_samp_factor = Math.Max(m_max_h_samp_factor, m_comp_info[ci].h_samp_factor);
@@ -1333,16 +1333,16 @@ namespace LibJpeg.Classic
                 m_comp_info[ci].DCT_scaled_size = JpegConstants.DCTSIZE;
 
                 /* Size in DCT blocks */
-                m_comp_info[ci].width_in_blocks = (uint) JpegUtils.jdiv_round_up(
-                    (long)m_image_width * (long)m_comp_info[ci].h_samp_factor, (long)(m_max_h_samp_factor * JpegConstants.DCTSIZE));
-                m_comp_info[ci].height_in_blocks = (uint) JpegUtils.jdiv_round_up(
-                    (long)m_image_height * (long)m_comp_info[ci].v_samp_factor, (long)(m_max_v_samp_factor * JpegConstants.DCTSIZE));
+                m_comp_info[ci].width_in_blocks = JpegUtils.jdiv_round_up(
+                    m_image_width * m_comp_info[ci].h_samp_factor, m_max_h_samp_factor * JpegConstants.DCTSIZE);
+                m_comp_info[ci].height_in_blocks = JpegUtils.jdiv_round_up(
+                    m_image_height * m_comp_info[ci].v_samp_factor, m_max_v_samp_factor * JpegConstants.DCTSIZE);
 
                 /* Size in samples */
-                m_comp_info[ci].downsampled_width = (uint) JpegUtils.jdiv_round_up(
-                    (long)m_image_width * (long)m_comp_info[ci].h_samp_factor, (long)m_max_h_samp_factor);
-                m_comp_info[ci].downsampled_height = (uint) JpegUtils.jdiv_round_up(
-                    (long)m_image_height * (long)m_comp_info[ci].v_samp_factor, (long)m_max_v_samp_factor);
+                m_comp_info[ci].downsampled_width = JpegUtils.jdiv_round_up(
+                    m_image_width * m_comp_info[ci].h_samp_factor, m_max_h_samp_factor);
+                m_comp_info[ci].downsampled_height = JpegUtils.jdiv_round_up(
+                    m_image_height * m_comp_info[ci].v_samp_factor, m_max_v_samp_factor);
 
                 /* Mark component needed (this flag isn't actually used for compression) */
                 m_comp_info[ci].component_needed = true;
@@ -1351,7 +1351,7 @@ namespace LibJpeg.Classic
             /* Compute number of fully interleaved MCU rows (number of times that
             * main controller will call coefficient controller).
             */
-            m_total_iMCU_rows = (uint) JpegUtils.jdiv_round_up((long) m_image_height, (long) (m_max_v_samp_factor * JpegConstants.DCTSIZE));
+            m_total_iMCU_rows = JpegUtils.jdiv_round_up(m_image_height, m_max_v_samp_factor * JpegConstants.DCTSIZE);
         }
 
         /// <summary>
@@ -1361,7 +1361,7 @@ namespace LibJpeg.Classic
         private void validate_script()
         {
             if (m_num_scans <= 0)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, 0);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, 0);
 
             /* For sequential JPEG, all scans must have Ss=0, Se=DCTSIZE2-1;
             * for progressive JPEG, no scan can have this.
@@ -1396,17 +1396,17 @@ namespace LibJpeg.Classic
                 /* Validate component indexes */
                 int ncomps = scanInfo.comps_in_scan;
                 if (ncomps <= 0 || ncomps > JpegConstants.MAX_COMPS_IN_SCAN)
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, ncomps, JpegConstants.MAX_COMPS_IN_SCAN);
+                    ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, ncomps, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 for (int ci = 0; ci < ncomps; ci++)
                 {
                     int thisi = scanInfo.component_index[ci];
                     if (thisi < 0 || thisi >= m_num_components)
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, scanno);
+                        ERREXIT(J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, scanno);
 
                     /* Components must appear in SOF order within each scan */
                     if (ci > 0 && thisi <= scanInfo.component_index[ci - 1])
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, scanno);
+                        ERREXIT(J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, scanno);
                 }
 
                 /* Validate progression parameters */
@@ -1427,25 +1427,25 @@ namespace LibJpeg.Classic
                     if (Ss < 0 || Ss >= JpegConstants.DCTSIZE2 || Se < Ss || Se >= JpegConstants.DCTSIZE2 ||
                         Ah < 0 || Ah > MAX_AH_AL || Al < 0 || Al > MAX_AH_AL)
                     {
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
+                        ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
                     }
 
                     if (Ss == 0)
                     {
                         if (Se != 0)        /* DC and AC together not OK */
-                            ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
+                            ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
                     }
                     else
                     {
                         if (ncomps != 1)    /* AC scans must be for only one component */
-                            ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
+                            ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
                     }
                     
                     for (int ci = 0; ci < ncomps; ci++)
                     {
                         int lastBitComponentIndex = scanInfo.component_index[ci];
                         if (Ss != 0 && last_bitpos[lastBitComponentIndex][0] < 0) /* AC without prior DC scan */
-                            ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
+                            ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
 
                         for (int coefi = Ss; coefi <= Se; coefi++)
                         {
@@ -1453,13 +1453,13 @@ namespace LibJpeg.Classic
                             {
                                 /* first scan of this coefficient */
                                 if (Ah != 0)
-                                    ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
+                                    ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
                             }
                             else
                             {
                                 /* not first scan */
                                 if (Ah != last_bitpos[lastBitComponentIndex][coefi] || Al != Ah - 1)
-                                    ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
+                                    ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
                             }
                             
                             last_bitpos[lastBitComponentIndex][coefi] = Al;
@@ -1470,14 +1470,14 @@ namespace LibJpeg.Classic
                 {
                     /* For sequential JPEG, all progression parameters must be these: */
                     if (Ss != 0 || Se != JpegConstants.DCTSIZE2 - 1 || Ah != 0 || Al != 0)
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
+                        ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
 
                     /* Make sure components are not sent twice */
                     for (int ci = 0; ci < ncomps; ci++)
                     {
                         int thisi = scanInfo.component_index[ci];
                         if (component_sent[thisi])
-                            ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, scanno);
+                            ERREXIT(J_MESSAGE_CODE.JERR_BAD_SCAN_SCRIPT, scanno);
 
                         component_sent[thisi] = true;
                     }
@@ -1495,7 +1495,7 @@ namespace LibJpeg.Classic
                 for (int ci = 0; ci < m_num_components; ci++)
                 {
                     if (last_bitpos[ci][0] < 0)
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_MISSING_DATA);
+                        ERREXIT(J_MESSAGE_CODE.JERR_MISSING_DATA);
                 }
             }
             else
@@ -1503,7 +1503,7 @@ namespace LibJpeg.Classic
                 for (int ci = 0; ci < m_num_components; ci++)
                 {
                     if (!component_sent[ci])
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_MISSING_DATA);
+                        ERREXIT(J_MESSAGE_CODE.JERR_MISSING_DATA);
                 }
             }
         }
@@ -1543,7 +1543,7 @@ namespace LibJpeg.Classic
                 nsymbols += bits[len];
 
             if (nsymbols < 1 || nsymbols> 256)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
             Array.Copy(val, htblptr.huffval, nsymbols);
 

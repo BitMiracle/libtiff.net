@@ -16,20 +16,20 @@ namespace LibJpeg.Classic
     // Progress monitor object
     public abstract class jpeg_progress_mgr
     {
-        internal long m_pass_counter;
-        internal long m_pass_limit;
+        internal int m_pass_counter;
+        internal int m_pass_limit;
         internal int m_completed_passes;
         internal int m_total_passes;
 
         // work units completed in this pass
-        public long Pass_counter
+        public int Pass_counter
         {
             get { return m_pass_counter; }
             set { m_pass_counter = value; }
         }
         
         // total number of work units in this pass
-        public long Pass_limit
+        public int Pass_limit
         {
             get { return m_pass_limit; }
             set { m_pass_limit = value; }

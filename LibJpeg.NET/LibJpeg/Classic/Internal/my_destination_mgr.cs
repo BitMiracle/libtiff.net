@@ -83,8 +83,8 @@ namespace LibJpeg.Classic.Internal
             }
             catch (Exception e)
             {
-                m_cinfo.TRACEMS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             initInternalBuffer(m_buffer, OUTPUT_BUF_SIZE);
@@ -112,8 +112,8 @@ namespace LibJpeg.Classic.Internal
                 }
                 catch (Exception e)
                 {
-                    m_cinfo.TRACEMS(0, (int)J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_FILE_WRITE);
+                    m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
                 }
             }
 

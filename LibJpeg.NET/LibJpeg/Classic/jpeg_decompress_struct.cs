@@ -24,14 +24,14 @@ namespace LibJpeg.Classic
         /* Source of compressed data */
         internal jpeg_source_mgr m_src;
 
-        internal uint m_image_width; /* nominal image width (from SOF marker) */
-        internal uint m_image_height;    /* nominal image height */
+        internal int m_image_width; /* nominal image width (from SOF marker) */
+        internal int m_image_height;    /* nominal image height */
         internal int m_num_components;     /* # of color components in JPEG image */
         internal J_COLOR_SPACE m_jpeg_color_space; /* colorspace of JPEG image */
 
         internal J_COLOR_SPACE m_out_color_space; /* colorspace for output */
-        internal uint m_scale_num;
-        internal uint m_scale_denom; /* fraction by which to scale image */
+        internal int m_scale_num;
+        internal int m_scale_denom; /* fraction by which to scale image */
         internal bool m_buffered_image;    /* true=multiple output passes */
         internal bool m_raw_data_out;      /* true=downsampled data wanted */
         internal J_DCT_METHOD m_dct_method;    /* IDCT algorithm selector */
@@ -45,8 +45,8 @@ namespace LibJpeg.Classic
         internal bool m_enable_external_quant;/* enable future use of external colormap */
         internal bool m_enable_2pass_quant;    /* enable future use of 2-pass quantizer */
 
-        internal uint m_output_width;    /* scaled image width */
-        internal uint m_output_height;   /* scaled image height */
+        internal int m_output_width;    /* scaled image width */
+        internal int m_output_height;   /* scaled image height */
         internal int m_out_color_components;   /* # of color components in out_color_space */
         /* # of color components returned
          * output_components is 1 (a colormap index) when quantizing colors;
@@ -59,13 +59,13 @@ namespace LibJpeg.Classic
         internal int m_actual_number_of_colors;    /* number of entries in use */
         internal byte[][] m_colormap;     /* The color map as a 2-D pixel array */
 
-        internal uint m_output_scanline; /* 0 .. output_height-1  */
+        internal int m_output_scanline; /* 0 .. output_height-1  */
 
         internal int m_input_scan_number;  /* Number of SOS markers seen so far */
-        internal uint m_input_iMCU_row;  /* Number of iMCU rows completed */
+        internal int m_input_iMCU_row;  /* Number of iMCU rows completed */
 
         internal int m_output_scan_number; /* Nominal scan number being displayed */
-        internal uint m_output_iMCU_row; /* Number of iMCU rows read */
+        internal int m_output_iMCU_row; /* Number of iMCU rows read */
 
         internal int[][] m_coef_bits; /* -1 or current Al value for each coef */
 
@@ -96,7 +96,7 @@ namespace LibJpeg.Classic
 
         internal bool m_progressive_mode;  /* true if SOFn specifies progressive mode */
 
-        internal uint m_restart_interval; /* MCUs per restart interval, or 0 for no restart */
+        internal int m_restart_interval; /* MCUs per restart interval, or 0 for no restart */
 
         /* These fields record data obtained from optional markers recognized by
          * the JPEG library.
@@ -107,8 +107,8 @@ namespace LibJpeg.Classic
         internal byte m_JFIF_minor_version;
 
         internal byte m_density_unit;     /* JFIF code for pixel size units */
-        internal ushort m_X_density;       /* Horizontal pixel density */
-        internal ushort m_Y_density;       /* Vertical pixel density */
+        internal short m_X_density;       /* Horizontal pixel density */
+        internal short m_Y_density;       /* Vertical pixel density */
 
         internal bool m_saw_Adobe_marker;  /* true iff an Adobe APP14 marker was found */
         internal byte m_Adobe_transform;  /* Color transform code from Adobe marker */
@@ -133,7 +133,7 @@ namespace LibJpeg.Classic
 
         internal int m_min_DCT_scaled_size;    /* smallest DCT_scaled_size of any component */
 
-        internal uint m_total_iMCU_rows; /* # of iMCU rows in image */
+        internal int m_total_iMCU_rows; /* # of iMCU rows in image */
         /* The coefficient controller's input and output progress is measured in
          * units of "iMCU" (interleaved MCU) rows.  These are the same as MCU rows
          * in fully interleaved JPEG scans, but are used whether the scan is
@@ -154,8 +154,8 @@ namespace LibJpeg.Classic
         internal int[] m_cur_comp_info = new int[JpegConstants.MAX_COMPS_IN_SCAN];
         /* *cur_comp_info[i] describes component that appears i'th in SOS */
 
-        internal uint m_MCUs_per_row;    /* # of MCUs across the image */
-        internal uint m_MCU_rows_in_scan;    /* # of MCU rows in the image */
+        internal int m_MCUs_per_row;    /* # of MCUs across the image */
+        internal int m_MCU_rows_in_scan;    /* # of MCU rows in the image */
 
         internal int m_blocks_in_MCU;      /* # of DCT blocks per MCU */
         internal int[] m_MCU_membership = new int[JpegConstants.D_MAX_BLOCKS_IN_MCU];
@@ -199,13 +199,13 @@ namespace LibJpeg.Classic
         /* Application may inspect these values to decide how to process image. */
 
         // nominal image width (from SOF marker)
-        public uint Image_width
+        public int Image_width
         {
             get { return m_image_width; }
         }
         
         // nominal image height
-        public uint Image_height
+        public int Image_height
         {
             get { return m_image_height; }
         }
@@ -235,13 +235,13 @@ namespace LibJpeg.Classic
         }
 
         // fraction by which to scale image
-        public uint Scale_num
+        public int Scale_num
         {
             get { return m_scale_num; }
             set { m_scale_num = value; }
         }
         
-        public uint Scale_denom
+        public int Scale_denom
         {
             get { return m_scale_denom; }
             set { m_scale_denom = value; }
@@ -342,13 +342,13 @@ namespace LibJpeg.Classic
          */
 
         // scaled image width
-        public uint Output_width
+        public int Output_width
         {
             get { return m_output_width; }
         }
         
         // scaled image height
-        public uint Output_height
+        public int Output_height
         {
             get { return m_output_height; }
         }
@@ -406,7 +406,7 @@ namespace LibJpeg.Classic
          */
         
         // 0 .. output_height-1
-        public uint Output_scanline
+        public int Output_scanline
         {
             get { return m_output_scanline; }
         }
@@ -422,7 +422,7 @@ namespace LibJpeg.Classic
         }
         
         // Number of iMCU rows completed
-        public uint Input_iMCU_row
+        public int Input_iMCU_row
         {
             get { return m_input_iMCU_row; }
         }
@@ -439,7 +439,7 @@ namespace LibJpeg.Classic
         }
         
         // Number of iMCU rows read
-        public uint Output_iMCU_row
+        public int Output_iMCU_row
         {
             get { return m_output_iMCU_row; }
         }
@@ -468,13 +468,13 @@ namespace LibJpeg.Classic
         }
 
         // Horizontal pixel density
-        public ushort X_density
+        public short X_density
         {
             get { return m_X_density; }
         }
 
         // Vertical pixel density
-        public ushort Y_density
+        public short Y_density
         {
             get { return m_Y_density; }
         }
@@ -560,7 +560,7 @@ namespace LibJpeg.Classic
         public ReadResult jpeg_read_header(bool require_image)
         {
             if (m_global_state != JpegState.DSTATE_START && m_global_state != JpegState.DSTATE_INHEADER)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             ReadResult retcode = jpeg_consume_input();
 
@@ -570,7 +570,7 @@ namespace LibJpeg.Classic
                     return ReadResult.JPEG_HEADER_OK;
                 case ReadResult.JPEG_REACHED_EOI:
                     if (require_image)      /* Complain if application wanted an image */
-                        ERREXIT((int)J_MESSAGE_CODE.JERR_NO_IMAGE);
+                        ERREXIT(J_MESSAGE_CODE.JERR_NO_IMAGE);
                     /* Reset to start state; it would be safer to require the application to
                     * call jpeg_abort, but we can't change it now for compatibility reasons.
                     * A side effect is to free any temporary memory (there shouldn't be any).
@@ -641,7 +641,7 @@ namespace LibJpeg.Classic
                             if (m_progress.m_pass_counter >= m_progress.m_pass_limit)
                             {
                                 /* underestimated number of scans; ratchet up one scan */
-                                m_progress.m_pass_limit += (long)m_total_iMCU_rows;
+                                m_progress.m_pass_limit += m_total_iMCU_rows;
                             }
                         }
                     }
@@ -650,7 +650,7 @@ namespace LibJpeg.Classic
                 m_output_scan_number = m_input_scan_number;
             }
             else if (m_global_state != JpegState.DSTATE_PRESCAN)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Perform any dummy output passes, and set up for the final pass */
             return output_pass_setup();
@@ -668,27 +668,27 @@ namespace LibJpeg.Classic
         /// this likely signals an application programmer error.  However,
         /// an oversize buffer (max_lines > scanlines remaining) is not an error.
         /// </summary>
-        public uint jpeg_read_scanlines(byte[][] scanlines, uint max_lines)
+        public int jpeg_read_scanlines(byte[][] scanlines, int max_lines)
         {
             if (m_global_state != JpegState.DSTATE_SCANNING)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (m_output_scanline >= m_output_height)
             {
-                WARNMS((int)J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
+                WARNMS(J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
                 return 0;
             }
 
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = (long)m_output_scanline;
-                m_progress.m_pass_limit = (long)m_output_height;
+                m_progress.m_pass_counter = m_output_scanline;
+                m_progress.m_pass_limit = m_output_height;
                 m_progress.progress_monitor();
             }
 
             /* Process some data */
-            uint row_ctr = 0;
+            int row_ctr = 0;
             m_main.process_data(scanlines, ref row_ctr, max_lines);
             m_output_scanline += row_ctr;
             return row_ctr;
@@ -708,7 +708,7 @@ namespace LibJpeg.Classic
             {
                 /* Terminate final pass of non-buffered mode */
                 if (m_output_scanline < m_output_height)
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_TOO_LITTLE_DATA);
+                    ERREXIT(J_MESSAGE_CODE.JERR_TOO_LITTLE_DATA);
 
                 m_master.finish_output_pass();
                 m_global_state = JpegState.DSTATE_STOPPING;
@@ -721,7 +721,7 @@ namespace LibJpeg.Classic
             else if (m_global_state != JpegState.DSTATE_STOPPING)
             {
                 /* STOPPING = repeat call after a suspension, anything else is error */
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
             }
 
             /* Read until EOI */
@@ -747,29 +747,29 @@ namespace LibJpeg.Classic
         /// Replaces jpeg_read_scanlines when reading raw downsampled data.
         /// Processes exactly one iMCU row per call, unless suspended.
         /// </summary>
-        public uint jpeg_read_raw_data(byte[][][] data, uint max_lines)
+        public int jpeg_read_raw_data(byte[][][] data, int max_lines)
         {
             if (m_global_state != JpegState.DSTATE_RAW_OK)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             if (m_output_scanline >= m_output_height)
             {
-                WARNMS((int)J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
+                WARNMS(J_MESSAGE_CODE.JWRN_TOO_MUCH_DATA);
                 return 0;
             }
 
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = (long) m_output_scanline;
-                m_progress.m_pass_limit = (long) m_output_height;
+                m_progress.m_pass_counter = m_output_scanline;
+                m_progress.m_pass_limit = m_output_height;
                 m_progress.progress_monitor();
             }
 
             /* Verify that at least one iMCU row can be returned. */
-            uint lines_per_iMCU_row = (uint)(m_max_v_samp_factor * m_min_DCT_scaled_size);
+            int lines_per_iMCU_row = m_max_v_samp_factor * m_min_DCT_scaled_size;
             if (max_lines < lines_per_iMCU_row)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BUFFER_SIZE);
+                ERREXIT(J_MESSAGE_CODE.JERR_BUFFER_SIZE);
 
             int componentCount = data.Length;
             ComponentBuffer[] cb = new ComponentBuffer[componentCount];
@@ -798,7 +798,7 @@ namespace LibJpeg.Classic
         {
             /* Only valid after jpeg_read_header completes */
             if (m_global_state < JpegState.DSTATE_READY || m_global_state > JpegState.DSTATE_STOPPING)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             return m_inputctl.HasMultipleScans();
         }
@@ -809,7 +809,7 @@ namespace LibJpeg.Classic
         public bool jpeg_start_output(int scan_number)
         {
             if (m_global_state != JpegState.DSTATE_BUFIMAGE && m_global_state != JpegState.DSTATE_PRESCAN)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Limit scan number to valid range */
             if (scan_number <= 0)
@@ -841,7 +841,7 @@ namespace LibJpeg.Classic
             else if (m_global_state != JpegState.DSTATE_BUFPOST)
             {
                 /* BUFPOST = repeat call after a suspension, anything else is error */
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
             }
 
             /* Read markers looking for SOS or EOI */
@@ -865,7 +865,7 @@ namespace LibJpeg.Classic
         {
             /* Check for valid jpeg object */
             if (m_global_state < JpegState.DSTATE_START || m_global_state > JpegState.DSTATE_STOPPING)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             return m_inputctl.EOIReached();
         }
@@ -909,7 +909,7 @@ namespace LibJpeg.Classic
                     retcode = m_inputctl.consume_input();
                     break;
                 default:
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                    ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
                     break;
             }
             return retcode;
@@ -928,28 +928,28 @@ namespace LibJpeg.Classic
             // Do computations that are needed before master selection phase
             /* Prevent application from calling me at wrong times */
             if (m_global_state != JpegState.DSTATE_READY)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
             /* Compute actual output image dimensions and DCT scaling choices. */
             if (m_scale_num * 8 <= m_scale_denom)
             {
                 /* Provide 1/8 scaling */
-                m_output_width = (uint) JpegUtils.jdiv_round_up((long) m_image_width, 8L);
-                m_output_height = (uint) JpegUtils.jdiv_round_up((long) m_image_height, 8L);
+                m_output_width = JpegUtils.jdiv_round_up(m_image_width, 8);
+                m_output_height = JpegUtils.jdiv_round_up(m_image_height, 8);
                 m_min_DCT_scaled_size = 1;
             }
             else if (m_scale_num * 4 <= m_scale_denom)
             {
                 /* Provide 1/4 scaling */
-                m_output_width = (uint) JpegUtils.jdiv_round_up((long) m_image_width, 4L);
-                m_output_height = (uint) JpegUtils.jdiv_round_up((long) m_image_height, 4L);
+                m_output_width = JpegUtils.jdiv_round_up(m_image_width, 4);
+                m_output_height = JpegUtils.jdiv_round_up(m_image_height, 4);
                 m_min_DCT_scaled_size = 2;
             }
             else if (m_scale_num * 2 <= m_scale_denom)
             {
                 /* Provide 1/2 scaling */
-                m_output_width = (uint) JpegUtils.jdiv_round_up((long) m_image_width, 2L);
-                m_output_height = (uint) JpegUtils.jdiv_round_up((long) m_image_height, 2L);
+                m_output_width = JpegUtils.jdiv_round_up(m_image_width, 2);
+                m_output_height = JpegUtils.jdiv_round_up(m_image_height, 2);
                 m_min_DCT_scaled_size = 4;
             }
             else
@@ -984,13 +984,13 @@ namespace LibJpeg.Classic
             for (int ci = 0; ci < m_num_components; ci++)
             {
                 /* Size in samples, after IDCT scaling */
-                m_comp_info[ci].downsampled_width = (uint)JpegUtils.jdiv_round_up(
-                    (long)m_image_width * (long)(m_comp_info[ci].h_samp_factor * m_comp_info[ci].DCT_scaled_size),
-                    (long)(m_max_h_samp_factor * JpegConstants.DCTSIZE));
+                m_comp_info[ci].downsampled_width = JpegUtils.jdiv_round_up(
+                    m_image_width * m_comp_info[ci].h_samp_factor * m_comp_info[ci].DCT_scaled_size,
+                    m_max_h_samp_factor * JpegConstants.DCTSIZE);
 
-                m_comp_info[ci].downsampled_height = (uint)JpegUtils.jdiv_round_up(
-                    (long)m_image_height * (long)(m_comp_info[ci].v_samp_factor * m_comp_info[ci].DCT_scaled_size),
-                    (long)(m_max_v_samp_factor * JpegConstants.DCTSIZE));
+                m_comp_info[ci].downsampled_height = JpegUtils.jdiv_round_up(
+                    m_image_height * m_comp_info[ci].v_samp_factor * m_comp_info[ci].DCT_scaled_size,
+                    m_max_v_samp_factor * JpegConstants.DCTSIZE);
             }
 
             /* Report number of components in selected colorspace. */
@@ -1080,7 +1080,7 @@ namespace LibJpeg.Classic
                         if (m_progress.m_pass_counter >= m_progress.m_pass_limit)
                         {
                             /* startup underestimated number of scans; ratchet up one scan */
-                            m_progress.m_pass_limit += (long)m_total_iMCU_rows;
+                            m_progress.m_pass_limit += m_total_iMCU_rows;
                         }
                     }
                 }
@@ -1097,7 +1097,7 @@ namespace LibJpeg.Classic
                 return m_coef.GetCoefArrays();
 
             /* Oops, improper usage */
-            ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
+            ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
             /* keep compiler happy */
             return null;
         }
@@ -1112,7 +1112,7 @@ namespace LibJpeg.Classic
         {
             /* Safety check to ensure start_compress not called yet. */
             if (dstinfo.m_global_state != JpegState.CSTATE_START)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)dstinfo.m_global_state);
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)dstinfo.m_global_state);
 
             /* Copy fundamental image dimensions */
             dstinfo.m_image_width = m_image_width;
@@ -1148,7 +1148,7 @@ namespace LibJpeg.Classic
             */
             dstinfo.m_num_components = m_num_components;
             if (dstinfo.m_num_components < 1 || dstinfo.m_num_components> JpegConstants.MAX_COMPONENTS)
-                ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, dstinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
+                ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, dstinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
 
             for (int ci = 0; ci < dstinfo.m_num_components; ci++)
             {
@@ -1163,7 +1163,7 @@ namespace LibJpeg.Classic
                 */
                 int tblno = dstinfo.m_comp_info[ci].quant_tbl_no;
                 if (tblno < 0 || tblno >= JpegConstants.NUM_QUANT_TBLS || m_quant_tbl_ptrs[tblno] == null)
-                    ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
+                    ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
 
                 JQUANT_TBL c_quant = m_comp_info[ci].quant_table;
                 if (c_quant != null)
@@ -1172,7 +1172,7 @@ namespace LibJpeg.Classic
                     for (int coefi = 0; coefi < JpegConstants.DCTSIZE2; coefi++)
                     {
                         if (c_quant.quantval[coefi] != slot_quant.quantval[coefi])
-                            ERREXIT((int)J_MESSAGE_CODE.JERR_MISMATCHED_QUANT_TABLE, tblno);
+                            ERREXIT(J_MESSAGE_CODE.JERR_MISMATCHED_QUANT_TABLE, tblno);
                     }
                 }
                 /* Note: we do not copy the source's Huffman table assignments;
@@ -1197,8 +1197,8 @@ namespace LibJpeg.Classic
                 }
 
                 dstinfo.m_density_unit = m_density_unit;
-                dstinfo.m_X_density = m_X_density;
-                dstinfo.m_Y_density = m_Y_density;
+                dstinfo.m_X_density = (short)m_X_density;
+                dstinfo.m_Y_density = (short)m_Y_density;
             }
         }
 
@@ -1230,7 +1230,7 @@ namespace LibJpeg.Classic
         }
 
         /* Control saving of COM and APPn markers into marker_list. */
-        public void jpeg_save_markers(int marker_code, uint length_limit)
+        public void jpeg_save_markers(int marker_code, int length_limit)
         {
             m_marker.jpeg_save_markers(marker_code, length_limit);
         }
@@ -1344,8 +1344,8 @@ namespace LibJpeg.Classic
                     nscans = m_num_components;
                 }
 
-                m_progress.m_pass_counter = 0L;
-                m_progress.m_pass_limit = (long)m_total_iMCU_rows * nscans;
+                m_progress.m_pass_counter = 0;
+                m_progress.m_pass_limit = m_total_iMCU_rows * nscans;
                 m_progress.m_completed_passes = 0;
                 m_progress.m_total_passes = 1;
             }
@@ -1374,12 +1374,12 @@ namespace LibJpeg.Classic
                  /* Crank through the dummy pass */
                 while (m_output_scanline < m_output_height)
                 {
-                    uint last_scanline;
+                    int last_scanline;
                     /* Call progress monitor hook if present */
                     if (m_progress != null)
                     {
-                        m_progress.m_pass_counter = (long)m_output_scanline;
-                        m_progress.m_pass_limit = (long)m_output_height;
+                        m_progress.m_pass_counter = m_output_scanline;
+                        m_progress.m_pass_limit = m_output_height;
                         m_progress.progress_monitor();
                     }
 
@@ -1438,7 +1438,7 @@ namespace LibJpeg.Classic
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
                                 break;
                             default:
-                                WARNMS((int)J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
+                                WARNMS(J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr; /* assume it's YCbCr */
                                 break;
                         }
@@ -1462,7 +1462,7 @@ namespace LibJpeg.Classic
                         }
                         else
                         {
-                            TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_UNKNOWN_IDS, cid0, cid1, cid2);
+                            TRACEMS(1, J_MESSAGE_CODE.JTRC_UNKNOWN_IDS, cid0, cid1, cid2);
                             /* assume it's YCbCr */
                             m_jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
                         }
@@ -1483,7 +1483,7 @@ namespace LibJpeg.Classic
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCCK;
                                 break;
                             default:
-                                WARNMS((int)J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
+                                WARNMS(J_MESSAGE_CODE.JWRN_ADOBE_XFORM, m_Adobe_transform);
                                 /* assume it's YCCK */
                                 m_jpeg_color_space = J_COLOR_SPACE.JCS_YCCK;
                                 break;

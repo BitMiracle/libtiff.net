@@ -30,8 +30,8 @@ namespace LibJpeg.Classic.Internal
         private J_BUF_MODE m_passModeSetByLastStartPass;
         private jpeg_compress_struct m_cinfo;
 
-        private uint m_iMCU_row_num;    /* iMCU row # within image */
-        private uint m_mcu_ctr;     /* counts MCUs processed in current row */
+        private int m_iMCU_row_num;    /* iMCU row # within image */
+        private int m_mcu_ctr;     /* counts MCUs processed in current row */
         private int m_MCU_vert_offset;        /* counts MCU rows within iMCU row */
         private int m_MCU_rows_per_iMCU_row;  /* number of such rows needed */
 
@@ -61,8 +61,8 @@ namespace LibJpeg.Classic.Internal
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_whole_image[ci] = new jvirt_barray_control(cinfo, false, 
-                        (uint)JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor),
-                        (uint)JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
+                        JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor),
+                        JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
                 }
             }
             else
@@ -94,21 +94,21 @@ namespace LibJpeg.Classic.Internal
             {
                 case J_BUF_MODE.JBUF_PASS_THRU:
                     if (m_whole_image[0] != null)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
                     break;
 
                 case J_BUF_MODE.JBUF_SAVE_AND_PASS:
                     if (m_whole_image[0] == null)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
                     break;
 
                 case J_BUF_MODE.JBUF_CRANK_DEST:
                     if (m_whole_image[0] == null)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
                     break;
 
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
                     break;
             }
 
@@ -143,13 +143,13 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         private bool compressDataImpl(byte[][][] input_buf)
         {
-            uint last_MCU_col = m_cinfo.m_MCUs_per_row - 1;
-            uint last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
+            int last_MCU_col = m_cinfo.m_MCUs_per_row - 1;
+            int last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
 
             /* Loop to write as much as one whole iMCU row */
             for (int yoffset = m_MCU_vert_offset; yoffset < m_MCU_rows_per_iMCU_row; yoffset++)
             {
-                for (uint MCU_col_num = m_mcu_ctr; MCU_col_num <= last_MCU_col; MCU_col_num++)
+                for (int MCU_col_num = m_mcu_ctr; MCU_col_num <= last_MCU_col; MCU_col_num++)
                 {
                     /* Determine where data comes from in input_buf and do the DCT thing.
                      * Each call on forward_DCT processes a horizontal row of DCT blocks
@@ -165,15 +165,15 @@ namespace LibJpeg.Classic.Internal
                     {
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                         int blockcnt = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
-                        uint xpos = (uint)(MCU_col_num * componentInfo.MCU_sample_width);
-                        uint ypos = (uint)(yoffset * JpegConstants.DCTSIZE);
+                        int xpos = MCU_col_num * componentInfo.MCU_sample_width;
+                        int ypos = yoffset * JpegConstants.DCTSIZE;
 
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
                             if (m_iMCU_row_num < last_iMCU_row || yoffset + yindex < componentInfo.last_row_height)
                             {
                                 m_cinfo.m_fdct.forward_DCT(componentInfo.quant_tbl_no, input_buf[componentInfo.component_index],
-                                    m_MCU_buffer[blkn], ypos, xpos, (uint)blockcnt);
+                                    m_MCU_buffer[blkn], ypos, xpos, blockcnt);
 
                                 if (blockcnt < componentInfo.MCU_width)
                                 {
@@ -244,7 +244,7 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         private bool compressFirstPass(byte[][][] input_buf)
         {
-            uint last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
+            int last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
@@ -252,8 +252,8 @@ namespace LibJpeg.Classic.Internal
 
                 /* Align the virtual buffer for this component. */
                 JBLOCK[][] buffer = m_whole_image[ci].access_virt_barray(
-                    (uint)(m_iMCU_row_num * componentInfo.v_samp_factor),
-                    (uint)componentInfo.v_samp_factor);
+                    m_iMCU_row_num * componentInfo.v_samp_factor,
+                    componentInfo.v_samp_factor);
 
                 /* Count non-dummy DCT block rows in this iMCU row. */
                 int block_rows;
@@ -264,16 +264,16 @@ namespace LibJpeg.Classic.Internal
                 else
                 {
                     /* NB: can't use last_row_height here, since may not be set! */
-                    block_rows = (int)(componentInfo.height_in_blocks % componentInfo.v_samp_factor);
+                    block_rows = componentInfo.height_in_blocks % componentInfo.v_samp_factor;
                     if (block_rows == 0)
                         block_rows = componentInfo.v_samp_factor;
                 }
 
-                uint blocks_across = componentInfo.width_in_blocks;
+                int blocks_across = componentInfo.width_in_blocks;
                 int h_samp_factor = componentInfo.h_samp_factor;
 
                 /* Count number of dummy blocks to be added at the right margin. */
-                int ndummy = (int)(blocks_across % h_samp_factor);
+                int ndummy = blocks_across % h_samp_factor;
                 if (ndummy > 0)
                     ndummy = h_samp_factor - ndummy;
 
@@ -283,7 +283,7 @@ namespace LibJpeg.Classic.Internal
                 for (int block_row = 0; block_row < block_rows; block_row++)
                 {
                     m_cinfo.m_fdct.forward_DCT(componentInfo.quant_tbl_no, input_buf[ci],
-                        buffer[block_row], (uint)(block_row * JpegConstants.DCTSIZE), (uint)0, blocks_across);
+                        buffer[block_row], block_row * JpegConstants.DCTSIZE, 0, blocks_across);
 
                     if (ndummy > 0)
                     {
@@ -303,8 +303,8 @@ namespace LibJpeg.Classic.Internal
                  */
                 if (m_iMCU_row_num == last_iMCU_row)
                 {
-                    blocks_across += (uint)ndummy;    /* include lower right corner */
-                    uint MCUs_across = (uint)(blocks_across / h_samp_factor);
+                    blocks_across += ndummy;    /* include lower right corner */
+                    int MCUs_across = blocks_across / h_samp_factor;
                     for (int block_row = block_rows; block_row < componentInfo.v_samp_factor; block_row++)
                     {
                         for (int i = 0; i < blocks_across; i++)
@@ -312,7 +312,7 @@ namespace LibJpeg.Classic.Internal
 
                         int thisOffset = 0;
                         int lastOffset = 0;
-                        for (uint MCUindex = 0; MCUindex < MCUs_across; MCUindex++)
+                        for (int MCUindex = 0; MCUindex < MCUs_across; MCUindex++)
                         {
                             short lastDC = buffer[block_row - 1][lastOffset + h_samp_factor - 1][0];
                             for (int bi = 0; bi < h_samp_factor; bi++)
@@ -349,20 +349,20 @@ namespace LibJpeg.Classic.Internal
             {
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                 buffer[ci] = m_whole_image[componentInfo.component_index].access_virt_barray(
-                    (uint)(m_iMCU_row_num * componentInfo.v_samp_factor), (uint)componentInfo.v_samp_factor);
+                    m_iMCU_row_num * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
             }
 
             /* Loop to process one whole iMCU row */
             for (int yoffset = m_MCU_vert_offset; yoffset < m_MCU_rows_per_iMCU_row; yoffset++)
             {
-                for (uint MCU_col_num = m_mcu_ctr; MCU_col_num < m_cinfo.m_MCUs_per_row; MCU_col_num++)
+                for (int MCU_col_num = m_mcu_ctr; MCU_col_num < m_cinfo.m_MCUs_per_row; MCU_col_num++)
                 {
                     /* Construct list of pointers to DCT blocks belonging to this MCU */
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
-                        int start_col = (int)(MCU_col_num * componentInfo.MCU_width);
+                        int start_col = MCU_col_num * componentInfo.MCU_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
                             for (int xindex = 0; xindex < componentInfo.MCU_width; xindex++)

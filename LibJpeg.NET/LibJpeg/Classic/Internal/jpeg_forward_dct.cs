@@ -140,7 +140,7 @@ namespace LibJpeg.Classic.Internal
                     m_useFloatMethod = true;
                     break;
                 default:
-                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                     break;
             }
 
@@ -168,7 +168,7 @@ namespace LibJpeg.Classic.Internal
 
                 /* Make sure specified quantization table is present */
                 if (qtblno < 0 || qtblno >= JpegConstants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
 
                 JQUANT_TBL qtbl = m_cinfo.m_quant_tbl_ptrs[qtblno];
 
@@ -184,7 +184,7 @@ namespace LibJpeg.Classic.Internal
                         m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
 
                     for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
-                        m_divisors[qtblno][i] = ((int) qtbl.quantval[i]) << 3;
+                        m_divisors[qtblno][i] = ((int)qtbl.quantval[i]) << 3;
 
                     break;
                 case J_DCT_METHOD.JDCT_IFAST:
@@ -193,7 +193,7 @@ namespace LibJpeg.Classic.Internal
                             m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
 
                         for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
-                            m_divisors[qtblno][i] = JpegUtils.DESCALE((int) qtbl.quantval[i] * (int) aanscales[i], CONST_BITS - 3);
+                            m_divisors[qtblno][i] = JpegUtils.DESCALE((int)qtbl.quantval[i] * (int)aanscales[i], CONST_BITS - 3);
                     }
                     break;
                 case J_DCT_METHOD.JDCT_FLOAT:
@@ -214,7 +214,7 @@ namespace LibJpeg.Classic.Internal
                     }
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                     break;
                 }
             }
@@ -227,7 +227,7 @@ namespace LibJpeg.Classic.Internal
         /// position start_row/start_col, and moving to the right for any additional
         /// blocks. The quantized coefficients are returned in coef_blocks[].
         /// </summary>
-        public virtual void forward_DCT(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, uint start_row, uint start_col, uint num_blocks)
+        public virtual void forward_DCT(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
         {
             if (m_useFloatMethod)
                 forwardDCTFloatImpl(quant_tbl_no, sample_data, coef_blocks, start_row, start_col, num_blocks);
@@ -236,11 +236,11 @@ namespace LibJpeg.Classic.Internal
         }
 
         // This version is used for integer DCT implementations.
-        private void forwardDCTImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, uint start_row, uint start_col, uint num_blocks)
+        private void forwardDCTImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
         {
             /* This routine is heavily used, so it's worth coding it tightly. */
             int[] workspace = new int [JpegConstants.DCTSIZE2];    /* work area for FDCT subroutine */
-            for (uint bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
+            for (int bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
             {
                 /* Load data into workspace, applying unsigned->signed conversion */
                 int workspaceIndex = 0;
@@ -293,11 +293,11 @@ namespace LibJpeg.Classic.Internal
         }
 
         // This version is used for floating-point DCT implementations.
-        private void forwardDCTFloatImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, uint start_row, uint start_col, uint num_blocks)
+        private void forwardDCTFloatImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
         {
             /* This routine is heavily used, so it's worth coding it tightly. */
             float[] workspace = new float [JpegConstants.DCTSIZE2]; /* work area for FDCT subroutine */
-            for (uint bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
+            for (int bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
             {
                 /* Load data into workspace, applying unsigned->signed conversion */
                 int workspaceIndex = 0;
@@ -305,7 +305,7 @@ namespace LibJpeg.Classic.Internal
                 {
                     for (int column = 0; column < JpegConstants.DCTSIZE; column++)
                     {
-                        workspace[workspaceIndex] = (float) ((int)sample_data[start_row + elemr][start_col + column] - JpegConstants.CENTERJSAMPLE);
+                        workspace[workspaceIndex] = (float)((int)sample_data[start_row + elemr][start_col + column] - JpegConstants.CENTERJSAMPLE);
                         workspaceIndex++;
                     }
                 }
@@ -325,7 +325,7 @@ namespace LibJpeg.Classic.Internal
                      * The maximum coefficient size is +-16K (for 12-bit data), so this
                      * code should work for either 16-bit or 32-bit ints.
                      */
-                    coef_blocks[bi][i] = (short) ((int) (temp + (float) 16384.5) - 16384);
+                    coef_blocks[bi][i] = (short)((int)(temp + (float)16384.5) - 16384);
                 }
             }
         }
@@ -693,8 +693,8 @@ namespace LibJpeg.Classic.Internal
                 int tmp11 = tmp1 + tmp2;
                 int tmp12 = tmp1 - tmp2;
 
-                data[dataIndex + 0] = (int) ((tmp10 + tmp11) << SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 4] = (int) ((tmp10 - tmp11) << SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 0] = (tmp10 + tmp11) << SLOW_INTEGER_PASS1_BITS;
+                data[dataIndex + 4] = (tmp10 - tmp11) << SLOW_INTEGER_PASS1_BITS;
 
                 int z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_0_541196100;
                 data[dataIndex + 2] = JpegUtils.DESCALE(z1 + tmp13 * SLOW_INTEGER_FIX_0_765366865,

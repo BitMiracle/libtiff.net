@@ -23,7 +23,7 @@ namespace LibJpeg.Classic.Internal
     class jpeg_marker_writer
     {
         private jpeg_compress_struct m_cinfo;
-        private uint m_last_restart_interval; /* last DRI value emitted; 0 after SOI */
+        private int m_last_restart_interval; /* last DRI value emitted; 0 after SOI */
 
         public jpeg_marker_writer(jpeg_compress_struct cinfo)
         {
@@ -95,7 +95,7 @@ namespace LibJpeg.Classic.Internal
                 {
                     is_baseline = false;
                     /* If it's baseline except for quantizer size, warn the user */
-                    m_cinfo.TRACEMS(0, (int)J_MESSAGE_CODE.JTRC_16BIT_TABLES);
+                    m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JTRC_16BIT_TABLES);
                 }
             }
 
@@ -203,14 +203,14 @@ namespace LibJpeg.Classic.Internal
         /// <summary>
         /// Emit an arbitrary marker header
         /// </summary>
-        public void write_marker_header(int marker, uint datalen)
+        public void write_marker_header(int marker, int datalen)
         {
-            if (datalen > (uint) 65533)     /* safety check */
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_LENGTH);
+            if (datalen > 65533)     /* safety check */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
 
             emit_marker((JPEG_MARKER) marker);
 
-            emit_2bytes((int) (datalen + 2));    /* total length */
+            emit_2bytes(datalen + 2);    /* total length */
         }
 
         /// <summary>
@@ -285,12 +285,12 @@ namespace LibJpeg.Classic.Internal
             emit_2bytes(3 * m_cinfo.m_num_components + 2 + 5 + 1); /* length */
 
             /* Make sure image isn't bigger than SOF field can handle */
-            if ((long) m_cinfo.m_image_height > 65535L || (long) m_cinfo.m_image_width > 65535L)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int)65535);
+            if (m_cinfo.m_image_height > 65535 || m_cinfo.m_image_width > 65535)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, 65535);
 
             emit_byte(m_cinfo.m_data_precision);
-            emit_2bytes((int) m_cinfo.m_image_height);
-            emit_2bytes((int) m_cinfo.m_image_width);
+            emit_2bytes(m_cinfo.m_image_height);
+            emit_2bytes(m_cinfo.m_image_width);
 
             emit_byte(m_cinfo.m_num_components);
 
@@ -359,7 +359,7 @@ namespace LibJpeg.Classic.Internal
 
             emit_2bytes(4);  /* fixed length */
 
-            emit_2bytes((int)m_cinfo.m_restart_interval);
+            emit_2bytes(m_cinfo.m_restart_interval);
         }
         
         /// <summary>
@@ -375,7 +375,7 @@ namespace LibJpeg.Classic.Internal
             }
 
             if (htbl == null)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, index);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, index);
 
             if (!htbl.sent_table)
             {
@@ -407,7 +407,7 @@ namespace LibJpeg.Classic.Internal
         {
             JQUANT_TBL qtbl = m_cinfo.m_quant_tbl_ptrs[index];
             if (qtbl == null)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, index);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, index);
 
             int prec = 0;
             for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
@@ -427,12 +427,12 @@ namespace LibJpeg.Classic.Internal
                 for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
                     /* The table entries must be emitted in zigzag order. */
-                    uint qval = qtbl.quantval[JpegUtils.jpeg_natural_order[i]];
+                    int qval = qtbl.quantval[JpegUtils.jpeg_natural_order[i]];
 
                     if (prec != 0)
-                        emit_byte((int) (qval >> 8));
+                        emit_byte(qval >> 8);
 
-                    emit_byte((int) (qval & 0xFF));
+                    emit_byte(qval & 0xFF);
                 }
 
                 qtbl.sent_table = true;
@@ -470,8 +470,8 @@ namespace LibJpeg.Classic.Internal
             emit_byte(m_cinfo.m_JFIF_major_version); /* Version fields */
             emit_byte(m_cinfo.m_JFIF_minor_version);
             emit_byte(m_cinfo.m_density_unit); /* Pixel size information */
-            emit_2bytes((int)m_cinfo.m_X_density);
-            emit_2bytes((int)m_cinfo.m_Y_density);
+            emit_2bytes(m_cinfo.m_X_density);
+            emit_2bytes(m_cinfo.m_Y_density);
             emit_byte(0);        /* No thumbnail image */
             emit_byte(0);
         }
@@ -512,7 +512,7 @@ namespace LibJpeg.Classic.Internal
         private void emit_byte(int val)
         {
             if (!m_cinfo.m_dest.emit_byte(val))
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CANT_SUSPEND);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CANT_SUSPEND);
         }
     }
 }

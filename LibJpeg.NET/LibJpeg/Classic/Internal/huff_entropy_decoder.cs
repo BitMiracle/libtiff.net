@@ -48,7 +48,7 @@ namespace LibJpeg.Classic.Internal
         private savable_state m_saved = new savable_state();        /* Other state at start of MCU */
 
         /* These fields are NOT loaded into local working state. */
-        private uint m_restarts_to_go;    /* MCUs left in this restart interval */
+        private int m_restarts_to_go;    /* MCUs left in this restart interval */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
         private d_derived_tbl[] m_dc_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
@@ -83,7 +83,7 @@ namespace LibJpeg.Classic.Internal
              * there are some baseline files out there with all zeroes in these bytes.
              */
             if (m_cinfo.m_Ss != 0 || m_cinfo.m_Se != JpegConstants.DCTSIZE2 - 1 || m_cinfo.m_Ah != 0 || m_cinfo.m_Al != 0)
-                m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_NOT_SEQUENTIAL);
+                m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_NOT_SEQUENTIAL);
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
@@ -288,7 +288,7 @@ namespace LibJpeg.Classic.Internal
         {
             /* Throw away any unused bits remaining in bit buffer; */
             /* include any full bytes in next_marker's count of discarded bytes */
-            m_cinfo.m_marker.SkipBytes((uint)(m_bitstate.bits_left / 8));
+            m_cinfo.m_marker.SkipBytes(m_bitstate.bits_left / 8);
             m_bitstate.bits_left = 0;
 
             /* Advance past the RSTn marker */

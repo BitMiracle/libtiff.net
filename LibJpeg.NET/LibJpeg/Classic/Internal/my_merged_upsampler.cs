@@ -44,7 +44,7 @@ namespace LibJpeg.Classic.Internal
     class my_merged_upsampler : jpeg_upsampler
     {
         private const int SCALEBITS = 16;  /* speediest right-shift on some machines */
-        private const int ONE_HALF = ((int)1 << (SCALEBITS - 1));
+        private const int ONE_HALF = 1 << (SCALEBITS - 1);
 
         private jpeg_decompress_struct m_cinfo;
         
@@ -64,15 +64,15 @@ namespace LibJpeg.Classic.Internal
         private byte[] m_spare_row;
         private bool m_spare_full;        /* T if spare buffer is occupied */
 
-        private uint m_out_row_width;   /* samples per output row */
-        private uint m_rows_to_go;  /* counts rows remaining in image */
+        private int m_out_row_width;   /* samples per output row */
+        private int m_rows_to_go;  /* counts rows remaining in image */
 
         public my_merged_upsampler(jpeg_decompress_struct cinfo)
         {
             m_cinfo = cinfo;
             m_need_context_rows = false;
 
-            m_out_row_width = (uint)(cinfo.m_output_width * cinfo.m_out_color_components);
+            m_out_row_width = cinfo.m_output_width * cinfo.m_out_color_components;
 
             if (cinfo.m_max_v_samp_factor == 2)
             {
@@ -102,7 +102,7 @@ namespace LibJpeg.Classic.Internal
             m_rows_to_go = m_cinfo.m_output_height;
         }
 
-        public override void upsample(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, uint in_row_groups_avail, byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        public override void upsample(ComponentBuffer[] input_buf, ref int in_row_group_ctr, int in_row_groups_avail, byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
             if (m_use_2v_upsample)
                 merged_2v_upsample(input_buf, ref in_row_group_ctr, output_buf, ref out_row_ctr, out_rows_avail);
@@ -115,10 +115,10 @@ namespace LibJpeg.Classic.Internal
         /// The control routine just handles the row buffering considerations.
         /// 1:1 vertical sampling case: much easier, never need a spare row.
         /// </summary>
-        private void merged_1v_upsample(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, byte[][] output_buf, ref uint out_row_ctr)
+        private void merged_1v_upsample(ComponentBuffer[] input_buf, ref int in_row_group_ctr, byte[][] output_buf, ref int out_row_ctr)
         {
             /* Just do the upsampling. */
-            h2v1_merged_upsample(input_buf, in_row_group_ctr, output_buf, (int)out_row_ctr);
+            h2v1_merged_upsample(input_buf, in_row_group_ctr, output_buf, out_row_ctr);
 
             /* Adjust counts */
             out_row_ctr++;
@@ -130,15 +130,15 @@ namespace LibJpeg.Classic.Internal
         /// The control routine just handles the row buffering considerations.
         /// 2:1 vertical sampling case: may need a spare row.
         /// </summary>
-        private void merged_2v_upsample(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        private void merged_2v_upsample(ComponentBuffer[] input_buf, ref int in_row_group_ctr, byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
-            uint num_rows;        /* number of rows returned to caller */
+            int num_rows;        /* number of rows returned to caller */
             if (m_spare_full)
             {
                 /* If we have a spare row saved from a previous cycle, just return it. */
                 byte[][] temp = new byte[1][];
                 temp[0] = m_spare_row;
-                JpegUtils.jcopy_sample_rows(temp, 0, output_buf, (int)out_row_ctr, 1, m_out_row_width);
+                JpegUtils.jcopy_sample_rows(temp, 0, output_buf, out_row_ctr, 1, m_out_row_width);
                 num_rows = 1;
                 m_spare_full = false;
             }
@@ -194,7 +194,7 @@ namespace LibJpeg.Classic.Internal
         /// <summary>
         /// Upsample and color convert for the case of 2:1 horizontal and 1:1 vertical.
         /// </summary>
-        private void h2v1_merged_upsample(ComponentBuffer[] input_buf, uint in_row_group_ctr, byte[][] output_buf, int outRow)
+        private void h2v1_merged_upsample(ComponentBuffer[] input_buf, int in_row_group_ctr, byte[][] output_buf, int outRow)
         {
             int inputIndex0 = 0;
             int inputIndex1 = 0;
@@ -205,13 +205,13 @@ namespace LibJpeg.Classic.Internal
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             /* Loop for each pair of output pixels */
-            for (uint col = m_cinfo.m_output_width >> 1; col > 0; col--)
+            for (int col = m_cinfo.m_output_width >> 1; col > 0; col--)
             {
                 /* Do the chroma part of the calculation */
-                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
+                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
                 inputIndex1++;
 
-                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
+                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
                 inputIndex2++;
 
                 int cred = m_Cr_r_tab[cr];
@@ -219,7 +219,7 @@ namespace LibJpeg.Classic.Internal
                 int cblue = m_Cb_b_tab[cb];
 
                 /* Fetch 2 Y values and emit 2 pixels */
-                int y = input_buf[0][(int)in_row_group_ctr][inputIndex0];
+                int y = input_buf[0][in_row_group_ctr][inputIndex0];
                 inputIndex0++;
 
                 output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
@@ -227,7 +227,7 @@ namespace LibJpeg.Classic.Internal
                 output_buf[outRow][outputIndex + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
                 outputIndex += JpegConstants.RGB_PIXELSIZE;
                 
-                y = input_buf[0][(int)in_row_group_ctr][inputIndex0];
+                y = input_buf[0][in_row_group_ctr][inputIndex0];
                 inputIndex0++;
 
                 output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
@@ -239,13 +239,13 @@ namespace LibJpeg.Classic.Internal
             /* If image width is odd, do the last output column separately */
             if ((m_cinfo.m_output_width & 1) != 0)
             {
-                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
-                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
+                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
+                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
                 int cred = m_Cr_r_tab[cr];
                 int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
                 int cblue = m_Cb_b_tab[cb];
                 
-                int y = input_buf[0][(int)in_row_group_ctr][inputIndex0];
+                int y = input_buf[0][in_row_group_ctr][inputIndex0];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
@@ -255,12 +255,12 @@ namespace LibJpeg.Classic.Internal
         /// <summary>
         /// Upsample and color convert for the case of 2:1 horizontal and 2:1 vertical.
         /// </summary>
-        private void h2v2_merged_upsample(ComponentBuffer[] input_buf, uint in_row_group_ctr, byte[][] output_buf)
+        private void h2v2_merged_upsample(ComponentBuffer[] input_buf, int in_row_group_ctr, byte[][] output_buf)
         {
-            int inputRow00 = (int)(in_row_group_ctr * 2);
+            int inputRow00 = in_row_group_ctr * 2;
             int inputIndex00 = 0;
 
-            int inputRow01 = (int)(in_row_group_ctr * 2 + 1);
+            int inputRow01 = in_row_group_ctr * 2 + 1;
             int inputIndex01 = 0;
 
             int inputIndex1 = 0;
@@ -273,13 +273,13 @@ namespace LibJpeg.Classic.Internal
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             /* Loop for each group of output pixels */
-            for (uint col = m_cinfo.m_output_width >> 1; col > 0; col--)
+            for (int col = m_cinfo.m_output_width >> 1; col > 0; col--)
             {
                 /* Do the chroma part of the calculation */
-                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
+                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
                 inputIndex1++;
 
-                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
+                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
                 inputIndex2++;
 
                 int cred = m_Cr_r_tab[cr];
@@ -323,8 +323,8 @@ namespace LibJpeg.Classic.Internal
             /* If image width is odd, do the last output column separately */
             if ((m_cinfo.m_output_width & 1) != 0)
             {
-                int cb = input_buf[1][(int)in_row_group_ctr][inputIndex1];
-                int cr = input_buf[2][(int)in_row_group_ctr][inputIndex2];
+                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
+                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
                 int cred = m_Cr_r_tab[cr];
                 int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
                 int cblue = m_Cb_b_tab[cb];

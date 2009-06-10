@@ -20,8 +20,8 @@ namespace LibJpeg.Classic.Internal
     {
         public jpeg_marker_struct next;   /* next in list, or null */
         public byte marker;           /* marker code: JPEG_COM, or JPEG_APP0+n */
-        public uint original_length;   /* # bytes of data in the file */
-        public uint data_length;   /* # bytes of data saved at data[] */
+        public int original_length;   /* # bytes of data in the file */
+        public int data_length;   /* # bytes of data saved at data[] */
         public byte[] data;       /* the data contained in the marker */
         /* the marker length word is not counted in data_length or original_length */
     }

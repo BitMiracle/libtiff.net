@@ -77,18 +77,18 @@ namespace LibJpeg.Classic.Internal
         * }
         */
 
-        private const int SLOW_INTEGER_FIX_0_298631336 = ((int)  2446);   /* SLOW_INTEGER_FIX(0.298631336) */
-        private const int SLOW_INTEGER_FIX_0_390180644 = ((int)  3196);   /* SLOW_INTEGER_FIX(0.390180644) */
-        private const int SLOW_INTEGER_FIX_0_541196100 = ((int)  4433);   /* SLOW_INTEGER_FIX(0.541196100) */
-        private const int SLOW_INTEGER_FIX_0_765366865 = ((int)  6270);   /* SLOW_INTEGER_FIX(0.765366865) */
-        private const int SLOW_INTEGER_FIX_0_899976223 = ((int)  7373);   /* SLOW_INTEGER_FIX(0.899976223) */
-        private const int SLOW_INTEGER_FIX_1_175875602 = ((int)  9633);   /* SLOW_INTEGER_FIX(1.175875602) */
-        private const int SLOW_INTEGER_FIX_1_501321110 = ((int)  12299);  /* SLOW_INTEGER_FIX(1.501321110) */
-        private const int SLOW_INTEGER_FIX_1_847759065 = ((int)  15137);  /* SLOW_INTEGER_FIX(1.847759065) */
-        private const int SLOW_INTEGER_FIX_1_961570560 = ((int)  16069);  /* SLOW_INTEGER_FIX(1.961570560) */
-        private const int SLOW_INTEGER_FIX_2_053119869 = ((int)  16819);  /* SLOW_INTEGER_FIX(2.053119869) */
-        private const int SLOW_INTEGER_FIX_2_562915447 = ((int)  20995);  /* SLOW_INTEGER_FIX(2.562915447) */
-        private const int SLOW_INTEGER_FIX_3_072711026 = ((int)  25172);  /* SLOW_INTEGER_FIX(3.072711026) */
+        private const int SLOW_INTEGER_FIX_0_298631336 = 2446;   /* SLOW_INTEGER_FIX(0.298631336) */
+        private const int SLOW_INTEGER_FIX_0_390180644 = 3196;   /* SLOW_INTEGER_FIX(0.390180644) */
+        private const int SLOW_INTEGER_FIX_0_541196100 = 4433;   /* SLOW_INTEGER_FIX(0.541196100) */
+        private const int SLOW_INTEGER_FIX_0_765366865 = 6270;   /* SLOW_INTEGER_FIX(0.765366865) */
+        private const int SLOW_INTEGER_FIX_0_899976223 = 7373;   /* SLOW_INTEGER_FIX(0.899976223) */
+        private const int SLOW_INTEGER_FIX_1_175875602 = 9633;   /* SLOW_INTEGER_FIX(1.175875602) */
+        private const int SLOW_INTEGER_FIX_1_501321110 = 12299;  /* SLOW_INTEGER_FIX(1.501321110) */
+        private const int SLOW_INTEGER_FIX_1_847759065 = 15137;  /* SLOW_INTEGER_FIX(1.847759065) */
+        private const int SLOW_INTEGER_FIX_1_961570560 = 16069;  /* SLOW_INTEGER_FIX(1.961570560) */
+        private const int SLOW_INTEGER_FIX_2_053119869 = 16819;  /* SLOW_INTEGER_FIX(2.053119869) */
+        private const int SLOW_INTEGER_FIX_2_562915447 = 20995;  /* SLOW_INTEGER_FIX(2.562915447) */
+        private const int SLOW_INTEGER_FIX_3_072711026 = 25172;  /* SLOW_INTEGER_FIX(3.072711026) */
 
         private const int FAST_INTEGER_CONST_BITS = 8;
         private const int FAST_INTEGER_PASS1_BITS = 2;
@@ -96,10 +96,10 @@ namespace LibJpeg.Classic.Internal
         /* We use the following pre-calculated constants.
         * If you change FAST_INTEGER_CONST_BITS you may want to add appropriate values.
         */
-        private const int FAST_INTEGER_FIX_1_082392200 = ((int)  277);        /* FAST_INTEGER_FIX(1.082392200) */
-        private const int FAST_INTEGER_FIX_1_414213562 = ((int)  362);        /* FAST_INTEGER_FIX(1.414213562) */
-        private const int FAST_INTEGER_FIX_1_847759065 = ((int)  473);        /* FAST_INTEGER_FIX(1.847759065) */
-        private const int FAST_INTEGER_FIX_2_613125930 = ((int)  669);        /* FAST_INTEGER_FIX(2.613125930) */
+        private const int FAST_INTEGER_FIX_1_082392200 = 277;        /* FAST_INTEGER_FIX(1.082392200) */
+        private const int FAST_INTEGER_FIX_1_414213562 = 362;        /* FAST_INTEGER_FIX(1.414213562) */
+        private const int FAST_INTEGER_FIX_1_847759065 = 473;        /* FAST_INTEGER_FIX(1.847759065) */
+        private const int FAST_INTEGER_FIX_2_613125930 = 669;        /* FAST_INTEGER_FIX(2.613125930) */
 
         private const int REDUCED_CONST_BITS = 13;
         private const int REDUCED_PASS1_BITS = 2;
@@ -113,20 +113,20 @@ namespace LibJpeg.Classic.Internal
         * }
         */
 
-        private const int REDUCED_FIX_0_211164243 = ((int)  1730);    /* REDUCED_FIX(0.211164243) */
-        private const int REDUCED_FIX_0_509795579 = ((int)  4176);    /* REDUCED_FIX(0.509795579) */
-        private const int REDUCED_FIX_0_601344887 = ((int)  4926);    /* REDUCED_FIX(0.601344887) */
-        private const int REDUCED_FIX_0_720959822 = ((int)  5906);    /* REDUCED_FIX(0.720959822) */
-        private const int REDUCED_FIX_0_765366865 = ((int)  6270);    /* REDUCED_FIX(0.765366865) */
-        private const int REDUCED_FIX_0_850430095 = ((int)  6967);    /* REDUCED_FIX(0.850430095) */
-        private const int REDUCED_FIX_0_899976223 = ((int)  7373);    /* REDUCED_FIX(0.899976223) */
-        private const int REDUCED_FIX_1_061594337 = ((int)  8697);    /* REDUCED_FIX(1.061594337) */
-        private const int REDUCED_FIX_1_272758580 = ((int)  10426);   /* REDUCED_FIX(1.272758580) */
-        private const int REDUCED_FIX_1_451774981 = ((int)  11893);  /* REDUCED_FIX(1.451774981) */
-        private const int REDUCED_FIX_1_847759065 = ((int)  15137);   /* REDUCED_FIX(1.847759065) */
-        private const int REDUCED_FIX_2_172734803 = ((int)  17799);   /* REDUCED_FIX(2.172734803) */
-        private const int REDUCED_FIX_2_562915447 = ((int)  20995);   /* REDUCED_FIX(2.562915447) */
-        private const int REDUCED_FIX_3_624509785 = ((int)29692);   /* REDUCED_FIX(3.624509785) */
+        private const int REDUCED_FIX_0_211164243 = 1730;    /* REDUCED_FIX(0.211164243) */
+        private const int REDUCED_FIX_0_509795579 = 4176;    /* REDUCED_FIX(0.509795579) */
+        private const int REDUCED_FIX_0_601344887 = 4926;    /* REDUCED_FIX(0.601344887) */
+        private const int REDUCED_FIX_0_720959822 = 5906;    /* REDUCED_FIX(0.720959822) */
+        private const int REDUCED_FIX_0_765366865 = 6270;    /* REDUCED_FIX(0.765366865) */
+        private const int REDUCED_FIX_0_850430095 = 6967;    /* REDUCED_FIX(0.850430095) */
+        private const int REDUCED_FIX_0_899976223 = 7373;    /* REDUCED_FIX(0.899976223) */
+        private const int REDUCED_FIX_1_061594337 = 8697;    /* REDUCED_FIX(1.061594337) */
+        private const int REDUCED_FIX_1_272758580 = 10426;   /* REDUCED_FIX(1.272758580) */
+        private const int REDUCED_FIX_1_451774981 = 11893;   /* REDUCED_FIX(1.451774981) */
+        private const int REDUCED_FIX_1_847759065 = 15137;   /* REDUCED_FIX(1.847759065) */
+        private const int REDUCED_FIX_2_172734803 = 17799;   /* REDUCED_FIX(2.172734803) */
+        private const int REDUCED_FIX_2_562915447 = 20995;   /* REDUCED_FIX(2.562915447) */
+        private const int REDUCED_FIX_3_624509785 = 29692;   /* REDUCED_FIX(3.624509785) */
 
         /* precomputed values scaled up by 14 bits */
         private static short[] aanscales = 
@@ -241,12 +241,12 @@ namespace LibJpeg.Classic.Internal
                                 method = (int)J_DCT_METHOD.JDCT_FLOAT;
                                 break;
                             default:
-                                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                                 break;
                         }
                         break;
                     default:
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCTSIZE, componentInfo.DCT_scaled_size);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCTSIZE, componentInfo.DCT_scaled_size);
                         break;
                 }
 
@@ -275,7 +275,7 @@ namespace LibJpeg.Classic.Internal
                          */
                         int[] ismtbl = m_dctTables[ci].int_array;
                         for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
-                            ismtbl[i] = (int) componentInfo.quant_table.quantval[i];
+                            ismtbl[i] = componentInfo.quant_table.quantval[i];
 
                     }
                     break;
@@ -292,8 +292,7 @@ namespace LibJpeg.Classic.Internal
                         
                         for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                         {
-                            ifmtbl[i] = JpegUtils.DESCALE((int) componentInfo.quant_table.quantval[i] * (int) aanscales[i],
-                                                           CONST_BITS - IFAST_SCALE_BITS);
+                            ifmtbl[i] = JpegUtils.DESCALE((int)componentInfo.quant_table.quantval[i] * (int)aanscales[i], CONST_BITS - IFAST_SCALE_BITS);
                         }
                     }
                     break;
@@ -317,14 +316,14 @@ namespace LibJpeg.Classic.Internal
                     }
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                     break;
                 }
             }
         }
 
         /* Inverse DCT (also performs dequantization) */
-        public void inverse(int component_index, short[] coef_block, ComponentBuffer output_buf, uint output_row, uint output_col)
+        public void inverse(int component_index, short[] coef_block, ComponentBuffer output_buf, int output_row, int output_col)
         {
             m_componentBuffer = output_buf;
             switch (m_inverse_DCT_method[component_index])
@@ -349,7 +348,7 @@ namespace LibJpeg.Classic.Internal
                     break;
                 case InverseMethod.Unknown:
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                     break;
             }
         }
@@ -406,7 +405,7 @@ namespace LibJpeg.Classic.Internal
         /// have BITS_IN_JSAMPLE + SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS <= 26.  Error analysis
         /// shows that the values given below are the most effective.
         /// </summary>
-        private void jpeg_idct_islow(int component_index, short[] coef_block, uint output_row, uint output_col)
+        private void jpeg_idct_islow(int component_index, short[] coef_block, int output_row, int output_col)
         {
             /* buffers data between passes */
             int[] workspace = new int[JpegConstants.DCTSIZE2];
@@ -556,7 +555,7 @@ namespace LibJpeg.Classic.Internal
                 * test takes more time than it's worth.  In that case this section
                 * may be commented out.
                 */
-                int currentOutRow = (int)(output_row + ctr);
+                int currentOutRow = output_row + ctr;
                 if (workspace[workspaceIndex + 1] == 0 &&
                     workspace[workspaceIndex + 2] == 0 &&
                     workspace[workspaceIndex + 3] == 0 &&
@@ -566,7 +565,7 @@ namespace LibJpeg.Classic.Internal
                     workspace[workspaceIndex + 7] == 0)
                 {
                     /* AC terms all zero */
-                    byte dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], SLOW_INTEGER_PASS1_BITS + 3) & RANGE_MASK];
+                    byte dcval = limit[limitOffset + JpegUtils.DESCALE(workspace[workspaceIndex + 0], SLOW_INTEGER_PASS1_BITS + 3) & RANGE_MASK];
 
                     m_componentBuffer[currentOutRow][output_col + 0] = dcval;
                     m_componentBuffer[currentOutRow][output_col + 1] = dcval;
@@ -584,15 +583,15 @@ namespace LibJpeg.Classic.Internal
                 /* Even part: reverse the even part of the forward DCT. */
                 /* The rotator is sqrt(2)*c(-6). */
 
-                int z2 = (int)workspace[workspaceIndex + 2];
-                int z3 = (int)workspace[workspaceIndex + 6];
+                int z2 = workspace[workspaceIndex + 2];
+                int z3 = workspace[workspaceIndex + 6];
 
                 int z1 = (z2 + z3) * SLOW_INTEGER_FIX_0_541196100;
                 int tmp2 = z1 + z3 * (-SLOW_INTEGER_FIX_1_847759065);
                 int tmp3 = z1 + z2 * SLOW_INTEGER_FIX_0_765366865;
 
-                int tmp0 = ((int)workspace[workspaceIndex + 0] + (int)workspace[workspaceIndex + 4]) << SLOW_INTEGER_CONST_BITS;
-                int tmp1 = ((int)workspace[workspaceIndex + 0] - (int)workspace[workspaceIndex + 4]) << SLOW_INTEGER_CONST_BITS;
+                int tmp0 = (workspace[workspaceIndex + 0] + workspace[workspaceIndex + 4]) << SLOW_INTEGER_CONST_BITS;
+                int tmp1 = (workspace[workspaceIndex + 0] - workspace[workspaceIndex + 4]) << SLOW_INTEGER_CONST_BITS;
 
                 int tmp10 = tmp0 + tmp3;
                 int tmp13 = tmp0 - tmp3;
@@ -603,10 +602,10 @@ namespace LibJpeg.Classic.Internal
                 * transpose is its inverse.  i0..i3 are y7,y5,y3,y1 respectively.
                 */
 
-                tmp0 = (int)workspace[workspaceIndex + 7];
-                tmp1 = (int)workspace[workspaceIndex + 5];
-                tmp2 = (int)workspace[workspaceIndex + 3];
-                tmp3 = (int)workspace[workspaceIndex + 1];
+                tmp0 = workspace[workspaceIndex + 7];
+                tmp1 = workspace[workspaceIndex + 5];
+                tmp2 = workspace[workspaceIndex + 3];
+                tmp3 = workspace[workspaceIndex + 1];
 
                 z1 = tmp0 + tmp3;
                 z2 = tmp1 + tmp2;
@@ -654,7 +653,7 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         private static int SLOW_INTEGER_DEQUANTIZE(int coef, int quantval)
         {
-            return (((int)(coef)) * (quantval));
+            return (coef * quantval);
         }
 
         /// <summary>
@@ -710,7 +709,7 @@ namespace LibJpeg.Classic.Internal
         /// machines, and may also reduce the cost of multiplication (since there
         /// are fewer one-bits in the constants).
         /// </summary>
-        private void jpeg_idct_ifast(int component_index, short[] coef_block, uint output_row, uint output_col)
+        private void jpeg_idct_ifast(int component_index, short[] coef_block, int output_row, int output_col)
         {
             /* buffers data between passes */
             int[] workspace = new int[JpegConstants.DCTSIZE2];
@@ -836,7 +835,7 @@ namespace LibJpeg.Classic.Internal
 
             for (int ctr = 0; ctr < JpegConstants.DCTSIZE; ctr++)
             {
-                int currentOutRow = (int)(output_row + ctr);
+                int currentOutRow = output_row + ctr;
 
                 /* Rows of zeroes can be exploited in the same way as we did with columns.
                 * However, the column calculation has created many nonzero AC terms, so
@@ -939,7 +938,7 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         private static int FAST_INTEGER_DEQUANTIZE(short coef, int quantval)
         {
-            return (((int)coef) * quantval);
+            return ((int)coef * quantval);
         }
 
         /// <summary>
@@ -948,15 +947,15 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         private static int FAST_INTEGER_IRIGHT_SHIFT(int x, int shft)
         {
-            return ((x) >> (shft));
+            return (x >> shft);
         }
 
         private static int FAST_INTEGER_IDESCALE(int x, int n)
         {
 #if USE_ACCURATE_ROUNDING
-            return ((int) FAST_INTEGER_IRIGHT_SHIFT((x) + (1 << ((n) - 1)), n));
+            return (FAST_INTEGER_IRIGHT_SHIFT((x) + (1 << ((n) - 1)), n));
 #else
-            return ((int) FAST_INTEGER_IRIGHT_SHIFT(x, n));
+            return (FAST_INTEGER_IRIGHT_SHIFT(x, n));
 #endif
         }
 
@@ -994,7 +993,7 @@ namespace LibJpeg.Classic.Internal
         /// scaled quantization values.  However, that problem does not arise if
         /// we use floating point arithmetic.
         /// </summary>
-        private void jpeg_idct_float(int component_index, short[] coef_block, uint output_row, uint output_col)
+        private void jpeg_idct_float(int component_index, short[] coef_block, int output_row, int output_col)
         {
             /* buffers data between passes */
             float[] workspace = new float[JpegConstants.DCTSIZE2];
@@ -1154,15 +1153,15 @@ namespace LibJpeg.Classic.Internal
                 float tmp4 = tmp10 + tmp5;
 
                 /* Final output stage: scale down by a factor of 8 and range-limit */
-                int currentOutRow = (int)(output_row + ctr);
-                m_componentBuffer[currentOutRow][output_col + 0] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp0 + tmp7), 3) & RANGE_MASK];
-                m_componentBuffer[currentOutRow][output_col + 7] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp0 - tmp7), 3) & RANGE_MASK];
-                m_componentBuffer[currentOutRow][output_col + 1] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp1 + tmp6), 3) & RANGE_MASK];
-                m_componentBuffer[currentOutRow][output_col + 6] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp1 - tmp6), 3) & RANGE_MASK];
-                m_componentBuffer[currentOutRow][output_col + 2] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp2 + tmp5), 3) & RANGE_MASK];
-                m_componentBuffer[currentOutRow][output_col + 5] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp2 - tmp5), 3) & RANGE_MASK];
-                m_componentBuffer[currentOutRow][output_col + 4] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp3 + tmp4), 3) & RANGE_MASK];
-                m_componentBuffer[currentOutRow][output_col + 3] = limit[limitOffset + JpegUtils.DESCALE((int) (tmp3 - tmp4), 3) & RANGE_MASK];
+                int currentOutRow = output_row + ctr;
+                m_componentBuffer[currentOutRow][output_col + 0] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp0 + tmp7), 3) & RANGE_MASK];
+                m_componentBuffer[currentOutRow][output_col + 7] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp0 - tmp7), 3) & RANGE_MASK];
+                m_componentBuffer[currentOutRow][output_col + 1] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp1 + tmp6), 3) & RANGE_MASK];
+                m_componentBuffer[currentOutRow][output_col + 6] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp1 - tmp6), 3) & RANGE_MASK];
+                m_componentBuffer[currentOutRow][output_col + 2] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp2 + tmp5), 3) & RANGE_MASK];
+                m_componentBuffer[currentOutRow][output_col + 5] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp2 - tmp5), 3) & RANGE_MASK];
+                m_componentBuffer[currentOutRow][output_col + 4] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp3 + tmp4), 3) & RANGE_MASK];
+                m_componentBuffer[currentOutRow][output_col + 3] = limit[limitOffset + JpegUtils.DESCALE((int)(tmp3 - tmp4), 3) & RANGE_MASK];
 
                 workspaceIndex += JpegConstants.DCTSIZE;       /* advance pointer to next row */
             }
@@ -1195,7 +1194,7 @@ namespace LibJpeg.Classic.Internal
         /// Perform dequantization and inverse DCT on one block of coefficients,
         /// producing a reduced-size 4x4 output block.
         /// </summary>
-        private void jpeg_idct_4x4(int component_index, short[] coef_block, uint output_row, uint output_col)
+        private void jpeg_idct_4x4(int component_index, short[] coef_block, int output_row, int output_col)
         {
             /* buffers data between passes */
             int[] workspace = new int[JpegConstants.DCTSIZE * 4];
@@ -1284,7 +1283,7 @@ namespace LibJpeg.Classic.Internal
             workspaceIndex = 0;
             for (int ctr = 0; ctr < 4; ctr++)
             {
-                int currentOutRow = (int)(output_row + ctr);
+                int currentOutRow = output_row + ctr;
                 /* It's not clear whether a zero row test is worthwhile here ... */
 
                 if (workspace[workspaceIndex + 1] == 0 && 
@@ -1295,7 +1294,7 @@ namespace LibJpeg.Classic.Internal
                     workspace[workspaceIndex + 7] == 0)
                 {
                     /* AC terms all zero */
-                    byte dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
+                    byte dcval = limit[limitOffset + JpegUtils.DESCALE(workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
 
                     m_componentBuffer[currentOutRow][output_col + 0] = dcval;
                     m_componentBuffer[currentOutRow][output_col + 1] = dcval;
@@ -1308,19 +1307,19 @@ namespace LibJpeg.Classic.Internal
 
                 /* Even part */
 
-                int tmp0 = ((int)workspace[workspaceIndex + 0]) << (REDUCED_CONST_BITS + 1);
+                int tmp0 = (workspace[workspaceIndex + 0]) << (REDUCED_CONST_BITS + 1);
 
-                int tmp2 = (int)workspace[workspaceIndex + 2] * REDUCED_FIX_1_847759065 + (int)workspace[workspaceIndex + 6] * (-REDUCED_FIX_0_765366865);
+                int tmp2 = workspace[workspaceIndex + 2] * REDUCED_FIX_1_847759065 + workspace[workspaceIndex + 6] * (-REDUCED_FIX_0_765366865);
 
                 int tmp10 = tmp0 + tmp2;
                 int tmp12 = tmp0 - tmp2;
 
                 /* Odd part */
 
-                int z1 = (int)workspace[workspaceIndex + 7];
-                int z2 = (int)workspace[workspaceIndex + 5];
-                int z3 = (int)workspace[workspaceIndex + 3];
-                int z4 = (int)workspace[workspaceIndex + 1];
+                int z1 = workspace[workspaceIndex + 7];
+                int z2 = workspace[workspaceIndex + 5];
+                int z3 = workspace[workspaceIndex + 3];
+                int z4 = workspace[workspaceIndex + 1];
 
                 tmp0 = z1 * (-REDUCED_FIX_0_211164243) /* sqrt(2) * (c3-c1) */ +
                        z2 * REDUCED_FIX_1_451774981 /* sqrt(2) * (c3+c7) */ +
@@ -1347,7 +1346,7 @@ namespace LibJpeg.Classic.Internal
         /// Perform dequantization and inverse DCT on one block of coefficients,
         /// producing a reduced-size 2x2 output block.
         /// </summary>
-        private void jpeg_idct_2x2(int component_index, short[] coef_block, uint output_row, uint output_col)
+        private void jpeg_idct_2x2(int component_index, short[] coef_block, int output_row, int output_col)
         {
             /* buffers data between passes */
             int[] workspace = new int[JpegConstants.DCTSIZE * 2];
@@ -1414,7 +1413,7 @@ namespace LibJpeg.Classic.Internal
 
             for (int ctr = 0; ctr < 2; ctr++)
             {
-                int currentOutRow = (int)(output_row + ctr);
+                int currentOutRow = output_row + ctr;
                 /* It's not clear whether a zero row test is worthwhile here ... */
 
                 if (workspace[workspaceIndex + 1] == 0 && 
@@ -1423,7 +1422,7 @@ namespace LibJpeg.Classic.Internal
                     workspace[workspaceIndex + 7] == 0)
                 {
                     /* AC terms all zero */
-                    byte dcval = limit[limitOffset + JpegUtils.DESCALE((int)workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
+                    byte dcval = limit[limitOffset + JpegUtils.DESCALE(workspace[workspaceIndex + 0], REDUCED_PASS1_BITS + 3) & RANGE_MASK];
 
                     m_componentBuffer[currentOutRow][output_col + 0] = dcval;
                     m_componentBuffer[currentOutRow][output_col + 1] = dcval;
@@ -1434,14 +1433,14 @@ namespace LibJpeg.Classic.Internal
 
                 /* Even part */
 
-                int tmp10 = ((int)workspace[workspaceIndex + 0]) << (REDUCED_CONST_BITS + 2);
+                int tmp10 = (workspace[workspaceIndex + 0]) << (REDUCED_CONST_BITS + 2);
 
                 /* Odd part */
 
-                int tmp0 = (int)workspace[workspaceIndex + 7] * (-REDUCED_FIX_0_720959822) /* sqrt(2) * (c7-c5+c3-c1) */ +
-                       (int)workspace[workspaceIndex + 5] * REDUCED_FIX_0_850430095 /* sqrt(2) * (-c1+c3+c5+c7) */ +
-                       (int)workspace[workspaceIndex + 3] * (-REDUCED_FIX_1_272758580) /* sqrt(2) * (-c1+c3-c5-c7) */ +
-                       (int)workspace[workspaceIndex + 1] * REDUCED_FIX_3_624509785; /* sqrt(2) * (c1+c3+c5+c7) */
+                int tmp0 = workspace[workspaceIndex + 7] * (-REDUCED_FIX_0_720959822) /* sqrt(2) * (c7-c5+c3-c1) */ +
+                       workspace[workspaceIndex + 5] * REDUCED_FIX_0_850430095 /* sqrt(2) * (-c1+c3+c5+c7) */ +
+                       workspace[workspaceIndex + 3] * (-REDUCED_FIX_1_272758580) /* sqrt(2) * (-c1+c3-c5-c7) */ +
+                       workspace[workspaceIndex + 1] * REDUCED_FIX_3_624509785; /* sqrt(2) * (c1+c3+c5+c7) */
 
                 /* Final output stage */
 
@@ -1456,19 +1455,19 @@ namespace LibJpeg.Classic.Internal
         /// Perform dequantization and inverse DCT on one block of coefficients,
         /// producing a reduced-size 1x1 output block.
         /// </summary>
-        private void jpeg_idct_1x1(int component_index, short[] coef_block, uint output_row, uint output_col)
+        private void jpeg_idct_1x1(int component_index, short[] coef_block, int output_row, int output_col)
         {
             /* We hardly need an inverse DCT routine for this: just take the
             * average pixel value, which is one-eighth of the DC coefficient.
             */
             int[] quantptr = m_dctTables[component_index].int_array;
             int dcval = REDUCED_DEQUANTIZE(coef_block[0], quantptr[0]);
-            dcval = JpegUtils.DESCALE((int) dcval, 3);
+            dcval = JpegUtils.DESCALE(dcval, 3);
 
             byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset + JpegConstants.CENTERJSAMPLE;
 
-            m_componentBuffer[(int)(output_row + 0)][output_col] = limit[limitOffset + dcval & RANGE_MASK];
+            m_componentBuffer[output_row + 0][output_col] = limit[limitOffset + dcval & RANGE_MASK];
         }
 
         /// <summary>
@@ -1478,7 +1477,7 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         private static int REDUCED_DEQUANTIZE(short coef, int quantval)
         {
-            return (((int)(coef)) * (quantval));
+            return ((int)coef * quantval);
         }
     }
 }

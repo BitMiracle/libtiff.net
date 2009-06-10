@@ -208,7 +208,7 @@ namespace LibJpeg.Classic.Internal
 
             /* Make sure jdmaster didn't give me a case I can't handle */
             if (cinfo.m_out_color_components != 3)
-                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
 
             /* Allocate the histogram/inverse colormap storage */
             m_histogram = new ushort[HIST_C0_ELEMS][];
@@ -228,13 +228,13 @@ namespace LibJpeg.Classic.Internal
 
                 /* Lower bound on # of colors ... somewhat arbitrary as long as > 0 */
                 if (desired_local < 8)
-                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 8);
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 8);
 
                 /* Make sure colormap indexes can be represented by JSAMPLEs */
                 if (desired_local > MAXNUMCOLORS)
-                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
 
-                m_sv_colormap = jpeg_common_struct.AllocJpegSamples((uint)desired_local, (uint)3);
+                m_sv_colormap = jpeg_common_struct.AllocJpegSamples(desired_local, 3);
                 m_desired = desired_local;
             }
             else
@@ -289,17 +289,17 @@ namespace LibJpeg.Classic.Internal
                 /* Make sure color count is acceptable */
                 int i = m_cinfo.m_actual_number_of_colors;
                 if (i < 1)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 1);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, 1);
 
                 if (i > MAXNUMCOLORS)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, MAXNUMCOLORS);
 
                 if (m_cinfo.m_dither_mode == J_DITHER_MODE.JDITHER_FS)
                 {
                     /* Allocate Floyd-Steinberg workspace if we didn't already. */
                     if (m_fserrors == null)
                     {
-                        uint arraysize = (uint)((m_cinfo.m_output_width + 2) * 3);
+                        int arraysize = (m_cinfo.m_output_width + 2) * 3;
                         m_fserrors = new short[arraysize];
                     }
                     else
@@ -326,7 +326,7 @@ namespace LibJpeg.Classic.Internal
             }
         }
 
-        public virtual void color_quantize(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        public virtual void color_quantize(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
             switch (m_quantizer)
             {
@@ -340,7 +340,7 @@ namespace LibJpeg.Classic.Internal
                     pass2_no_dither(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
                     break;
             }
         }
@@ -368,12 +368,12 @@ namespace LibJpeg.Classic.Internal
         /// is actually output (in fact the buffer controller is probably passing a
         /// null pointer).
         /// </summary>
-        private void prescan_quantize(byte[][] input_buf, uint in_row, int num_rows)
+        private void prescan_quantize(byte[][] input_buf, int in_row, int num_rows)
         {
             for (int row = 0; row < num_rows; row++)
             {
                 int inputIndex = 0;
-                for (uint col = m_cinfo.m_output_width; col > 0; col--)
+                for (int col = m_cinfo.m_output_width; col > 0; col--)
                 {
                     int rowIndex = (int)input_buf[in_row + row][inputIndex] >> C0_SHIFT;
                     int columnIndex = ((int)input_buf[in_row + row][inputIndex + 1] >> C1_SHIFT) * HIST_C2_ELEMS +
@@ -393,7 +393,7 @@ namespace LibJpeg.Classic.Internal
         /// Map some rows of pixels to the output colormapped representation.
         /// This version performs Floyd-Steinberg dithering
         /// </summary>
-        private void pass2_fs_dither(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        private void pass2_fs_dither(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
             byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
@@ -408,11 +408,11 @@ namespace LibJpeg.Classic.Internal
                 if (m_on_odd_row)
                 {
                     /* work right to left in this row */
-                    inputPixelIndex += (int)((m_cinfo.m_output_width - 1) * 3);   /* so point to rightmost pixel */
-                    outputPixelIndex += (int)(m_cinfo.m_output_width - 1);
+                    inputPixelIndex += (m_cinfo.m_output_width - 1) * 3;   /* so point to rightmost pixel */
+                    outputPixelIndex += m_cinfo.m_output_width - 1;
                     dir = -1;
                     dir3 = -3;
-                    errorIndex = (int)((m_cinfo.m_output_width + 1) * 3); /* => entry after last column */
+                    errorIndex = (m_cinfo.m_output_width + 1) * 3; /* => entry after last column */
                     m_on_odd_row = false; /* flip for next time */
                 }
                 else
@@ -439,7 +439,7 @@ namespace LibJpeg.Classic.Internal
                 int bpreverr1 = 0;
                 int bpreverr2 = 0;
 
-                for (uint col = m_cinfo.m_output_width; col > 0; col--)
+                for (int col = m_cinfo.m_output_width; col > 0; col--)
                 {
                     /* curN holds the error propagated from the previous pixel on the
                      * current line.  Add the error propagated from the previous line
@@ -541,15 +541,15 @@ namespace LibJpeg.Classic.Internal
         /// Map some rows of pixels to the output colormapped representation.
         /// This version performs no dithering
         /// </summary>
-        private void pass2_no_dither(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        private void pass2_no_dither(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
             for (int row = 0; row < num_rows; row++)
             {
-                int inRow = (int)(row + in_row);
+                int inRow = row + in_row;
                 int inIndex = 0;
                 int outIndex = 0;
-                int outRow = (int)(out_row + row);
-                for (uint col = m_cinfo.m_output_width; col > 0; col--)
+                int outRow = out_row + row;
+                for (int col = m_cinfo.m_output_width; col > 0; col--)
                 {
                     /* get pixel value and index into the cache */
                     int c0 = (int)input_buf[inRow][inIndex] >> C0_SHIFT;
@@ -655,7 +655,7 @@ namespace LibJpeg.Classic.Internal
                 compute_color(boxlist, i, i);
 
             m_cinfo.m_actual_number_of_colors = numboxes;
-            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_QUANT_SELECTED, numboxes);
+            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_QUANT_SELECTED, numboxes);
         }
 
         /// <summary>
@@ -1137,7 +1137,7 @@ namespace LibJpeg.Classic.Internal
              * We save the minimum distance for each color in mindist[];
              * only the smallest maximum distance is of interest.
              */
-            int minmaxdist = (int)0x7FFFFFFFL;
+            int minmaxdist = 0x7FFFFFFF;
             int[] mindist = new int[MAXNUMCOLORS];    /* min distance to colormap entry i */
 
             for (int i = 0; i < m_cinfo.m_actual_number_of_colors; i++)
@@ -1277,7 +1277,7 @@ namespace LibJpeg.Classic.Internal
             int bestIndex = 0;
             for (int i = BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS - 1; i >= 0; i--)
             {
-                bestdist[bestIndex] = (int)0x7FFFFFFFL;
+                bestdist[bestIndex] = 0x7FFFFFFF;
                 bestIndex++;
             }
 

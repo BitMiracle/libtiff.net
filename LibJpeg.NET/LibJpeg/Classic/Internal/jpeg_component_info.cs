@@ -40,8 +40,8 @@ namespace LibJpeg.Classic.Internal
          * Any dummy blocks added to complete an MCU are not counted; therefore
          * these values do not depend on whether a scan is interleaved or not.
          */
-        internal uint width_in_blocks;
-        internal uint height_in_blocks;
+        internal int width_in_blocks;
+        internal int height_in_blocks;
         /* Size of a DCT block in samples.  Always DCTSIZE for compression.
          * For decompression this is the size of the output from one DCT block,
          * reflecting any scaling we choose to apply during the IDCT step.
@@ -55,8 +55,8 @@ namespace LibJpeg.Classic.Internal
          * and similarly for height.  For decompression, IDCT scaling is included, so
          * downsampled_width = ceil(image_width * Hi/Hmax * DCT_scaled_size/DCTSIZE)
          */
-        internal uint downsampled_width;    /* actual width in samples */
-        internal uint downsampled_height; /* actual height in samples */
+        internal int downsampled_width;    /* actual width in samples */
+        internal int downsampled_height; /* actual height in samples */
         /* This flag is used only for decompression.  In cases where some of the
          * components will be ignored (eg grayscale output from YCbCr image),
          * we can skip most computations for the unused components.

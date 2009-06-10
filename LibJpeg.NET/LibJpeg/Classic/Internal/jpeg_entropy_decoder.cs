@@ -32,13 +32,13 @@ namespace LibJpeg.Classic.Internal
         // entry n is (-1 << n) + 1
         private static int[] extend_offset = 
         { 
-            0, ((-1) << 1) + 1, ((-1) << 2) + 1, 
-            ((-1) << 3) + 1, ((-1) << 4) + 1, ((-1) << 5) + 1,
-            ((-1) << 6) + 1, ((-1) << 7) + 1, ((-1) << 8) + 1,
-            ((-1) << 9) + 1, ((-1) << 10) + 1,
-            ((-1) << 11) + 1, ((-1) << 12) + 1,
-            ((-1) << 13) + 1, ((-1) << 14) + 1,
-            ((-1) << 15) + 1 
+            0, (-1 << 1) + 1, (-1 << 2) + 1, 
+            (-1 << 3) + 1, (-1 << 4) + 1, (-1 << 5) + 1,
+            (-1 << 6) + 1, (-1 << 7) + 1, (-1 << 8) + 1,
+            (-1 << 9) + 1, (-1 << 10) + 1,
+            (-1 << 11) + 1, (-1 << 12) + 1,
+            (-1 << 13) + 1, (-1 << 14) + 1,
+            (-1 << 15) + 1 
         };
         
         /* Fetching the next N bits from the input stream is a time-critical operation
@@ -115,11 +115,11 @@ namespace LibJpeg.Classic.Internal
 
             /* Find the input Huffman table */
             if (tblno < 0 || tblno >= JpegConstants.NUM_HUFF_TBLS)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
 
             JHUFF_TBL htbl = isDC ? m_cinfo.m_dc_huff_tbl_ptrs[tblno] : m_cinfo.m_ac_huff_tbl_ptrs[tblno];
             if (htbl == null)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
 
             /* Allocate a workspace if we haven't already done so. */
             if (dtbl == null)
@@ -133,9 +133,9 @@ namespace LibJpeg.Classic.Internal
             char[] huffsize = new char[257];
             for (int l = 1; l <= 16; l++)
             {
-                int i = (int) htbl.bits[l];
+                int i = htbl.bits[l];
                 if (i < 0 || p + i> 256)    /* protect against table overrun */
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
                 while ((i--) != 0)
                     huffsize[p++] = (char) l;
@@ -146,13 +146,13 @@ namespace LibJpeg.Classic.Internal
             /* Figure C.2: generate the codes themselves */
             /* We also validate that the counts represent a legal Huffman code tree. */
 
-            uint code = 0;
+            int code = 0;
             int si = huffsize[0];
-            uint[] huffcode = new uint[257];
+            int[] huffcode = new int[257];
             p = 0;
             while (huffsize[p] != 0)
             {
-                while (((int) huffsize[p]) == si)
+                while (((int)huffsize[p]) == si)
                 {
                     huffcode[p++] = code;
                     code++;
@@ -161,8 +161,8 @@ namespace LibJpeg.Classic.Internal
                 /* code is now 1 more than the last code used for codelength si; but
                 * it must still fit in si bits, since no code is allowed to be all ones.
                 */
-                if (((int) code) >= (((int) 1) << si))
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                if (code >= (1 << si))
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
                 code <<= 1;
                 si++;
             }
@@ -177,9 +177,9 @@ namespace LibJpeg.Classic.Internal
                     /* valoffset[l] = huffval[] index of 1st symbol of code length l,
                     * minus the minimum code of length l
                     */
-                    dtbl.valoffset[l] = (int) p - (int) huffcode[p];
+                    dtbl.valoffset[l] = p - huffcode[p];
                     p += htbl.bits[l];
-                    dtbl.maxcode[l] = (int)huffcode[p - 1]; /* maximum code of length l */
+                    dtbl.maxcode[l] = huffcode[p - 1]; /* maximum code of length l */
                 }
                 else
                 {
@@ -187,7 +187,7 @@ namespace LibJpeg.Classic.Internal
                     dtbl.maxcode[l] = -1;
                 }
             }
-            dtbl.maxcode[17] = (int)0xFFFFFL; /* ensures jpeg_huff_decode terminates */
+            dtbl.maxcode[17] = 0xFFFFF; /* ensures jpeg_huff_decode terminates */
 
             /* Compute lookahead tables to speed up decoding.
             * First we set all the table entries to 0, indicating "too long";
@@ -200,11 +200,11 @@ namespace LibJpeg.Classic.Internal
             p = 0;
             for (int l = 1; l <= JpegConstants.HUFF_LOOKAHEAD; l++)
             {
-                for (int i = 1; i <= (int) htbl.bits[l]; i++, p++)
+                for (int i = 1; i <= htbl.bits[l]; i++, p++)
                 {
                     /* l = current code's length, p = its index in huffcode[] & huffval[]. */
                     /* Generate left-justified code followed by all possible bit sequences */
-                    int lookbits = (int)(huffcode[p] << (JpegConstants.HUFF_LOOKAHEAD - l));
+                    int lookbits = huffcode[p] << (JpegConstants.HUFF_LOOKAHEAD - l);
                     for (int ctr = 1 << (JpegConstants.HUFF_LOOKAHEAD - l); ctr > 0; ctr--)
                     {
                         dtbl.look_nbits[lookbits] = l;
@@ -226,7 +226,7 @@ namespace LibJpeg.Classic.Internal
                 {
                     int sym = htbl.huffval[i];
                     if (sym < 0 || sym> 15)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
                 }
             }
         }
@@ -265,12 +265,12 @@ namespace LibJpeg.Classic.Internal
 
         protected static int GET_BITS(int nbits, int get_buffer, ref int bits_left)
         {
-            return (((int)(get_buffer >> (bits_left -= (nbits)))) & ((1 << (nbits)) - 1));
+            return (((int)(get_buffer >> (bits_left -= nbits))) & ((1 << nbits) - 1));
         }
 
         protected static int PEEK_BITS(int nbits, int get_buffer, int bits_left)
         {
-            return (((int)(get_buffer >> (bits_left - (nbits)))) & ((1 << (nbits)) - 1));
+            return (((int)(get_buffer >> (bits_left - nbits))) & ((1 << nbits) - 1));
         }
 
         protected static void DROP_BITS(int nbits, ref int bits_left)
@@ -354,7 +354,7 @@ namespace LibJpeg.Classic.Internal
                     */
                     if (!state.cinfo.m_entropy.m_insufficient_data)
                     {
-                        state.cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_HIT_MARKER);
+                        state.cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HIT_MARKER);
                         state.cinfo.m_entropy.m_insufficient_data = true;
                     }
 
@@ -463,12 +463,12 @@ namespace LibJpeg.Classic.Internal
 
             if (l > 16)
             {
-                state.cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
+                state.cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
                 /* fake a zero as the safest result */
                 return 0;
             }
 
-            return htbl.pub.huffval[(int)(code + htbl.valoffset[l])];
+            return htbl.pub.huffval[code + htbl.valoffset[l]];
         }
     }
 }

@@ -29,8 +29,8 @@ namespace LibJpeg.Classic.Internal
     {
         private jpeg_compress_struct m_cinfo;
 
-        private uint m_iMCU_row_num;    /* iMCU row # within image */
-        private uint m_mcu_ctr;     /* counts MCUs processed in current row */
+        private int m_iMCU_row_num;    /* iMCU row # within image */
+        private int m_mcu_ctr;     /* counts MCUs processed in current row */
         private int m_MCU_vert_offset;        /* counts MCU rows within iMCU row */
         private int m_MCU_rows_per_iMCU_row;  /* number of such rows needed */
 
@@ -73,7 +73,7 @@ namespace LibJpeg.Classic.Internal
         public virtual void start_pass(J_BUF_MODE pass_mode)
         {
             if (pass_mode != J_BUF_MODE.JBUF_CRANK_DEST)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
 
             m_iMCU_row_num = 0;
             start_iMCU_row();
@@ -96,23 +96,23 @@ namespace LibJpeg.Classic.Internal
             {
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                 buffer[ci] = m_whole_image[componentInfo.component_index].access_virt_barray(
-                    (uint)(m_iMCU_row_num * componentInfo.v_samp_factor), (uint)componentInfo.v_samp_factor);
+                    m_iMCU_row_num * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
             }
 
             /* Loop to process one whole iMCU row */
-            uint last_MCU_col = m_cinfo.m_MCUs_per_row - 1;
-            uint last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
+            int last_MCU_col = m_cinfo.m_MCUs_per_row - 1;
+            int last_iMCU_row = m_cinfo.m_total_iMCU_rows - 1;
             JBLOCK[][] MCU_buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU][];
             for (int yoffset = m_MCU_vert_offset; yoffset < m_MCU_rows_per_iMCU_row; yoffset++)
             {
-                for (uint MCU_col_num = m_mcu_ctr; MCU_col_num < m_cinfo.m_MCUs_per_row; MCU_col_num++)
+                for (int MCU_col_num = m_mcu_ctr; MCU_col_num < m_cinfo.m_MCUs_per_row; MCU_col_num++)
                 {
                     /* Construct list of pointers to DCT blocks belonging to this MCU */
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
-                        int start_col = (int)(MCU_col_num * componentInfo.MCU_width);
+                        int start_col = MCU_col_num * componentInfo.MCU_width;
                         int blockcnt = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {

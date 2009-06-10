@@ -83,10 +83,10 @@ namespace LibJpeg.Classic
         }
 
         // Creation of 2-D sample arrays.
-        public static byte[][] AllocJpegSamples(uint samplesPerRow, uint numberOfRows)
+        public static byte[][] AllocJpegSamples(int samplesPerRow, int numberOfRows)
         {
             byte[][] result = new byte[numberOfRows][];
-            for (int i = 0; i < (int)numberOfRows; i++)
+            for (int i = 0; i < numberOfRows; i++)
                 result[i] = new byte[samplesPerRow];
 
             return result;
@@ -155,10 +155,20 @@ namespace LibJpeg.Classic
 
         // Fatal errors (print message and exit)
 
+        public void ERREXIT(J_MESSAGE_CODE code)
+        {
+            ERREXIT((int)code);
+        }
+
         public void ERREXIT(int code)
         {
             m_err.m_msg_code = code;
             m_err.error_exit();
+        }
+
+        public void ERREXIT(J_MESSAGE_CODE code, params object[] args)
+        {
+            ERREXIT((int)code, args);
         }
 
         public void ERREXIT(int code, params object[] args)
@@ -170,10 +180,20 @@ namespace LibJpeg.Classic
 
         // Nonfatal errors (we can keep going, but the data is probably corrupt)
 
+        public void WARNMS(J_MESSAGE_CODE code)
+        {
+            WARNMS((int)code);
+        }
+
         public void WARNMS(int code)
         {
             m_err.m_msg_code = code;
             m_err.emit_message(-1);
+        }
+
+        public void WARNMS(J_MESSAGE_CODE code, params object[] args)
+        {
+            WARNMS((int)code, args);
         }
 
         public void WARNMS(int code, params object[] args)
@@ -185,10 +205,20 @@ namespace LibJpeg.Classic
 
         // Informational/debugging messages
 
+        public void TRACEMS(int lvl, J_MESSAGE_CODE code)
+        {
+            TRACEMS(lvl, (int)code);
+        }
+
         public void TRACEMS(int lvl, int code)
         {
             m_err.m_msg_code = code;
             m_err.emit_message(lvl);
+        }
+
+        public void TRACEMS(int lvl, J_MESSAGE_CODE code, params object[] args)
+        {
+            TRACEMS(lvl, (int)code, args);
         }
 
         public void TRACEMS(int lvl, int code, params object[] args)

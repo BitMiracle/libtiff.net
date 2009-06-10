@@ -43,7 +43,7 @@ namespace LibJpeg.Classic.Internal
         private savable_state m_saved = new savable_state();        /* Bit buffer & DC state at start of MCU */
 
         /* These fields are NOT loaded into local working state. */
-        private uint m_restarts_to_go;    /* MCUs left in this restart interval */
+        private int m_restarts_to_go;    /* MCUs left in this restart interval */
         private int m_next_restart_num;       /* next restart number to write (0-7) */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
@@ -84,10 +84,10 @@ namespace LibJpeg.Classic.Internal
                     /* Check for invalid table indexes */
                     /* (make_c_derived_tbl does this in the other path) */
                     if (dctbl < 0 || dctbl >= JpegConstants.NUM_HUFF_TBLS)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, dctbl);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, dctbl);
 
                     if (actbl < 0 || actbl >= JpegConstants.NUM_HUFF_TBLS)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, actbl);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, actbl);
 
                     /* Allocate and zero the statistics tables */
                     /* Note that jpeg_gen_optimal_table expects 257 entries in each table! */
@@ -202,7 +202,7 @@ namespace LibJpeg.Classic.Internal
 
             /* Flush out the last data */
             if (!flush_bits(state))
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CANT_SUSPEND);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CANT_SUSPEND);
 
             /* Update state */
             m_saved = state;
@@ -305,7 +305,7 @@ namespace LibJpeg.Classic.Internal
              * Since we're encoding a difference, the range limit is twice as much.
              */
             if (nbits > MAX_HUFFMAN_COEF_BITS + 1)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
             /* Emit the Huffman-coded symbol for the number of bits */
             if (!emit_bits(state, dctbl.ehufco[nbits], dctbl.ehufsi[nbits]))
@@ -316,7 +316,7 @@ namespace LibJpeg.Classic.Internal
             if (nbits != 0)
             {
                 /* emit_bits rejects calls with size 0 */
-                if (!emit_bits(state, (uint) temp2, nbits))
+                if (!emit_bits(state, temp2, nbits))
                     return false;
             }
 
@@ -354,7 +354,7 @@ namespace LibJpeg.Classic.Internal
 
                     /* Check for out-of-range coefficient values */
                     if (nbits > MAX_HUFFMAN_COEF_BITS)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
                     /* Emit Huffman symbol for run length / number of bits */
                     int i = (r << 4) + nbits;
@@ -363,7 +363,7 @@ namespace LibJpeg.Classic.Internal
 
                     /* Emit that number of bits of the value, if positive, */
                     /* or the complement of its magnitude, if negative. */
-                    if (!emit_bits(state, (uint) temp2, nbits))
+                    if (!emit_bits(state, temp2, nbits))
                         return false;
 
                     r = 0;
@@ -409,7 +409,7 @@ namespace LibJpeg.Classic.Internal
              * Since we're encoding a difference, the range limit is twice as much.
              */
             if (nbits > MAX_HUFFMAN_COEF_BITS + 1)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
             /* Count the Huffman symbol for the number of bits */
             dc_counts[nbits]++;
@@ -443,7 +443,7 @@ namespace LibJpeg.Classic.Internal
 
                     /* Check for out-of-range coefficient values */
                     if (nbits > MAX_HUFFMAN_COEF_BITS)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
                     /* Count Huffman symbol for run length / number of bits */
                     ac_counts[(r << 4) + nbits]++;
@@ -471,25 +471,25 @@ namespace LibJpeg.Classic.Internal
         /// in one call, and we never retain more than 7 bits in put_buffer
         /// between calls, so 24 bits are sufficient.
         /// </summary>
-        private bool emit_bits(savable_state state, uint code, int size)
+        private bool emit_bits(savable_state state, int code, int size)
         {
             // Emit some bits; return true if successful, false if must suspend
             /* This routine is heavily used, so it's worth coding tightly. */
-            int put_buffer = (int)code;
+            int put_buffer = code;
             int put_bits = state.put_bits;
 
             /* if size is 0, caller used an invalid Huffman table entry */
             if (size == 0)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE);
 
-            put_buffer &= (((int)1) << size) - 1; /* mask off any extra bits in code */
+            put_buffer &= (1 << size) - 1; /* mask off any extra bits in code */
             put_bits += size;       /* new number of bits in buffer */
             put_buffer <<= 24 - put_bits; /* align incoming bits */
             put_buffer |= state.put_buffer; /* and merge with old buffer contents */
 
             while (put_bits >= 8)
             {
-                int c = (int)((put_buffer >> 16) & 0xFF);
+                int c = (put_buffer >> 16) & 0xFF;
                 if (!emit_byte(c))
                     return false;
 

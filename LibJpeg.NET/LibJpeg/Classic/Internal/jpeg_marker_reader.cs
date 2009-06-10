@@ -37,17 +37,17 @@ namespace LibJpeg.Classic.Internal
         private jpeg_decompress_struct.jpeg_marker_parser_method[] m_process_APPn = new jpeg_decompress_struct.jpeg_marker_parser_method[16];
 
         /* Limit on marker data length to save for each marker type */
-        private uint m_length_limit_COM;
-        private uint[] m_length_limit_APPn = new uint[16];
+        private int m_length_limit_COM;
+        private int[] m_length_limit_APPn = new int[16];
 
         private bool m_saw_SOI;       /* found SOI? */
         private bool m_saw_SOF;       /* found SOF? */
         private int m_next_restart_num;       /* next restart number expected (0-7) */
-        private uint m_discarded_bytes;   /* # of bytes skipped looking for a marker */
+        private int m_discarded_bytes;   /* # of bytes skipped looking for a marker */
 
         /* Status of COM/APPn marker saving */
         private jpeg_marker_struct m_cur_marker; /* null if not processing a marker */
-        private uint m_bytes_read;        /* data bytes read so far in marker */
+        private int m_bytes_read;        /* data bytes read so far in marker */
         /* Note: cur_marker is not linked into marker_list until it's all read. */
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace LibJpeg.Classic.Internal
                     /* Differential progressive, arithmetic */
                     case JPEG_MARKER.M_SOF15:
                         /* Differential lossless, arithmetic */
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED, m_cinfo.m_unread_marker);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED, m_cinfo.m_unread_marker);
                         break;
 
                     case JPEG_MARKER.M_SOS:
@@ -177,7 +177,7 @@ namespace LibJpeg.Classic.Internal
                         return ReadResult.JPEG_REACHED_SOS;
 
                     case JPEG_MARKER.M_EOI:
-                        m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_EOI);
+                        m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_EOI);
                         m_cinfo.m_unread_marker = 0;   /* processed the marker */
                         return ReadResult.JPEG_REACHED_EOI;
 
@@ -236,7 +236,7 @@ namespace LibJpeg.Classic.Internal
                     case JPEG_MARKER.M_RST6:
                     case JPEG_MARKER.M_RST7:
                     case JPEG_MARKER.M_TEM:
-                        m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_PARMLESS_MARKER, m_cinfo.m_unread_marker);
+                        m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_PARMLESS_MARKER, m_cinfo.m_unread_marker);
                         break;
 
                     case JPEG_MARKER.M_DNL:
@@ -252,7 +252,7 @@ namespace LibJpeg.Classic.Internal
                          * Once the JPEG 3 version-number marker is well defined, this code
                          * ought to change!
                          */
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, m_cinfo.m_unread_marker);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, m_cinfo.m_unread_marker);
                         break;
                 }
 
@@ -287,7 +287,7 @@ namespace LibJpeg.Classic.Internal
             if (m_cinfo.m_unread_marker == ((int)JPEG_MARKER.M_RST0 + m_cinfo.m_marker.m_next_restart_num))
             {
                 /* Normal case --- swallow the marker and let entropy decoder continue */
-                m_cinfo.TRACEMS(3, (int)J_MESSAGE_CODE.JTRC_RST, m_cinfo.m_marker.m_next_restart_num);
+                m_cinfo.TRACEMS(3, J_MESSAGE_CODE.JTRC_RST, m_cinfo.m_marker.m_next_restart_num);
                 m_cinfo.m_unread_marker = 0;
             }
             else
@@ -358,7 +358,7 @@ namespace LibJpeg.Classic.Internal
 
             if (m_cinfo.m_marker.m_discarded_bytes != 0)
             {
-                m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_EXTRANEOUS_DATA, (int)m_cinfo.m_marker.m_discarded_bytes, c);
+                m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_EXTRANEOUS_DATA, m_cinfo.m_marker.m_discarded_bytes, c);
                 m_cinfo.m_marker.m_discarded_bytes = 0;
             }
 
@@ -376,10 +376,10 @@ namespace LibJpeg.Classic.Internal
             else if (marker_code >= (int)JPEG_MARKER.M_APP0 && marker_code <= (int)JPEG_MARKER.M_APP15)
                 m_process_APPn[marker_code - (int)JPEG_MARKER.M_APP0] = routine;
             else
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
         }
 
-        public void jpeg_save_markers(int marker_code, uint length_limit)
+        public void jpeg_save_markers(int marker_code, int length_limit)
         {
             /* Choose processor routine to use.
              * APP0/APP14 have special requirements.
@@ -413,7 +413,7 @@ namespace LibJpeg.Classic.Internal
                 m_length_limit_APPn[marker_code - (int)JPEG_MARKER.M_APP0] = length_limit;
             }
             else
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
         }
 
         /* State of marker reader, applications
@@ -434,12 +434,12 @@ namespace LibJpeg.Classic.Internal
             return m_next_restart_num;
         }
 
-        public uint DiscardedByteCount()
+        public int DiscardedByteCount()
         {
             return m_discarded_bytes;
         }
 
-        public void SkipBytes(uint count)
+        public void SkipBytes(int count)
         {
             m_discarded_bytes += count;
         }
@@ -453,8 +453,8 @@ namespace LibJpeg.Classic.Internal
     
             byte[] data = null;
             int length = 0;
-            uint bytes_read;
-            uint data_length;
+            int bytes_read;
+            int data_length;
             int dataOffset = 0;
 
             if (cur_marker == null)
@@ -468,21 +468,21 @@ namespace LibJpeg.Classic.Internal
                 {
                     /* watch out for bogus length word */
                     /* figure out how much we want to save */
-                    uint limit;
-                    if (cinfo.m_unread_marker == (int) JPEG_MARKER.M_COM)
+                    int limit;
+                    if (cinfo.m_unread_marker == (int)JPEG_MARKER.M_COM)
                         limit = cinfo.m_marker.m_length_limit_COM;
                     else
-                        limit = cinfo.m_marker.m_length_limit_APPn[cinfo.m_unread_marker - (int) JPEG_MARKER.M_APP0];
+                        limit = cinfo.m_marker.m_length_limit_APPn[cinfo.m_unread_marker - (int)JPEG_MARKER.M_APP0];
 
-                    if ((uint) length < limit)
-                        limit = (uint) length;
+                    if (length < limit)
+                        limit = length;
                     
                     /* allocate and initialize the marker item */
                     cur_marker = new jpeg_marker_struct();
                     cur_marker.data = new byte[limit];
                     cur_marker.next = null;
                     cur_marker.marker = (byte) cinfo.m_unread_marker;
-                    cur_marker.original_length = (uint) length;
+                    cur_marker.original_length = length;
                     cur_marker.data_length = limit;
                     
                     /* data area is just beyond the jpeg_marker_struct */
@@ -505,7 +505,7 @@ namespace LibJpeg.Classic.Internal
                 bytes_read = cinfo.m_marker.m_bytes_read;
                 data_length = cur_marker.data_length;
                 data = cur_marker.data;
-                dataOffset = (int)bytes_read;
+                dataOffset = bytes_read;
             }
 
             byte[] tempData = null;
@@ -522,8 +522,8 @@ namespace LibJpeg.Classic.Internal
                     return false;
 
                 /* Copy bytes with reasonable rapidity */
-                uint read = (uint)cinfo.m_src.GetBytes(tempData, (int)(data_length - bytes_read));
-                Array.Copy(tempData, 0, data, dataOffset, (int)(data_length - bytes_read));
+                int read = cinfo.m_src.GetBytes(tempData, data_length - bytes_read);
+                Array.Copy(tempData, 0, data, dataOffset, data_length - bytes_read);
                 bytes_read += read;
             }
 
@@ -548,7 +548,7 @@ namespace LibJpeg.Classic.Internal
                 /* Reset pointer & calc remaining data length */
                 data = cur_marker.data;
                 dataOffset = 0;
-                length = (int)(cur_marker.original_length - data_length);
+                length = cur_marker.original_length - data_length;
             }
 
             /* Reset to initial state for next marker */
@@ -571,7 +571,7 @@ namespace LibJpeg.Classic.Internal
                     examine_app14(cinfo, tempData, data_length, length);
                     break;
                 default:
-                    cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int) (data_length + length));
+                    cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, data_length + length);
                     break;
             }
 
@@ -593,7 +593,7 @@ namespace LibJpeg.Classic.Internal
 
             length -= 2;
 
-            cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, (int)length);
+            cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_MISC_MARKER, cinfo.m_unread_marker, length);
 
             if (length > 0)
                 cinfo.m_src.skip_input_data(length);
@@ -635,14 +635,14 @@ namespace LibJpeg.Classic.Internal
             switch ((JPEG_MARKER)cinfo.m_unread_marker)
             {
             case JPEG_MARKER.M_APP0:
-                examine_app0(cinfo, b, (uint)numtoread, length);
+                examine_app0(cinfo, b, numtoread, length);
                 break;
             case JPEG_MARKER.M_APP14:
-                examine_app14(cinfo, b, (uint)numtoread, length);
+                examine_app14(cinfo, b, numtoread, length);
                 break;
             default:
                 /* can't get here unless jpeg_save_markers chooses wrong processor */
-                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, cinfo.m_unread_marker);
+                cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, cinfo.m_unread_marker);
                 break;
             }
 
@@ -665,9 +665,9 @@ namespace LibJpeg.Classic.Internal
         /// Take appropriate action if it is a JFIF marker.
         /// datalen is # of bytes at data[], remaining is length of rest of marker data.
         /// </summary>
-        private static void examine_app0(jpeg_decompress_struct cinfo, byte[] data, uint datalen, int remaining)
+        private static void examine_app0(jpeg_decompress_struct cinfo, byte[] data, int datalen, int remaining)
         {
-            int totallen = (int)datalen + remaining;
+            int totallen = datalen + remaining;
 
             if (datalen >= APP0_DATA_LEN &&
                 data[0] == 0x4A &&
@@ -681,8 +681,8 @@ namespace LibJpeg.Classic.Internal
                 cinfo.m_JFIF_major_version = data[5];
                 cinfo.m_JFIF_minor_version = data[6];
                 cinfo.m_density_unit = data[7];
-                cinfo.m_X_density = (ushort)((data[8] << 8) + data[9]);
-                cinfo.m_Y_density = (ushort)((data[10] << 8) + data[11]);
+                cinfo.m_X_density = (short)((data[8] << 8) + data[9]);
+                cinfo.m_Y_density = (short)((data[10] << 8) + data[11]);
 
                 /* Check version.
                  * Major version must be 1, anything else signals an incompatible change.
@@ -691,19 +691,19 @@ namespace LibJpeg.Classic.Internal
                  * Minor version should be 0..2, but process anyway if newer.
                  */
                 if (cinfo.m_JFIF_major_version != 1)
-                    cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_JFIF_MAJOR, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version);
+                    cinfo.WARNMS(J_MESSAGE_CODE.JWRN_JFIF_MAJOR, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version);
 
                 /* Generate trace messages */
-                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version, cinfo.m_X_density,
+                cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_JFIF, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version, cinfo.m_X_density,
                                 cinfo.m_Y_density, cinfo.m_density_unit);
 
                 /* Validate thumbnail dimensions and issue appropriate messages */
                 if ((data[12] | data[13]) != 0)
-                    cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF_THUMBNAIL, data[12], data[13]);
+                    cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_JFIF_THUMBNAIL, data[12], data[13]);
 
                 totallen -= APP0_DATA_LEN;
-                if (totallen != ((int)data[12] * (int)data[13] * (int)3))
-                    cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF_BADTHUMBNAILSIZE, (int)totallen);
+                if (totallen != ((int)data[12] * (int)data[13] * 3))
+                    cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_JFIF_BADTHUMBNAILSIZE, totallen);
             }
             else if (datalen >= 6 && data[0] == 0x4A && data[1] == 0x46 && data[2] == 0x58 && data[3] == 0x58 && data[4] == 0)
             {
@@ -714,23 +714,23 @@ namespace LibJpeg.Classic.Internal
                 switch (data[5])
                 {
                     case 0x10:
-                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_THUMB_JPEG, (int)totallen);
+                        cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_THUMB_JPEG, totallen);
                         break;
                     case 0x11:
-                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_THUMB_PALETTE, (int)totallen);
+                        cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_THUMB_PALETTE, totallen);
                         break;
                     case 0x13:
-                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_THUMB_RGB, (int)totallen);
+                        cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_THUMB_RGB, totallen);
                         break;
                     default:
-                        cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_JFIF_EXTENSION, data[5], (int)totallen);
+                        cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_JFIF_EXTENSION, data[5], totallen);
                         break;
                 }
             }
             else
             {
                 /* Start of APP0 does not match "JFIF" or "JFXX", or too short */
-                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_APP0, (int)totallen);
+                cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_APP0, totallen);
             }
         }
 
@@ -739,7 +739,7 @@ namespace LibJpeg.Classic.Internal
         /// Take appropriate action if it is an Adobe marker.
         /// datalen is # of bytes at data[], remaining is length of rest of marker data.
         /// </summary>
-        private static void examine_app14(jpeg_decompress_struct cinfo, byte[] data, uint datalen, int remaining)
+        private static void examine_app14(jpeg_decompress_struct cinfo, byte[] data, int datalen, int remaining)
         {
             if (datalen >= APP14_DATA_LEN &&
                 data[0] == 0x41 &&
@@ -753,14 +753,14 @@ namespace LibJpeg.Classic.Internal
                 int flags0 = (data[7] << 8) + data[8];
                 int flags1 = (data[9] << 8) + data[10];
                 int transform = data[11];
-                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_ADOBE, version, flags0, flags1, transform);
+                cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_ADOBE, version, flags0, flags1, transform);
                 cinfo.m_saw_Adobe_marker = true;
                 cinfo.m_Adobe_transform = (byte) transform;
             }
             else
             {
                 /* Start of APP14 does not match "Adobe", or too short */
-                cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_APP14, (int) (datalen + remaining));
+                cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_APP14, datalen + remaining);
             }
         }
 
@@ -800,10 +800,10 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         private bool get_soi()
         {
-            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOI);
+            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOI);
 
             if (m_cinfo.m_marker.m_saw_SOI)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_SOI_DUPLICATE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOI_DUPLICATE);
 
             /* Reset all parameters that are defined to be reset by SOI */
             m_cinfo.m_restart_interval = 0;
@@ -844,31 +844,31 @@ namespace LibJpeg.Classic.Internal
             int temp = 0;
             if (!m_cinfo.m_src.GetTwoBytes(out temp))
                 return false;
-            m_cinfo.m_image_height = (uint)temp;
+            m_cinfo.m_image_height = temp;
 
             if (!m_cinfo.m_src.GetTwoBytes(out temp))
                 return false;
-            m_cinfo.m_image_width = (uint)temp;
+            m_cinfo.m_image_width = temp;
 
             if (!m_cinfo.m_src.GetByte(out m_cinfo.m_num_components))
                 return false;
 
             length -= 8;
 
-            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOF, m_cinfo.m_unread_marker, (int)m_cinfo.m_image_width, (int)m_cinfo.m_image_height,
+            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF, m_cinfo.m_unread_marker, m_cinfo.m_image_width, m_cinfo.m_image_height,
                               m_cinfo.m_num_components);
 
             if (m_cinfo.m_marker.m_saw_SOF)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_SOF_DUPLICATE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_DUPLICATE);
 
             /* We don't support files in which the image height is initially specified */
             /* as 0 and is later redefined by DNL.  As long as we have to check that,  */
             /* might as well have a general sanity check. */
             if (m_cinfo.m_image_height <= 0 || m_cinfo.m_image_width <= 0 || m_cinfo.m_num_components <= 0)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
 
             if (length != (m_cinfo.m_num_components * 3))
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_LENGTH);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
 
             if (m_cinfo.m_comp_info == null)
             {
@@ -891,7 +891,7 @@ namespace LibJpeg.Classic.Internal
                 if (!m_cinfo.m_src.GetByte(out m_cinfo.m_comp_info[ci].quant_tbl_no))
                     return false;
 
-                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOF_COMPONENT, m_cinfo.m_comp_info[ci].component_id,
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF_COMPONENT, m_cinfo.m_comp_info[ci].component_id,
                     m_cinfo.m_comp_info[ci].h_samp_factor, m_cinfo.m_comp_info[ci].v_samp_factor,
                     m_cinfo.m_comp_info[ci].quant_tbl_no);
             }
@@ -906,7 +906,7 @@ namespace LibJpeg.Classic.Internal
         private bool get_sos()
         {
             if (!m_cinfo.m_marker.m_saw_SOF)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_SOS_NO_SOF);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOS_NO_SOF);
 
             int length;
             if (!m_cinfo.m_src.GetTwoBytes(out length))
@@ -917,10 +917,10 @@ namespace LibJpeg.Classic.Internal
             if (!m_cinfo.m_src.GetByte(out n))
                 return false;
 
-            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOS, n);
+            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOS, n);
 
             if (length != (n * 2 + 6) || n < 1 || n > JpegConstants.MAX_COMPS_IN_SCAN)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_LENGTH);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
 
             m_cinfo.m_comps_in_scan = n;
 
@@ -949,13 +949,13 @@ namespace LibJpeg.Classic.Internal
                 }
 
                 if (!idFound)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, cc);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, cc);
 
                 m_cinfo.m_cur_comp_info[i] = foundIndex;
                 m_cinfo.m_comp_info[foundIndex].dc_tbl_no = (c >> 4) & 15;
                 m_cinfo.m_comp_info[foundIndex].ac_tbl_no = (c) & 15;
 
-                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOS_COMPONENT, cc,
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOS_COMPONENT, cc,
                     m_cinfo.m_comp_info[foundIndex].dc_tbl_no, m_cinfo.m_comp_info[foundIndex].ac_tbl_no);
             }
 
@@ -975,7 +975,7 @@ namespace LibJpeg.Classic.Internal
             m_cinfo.m_Ah = (temp >> 4) & 15;
             m_cinfo.m_Al = (temp) & 15;
 
-            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_SOS_PARAMS, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
+            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOS_PARAMS, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
 
             /* Prepare to scan data & restart markers */
             m_cinfo.m_marker.m_next_restart_num = 0;
@@ -1004,7 +1004,7 @@ namespace LibJpeg.Classic.Internal
                 if (!m_cinfo.m_src.GetByte(out index))
                     return false;
 
-                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_DHT, index);
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_DHT, index);
 
                 bits[0] = 0;
                 int count = 0;
@@ -1020,14 +1020,14 @@ namespace LibJpeg.Classic.Internal
 
                 length -= 1 + 16;
 
-                m_cinfo.TRACEMS(2, (int)J_MESSAGE_CODE.JTRC_HUFFBITS, bits[1], bits[2], bits[3], bits[4], bits[5], bits[6], bits[7], bits[8]);
-                m_cinfo.TRACEMS(2, (int)J_MESSAGE_CODE.JTRC_HUFFBITS, bits[9], bits[10], bits[11], bits[12], bits[13], bits[14], bits[15], bits[16]);
+                m_cinfo.TRACEMS(2, J_MESSAGE_CODE.JTRC_HUFFBITS, bits[1], bits[2], bits[3], bits[4], bits[5], bits[6], bits[7], bits[8]);
+                m_cinfo.TRACEMS(2, J_MESSAGE_CODE.JTRC_HUFFBITS, bits[9], bits[10], bits[11], bits[12], bits[13], bits[14], bits[15], bits[16]);
 
                 /* Here we just do minimal validation of the counts to avoid walking
                  * off the end of our table space. huff_entropy_decoder will check more carefully.
                  */
-                if (count > 256 || ((int) count) > length)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                if (count > 256 || count > length)
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -1060,14 +1060,14 @@ namespace LibJpeg.Classic.Internal
                 }
 
                 if (index < 0 || index >= JpegConstants.NUM_HUFF_TBLS)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_DHT_INDEX, index);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_DHT_INDEX, index);
 
                 Array.Copy(bits, htblptr.bits, htblptr.bits.Length);
                 Array.Copy(huffval, htblptr.huffval, htblptr.huffval.Length);
             }
 
             if (length != 0)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_LENGTH);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
 
             return true;
         }
@@ -1091,10 +1091,10 @@ namespace LibJpeg.Classic.Internal
                 int prec = n >> 4;
                 n &= 0x0F;
 
-                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_DQT, n, prec);
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_DQT, n, prec);
 
                 if (n >= JpegConstants.NUM_QUANT_TBLS)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_DQT_INDEX, n);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_DQT_INDEX, n);
 
                 if (m_cinfo.m_quant_tbl_ptrs[n] == null)
                     m_cinfo.m_quant_tbl_ptrs[n] = new JQUANT_TBL();
@@ -1103,14 +1103,14 @@ namespace LibJpeg.Classic.Internal
 
                 for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
-                    uint tmp;
+                    int tmp;
                     if (prec != 0)
                     {
                         int temp = 0;
                         if (!m_cinfo.m_src.GetTwoBytes(out temp))
                             return false;
 
-                        tmp = (uint)temp;
+                        tmp = temp;
                     }
                     else
                     {
@@ -1118,18 +1118,18 @@ namespace LibJpeg.Classic.Internal
                         if (!m_cinfo.m_src.GetByte(out temp))
                             return false;
 
-                        tmp = (uint)temp;
+                        tmp = temp;
                     }
 
                     /* We convert the zigzag-order table to natural array order. */
-                    quant_ptr.quantval[JpegUtils.jpeg_natural_order[i]] = (ushort) tmp;
+                    quant_ptr.quantval[JpegUtils.jpeg_natural_order[i]] = (short) tmp;
                 }
 
                 if (m_cinfo.m_err.m_trace_level >= 2)
                 {
                     for (int i = 0; i < JpegConstants.DCTSIZE2; i += 8)
                     {
-                        m_cinfo.TRACEMS(2, (int)J_MESSAGE_CODE.JTRC_QUANTVALS, quant_ptr.quantval[i], 
+                        m_cinfo.TRACEMS(2, J_MESSAGE_CODE.JTRC_QUANTVALS, quant_ptr.quantval[i], 
                             quant_ptr.quantval[i + 1], quant_ptr.quantval[i + 2], 
                             quant_ptr.quantval[i + 3], quant_ptr.quantval[i + 4],
                             quant_ptr.quantval[i + 5], quant_ptr.quantval[i + 6], quant_ptr.quantval[i + 7]);
@@ -1142,7 +1142,7 @@ namespace LibJpeg.Classic.Internal
             }
 
             if (length != 0)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_LENGTH);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
 
             return true;
         }
@@ -1157,15 +1157,15 @@ namespace LibJpeg.Classic.Internal
                 return false;
 
             if (length != 4)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_LENGTH);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
 
             int temp = 0;
             if (!m_cinfo.m_src.GetTwoBytes(out temp))
                 return false;
             
             int tmp = temp;
-            m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_DRI, tmp);
-            m_cinfo.m_restart_interval = (uint)tmp;
+            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_DRI, tmp);
+            m_cinfo.m_restart_interval = tmp;
 
             return true;
         }
@@ -1188,7 +1188,7 @@ namespace LibJpeg.Classic.Internal
                 return false;
 
             if (c != 0xFF || c2 != (int)JPEG_MARKER.M_SOI)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_SOI, c, c2);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_SOI, c, c2);
 
             m_cinfo.m_unread_marker = c2;
             return true;

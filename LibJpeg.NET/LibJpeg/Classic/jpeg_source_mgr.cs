@@ -118,7 +118,7 @@ namespace LibJpeg.Classic
         public virtual bool resync_to_restart(jpeg_decompress_struct cinfo, int desired)
         {
             /* Always put up a warning. */
-            cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_MUST_RESYNC, cinfo.m_unread_marker, desired);
+            cinfo.WARNMS(J_MESSAGE_CODE.JWRN_MUST_RESYNC, cinfo.m_unread_marker, desired);
 
             /* Outer loop handles repeated decision after scanning forward. */
             int action = 1;
@@ -156,7 +156,7 @@ namespace LibJpeg.Classic
                     }
                 }
 
-                cinfo.TRACEMS(4, (int)J_MESSAGE_CODE.JTRC_RECOVERY_ACTION, cinfo.m_unread_marker, action);
+                cinfo.TRACEMS(4, J_MESSAGE_CODE.JTRC_RECOVERY_ACTION, cinfo.m_unread_marker, action);
 
                 switch (action)
                 {
@@ -191,7 +191,6 @@ namespace LibJpeg.Classic
 
         /// <summary>
         /// Reads two bytes interpreted as an unsigned 16-bit integer.
-        /// V should be declared uint or perhaps int.
         /// </summary>
         public virtual bool GetTwoBytes(out int V)
         {
@@ -202,7 +201,7 @@ namespace LibJpeg.Classic
             }
 
             m_bytes_in_buffer--;
-            V = (int)(((uint) m_next_input_byte[m_position]) << 8);
+            V = m_next_input_byte[m_position] << 8;
             m_position++;
 
             if (!MakeByteAvailable())
@@ -235,7 +234,7 @@ namespace LibJpeg.Classic
         public virtual int GetBytes(byte[] dest, int amount)
         {
             int avail = amount;
-            if (avail > (int)m_bytes_in_buffer)
+            if (avail > m_bytes_in_buffer)
                 avail = m_bytes_in_buffer;
 
             for (int i = 0; i < avail; i++)

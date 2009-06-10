@@ -23,8 +23,8 @@ namespace LibJpeg.Classic.Internal
     class jpeg_color_converter
     {
         private const int SCALEBITS = 16;  /* speediest right-shift on some machines */
-        private const int CBCR_OFFSET = ((int) JpegConstants.CENTERJSAMPLE << SCALEBITS);
-        private const int ONE_HALF = ((int)1 << (SCALEBITS - 1));
+        private const int CBCR_OFFSET = JpegConstants.CENTERJSAMPLE << SCALEBITS;
+        private const int ONE_HALF = 1 << (SCALEBITS - 1);
 
         // We allocate one big table and divide it up into eight parts, instead of
         // doing eight alloc_small requests.  This lets us use a single table base
@@ -65,25 +65,25 @@ namespace LibJpeg.Classic.Internal
             {
                 case J_COLOR_SPACE.JCS_GRAYSCALE:
                     if (cinfo.m_input_components != 1)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
                     break;
 
                 case J_COLOR_SPACE.JCS_RGB:
                 case J_COLOR_SPACE.JCS_YCbCr:
                     if (cinfo.m_input_components != 3)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
                     break;
 
                 case J_COLOR_SPACE.JCS_CMYK:
                 case J_COLOR_SPACE.JCS_YCCK:
                     if (cinfo.m_input_components != 4)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
                     break;
 
                 default:
                     /* JCS_UNKNOWN can be anything */
                     if (cinfo.m_input_components < 1)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
                     break;
             }
 
@@ -93,7 +93,7 @@ namespace LibJpeg.Classic.Internal
             {
                 case J_COLOR_SPACE.JCS_GRAYSCALE:
                     if (cinfo.m_num_components != 1)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_GRAYSCALE)
                         m_useGrayscaleConvert = true;
                     else if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_RGB)
@@ -104,21 +104,21 @@ namespace LibJpeg.Classic.Internal
                     else if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_YCbCr)
                         m_useGrayscaleConvert = true;
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 case J_COLOR_SPACE.JCS_RGB:
                     if (cinfo.m_num_components != 3)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_RGB)
                         m_useNullConvert = true;
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 case J_COLOR_SPACE.JCS_YCbCr:
                     if (cinfo.m_num_components != 3)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_RGB)
                     {
                         m_useNullStart = false; // use rgb_ycc_start
@@ -127,21 +127,21 @@ namespace LibJpeg.Classic.Internal
                     else if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_YCbCr)
                         m_useNullConvert = true;
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 case J_COLOR_SPACE.JCS_CMYK:
                     if (cinfo.m_num_components != 4)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_CMYK)
                         m_useNullConvert = true;
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 case J_COLOR_SPACE.JCS_YCCK:
                     if (cinfo.m_num_components != 4)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_CMYK)
                     {
                         m_useNullStart = false; // use rgb_ycc_start
@@ -150,13 +150,13 @@ namespace LibJpeg.Classic.Internal
                     else if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_YCCK)
                         m_useNullConvert = true;
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 default:
                     /* allow null conversion of JCS_UNKNOWN */
                     if (cinfo.m_jpeg_color_space != cinfo.m_in_color_space || cinfo.m_num_components != cinfo.m_input_components)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
 
                     m_useNullConvert = true;
                     break;
@@ -180,7 +180,7 @@ namespace LibJpeg.Classic.Internal
         /// can easily adjust the passed input_buf value to accommodate any row
         /// offset required on that side.
         /// </summary>
-        public void color_convert(byte[][] input_buf, uint input_row, byte[][][] output_buf, uint output_row, int num_rows)
+        public void color_convert(byte[][] input_buf, int input_row, byte[][][] output_buf, int output_row, int num_rows)
         {
             if (m_useCmykYcckConvert)
                 cmyk_ycck_convert(input_buf, input_row, output_buf, output_row, num_rows);
@@ -193,7 +193,7 @@ namespace LibJpeg.Classic.Internal
             else if (m_useNullConvert)
                 null_convert(input_buf, input_row, output_buf, output_row, num_rows);
             else
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
         }
 
         /// <summary>
@@ -237,7 +237,7 @@ namespace LibJpeg.Classic.Internal
 
         private static int FIX(double x)
         {
-            return ((int)((x) * (1L << SCALEBITS) + 0.5));
+            return (int)(x * (1L << SCALEBITS) + 0.5);
         }
 
         /// <summary>
@@ -261,13 +261,13 @@ namespace LibJpeg.Classic.Internal
         /// The CENTERJSAMPLE offsets and the rounding fudge-factor of 0.5 are included
         /// in the tables to save adding them separately in the inner loop.
         /// </summary>
-        private void rgb_ycc_convert(byte[][] input_buf, uint input_row, byte[][][] output_buf, uint output_row, int num_rows)
+        private void rgb_ycc_convert(byte[][] input_buf, int input_row, byte[][][] output_buf, int output_row, int num_rows)
         {
-            uint num_cols = m_cinfo.m_image_width;
+            int num_cols = m_cinfo.m_image_width;
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
-                for (uint col = 0; col < num_cols; col++)
+                for (int col = 0; col < num_cols; col++)
                 {
                     int r = input_buf[input_row + row][columnOffset + JpegConstants.RGB_RED];
                     int g = input_buf[input_row + row][columnOffset + JpegConstants.RGB_GREEN];
@@ -297,13 +297,13 @@ namespace LibJpeg.Classic.Internal
         /// as the RGB->Y portion of RGB->YCbCr.
         /// We assume rgb_ycc_start has been called (we only use the Y tables).
         /// </summary>
-        private void rgb_gray_convert(byte[][] input_buf, uint input_row, byte[][][] output_buf, uint output_row, int num_rows)
+        private void rgb_gray_convert(byte[][] input_buf, int input_row, byte[][][] output_buf, int output_row, int num_rows)
         {
-            uint num_cols = m_cinfo.m_image_width;
+            int num_cols = m_cinfo.m_image_width;
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
-                for (uint col = 0; col < num_cols; col++)
+                for (int col = 0; col < num_cols; col++)
                 {
                     int r = input_buf[input_row + row][columnOffset + JpegConstants.RGB_RED];
                     int g = input_buf[input_row + row][columnOffset + JpegConstants.RGB_GREEN];
@@ -325,13 +325,13 @@ namespace LibJpeg.Classic.Internal
         /// conversion as above, while passing K (black) unchanged.
         /// We assume rgb_ycc_start has been called.
         /// </summary>
-        private void cmyk_ycck_convert(byte[][] input_buf, uint input_row, byte[][][] output_buf, uint output_row, int num_rows)
+        private void cmyk_ycck_convert(byte[][] input_buf, int input_row, byte[][][] output_buf, int output_row, int num_rows)
         {
-            uint num_cols = m_cinfo.m_image_width;
+            int num_cols = m_cinfo.m_image_width;
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
-                for (uint col = 0; col < num_cols; col++)
+                for (int col = 0; col < num_cols; col++)
                 {
                     int r = JpegConstants.MAXJSAMPLE - input_buf[input_row + row][columnOffset];
                     int g = JpegConstants.MAXJSAMPLE - input_buf[input_row + row][columnOffset + 1];
@@ -364,15 +364,15 @@ namespace LibJpeg.Classic.Internal
         /// This version handles grayscale output with no conversion.
         /// The source can be either plain grayscale or YCbCr (since Y == gray).
         /// </summary>
-        private void grayscale_convert(byte[][] input_buf, uint input_row, byte[][][] output_buf, uint output_row, int num_rows)
+        private void grayscale_convert(byte[][] input_buf, int input_row, byte[][][] output_buf, int output_row, int num_rows)
         {
-            uint num_cols = m_cinfo.m_image_width;
+            int num_cols = m_cinfo.m_image_width;
             int instride = m_cinfo.m_input_components;
 
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
-                for (uint col = 0; col < num_cols; col++)
+                for (int col = 0; col < num_cols; col++)
                 {
                     /* don't need GETJSAMPLE() here */
                     output_buf[0][output_row][col] = input_buf[input_row + row][columnOffset];
@@ -388,10 +388,10 @@ namespace LibJpeg.Classic.Internal
         /// This version handles multi-component colorspaces without conversion.
         /// We assume input_components == num_components.
         /// </summary>
-        private void null_convert(byte[][] input_buf, uint input_row, byte[][][] output_buf, uint output_row, int num_rows)
+        private void null_convert(byte[][] input_buf, int input_row, byte[][][] output_buf, int output_row, int num_rows)
         {
             int nc = m_cinfo.m_num_components;
-            uint num_cols = m_cinfo.m_image_width;
+            int num_cols = m_cinfo.m_image_width;
 
             for (int row = 0; row < num_rows; row++)
             {
@@ -399,7 +399,7 @@ namespace LibJpeg.Classic.Internal
                 for (int ci = 0; ci < nc; ci++)
                 {
                     int columnOffset = 0;
-                    for (uint col = 0; col < num_cols; col++)
+                    for (int col = 0; col < num_cols; col++)
                     {
                         /* don't need GETJSAMPLE() here */
                         output_buf[ci][output_row][col] = input_buf[input_row + row][columnOffset + ci];

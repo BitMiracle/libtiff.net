@@ -27,7 +27,7 @@ namespace LibJpeg.Classic.Internal
          * (not the zigzag order in which they are stored in a JPEG DQT marker).
          * CAUTION: IJG versions prior to v6a kept this array in zigzag order.
          */
-        public ushort[] quantval = new ushort[JpegConstants.DCTSIZE2];  /* quantization step for each coefficient */
+        public short[] quantval = new short[JpegConstants.DCTSIZE2];  /* quantization step for each coefficient */
 
         /* This field is used only during compression.  It's initialized false when
          * the table is created, and set true when it's been output to the file.

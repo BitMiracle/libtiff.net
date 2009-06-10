@@ -37,11 +37,11 @@ namespace LibJpeg.Classic
     {
         private jpeg_common_struct m_cinfo;
         private byte[][] m_mem_buffer;   /* => the in-memory buffer */
-        private uint m_rows_in_array;   /* total virtual array height */
-        private uint m_samplesperrow;   /* width of array (and of memory buffer) */
+        private int m_rows_in_array;   /* total virtual array height */
+        private int m_samplesperrow;   /* width of array (and of memory buffer) */
 
         // Request a virtual 2-D sample array
-        public jvirt_sarray_control(jpeg_common_struct cinfo, bool pre_zero, uint samplesperrow, uint numrows)
+        public jvirt_sarray_control(jpeg_common_struct cinfo, bool pre_zero, int samplesperrow, int numrows)
         {
             m_cinfo = cinfo;
             m_rows_in_array = numrows;
@@ -53,13 +53,13 @@ namespace LibJpeg.Classic
         /// Access the part of a virtual sample array starting at start_row
         /// and extending for num_rows rows.
         /// </summary>
-        public byte[][] access_virt_sarray(uint start_row, uint num_rows)
+        public byte[][] access_virt_sarray(int start_row, int num_rows)
         {
-            uint end_row = start_row + num_rows;
+            int end_row = start_row + num_rows;
 
             /* debugging check */
             if (end_row > m_rows_in_array || m_mem_buffer == null)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
 
             /* Return proper part of the buffer */
             byte[][] ret = new byte[num_rows][];

@@ -76,7 +76,7 @@ namespace LibJpeg.Classic.Internal
                     else if (m_cinfo.m_enable_1pass_quant)
                         m_cinfo.m_cquantize = m_quantizer_1pass;
                     else
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_MODE_CHANGE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_MODE_CHANGE);
                 }
 
                 m_cinfo.m_idct.start_pass();
@@ -140,11 +140,11 @@ namespace LibJpeg.Classic.Internal
             m_cinfo.jpeg_calc_output_dimensions();
             prepare_range_limit_table();
 
-            /* Width of an output scanline must be representable as uint. */
-            long samplesperrow = (long)m_cinfo.m_output_width * (long)m_cinfo.m_out_color_components;
-            uint jd_samplesperrow = (uint)samplesperrow;
+            /* Width of an output scanline must be representable as int. */
+            long samplesperrow = m_cinfo.m_output_width * m_cinfo.m_out_color_components;
+            int jd_samplesperrow = (int)samplesperrow;
             if ((long)jd_samplesperrow != samplesperrow)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
 
             /* Initialize my private state */
             m_pass_number = 0;
@@ -165,7 +165,7 @@ namespace LibJpeg.Classic.Internal
             if (m_cinfo.m_quantize_colors)
             {
                 if (m_cinfo.m_raw_data_out)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
 
                 /* 2-pass quantizer only works in 3-component color space. */
                 if (m_cinfo.m_out_color_components != 3)
@@ -253,8 +253,8 @@ namespace LibJpeg.Classic.Internal
                     nscans = m_cinfo.m_num_components;
                 }
 
-                m_cinfo.m_progress.m_pass_counter = 0L;
-                m_cinfo.m_progress.m_pass_limit = (long)m_cinfo.m_total_iMCU_rows * nscans;
+                m_cinfo.m_progress.m_pass_counter = 0;
+                m_cinfo.m_progress.m_pass_limit = m_cinfo.m_total_iMCU_rows * nscans;
                 m_cinfo.m_progress.m_completed_passes = 0;
                 m_cinfo.m_progress.m_total_passes = (m_cinfo.m_enable_2pass_quant ? 3 : 2);
 

@@ -48,7 +48,7 @@ namespace LibJpeg
         {
             get
             {
-                return m_array.access_virt_barray((uint)startRow, (uint)numRows);
+                return m_array.access_virt_barray(startRow, numRows);
             }
             
         }

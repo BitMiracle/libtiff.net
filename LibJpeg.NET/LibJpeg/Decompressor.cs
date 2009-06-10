@@ -37,7 +37,7 @@ namespace LibJpeg
         {
             get
             {
-                return (int)m_classicDecompressor.Image_width;
+                return m_classicDecompressor.Image_width;
             }
         }
 
@@ -46,7 +46,7 @@ namespace LibJpeg
         {
             get
             {
-                return (int)m_classicDecompressor.Image_height;
+                return m_classicDecompressor.Image_height;
             }
         }
 
@@ -91,11 +91,11 @@ namespace LibJpeg
         {
             get
             {
-                return (int)m_classicDecompressor.Scale_num;
+                return m_classicDecompressor.Scale_num;
             }
             set
             {
-                m_classicDecompressor.Scale_num = (uint)value;
+                m_classicDecompressor.Scale_num = value;
             }
         }
 
@@ -103,11 +103,11 @@ namespace LibJpeg
         {
             get
             {
-                return (int)m_classicDecompressor.Scale_denom;
+                return m_classicDecompressor.Scale_denom;
             }
             set
             {
-                m_classicDecompressor.Scale_denom = (uint)value;
+                m_classicDecompressor.Scale_denom = value;
             }
         }
 
@@ -282,7 +282,7 @@ namespace LibJpeg
         {
             get
             {
-                return (int)m_classicDecompressor.Output_width; 
+                return m_classicDecompressor.Output_width; 
             }
         }
 
@@ -291,7 +291,7 @@ namespace LibJpeg
         {
             get
             {
-                return (int)m_classicDecompressor.Output_height; 
+                return m_classicDecompressor.Output_height; 
             }
         }
 
@@ -373,7 +373,7 @@ namespace LibJpeg
         {
             get 
             {
-                return (int)m_classicDecompressor.Output_scanline; 
+                return m_classicDecompressor.Output_scanline; 
             }
         }
 
@@ -395,7 +395,7 @@ namespace LibJpeg
         {
             get 
             {
-                return (int)m_classicDecompressor.Input_iMCU_row; 
+                return m_classicDecompressor.Input_iMCU_row; 
             }
         }
 
@@ -418,7 +418,7 @@ namespace LibJpeg
         {
             get 
             {
-                return (int)m_classicDecompressor.Output_iMCU_row; 
+                return m_classicDecompressor.Output_iMCU_row; 
             }
         }
 
@@ -563,7 +563,7 @@ namespace LibJpeg
         /// </summary>
         public int ReadScanlines(byte[][] scanlines, int max_lines)
         {
-            return (int)m_classicDecompressor.jpeg_read_scanlines(scanlines, (uint)max_lines);
+            return m_classicDecompressor.jpeg_read_scanlines(scanlines, max_lines);
         }
 
         /// <summary>
@@ -586,7 +586,7 @@ namespace LibJpeg
         /// </summary>
         public int ReadRawData(byte[][][] data, int max_lines)
         {
-            return (int)m_classicDecompressor.jpeg_read_raw_data(data, (uint)max_lines);
+            return m_classicDecompressor.jpeg_read_raw_data(data, max_lines);
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -702,7 +702,7 @@ namespace LibJpeg
         //{
         //    /* Safety check to ensure start_compress not called yet. */
         //    if (dstinfo.m_global_state != JpegState.CSTATE_START)
-        //        ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_STATE, (int)dstinfo.m_global_state);
+        //        ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)dstinfo.m_global_state);
 
         //    /* Copy fundamental image dimensions */
         //    dstinfo.m_image_width = m_image_width;
@@ -738,7 +738,7 @@ namespace LibJpeg
         //    */
         //    dstinfo.m_num_components = m_num_components;
         //    if (dstinfo.m_num_components < 1 || dstinfo.m_num_components > JpegConstants.MAX_COMPONENTS)
-        //        ERREXIT((int)J_MESSAGE_CODE.JERR_COMPONENT_COUNT, dstinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
+        //        ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, dstinfo.m_num_components, JpegConstants.MAX_COMPONENTS);
 
         //    for (int ci = 0; ci < dstinfo.m_num_components; ci++)
         //    {
@@ -753,7 +753,7 @@ namespace LibJpeg
         //        */
         //        int tblno = dstinfo.m_comp_info[ci].quant_tbl_no;
         //        if (tblno < 0 || tblno >= JpegConstants.NUM_QUANT_TBLS || m_quant_tbl_ptrs[tblno] == null)
-        //            ERREXIT((int)J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
+        //            ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
 
         //        JQUANT_TBL c_quant = m_comp_info[ci].quant_table;
         //        if (c_quant != null)
@@ -762,7 +762,7 @@ namespace LibJpeg
         //            for (int coefi = 0; coefi < JpegConstants.DCTSIZE2; coefi++)
         //            {
         //                if (c_quant.quantval[coefi] != slot_quant.quantval[coefi])
-        //                    ERREXIT((int)J_MESSAGE_CODE.JERR_MISMATCHED_QUANT_TABLE, tblno);
+        //                    ERREXIT(J_MESSAGE_CODE.JERR_MISMATCHED_QUANT_TABLE, tblno);
         //            }
         //        }
         //        /* Note: we do not copy the source's Huffman table assignments;
@@ -823,7 +823,7 @@ namespace LibJpeg
         /* Control saving of COM and APPn markers into marker_list. */
         public void SaveMarkers(int markerCode, int lengthLimit)
         {
-            m_classicDecompressor.jpeg_save_markers(markerCode, (uint)lengthLimit);
+            m_classicDecompressor.jpeg_save_markers(markerCode, lengthLimit);
         }
     }
 }

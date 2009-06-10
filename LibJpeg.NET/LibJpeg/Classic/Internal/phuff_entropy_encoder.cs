@@ -55,12 +55,12 @@ namespace LibJpeg.Classic.Internal
 
         /* Coding status for AC components */
         private int m_ac_tbl_no;      /* the table number of the single component */
-        private uint m_EOBRUN;        /* run length of EOBs */
-        private uint m_BE;        /* # of buffered correction bits before MCU */
+        private int m_EOBRUN;        /* run length of EOBs */
+        private int m_BE;        /* # of buffered correction bits before MCU */
         private char[] m_bit_buffer;       /* buffer for correction bits (1 per char) */
         /* packing correction bits tightly would save some space but cost time... */
 
-        private uint m_restarts_to_go;    /* MCUs left in this restart interval */
+        private int m_restarts_to_go;    /* MCUs left in this restart interval */
         private int m_next_restart_num;       /* next restart number to write (0-7) */
 
         /* Pointers to derived tables (these workspaces have image lifespan).
@@ -148,7 +148,7 @@ namespace LibJpeg.Classic.Internal
                     /* Check for invalid table index */
                     /* (make_c_derived_tbl does this in the other path) */
                     if (tbl < 0 || tbl >= JpegConstants.NUM_HUFF_TBLS)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tbl);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tbl);
 
                     /* Allocate and zero the statistics tables */
                     /* Note that jpeg_gen_optimal_table expects 257 entries in each table! */
@@ -192,7 +192,7 @@ namespace LibJpeg.Classic.Internal
                     return encode_mcu_AC_refine(MCU_data);
             }
 
-            m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
             return false;
         }
 
@@ -223,7 +223,7 @@ namespace LibJpeg.Classic.Internal
                 /* Compute the DC value after the required point transform by Al.
                  * This is simply an arithmetic right shift.
                  */
-                int temp2 = IRIGHT_SHIFT((int)MCU_data[blkn][0][0], m_cinfo.m_Al);
+                int temp2 = IRIGHT_SHIFT(MCU_data[blkn][0][0], m_cinfo.m_Al);
 
                 /* DC differences are figured on the point-transformed values. */
                 int ci = m_cinfo.m_MCU_membership[blkn];
@@ -254,7 +254,7 @@ namespace LibJpeg.Classic.Internal
                  * Since we're encoding a difference, the range limit is twice as much.
                  */
                 if (nbits > MAX_HUFFMAN_COEF_BITS + 1)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
                 /* Count/emit the Huffman-coded symbol for the number of bits */
                 emit_symbol(m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no, nbits);
@@ -264,7 +264,7 @@ namespace LibJpeg.Classic.Internal
                 if (nbits != 0)
                 {
                     /* emit_bits rejects calls with size 0 */
-                    emit_bits((uint) temp2, nbits);
+                    emit_bits(temp2, nbits);
                 }
             }
 
@@ -353,14 +353,14 @@ namespace LibJpeg.Classic.Internal
 
                 /* Check for out-of-range coefficient values */
                 if (nbits > MAX_HUFFMAN_COEF_BITS)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
                 /* Count/emit Huffman symbol for run length / number of bits */
                 emit_symbol(m_ac_tbl_no, (r << 4) + nbits);
 
                 /* Emit that number of bits of the value, if positive, */
                 /* or the complement of its magnitude, if negative. */
-                emit_bits((uint) temp2, nbits);
+                emit_bits(temp2, nbits);
 
                 r = 0;          /* reset zero run length */
             }
@@ -407,7 +407,7 @@ namespace LibJpeg.Classic.Internal
             {
                 /* We simply emit the Al'th bit of the DC coefficient value. */
                 int temp = MCU_data[blkn][0][0];
-                emit_bits((uint) (temp >> m_cinfo.m_Al), 1);
+                emit_bits(temp >> m_cinfo.m_Al, 1);
             }
 
             /* Update restart-interval state too */
@@ -468,8 +468,8 @@ namespace LibJpeg.Classic.Internal
             /* Encode the AC coefficients per section G.1.2.3, fig. G.7 */
 
             int r = 0;          /* r = run length of zeros */
-            uint BR = 0;         /* BR = count of buffered bits added now */
-            int bitBufferOffset = (int)m_BE; /* Append bits to buffer */
+            int BR = 0;         /* BR = count of buffered bits added now */
+            int bitBufferOffset = m_BE; /* Append bits to buffer */
 
             for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
             {
@@ -517,7 +517,7 @@ namespace LibJpeg.Classic.Internal
 
                 /* Emit output bit for newly-nonzero coef */
                 temp = (MCU_data[0][0][JpegUtils.jpeg_natural_order[k]] < 0) ? 0 : 1;
-                emit_bits((uint) temp, 1);
+                emit_bits(temp, 1);
 
                 /* Emit buffered correction bits that must be associated with this code */
                 emit_buffered_bits(bitBufferOffset, BR);
@@ -635,15 +635,15 @@ namespace LibJpeg.Classic.Internal
         /// in one call, and we never retain more than 7 bits in put_buffer
         /// between calls, so 24 bits are sufficient.
         /// </summary>
-        private void emit_bits(uint code, int size)
+        private void emit_bits(int code, int size)
         {
             // Emit some bits, unless we are in gather mode
             /* This routine is heavily used, so it's worth coding tightly. */
-            int local_put_buffer = (int)code;
+            int local_put_buffer = code;
 
             /* if size is 0, caller used an invalid Huffman table entry */
             if (size == 0)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE);
 
             if (m_gather_statistics)
             {
@@ -651,7 +651,7 @@ namespace LibJpeg.Classic.Internal
                 return;
             }
 
-            local_put_buffer &= (((int)1) << size) - 1; /* mask off any extra bits in code */
+            local_put_buffer &= (1 << size) - 1; /* mask off any extra bits in code */
 
             m_put_bits += size;       /* new number of bits in buffer */
 
@@ -661,7 +661,7 @@ namespace LibJpeg.Classic.Internal
 
             while (m_put_bits >= 8)
             {
-                int c = (int)((local_put_buffer >> 16) & 0xFF);
+                int c = (local_put_buffer >> 16) & 0xFF;
 
                 emit_byte(c);
                 if (c == 0xFF)
@@ -693,7 +693,7 @@ namespace LibJpeg.Classic.Internal
         }
 
         // Emit bits from a correction bit buffer.
-        private void emit_buffered_bits(int offset, uint nbits)
+        private void emit_buffered_bits(int offset, int nbits)
         {
             if (m_gather_statistics)
             {
@@ -701,8 +701,8 @@ namespace LibJpeg.Classic.Internal
                 return;
             }
 
-            for (uint i = 0; i < nbits; i++)
-                emit_bits((uint)m_bit_buffer[offset + i], 1);
+            for (int i = 0; i < nbits; i++)
+                emit_bits(m_bit_buffer[offset + i], 1);
         }
 
         // Emit any pending EOBRUN symbol.
@@ -711,14 +711,14 @@ namespace LibJpeg.Classic.Internal
             if (m_EOBRUN > 0)
             {
                 /* if there is any pending EOBRUN */
-                int temp = (int)m_EOBRUN;
+                int temp = m_EOBRUN;
                 int nbits = 0;
                 while ((temp >>= 1) != 0)
                     nbits++;
 
                 /* safety check: shouldn't happen given limited correction-bit buffer */
                 if (nbits > 14)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_HUFF_MISSING_CODE);
 
                 emit_symbol(m_ac_tbl_no, nbits << 4);
                 if (nbits != 0)

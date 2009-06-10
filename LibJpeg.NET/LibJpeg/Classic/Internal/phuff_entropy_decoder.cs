@@ -34,7 +34,7 @@ namespace LibJpeg.Classic.Internal
         private class savable_state
         {
             //savable_state operator=(savable_state src);
-            public uint EOBRUN;            /* remaining EOBs in EOBRUN */
+            public int EOBRUN;            /* remaining EOBs in EOBRUN */
             public int[] last_dc_val = new int[JpegConstants.MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
 
             public void Assign(savable_state ss)
@@ -61,7 +61,7 @@ namespace LibJpeg.Classic.Internal
         private savable_state m_saved = new savable_state();        /* Other state at start of MCU */
 
         /* These fields are NOT loaded into local working state. */
-        private uint m_restarts_to_go;    /* MCUs left in this restart interval */
+        private int m_restarts_to_go;    /* MCUs left in this restart interval */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
         private d_derived_tbl[] m_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
@@ -132,7 +132,7 @@ namespace LibJpeg.Classic.Internal
              * overflows in the IDCT math.  But we won't crash.
              */
             if (bad)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_PROGRESSION, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROGRESSION, m_cinfo.m_Ss, m_cinfo.m_Se, m_cinfo.m_Ah, m_cinfo.m_Al);
 
             /* Update progression status, and verify that scan order is legal.
              * Note that inter-scan inconsistencies are treated as warnings
@@ -142,7 +142,7 @@ namespace LibJpeg.Classic.Internal
             {
                 int cindex = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].component_index;
                 if (!is_DC_band && m_cinfo.m_coef_bits[cindex][0] < 0) /* AC without prior DC scan */
-                    m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, 0);
+                    m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, 0);
 
                 for (int coefi = m_cinfo.m_Ss; coefi <= m_cinfo.m_Se; coefi++)
                 {
@@ -151,7 +151,7 @@ namespace LibJpeg.Classic.Internal
                         expected = 0;
 
                     if (m_cinfo.m_Ah != expected)
-                        m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, coefi);
+                        m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, coefi);
 
                     m_cinfo.m_coef_bits[cindex][coefi] = m_cinfo.m_Al;
                 }
@@ -225,7 +225,7 @@ namespace LibJpeg.Classic.Internal
                     return decode_mcu_AC_refine(MCU_data);
             }
 
-            m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
             return false;
         }
 
@@ -339,7 +339,7 @@ namespace LibJpeg.Classic.Internal
                 /* Load up working state.
                  * We can avoid loading/saving bitread state if in an EOB run.
                  */
-                uint EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
+                int EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
 
                 /* There is always only one block per MCU */
 
@@ -387,7 +387,7 @@ namespace LibJpeg.Classic.Internal
                             else
                             {
                                 /* EOBr, run length is 2^r + appended bits */
-                                EOBRUN = (uint)(1 << r);
+                                EOBRUN = 1 << r;
                                 if (r != 0)
                                 {
                                     /* EOBr, r > 0 */
@@ -395,7 +395,7 @@ namespace LibJpeg.Classic.Internal
                                         return false;
 
                                     r = GET_BITS(r, get_buffer, ref bits_left);
-                                    EOBRUN += (uint)r;
+                                    EOBRUN += r;
                                 }
 
                                 EOBRUN--;       /* this band is processed at this moment */
@@ -474,7 +474,7 @@ namespace LibJpeg.Classic.Internal
         private bool decode_mcu_AC_refine(JBLOCK[] MCU_data)
         {
             int p1 = 1 << m_cinfo.m_Al;    /* 1 in the bit position being coded */
-            int m1 = (-1) << m_cinfo.m_Al; /* -1 in the bit position being coded */
+            int m1 = -1 << m_cinfo.m_Al; /* -1 in the bit position being coded */
 
             /* Process restart marker if needed; may have to suspend */
             if (m_cinfo.m_restart_interval != 0)
@@ -495,7 +495,7 @@ namespace LibJpeg.Classic.Internal
                 int bits_left;
                 bitread_working_state br_state = new bitread_working_state();
                 BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
-                uint EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
+                int EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
 
                 /* If we are forced to suspend, we must undo the assignments to any newly
                  * nonzero coefficients in the block, because otherwise we'd get confused
@@ -527,7 +527,7 @@ namespace LibJpeg.Classic.Internal
                             if (s != 1)
                             {
                                 /* size of new coef should always be 1 */
-                                m_cinfo.WARNMS((int)J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
+                                m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
                             }
 
                             if (!CHECK_BIT_BUFFER(ref br_state, 1, ref get_buffer, ref bits_left))
@@ -551,7 +551,7 @@ namespace LibJpeg.Classic.Internal
                         {
                             if (r != 15)
                             {
-                                EOBRUN = (uint)(1 << r);    /* EOBr, run length is 2^r + appended bits */
+                                EOBRUN = 1 << r;    /* EOBr, run length is 2^r + appended bits */
                                 if (r != 0)
                                 {
                                     if (!CHECK_BIT_BUFFER(ref br_state, r, ref get_buffer, ref bits_left))
@@ -561,7 +561,7 @@ namespace LibJpeg.Classic.Internal
                                     }
 
                                     r = GET_BITS(r, get_buffer, ref bits_left);
-                                    EOBRUN += (uint)r;
+                                    EOBRUN += r;
                                 }
                                 break;      /* rest of block is handled by EOB logic */
                             }
@@ -675,7 +675,7 @@ namespace LibJpeg.Classic.Internal
         {
             /* Throw away any unused bits remaining in bit buffer; */
             /* include any full bytes in next_marker's count of discarded bytes */
-            m_cinfo.m_marker.SkipBytes((uint)(m_bitstate.bits_left / 8));
+            m_cinfo.m_marker.SkipBytes(m_bitstate.bits_left / 8);
             m_bitstate.bits_left = 0;
 
             /* Advance past the RSTn marker */

@@ -26,8 +26,8 @@ namespace LibJpeg.Classic.Internal
     {
         private jpeg_compress_struct m_cinfo;
 
-        private uint m_cur_iMCU_row;    /* number of current iMCU row */
-        private uint m_rowgroup_ctr;    /* counts row groups received in iMCU row */
+        private int m_cur_iMCU_row;    /* number of current iMCU row */
+        private int m_rowgroup_ctr;    /* counts row groups received in iMCU row */
         private bool m_suspended;     /* remember if we suspended output */
         private J_BUF_MODE m_pass_mode;       /* current operating mode */
 
@@ -44,8 +44,9 @@ namespace LibJpeg.Classic.Internal
             /* Allocate a strip buffer for each component */
             for (int ci = 0; ci < cinfo.m_num_components; ci++)
             {
-                m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE,
-                    (uint)(cinfo.m_comp_info[ci].v_samp_factor * JpegConstants.DCTSIZE));
+                m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(
+                    cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE,
+                    cinfo.m_comp_info[ci].v_samp_factor * JpegConstants.DCTSIZE);
             }
         }
 
@@ -62,7 +63,7 @@ namespace LibJpeg.Classic.Internal
             m_pass_mode = pass_mode;    /* save mode for use by process_data */
 
             if (pass_mode != J_BUF_MODE.JBUF_PASS_THRU)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
         }
 
         /// <summary>
@@ -70,13 +71,13 @@ namespace LibJpeg.Classic.Internal
         /// This routine handles the simple pass-through mode,
         /// where we have only a strip buffer.
         /// </summary>
-        public void process_data(byte[][] input_buf, ref uint in_row_ctr, uint in_rows_avail)
+        public void process_data(byte[][] input_buf, ref int in_row_ctr, int in_rows_avail)
         {
             while (m_cur_iMCU_row < m_cinfo.m_total_iMCU_rows)
             {
                 /* Read input data if we haven't filled the main buffer yet */
                 if (m_rowgroup_ctr < JpegConstants.DCTSIZE)
-                    m_cinfo.m_prep.pre_process_data(input_buf, ref in_row_ctr, in_rows_avail, m_buffer, ref m_rowgroup_ctr, (uint)JpegConstants.DCTSIZE);
+                    m_cinfo.m_prep.pre_process_data(input_buf, ref in_row_ctr, in_rows_avail, m_buffer, ref m_rowgroup_ctr, JpegConstants.DCTSIZE);
 
                 /* If we don't have a full iMCU row buffered, return to application for
                  * more data.  Note that preprocessor will always pad to fill the iMCU row

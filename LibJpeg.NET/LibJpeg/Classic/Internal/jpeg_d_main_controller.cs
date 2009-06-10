@@ -134,7 +134,7 @@ namespace LibJpeg.Classic.Internal
         private byte[][][] m_buffer = new byte[JpegConstants.MAX_COMPONENTS][][];
 
         private bool m_buffer_full;       /* Have we gotten an iMCU row from decoder? */
-        private uint m_rowgroup_ctr;    /* counts row groups output to postprocessor */
+        private int m_rowgroup_ctr;    /* counts row groups output to postprocessor */
 
         /* Remaining fields are only used in the context case. */
 
@@ -143,8 +143,8 @@ namespace LibJpeg.Classic.Internal
         private int m_whichFunny;           /* indicates which funny indices set is now in use */
 
         private int m_context_state;      /* process_data state machine status */
-        private uint m_rowgroups_avail; /* row groups available to postprocessor */
-        private uint m_iMCU_row_ctr;    /* counts iMCU rows to detect image top/bot */
+        private int m_rowgroups_avail; /* row groups available to postprocessor */
+        private int m_iMCU_row_ctr;    /* counts iMCU rows to detect image top/bot */
 
         public jpeg_d_main_controller(jpeg_decompress_struct cinfo)
         {
@@ -157,7 +157,7 @@ namespace LibJpeg.Classic.Internal
             if (cinfo.m_upsample.NeedContextRows())
             {
                 if (cinfo.m_min_DCT_scaled_size < 2) /* unsupported, see comments above */
-                    cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
 
                 alloc_funny_pointers(); /* Alloc space for xbuffer[] lists */
                 ngroups = cinfo.m_min_DCT_scaled_size + 2;
@@ -169,8 +169,8 @@ namespace LibJpeg.Classic.Internal
                 int rgroup = (cinfo.m_comp_info[ci].v_samp_factor * cinfo.m_comp_info[ci].DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
 
                 m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(
-                    (uint)(cinfo.m_comp_info[ci].width_in_blocks * cinfo.m_comp_info[ci].DCT_scaled_size),
-                    (uint)(rgroup * ngroups));
+                    cinfo.m_comp_info[ci].width_in_blocks * cinfo.m_comp_info[ci].DCT_scaled_size, 
+                    rgroup * ngroups);
             }
         }
 
@@ -203,12 +203,12 @@ namespace LibJpeg.Classic.Internal
                     m_dataProcessor = DataProcessor.crank_post;
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
                     break;
             }
         }
 
-        public void process_data(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        public void process_data(byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
             switch (m_dataProcessor)
             {
@@ -225,7 +225,7 @@ namespace LibJpeg.Classic.Internal
                     break;
 
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
                     break;
             }
         }
@@ -234,7 +234,7 @@ namespace LibJpeg.Classic.Internal
         /// Process some data.
         /// This handles the simple case where no context is required.
         /// </summary>
-        private void process_data_simple_main(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        private void process_data_simple_main(byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
             ComponentBuffer[] cb = new ComponentBuffer[JpegConstants.MAX_COMPONENTS];
             for (int i = 0; i < JpegConstants.MAX_COMPONENTS; i++)
@@ -257,7 +257,7 @@ namespace LibJpeg.Classic.Internal
             }
 
             /* There are always min_DCT_scaled_size row groups in an iMCU row. */
-            uint rowgroups_avail = (uint) m_cinfo.m_min_DCT_scaled_size;
+            int rowgroups_avail = m_cinfo.m_min_DCT_scaled_size;
 
             /* Note: at the bottom of the image, we may pass extra garbage row groups
              * to the postprocessor.  The postprocessor has to check for bottom
@@ -279,7 +279,7 @@ namespace LibJpeg.Classic.Internal
         /// Process some data.
         /// This handles the case where context rows must be provided.
         /// </summary>
-        private void process_data_context_main(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        private void process_data_context_main(byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
             ComponentBuffer[] cb = new ComponentBuffer[m_cinfo.m_num_components];
             for (int i = 0; i < m_cinfo.m_num_components; i++)
@@ -337,7 +337,7 @@ namespace LibJpeg.Classic.Internal
             {
                 /* Prepare to process first M-1 row groups of this iMCU row */
                 m_rowgroup_ctr = 0;
-                m_rowgroups_avail = (uint)(m_cinfo.m_min_DCT_scaled_size - 1);
+                m_rowgroups_avail = m_cinfo.m_min_DCT_scaled_size - 1;
 
                 /* Check for bottom of image: if so, tweak pointers to "duplicate"
                  * the last sample row, and adjust rowgroups_avail to ignore padding rows.
@@ -370,8 +370,8 @@ namespace LibJpeg.Classic.Internal
 
                 /* Still need to process last row group of this iMCU row, */
                 /* which is saved at index M+1 of the other xbuffer */
-                m_rowgroup_ctr = (uint)(m_cinfo.m_min_DCT_scaled_size + 1);
-                m_rowgroups_avail = (uint)(m_cinfo.m_min_DCT_scaled_size + 2);
+                m_rowgroup_ctr = m_cinfo.m_min_DCT_scaled_size + 1;
+                m_rowgroups_avail = m_cinfo.m_min_DCT_scaled_size + 2;
                 m_context_state = CTX_POSTPONED_ROW;
             }
         }
@@ -381,10 +381,10 @@ namespace LibJpeg.Classic.Internal
         /// Final pass of two-pass quantization: just call the postprocessor.
         /// Source data will be the postprocessor controller's internal buffer.
         /// </summary>
-        private void process_data_crank_post(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        private void process_data_crank_post(byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
-            uint dummy = 0;
-            m_cinfo.m_post.post_process_data(null, ref dummy, (uint)0, output_buf, ref out_row_ctr, out_rows_avail);
+            int dummy = 0;
+            m_cinfo.m_post.post_process_data(null, ref dummy, 0, output_buf, ref out_row_ctr, out_rows_avail);
         }
 
         /// <summary>
@@ -489,7 +489,7 @@ namespace LibJpeg.Classic.Internal
                 int rgroup = iMCUheight / m_cinfo.m_min_DCT_scaled_size;
 
                 /* Count nondummy sample rows remaining for this component */
-                int rows_left = (int)(m_cinfo.m_comp_info[ci].downsampled_height % (uint)iMCUheight);
+                int rows_left = m_cinfo.m_comp_info[ci].downsampled_height % iMCUheight;
                 if (rows_left == 0)
                     rows_left = iMCUheight;
 
@@ -497,7 +497,7 @@ namespace LibJpeg.Classic.Internal
                  * so we need only do it once.
                  */
                 if (ci == 0)
-                    m_rowgroups_avail = (uint)((rows_left - 1) / rgroup + 1);
+                    m_rowgroups_avail = (rows_left - 1) / rgroup + 1;
 
                 /* Duplicate the last real sample row rgroup*2 times; this pads out the
                  * last partial rowgroup and ensures at least one full rowgroup of context.

@@ -173,11 +173,11 @@ namespace LibJpeg.Classic.Internal
 
             /* Make sure my internal arrays won't overflow */
             if (cinfo.m_out_color_components > MAX_Q_COMPS)
-                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_COMPONENTS, MAX_Q_COMPS);
+                cinfo.ERREXIT(J_MESSAGE_CODE.JERR_QUANT_COMPONENTS, MAX_Q_COMPS);
 
             /* Make sure colormap indexes can be represented by JSAMPLEs */
             if (cinfo.m_desired_number_of_colors > (JpegConstants.MAXJSAMPLE + 1))
-                cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, JpegConstants.MAXJSAMPLE + 1);
+                cinfo.ERREXIT(J_MESSAGE_CODE.JERR_QUANT_MANY_COLORS, JpegConstants.MAXJSAMPLE + 1);
 
             /* Create the colormap and color index table. */
             create_colormap();
@@ -245,19 +245,19 @@ namespace LibJpeg.Classic.Internal
                             alloc_fs_workspace();
 
                         /* Initialize the propagated errors to zero. */
-                        int arraysize = (int)(m_cinfo.m_output_width + 2);
+                        int arraysize = m_cinfo.m_output_width + 2;
                         for (int i = 0; i < m_cinfo.m_out_color_components; i++)
                             Array.Clear(m_fserrors[i], 0, arraysize);
 
                         break;
                     }
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                     break;
             }
         }
 
-        public virtual void color_quantize(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        public virtual void color_quantize(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
             switch (m_quantizer)
             {
@@ -277,7 +277,7 @@ namespace LibJpeg.Classic.Internal
                     quantize_fs_dither(input_buf, in_row, output_buf, out_row, num_rows);
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
                     break;
             }
         }
@@ -296,31 +296,31 @@ namespace LibJpeg.Classic.Internal
         /// </summary>
         public virtual void new_color_map()
         {
-            m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_MODE_CHANGE);
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_MODE_CHANGE);
         }
 
         /// <summary>
         /// Map some rows of pixels to the output colormapped representation.
         /// General case, no dithering.
         /// </summary>
-        private void quantize(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        private void quantize(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
             int nc = m_cinfo.m_out_color_components;
 
             for (int row = 0; row < num_rows; row++)
             {
                 int inIndex = 0;
-                int inRow = (int)(in_row + row);
+                int inRow = in_row + row;
 
                 int outIndex = 0;
-                int outRow = (int)(out_row + row);
+                int outRow = out_row + row;
 
-                for (uint col = m_cinfo.m_output_width; col > 0; col--)
+                for (int col = m_cinfo.m_output_width; col > 0; col--)
                 {
                     int pixcode = 0;
                     for (int ci = 0; ci < nc; ci++)
                     {
-                        pixcode += m_colorindex[ci][m_colorindexOffset[ci] + (int)input_buf[inRow][inIndex]];
+                        pixcode += m_colorindex[ci][m_colorindexOffset[ci] + input_buf[inRow][inIndex]];
                         inIndex++;
                     }
 
@@ -334,27 +334,27 @@ namespace LibJpeg.Classic.Internal
         /// Map some rows of pixels to the output colormapped representation.
         /// Fast path for out_color_components==3, no dithering
         /// </summary>
-        private void quantize3(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        private void quantize3(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
-            uint width = m_cinfo.m_output_width;
+            int width = m_cinfo.m_output_width;
 
             for (int row = 0; row < num_rows; row++)
             {
                 int inIndex = 0;
-                int inRow = (int)(in_row + row);
+                int inRow = in_row + row;
 
                 int outIndex = 0;
-                int outRow = (int)(out_row + row);
+                int outRow = out_row + row;
 
-                for (uint col = width; col > 0; col--)
+                for (int col = width; col > 0; col--)
                 {
-                    int pixcode = m_colorindex[0][m_colorindexOffset[0] + (int)input_buf[inRow][inIndex]];
+                    int pixcode = m_colorindex[0][m_colorindexOffset[0] + input_buf[inRow][inIndex]];
                     inIndex++;
 
-                    pixcode += m_colorindex[1][m_colorindexOffset[1] + (int)input_buf[inRow][inIndex]];
+                    pixcode += m_colorindex[1][m_colorindexOffset[1] + input_buf[inRow][inIndex]];
                     inIndex++;
 
-                    pixcode += m_colorindex[2][m_colorindexOffset[2] + (int)input_buf[inRow][inIndex]];
+                    pixcode += m_colorindex[2][m_colorindexOffset[2] + input_buf[inRow][inIndex]];
                     inIndex++;
 
                     output_buf[outRow][outIndex] = (byte)pixcode;
@@ -367,25 +367,25 @@ namespace LibJpeg.Classic.Internal
         /// Map some rows of pixels to the output colormapped representation.
         /// General case, with ordered dithering.
         /// </summary>
-        private void quantize_ord_dither(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        private void quantize_ord_dither(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
             int nc = m_cinfo.m_out_color_components;
-            uint width = m_cinfo.m_output_width;
+            int width = m_cinfo.m_output_width;
 
             for (int row = 0; row < num_rows; row++)
             {
                 /* Initialize output values to 0 so can process components separately */
-                Array.Clear(output_buf[out_row + row], 0, (int)width);
+                Array.Clear(output_buf[out_row + row], 0, width);
 
                 int row_index = m_row_index;
                 for (int ci = 0; ci < nc; ci++)
                 {
                     int inputIndex = ci;
                     int outIndex = 0;
-                    int outRow = (int)(out_row + row);
+                    int outRow = out_row + row;
 
                     int col_index = 0;
-                    for (uint col = width; col > 0; col--)
+                    for (int col = width; col > 0; col--)
                     {
                         /* Form pixel value + dither, range-limit to 0..MAXJSAMPLE,
                          * select output value, accumulate into output code for this pixel.
@@ -394,7 +394,7 @@ namespace LibJpeg.Classic.Internal
                          * inputs.  The maximum dither is +- MAXJSAMPLE; this sets the
                          * required amount of padding.
                          */
-                        output_buf[outRow][outIndex] += m_colorindex[ci][m_colorindexOffset[ci] + (int)input_buf[in_row + row][inputIndex] + m_odither[ci][row_index][col_index]];
+                        output_buf[outRow][outIndex] += m_colorindex[ci][m_colorindexOffset[ci] + input_buf[in_row + row][inputIndex] + m_odither[ci][row_index][col_index]];
                         inputIndex += nc;
                         outIndex++;
                         col_index = (col_index + 1) & ODITHER_MASK;
@@ -411,29 +411,29 @@ namespace LibJpeg.Classic.Internal
         /// Map some rows of pixels to the output colormapped representation.
         /// Fast path for out_color_components==3, with ordered dithering
         /// </summary>
-        private void quantize3_ord_dither(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        private void quantize3_ord_dither(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
-            uint width = m_cinfo.m_output_width;
+            int width = m_cinfo.m_output_width;
 
             for (int row = 0; row < num_rows; row++)
             {
                 int row_index = m_row_index;
-                int inRow = (int)(in_row + row);
+                int inRow = in_row + row;
                 int inIndex = 0;
 
                 int outIndex = 0;
-                int outRow = (int)(out_row + row);
+                int outRow = out_row + row;
 
                 int col_index = 0;
-                for (uint col = width; col > 0; col--)
+                for (int col = width; col > 0; col--)
                 {
-                    int pixcode = m_colorindex[0][m_colorindexOffset[0] + (int)input_buf[inRow][inIndex] + m_odither[0][row_index][col_index]];
+                    int pixcode = m_colorindex[0][m_colorindexOffset[0] + input_buf[inRow][inIndex] + m_odither[0][row_index][col_index]];
                     inIndex++;
 
-                    pixcode += m_colorindex[1][m_colorindexOffset[1] + (int)input_buf[inRow][inIndex] + m_odither[1][row_index][col_index]];
+                    pixcode += m_colorindex[1][m_colorindexOffset[1] + input_buf[inRow][inIndex] + m_odither[1][row_index][col_index]];
                     inIndex++;
 
-                    pixcode += m_colorindex[2][m_colorindexOffset[2] + (int)input_buf[inRow][inIndex] + m_odither[2][row_index][col_index]];
+                    pixcode += m_colorindex[2][m_colorindexOffset[2] + input_buf[inRow][inIndex] + m_odither[2][row_index][col_index]];
                     inIndex++;
 
                     output_buf[outRow][outIndex] = (byte)pixcode;
@@ -451,10 +451,10 @@ namespace LibJpeg.Classic.Internal
         /// Map some rows of pixels to the output colormapped representation.
         /// General case, with Floyd-Steinberg dithering
         /// </summary>
-        private void quantize_fs_dither(byte[][] input_buf, uint in_row, byte[][] output_buf, uint out_row, int num_rows)
+        private void quantize_fs_dither(byte[][] input_buf, int in_row, byte[][] output_buf, int out_row, int num_rows)
         {
             int nc = m_cinfo.m_out_color_components;
-            uint width = m_cinfo.m_output_width;
+            int width = m_cinfo.m_output_width;
 
             byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
@@ -462,25 +462,25 @@ namespace LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 /* Initialize output values to 0 so can process components separately */
-                Array.Clear(output_buf[out_row + row], 0, (int)width);
+                Array.Clear(output_buf[out_row + row], 0, width);
 
                 for (int ci = 0; ci < nc; ci++)
                 {
-                    int inRow = (int)(in_row + row);
+                    int inRow = in_row + row;
                     int inIndex = ci;
 
                     int outIndex = 0;
-                    int outRow = (int)(out_row + row);
+                    int outRow = out_row + row;
 
                     int errorIndex = 0;
                     int dir;            /* 1 for left-to-right, -1 for right-to-left */
                     if (m_on_odd_row)
                     {
                         /* work right to left in this row */
-                        inIndex += (int)((width - 1) * nc); /* so point to rightmost pixel */
-                        outIndex += (int)(width - 1);
+                        inIndex += (width - 1) * nc; /* so point to rightmost pixel */
+                        outIndex += width - 1;
                         dir = -1;
-                        errorIndex = (int)(width + 1); /* => entry after last column */
+                        errorIndex = width + 1; /* => entry after last column */
                     }
                     else
                     {
@@ -496,7 +496,7 @@ namespace LibJpeg.Classic.Internal
                     int belowerr = 0;
                     int bpreverr = 0;
 
-                    for (uint col = width; col > 0; col--)
+                    for (int col = width; col > 0; col--)
                     {
                         /* cur holds the error propagated from the previous pixel on the
                          * current line.  Add the error propagated from the previous line
@@ -567,14 +567,14 @@ namespace LibJpeg.Classic.Internal
 
             /* Report selected color counts */
             if (m_cinfo.m_out_color_components == 3)
-                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_QUANT_3_NCOLORS, total_colors, m_Ncolors[0], m_Ncolors[1], m_Ncolors[2]);
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_QUANT_3_NCOLORS, total_colors, m_Ncolors[0], m_Ncolors[1], m_Ncolors[2]);
             else
-                m_cinfo.TRACEMS(1, (int)J_MESSAGE_CODE.JTRC_QUANT_NCOLORS, total_colors);
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_QUANT_NCOLORS, total_colors);
 
             /* Allocate and fill in the colormap. */
             /* The colors are ordered in the map in standard row-major order, */
             /* i.e. rightmost (highest-indexed) color changes most rapidly. */
-            byte[][] colormap = jpeg_common_struct.AllocJpegSamples((uint)total_colors, (uint)m_cinfo.m_out_color_components);
+            byte[][] colormap = jpeg_common_struct.AllocJpegSamples(total_colors, m_cinfo.m_out_color_components);
 
             /* blksize is number of adjacent repeated entries for a component */
             /* blkdist is distance between groups of identical entries for a component */
@@ -631,7 +631,7 @@ namespace LibJpeg.Classic.Internal
                 m_is_padded = false;
             }
 
-            m_colorindex = jpeg_common_struct.AllocJpegSamples((uint)(JpegConstants.MAXJSAMPLE + 1 + pad), (uint)m_cinfo.m_out_color_components);
+            m_colorindex = jpeg_common_struct.AllocJpegSamples(JpegConstants.MAXJSAMPLE + 1 + pad, m_cinfo.m_out_color_components);
             m_colorindexOffset = new int[m_cinfo.m_out_color_components];
 
             /* blksize is number of adjacent repeated entries for a component */
@@ -736,7 +736,7 @@ namespace LibJpeg.Classic.Internal
         private int largest_input_value(int j, int maxj)
         {
             /* Breakpoints are halfway between values returned by output_value */
-            return (int)(((int)(2 * j + 1) * JpegConstants.MAXJSAMPLE + maxj) / (2 * maxj));
+            return (int)(((2 * j + 1) * JpegConstants.MAXJSAMPLE + maxj) / (2 * maxj));
         }
 
         /// <summary>
@@ -750,7 +750,7 @@ namespace LibJpeg.Classic.Internal
              * (Forcing the upper and lower values to the limits ensures that
              * dithering can't produce a color outside the selected gamut.)
              */
-            return (int)(((int)j * JpegConstants.MAXJSAMPLE + maxj / 2) / maxj);
+            return (int)((j * JpegConstants.MAXJSAMPLE + maxj / 2) / maxj);
         }
 
         /// <summary>
@@ -774,14 +774,14 @@ namespace LibJpeg.Classic.Internal
                 for (int i = 1; i < nc; i++)
                     temp *= iroot;
             }
-            while (temp <= (long) max_colors); /* repeat till iroot exceeds root */
+            while (temp <= max_colors); /* repeat till iroot exceeds root */
 
             /* now iroot = floor(root) */
             iroot--;
 
             /* Must have at least 2 color values per component */
             if (iroot < 2)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, (int) temp);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_QUANT_FEW_COLORS, (int)temp);
 
             /* Initialize to iroot color values for each component */
             int total_colors = 1;
@@ -808,11 +808,11 @@ namespace LibJpeg.Classic.Internal
                     temp = total_colors / Ncolors[j];
                     temp *= Ncolors[j] + 1; /* done in long arith to avoid oflo */
 
-                    if (temp > (long) max_colors)
+                    if (temp > max_colors)
                         break;          /* won't fit, done with this pass */
                     
                     Ncolors[j]++;       /* OK, apply the increment */
-                    total_colors = (int) temp;
+                    total_colors = (int)temp;
                     changed = true;
                 }
             }
@@ -836,7 +836,7 @@ namespace LibJpeg.Classic.Internal
              * (f=0..N-1) should be (N-1-2*f)/(2*N) * MAXJSAMPLE/(ncolors-1).
              * On 16-bit-int machine, be careful to avoid overflow.
              */
-            int den = 2 * ODITHER_CELLS * ((int)(ncolors - 1));
+            int den = 2 * ODITHER_CELLS * (ncolors - 1);
             for (int j = 0; j < ODITHER_SIZE; j++)
             {
                 for (int k = 0; k < ODITHER_SIZE; k++)
@@ -846,7 +846,7 @@ namespace LibJpeg.Classic.Internal
                     /* Ensure round towards zero despite C's lack of consistency
                      * about rounding negative values in integer division...
                      */
-                    odither[j][k] = (int)(num < 0 ? -((-num) / den) : num / den);
+                    odither[j][k] = num < 0 ? -((-num) / den) : num / den;
                 }
             }
 

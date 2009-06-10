@@ -23,7 +23,7 @@ namespace LibJpeg.Classic.Internal
     class jpeg_color_deconverter
     {
         private const int SCALEBITS = 16;  /* speediest right-shift on some machines */
-        private const int ONE_HALF = ((int)1 << (SCALEBITS - 1));
+        private const int ONE_HALF = 1 << (SCALEBITS - 1);
 
         private enum ColorConverter
         {
@@ -57,25 +57,25 @@ namespace LibJpeg.Classic.Internal
             {
                 case J_COLOR_SPACE.JCS_GRAYSCALE:
                     if (cinfo.m_num_components != 1)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
 
                 case J_COLOR_SPACE.JCS_RGB:
                 case J_COLOR_SPACE.JCS_YCbCr:
                     if (cinfo.m_num_components != 3)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
 
                 case J_COLOR_SPACE.JCS_CMYK:
                 case J_COLOR_SPACE.JCS_YCCK:
                     if (cinfo.m_num_components != 4)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
 
                 default:
                     /* JCS_UNKNOWN can be anything */
                     if (cinfo.m_num_components < 1)
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
             }
 
@@ -96,7 +96,7 @@ namespace LibJpeg.Classic.Internal
                             cinfo.m_comp_info[ci].component_needed = false;
                     }
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 case J_COLOR_SPACE.JCS_RGB:
@@ -111,7 +111,7 @@ namespace LibJpeg.Classic.Internal
                     else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_RGB)
                         m_converter = ColorConverter.null_converter;
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 case J_COLOR_SPACE.JCS_CMYK:
@@ -124,7 +124,7 @@ namespace LibJpeg.Classic.Internal
                     else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_CMYK)
                         m_converter = ColorConverter.null_converter;
                     else
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 default:
@@ -137,7 +137,7 @@ namespace LibJpeg.Classic.Internal
                     else
                     {
                         /* unsupported non-null conversion */
-                        cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     }
                     break;
             }
@@ -158,7 +158,7 @@ namespace LibJpeg.Classic.Internal
         /// can easily adjust the passed output_buf value to accommodate any row
         /// offset required on that side.
         /// </summary>
-        public void color_convert(ComponentBuffer[] input_buf, int[] perComponentOffsets, uint input_row, byte[][] output_buf, uint output_row, int num_rows)
+        public void color_convert(ComponentBuffer[] input_buf, int[] perComponentOffsets, int input_row, byte[][] output_buf, int output_row, int num_rows)
         {
             m_perComponentOffsets = perComponentOffsets;
 
@@ -180,7 +180,7 @@ namespace LibJpeg.Classic.Internal
                     ycck_cmyk_convert(input_buf, input_row, output_buf, output_row, num_rows);
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
             }
         }
@@ -243,7 +243,7 @@ namespace LibJpeg.Classic.Internal
             }
         }
 
-        private void ycc_rgb_convert(ComponentBuffer[] input_buf, uint input_row, byte[][] output_buf, uint output_row, int num_rows)
+        private void ycc_rgb_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
         {
             int component0RowOffset = m_perComponentOffsets[0];
             int component1RowOffset = m_perComponentOffsets[1];
@@ -255,11 +255,11 @@ namespace LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
-                for (uint col = 0; col < m_cinfo.m_output_width; col++)
+                for (int col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    int y = input_buf[0][(int)(input_row + component0RowOffset)][col];
-                    int cb = input_buf[1][(int)(input_row + component1RowOffset)][col];
-                    int cr = input_buf[2][(int)(input_row + component2RowOffset)][col];
+                    int y = input_buf[0][input_row + component0RowOffset][col];
+                    int cb = input_buf[1][input_row + component1RowOffset][col];
+                    int cr = input_buf[2][input_row + component2RowOffset][col];
 
                     /* Range-limiting is essential due to noise introduced by DCT losses. */
                     output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = limit[limitOffset + y + m_Cr_r_tab[cr]];
@@ -280,7 +280,7 @@ namespace LibJpeg.Classic.Internal
         /// conversion as above, while passing K (black) unchanged.
         /// We assume build_ycc_rgb_table has been called.
         /// </summary>
-        private void ycck_cmyk_convert(ComponentBuffer[] input_buf, uint input_row, byte[][] output_buf, uint output_row, int num_rows)
+        private void ycck_cmyk_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
         {
             int component0RowOffset = m_perComponentOffsets[0];
             int component1RowOffset = m_perComponentOffsets[1];
@@ -290,15 +290,15 @@ namespace LibJpeg.Classic.Internal
             byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
-            uint num_cols = m_cinfo.m_output_width;
+            int num_cols = m_cinfo.m_output_width;
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
-                for (uint col = 0; col < num_cols; col++)
+                for (int col = 0; col < num_cols; col++)
                 {
-                    int y = input_buf[0][(int)(input_row + component0RowOffset)][col];
-                    int cb = input_buf[1][(int)(input_row + component1RowOffset)][col];
-                    int cr = input_buf[2][(int)(input_row + component2RowOffset)][col];
+                    int y = input_buf[0][input_row + component0RowOffset][col];
+                    int cb = input_buf[1][input_row + component1RowOffset][col];
+                    int cr = input_buf[2][input_row + component2RowOffset][col];
 
                     /* Range-limiting is essential due to noise introduced by DCT losses. */
                     output_buf[output_row + row][columnOffset] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cr_r_tab[cr])]; /* red */
@@ -307,7 +307,7 @@ namespace LibJpeg.Classic.Internal
                     
                     /* K passes through unchanged */
                     /* don't need GETJSAMPLE here */
-                    output_buf[output_row + row][columnOffset + 3] = input_buf[3][(int)(input_row + component3RowOffset)][col];
+                    output_buf[output_row + row][columnOffset + 3] = input_buf[3][input_row + component3RowOffset][col];
                     columnOffset += 4;
                 }
 
@@ -320,22 +320,22 @@ namespace LibJpeg.Classic.Internal
         /// This is provided to support applications that don't want to cope
         /// with grayscale as a separate case.
         /// </summary>
-        private void gray_rgb_convert(ComponentBuffer[] input_buf, uint input_row, byte[][] output_buf, uint output_row, int num_rows)
+        private void gray_rgb_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
         {
             int component0RowOffset = m_perComponentOffsets[0];
             int component1RowOffset = m_perComponentOffsets[1];
             int component2RowOffset = m_perComponentOffsets[2];
 
-            uint num_cols = m_cinfo.m_output_width;
+            int num_cols = m_cinfo.m_output_width;
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
-                for (uint col = 0; col < num_cols; col++)
+                for (int col = 0; col < num_cols; col++)
                 {
                     /* We can dispense with GETJSAMPLE() here */
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = input_buf[0][(int)(input_row + component0RowOffset)][col];
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = input_buf[0][(int)(input_row + component1RowOffset)][col];
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = input_buf[0][(int)(input_row + component2RowOffset)][col];
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = input_buf[0][input_row + component0RowOffset][col];
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = input_buf[0][input_row + component1RowOffset][col];
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = input_buf[0][input_row + component2RowOffset][col];
                     columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
 
@@ -348,16 +348,16 @@ namespace LibJpeg.Classic.Internal
         /// This also works for YCbCr -> grayscale conversion, in which
         /// we just copy the Y (luminance) component and ignore chrominance.
         /// </summary>
-        private void grayscale_convert(ComponentBuffer[] input_buf, uint input_row, byte[][] output_buf, uint output_row, int num_rows)
+        private void grayscale_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
         {
-            JpegUtils.jcopy_sample_rows(input_buf[0], (int) input_row + m_perComponentOffsets[0], output_buf, (int)output_row, num_rows, m_cinfo.m_output_width);
+            JpegUtils.jcopy_sample_rows(input_buf[0], input_row + m_perComponentOffsets[0], output_buf, output_row, num_rows, m_cinfo.m_output_width);
         }
 
         /// <summary>
         /// Color conversion for no colorspace change: just copy the data,
         /// converting from separate-planes to interleaved representation.
         /// </summary>
-        private void null_convert(ComponentBuffer[] input_buf, uint input_row, byte[][] output_buf, uint output_row, int num_rows)
+        private void null_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
         {
             for (int row = 0; row < num_rows; row++)
             {
@@ -367,10 +367,10 @@ namespace LibJpeg.Classic.Internal
                     int componentOffset = 0;
                     int perComponentOffset = m_perComponentOffsets[ci];
 
-                    for (uint count = m_cinfo.m_output_width; count > 0; count--)
+                    for (int count = m_cinfo.m_output_width; count > 0; count--)
                     {
                         /* needn't bother with GETJSAMPLE() here */
-                        output_buf[output_row + row][ci + componentOffset] = input_buf[ci][(int)(input_row + perComponentOffset)][columnIndex];
+                        output_buf[output_row + row][ci + componentOffset] = input_buf[ci][input_row + perComponentOffset][columnIndex];
                         componentOffset += m_cinfo.m_num_components;
                         columnIndex++;
                     }
@@ -382,7 +382,7 @@ namespace LibJpeg.Classic.Internal
 
         private static int FIX(double x)
         {
-            return ((int)((x) * (1L << SCALEBITS) + 0.5));
+            return (int)(x * (1L << SCALEBITS) + 0.5);
         }
     }
 }

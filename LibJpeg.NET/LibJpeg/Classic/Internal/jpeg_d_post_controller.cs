@@ -49,10 +49,10 @@ namespace LibJpeg.Classic.Internal
         */
         private jvirt_sarray_control m_whole_image;  /* virtual array, or null if one-pass */
         private byte[][] m_buffer;       /* strip buffer, or current strip of virtual */
-        private uint m_strip_height;    /* buffer size in rows */
+        private int m_strip_height;    /* buffer size in rows */
         /* for two-pass mode only: */
-        private uint m_starting_row;    /* row # of first row in current strip */
-        private uint m_next_row;        /* index of next row to fill/empty in strip */
+        private int m_starting_row;    /* row # of first row in current strip */
+        private int m_next_row;        /* index of next row to fill/empty in strip */
 
         /// <summary>
         /// Initialize postprocessing controller.
@@ -71,20 +71,20 @@ namespace LibJpeg.Classic.Internal
                 * an efficient number of rows for upsampling to return.
                 * (In the presence of output rescaling, we might want to be smarter?)
                 */
-                m_strip_height = (uint) cinfo.m_max_v_samp_factor;
+                m_strip_height = cinfo.m_max_v_samp_factor;
 
                 if (need_full_buffer)
                 {
                     /* Two-pass color quantization: need full-image storage. */
                     /* We round up the number of rows to a multiple of the strip height. */
                     m_whole_image = new jvirt_sarray_control(cinfo, false, 
-                        (uint)(cinfo.m_output_width * cinfo.m_out_color_components),
-                        (uint)JpegUtils.jround_up(cinfo.m_output_height, m_strip_height));
+                        cinfo.m_output_width * cinfo.m_out_color_components,
+                        JpegUtils.jround_up(cinfo.m_output_height, m_strip_height));
                 }
                 else
                 {
                     /* One-pass color quantization: just make a strip buffer. */
-                    m_buffer = jpeg_common_struct.AllocJpegSamples((uint)(cinfo.m_output_width * cinfo.m_out_color_components), m_strip_height);
+                    m_buffer = jpeg_common_struct.AllocJpegSamples(cinfo.m_output_width * cinfo.m_out_color_components, m_strip_height);
                 }
             }
         }
@@ -106,7 +106,7 @@ namespace LibJpeg.Classic.Internal
                          * allocate a strip buffer.  Use the virtual-array buffer as workspace.
                          */
                         if (m_buffer == null)
-                            m_buffer = m_whole_image.access_virt_sarray((uint)0, m_strip_height);
+                            m_buffer = m_whole_image.access_virt_sarray(0, m_strip_height);
                     }
                     else
                     {
@@ -119,25 +119,25 @@ namespace LibJpeg.Classic.Internal
                 case J_BUF_MODE.JBUF_SAVE_AND_PASS:
                     /* First pass of 2-pass quantization */
                     if (m_whole_image == null)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
 
                     m_processor = ProcessorType.PrePass;
                     break;
                 case J_BUF_MODE.JBUF_CRANK_DEST:
                     /* Second pass of 2-pass quantization */
                     if (m_whole_image == null)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
 
                     m_processor = ProcessorType.SecondPass;
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
                     break;
             }
             m_starting_row = m_next_row = 0;
         }
 
-        public void post_process_data(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, uint in_row_groups_avail, byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        public void post_process_data(ComponentBuffer[] input_buf, ref int in_row_group_ctr, int in_row_groups_avail, byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
             switch (m_processor)
             {
@@ -154,7 +154,7 @@ namespace LibJpeg.Classic.Internal
                     post_process_2pass(output_buf, ref out_row_ctr, out_rows_avail);
                     break;
                 default:
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NOTIMPL);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
                     break;
             }
         }
@@ -163,28 +163,28 @@ namespace LibJpeg.Classic.Internal
         /// Process some data in the one-pass (strip buffer) case.
         /// This is used for color precision reduction as well as one-pass quantization.
         /// </summary>
-        private void post_process_1pass(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, uint in_row_groups_avail, byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        private void post_process_1pass(ComponentBuffer[] input_buf, ref int in_row_group_ctr, int in_row_groups_avail, byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
             /* Fill the buffer, but not more than what we can dump out in one go. */
             /* Note we rely on the upsampler to detect bottom of image. */
-            uint max_rows = out_rows_avail - out_row_ctr;
+            int max_rows = out_rows_avail - out_row_ctr;
             if (max_rows > m_strip_height)
                 max_rows = m_strip_height;
 
-            uint num_rows = 0;
+            int num_rows = 0;
             m_cinfo.m_upsample.upsample(input_buf, ref in_row_group_ctr, in_row_groups_avail, m_buffer, ref num_rows, max_rows);
 
             /* Quantize and emit data. */
-            m_cinfo.m_cquantize.color_quantize(m_buffer, 0, output_buf, out_row_ctr, (int)num_rows);
+            m_cinfo.m_cquantize.color_quantize(m_buffer, 0, output_buf, out_row_ctr, num_rows);
             out_row_ctr += num_rows;
         }
 
         /// <summary>
         /// Process some data in the first pass of 2-pass quantization.
         /// </summary>
-        private void post_process_prepass(ComponentBuffer[] input_buf, ref uint in_row_group_ctr, uint in_row_groups_avail, ref uint out_row_ctr)
+        private void post_process_prepass(ComponentBuffer[] input_buf, ref int in_row_group_ctr, int in_row_groups_avail, ref int out_row_ctr)
         {
-            uint old_next_row, num_rows;
+            int old_next_row, num_rows;
 
             /* Reposition virtual buffer if at start of strip. */
             if (m_next_row == 0)
@@ -199,7 +199,7 @@ namespace LibJpeg.Classic.Internal
             if (m_next_row > old_next_row)
             {
                 num_rows = m_next_row - old_next_row;
-                m_cinfo.m_cquantize.color_quantize(m_buffer, old_next_row, null, 0, (int)num_rows);
+                m_cinfo.m_cquantize.color_quantize(m_buffer, old_next_row, null, 0, num_rows);
                 out_row_ctr += num_rows;
             }
 
@@ -214,9 +214,9 @@ namespace LibJpeg.Classic.Internal
         /// <summary>
         /// Process some data in the second pass of 2-pass quantization.
         /// </summary>
-        private void post_process_2pass(byte[][] output_buf, ref uint out_row_ctr, uint out_rows_avail)
+        private void post_process_2pass(byte[][] output_buf, ref int out_row_ctr, int out_rows_avail)
         {
-            uint num_rows, max_rows;
+            int num_rows, max_rows;
 
             /* Reposition virtual buffer if at start of strip. */
             if (m_next_row == 0)
@@ -234,7 +234,7 @@ namespace LibJpeg.Classic.Internal
                 num_rows = max_rows;
 
             /* Quantize and emit data. */
-            m_cinfo.m_cquantize.color_quantize(m_buffer, m_next_row, output_buf, out_row_ctr, (int)num_rows);
+            m_cinfo.m_cquantize.color_quantize(m_buffer, m_next_row, output_buf, out_row_ctr, num_rows);
             out_row_ctr += num_rows;
 
             /* Advance if we filled the strip. */

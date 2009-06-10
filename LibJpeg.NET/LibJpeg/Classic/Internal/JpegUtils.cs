@@ -64,7 +64,7 @@ namespace LibJpeg.Classic.Internal
         */
         public static int DESCALE(int x, int n)
         {
-            return RIGHT_SHIFT((x) + (((int)1) << ((n) - 1)), n);
+            return RIGHT_SHIFT(x + (1 << (n - 1)), n);
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -74,18 +74,18 @@ namespace LibJpeg.Classic.Internal
         /// Compute a/b rounded up to next integer, ie, ceil(a/b)
         /// Assumes a >= 0, b > 0
         /// </summary>
-        public static long jdiv_round_up(long a, long b)
+        public static int jdiv_round_up(int a, int b)
         {
-            return (a + b - 1L) / b;
+            return (a + b - 1) / b;
         }
 
         /// <summary>
         /// Compute a rounded up to next multiple of b, ie, ceil(a/b)*b
         /// Assumes a >= 0, b > 0
         /// </summary>
-        public static long jround_up(long a, long b)
+        public static int jround_up(int a, int b)
         {
-            a += b - 1L;
+            a += b - 1;
             return a - (a % b);
         }
 
@@ -95,19 +95,19 @@ namespace LibJpeg.Classic.Internal
         /// to output_array[dest_row++]; these areas may overlap for duplication.
         /// The source and destination arrays must be at least as wide as num_cols.
         /// </summary>
-        public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, uint num_cols)
+        public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
                 Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
 
-        public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, ComponentBuffer output_array, int dest_row, int num_rows, uint num_cols)
+        public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, ComponentBuffer output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
                 Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
 
-        public static void jcopy_sample_rows(byte[][] input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, uint num_cols)
+        public static void jcopy_sample_rows(byte[][] input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
                 Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);

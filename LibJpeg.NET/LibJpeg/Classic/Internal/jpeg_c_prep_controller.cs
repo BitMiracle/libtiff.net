@@ -51,7 +51,7 @@ namespace LibJpeg.Classic.Internal
         */
         private byte[][][] m_color_buf = new byte[JpegConstants.MAX_COMPONENTS][][];
 
-        private uint m_rows_to_go;  /* counts rows remaining in source image */
+        private int m_rows_to_go;  /* counts rows remaining in source image */
         private int m_next_buf_row;       /* index of next row to store in color_buf */
 
         private int m_this_row_group;     /* starting row index of group to process */
@@ -76,8 +76,8 @@ namespace LibJpeg.Classic.Internal
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_color_buf[ci] = jpeg_compress_struct.AllocJpegSamples(
-                        (uint)(((long)cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.m_comp_info[ci].h_samp_factor),
-                        (uint)cinfo.m_max_v_samp_factor);
+                        (cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.m_comp_info[ci].h_samp_factor,
+                        cinfo.m_max_v_samp_factor);
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace LibJpeg.Classic.Internal
         public void start_pass(J_BUF_MODE pass_mode)
         {
             if (pass_mode != J_BUF_MODE.JBUF_PASS_THRU)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);
 
             /* Initialize total-height counter for detecting bottom of image */
             m_rows_to_go = m_cinfo.m_image_height;
@@ -105,7 +105,7 @@ namespace LibJpeg.Classic.Internal
             m_next_buf_stop = 2 * m_cinfo.m_max_v_samp_factor;
         }
 
-        public void pre_process_data(byte[][] input_buf, ref uint in_row_ctr, uint in_rows_avail, byte[][][] output_buf, ref uint out_row_group_ctr, uint out_row_groups_avail)
+        public void pre_process_data(byte[][] input_buf, ref int in_row_ctr, int in_rows_avail, byte[][][] output_buf, ref int out_row_group_ctr, int out_row_groups_avail)
         {
             if (m_cinfo.m_downsample.NeedContextRows())
                 pre_process_context(input_buf, ref in_row_ctr, in_rows_avail, output_buf, ref out_row_group_ctr, out_row_groups_avail);
@@ -121,7 +121,7 @@ namespace LibJpeg.Classic.Internal
             int rgroup_height = m_cinfo.m_max_v_samp_factor;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                uint samplesPerRow = (uint)(((long)m_cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.m_comp_info[ci].h_samp_factor);
+                int samplesPerRow = (m_cinfo.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.m_comp_info[ci].h_samp_factor;
 
                 byte[][] fake_buffer = new byte[5 * rgroup_height][];
                 for (int i = 0; i < 5 * rgroup_height; i++)
@@ -131,7 +131,7 @@ namespace LibJpeg.Classic.Internal
                  * We make the buffer wide enough to allow the downsampler to edge-expand
                  * horizontally within the buffer, if it so chooses.
                  */
-                byte[][] true_buffer = jpeg_common_struct.AllocJpegSamples(samplesPerRow, (uint)(3 * rgroup_height));
+                byte[][] true_buffer = jpeg_common_struct.AllocJpegSamples(samplesPerRow, 3 * rgroup_height);
 
                 /* Copy true buffer row pointers into the middle of the fake row array */
                 for (int  i = 0; i < 3 * rgroup_height; i++)
@@ -156,18 +156,18 @@ namespace LibJpeg.Classic.Internal
         /// Downsampling will produce this much data from each max_v_samp_factor
         /// input rows.
         /// </summary>
-        private void pre_process_WithoutContext(byte[][] input_buf, ref uint in_row_ctr, uint in_rows_avail, byte[][][] output_buf, ref uint out_row_group_ctr, uint out_row_groups_avail)
+        private void pre_process_WithoutContext(byte[][] input_buf, ref int in_row_ctr, int in_rows_avail, byte[][][] output_buf, ref int out_row_group_ctr, int out_row_groups_avail)
         {
             while (in_row_ctr < in_rows_avail && out_row_group_ctr < out_row_groups_avail)
             {
                 /* Do color conversion to fill the conversion buffer. */
-                uint inrows = in_rows_avail - in_row_ctr;
+                int inrows = in_rows_avail - in_row_ctr;
                 int numrows = m_cinfo.m_max_v_samp_factor - m_next_buf_row;
-                numrows = (int)Math.Min((uint)numrows, inrows);
-                m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, (uint)m_next_buf_row, numrows);
-                in_row_ctr += (uint)numrows;
+                numrows = Math.Min(numrows, inrows);
+                m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, m_next_buf_row, numrows);
+                in_row_ctr += numrows;
                 m_next_buf_row += numrows;
-                m_rows_to_go -= (uint)numrows;
+                m_rows_to_go -= numrows;
 
                 /* If at bottom of image, pad to fill the conversion buffer. */
                 if (m_rows_to_go == 0 && m_next_buf_row < m_cinfo.m_max_v_samp_factor)
@@ -181,7 +181,7 @@ namespace LibJpeg.Classic.Internal
                 /* If we've filled the conversion buffer, empty it. */
                 if (m_next_buf_row == m_cinfo.m_max_v_samp_factor)
                 {
-                    m_cinfo.m_downsample.downsample(m_color_buf, (uint)0, output_buf, out_row_group_ctr);
+                    m_cinfo.m_downsample.downsample(m_color_buf, 0, output_buf, out_row_group_ctr);
                     m_next_buf_row = 0;
                     out_row_group_ctr++;
                 }
@@ -195,8 +195,8 @@ namespace LibJpeg.Classic.Internal
                     {
                         jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
                         expand_bottom_edge(output_buf[ci], componentInfo.width_in_blocks * JpegConstants.DCTSIZE,
-                            (int)(out_row_group_ctr * componentInfo.v_samp_factor),
-                            (int)(out_row_groups_avail * componentInfo.v_samp_factor));
+                            out_row_group_ctr * componentInfo.v_samp_factor,
+                            out_row_groups_avail * componentInfo.v_samp_factor);
                     }
 
                     out_row_group_ctr = out_row_groups_avail;
@@ -208,17 +208,17 @@ namespace LibJpeg.Classic.Internal
         /// <summary>
         /// Process some data in the context case.
         /// </summary>
-        private void pre_process_context(byte[][] input_buf, ref uint in_row_ctr, uint in_rows_avail, byte[][][] output_buf, ref uint out_row_group_ctr, uint out_row_groups_avail)
+        private void pre_process_context(byte[][] input_buf, ref int in_row_ctr, int in_rows_avail, byte[][][] output_buf, ref int out_row_group_ctr, int out_row_groups_avail)
         {
             while (out_row_group_ctr < out_row_groups_avail)
             {
                 if (in_row_ctr < in_rows_avail)
                 {
                     /* Do color conversion to fill the conversion buffer. */
-                    uint inrows = in_rows_avail - in_row_ctr;
+                    int inrows = in_rows_avail - in_row_ctr;
                     int numrows = m_next_buf_stop - m_next_buf_row;
-                    numrows = (int)Math.Min((uint) numrows, inrows);
-                    m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, (uint) m_next_buf_row, numrows);
+                    numrows = Math.Min(numrows, inrows);
+                    m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, m_next_buf_row, numrows);
 
                     /* Pad at top of image, if first time through */
                     if (m_rows_to_go == m_cinfo.m_image_height)
@@ -230,9 +230,9 @@ namespace LibJpeg.Classic.Internal
                         }
                     }
                     
-                    in_row_ctr += (uint)numrows;
+                    in_row_ctr += numrows;
                     m_next_buf_row += numrows;
-                    m_rows_to_go -= (uint)numrows;
+                    m_rows_to_go -= numrows;
                 }
                 else
                 {
@@ -253,7 +253,7 @@ namespace LibJpeg.Classic.Internal
                 /* If we've gotten enough data, downsample a row group. */
                 if (m_next_buf_row == m_next_buf_stop)
                 {
-                    m_cinfo.m_downsample.downsample(m_color_buf, (uint) m_this_row_group, output_buf, out_row_group_ctr);
+                    m_cinfo.m_downsample.downsample(m_color_buf, m_this_row_group, output_buf, out_row_group_ctr);
                     out_row_group_ctr++;
                 
                     /* Advance pointers with wraparound as necessary. */
@@ -275,7 +275,7 @@ namespace LibJpeg.Classic.Internal
         /// Expand an image vertically from height input_rows to height output_rows,
         /// by duplicating the bottom row.
         /// </summary>
-        private static void expand_bottom_edge(byte[][] image_data, uint num_cols, int input_rows, int output_rows)
+        private static void expand_bottom_edge(byte[][] image_data, int num_cols, int input_rows, int output_rows)
         {
             for (int row = input_rows; row < output_rows; row++)
                 JpegUtils.jcopy_sample_rows(image_data, input_rows - 1, image_data, row, 1, num_cols);

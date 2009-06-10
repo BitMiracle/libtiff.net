@@ -21,7 +21,7 @@ namespace LibJpeg.Classic.Internal
         /* Derived data constructed for each Huffman table */
         protected class c_derived_tbl
         {
-            public uint[] ehufco = new uint[256];   /* code for each symbol */
+            public int[] ehufco = new int[256];   /* code for each symbol */
             public char[] ehufsi = new char[256];       /* length of code for each symbol */
             /* If no code has been allocated for a symbol S, ehufsi[S] contains 0 */
         }
@@ -53,11 +53,11 @@ namespace LibJpeg.Classic.Internal
 
             /* Find the input Huffman table */
             if (tblno < 0 || tblno >= JpegConstants.NUM_HUFF_TBLS)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
 
             JHUFF_TBL htbl = isDC ? m_cinfo.m_dc_huff_tbl_ptrs[tblno] : m_cinfo.m_ac_huff_tbl_ptrs[tblno];
             if (htbl == null)
-                m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
 
             /* Allocate a workspace if we haven't already done so. */
             if (dtbl == null)
@@ -69,9 +69,9 @@ namespace LibJpeg.Classic.Internal
             char[] huffsize = new char[257];
             for (int l = 1; l <= 16; l++)
             {
-                int i = (int) htbl.bits[l];
+                int i = htbl.bits[l];
                 if (i < 0 || p + i> 256)    /* protect against table overrun */
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
                 while ((i--) != 0)
                     huffsize[p++] = (char) l;
@@ -82,13 +82,13 @@ namespace LibJpeg.Classic.Internal
             /* Figure C.2: generate the codes themselves */
             /* We also validate that the counts represent a legal Huffman code tree. */
 
-            uint code = 0;
+            int code = 0;
             int si = huffsize[0];
             p = 0;
-            uint[] huffcode = new uint[257];
+            int[] huffcode = new int[257];
             while (huffsize[p] != 0)
             {
-                while (((int) huffsize[p]) == si)
+                while (((int)huffsize[p]) == si)
                 {
                     huffcode[p++] = code;
                     code++;
@@ -96,8 +96,8 @@ namespace LibJpeg.Classic.Internal
                 /* code is now 1 more than the last code used for codelength si; but
                 * it must still fit in si bits, since no code is allowed to be all ones.
                 */
-                if (((int) code) >= (((int) 1) << si))
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                if (code >= (1 << si))
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
                 code <<= 1;
                 si++;
             }
@@ -122,7 +122,7 @@ namespace LibJpeg.Classic.Internal
             {
                 int i = htbl.huffval[p];
                 if (i < 0 || i> maxsymbol || dtbl.ehufsi[i] != 0)
-                    m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
                 dtbl.ehufco[i] = huffcode[p];
                 dtbl.ehufsi[i] = huffsize[p];
@@ -239,7 +239,7 @@ namespace LibJpeg.Classic.Internal
                     /* The JPEG standard seems to think that this can't happen, */
                     /* but I'm paranoid... */
                     if (codesize[i] > MAX_CLEN)
-                        m_cinfo.ERREXIT((int)J_MESSAGE_CODE.JERR_HUFF_CLEN_OVERFLOW);
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_HUFF_CLEN_OVERFLOW);
 
                     bits[codesize[i]]++;
                 }
