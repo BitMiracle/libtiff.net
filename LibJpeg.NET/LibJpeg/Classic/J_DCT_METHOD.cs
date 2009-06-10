@@ -16,7 +16,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// DCT/IDCT algorithm options.
     /// </summary>
-    public enum J_DCT_METHOD
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum J_DCT_METHOD
     {
         JDCT_ISLOW,     /* slow but accurate integer algorithm */
         JDCT_IFAST,     /* faster, less accurate integer method */

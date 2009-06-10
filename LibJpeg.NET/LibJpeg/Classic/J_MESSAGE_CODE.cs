@@ -17,7 +17,13 @@ using System.Text;
 
 namespace LibJpeg.Classic
 {
-    public enum J_MESSAGE_CODE
+    /// <summary>
+    /// Message codes used in code to signal errors, warning and trace messages.
+    /// </summary>
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum J_MESSAGE_CODE
     {
         // Must be first entry!
         JMSG_NOMESSAGE,

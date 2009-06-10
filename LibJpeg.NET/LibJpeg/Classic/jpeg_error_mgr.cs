@@ -23,7 +23,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// Error handler object
     /// </summary>
-    public class jpeg_error_mgr
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class jpeg_error_mgr
     {
         // The message ID code and any parameters are saved in fields below. 
         internal int m_msg_code;

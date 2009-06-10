@@ -10,7 +10,10 @@ namespace LibJpeg
     /// <summary>
     /// Master record for a decompression instance
     /// </summary>
-    public class Decompressor
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class Decompressor
     {
         private jpeg_decompress_struct m_classicDecompressor = new jpeg_decompress_struct(new jpeg_error_mgr());
 

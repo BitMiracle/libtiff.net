@@ -7,7 +7,10 @@ namespace LibJpeg
     /// <summary>
     /// Known color spaces.
     /// </summary>
-    public enum Colorspace
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum Colorspace
     {
         Unknown,    /* error/unspecified */
         Grayscale,  /* monochrome */
@@ -20,7 +23,10 @@ namespace LibJpeg
     /// <summary>
     /// DCT/IDCT algorithm options.
     /// </summary>
-    public enum DCTMethod
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum DCTMethod
     {
         IntegerSlow,     /* slow but accurate integer algorithm */
         IntegerFast,     /* faster, less accurate integer method */
@@ -30,7 +36,10 @@ namespace LibJpeg
     /// <summary>
     /// Dithering options for decompression.
     /// </summary>
-    public enum DitherMode
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum DitherMode
     {
         None,               /* no dithering */
         Ordered,            /* simple ordered dither */
@@ -40,7 +49,10 @@ namespace LibJpeg
     /// <summary>
     /// Describes a result of read operation
     /// </summary>
-    public enum Read
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum Read
     {
         Suspended = 0, /* Suspended due to lack of input data */
         HeaderOK = 1, /* Found valid image datastream */

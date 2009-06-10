@@ -16,7 +16,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// Known color spaces.
     /// </summary>
-    public enum J_COLOR_SPACE
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum J_COLOR_SPACE
     {
         JCS_UNKNOWN,    /* error/unspecified */
         JCS_GRAYSCALE,  /* monochrome */

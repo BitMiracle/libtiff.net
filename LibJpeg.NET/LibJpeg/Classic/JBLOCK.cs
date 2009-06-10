@@ -16,7 +16,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// one block of coefficients
     /// </summary>
-    public class JBLOCK
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class JBLOCK
     {
         internal short[] data = new short[JpegConstants.DCTSIZE2];
 

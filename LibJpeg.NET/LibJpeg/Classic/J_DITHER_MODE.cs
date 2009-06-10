@@ -16,7 +16,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// Dithering options for decompression.
     /// </summary>
-    public enum J_DITHER_MODE
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum J_DITHER_MODE
     {
         JDITHER_NONE,       /* no dithering */
         JDITHER_ORDERED,    /* simple ordered dither */

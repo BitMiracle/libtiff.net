@@ -19,7 +19,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// Master record for a compression instance
     /// </summary>
-    public class jpeg_compress_struct : jpeg_common_struct
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class jpeg_compress_struct : jpeg_common_struct
     {
         /* These are the sample quantization tables given in JPEG spec section K.1.
          * The spec says that the values given produce "good" quality, and

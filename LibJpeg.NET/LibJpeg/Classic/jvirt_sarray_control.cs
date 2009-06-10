@@ -33,7 +33,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// The control blocks for virtual arrays.
     /// </summary>
-    public class jvirt_sarray_control
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class jvirt_sarray_control
     {
         private jpeg_common_struct m_cinfo;
         private byte[][] m_mem_buffer;   /* => the in-memory buffer */

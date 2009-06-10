@@ -19,7 +19,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// Master record for a decompression instance
     /// </summary>
-    public class jpeg_decompress_struct : jpeg_common_struct
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class jpeg_decompress_struct : jpeg_common_struct
     {
         /* Source of compressed data */
         internal jpeg_source_mgr m_src;

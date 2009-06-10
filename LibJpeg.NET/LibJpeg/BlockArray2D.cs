@@ -30,7 +30,10 @@ namespace LibJpeg
     //    }
     //}
 
-    public class BlockArray2D
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class BlockArray2D
     {
         private Classic.jvirt_barray_control m_array;
 

@@ -16,7 +16,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// JPEG marker codes
     /// </summary>
-    public enum JPEG_MARKER
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum JPEG_MARKER
     {
         M_SOF0 = 0xc0,
         M_SOF1 = 0xc1,

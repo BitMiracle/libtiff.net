@@ -25,7 +25,10 @@ namespace LibJpeg.Classic
     ///  to receive an instance of this structure. There are no actual instances of 
     ///  jpeg_common_struct, only of jpeg_compress_struct and jpeg_decompress_struct.
     /// </summary>
-    public class jpeg_common_struct
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class jpeg_common_struct
     {
         internal enum JpegState
         {

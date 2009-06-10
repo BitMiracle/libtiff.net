@@ -13,7 +13,13 @@ using System.Text;
 
 namespace LibJpeg.Classic
 {
-    public static class JpegConstants
+    /// <summary>
+    /// Constants used in code
+    /// </summary>
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    static class JpegConstants
     {
         //////////////////////////////////////////////////////////////////////////
         // All of these are specified by the JPEG standard, so don't change them

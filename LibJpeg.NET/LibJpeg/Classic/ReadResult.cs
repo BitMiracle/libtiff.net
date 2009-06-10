@@ -11,7 +11,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// Describes a result of read operation
     /// </summary>
-    public enum ReadResult
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum ReadResult
     {
         JPEG_SUSPENDED = 0, /* Suspended due to lack of input data */
         JPEG_HEADER_OK = 1, /* Found valid image datastream */

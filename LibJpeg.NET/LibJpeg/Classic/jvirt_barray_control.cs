@@ -18,7 +18,13 @@ using System.Text;
 
 namespace LibJpeg.Classic
 {
-    public class jvirt_barray_control
+    /// <summary>
+    /// JPEG system-independent memory management routines for binary arrays. 
+    /// </summary>
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class jvirt_barray_control
     {
         private jpeg_common_struct m_cinfo;
         private JBLOCK[][] m_mem_buffer;    /* => the in-memory buffer */

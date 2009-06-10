@@ -14,7 +14,10 @@ using System.Text;
 namespace LibJpeg.Classic
 {
     // Progress monitor object
-    public abstract class jpeg_progress_mgr
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    abstract class jpeg_progress_mgr
     {
         internal int m_pass_counter;
         internal int m_pass_limit;

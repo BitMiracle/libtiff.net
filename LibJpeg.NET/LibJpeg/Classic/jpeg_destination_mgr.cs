@@ -16,7 +16,10 @@ namespace LibJpeg.Classic
     /// <summary>
     /// Data destination object for compression
     /// </summary>
-    public abstract class jpeg_destination_mgr
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    abstract class jpeg_destination_mgr
     {
         private byte[] m_next_output_byte;   /* => next byte to write in buffer */
         private int m_position;
