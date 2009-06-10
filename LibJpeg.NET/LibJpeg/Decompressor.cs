@@ -15,6 +15,14 @@ namespace LibJpeg
         private jpeg_decompress_struct m_classicDecompressor = new jpeg_decompress_struct(new jpeg_error_mgr());
 
 
+        public jpeg_decompress_struct ClassicDecompressor
+        {
+            get
+            {
+                return m_classicDecompressor;
+            }
+        }
+
         //public LibJpeg.Classic.jpeg_source_mgr Src
         //{
         //    get { return m_src; }
@@ -477,9 +485,12 @@ namespace LibJpeg
         /// The caller must have already opened the stream, and is responsible
         /// for closing it after finishing decompression.
         /// </summary>
-        public void InputStream(FileStream infile)
+        public FileStream InputStream
         {
-            m_classicDecompressor.jpeg_stdio_src(infile);
+            set
+            {
+                m_classicDecompressor.jpeg_stdio_src(value);
+            }
         }
 
         /// <summary>
@@ -800,18 +811,19 @@ namespace LibJpeg
         /// Delegate for application-supplied marker processing methods.
         /// Need not pass marker code since it is stored in cinfo.unread_marker.
         /// </summary>
-        //public delegate bool jpeg_marker_parser_method(jpeg_decompress_struct cinfo);
+        public delegate bool MarkerParser(Decompressor decompressor);
 
-        ///* Install a special processing method for COM or APPn markers. */
-        //public void jpeg_set_marker_processor(int marker_code, jpeg_marker_parser_method routine)
-        //{
-        //    m_marker.jpeg_set_marker_processor(marker_code, routine);
-        //}
+        /* Install a special processing method for COM or APPn markers. */
+        public void SetMarkerProcessor(int markerCode, MarkerParser routine)
+        {
+            jpeg_decompress_struct.jpeg_marker_parser_method f = delegate { return routine(this); };
+            m_classicDecompressor.jpeg_set_marker_processor(markerCode, f);
+        }
 
-        ///* Control saving of COM and APPn markers into marker_list. */
-        //public void jpeg_save_markers(int marker_code, int length_limit)
-        //{
-        //    m_marker.jpeg_save_markers(marker_code, length_limit);
-        //}
+        /* Control saving of COM and APPn markers into marker_list. */
+        public void SaveMarkers(int markerCode, int lengthLimit)
+        {
+            m_classicDecompressor.jpeg_save_markers(markerCode, (uint)lengthLimit);
+        }
     }
 }
