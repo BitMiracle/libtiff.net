@@ -3,13 +3,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LibJpeg</RootNamespace>
-    <AssemblyName>LibJpeg.NET</AssemblyName>
+    <AssemblyName>BitMiracle.LibJpeg.NET</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,6 +36,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyVersion.cs" />
     <Compile Include="BlockArray2D.cs" />
     <Compile Include="Classic\Internal\bitread_perm_state.cs" />
     <Compile Include="Classic\Internal\bitread_working_state.cs" />
@@ -109,4 +110,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PreBuildEvent>cd "$(SolutionDir)"
+update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
+  </PropertyGroup>
 </Project>
