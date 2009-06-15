@@ -37,7 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyVersion.cs" />
-    <Compile Include="BlockArray2D.cs" />
     <Compile Include="Classic\Internal\bitread_perm_state.cs" />
     <Compile Include="Classic\Internal\bitread_working_state.cs" />
     <Compile Include="Classic\Internal\d_derived_tbl.cs" />
@@ -97,8 +96,9 @@
     <Compile Include="Classic\Internal\my_upsampler.cs" />
     <Compile Include="Classic\Internal\phuff_entropy_decoder.cs" />
     <Compile Include="Classic\Internal\phuff_entropy_encoder.cs" />
+    <Compile Include="DecompressionParameters.cs" />
     <Compile Include="Enumerations.cs" />
-    <Compile Include="Decompressor.cs" />
+    <Compile Include="Jpeg.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classic\ReadResult.cs" />
   </ItemGroup>

@@ -62,4 +62,17 @@ namespace LibJpeg
         RowCompleted = 5, /* Completed one iMCU row */
         ScanCompleted = 6 /* Completed last iMCU row of a scan */
     }
+
+    /// <summary>
+    /// This list defines the known output image formats
+    /// (not all of which need be supported by a given version).
+    /// </summary>
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    enum ImageFormat
+    {
+        BMP, /* BMP format (Windows flavor) */
+        BMP_OS2, /* BMP format (OS/2 flavor) */
+    }
 }
