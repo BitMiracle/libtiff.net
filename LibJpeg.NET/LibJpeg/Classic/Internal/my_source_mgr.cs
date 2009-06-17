@@ -33,7 +33,7 @@ namespace LibJpeg.Classic.Internal
 
         private jpeg_decompress_struct m_cinfo;
 
-        private FileStream m_infile;       /* source stream */
+        private Stream m_infile;       /* source stream */
         private byte[] m_buffer;     /* start of buffer */
         private bool m_start_of_file; /* have we gotten any data yet? */
         
@@ -47,7 +47,7 @@ namespace LibJpeg.Classic.Internal
             m_buffer = new byte[INPUT_BUF_SIZE];
         }
 
-        public void Attach(FileStream infile)
+        public void Attach(Stream infile)
         {
             m_infile = infile;
             initInternalBuffer(null, 0);

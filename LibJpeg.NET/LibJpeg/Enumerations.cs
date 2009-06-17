@@ -75,4 +75,44 @@ namespace LibJpeg
         BMP, /* BMP format (Windows flavor) */
         BMP_OS2, /* BMP format (OS/2 flavor) */
     }
+
+    enum ADDON_MESSAGE_CODE
+    {
+        // Must be first entry!
+        JMSG_FIRSTADDONCODE = 1000,
+
+        JERR_BMP_BADCMAP,
+        JERR_BMP_BADDEPTH,
+        JERR_BMP_BADHEADER,
+        JERR_BMP_BADPLANES,
+        JERR_BMP_COLORSPACE,
+        JERR_BMP_COMPRESSED,
+        JERR_BMP_NOT,
+        JTRC_BMP,
+        JTRC_BMP_MAPPED,
+        JTRC_BMP_OS2,
+        JTRC_BMP_OS2_MAPPED,
+
+        JERR_GIF_BUG,
+        JERR_GIF_CODESIZE,
+        JERR_GIF_COLORSPACE,
+        JERR_GIF_IMAGENOTFOUND,
+        JERR_GIF_NOT,
+        JTRC_GIF,
+        JTRC_GIF_BADVERSION,
+        JTRC_GIF_EXTENSION,
+        JTRC_GIF_NONSQUARE,
+        JWRN_GIF_BADDATA,
+        JWRN_GIF_CHAR,
+        JWRN_GIF_ENDCODE,
+        JWRN_GIF_NOMOREDATA,
+
+        JERR_BAD_CMAP_FILE,
+        JERR_TOO_MANY_COLORS,
+        JERR_UNGETC_FAILED,
+        JERR_UNKNOWN_FORMAT,
+        JERR_UNSUPPORTED_FORMAT,
+
+        JMSG_LASTADDONCODE
+    }
 }

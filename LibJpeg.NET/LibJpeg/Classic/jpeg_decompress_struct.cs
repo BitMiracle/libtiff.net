@@ -509,7 +509,7 @@ namespace LibJpeg.Classic
         /// The caller must have already opened the stream, and is responsible
         /// for closing it after finishing decompression.
         /// </summary>
-        public void jpeg_stdio_src(FileStream infile)
+        public void jpeg_stdio_src(Stream infile)
         {
             /* The source object and input buffer are made permanent so that a series
             * of JPEG images can be read from the same file by calling jpeg_stdio_src

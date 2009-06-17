@@ -33,10 +33,10 @@ namespace LibJpeg.Classic.Internal
 
         private jpeg_compress_struct m_cinfo;
 
-        private FileStream m_outfile;      /* target stream */
+        private Stream m_outfile;      /* target stream */
         private byte[] m_buffer;     /* start of buffer */
 
-        public my_destination_mgr(jpeg_compress_struct cinfo, FileStream alreadyOpenFile)
+        public my_destination_mgr(jpeg_compress_struct cinfo, Stream alreadyOpenFile)
         {
             m_cinfo = cinfo;
             m_outfile = alreadyOpenFile;

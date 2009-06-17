@@ -576,7 +576,7 @@ namespace LibJpeg.Classic
         /// The caller must have already opened the stream, and is responsible
         /// for closing it after finishing compression.
         /// </summary>
-        public void jpeg_stdio_dest(FileStream outfile)
+        public void jpeg_stdio_dest(Stream outfile)
         {
             m_dest = new my_destination_mgr(this, outfile);
         }
