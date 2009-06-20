@@ -41,7 +41,7 @@ namespace LibJpeg
             }
         }
 
-        public ImageFormat ImageFormat
+        public ImageFormat OutputImageFormat
         {
             get
             {

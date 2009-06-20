@@ -7,79 +7,55 @@ using LibJpeg.Classic;
 
 namespace LibJpeg
 {
-    public class BitmapDestination
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    interface IDecompressDestination
     {
+        Stream Output
+        {
+            get;
+        }
+
+        void Start();
+        void ProcessPixelsRow(byte[] row);
+        void Finish();
+    }
+
+    internal class BitmapDestination : IDecompressDestination
+    {
+        private Jpeg m_decompressor;
+
         /* Target file spec; filled in by djpeg.c after object is created. */
-        private Stream output_file;
+        private Stream m_output;
 
         /* Output pixel-row buffer.  Created by module init or start_output.
          * Width is cinfo.output_width * cinfo.output_components;
          * height is buffer_height.
          */
-        public byte[][] buffer;
-        public int buffer_height;
+        private byte[][] m_buffer = null;
+        
+        private bool m_putGrayRows = false;
+        private bool m_isOS2 = false;        /* saves the OS2 format request flag */
 
-        private Jpeg decompressor;
-        private bool m_putGrayRows;
-        private bool is_os2;        /* saves the OS2 format request flag */
+        private jvirt_sarray_control m_wholeImage = null;  /* needed to reverse row order */
+        private int m_dataWidth = 0;  /* bytes per row */
+        private int m_rowWidth = 0;       /* physical width of one row in the BMP file */
+        private int m_padBytes = 0;      /* number of padding bytes needed per row */
+        private int m_currentOutputRow = 0;  /* next row# to write to virtual array */
 
-        private jvirt_sarray_control whole_image;  /* needed to reverse row order */
-        private int data_width;  /* bytes per row */
-        private int row_width;       /* physical width of one row in the BMP file */
-        private int pad_bytes;      /* number of padding bytes needed per row */
-        private int cur_output_row;  /* next row# to write to virtual array */
-
-        public BitmapDestination(Jpeg decompressor, bool is_os2)
+        public BitmapDestination(Jpeg decompressor, Stream output, bool is_os2)
         {
-            this.decompressor = decompressor;
-            this.is_os2 = is_os2;
-
-            if (decompressor.OutColorspace == Colorspace.Grayscale)
-            {
-                m_putGrayRows = true;
-            }
-            else if (decompressor.OutColorspace == Colorspace.RGB)
-            {
-                if (decompressor.QuantizeColors)
-                    m_putGrayRows = true;
-                else
-                    m_putGrayRows = false;
-            }
-            else
-            {
-                decompressor.ClassicDecompressor.ERREXIT((J_MESSAGE_CODE)ADDON_MESSAGE_CODE.JERR_BMP_COLORSPACE);
-            }
-
-            /* Calculate output image dimensions so we can allocate space */
-            decompressor.ClassicDecompressor.jpeg_calc_output_dimensions();
-
-            /* Determine width of rows in the BMP file (padded to 4-byte boundary). */
-            row_width = decompressor.OutputWidth * decompressor.OutputComponents;
-            data_width = row_width;
-            while ((row_width & 3) != 0)
-                row_width++;
-
-            pad_bytes = (int)(row_width - data_width);
-
-            /* Allocate space for inversion array, prepare for write pass */
-            jpeg_decompress_struct cinfo = decompressor.ClassicDecompressor;
-            whole_image = new jvirt_sarray_control(cinfo, false, row_width, decompressor.OutputHeight);
-            cur_output_row = 0;
-
-            /* Create decompressor output buffer. */
-            buffer = jpeg_common_struct.AllocJpegSamples(row_width, 1);
-            buffer_height = 1;
+            m_decompressor = decompressor;
+            m_output = output;
+            m_isOS2 = is_os2;
         }
 
-        public Stream OutputFile
+        public Stream Output
         {
             get
             {
-                return output_file;
-            }
-            set
-            {
-                output_file = value;
+                return m_output;
             }
         }
 
@@ -87,82 +63,104 @@ namespace LibJpeg
         /// Startup: normally writes the file header.
         /// In this module we may as well postpone everything until finish_output.
         /// </summary>
-        public void start_output()
+        public void Start()
         {
-            /* no work here */
+            if (m_decompressor.OutColorspace == Colorspace.Grayscale)
+                m_putGrayRows = true;
+            else if (m_decompressor.OutColorspace == Colorspace.RGB)
+                m_putGrayRows = m_decompressor.QuantizeColors;
+            else
+                m_decompressor.ClassicDecompressor.ERREXIT((J_MESSAGE_CODE)ADDON_MESSAGE_CODE.JERR_BMP_COLORSPACE);
+
+            /* Determine width of rows in the BMP file (padded to 4-byte boundary). */
+            m_rowWidth = m_decompressor.OutputWidth * m_decompressor.OutputComponents;
+            m_dataWidth = m_rowWidth;
+            while ((m_rowWidth & 3) != 0)
+                m_rowWidth++;
+
+            m_padBytes = (int)(m_rowWidth - m_dataWidth);
+
+            /* Allocate space for inversion array, prepare for write pass */
+            jpeg_decompress_struct cinfo = m_decompressor.ClassicDecompressor;
+            m_wholeImage = new jvirt_sarray_control(cinfo, false, m_rowWidth, m_decompressor.OutputHeight);
+            m_currentOutputRow = 0;
+
+            /* Create decompressor output buffer. */
+            m_buffer = jpeg_common_struct.AllocJpegSamples(m_rowWidth, 1);
         }
 
         /// <summary>
         /// Write some pixel data.
-        /// In this module rows_supplied will always be 1.
         /// </summary>
-        public void put_pixel_rows(int rows_supplied)
+        public void ProcessPixelsRow(byte[] row)
         {
+            for (int i = 0; i < row.Length; ++i)
+                m_buffer[0][i] = row[i];
+
             if (m_putGrayRows)
-                put_gray_rows(rows_supplied);
+                put_gray_row();
             else
-                put_24bit_rows(rows_supplied);
+                put_24bit_row();
         }
 
         /// <summary>
         /// Finish up at the end of the file.
         /// Here is where we really output the BMP file.
         /// </summary>
-        public void finish_output()
+        public void Finish()
         {
             /* Write the header and colormap */
-            if (is_os2)
+            if (m_isOS2)
                 write_os2_header();
             else
                 write_bmp_header();
 
-            jpeg_decompress_struct cinfo = decompressor.ClassicDecompressor;
+            jpeg_decompress_struct cinfo = m_decompressor.ClassicDecompressor;
             /* Write the file body from our virtual array */
             for (int row = cinfo.Output_height; row > 0; row--)
             {
-                byte[][] image_ptr = whole_image.access_virt_sarray(row - 1, 1);
+                byte[][] image_ptr = m_wholeImage.access_virt_sarray(row - 1, 1);
                 int imageIndex = 0;
-                for (int col = row_width; col > 0; col--)
+                for (int col = m_rowWidth; col > 0; col--)
                 {
-                    output_file.WriteByte(image_ptr[0][imageIndex]);
+                    m_output.WriteByte(image_ptr[0][imageIndex]);
                     imageIndex++;
                 }
             }
 
             /* Make sure we wrote the output file OK */
-            output_file.Flush();
+            m_output.Flush();
         }
 
         /// <summary>
         /// Write some pixel data.
-        /// In this module rows_supplied will always be 1.
         /// 
         /// This version is for writing 24-bit pixels
         /// </summary>
-        private void put_24bit_rows(int rows_supplied)
+        private void put_24bit_row()
         {
             /* Access next row in virtual array */
-            byte[][] image_ptr = whole_image.access_virt_sarray(cur_output_row, 1);
-            cur_output_row++;
+            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_currentOutputRow, 1);
+            m_currentOutputRow++;
 
             /* Transfer data.  Note destination values must be in BGR order
              * (even though Microsoft's own documents say the opposite).
              */
             int bufferIndex = 0;
             int imageIndex = 0;
-            for (int col = decompressor.OutputWidth; col > 0; col--)
+            for (int col = m_decompressor.OutputWidth; col > 0; col--)
             {
-                image_ptr[0][imageIndex + 2] = buffer[0][bufferIndex];   /* can omit GETJSAMPLE() safely */
+                image_ptr[0][imageIndex + 2] = m_buffer[0][bufferIndex];   /* can omit GETJSAMPLE() safely */
                 bufferIndex++;
-                image_ptr[0][imageIndex + 1] = buffer[0][bufferIndex];
+                image_ptr[0][imageIndex + 1] = m_buffer[0][bufferIndex];
                 bufferIndex++;
-                image_ptr[0][imageIndex] = buffer[0][bufferIndex];
+                image_ptr[0][imageIndex] = m_buffer[0][bufferIndex];
                 bufferIndex++;
                 imageIndex += 3;
             }
 
             /* Zero out the pad bytes. */
-            int pad = pad_bytes;
+            int pad = m_padBytes;
             while (--pad >= 0)
             {
                 image_ptr[0][imageIndex] = 0;
@@ -172,26 +170,25 @@ namespace LibJpeg
 
         /// <summary>
         /// Write some pixel data.
-        /// In this module rows_supplied will always be 1.
         /// 
         /// This version is for grayscale OR quantized color output
         /// </summary>
-        private void put_gray_rows(int rows_supplied)
+        private void put_gray_row()
         {
             /* Access next row in virtual array */
-            byte[][] image_ptr = whole_image.access_virt_sarray(cur_output_row, 1);
-            cur_output_row++;
+            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_currentOutputRow, 1);
+            m_currentOutputRow++;
 
             /* Transfer data. */
             int index = 0;
-            for (int col = decompressor.OutputWidth; col > 0; col--)
+            for (int col = m_decompressor.OutputWidth; col > 0; col--)
             {
-                image_ptr[0][index] = buffer[0][index];/* can omit GETJSAMPLE() safely */
+                image_ptr[0][index] = m_buffer[0][index];/* can omit GETJSAMPLE() safely */
                 index++;
             }
 
             /* Zero out the pad bytes. */
-            int pad = pad_bytes;
+            int pad = m_padBytes;
             while (--pad >= 0)
             {
                 image_ptr[0][index] = 0;
@@ -208,9 +205,9 @@ namespace LibJpeg
             int cmap_entries;
 
             /* Compute colormap size and total file size */
-            if (decompressor.OutColorspace == Colorspace.RGB)
+            if (m_decompressor.OutColorspace == Colorspace.RGB)
             {
-                if (decompressor.QuantizeColors)
+                if (m_decompressor.QuantizeColors)
                 {
                     /* Colormapped RGB */
                     bits_per_pixel = 8;
@@ -232,7 +229,7 @@ namespace LibJpeg
 
             /* File size */
             int headersize = 14 + 40 + cmap_entries * 4; /* Header and colormap */
-            int bfSize = headersize + (int)row_width * (int)decompressor.OutputHeight;
+            int bfSize = headersize + (int)m_rowWidth * (int)m_decompressor.OutputHeight;
 
             /* Set unused fields of header to 0 */
             byte[] bmpfileheader = new byte[14];
@@ -247,40 +244,40 @@ namespace LibJpeg
 
             /* Fill the info header (Microsoft calls this a BITMAPINFOHEADER) */
             PUT_2B(bmpinfoheader, 0, 40);   /* biSize */
-            PUT_4B(bmpinfoheader, 4, decompressor.OutputWidth); /* biWidth */
-            PUT_4B(bmpinfoheader, 8, decompressor.OutputHeight); /* biHeight */
+            PUT_4B(bmpinfoheader, 4, m_decompressor.OutputWidth); /* biWidth */
+            PUT_4B(bmpinfoheader, 8, m_decompressor.OutputHeight); /* biHeight */
             PUT_2B(bmpinfoheader, 12, 1);   /* biPlanes - must be 1 */
             PUT_2B(bmpinfoheader, 14, bits_per_pixel); /* biBitCount */
             /* we leave biCompression = 0, for none */
             /* we leave biSizeImage = 0; this is correct for uncompressed data */
 
-            if (decompressor.DensityUnit == 2)
+            if (m_decompressor.DensityUnit == 2)
             {
                 /* if have density in dots/cm, then */
-                PUT_4B(bmpinfoheader, 24, decompressor.DensityX * 100); /* XPels/M */
-                PUT_4B(bmpinfoheader, 28, decompressor.DensityY * 100); /* XPels/M */
+                PUT_4B(bmpinfoheader, 24, m_decompressor.DensityX * 100); /* XPels/M */
+                PUT_4B(bmpinfoheader, 28, m_decompressor.DensityY * 100); /* XPels/M */
             }
             PUT_2B(bmpinfoheader, 32, cmap_entries); /* biClrUsed */
             /* we leave biClrImportant = 0 */
 
             try
             {
-                output_file.Write(bmpfileheader, 0, 14);
+                m_output.Write(bmpfileheader, 0, 14);
             }
             catch (Exception e)
             {
-                decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             try
             {
-                output_file.Write(bmpinfoheader, 0, 40);
+                m_output.Write(bmpinfoheader, 0, 40);
             }
             catch (Exception e)
             {
-                decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             if (cmap_entries > 0)
@@ -296,9 +293,9 @@ namespace LibJpeg
             int cmap_entries;
 
             /* Compute colormap size and total file size */
-            if (decompressor.OutColorspace == Colorspace.RGB)
+            if (m_decompressor.OutColorspace == Colorspace.RGB)
             {
-                if (decompressor.QuantizeColors)
+                if (m_decompressor.QuantizeColors)
                 {
                     /* Colormapped RGB */
                     bits_per_pixel = 8;
@@ -320,7 +317,7 @@ namespace LibJpeg
 
             /* File size */
             int headersize = 14 + 12 + cmap_entries * 3; /* Header and colormap */
-            int bfSize = headersize + (int)row_width * decompressor.OutputHeight;
+            int bfSize = headersize + (int)m_rowWidth * m_decompressor.OutputHeight;
 
             /* Set unused fields of header to 0 */
             byte[] bmpfileheader = new byte[14];
@@ -335,29 +332,29 @@ namespace LibJpeg
 
             /* Fill the info header (Microsoft calls this a BITMAPCOREHEADER) */
             PUT_2B(bmpcoreheader, 0, 12);   /* bcSize */
-            PUT_2B(bmpcoreheader, 4, decompressor.OutputWidth); /* bcWidth */
-            PUT_2B(bmpcoreheader, 6, decompressor.OutputHeight); /* bcHeight */
+            PUT_2B(bmpcoreheader, 4, m_decompressor.OutputWidth); /* bcWidth */
+            PUT_2B(bmpcoreheader, 6, m_decompressor.OutputHeight); /* bcHeight */
             PUT_2B(bmpcoreheader, 8, 1);    /* bcPlanes - must be 1 */
             PUT_2B(bmpcoreheader, 10, bits_per_pixel); /* bcBitCount */
 
             try
             {
-                output_file.Write(bmpfileheader, 0, 14);
+                m_output.Write(bmpfileheader, 0, 14);
             }
             catch (Exception e)
             {
-                decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             try
             {
-                output_file.Write(bmpcoreheader, 0, 12);
+                m_output.Write(bmpcoreheader, 0, 12);
             }
             catch (Exception e)
             {
-                decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             if (cmap_entries > 0)
@@ -370,22 +367,22 @@ namespace LibJpeg
         /// </summary>
         private void write_colormap(int map_colors, int map_entry_size)
         {
-            byte[][] colormap = decompressor.Colormap;
-            int num_colors = decompressor.ActualNumberOfColors;
+            byte[][] colormap = m_decompressor.Colormap;
+            int num_colors = m_decompressor.ActualNumberOfColors;
 
             int i = 0;
             if (colormap != null)
             {
-                if (decompressor.OutComponentsPerSample == 3)
+                if (m_decompressor.OutComponentsPerSample == 3)
                 {
                     /* Normal case with RGB colormap */
                     for (i = 0; i < num_colors; i++)
                     {
-                        output_file.WriteByte(colormap[2][i]);
-                        output_file.WriteByte(colormap[1][i]);
-                        output_file.WriteByte(colormap[0][i]);
+                        m_output.WriteByte(colormap[2][i]);
+                        m_output.WriteByte(colormap[1][i]);
+                        m_output.WriteByte(colormap[0][i]);
                         if (map_entry_size == 4)
-                            output_file.WriteByte(0);
+                            m_output.WriteByte(0);
                     }
                 }
                 else
@@ -393,11 +390,11 @@ namespace LibJpeg
                     /* Grayscale colormap (only happens with grayscale quantization) */
                     for (i = 0; i < num_colors; i++)
                     {
-                        output_file.WriteByte(colormap[0][i]);
-                        output_file.WriteByte(colormap[0][i]);
-                        output_file.WriteByte(colormap[0][i]);
+                        m_output.WriteByte(colormap[0][i]);
+                        m_output.WriteByte(colormap[0][i]);
+                        m_output.WriteByte(colormap[0][i]);
                         if (map_entry_size == 4)
-                            output_file.WriteByte(0);
+                            m_output.WriteByte(0);
                     }
                 }
             }
@@ -406,11 +403,11 @@ namespace LibJpeg
                 /* If no colormap, must be grayscale data.  Generate a linear "map". */
                 for (i = 0; i < 256; i++)
                 {
-                    output_file.WriteByte((byte)i);
-                    output_file.WriteByte((byte)i);
-                    output_file.WriteByte((byte)i);
+                    m_output.WriteByte((byte)i);
+                    m_output.WriteByte((byte)i);
+                    m_output.WriteByte((byte)i);
                     if (map_entry_size == 4)
-                        output_file.WriteByte(0);
+                        m_output.WriteByte(0);
                 }
             }
 
@@ -418,16 +415,16 @@ namespace LibJpeg
             if (i > map_colors)
             {
                 int errCode = 1026;//JERR_TOO_MANY_COLORS
-                decompressor.ClassicDecompressor.ERREXIT(errCode, i);
+                m_decompressor.ClassicDecompressor.ERREXIT(errCode, i);
             }
 
             for (; i < map_colors; i++)
             {
-                output_file.WriteByte(0);
-                output_file.WriteByte(0);
-                output_file.WriteByte(0);
+                m_output.WriteByte(0);
+                m_output.WriteByte(0);
+                m_output.WriteByte(0);
                 if (map_entry_size == 4)
-                    output_file.WriteByte(0);
+                    m_output.WriteByte(0);
             }
         }
 

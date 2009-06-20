@@ -11,10 +11,12 @@ namespace LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
- class Jpeg
+    class Jpeg
     {
         private jpeg_compress_struct m_compressor = new jpeg_compress_struct(new jpeg_error_mgr());
         private jpeg_decompress_struct m_decompressor = new jpeg_decompress_struct(new jpeg_error_mgr());
+
+        private DecompressionParameters m_decompressionParameters = new DecompressionParameters();
 
         public void Compress(Stream input, CompressionParameters parameters, Stream output)
         {
@@ -63,13 +65,30 @@ namespace LibJpeg
             m_compressor.jpeg_finish_compress();
         }
 
-        public void Decompress(Stream jpeg, DecompressionParameters parameters, Stream output)
+        public DecompressionParameters DecompressionParameters
+        {
+            get
+            {
+                return m_decompressionParameters;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
+                m_decompressionParameters = value;
+            }
+        }
+
+        public void Decompress(Stream jpeg, Stream output)
+        {
+            decompress(jpeg, output);
+        }
+
+        private void decompress(Stream jpeg, Stream output)
         {
             if (jpeg == null)
                 throw new ArgumentNullException("jpeg");
-
-            if (parameters == null)
-                throw new ArgumentNullException("parameters");
 
             if (output == null)
                 throw new ArgumentNullException("output");
@@ -78,32 +97,33 @@ namespace LibJpeg
             /* Read file header, set default decompression parameters */
             m_decompressor.jpeg_read_header(true);
 
-            applyParameters(parameters);
-
-            /* Initialize the output module now to let it override any crucial
-             * option settings (for instance, GIF wants to force color quantization).
-             */
-            BitmapDestination dest_mgr = new BitmapDestination(this, parameters.ImageFormat == ImageFormat.BMP_OS2);
-            dest_mgr.OutputFile = output;
+            applyParameters(m_decompressionParameters);
+            m_decompressor.jpeg_calc_output_dimensions();
 
             /* Start decompressor */
             m_decompressor.jpeg_start_decompress();
 
+            /* Initialize the output module now to let it override any crucial
+             * option settings (for instance, GIF wants to force color quantization).
+             */
+            BitmapDestination destination = new BitmapDestination(this, output, m_decompressionParameters.OutputImageFormat == ImageFormat.BMP_OS2);
+
             /* Write output file header */
-            dest_mgr.start_output();
+            destination.Start();
 
             /* Process data */
             while (m_decompressor.Output_scanline < m_decompressor.Output_height)
             {
-                int num_scanlines = m_decompressor.jpeg_read_scanlines(dest_mgr.buffer, dest_mgr.buffer_height);
-                dest_mgr.put_pixel_rows(num_scanlines);
+                byte[][] row = jpeg_common_struct.AllocJpegSamples(OutputWidth * OutputComponents, 1);
+                m_decompressor.jpeg_read_scanlines(row, 1);
+                destination.ProcessPixelsRow(row[0]);
             }
 
             /* Finish decompression and release memory.
              * I must do it in this order because output module has allocated memory
              * of lifespan JPOOL_IMAGE; it needs to finish before releasing memory.
              */
-            dest_mgr.finish_output();
+            destination.Finish();
             m_decompressor.jpeg_finish_decompress();
         }
 
