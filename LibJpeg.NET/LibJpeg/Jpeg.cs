@@ -16,13 +16,13 @@ namespace LibJpeg
         private jpeg_compress_struct m_compressor = new jpeg_compress_struct(new jpeg_error_mgr());
         private jpeg_decompress_struct m_decompressor = new jpeg_decompress_struct(new jpeg_error_mgr());
 
-        public void Compress(Stream input, Stream output)
+        public void Compress(Stream input, CompressionParameters parameters, Stream output)
         {
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            //if (parameters == null)
-            //throw new ArgumentNullException("parameters");
+            if (parameters == null)
+                throw new ArgumentNullException("parameters");
 
             if (output == null)
                 throw new ArgumentNullException("output");
@@ -43,12 +43,7 @@ namespace LibJpeg
             /* Read the input file header to obtain file size & colorspace. */
             src_mgr.StartInput();
 
-            /* Now that we know input colorspace, fix colorspace-dependent defaults */
-            m_compressor.jpeg_default_colorspace();
-
-            /* Adjust default compression parameters */
-            //if (!applyOptions(m_compressor, options))
-            //    return;
+            applyParameters(parameters);
 
             /* Specify data destination for compression */
             m_compressor.jpeg_stdio_dest(output);
@@ -315,6 +310,26 @@ namespace LibJpeg
             m_decompressor.Enable_external_quant = parameters.EnableExternalQuant;
             m_decompressor.Enable_2pass_quant = parameters.EnableTwoPassQuantizer;
             m_decompressor.Err.Trace_level = parameters.TraceLevel;
+        }
+
+        private void applyParameters(CompressionParameters parameters)
+        {
+            Debug.Assert(parameters != null);
+
+            if (parameters.Colorspace != Colorspace.Unknown)
+                m_compressor.jpeg_set_colorspace((J_COLOR_SPACE)parameters.Colorspace);
+
+            m_compressor.Optimize_coding = parameters.OptimizeCoding;
+            m_compressor.Restart_interval = parameters.RestartInterval;
+            m_compressor.Restart_in_rows = parameters.RestartInRows;
+            m_compressor.Smoothing_factor = parameters.SmoothingFactor;
+            m_compressor.Dct_method = (J_DCT_METHOD)parameters.DCTMethod;
+            m_compressor.Err.Trace_level = parameters.TraceLevel;
+
+            m_compressor.jpeg_set_quality(parameters.Quality, parameters.ForceBaseline);
+
+            if (parameters.SimpleProgressive)
+                m_compressor.jpeg_simple_progression();
         }
     }
 }
