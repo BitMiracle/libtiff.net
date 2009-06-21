@@ -10,6 +10,210 @@ namespace LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
+    class ImageParameters
+    {
+        public readonly jpeg_decompress_struct ClassicDecompressor;
+
+        private Colorspace m_colorspace;
+        private Colorspace m_outColorspace;
+        private bool m_quantizeColors;
+        private int m_width;
+        private int m_height;
+        private int m_componentsPerSample;
+        private int m_components;
+        private int m_actualNumberOfColors;
+        private byte[][] m_colormap;
+        private byte m_densityUnit;
+        private int m_densityX;
+        private int m_densityY;
+
+        internal ImageParameters(jpeg_decompress_struct decompressor)
+        {
+            ClassicDecompressor = decompressor;
+        }
+
+        // colorspace of JPEG image
+        public Colorspace Colorspace
+        {
+            get
+            {
+                return m_colorspace;
+            }
+            internal set
+            {
+                m_colorspace = value;
+            }
+        }
+
+        /* Decompression processing parameters --- these fields must be set before
+         * calling jpeg_start_decompress().  Note that jpeg_read_header() initializes
+         * them to default values.
+         */
+
+        // colorspace for output
+        public Colorspace OutColorspace
+        {
+            get
+            {
+                return m_outColorspace;
+            }
+            internal set
+            {
+                m_outColorspace = value;
+            }
+        }
+
+        // true=colormapped output wanted
+        public bool QuantizeColors
+        {
+            get
+            {
+                return m_quantizeColors;
+            }
+            internal set
+            {
+                m_quantizeColors = value;
+            }
+        }
+
+        /* Description of actual output image that will be returned to application.
+         * These fields are computed by jpeg_start_decompress().
+         * You can also use jpeg_calc_output_dimensions() to determine these values
+         * in advance of calling jpeg_start_decompress().
+         */
+
+        // scaled image width
+        public int Width
+        {
+            get
+            {
+                return m_width;
+            }
+            internal set
+            {
+                m_width = value;
+            }
+        }
+
+        // scaled image height
+        public int Height
+        {
+            get
+            {
+                return m_height;
+            }
+            internal set
+            {
+                m_height = value;
+            }
+        }
+
+        // # of color components in out_color_space
+        public int ComponentsPerSample
+        {
+            get
+            {
+                return m_componentsPerSample;
+            }
+            internal set
+            {
+                m_componentsPerSample = value;
+            }
+        }
+
+        // # of color components returned. it is 1 (a colormap index) when 
+        // quantizing colors; otherwise it equals out_color_components.
+        public int Components
+        {
+            get
+            {
+                return m_components;
+            }
+            internal set
+            {
+                m_components = value;
+            }
+        }
+
+        /* When quantizing colors, the output colormap is described by these fields.
+         * The application can supply a colormap by setting colormap non-null before
+         * calling jpeg_start_decompress; otherwise a colormap is created during
+         * jpeg_start_decompress or jpeg_start_output.
+         * The map has out_color_components rows and actual_number_of_colors columns.
+         */
+
+        // number of entries in use
+        public int ActualNumberOfColors
+        {   
+            get
+            {
+                return m_actualNumberOfColors;
+            }
+            internal set
+            {
+                m_actualNumberOfColors = value;
+            }
+        }
+
+        // The color map as a 2-D pixel array
+        public byte[][] Colormap
+        {
+            get
+            {
+                return m_colormap;
+            }
+            internal set
+            {
+                m_colormap = value;
+            }
+        }
+
+        // These fields record data obtained from optional markers 
+        // recognized by the JPEG library.
+
+        // JFIF code for pixel size units
+        public byte DensityUnit
+        {
+            get
+            {
+                return m_densityUnit;
+            }
+            internal set
+            {
+                m_densityUnit = value;
+            }
+        }
+
+        // Horizontal pixel density
+        public int DensityX
+        {
+            get
+            {
+                return m_densityY;
+            }
+            internal set
+            {
+                m_densityX = value;
+            }
+        }
+
+        // Vertical pixel density
+        public int DensityY
+        {
+            get
+            {
+                return m_densityY;
+            }
+            internal set
+            {
+                m_densityY = value;
+            }
+        }
+    }
+
+#if EXPOSE_LIBJPEG
+    public
+#endif
     interface IDecompressDestination
     {
         Stream Output
@@ -17,15 +221,18 @@ namespace LibJpeg
             get;
         }
 
+        void SetImageParameters(ImageParameters parameters);
+
         void Start();
         void ProcessPixelsRow(byte[] row);
         void Finish();
     }
 
-    internal class BitmapDestination : IDecompressDestination
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class BitmapDestination : IDecompressDestination
     {
-        private Jpeg m_decompressor;
-
         /* Target file spec; filled in by djpeg.c after object is created. */
         private Stream m_output;
 
@@ -43,10 +250,10 @@ namespace LibJpeg
         private int m_rowWidth = 0;       /* physical width of one row in the BMP file */
         private int m_padBytes = 0;      /* number of padding bytes needed per row */
         private int m_currentOutputRow = 0;  /* next row# to write to virtual array */
+        private ImageParameters m_parameters;
 
-        public BitmapDestination(Jpeg decompressor, Stream output, bool is_os2)
+        public BitmapDestination(Stream output, bool is_os2)
         {
-            m_decompressor = decompressor;
             m_output = output;
             m_isOS2 = is_os2;
         }
@@ -59,21 +266,29 @@ namespace LibJpeg
             }
         }
 
+        public void SetImageParameters(ImageParameters parameters)
+        {
+            if (parameters == null)
+                throw new ArgumentNullException("parameters");
+
+            m_parameters = parameters;
+        }
+
         /// <summary>
         /// Startup: normally writes the file header.
         /// In this module we may as well postpone everything until finish_output.
         /// </summary>
         public void Start()
         {
-            if (m_decompressor.OutColorspace == Colorspace.Grayscale)
+            if (m_parameters.OutColorspace == Colorspace.Grayscale)
                 m_putGrayRows = true;
-            else if (m_decompressor.OutColorspace == Colorspace.RGB)
-                m_putGrayRows = m_decompressor.QuantizeColors;
+            else if (m_parameters.OutColorspace == Colorspace.RGB)
+                m_putGrayRows = m_parameters.QuantizeColors;
             else
-                m_decompressor.ClassicDecompressor.ERREXIT((J_MESSAGE_CODE)ADDON_MESSAGE_CODE.JERR_BMP_COLORSPACE);
+                throw new ArgumentException("Image format is unsupported");
 
             /* Determine width of rows in the BMP file (padded to 4-byte boundary). */
-            m_rowWidth = m_decompressor.OutputWidth * m_decompressor.OutputComponents;
+            m_rowWidth = m_parameters.Width * m_parameters.Components;
             m_dataWidth = m_rowWidth;
             while ((m_rowWidth & 3) != 0)
                 m_rowWidth++;
@@ -81,8 +296,8 @@ namespace LibJpeg
             m_padBytes = (int)(m_rowWidth - m_dataWidth);
 
             /* Allocate space for inversion array, prepare for write pass */
-            jpeg_decompress_struct cinfo = m_decompressor.ClassicDecompressor;
-            m_wholeImage = new jvirt_sarray_control(cinfo, false, m_rowWidth, m_decompressor.OutputHeight);
+            jpeg_decompress_struct cinfo = m_parameters.ClassicDecompressor;
+            m_wholeImage = new jvirt_sarray_control(cinfo, false, m_rowWidth, m_parameters.Height);
             m_currentOutputRow = 0;
 
             /* Create decompressor output buffer. */
@@ -115,7 +330,7 @@ namespace LibJpeg
             else
                 write_bmp_header();
 
-            jpeg_decompress_struct cinfo = m_decompressor.ClassicDecompressor;
+            jpeg_decompress_struct cinfo = m_parameters.ClassicDecompressor;
             /* Write the file body from our virtual array */
             for (int row = cinfo.Output_height; row > 0; row--)
             {
@@ -148,7 +363,7 @@ namespace LibJpeg
              */
             int bufferIndex = 0;
             int imageIndex = 0;
-            for (int col = m_decompressor.OutputWidth; col > 0; col--)
+            for (int col = m_parameters.Width; col > 0; col--)
             {
                 image_ptr[0][imageIndex + 2] = m_buffer[0][bufferIndex];   /* can omit GETJSAMPLE() safely */
                 bufferIndex++;
@@ -181,7 +396,7 @@ namespace LibJpeg
 
             /* Transfer data. */
             int index = 0;
-            for (int col = m_decompressor.OutputWidth; col > 0; col--)
+            for (int col = m_parameters.Width; col > 0; col--)
             {
                 image_ptr[0][index] = m_buffer[0][index];/* can omit GETJSAMPLE() safely */
                 index++;
@@ -205,9 +420,9 @@ namespace LibJpeg
             int cmap_entries;
 
             /* Compute colormap size and total file size */
-            if (m_decompressor.OutColorspace == Colorspace.RGB)
+            if (m_parameters.OutColorspace == Colorspace.RGB)
             {
-                if (m_decompressor.QuantizeColors)
+                if (m_parameters.QuantizeColors)
                 {
                     /* Colormapped RGB */
                     bits_per_pixel = 8;
@@ -229,7 +444,7 @@ namespace LibJpeg
 
             /* File size */
             int headersize = 14 + 40 + cmap_entries * 4; /* Header and colormap */
-            int bfSize = headersize + (int)m_rowWidth * (int)m_decompressor.OutputHeight;
+            int bfSize = headersize + (int)m_rowWidth * (int)m_parameters.Height;
 
             /* Set unused fields of header to 0 */
             byte[] bmpfileheader = new byte[14];
@@ -244,18 +459,18 @@ namespace LibJpeg
 
             /* Fill the info header (Microsoft calls this a BITMAPINFOHEADER) */
             PUT_2B(bmpinfoheader, 0, 40);   /* biSize */
-            PUT_4B(bmpinfoheader, 4, m_decompressor.OutputWidth); /* biWidth */
-            PUT_4B(bmpinfoheader, 8, m_decompressor.OutputHeight); /* biHeight */
+            PUT_4B(bmpinfoheader, 4, m_parameters.Width); /* biWidth */
+            PUT_4B(bmpinfoheader, 8, m_parameters.Height); /* biHeight */
             PUT_2B(bmpinfoheader, 12, 1);   /* biPlanes - must be 1 */
             PUT_2B(bmpinfoheader, 14, bits_per_pixel); /* biBitCount */
             /* we leave biCompression = 0, for none */
             /* we leave biSizeImage = 0; this is correct for uncompressed data */
 
-            if (m_decompressor.DensityUnit == 2)
+            if (m_parameters.DensityUnit == 2)
             {
                 /* if have density in dots/cm, then */
-                PUT_4B(bmpinfoheader, 24, m_decompressor.DensityX * 100); /* XPels/M */
-                PUT_4B(bmpinfoheader, 28, m_decompressor.DensityY * 100); /* XPels/M */
+                PUT_4B(bmpinfoheader, 24, m_parameters.DensityX * 100); /* XPels/M */
+                PUT_4B(bmpinfoheader, 28, m_parameters.DensityY * 100); /* XPels/M */
             }
             PUT_2B(bmpinfoheader, 32, cmap_entries); /* biClrUsed */
             /* we leave biClrImportant = 0 */
@@ -266,8 +481,8 @@ namespace LibJpeg
             }
             catch (Exception e)
             {
-                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_parameters.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_parameters.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             try
@@ -276,8 +491,8 @@ namespace LibJpeg
             }
             catch (Exception e)
             {
-                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_parameters.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_parameters.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             if (cmap_entries > 0)
@@ -293,9 +508,9 @@ namespace LibJpeg
             int cmap_entries;
 
             /* Compute colormap size and total file size */
-            if (m_decompressor.OutColorspace == Colorspace.RGB)
+            if (m_parameters.OutColorspace == Colorspace.RGB)
             {
-                if (m_decompressor.QuantizeColors)
+                if (m_parameters.QuantizeColors)
                 {
                     /* Colormapped RGB */
                     bits_per_pixel = 8;
@@ -317,7 +532,7 @@ namespace LibJpeg
 
             /* File size */
             int headersize = 14 + 12 + cmap_entries * 3; /* Header and colormap */
-            int bfSize = headersize + (int)m_rowWidth * m_decompressor.OutputHeight;
+            int bfSize = headersize + (int)m_rowWidth * m_parameters.Height;
 
             /* Set unused fields of header to 0 */
             byte[] bmpfileheader = new byte[14];
@@ -332,8 +547,8 @@ namespace LibJpeg
 
             /* Fill the info header (Microsoft calls this a BITMAPCOREHEADER) */
             PUT_2B(bmpcoreheader, 0, 12);   /* bcSize */
-            PUT_2B(bmpcoreheader, 4, m_decompressor.OutputWidth); /* bcWidth */
-            PUT_2B(bmpcoreheader, 6, m_decompressor.OutputHeight); /* bcHeight */
+            PUT_2B(bmpcoreheader, 4, m_parameters.Width); /* bcWidth */
+            PUT_2B(bmpcoreheader, 6, m_parameters.Height); /* bcHeight */
             PUT_2B(bmpcoreheader, 8, 1);    /* bcPlanes - must be 1 */
             PUT_2B(bmpcoreheader, 10, bits_per_pixel); /* bcBitCount */
 
@@ -343,8 +558,8 @@ namespace LibJpeg
             }
             catch (Exception e)
             {
-                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_parameters.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_parameters.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             try
@@ -353,8 +568,8 @@ namespace LibJpeg
             }
             catch (Exception e)
             {
-                m_decompressor.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                m_decompressor.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+                m_parameters.ClassicDecompressor.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_parameters.ClassicDecompressor.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
             if (cmap_entries > 0)
@@ -367,13 +582,13 @@ namespace LibJpeg
         /// </summary>
         private void write_colormap(int map_colors, int map_entry_size)
         {
-            byte[][] colormap = m_decompressor.Colormap;
-            int num_colors = m_decompressor.ActualNumberOfColors;
+            byte[][] colormap = m_parameters.Colormap;
+            int num_colors = m_parameters.ActualNumberOfColors;
 
             int i = 0;
             if (colormap != null)
             {
-                if (m_decompressor.OutComponentsPerSample == 3)
+                if (m_parameters.ComponentsPerSample == 3)
                 {
                     /* Normal case with RGB colormap */
                     for (i = 0; i < num_colors; i++)
@@ -415,7 +630,7 @@ namespace LibJpeg
             if (i > map_colors)
             {
                 int errCode = 1026;//JERR_TOO_MANY_COLORS
-                m_decompressor.ClassicDecompressor.ERREXIT(errCode, i);
+                m_parameters.ClassicDecompressor.ERREXIT(errCode, i);
             }
 
             for (; i < map_colors; i++)

@@ -82,32 +82,28 @@ namespace LibJpeg
 
         public void Decompress(Stream jpeg, Stream output)
         {
-            decompress(jpeg, output);
+            /* Initialize the output module now to let it override any crucial
+             * option settings (for instance, GIF wants to force color quantization).
+             */
+            IDecompressDestination destination = new BitmapDestination(output, m_decompressionParameters.OutputImageFormat == ImageFormat.BMP_OS2);
+            Decompress(jpeg, destination);
         }
 
-        private void decompress(Stream jpeg, Stream output)
+        public void Decompress(Stream jpeg, IDecompressDestination destination)
         {
             if (jpeg == null)
                 throw new ArgumentNullException("jpeg");
 
-            if (output == null)
-                throw new ArgumentNullException("output");
+            if (destination == null)
+                throw new ArgumentNullException("destination");
 
-            m_decompressor.jpeg_stdio_src(jpeg);
-            /* Read file header, set default decompression parameters */
-            m_decompressor.jpeg_read_header(true);
-
-            applyParameters(m_decompressionParameters);
-            m_decompressor.jpeg_calc_output_dimensions();
+            beforeDecompress(jpeg);
 
             /* Start decompressor */
             m_decompressor.jpeg_start_decompress();
 
-            /* Initialize the output module now to let it override any crucial
-             * option settings (for instance, GIF wants to force color quantization).
-             */
-            BitmapDestination destination = new BitmapDestination(this, output, m_decompressionParameters.OutputImageFormat == ImageFormat.BMP_OS2);
-
+            ImageParameters parameters = createOutputImageParameters();
+            destination.SetImageParameters(parameters);
             /* Write output file header */
             destination.Start();
 
@@ -125,6 +121,34 @@ namespace LibJpeg
              */
             destination.Finish();
             m_decompressor.jpeg_finish_decompress();
+        }
+
+        private void beforeDecompress(Stream jpeg)
+        {
+            m_decompressor.jpeg_stdio_src(jpeg);
+            /* Read file header, set default decompression parameters */
+            m_decompressor.jpeg_read_header(true);
+
+            applyParameters(m_decompressionParameters);
+            m_decompressor.jpeg_calc_output_dimensions();
+        }
+
+        private ImageParameters createOutputImageParameters()
+        {
+            ImageParameters result = new ImageParameters(m_decompressor);
+            result.Colorspace = (Colorspace)m_decompressor.Jpeg_color_space;
+            result.OutColorspace = (Colorspace)m_decompressor.Out_color_space;
+            result.QuantizeColors = m_decompressor.Quantize_colors;
+            result.Width = m_decompressor.Output_width;
+            result.Height = m_decompressor.Output_height;
+            result.ComponentsPerSample = m_decompressor.Out_color_components;
+            result.Components = m_decompressor.Output_components;
+            result.ActualNumberOfColors = m_decompressor.Actual_number_of_colors;
+            result.Colormap = m_decompressor.Colormap;
+            result.DensityUnit = m_decompressor.Density_unit;
+            result.DensityX = m_decompressor.X_density;
+            result.DensityY = m_decompressor.Y_density;
+            return result;
         }
 
         public jpeg_compress_struct ClassicCompressor
