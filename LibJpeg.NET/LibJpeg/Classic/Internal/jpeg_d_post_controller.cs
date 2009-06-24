@@ -77,7 +77,7 @@ namespace LibJpeg.Classic.Internal
                 {
                     /* Two-pass color quantization: need full-image storage. */
                     /* We round up the number of rows to a multiple of the strip height. */
-                    m_whole_image = new jvirt_sarray_control(cinfo, false, 
+                    m_whole_image = new jvirt_sarray_control(cinfo, 
                         cinfo.m_output_width * cinfo.m_out_color_components,
                         JpegUtils.jround_up(cinfo.m_output_height, m_strip_height));
                 }

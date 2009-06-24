@@ -205,7 +205,7 @@ namespace LibJpeg
                 m_rowWidth++;
 
             /* Allocate space for inversion array, prepare for preload pass */
-            m_wholeImage = new jvirt_sarray_control(m_compressor, false, m_rowWidth, biHeight);
+            m_wholeImage = new jvirt_sarray_control(m_compressor, m_rowWidth, biHeight);
             m_pixelRowsMethod = PixelRowsMethod.preload;
 
             /* Allocate one-row buffer for returned data */

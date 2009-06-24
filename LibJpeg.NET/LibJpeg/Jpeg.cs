@@ -110,7 +110,7 @@ namespace LibJpeg
             /* Process data */
             while (m_decompressor.Output_scanline < m_decompressor.Output_height)
             {
-                byte[][] row = jpeg_common_struct.AllocJpegSamples(OutputWidth * OutputComponents, 1);
+                byte[][] row = jpeg_common_struct.AllocJpegSamples(m_decompressor.Output_width * m_decompressor.Output_components, 1);
                 m_decompressor.jpeg_read_scanlines(row, 1);
                 destination.ProcessPixelsRow(row[0]);
             }
@@ -135,9 +135,8 @@ namespace LibJpeg
 
         private ImageParameters createOutputImageParameters()
         {
-            ImageParameters result = new ImageParameters(m_decompressor);
-            result.Colorspace = (Colorspace)m_decompressor.Jpeg_color_space;
-            result.OutColorspace = (Colorspace)m_decompressor.Out_color_space;
+            ImageParameters result = new ImageParameters();
+            result.Colorspace = (Colorspace)m_decompressor.Out_color_space;
             result.QuantizeColors = m_decompressor.Quantize_colors;
             result.Width = m_decompressor.Output_width;
             result.Height = m_decompressor.Output_height;
@@ -184,152 +183,6 @@ namespace LibJpeg
         public void SaveMarkers(int markerCode, int lengthLimit)
         {
             m_decompressor.jpeg_save_markers(markerCode, lengthLimit);
-        }
-
-        // colorspace of JPEG image
-        internal Colorspace Colorspace
-        {
-            get
-            {
-                return (Colorspace)m_decompressor.Jpeg_color_space;
-            }
-        }
-
-        /* Decompression processing parameters --- these fields must be set before
-         * calling jpeg_start_decompress().  Note that jpeg_read_header() initializes
-         * them to default values.
-         */
-
-        // colorspace for output
-        internal Colorspace OutColorspace
-        {
-            get
-            {
-                return (Colorspace)m_decompressor.Out_color_space;
-            }
-            set
-            {
-                m_decompressor.Out_color_space = (J_COLOR_SPACE)value;
-            }
-        }
-
-        // true=colormapped output wanted
-        internal bool QuantizeColors
-        {
-            get
-            {
-                return m_decompressor.Quantize_colors;
-            }
-            set
-            {
-                m_decompressor.Quantize_colors = value;
-            }
-        }
-
-        /* Description of actual output image that will be returned to application.
-         * These fields are computed by jpeg_start_decompress().
-         * You can also use jpeg_calc_output_dimensions() to determine these values
-         * in advance of calling jpeg_start_decompress().
-         */
-
-        // scaled image width
-        internal int OutputWidth
-        {
-            get
-            {
-                return m_decompressor.Output_width;
-            }
-        }
-
-        // scaled image height
-        internal int OutputHeight
-        {
-            get
-            {
-                return m_decompressor.Output_height;
-            }
-        }
-
-        // # of color components in out_color_space
-        internal int OutComponentsPerSample
-        {
-            get
-            {
-                return m_decompressor.Out_color_components;
-            }
-        }
-
-        // # of color components returned. it is 1 (a colormap index) when 
-        // quantizing colors; otherwise it equals out_color_components.
-        internal int OutputComponents
-        {
-            get
-            {
-                return m_decompressor.Output_components;
-            }
-        }
-
-        /* When quantizing colors, the output colormap is described by these fields.
-         * The application can supply a colormap by setting colormap non-null before
-         * calling jpeg_start_decompress; otherwise a colormap is created during
-         * jpeg_start_decompress or jpeg_start_output.
-         * The map has out_color_components rows and actual_number_of_colors columns.
-         */
-
-        // number of entries in use
-        internal int ActualNumberOfColors
-        {
-            get
-            {
-                return m_decompressor.Actual_number_of_colors;
-            }
-            set
-            {
-                m_decompressor.Actual_number_of_colors = value;
-            }
-        }
-
-        // The color map as a 2-D pixel array
-        internal byte[][] Colormap
-        {
-            get
-            {
-                return m_decompressor.Colormap;
-            }
-            set
-            {
-                m_decompressor.Colormap = value;
-            }
-        }
-
-        // These fields record data obtained from optional markers 
-        // recognized by the JPEG library.
-
-        // JFIF code for pixel size units
-        internal byte DensityUnit
-        {
-            get
-            {
-                return m_decompressor.Density_unit;
-            }
-        }
-
-        // Horizontal pixel density
-        internal int DensityX
-        {
-            get
-            {
-                return m_decompressor.X_density;
-            }
-        }
-
-        // Vertical pixel density
-        internal int DensityY
-        {
-            get
-            {
-                return m_decompressor.Y_density;
-            }
         }
 
         private void applyParameters(DecompressionParameters parameters)

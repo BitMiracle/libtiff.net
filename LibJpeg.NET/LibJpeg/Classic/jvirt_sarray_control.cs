@@ -44,9 +44,15 @@ namespace LibJpeg.Classic
         private int m_samplesperrow;   /* width of array (and of memory buffer) */
 
         // Request a virtual 2-D sample array
-        public jvirt_sarray_control(jpeg_common_struct cinfo, bool pre_zero, int samplesperrow, int numrows)
+        public jvirt_sarray_control(jpeg_common_struct cinfo, int samplesperrow, int numrows) : this(samplesperrow, numrows)
         {
             m_cinfo = cinfo;
+        }
+
+        // Request a virtual 2-D sample array
+        public jvirt_sarray_control(int samplesperrow, int numrows)
+        {
+            m_cinfo = null;
             m_rows_in_array = numrows;
             m_samplesperrow = samplesperrow;
             m_mem_buffer = jpeg_common_struct.AllocJpegSamples(m_samplesperrow, m_rows_in_array);
@@ -62,7 +68,12 @@ namespace LibJpeg.Classic
 
             /* debugging check */
             if (end_row > m_rows_in_array || m_mem_buffer == null)
-                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
+            {
+                if (m_cinfo != null)
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
+                else
+                    throw new InvalidOperationException("Bogus virtual array access");
+            }
 
             /* Return proper part of the buffer */
             byte[][] ret = new byte[num_rows][];
