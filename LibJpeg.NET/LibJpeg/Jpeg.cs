@@ -16,53 +16,22 @@ namespace LibJpeg
         private jpeg_compress_struct m_compressor = new jpeg_compress_struct(new jpeg_error_mgr());
         private jpeg_decompress_struct m_decompressor = new jpeg_decompress_struct(new jpeg_error_mgr());
 
+        private CompressionParameters m_compressionParameters = new CompressionParameters();
         private DecompressionParameters m_decompressionParameters = new DecompressionParameters();
 
-        public void Compress(Stream input, CompressionParameters parameters, Stream output)
+        public CompressionParameters CompressionParameters
         {
-            if (input == null)
-                throw new ArgumentNullException("input");
-
-            if (parameters == null)
-                throw new ArgumentNullException("parameters");
-
-            if (output == null)
-                throw new ArgumentNullException("output");
-
-            /* Initialize JPEG parameters.
-             * Much of this may be overridden later.
-             * In particular, we don't yet know the input file's color space,
-             * but we need to provide some value for jpeg_set_defaults() to work.
-             */
-
-            m_compressor.In_color_space = J_COLOR_SPACE.JCS_RGB; /* arbitrary guess */
-            m_compressor.jpeg_set_defaults();
-
-            /* Figure out the input file format, and set up to read it. */
-            BitmapSource src_mgr = new BitmapSource(m_compressor);
-            src_mgr.InputFile = input;
-
-            /* Read the input file header to obtain file size & colorspace. */
-            src_mgr.StartInput();
-
-            applyParameters(parameters);
-
-            /* Specify data destination for compression */
-            m_compressor.jpeg_stdio_dest(output);
-
-            /* Start compressor */
-            m_compressor.jpeg_start_compress(true);
-
-            /* Process data */
-            while (m_compressor.Next_scanline < m_compressor.Image_height)
+            get
             {
-                int num_scanlines = src_mgr.GetPixelRows();
-                m_compressor.jpeg_write_scanlines(src_mgr.m_buffer, num_scanlines);
+                return m_compressionParameters;
             }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
 
-            /* Finish compression and release memory */
-            src_mgr.FinishInput();
-            m_compressor.jpeg_finish_compress();
+                m_compressionParameters = value;
+            }
         }
 
         public DecompressionParameters DecompressionParameters
@@ -78,6 +47,54 @@ namespace LibJpeg
 
                 m_decompressionParameters = value;
             }
+        }
+
+        public void Compress(Stream input, Stream output)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            if (output == null)
+                throw new ArgumentNullException("output");
+
+            /* Initialize JPEG parameters.
+             * Much of this may be overridden later.
+             * In particular, we don't yet know the input file's color space,
+             * but we need to provide some value for jpeg_set_defaults() to work.
+             */
+
+            m_compressor.In_color_space = J_COLOR_SPACE.JCS_RGB; /* arbitrary guess */
+            m_compressor.jpeg_set_defaults();
+
+            /* Figure out the input file format, and set up to read it. */
+            BitmapSource source = new BitmapSource(m_compressor, input);
+
+            /* Read the input file header to obtain file size & colorspace. */
+            source.Start();
+
+            applyParameters(m_compressionParameters);
+
+            /* Specify data destination for compression */
+            m_compressor.jpeg_stdio_dest(output);
+
+            /* Start compressor */
+            m_compressor.jpeg_start_compress(true);
+
+            /* Process data */
+            while (m_compressor.Next_scanline < m_compressor.Image_height)
+            {
+                byte[] row = source.GetPixelRow();
+                if (row == null)
+                    throw new InvalidDataException("Row of pixels is null");
+
+                byte[][] rowForDecompressor = new byte[1][];
+                rowForDecompressor[0] = row;
+                m_compressor.jpeg_write_scanlines(rowForDecompressor, 1);
+            }
+
+            /* Finish compression and release memory */
+            source.Finish();
+            m_compressor.jpeg_finish_compress();
         }
 
         public void Decompress(Stream jpeg, Stream output)

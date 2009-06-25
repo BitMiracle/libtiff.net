@@ -8,7 +8,20 @@ using LibJpeg.Classic;
 
 namespace LibJpeg
 {
-    class BitmapSource
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    interface ICompressSource
+    {
+        void Start();
+        byte[] GetPixelRow();
+        void Finish();
+    }
+
+#if EXPOSE_LIBJPEG
+    public
+#endif
+    class BitmapSource : ICompressSource
     {
         private enum PixelRowsMethod
         {
@@ -17,9 +30,8 @@ namespace LibJpeg
             use24bit
         }
 
-        public Stream m_inputFile;
-        public byte[][] m_buffer;
-        public int m_bufferHeight;
+        private Stream m_inputFile;
+        private byte[] m_buffer;
 
         private jpeg_compress_struct m_compressor;
         private PixelRowsMethod m_pixelRowsMethod;
@@ -36,38 +48,31 @@ namespace LibJpeg
         // Physical width of scanlines in file
         private int m_rowWidth;
 
+        private int m_imageWidth = 0;
+        private int m_imageHeight = 0;
+
         // remembers 8- or 24-bit format
         private int m_bitsPerPixel;
 
-        public BitmapSource(jpeg_compress_struct cinfo)
+        public BitmapSource(jpeg_compress_struct cinfo, Stream input)
         {
-            m_compressor = cinfo;
-        }
+            if (input == null)
+                throw new ArgumentNullException("input");
 
-        public Stream InputFile
-        {
-            get
-            {
-                return m_inputFile;
-            }
-            set
-            {
-                m_inputFile = value;
-            }
+            m_compressor = cinfo;
+            m_inputFile = input;
         }
 
         /// <summary>
         /// Read the file header; detects image size and component count.
         /// </summary>
-        public void StartInput()
+        public void Start()
         {
             byte[] bmpfileheader = new byte[14];
             /* Read and verify the bitmap file header */
-            if (!readOK(m_inputFile, bmpfileheader, 0, 14))
-                m_compressor.ERREXIT(J_MESSAGE_CODE.JERR_INPUT_EOF);
-
+            read(bmpfileheader, 0, 14);
             if (get2bytes(bmpfileheader, 0) != 0x4D42) /* 'BM' */
-                m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_NOT);
+                throw new InvalidDataException("Need BMP image");
 
             int bfOffBits = get4bytes(bmpfileheader, 10);
             /* We ignore the remaining fileheader fields */
@@ -76,18 +81,14 @@ namespace LibJpeg
              * or 64 bytes (OS/2 2.x).  Check the first 4 bytes to find out which.
              */
             byte[] bmpinfoheader = new byte[64];
-            if (!readOK(m_inputFile, bmpinfoheader, 0, 4))
-                m_compressor.ERREXIT(J_MESSAGE_CODE.JERR_INPUT_EOF);
+            read(bmpinfoheader, 0, 4);
 
             int headerSize = get4bytes(bmpinfoheader, 0);
             if (headerSize < 12 || headerSize > 64)
-                m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADHEADER);
+                throw new InvalidDataException("Bad BMP header");
 
-            if (!readOK(m_inputFile, bmpinfoheader, 4, headerSize - 4))
-                m_compressor.ERREXIT(J_MESSAGE_CODE.JERR_INPUT_EOF);
+            read(bmpinfoheader, 4, headerSize - 4);
 
-            int biWidth = 0;      /* initialize to avoid compiler warning */
-            int biHeight = 0;
             int biPlanes;
             int biCompression;
             int biXPelsPerMeter;
@@ -98,8 +99,8 @@ namespace LibJpeg
             {
                 case 12:
                     /* Decode OS/2 1.x header (Microsoft calls this a BITMAPCOREHEADER) */
-                    biWidth = get2bytes(bmpinfoheader, 4);
-                    biHeight = get2bytes(bmpinfoheader, 6);
+                    m_imageWidth = get2bytes(bmpinfoheader, 4);
+                    m_imageHeight = get2bytes(bmpinfoheader, 6);
                     biPlanes = get2bytes(bmpinfoheader, 8);
                     m_bitsPerPixel = get2bytes(bmpinfoheader, 10);
 
@@ -108,25 +109,24 @@ namespace LibJpeg
                         case 8:
                             /* colormapped image */
                             mapentrysize = 3;       /* OS/2 uses RGBTRIPLE colormap */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2_MAPPED, biWidth, biHeight);
+                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2_MAPPED, m_imageWidth, m_imageHeight);
                             break;
                         case 24:
                             /* RGB image */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2, biWidth, biHeight);
+                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2, m_imageWidth, m_imageHeight);
                             break;
                         default:
-                            m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADDEPTH);
-                            break;
+                            throw new InvalidDataException("Unsupported color depth");
                     }
                     if (biPlanes != 1)
-                        m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADPLANES);
+                        throw new InvalidDataException("Unsupported number of planes");
                     break;
                 case 40:
                 case 64:
                     /* Decode Windows 3.x header (Microsoft calls this a BITMAPINFOHEADER) */
                     /* or OS/2 2.x header, which has additional fields that we ignore */
-                    biWidth = get4bytes(bmpinfoheader, 4);
-                    biHeight = get4bytes(bmpinfoheader, 8);
+                    m_imageWidth = get4bytes(bmpinfoheader, 4);
+                    m_imageHeight = get4bytes(bmpinfoheader, 8);
                     biPlanes = get2bytes(bmpinfoheader, 12);
                     m_bitsPerPixel = get2bytes(bmpinfoheader, 14);
                     biCompression = get4bytes(bmpinfoheader, 16);
@@ -140,20 +140,19 @@ namespace LibJpeg
                         case 8:
                             /* colormapped image */
                             mapentrysize = 4;       /* Windows uses RGBQUAD colormap */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_MAPPED, biWidth, biHeight);
+                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_MAPPED, m_imageWidth, m_imageHeight);
                             break;
                         case 24:
                             /* RGB image */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP, biWidth, biHeight);
+                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP, m_imageWidth, m_imageHeight);
                             break;
                         default:
-                            m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADDEPTH);
-                            break;
+                            throw new InvalidDataException("Unsupported color depth");
                     }
                     if (biPlanes != 1)
-                        m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADPLANES);
+                        throw new InvalidDataException("Unsupported number of planes");
                     if (biCompression != 0)
-                        m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_COMPRESSED);
+                        throw new InvalidDataException("Compressed BMP is not supported");
 
                     if (biXPelsPerMeter > 0 && biYPelsPerMeter > 0)
                     {
@@ -164,8 +163,7 @@ namespace LibJpeg
                     }
                     break;
                 default:
-                    m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADHEADER);
-                    break;
+                    throw new InvalidDataException("Wrong bitmap header");
             }
 
             /* Compute distance to bitmap data --- will adjust for colormap below */
@@ -177,7 +175,8 @@ namespace LibJpeg
                 if (biClrUsed <= 0)
                     biClrUsed = 256;        /* assume it's 256 */
                 else if (biClrUsed > 256)
-                    m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADCMAP);
+                    throw new InvalidDataException("Bad BMP cmap");
+
                 /* Allocate space to store the colormap */
                 m_colorMap = jpeg_common_struct.AllocJpegSamples(biClrUsed, 3);
                 /* and read it from the file */
@@ -188,49 +187,51 @@ namespace LibJpeg
 
             /* Skip any remaining pad bytes */
             if (bPad < 0)           /* incorrect bfOffBits value? */
-                m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADHEADER);
+                throw new InvalidDataException("Bad BMP header");
 
             while (--bPad >= 0)
-            {
                 readByte();
-            }
 
             /* Compute row width in file, including padding to 4-byte boundary */
             if (m_bitsPerPixel == 24)
-                m_rowWidth = biWidth * 3;
+                m_rowWidth = m_imageWidth * 3;
             else
-                m_rowWidth = biWidth;
+                m_rowWidth = m_imageWidth;
 
             while ((m_rowWidth & 3) != 0)
                 m_rowWidth++;
 
             /* Allocate space for inversion array, prepare for preload pass */
-            m_wholeImage = new jvirt_sarray_control(m_compressor, m_rowWidth, biHeight);
+            m_wholeImage = new jvirt_sarray_control(m_rowWidth, m_imageHeight);
             m_pixelRowsMethod = PixelRowsMethod.preload;
 
             /* Allocate one-row buffer for returned data */
-            m_buffer = jpeg_common_struct.AllocJpegSamples(biWidth * 3, 1);
-            m_bufferHeight = 1;
+            m_buffer = new byte[m_imageWidth * 3];
 
             m_compressor.In_color_space = J_COLOR_SPACE.JCS_RGB;
             m_compressor.Input_components = 3;
             m_compressor.Data_precision = 8;
-            m_compressor.Image_width = biWidth;
-            m_compressor.Image_height = biHeight;
+            m_compressor.Image_width = m_imageWidth;
+            m_compressor.Image_height = m_imageHeight;
         }
 
-        public int GetPixelRows()
+        public byte[] GetPixelRow()
         {
             if (m_pixelRowsMethod == PixelRowsMethod.preload)
-                return preloadImage();
-            else if (m_pixelRowsMethod == PixelRowsMethod.use8bit)
-                return get8bitRow();
+                preloadImage();
 
-            return get24bitRow();
+            if (m_pixelRowsMethod == PixelRowsMethod.use8bit)
+                get8bitRow();
+            else if (m_pixelRowsMethod == PixelRowsMethod.use24bit)
+                get24bitRow();
+            else
+                Debug.Fail("");
+
+            return m_buffer;
         }
 
         // Finish up at the end of the file.
-        public void FinishInput()
+        public void Finish()
         {
             // no work
         }
@@ -242,7 +243,7 @@ namespace LibJpeg
         /// it is an 8-bit image, we must expand colormapped pixels to 24bit format.
         /// This version is for reading 8-bit colormap indexes.
         /// </summary>
-        private int get8bitRow()
+        private void get8bitRow()
         {
             /* Fetch next row from virtual array */
             m_sourceRow--;
@@ -252,20 +253,18 @@ namespace LibJpeg
             /* Expand the colormap indexes to real data */
             int imageIndex = 0;
             int outIndex = 0;
-            for (int col = m_compressor.Image_width; col > 0; col--)
+            for (int col = m_imageWidth; col > 0; col--)
             {
                 int t = image_ptr[0][imageIndex];
                 imageIndex++;
 
-                m_buffer[0][outIndex] = m_colorMap[0][t]; /* can omit GETbyte() safely */
+                m_buffer[outIndex] = m_colorMap[0][t]; /* can omit GETbyte() safely */
                 outIndex++;
-                m_buffer[0][outIndex] = m_colorMap[1][t];
+                m_buffer[outIndex] = m_colorMap[1][t];
                 outIndex++;
-                m_buffer[0][outIndex] = m_colorMap[2][t];
+                m_buffer[outIndex] = m_colorMap[2][t];
                 outIndex++;
             }
-
-            return 1;
         }
 
         /// <summary>
@@ -275,7 +274,7 @@ namespace LibJpeg
         /// it is an 8-bit image, we must expand colormapped pixels to 24bit format.
         /// This version is for reading 24-bit pixels.
         /// </summary>
-        private int get24bitRow()
+        private void get24bitRow()
         {
             /* Fetch next row from virtual array */
             m_sourceRow--;
@@ -287,28 +286,26 @@ namespace LibJpeg
             int imageIndex = 0;
             int outIndex = 0;
 
-            for (int col = m_compressor.Image_width; col > 0; col--)
+            for (int col = m_imageWidth; col > 0; col--)
             {
-                m_buffer[0][outIndex + 2] = image_ptr[0][imageIndex];   /* can omit GETbyte() safely */
+                m_buffer[outIndex + 2] = image_ptr[0][imageIndex];   /* can omit GETbyte() safely */
                 imageIndex++;
-                m_buffer[0][outIndex + 1] = image_ptr[0][imageIndex];
+                m_buffer[outIndex + 1] = image_ptr[0][imageIndex];
                 imageIndex++;
-                m_buffer[0][outIndex] = image_ptr[0][imageIndex];
+                m_buffer[outIndex] = image_ptr[0][imageIndex];
                 imageIndex++;
                 outIndex += 3;
             }
-
-            return 1;
         }
 
         /// <summary>
         /// This method loads the image into whole_image during the first call on
         /// get_pixel_rows. 
         /// </summary>
-        private int preloadImage()
+        private void preloadImage()
         {
             /* Read the data into a virtual array in input-file row order. */
-            for (int row = 0; row < m_compressor.Image_height; row++)
+            for (int row = 0; row < m_imageHeight; row++)
             {
                 byte[][] image_ptr = m_wholeImage.access_virt_sarray(row, 1);
                 int imageIndex = 0;
@@ -317,7 +314,7 @@ namespace LibJpeg
                     /* inline copy of read_byte() for speed */
                     int c = m_inputFile.ReadByte();
                     if (c == -1)
-                        m_compressor.ERREXIT(J_MESSAGE_CODE.JERR_INPUT_EOF);
+                        throw new EndOfStreamException();
 
                     image_ptr[0][imageIndex] = (byte)c;
                     imageIndex++;
@@ -334,24 +331,10 @@ namespace LibJpeg
                     m_pixelRowsMethod = PixelRowsMethod.use24bit;
                     break;
                 default:
-                    m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADDEPTH);
-                    break;
+                    throw new InvalidDataException("Unsupported color depth");
             }
 
-            m_sourceRow = m_compressor.Image_height;
-
-            /* And read the first row */
-            return GetPixelRows();
-        }
-
-        // Read next byte from BMP file
-        private int readByte()
-        {
-            int c = m_inputFile.ReadByte();
-            if (c == -1)
-                m_compressor.ERREXIT(J_MESSAGE_CODE.JERR_INPUT_EOF);
-
-            return c;
+            m_sourceRow = m_imageHeight;
         }
 
         // Read the colormap from a BMP file
@@ -379,15 +362,25 @@ namespace LibJpeg
                     }
                     break;
                 default:
-                    m_compressor.ERREXIT((int)ADDON_MESSAGE_CODE.JERR_BMP_BADCMAP);
-                    break;
+                    throw new InvalidDataException("Bad BMP cmap");
             }
         }
 
-        private static bool readOK(Stream file, byte[] buffer, int offset, int len)
+        // Read next byte from BMP file
+        private int readByte()
         {
-            int read = file.Read(buffer, offset, len);
-            return (read == len);
+            int c = m_inputFile.ReadByte();
+            if (c == -1)
+                throw new EndOfStreamException();
+
+            return c;
+        }
+
+        private void read(byte[] buffer, int offset, int len)
+        {
+            int read = m_inputFile.Read(buffer, offset, len);
+            if (read != len)
+                throw new EndOfStreamException();
         }
 
         private static int get2bytes(byte[] array, int offset)
