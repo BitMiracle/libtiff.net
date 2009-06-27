@@ -7,6 +7,9 @@ using LibJpeg.Classic;
 
 namespace LibJpeg
 {
+    /// <summary>
+    /// Holds parameters of image for decompression (IDecomressDesination)
+    /// </summary>
 #if EXPOSE_LIBJPEG
     public
 #endif
@@ -190,20 +193,42 @@ namespace LibJpeg
         }
     }
 
+    /// <summary>
+    /// Common interface for processing of decompression.
+    /// </summary>
 #if EXPOSE_LIBJPEG
     public
 #endif
     interface IDecompressDestination
     {
+        /// <summary>
+        /// Strean with decompressed data
+        /// </summary>
         Stream Output
         {
             get;
         }
 
+        /// <summary>
+        /// Implementor of this interface should process image properties received from decompressor.
+        /// </summary>
+        /// <param name="parameters">Image properties</param>
         void SetImageParameters(ImageParameters parameters);
 
+        /// <summary>
+        /// Called before decompression
+        /// </summary>
         void Start();
+
+        /// <summary>
+        /// It called during decompression - pass row of pixels from JPEG
+        /// </summary>
+        /// <param name="row"></param>
         void ProcessPixelsRow(byte[] row);
+
+        /// <summary>
+        /// Called after decompression
+        /// </summary>
         void Finish();
     }
 

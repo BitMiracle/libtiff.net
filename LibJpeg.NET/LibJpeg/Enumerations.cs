@@ -70,10 +70,10 @@ namespace LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
-    enum ImageFormat
+    enum BitmapFormat
     {
-        BMP, /* BMP format (Windows flavor) */
-        BMP_OS2, /* BMP format (OS/2 flavor) */
+        Windows, /* BMP format (Windows flavor) */
+        OS2 /* BMP format (OS/2 flavor) */
     }
 
     enum ADDON_MESSAGE_CODE

@@ -13,9 +13,32 @@ namespace LibJpeg
 #endif
     interface ICompressSource
     {
-        void Start();
+        int Width
+        { get; }
+
+        int Height
+        { get; }
+
+        Colorspace Colorspace
+        { get; }
+
+        int ComponentsPerPixel
+        { get; }
+
+        int DataPrecision
+        { get; }
+
+        byte DensityUnit
+        { get; }
+
+        int DensityX
+        { get; }
+
+        int DensityY
+        { get; }
+
+        void Reset();
         byte[] GetPixelRow();
-        void Finish();
     }
 
 #if EXPOSE_LIBJPEG
@@ -23,21 +46,11 @@ namespace LibJpeg
 #endif
     class BitmapSource : ICompressSource
     {
-        private enum PixelRowsMethod
-        {
-            preload,
-            use8bit,
-            use24bit
-        }
+        internal delegate void TraceHandler(int lvl, int code, params object[] args);
 
         private Stream m_inputFile;
-        private byte[] m_buffer;
 
-        private jpeg_compress_struct m_compressor;
-        private PixelRowsMethod m_pixelRowsMethod;
-
-        // BMP colormap (converted to my format)
-        private byte[][] m_colorMap;
+        private TraceHandler m_tracer;
 
         // Needed to reverse row order
         private jvirt_sarray_control m_wholeImage;
@@ -45,29 +58,39 @@ namespace LibJpeg
         // Current source row number
         private int m_sourceRow;
 
+        private int m_imageWidth = 0;
+        private int m_imageHeight = 0;
+        private int m_bitsPerPixel = 0;
+
         // Physical width of scanlines in file
         private int m_rowWidth;
 
-        private int m_imageWidth = 0;
-        private int m_imageHeight = 0;
+        // BMP colormap (converted to my format)
+        private byte[][] m_colorMap;
 
-        // remembers 8- or 24-bit format
-        private int m_bitsPerPixel;
+        private byte m_densityUnit = 0;
+        private int m_densityX = 1;
+        private int m_densityY = 1;
 
-        public BitmapSource(jpeg_compress_struct cinfo, Stream input)
+        private int m_startOfDataInStream = -1;
+
+        public BitmapSource(Stream input)
         {
             if (input == null)
                 throw new ArgumentNullException("input");
 
-            m_compressor = cinfo;
             m_inputFile = input;
+
+            parseBitmapHeader();
         }
 
         /// <summary>
         /// Read the file header; detects image size and component count.
         /// </summary>
-        public void Start()
+        private void parseBitmapHeader()
         {
+            m_inputFile.Seek(0, SeekOrigin.Begin);
+
             byte[] bmpfileheader = new byte[14];
             /* Read and verify the bitmap file header */
             read(bmpfileheader, 0, 14);
@@ -109,11 +132,13 @@ namespace LibJpeg
                         case 8:
                             /* colormapped image */
                             mapentrysize = 3;       /* OS/2 uses RGBTRIPLE colormap */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2_MAPPED, m_imageWidth, m_imageHeight);
+                            if (m_tracer != null)
+                                m_tracer(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2_MAPPED, m_imageWidth, m_imageHeight);
                             break;
                         case 24:
                             /* RGB image */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2, m_imageWidth, m_imageHeight);
+                            if (m_tracer != null)
+                                m_tracer(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_OS2, m_imageWidth, m_imageHeight);
                             break;
                         default:
                             throw new InvalidDataException("Unsupported color depth");
@@ -140,11 +165,13 @@ namespace LibJpeg
                         case 8:
                             /* colormapped image */
                             mapentrysize = 4;       /* Windows uses RGBQUAD colormap */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_MAPPED, m_imageWidth, m_imageHeight);
+                            if (m_tracer != null)
+                                m_tracer(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP_MAPPED, m_imageWidth, m_imageHeight);
                             break;
                         case 24:
                             /* RGB image */
-                            m_compressor.TRACEMS(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP, m_imageWidth, m_imageHeight);
+                            if (m_tracer != null)
+                                m_tracer(1, (int)ADDON_MESSAGE_CODE.JTRC_BMP, m_imageWidth, m_imageHeight);
                             break;
                         default:
                             throw new InvalidDataException("Unsupported color depth");
@@ -157,9 +184,9 @@ namespace LibJpeg
                     if (biXPelsPerMeter > 0 && biYPelsPerMeter > 0)
                     {
                         /* Set JFIF density parameters from the BMP data */
-                        m_compressor.X_density = (short)(biXPelsPerMeter / 100); /* 100 cm per meter */
-                        m_compressor.Y_density = (short)(biYPelsPerMeter / 100);
-                        m_compressor.Density_unit = 2;  /* dots/cm */
+                        m_densityX = (int)(biXPelsPerMeter / 100); /* 100 cm per meter */
+                        m_densityY = (int)(biYPelsPerMeter / 100);
+                        m_densityUnit = 2;  /* dots/cm */
                     }
                     break;
                 default:
@@ -201,109 +228,85 @@ namespace LibJpeg
             while ((m_rowWidth & 3) != 0)
                 m_rowWidth++;
 
+            m_startOfDataInStream = (int)m_inputFile.Position;
+        }
+
+        public int Width
+        {
+            get
+            {
+                return m_imageWidth;
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                return m_imageHeight;
+            }
+        }
+
+        public Colorspace Colorspace
+        {
+            get
+            {
+                return Colorspace.RGB;
+            }
+        }
+
+        public int ComponentsPerPixel
+        {
+            get
+            {
+                return 3;
+            }
+        }
+
+        public int DataPrecision
+        {
+            get
+            {
+                return 8;
+            }
+        }
+
+        public byte DensityUnit
+        {
+            get
+            {
+                return m_densityUnit;
+            }
+        }
+
+        public int DensityX
+        {
+            get
+            {
+                return m_densityX;
+            }
+        }
+
+        public int DensityY
+        {
+            get
+            {
+                return m_densityY;
+            }
+        }
+
+        internal void SetTracer(TraceHandler tracer)
+        {
+            m_tracer = tracer;
+        }
+
+        public void Reset()
+        {
+            m_inputFile.Seek(m_startOfDataInStream, SeekOrigin.Begin);
+
             /* Allocate space for inversion array, prepare for preload pass */
             m_wholeImage = new jvirt_sarray_control(m_rowWidth, m_imageHeight);
-            m_pixelRowsMethod = PixelRowsMethod.preload;
 
-            /* Allocate one-row buffer for returned data */
-            m_buffer = new byte[m_imageWidth * 3];
-
-            m_compressor.In_color_space = J_COLOR_SPACE.JCS_RGB;
-            m_compressor.Input_components = 3;
-            m_compressor.Data_precision = 8;
-            m_compressor.Image_width = m_imageWidth;
-            m_compressor.Image_height = m_imageHeight;
-        }
-
-        public byte[] GetPixelRow()
-        {
-            if (m_pixelRowsMethod == PixelRowsMethod.preload)
-                preloadImage();
-
-            if (m_pixelRowsMethod == PixelRowsMethod.use8bit)
-                get8bitRow();
-            else if (m_pixelRowsMethod == PixelRowsMethod.use24bit)
-                get24bitRow();
-            else
-                Debug.Fail("");
-
-            return m_buffer;
-        }
-
-        // Finish up at the end of the file.
-        public void Finish()
-        {
-            // no work
-        }
-
-        /// <summary>
-        /// Read one row of pixels. 
-        /// The image has been read into the whole_image array, but is otherwise
-        /// unprocessed.  We must read it out in top-to-bottom row order, and if
-        /// it is an 8-bit image, we must expand colormapped pixels to 24bit format.
-        /// This version is for reading 8-bit colormap indexes.
-        /// </summary>
-        private void get8bitRow()
-        {
-            /* Fetch next row from virtual array */
-            m_sourceRow--;
-
-            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_sourceRow, 1);
-
-            /* Expand the colormap indexes to real data */
-            int imageIndex = 0;
-            int outIndex = 0;
-            for (int col = m_imageWidth; col > 0; col--)
-            {
-                int t = image_ptr[0][imageIndex];
-                imageIndex++;
-
-                m_buffer[outIndex] = m_colorMap[0][t]; /* can omit GETbyte() safely */
-                outIndex++;
-                m_buffer[outIndex] = m_colorMap[1][t];
-                outIndex++;
-                m_buffer[outIndex] = m_colorMap[2][t];
-                outIndex++;
-            }
-        }
-
-        /// <summary>
-        /// Read one row of pixels. 
-        /// The image has been read into the whole_image array, but is otherwise
-        /// unprocessed.  We must read it out in top-to-bottom row order, and if
-        /// it is an 8-bit image, we must expand colormapped pixels to 24bit format.
-        /// This version is for reading 24-bit pixels.
-        /// </summary>
-        private void get24bitRow()
-        {
-            /* Fetch next row from virtual array */
-            m_sourceRow--;
-            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_sourceRow, 1);
-
-            /* Transfer data.  Note source values are in BGR order
-             * (even though Microsoft's own documents say the opposite).
-             */
-            int imageIndex = 0;
-            int outIndex = 0;
-
-            for (int col = m_imageWidth; col > 0; col--)
-            {
-                m_buffer[outIndex + 2] = image_ptr[0][imageIndex];   /* can omit GETbyte() safely */
-                imageIndex++;
-                m_buffer[outIndex + 1] = image_ptr[0][imageIndex];
-                imageIndex++;
-                m_buffer[outIndex] = image_ptr[0][imageIndex];
-                imageIndex++;
-                outIndex += 3;
-            }
-        }
-
-        /// <summary>
-        /// This method loads the image into whole_image during the first call on
-        /// get_pixel_rows. 
-        /// </summary>
-        private void preloadImage()
-        {
             /* Read the data into a virtual array in input-file row order. */
             for (int row = 0; row < m_imageHeight; row++)
             {
@@ -321,20 +324,84 @@ namespace LibJpeg
                 }
             }
 
-            /* Set up to read from the virtual array in top-to-bottom order */
-            switch (m_bitsPerPixel)
+            m_sourceRow = m_imageHeight;
+        }
+
+        public byte[] GetPixelRow()
+        {
+            if (m_bitsPerPixel == 8)
+                return get8bitRow();
+            else if (m_bitsPerPixel == 24)
+                return get24bitRow();
+            else
+                throw new InvalidOperationException();
+        }
+
+        /// <summary>
+        /// Read one row of pixels. 
+        /// The image has been read into the whole_image array, but is otherwise
+        /// unprocessed.  We must read it out in top-to-bottom row order, and if
+        /// it is an 8-bit image, we must expand colormapped pixels to 24bit format.
+        /// This version is for reading 8-bit colormap indexes.
+        /// </summary>
+        private byte[] get8bitRow()
+        {
+            /* Fetch next row from virtual array */
+            m_sourceRow--;
+
+            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_sourceRow, 1);
+            byte[] result = new byte[m_imageWidth * 3];
+
+            /* Expand the colormap indexes to real data */
+            int imageIndex = 0;
+            int outIndex = 0;
+            for (int col = m_imageWidth; col > 0; col--)
             {
-                case 8:
-                    m_pixelRowsMethod = PixelRowsMethod.use8bit;
-                    break;
-                case 24:
-                    m_pixelRowsMethod = PixelRowsMethod.use24bit;
-                    break;
-                default:
-                    throw new InvalidDataException("Unsupported color depth");
+                int t = image_ptr[0][imageIndex];
+                imageIndex++;
+
+                result[outIndex] = m_colorMap[0][t]; /* can omit GETbyte() safely */
+                outIndex++;
+                result[outIndex] = m_colorMap[1][t];
+                outIndex++;
+                result[outIndex] = m_colorMap[2][t];
+                outIndex++;
             }
 
-            m_sourceRow = m_imageHeight;
+            return result;
+        }
+
+        /// <summary>
+        /// Read one row of pixels. 
+        /// The image has been read into the whole_image array, but is otherwise
+        /// unprocessed.  We must read it out in top-to-bottom row order, and if
+        /// it is an 8-bit image, we must expand colormapped pixels to 24bit format.
+        /// This version is for reading 24-bit pixels.
+        /// </summary>
+        private byte[] get24bitRow()
+        {
+            /* Fetch next row from virtual array */
+            m_sourceRow--;
+            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_sourceRow, 1);
+            byte[] result = new byte[m_imageWidth * 3];
+            /* Transfer data.  Note source values are in BGR order
+             * (even though Microsoft's own documents say the opposite).
+             */
+            int imageIndex = 0;
+            int outIndex = 0;
+
+            for (int col = m_imageWidth; col > 0; col--)
+            {
+                result[outIndex + 2] = image_ptr[0][imageIndex];   /* can omit GETbyte() safely */
+                imageIndex++;
+                result[outIndex + 1] = image_ptr[0][imageIndex];
+                imageIndex++;
+                result[outIndex] = image_ptr[0][imageIndex];
+                imageIndex++;
+                outIndex += 3;
+            }
+
+            return result;
         }
 
         // Read the colormap from a BMP file

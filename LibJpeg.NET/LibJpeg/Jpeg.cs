@@ -8,6 +8,9 @@ using LibJpeg.Classic;
 
 namespace LibJpeg
 {
+    /// <summary>
+    /// Class for JPEG compression and decompression
+    /// </summary>
 #if EXPOSE_LIBJPEG
     public
 #endif
@@ -19,6 +22,9 @@ namespace LibJpeg
         private CompressionParameters m_compressionParameters = new CompressionParameters();
         private DecompressionParameters m_decompressionParameters = new DecompressionParameters();
 
+        /// <summary>
+        /// Advanced users may set specific parameters of compression
+        /// </summary>
         public CompressionParameters CompressionParameters
         {
             get
@@ -34,6 +40,9 @@ namespace LibJpeg
             }
         }
 
+        /// <summary>
+        /// Advanced users may set specific parameters of decompression
+        /// </summary>
         public DecompressionParameters DecompressionParameters
         {
             get
@@ -49,38 +58,54 @@ namespace LibJpeg
             }
         }
 
-        public void Compress(Stream input, Stream output)
+        /// <summary>
+        /// Compresses bitmap to JPEG
+        /// </summary>
+        /// <param name="input">Stream with bitmap data</param>
+        /// <param name="output">Stream for output of compressed JPEG</param>
+        public void CompressBitmap(Stream inputBitmap, Stream output)
         {
-            if (input == null)
-                throw new ArgumentNullException("input");
+            BitmapSource source = new BitmapSource(inputBitmap);
+            source.SetTracer(m_compressor.TRACEMS);
+            Compress(source, output);
+        }
+
+        /// <summary>
+        /// Compresses any image described as ICompressSource to JPEG
+        /// </summary>
+        /// <param name="source">Contains description of input image</param>
+        /// <param name="output">Stream for output of compressed JPEG</param>
+        public void Compress(ICompressSource source, Stream output)
+        {
+            if (source == null)
+                throw new ArgumentNullException("source");
 
             if (output == null)
                 throw new ArgumentNullException("output");
 
-            /* Initialize JPEG parameters.
-             * Much of this may be overridden later.
-             * In particular, we don't yet know the input file's color space,
-             * but we need to provide some value for jpeg_set_defaults() to work.
-             */
+            m_compressor.Image_width = source.Width;
+            m_compressor.Image_height = source.Height;
+            m_compressor.In_color_space = (J_COLOR_SPACE)source.Colorspace;
+            m_compressor.Input_components = source.ComponentsPerPixel;
+            m_compressor.Data_precision = source.DataPrecision;
 
-            m_compressor.In_color_space = J_COLOR_SPACE.JCS_RGB; /* arbitrary guess */
             m_compressor.jpeg_set_defaults();
 
-            /* Figure out the input file format, and set up to read it. */
-            BitmapSource source = new BitmapSource(m_compressor, input);
-
-            /* Read the input file header to obtain file size & colorspace. */
-            source.Start();
+            //we need to set density parameters after setting of default jpeg parameters
+            m_compressor.Density_unit = source.DensityUnit;
+            m_compressor.X_density = (short)source.DensityX;
+            m_compressor.Y_density = (short)source.DensityY;
 
             applyParameters(m_compressionParameters);
 
-            /* Specify data destination for compression */
+            // Specify data destination for compression
             m_compressor.jpeg_stdio_dest(output);
 
-            /* Start compressor */
+            // Start compression
             m_compressor.jpeg_start_compress(true);
 
-            /* Process data */
+            // Process  pixels
+            source.Reset();
             while (m_compressor.Next_scanline < m_compressor.Image_height)
             {
                 byte[] row = source.GetPixelRow();
@@ -92,20 +117,27 @@ namespace LibJpeg
                 m_compressor.jpeg_write_scanlines(rowForDecompressor, 1);
             }
 
-            /* Finish compression and release memory */
-            source.Finish();
+            // Finish compression and release memory
             m_compressor.jpeg_finish_compress();
         }
 
-        public void Decompress(Stream jpeg, Stream output)
+        /// <summary>
+        /// Decompresses JPEG image to bitmap
+        /// </summary>
+        /// <param name="jpeg">Stream with JPEG data</param>
+        /// <param name="outputBitmap">Stream with resulted bitmap</param>
+        /// <param name="bitmapFormat">Expected format of resulted bitmap</param>
+        public void DecompressToBitmap(Stream jpeg, Stream outputBitmap, BitmapFormat bitmapFormat)
         {
-            /* Initialize the output module now to let it override any crucial
-             * option settings (for instance, GIF wants to force color quantization).
-             */
-            IDecompressDestination destination = new BitmapDestination(output, m_decompressionParameters.OutputImageFormat == ImageFormat.BMP_OS2);
+            IDecompressDestination destination = new BitmapDestination(outputBitmap, bitmapFormat == BitmapFormat.OS2);
             Decompress(jpeg, destination);
         }
 
+        /// <summary>
+        /// Decompresses JPEG image to any image described as ICompressDestination
+        /// </summary>
+        /// <param name="jpeg">Stream with JPEG data</param>
+        /// <param name="destination">Stream for output of compressed JPEG</param>
         public void Decompress(Stream jpeg, IDecompressDestination destination)
         {
             if (jpeg == null)
@@ -116,12 +148,11 @@ namespace LibJpeg
 
             beforeDecompress(jpeg);
 
-            /* Start decompressor */
+            // Start decompression
             m_decompressor.jpeg_start_decompress();
 
-            ImageParameters parameters = createOutputImageParameters();
+            ImageParameters parameters = getImageParametersFromDecompressor();
             destination.SetImageParameters(parameters);
-            /* Write output file header */
             destination.Start();
 
             /* Process data */
@@ -132,14 +163,16 @@ namespace LibJpeg
                 destination.ProcessPixelsRow(row[0]);
             }
 
-            /* Finish decompression and release memory.
-             * I must do it in this order because output module has allocated memory
-             * of lifespan JPOOL_IMAGE; it needs to finish before releasing memory.
-             */
             destination.Finish();
+
+            // Finish decompression and release memory.
             m_decompressor.jpeg_finish_decompress();
         }
 
+        /// <summary>
+        /// Tunes decompressor
+        /// </summary>
+        /// <param name="jpeg">Stream with input compressed JPEG data</param>
         private void beforeDecompress(Stream jpeg)
         {
             m_decompressor.jpeg_stdio_src(jpeg);
@@ -150,7 +183,7 @@ namespace LibJpeg
             m_decompressor.jpeg_calc_output_dimensions();
         }
 
-        private ImageParameters createOutputImageParameters()
+        private ImageParameters getImageParametersFromDecompressor()
         {
             ImageParameters result = new ImageParameters();
             result.Colorspace = (Colorspace)m_decompressor.Out_color_space;
@@ -194,12 +227,6 @@ namespace LibJpeg
         {
             jpeg_decompress_struct.jpeg_marker_parser_method f = delegate { return routine(this); };
             m_decompressor.jpeg_set_marker_processor(markerCode, f);
-        }
-
-        /* Control saving of COM and APPn markers into marker_list. */
-        public void SaveMarkers(int markerCode, int lengthLimit)
-        {
-            m_decompressor.jpeg_save_markers(markerCode, lengthLimit);
         }
 
         private void applyParameters(DecompressionParameters parameters)

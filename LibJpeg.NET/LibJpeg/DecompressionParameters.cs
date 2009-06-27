@@ -26,7 +26,6 @@ namespace LibJpeg
         private bool m_enableOnePassQuantizer = false;
         private bool m_enableExternalQuant = false;
         private bool m_enableTwoPassQuantizer = false;
-        private ImageFormat m_imageFormat = ImageFormat.BMP;
         private int m_traceLevel = 0;
 
         public int TraceLevel
@@ -38,18 +37,6 @@ namespace LibJpeg
             set
             {
                 m_traceLevel = value;
-            }
-        }
-
-        public ImageFormat OutputImageFormat
-        {
-            get
-            {
-                return m_imageFormat;
-            }
-            set
-            {
-                m_imageFormat = value;
             }
         }
 
