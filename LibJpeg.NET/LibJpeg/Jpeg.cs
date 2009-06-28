@@ -75,7 +75,7 @@ namespace LibJpeg
         /// </summary>
         /// <param name="source">Contains description of input image</param>
         /// <param name="output">Stream for output of compressed JPEG</param>
-        public void Compress(ICompressSource source, Stream output)
+        public void Compress(INonCompressedImage source, Stream output)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
@@ -105,7 +105,7 @@ namespace LibJpeg
             m_compressor.jpeg_start_compress(true);
 
             // Process  pixels
-            source.Reset();
+            source.Start();
             while (m_compressor.Next_scanline < m_compressor.Image_height)
             {
                 byte[] row = source.GetPixelRow();
@@ -116,6 +116,7 @@ namespace LibJpeg
                 rowForDecompressor[0] = row;
                 m_compressor.jpeg_write_scanlines(rowForDecompressor, 1);
             }
+            source.Finish();
 
             // Finish compression and release memory
             m_compressor.jpeg_finish_compress();
