@@ -274,4 +274,144 @@ namespace LibJpeg
                 m_compressor.jpeg_simple_progression();
         }
     }
+
+    class JpegImage
+    {
+        public JpegImage(System.Drawing.Bitmap bitmap)
+        {
+        }
+
+        public JpegImage(System.Drawing.Bitmap bitmap, CompressionParameters parameters)
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="imageData">Only jpeg compressed data. Theoretically this may be arbitrary image data, but really
+        ///                         we can only process here only images which are supported by System.Drawing.Bitmap.
+        ///                         So let's use first constructor for this case.
+        /// </param>
+        public JpegImage(Stream imageData)
+        {
+        }
+
+        public JpegImage(Stream imageData, DecompressionParameters parameters)
+        {
+        }
+
+        public int Width
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public short BitsPerComponent
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public short ComponentsPerSample
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public Colorspace Colorspace
+        {
+            get
+            {
+                return Colorspace.Unknown;
+            }
+        }
+
+        public RowOfSamples GetRow(int rowNumber)
+        {
+            return new RowOfSamples();
+        }
+
+        public void WriteCompressed(Stream output)
+        {
+        }
+
+        public void WriteDecompressed(Stream output)
+        {
+        }
+
+        public System.Drawing.Bitmap ToBitmap()
+        {
+            return null;
+        }
+    }
+
+    class RowOfSamples
+    {
+        public int SampleCount
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public float GetSampleAt(int sampleNumber)
+        {
+            return 0;
+        }
+
+        public float this[int sampleNumber]
+        {
+            get
+            {
+                return GetSampleAt(sampleNumber);
+            }
+        }
+    }
+
+    class Sample
+    {
+        public short BitsPerComponent
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public short ComponentCount
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        public float GetComponent(int componentNumber)
+        {
+            return 0;
+        }
+
+        public float this[int componentNumber]
+        {
+            get
+            {
+                return GetComponent(componentNumber);
+            }
+        }
+    }
 }
