@@ -39,7 +39,9 @@
   <ItemGroup>
     <Compile Include="AssemblyVersion.cs" />
     <Compile Include="BitmapDestination.cs" />
+    <Compile Include="BitmapImage.cs" />
     <Compile Include="BitmapSource.cs" />
+    <Compile Include="BitStream.cs" />
     <Compile Include="Classic\Internal\bitread_perm_state.cs" />
     <Compile Include="Classic\Internal\bitread_working_state.cs" />
     <Compile Include="Classic\Internal\d_derived_tbl.cs" />
@@ -103,8 +105,10 @@
     <Compile Include="DecompressionParameters.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="Jpeg.cs" />
+    <Compile Include="JpegImage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classic\ReadResult.cs" />
+    <Compile Include="Samples.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -250,7 +250,6 @@ namespace LibJpeg
         private bool m_isOS2 = false;        /* saves the OS2 format request flag */
 
         private jvirt_sarray_control m_wholeImage = null;  /* needed to reverse row order */
-        private int m_dataWidth = 0;  /* bytes per row */
         private int m_rowWidth = 0;       /* physical width of one row in the BMP file */
         private int m_padBytes = 0;      /* number of padding bytes needed per row */
         private int m_currentOutputRow = 0;  /* next row# to write to virtual array */
@@ -291,19 +290,19 @@ namespace LibJpeg
             else
                 throw new ArgumentException("Image format is unsupported");
 
-            /* Determine width of rows in the BMP file (padded to 4-byte boundary). */
+            //Determine width of rows in the BMP file (padded to 4-byte boundary).
             m_rowWidth = m_parameters.Width * m_parameters.Components;
-            m_dataWidth = m_rowWidth;
+            int dataWidth = m_rowWidth;
             while ((m_rowWidth & 3) != 0)
                 m_rowWidth++;
 
-            m_padBytes = (int)(m_rowWidth - m_dataWidth);
+            m_padBytes = (int)(m_rowWidth - dataWidth);
 
-            /* Allocate space for inversion array, prepare for write pass */
+            //Allocate space for inversion array, prepare for write pass
             m_wholeImage = new jvirt_sarray_control(m_rowWidth, m_parameters.Height);
             m_currentOutputRow = 0;
 
-            /* Create decompressor output buffer. */
+            //Create decompressor output buffer.
             m_buffer = jpeg_common_struct.AllocJpegSamples(m_rowWidth, 1);
         }
 

@@ -152,7 +152,7 @@ namespace LibJpeg
                 Color color = m_bitmap.GetPixel(i, m_scanLine);
                 rgbValues[i * 3] = color.R;
                 rgbValues[i * 3 + 1] = color.G;
-                rgbValues[i * 3 + 2] = color.B;
+                rgbValues[i * 3 + 2] = color.B; 
             }
             ++m_scanLine;
             return rgbValues;

@@ -50,6 +50,7 @@ namespace LibJpeg.Classic.Internal
         public void Attach(Stream infile)
         {
             m_infile = infile;
+            m_infile.Seek(0, SeekOrigin.Begin);
             initInternalBuffer(null, 0);
         }
 
