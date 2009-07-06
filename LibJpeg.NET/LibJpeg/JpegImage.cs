@@ -24,26 +24,16 @@ namespace LibJpeg
 
         public JpegImage(System.Drawing.Bitmap bitmap)
         {
-            if (bitmap == null)
-                throw new ArgumentNullException("bitmap");
-
-            m_bitmap = bitmap;
-            processPixelFormat(m_bitmap.PixelFormat);
-
+            initializeFromBitmap(bitmap);
             compress();
         }
 
         public JpegImage(System.Drawing.Bitmap bitmap, CompressionParameters parameters)
         {
-            if (bitmap == null)
-                throw new ArgumentNullException("bitmap");
-
             if (parameters == null)
                 throw new ArgumentNullException("parameters");
 
-            m_bitmap = bitmap;
-            processPixelFormat(m_bitmap.PixelFormat);
-
+            initializeFromBitmap(bitmap);
             compress(parameters);
         }
 
@@ -117,7 +107,7 @@ namespace LibJpeg
 
         public RowOfSamples GetRow(int rowNumber)
         {
-            return null;
+            return m_rows[rowNumber];
         }
 
         public void WriteCompressed(Stream output)
@@ -135,6 +125,16 @@ namespace LibJpeg
             return m_bitmap;
         }
 
+
+        private void initializeFromBitmap(Bitmap bitmap)
+        {
+            if (bitmap == null)
+                throw new ArgumentNullException("bitmap");
+
+            m_bitmap = bitmap;
+            processPixelFormat(m_bitmap.PixelFormat);
+            fillSamplesFromBitmap();
+        }
 
         private void compress()
         {
@@ -233,6 +233,23 @@ namespace LibJpeg
 
                 default:
                     throw new ArgumentException("Unsupported pixel format");
+            }
+        }
+
+        private void fillSamplesFromBitmap()
+        {
+            for (int i = 0; i < Height; ++i)
+            {
+                Rectangle rect = new Rectangle(0, i, m_bitmap.Width, 1);
+                BitmapData bitmapData = m_bitmap.LockBits(rect, ImageLockMode.ReadOnly, m_bitmap.PixelFormat);
+
+                IntPtr ptr = bitmapData.Scan0;
+                int byteCount  = bitmapData.Stride * m_bitmap.Height;
+                byte[] bytes = new byte[byteCount];
+                System.Runtime.InteropServices.Marshal.Copy(ptr, bytes, 0, byteCount);
+                
+                m_rows.Add(new RowOfSamples(bytes, Width, m_bitsPerComponent, m_componentsPerSample));
+                m_bitmap.UnlockBits(bitmapData);
             }
         }
     }
