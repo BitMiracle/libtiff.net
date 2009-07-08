@@ -11,35 +11,65 @@ namespace LibJpeg
         private Stream m_stream;
         private int m_positionInByte;
 
-        public BitStream(byte[] buffer)
+        private int m_size;
+
+        public BitStream()
         {
-            m_stream = new MemoryStream(buffer);
+            m_stream = new MemoryStream();
             m_positionInByte = 0;
+
+            m_size = 0;
         }
 
-        /*public BitStream(Stream stream)
+        public BitStream(byte[] buffer)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
 
-            m_stream = stream.Clone();
-            m_stream.Seek(0, SeekOrigin.Begin);
+            m_stream = new MemoryStream(buffer);
             m_positionInByte = 0;
-        }*/
 
-        //public virtual ~BitStream();
+            m_size = bitsAllocated();
+        }
 
         public int Size()
         {
-            return (int)m_stream.Length * bitsInByte;
+            return m_size;
+        }
+
+        public Stream UnderlyingStream
+        {
+            get
+            {
+                return m_stream;
+            }
         }
 
         public virtual int Read(int bitCount)
         {
-            if (Tell() + bitCount > Size())
-                throw new ArgumentException("Can't read bitCount bits");
+            if (Tell() + bitCount > bitsAllocated())
+                throw new ArgumentOutOfRangeException("bitCount");
 
             return read(bitCount);
+        }
+
+        public int Write(int bitStorage, int bitCount)
+        {
+            if (bitCount == 0)
+                return 0;
+
+            const int maxBitsInStorage = sizeof(int) * bitsInByte;
+            if (bitCount > maxBitsInStorage)
+                throw new ArgumentOutOfRangeException("bitCount");
+
+            for (int i = 0; i < (int)bitCount; ++i)
+            {
+                byte bit = (byte)((bitStorage << (maxBitsInStorage - (bitCount - i))) >> (maxBitsInStorage - 1));
+                if (!writeBit(bit))
+                    return (int)i;
+            }
+
+            return bitCount;
         }
 
         public void Seek(int pos, SeekOrigin mode)
@@ -53,6 +83,10 @@ namespace LibJpeg
                 case SeekOrigin.Current:
                     seekCurrent(pos);
                     break;
+
+                case SeekOrigin.End:
+                    seekSet(Size() + pos);
+                    break;
             }
         }
 
@@ -61,12 +95,23 @@ namespace LibJpeg
             return (int)m_stream.Position * bitsInByte + m_positionInByte;
         }
 
+        private int bitsAllocated()
+        {
+            return (int)m_stream.Length * bitsInByte;
+        }
+
         private int read(int bitsCount)
         {
             //Codes are packed into a continuous bit stream, high-order bit first. 
             //This stream is then divided into 8-bit bytes, high-order bit first. 
             //Thus, codes can straddle byte boundaries arbitrarily. After the EOD marker (code value 257), 
             //any leftover bits in the final byte are set to 0.
+
+            if (bitsCount < 0 || bitsCount > 32)
+                throw new ArgumentOutOfRangeException("bitsCount");
+
+            if (bitsCount == 0)
+                return 0;
 
             int bitsRead = 0;
             int result = 0;
@@ -89,10 +134,44 @@ namespace LibJpeg
                 m_stream.Seek(-1, SeekOrigin.Current);
             }
 
-            int mask = ((1 << bitsCount) - 1);
-            result = result & mask;
+            if (bitsCount < 32)
+            {
+                int mask = ((1 << bitsCount) - 1);
+                result = result & mask;
+            }
 
             return result;
+        }
+
+        private bool writeBit(byte bit)
+        {
+            if (m_stream.Position == m_stream.Length)
+            {
+                byte[] bt = { (byte)(bit << (bitsInByte - 1)) };
+                m_stream.Write(bt, 0, 1);
+                m_stream.Seek(-1, SeekOrigin.Current);
+            }
+            else
+            {
+                byte[] bt = { 0 };
+                m_stream.Read(bt, 0, 1);
+                m_stream.Seek(-1, SeekOrigin.Current);
+
+                int shift = (bitsInByte - m_positionInByte - 1) % bitsInByte;
+                byte maskByte = (byte)(bit << shift);
+
+                bt[0] |= maskByte;
+                m_stream.Write(bt, 0, 1);
+                m_stream.Seek(-1, SeekOrigin.Current);
+            }
+
+            Seek(1, SeekOrigin.Current);
+
+            int currentPosition = Tell();
+            if (currentPosition > m_size)
+                m_size = currentPosition;
+
+            return true;
         }
 
         private void seekSet(int pos)
@@ -110,8 +189,8 @@ namespace LibJpeg
         private void seekCurrent(int pos)
         {
             int result = Tell() + pos;
-            if (result < 0 || result > Size())
-                throw new ArgumentException("Wrong position");
+            if (result < 0 || result > bitsAllocated())
+                throw new ArgumentOutOfRangeException("pos");
 
             seekSet(result);
         }

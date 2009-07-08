@@ -238,18 +238,19 @@ namespace LibJpeg
 
         private void fillSamplesFromBitmap()
         {
-            for (int i = 0; i < Height; ++i)
-            {
-                Rectangle rect = new Rectangle(0, i, m_bitmap.Width, 1);
-                BitmapData bitmapData = m_bitmap.LockBits(rect, ImageLockMode.ReadOnly, m_bitmap.PixelFormat);
+            Debug.Assert(m_componentsPerSample == 3);
 
-                IntPtr ptr = bitmapData.Scan0;
-                int byteCount  = bitmapData.Stride * m_bitmap.Height;
-                byte[] bytes = new byte[byteCount];
-                System.Runtime.InteropServices.Marshal.Copy(ptr, bytes, 0, byteCount);
-                
-                m_rows.Add(new RowOfSamples(bytes, Width, m_bitsPerComponent, m_componentsPerSample));
-                m_bitmap.UnlockBits(bitmapData);
+            for (int y = 0; y < Height; ++y)
+            {
+                short[] samples = new short[Width * 3];
+                for (int x = 0; x < Width; ++x)
+                {
+                    Color color = m_bitmap.GetPixel(x, y);
+                    samples[x * 3] = color.R;
+                    samples[x * 3 + 1] = color.G;
+                    samples[x * 3 + 2] = color.B;
+                }
+                m_rows.Add(new RowOfSamples(samples, m_bitsPerComponent, m_componentsPerSample));
             }
         }
     }
