@@ -6,12 +6,14 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
+using LibJpeg.Classic;
+
 namespace LibJpeg
 {
 #if EXPOSE_LIBJPEG
     public
 #endif
- class JpegImage
+ class JpegImage : IDecompressDestination
     {
         private Bitmap m_bitmap;
         private MemoryStream m_compressedData = new MemoryStream();
@@ -24,45 +26,23 @@ namespace LibJpeg
 
         public JpegImage(System.Drawing.Bitmap bitmap)
         {
-            initializeFromBitmap(bitmap);
-            compress();
+            createFromBitmap(bitmap);
         }
 
-        public JpegImage(System.Drawing.Bitmap bitmap, CompressionParameters parameters)
-        {
-            if (parameters == null)
-                throw new ArgumentNullException("parameters");
-
-            initializeFromBitmap(bitmap);
-            compress(parameters);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="imageData">Only jpeg compressed data. Theoretically this may be arbitrary image data, but really
-        ///                         we can only process here only images which are supported by System.Drawing.Bitmap.
-        ///                         So let's use first constructor for this case.
-        /// </param>
         public JpegImage(Stream imageData)
         {
             if (imageData == null)
                 throw new ArgumentNullException("imageData");
 
-            m_compressedData = Utils.CopyStream(imageData);
-            decompress();
-        }
-
-        public JpegImage(Stream imageData, DecompressionParameters parameters)
-        {
-            if (imageData == null)
-                throw new ArgumentNullException("imageData");
-
-            if (parameters == null)
-                throw new ArgumentNullException("parameters");
-
-            m_compressedData = Utils.CopyStream(imageData);
-            decompress(parameters);
+            if (isCompressed(imageData))
+            {
+                m_compressedData = Utils.CopyStream(imageData);
+                decompress();
+            }
+            else
+            {
+                createFromBitmap(new Bitmap(imageData));
+            }
         }
 
         public int Width
@@ -125,6 +105,58 @@ namespace LibJpeg
             return m_bitmap;
         }
 
+        //----------- Implementation of IDecompressDestination ----------
+
+        public Stream Output
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public void SetImageParameters(ImageParameters parameters)
+        {
+            m_bitsPerComponent = 8;
+            m_componentsPerSample = (short)parameters.ComponentsPerSample;
+            m_colorspace = parameters.Colorspace;
+        }
+
+        public void Start()
+        {
+        }
+
+        public void ProcessPixelsRow(byte[] row)
+        {
+            RowOfSamples samplesRow = new RowOfSamples(row, m_bitmap.Width, m_bitsPerComponent, m_componentsPerSample);
+            m_rows.Add(samplesRow);
+        }
+
+        public void Finish()
+        {
+        }
+
+        //---------------------
+
+        private static bool isCompressed(Stream imageData)
+        {
+            if (imageData == null)
+                return false;
+
+            if (imageData.Length <= 2)
+                return false;
+
+            imageData.Seek(0, SeekOrigin.Begin);
+            int first = imageData.ReadByte();
+            int second = imageData.ReadByte();
+            return (first == 0xFF && second == (int)JPEG_MARKER.M_SOI);
+        }
+
+        private void createFromBitmap(System.Drawing.Bitmap bitmap)
+        {
+            initializeFromBitmap(bitmap);
+            compress();
+        }
 
         private void initializeFromBitmap(Bitmap bitmap)
         {
@@ -138,38 +170,22 @@ namespace LibJpeg
 
         private void compress()
         {
-            compress(null);
-        }
-
-        private void compress(CompressionParameters parameters)
-        {
             Debug.Assert(m_bitmap != null);
 
-            Jpeg jpeg = new Jpeg();
-            if (parameters != null)
-                jpeg.CompressionParameters = parameters;
             DotNetBitmapSource bitmapSource = new DotNetBitmapSource(m_bitmap);
+            Jpeg jpeg = new Jpeg();
             jpeg.Compress(bitmapSource, m_compressedData);
         }
 
         private void decompress()
         {
-            decompress(null);
-        }
-
-        private void decompress(DecompressionParameters parameters)
-        {
             Debug.Assert(m_compressedData != null);
             Debug.Assert(m_compressedData.Length != 0);
 
+            m_bitmap = new Bitmap(m_compressedData);
+
             Jpeg jpeg = new Jpeg();
-            if (parameters != null)
-                jpeg.DecompressionParameters = parameters;
-
-            MemoryStream decompressed = new MemoryStream();
-            jpeg.DecompressToBitmap(m_compressedData, decompressed, BitmapFormat.Windows);
-
-            m_bitmap = new Bitmap(decompressed);
+            jpeg.Decompress(m_compressedData, this);
         }
 
         private void processPixelFormat(PixelFormat pixelFormat)
