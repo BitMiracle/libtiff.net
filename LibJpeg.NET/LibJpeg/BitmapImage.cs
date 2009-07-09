@@ -1057,6 +1057,29 @@ namespace LibJpeg
 
     class Utils
     {
+        public static MemoryStream CopyStream(Stream imageData)
+        {
+            if (imageData == null)
+                throw new ArgumentNullException("imageData");
+
+            long positionBefore = imageData.Position;
+            imageData.Seek(0, SeekOrigin.Begin);
+
+            MemoryStream result = new MemoryStream((int)imageData.Length);
+
+            byte[] block = new byte[2048];
+            for (; ; )
+            {
+                int bytesRead = imageData.Read(block, 0, 2048);
+                result.Write(block, 0, bytesRead);
+                if (bytesRead < 2048)
+                    break;
+            }
+
+            imageData.Seek(positionBefore, SeekOrigin.Begin);
+            return result;
+        }
+
         public static int memcmp(byte[] left, byte[] right, int length)
         {
             return memcmp(left, 0, right, length);

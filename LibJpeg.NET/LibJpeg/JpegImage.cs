@@ -49,7 +49,7 @@ namespace LibJpeg
             if (imageData == null)
                 throw new ArgumentNullException("imageData");
 
-            copyCompressedData(imageData);
+            m_compressedData = Utils.CopyStream(imageData);
             decompress();
         }
 
@@ -61,7 +61,7 @@ namespace LibJpeg
             if (parameters == null)
                 throw new ArgumentNullException("parameters");
 
-            copyCompressedData(imageData);
+            m_compressedData = Utils.CopyStream(imageData);
             decompress(parameters);
         }
 
@@ -170,28 +170,6 @@ namespace LibJpeg
             jpeg.DecompressToBitmap(m_compressedData, decompressed, BitmapFormat.Windows);
 
             m_bitmap = new Bitmap(decompressed);
-        }
-
-        private void copyCompressedData(Stream imageData)
-        {
-            long positionBefore = imageData.Position;
-            imageData.Seek(0, SeekOrigin.Begin);
-
-            m_compressedData = new MemoryStream((int)imageData.Length);
-            byte[] block = new byte[2048];
-            for (; ; )
-            {
-                int bytesRead = imageData.Read(block, 0, 2048);
-                m_compressedData.Write(block, 0, bytesRead);
-                if (bytesRead < 2048)
-                    break;
-            }
-            imageData.Seek(positionBefore, SeekOrigin.Begin);
-        }
-
-        private void loadRowsFromBitmap()
-        {
-            Debug.Assert(m_bitmap != null);
         }
 
         private void processPixelFormat(PixelFormat pixelFormat)
