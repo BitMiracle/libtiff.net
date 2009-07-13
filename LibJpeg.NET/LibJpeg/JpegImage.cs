@@ -45,6 +45,27 @@ namespace LibJpeg
             }
         }
 
+        public JpegImage(RowOfSamples[] sampleData, Colorspace colorspace)
+        {
+            if (sampleData == null)
+                throw new ArgumentNullException("sampleData");
+
+            if (sampleData.Length == 0)
+                throw new ArgumentException("sampleData must be no empty");
+
+            if (colorspace == Colorspace.Unknown)
+                throw new ArgumentException("Unknown colorspace");
+
+            m_rows = new List<RowOfSamples>(sampleData);
+            Sample firstSample = m_rows[0][0];
+            m_bitsPerComponent = firstSample.BitsPerComponent;
+            m_componentsPerSample = firstSample.ComponentCount;
+            m_colorspace = colorspace;
+
+            compressFromSamples();
+            m_bitmap = new Bitmap(m_compressedData);
+        }
+
         public int Width
         {
             get
@@ -118,6 +139,14 @@ namespace LibJpeg
         }
 
 
+        internal List<RowOfSamples> samples
+        {
+            get
+            {
+                return m_rows;
+            }
+        }
+
         internal void addRowOfSamples(RowOfSamples row)
         {
             if (row == null)
@@ -143,7 +172,7 @@ namespace LibJpeg
         private void createFromBitmap(System.Drawing.Bitmap bitmap)
         {
             initializeFromBitmap(bitmap);
-            compress();
+            compressFromBitmap();
         }
 
         private void initializeFromBitmap(Bitmap bitmap)
@@ -156,13 +185,23 @@ namespace LibJpeg
             fillSamplesFromBitmap();
         }
 
-        private void compress()
+        private void compressFromBitmap()
         {
             Debug.Assert(m_bitmap != null);
 
             DotNetBitmapSource bitmapSource = new DotNetBitmapSource(m_bitmap);
             Jpeg jpeg = new Jpeg();
             jpeg.Compress(bitmapSource, m_compressedData);
+        }
+
+        private void compressFromSamples()
+        {
+            Debug.Assert(m_rows != null);
+            Debug.Assert(m_rows.Count != 0);
+
+            RawImage source = new RawImage(m_rows, m_colorspace);
+            Jpeg jpeg = new Jpeg();
+            jpeg.Compress(source, m_compressedData);
         }
 
         private void decompress()
@@ -173,7 +212,7 @@ namespace LibJpeg
             m_bitmap = new Bitmap(m_compressedData);
 
             Jpeg jpeg = new Jpeg();
-            jpeg.Decompress(m_compressedData, new DecompressDestination(this));
+            jpeg.Decompress(m_compressedData, new DecompressorToJpegImage(this));
         }
 
         private void processPixelFormat(PixelFormat pixelFormat)
@@ -237,11 +276,84 @@ namespace LibJpeg
         }
     }
 
-    class DecompressDestination : IDecompressDestination
+    class RawImage: INonCompressedImage
+    {
+        private List<RowOfSamples> m_samples;
+        private Colorspace m_colorspace;
+
+        private int m_currentRow = -1;
+
+        internal RawImage(List<RowOfSamples> samples, Colorspace colorspace)
+        {
+            Debug.Assert(samples != null);
+            Debug.Assert(samples.Count > 0);
+            Debug.Assert(colorspace != Colorspace.Unknown);
+
+            m_samples = samples;
+            m_colorspace = colorspace;
+        }
+
+        public int Width
+        {
+            get
+            {
+                RowOfSamples firstRow = m_samples[0];
+                return m_samples[0].SampleCount;
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                return m_samples.Count;
+            }
+        }
+
+        public Colorspace Colorspace
+        {
+            get
+            {
+                return m_colorspace;
+            }
+        }
+
+        public int ComponentsPerPixel
+        {
+            get
+            {
+                return m_samples[0][0].ComponentCount;
+            }
+        }
+
+        public void Start()
+        {
+            m_currentRow = 0;
+        }
+
+        public byte[] GetPixelRow()
+        {
+            RowOfSamples row = m_samples[m_currentRow];
+            List<byte> result = new List<byte>();
+            for (int i = 0; i < row.SampleCount; ++i)
+            {
+                Sample sample = row[i];
+                for (int j = 0; j < sample.ComponentCount; ++j)
+                    result.Add((byte)sample[j]);
+            }
+            return result.ToArray();
+        }
+
+        public void Finish()
+        {
+        }
+    }
+
+    class DecompressorToJpegImage : IDecompressDestination
     {
         private JpegImage m_jpegImage;
 
-        internal DecompressDestination(JpegImage jpegImage)
+        internal DecompressorToJpegImage(JpegImage jpegImage)
         {
             m_jpegImage = jpegImage;
         }

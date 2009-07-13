@@ -12,7 +12,7 @@ namespace LibJpeg
         private byte[] m_bytes;
         private Sample[] m_samples;
 
-        internal RowOfSamples(byte[] row, int sampleCount, short bitsPerComponent, short componentsPerSample)
+        public RowOfSamples(byte[] row, int sampleCount, short bitsPerComponent, short componentsPerSample)
         {
             if (row == null)
                 throw new ArgumentNullException("row");
@@ -37,7 +37,7 @@ namespace LibJpeg
                 m_samples[i] = new Sample(bitStream, bitsPerComponent, componentsPerSample);
         }
 
-        internal RowOfSamples(short[] row, short bitsPerComponent, short componentsPerSample)
+        public RowOfSamples(short[] row, short bitsPerComponent, short componentsPerSample)
         {
             if (row == null)
                 throw new ArgumentNullException("row");

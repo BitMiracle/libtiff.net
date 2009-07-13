@@ -25,18 +25,6 @@ namespace LibJpeg
         int ComponentsPerPixel
         { get; }
 
-        int DataPrecision
-        { get; }
-
-        byte DensityUnit
-        { get; }
-
-        int DensityX
-        { get; }
-
-        int DensityY
-        { get; }
-
         void Start();
         byte[] GetPixelRow();
         void Finish();
@@ -84,38 +72,6 @@ namespace LibJpeg
             get
             {
                 return 3;
-            }
-        }
-
-        public int DataPrecision
-        {
-            get
-            {
-                return m_bitmap.Flags;
-            }
-        }
-
-        public byte DensityUnit
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        public int DensityX
-        {
-            get
-            {
-                return 1;
-            }
-        }
-
-        public int DensityY
-        {
-            get
-            {
-                return 1;
             }
         }
 

@@ -10,9 +10,6 @@ namespace LibJpeg
     /// <summary>
     /// Holds parameters of image for decompression (IDecomressDesination)
     /// </summary>
-#if EXPOSE_LIBJPEG
-    public
-#endif
     class ImageParameters
     {
         private Colorspace m_colorspace;

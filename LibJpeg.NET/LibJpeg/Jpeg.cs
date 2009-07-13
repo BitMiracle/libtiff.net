@@ -74,14 +74,14 @@ namespace LibJpeg
             m_compressor.Image_height = source.Height;
             m_compressor.In_color_space = (J_COLOR_SPACE)source.Colorspace;
             m_compressor.Input_components = source.ComponentsPerPixel;
-            m_compressor.Data_precision = source.DataPrecision;
+            //m_compressor.Data_precision = source.DataPrecision;
 
             m_compressor.jpeg_set_defaults();
 
             //we need to set density parameters after setting of default jpeg parameters
-            m_compressor.Density_unit = source.DensityUnit;
-            m_compressor.X_density = (short)source.DensityX;
-            m_compressor.Y_density = (short)source.DensityY;
+            //m_compressor.Density_unit = source.DensityUnit;
+            //m_compressor.X_density = (short)source.DensityX;
+            //m_compressor.Y_density = (short)source.DensityY;
 
             applyParameters(m_compressionParameters);
 
