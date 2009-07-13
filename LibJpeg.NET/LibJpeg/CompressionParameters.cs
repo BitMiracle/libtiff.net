@@ -6,9 +6,6 @@ using LibJpeg.Classic;
 
 namespace LibJpeg
 {
-#if EXPOSE_LIBJPEG
-    public
-#endif
     class CompressionParameters
     {
         private DCTMethod m_dctMethod = (DCTMethod)JpegConstants.JDCT_DEFAULT;

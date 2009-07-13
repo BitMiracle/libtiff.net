@@ -6,9 +6,6 @@ using LibJpeg.Classic;
 
 namespace LibJpeg
 {
-#if EXPOSE_LIBJPEG
-    public
-#endif
     class DecompressionParameters
     {
         private Colorspace m_outColorspace = Colorspace.Unknown;

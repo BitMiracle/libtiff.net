@@ -39,7 +39,6 @@
   <ItemGroup>
     <Compile Include="AssemblyVersion.cs" />
     <Compile Include="BitmapDestination.cs" />
-    <Compile Include="BitmapImage.cs" />
     <Compile Include="BitmapSource.cs" />
     <Compile Include="BitStream.cs" />
     <Compile Include="Classic\Internal\bitread_perm_state.cs" />
@@ -109,6 +108,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classic\ReadResult.cs" />
     <Compile Include="Samples.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

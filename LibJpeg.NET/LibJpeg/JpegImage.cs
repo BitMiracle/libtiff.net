@@ -13,7 +13,7 @@ namespace LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
- class JpegImage : IDecompressDestination
+ class JpegImage
     {
         private Bitmap m_bitmap;
         private MemoryStream m_compressedData = new MemoryStream();
@@ -67,6 +67,10 @@ namespace LibJpeg
             {
                 return m_bitsPerComponent;
             }
+            internal set
+            {
+                m_bitsPerComponent = value;
+            }
         }
 
         public short ComponentsPerSample
@@ -75,6 +79,10 @@ namespace LibJpeg
             {
                 return m_componentsPerSample;
             }
+            internal set
+            {
+                m_componentsPerSample = value;
+            }
         }
 
         public Colorspace Colorspace
@@ -82,6 +90,10 @@ namespace LibJpeg
             get
             {
                 return m_colorspace;
+            }
+            internal set
+            {
+                m_colorspace = value;
             }
         }
 
@@ -105,38 +117,14 @@ namespace LibJpeg
             return m_bitmap;
         }
 
-        //----------- Implementation of IDecompressDestination ----------
 
-        public Stream Output
+        internal void addRowOfSamples(RowOfSamples row)
         {
-            get
-            {
-                return null;
-            }
-        }
+            if (row == null)
+                throw new ArgumentNullException("row");
 
-        public void SetImageParameters(ImageParameters parameters)
-        {
-            m_bitsPerComponent = 8;
-            m_componentsPerSample = (short)parameters.ComponentsPerSample;
-            m_colorspace = parameters.Colorspace;
+            m_rows.Add(row);
         }
-
-        public void Start()
-        {
-        }
-
-        public void ProcessPixelsRow(byte[] row)
-        {
-            RowOfSamples samplesRow = new RowOfSamples(row, m_bitmap.Width, m_bitsPerComponent, m_componentsPerSample);
-            m_rows.Add(samplesRow);
-        }
-
-        public void Finish()
-        {
-        }
-
-        //---------------------
 
         private static bool isCompressed(Stream imageData)
         {
@@ -185,7 +173,7 @@ namespace LibJpeg
             m_bitmap = new Bitmap(m_compressedData);
 
             Jpeg jpeg = new Jpeg();
-            jpeg.Decompress(m_compressedData, this);
+            jpeg.Decompress(m_compressedData, new DecompressDestination(this));
         }
 
         private void processPixelFormat(PixelFormat pixelFormat)
@@ -246,6 +234,45 @@ namespace LibJpeg
                 }
                 m_rows.Add(new RowOfSamples(samples, m_bitsPerComponent, m_componentsPerSample));
             }
+        }
+    }
+
+    class DecompressDestination : IDecompressDestination
+    {
+        private JpegImage m_jpegImage;
+
+        internal DecompressDestination(JpegImage jpegImage)
+        {
+            m_jpegImage = jpegImage;
+        }
+
+        public Stream Output
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public void SetImageParameters(ImageParameters parameters)
+        {
+            m_jpegImage.BitsPerComponent = 8;
+            m_jpegImage.ComponentsPerSample = (short)parameters.ComponentsPerSample;
+            m_jpegImage.Colorspace = parameters.Colorspace;
+        }
+
+        public void Start()
+        {
+        }
+
+        public void ProcessPixelsRow(byte[] row)
+        {
+            RowOfSamples samplesRow = new RowOfSamples(row, m_jpegImage.Width, m_jpegImage.BitsPerComponent, m_jpegImage.ComponentsPerSample);
+            m_jpegImage.addRowOfSamples(samplesRow);
+        }
+
+        public void Finish()
+        {
         }
     }
 }

@@ -11,11 +11,8 @@ using LibJpeg.Classic;
 namespace LibJpeg
 {
     /// <summary>
-    /// Class for JPEG compression and decompression
+    /// Internal wrapper for classic jpeg compressor and decompressor
     /// </summary>
-#if EXPOSE_LIBJPEG
-    public
-#endif
     class Jpeg
     {
         private jpeg_compress_struct m_compressor = new jpeg_compress_struct(new jpeg_error_mgr());
@@ -58,18 +55,6 @@ namespace LibJpeg
 
                 m_decompressionParameters = value;
             }
-        }
-
-        /// <summary>
-        /// Compresses bitmap to JPEG
-        /// </summary>
-        /// <param name="input">Stream with bitmap data</param>
-        /// <param name="output">Stream for output of compressed JPEG</param>
-        public void CompressBitmap(Stream inputBitmap, Stream output)
-        {
-            BitmapSource source = new BitmapSource(inputBitmap);
-            source.SetTracer(m_compressor.TRACEMS);
-            Compress(source, output);
         }
 
         /// <summary>
@@ -122,18 +107,6 @@ namespace LibJpeg
 
             // Finish compression and release memory
             m_compressor.jpeg_finish_compress();
-        }
-
-        /// <summary>
-        /// Decompresses JPEG image to bitmap
-        /// </summary>
-        /// <param name="jpeg">Stream with JPEG data</param>
-        /// <param name="outputBitmap">Stream with resulted bitmap</param>
-        /// <param name="bitmapFormat">Expected format of resulted bitmap</param>
-        public void DecompressToBitmap(Stream jpeg, Stream outputBitmap, BitmapFormat bitmapFormat)
-        {
-            IDecompressDestination destination = new BitmapDestination(outputBitmap, bitmapFormat == BitmapFormat.OS2);
-            Decompress(jpeg, destination);
         }
 
         /// <summary>

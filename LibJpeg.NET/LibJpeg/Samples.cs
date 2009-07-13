@@ -7,7 +7,7 @@ namespace LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
- class RowOfSamples
+    class RowOfSamples
     {
         private byte[] m_bytes;
         private Sample[] m_samples;
@@ -98,7 +98,7 @@ namespace LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
- class Sample
+    class Sample
     {
         private short[] m_components;
         private short m_bitsPerComponent;
