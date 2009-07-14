@@ -18,10 +18,10 @@ namespace LibJpeg
         private Bitmap m_bitmap;
         private MemoryStream m_compressedData = new MemoryStream();
 
-        private List<RowOfSamples> m_rows = new List<RowOfSamples>();
+        private List<SampleRow> m_rows = new List<SampleRow>();
 
-        private short m_bitsPerComponent;
-        private short m_componentsPerSample;
+        private byte m_bitsPerComponent;
+        private byte m_componentsPerSample;
         private Colorspace m_colorspace;
 
         public JpegImage(System.Drawing.Bitmap bitmap)
@@ -45,7 +45,7 @@ namespace LibJpeg
             }
         }
 
-        public JpegImage(RowOfSamples[] sampleData, Colorspace colorspace)
+        public JpegImage(SampleRow[] sampleData, Colorspace colorspace)
         {
             if (sampleData == null)
                 throw new ArgumentNullException("sampleData");
@@ -56,7 +56,7 @@ namespace LibJpeg
             if (colorspace == Colorspace.Unknown)
                 throw new ArgumentException("Unknown colorspace");
 
-            m_rows = new List<RowOfSamples>(sampleData);
+            m_rows = new List<SampleRow>(sampleData);
             Sample firstSample = m_rows[0][0];
             m_bitsPerComponent = firstSample.BitsPerComponent;
             m_componentsPerSample = firstSample.ComponentCount;
@@ -64,6 +64,11 @@ namespace LibJpeg
 
             compressFromSamples();
             m_bitmap = new Bitmap(m_compressedData);
+        }
+
+        public static JpegImage FromBitmap(Bitmap bitmap)
+        {
+            return new JpegImage(bitmap);
         }
 
         public int Width
@@ -82,7 +87,7 @@ namespace LibJpeg
             }
         }
 
-        public short BitsPerComponent
+        public byte BitsPerComponent
         {
             get
             {
@@ -94,7 +99,7 @@ namespace LibJpeg
             }
         }
 
-        public short ComponentsPerSample
+        public byte ComponentsPerSample
         {
             get
             {
@@ -118,7 +123,7 @@ namespace LibJpeg
             }
         }
 
-        public RowOfSamples GetRow(int rowNumber)
+        public SampleRow GetRow(int rowNumber)
         {
             return m_rows[rowNumber];
         }
@@ -139,7 +144,7 @@ namespace LibJpeg
         }
 
 
-        internal List<RowOfSamples> samples
+        internal List<SampleRow> samples
         {
             get
             {
@@ -147,7 +152,7 @@ namespace LibJpeg
             }
         }
 
-        internal void addRowOfSamples(RowOfSamples row)
+        internal void addRowOfSamples(SampleRow row)
         {
             if (row == null)
                 throw new ArgumentNullException("row");
@@ -252,6 +257,10 @@ namespace LibJpeg
                     m_bitsPerComponent = 16;
                     break;
 
+                case (PixelFormat)2807:
+                    m_bitsPerComponent = 8;
+                    break;
+
                 default:
                     throw new ArgumentException("Unsupported pixel format");
             }
@@ -271,120 +280,8 @@ namespace LibJpeg
                     samples[x * 3 + 1] = color.G;
                     samples[x * 3 + 2] = color.B;
                 }
-                m_rows.Add(new RowOfSamples(samples, m_bitsPerComponent, m_componentsPerSample));
+                m_rows.Add(new SampleRow(samples, m_bitsPerComponent, m_componentsPerSample));
             }
-        }
-    }
-
-    class RawImage: INonCompressedImage
-    {
-        private List<RowOfSamples> m_samples;
-        private Colorspace m_colorspace;
-
-        private int m_currentRow = -1;
-
-        internal RawImage(List<RowOfSamples> samples, Colorspace colorspace)
-        {
-            Debug.Assert(samples != null);
-            Debug.Assert(samples.Count > 0);
-            Debug.Assert(colorspace != Colorspace.Unknown);
-
-            m_samples = samples;
-            m_colorspace = colorspace;
-        }
-
-        public int Width
-        {
-            get
-            {
-                RowOfSamples firstRow = m_samples[0];
-                return m_samples[0].SampleCount;
-            }
-        }
-
-        public int Height
-        {
-            get
-            {
-                return m_samples.Count;
-            }
-        }
-
-        public Colorspace Colorspace
-        {
-            get
-            {
-                return m_colorspace;
-            }
-        }
-
-        public int ComponentsPerPixel
-        {
-            get
-            {
-                return m_samples[0][0].ComponentCount;
-            }
-        }
-
-        public void Start()
-        {
-            m_currentRow = 0;
-        }
-
-        public byte[] GetPixelRow()
-        {
-            RowOfSamples row = m_samples[m_currentRow];
-            List<byte> result = new List<byte>();
-            for (int i = 0; i < row.SampleCount; ++i)
-            {
-                Sample sample = row[i];
-                for (int j = 0; j < sample.ComponentCount; ++j)
-                    result.Add((byte)sample[j]);
-            }
-            return result.ToArray();
-        }
-
-        public void Finish()
-        {
-        }
-    }
-
-    class DecompressorToJpegImage : IDecompressDestination
-    {
-        private JpegImage m_jpegImage;
-
-        internal DecompressorToJpegImage(JpegImage jpegImage)
-        {
-            m_jpegImage = jpegImage;
-        }
-
-        public Stream Output
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        public void SetImageParameters(ImageParameters parameters)
-        {
-            m_jpegImage.BitsPerComponent = 8;
-            m_jpegImage.ComponentsPerSample = (short)parameters.ComponentsPerSample;
-            m_jpegImage.Colorspace = parameters.Colorspace;
-        }
-
-        public void Start()
-        {
-        }
-
-        public void ProcessPixelsRow(byte[] row)
-        {
-            RowOfSamples samplesRow = new RowOfSamples(row, m_jpegImage.Width, m_jpegImage.BitsPerComponent, m_jpegImage.ComponentsPerSample);
-            m_jpegImage.addRowOfSamples(samplesRow);
-        }
-
-        public void Finish()
-        {
         }
     }
 }

@@ -7,12 +7,12 @@ namespace LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
-    class RowOfSamples
+    class SampleRow
     {
         private byte[] m_bytes;
         private Sample[] m_samples;
 
-        public RowOfSamples(byte[] row, int sampleCount, short bitsPerComponent, short componentsPerSample)
+        public SampleRow(byte[] row, int sampleCount, byte bitsPerComponent, byte componentsPerSample)
         {
             if (row == null)
                 throw new ArgumentNullException("row");
@@ -37,7 +37,7 @@ namespace LibJpeg
                 m_samples[i] = new Sample(bitStream, bitsPerComponent, componentsPerSample);
         }
 
-        public RowOfSamples(short[] row, short bitsPerComponent, short componentsPerSample)
+        public SampleRow(short[] row, byte bitsPerComponent, byte componentsPerSample)
         {
             if (row == null)
                 throw new ArgumentNullException("row");
@@ -68,7 +68,7 @@ namespace LibJpeg
             bits.UnderlyingStream.Read(m_bytes, 0, (int)bits.UnderlyingStream.Length);
         }
 
-        public int SampleCount
+        public int Length
         {
             get
             {
@@ -76,7 +76,7 @@ namespace LibJpeg
             }
         }
 
-        public Sample GetSampleAt(int sampleNumber)
+        public Sample GetAt(int sampleNumber)
         {
             return m_samples[sampleNumber];
         }
@@ -85,86 +85,13 @@ namespace LibJpeg
         {
             get
             {
-                return GetSampleAt(sampleNumber);
+                return GetAt(sampleNumber);
             }
         }
 
         public byte[] ToBytes()
         {
             return m_bytes;
-        }
-    }
-
-#if EXPOSE_LIBJPEG
-    public
-#endif
-    class Sample
-    {
-        private short[] m_components;
-        private short m_bitsPerComponent;
-
-        internal Sample(BitStream bitStream, short bitsPerComponent, short componentCount)
-        {
-            if (bitStream == null)
-                throw new ArgumentNullException("bitStream");
-
-            if (bitsPerComponent <= 0 || bitsPerComponent > 16)
-                throw new ArgumentOutOfRangeException("bitsPerComponent");
-
-            if (componentCount <= 0 || componentCount > 5)
-                throw new ArgumentOutOfRangeException("componentCount");
-
-            m_bitsPerComponent = bitsPerComponent;
-
-            m_components = new short[componentCount];
-            for (short i = 0; i < componentCount; ++i)
-                m_components[i] = (short)bitStream.Read(bitsPerComponent);
-        }
-
-        internal Sample(short[] components, short bitsPerComponent)
-        {
-            if (components == null)
-                throw new ArgumentNullException("components");
-
-            if (components.Length == 0 || components.Length > 5)
-                throw new ArgumentException("components must be not empty and contain less than 5 elements");
-
-            if (bitsPerComponent <= 0 || bitsPerComponent > 16)
-                throw new ArgumentOutOfRangeException("bitsPerComponent");
-
-            m_bitsPerComponent = bitsPerComponent;
-
-            m_components = new short[components.Length];
-            Array.Copy(components, m_components, components.Length);
-        }
-
-        public short BitsPerComponent
-        {
-            get
-            {
-                return m_bitsPerComponent;
-            }
-        }
-
-        public short ComponentCount
-        {
-            get
-            {
-                return (short)m_components.Length;
-            }
-        }
-
-        public short GetComponent(int componentNumber)
-        {
-            return m_components[componentNumber];
-        }
-
-        public short this[int componentNumber]
-        {
-            get
-            {
-                return GetComponent(componentNumber);
-            }
         }
     }
 }

@@ -34,6 +34,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -102,12 +103,16 @@
     <Compile Include="Classic\Internal\phuff_entropy_encoder.cs" />
     <Compile Include="CompressionParameters.cs" />
     <Compile Include="DecompressionParameters.cs" />
+    <Compile Include="DecompressorToJpegImage.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="Jpeg.cs" />
     <Compile Include="JpegImage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classic\ReadResult.cs" />
-    <Compile Include="Samples.cs" />
+    <Compile Include="RawImage.cs" />
+    <Compile Include="Sample.cs" />
+    <Compile Include="SampleRow.cs">
+    </Compile>
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
