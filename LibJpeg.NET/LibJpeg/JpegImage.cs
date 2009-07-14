@@ -257,7 +257,7 @@ namespace LibJpeg
                     m_bitsPerComponent = 16;
                     break;
 
-                case (PixelFormat)2807:
+                case (PixelFormat)8207:
                     m_bitsPerComponent = 8;
                     break;
 
