@@ -222,6 +222,8 @@ namespace LibJpeg
 
         private void processPixelFormat(PixelFormat pixelFormat)
         {
+            //See GdiPlusPixelFormats.h for details
+
             if (pixelFormat == PixelFormat.Format16bppGrayScale)
             {
                 m_bitsPerComponent = 16;
@@ -230,40 +232,28 @@ namespace LibJpeg
                 return;
             }
 
-            m_colorspace = Colorspace.RGB;
-            m_componentsPerSample = 3;
+            byte formatIndexByte = (byte)((int)pixelFormat & 0x000000FF);
+            byte pixelSizeByte = (byte)((int)pixelFormat & 0x0000FF00);
 
-            switch (pixelFormat)
+            if (pixelSizeByte == 32 && formatIndexByte == 15) //PixelFormat32bppCMYK (15 | (32 << 8))
             {
-                case PixelFormat.Format16bppRgb555:
-                case PixelFormat.Format16bppRgb565:
-                case PixelFormat.Format16bppArgb1555:
-                    m_bitsPerComponent = 6;
-                    break;
-
-                case PixelFormat.Format1bppIndexed:
-                case PixelFormat.Format4bppIndexed:
-                case PixelFormat.Format8bppIndexed:
-                case PixelFormat.Format24bppRgb:
-                case PixelFormat.Format32bppRgb:
-                case PixelFormat.Format32bppArgb:
-                case PixelFormat.Format32bppPArgb:
-                    m_bitsPerComponent = 8;
-                    break;
-
-                case PixelFormat.Format48bppRgb:
-                case PixelFormat.Format64bppArgb:
-                case PixelFormat.Format64bppPArgb:
-                    m_bitsPerComponent = 16;
-                    break;
-
-                case (PixelFormat)8207:
-                    m_bitsPerComponent = 8;
-                    break;
-
-                default:
-                    throw new ArgumentException("Unsupported pixel format");
+                m_bitsPerComponent = 8;
+                m_componentsPerSample = 4;
+                m_colorspace = Colorspace.CMYK;
+                return;
             }
+
+            m_bitsPerComponent = 8;
+            m_componentsPerSample = 3;
+            m_colorspace = Colorspace.RGB;
+
+            
+            if (pixelSizeByte == 16)
+                m_bitsPerComponent = 6;
+            else if (pixelSizeByte == 24 || pixelSizeByte == 32)
+                m_bitsPerComponent = 8;
+            else if (pixelSizeByte == 48 || pixelSizeByte == 64)
+                m_bitsPerComponent = 16;
         }
 
         private void fillSamplesFromBitmap()
