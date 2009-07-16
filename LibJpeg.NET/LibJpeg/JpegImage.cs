@@ -258,8 +258,6 @@ namespace LibJpeg
 
         private void fillSamplesFromBitmap()
         {
-            Debug.Assert(m_componentsPerSample == 3);
-
             for (int y = 0; y < Height; ++y)
             {
                 short[] samples = new short[Width * 3];
