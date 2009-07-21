@@ -128,12 +128,12 @@ namespace BitMiracle.LibJpeg
             return m_rows[rowNumber];
         }
 
-        public void WriteCompressed(Stream output)
+        public void WriteJpeg(Stream output)
         {
             m_compressedData.WriteTo(output);
         }
 
-        public void WriteDecompressed(Stream output)
+        public void WriteBitmap(Stream output)
         {
             m_bitmap.Save(output, System.Drawing.Imaging.ImageFormat.Bmp);
         }
