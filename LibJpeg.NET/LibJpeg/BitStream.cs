@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace LibJpeg
+namespace BitMiracle.LibJpeg
 {
     class BitStream
     {

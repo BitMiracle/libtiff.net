@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Expanded data destination object for stdio output

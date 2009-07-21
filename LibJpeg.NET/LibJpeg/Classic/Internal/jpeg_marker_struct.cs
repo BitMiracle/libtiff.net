@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// The decompressor can save APPn and COM markers in a list of these:

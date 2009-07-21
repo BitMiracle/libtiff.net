@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// An inverse DCT routine is given a pointer to the input JBLOCK and a pointer

@@ -8,7 +8,7 @@
     <ProjectGuid>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LibJpeg</RootNamespace>
+    <RootNamespace>BitMiracle.LibJpeg</RootNamespace>
     <AssemblyName>BitMiracle.LibJpeg.NET</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

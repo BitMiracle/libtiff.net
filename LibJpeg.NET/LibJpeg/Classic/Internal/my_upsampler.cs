@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic.Internal
 {
     class my_upsampler : jpeg_upsampler
     {

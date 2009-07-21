@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg
+namespace BitMiracle.LibJpeg
 {
 #if EXPOSE_LIBJPEG
     public

@@ -11,9 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using LibJpeg.Classic.Internal;
-
-namespace LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Entropy decoding

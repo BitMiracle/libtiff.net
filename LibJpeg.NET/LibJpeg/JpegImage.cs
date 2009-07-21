@@ -6,9 +6,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
 
-using LibJpeg.Classic;
+using BitMiracle.LibJpeg.Classic;
 
-namespace LibJpeg
+namespace BitMiracle.LibJpeg
 {
 #if EXPOSE_LIBJPEG
     public

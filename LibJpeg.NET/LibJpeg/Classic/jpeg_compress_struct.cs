@@ -12,9 +12,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-using LibJpeg.Classic.Internal;
+using BitMiracle.LibJpeg.Classic.Internal;
 
-namespace LibJpeg.Classic
+namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Master record for a compression instance

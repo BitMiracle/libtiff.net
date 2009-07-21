@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-using LibJpeg.Classic;
+using BitMiracle.LibJpeg.Classic;
 
-namespace LibJpeg
+namespace BitMiracle.LibJpeg
 {
     class DecompressionParameters
     {

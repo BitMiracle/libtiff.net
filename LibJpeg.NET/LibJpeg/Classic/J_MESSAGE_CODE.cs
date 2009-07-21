@@ -15,7 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LibJpeg.Classic
+namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Message codes used in code to signal errors, warning and trace messages.
