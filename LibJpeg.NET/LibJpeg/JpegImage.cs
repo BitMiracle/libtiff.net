@@ -31,18 +31,18 @@ namespace BitMiracle.LibJpeg
 
         public JpegImage(Stream imageData)
         {
-            if (imageData == null)
-                throw new ArgumentNullException("imageData");
+            createFromStream(imageData);
+        }
 
-            if (isCompressed(imageData))
-            {
-                m_compressedData = Utils.CopyStream(imageData);
-                decompress();
-            }
-            else
-            {
-                createFromBitmap(new Bitmap(imageData));
-            }
+        
+
+        public JpegImage(string fileName)
+        {
+            if (fileName == null)
+                throw new ArgumentNullException("fileName");
+
+            using (FileStream input = new FileStream(fileName, FileMode.Open))
+                createFromStream(input);
         }
 
         public JpegImage(SampleRow[] sampleData, Colorspace colorspace)
@@ -178,6 +178,22 @@ namespace BitMiracle.LibJpeg
         {
             initializeFromBitmap(bitmap);
             compressFromBitmap();
+        }
+
+        private void createFromStream(Stream imageData)
+        {
+            if (imageData == null)
+                throw new ArgumentNullException("imageData");
+
+            if (isCompressed(imageData))
+            {
+                m_compressedData = Utils.CopyStream(imageData);
+                decompress();
+            }
+            else
+            {
+                createFromBitmap(new Bitmap(imageData));
+            }
         }
 
         private void initializeFromBitmap(Bitmap bitmap)
