@@ -233,18 +233,8 @@ namespace BitMiracle.LibJpeg
         {
             Debug.Assert(parameters != null);
 
-            if (parameters.Colorspace != Colorspace.Unknown)
-                m_compressor.jpeg_set_colorspace((J_COLOR_SPACE)parameters.Colorspace);
-
-            m_compressor.Optimize_coding = parameters.OptimizeCoding;
-            m_compressor.Restart_interval = parameters.RestartInterval;
-            m_compressor.Restart_in_rows = parameters.RestartInRows;
             m_compressor.Smoothing_factor = parameters.SmoothingFactor;
-            m_compressor.Dct_method = (J_DCT_METHOD)parameters.DCTMethod;
-            m_compressor.Err.Trace_level = parameters.TraceLevel;
-
             m_compressor.jpeg_set_quality(parameters.Quality, parameters.ForceBaseline);
-
             if (parameters.SimpleProgressive)
                 m_compressor.jpeg_simple_progression();
         }

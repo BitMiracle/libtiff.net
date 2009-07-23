@@ -6,53 +6,52 @@ using BitMiracle.LibJpeg.Classic;
 
 namespace BitMiracle.LibJpeg
 {
+#if EXPOSE_LIBJPEG
+    public
+#endif
     class CompressionParameters
     {
-        private DCTMethod m_dctMethod = (DCTMethod)JpegConstants.JDCT_DEFAULT;
-        private int m_traceLevel = 0;
-        private Colorspace m_colorspace = Colorspace.Unknown;
-        private bool m_optimizeCoding = false;
-        private int m_restartInterval = 0;
-        private int m_restartInRows = 0;
+        private int m_quality = 75;
         private int m_smoothingFactor = 0;
         private bool m_forceBaseline = true;
-        private int m_quality = 75;
         private bool m_simpleProgressive = false;
 
-
-        public DCTMethod DCTMethod
+        public CompressionParameters()
         {
-            get { return m_dctMethod; }
-            set { m_dctMethod = value; }
-        }
-        public int TraceLevel
-        {
-            get { return m_traceLevel; }
-            set { m_traceLevel = value; }
         }
 
-        public Colorspace Colorspace
+        internal CompressionParameters(CompressionParameters parameters)
         {
-            get { return m_colorspace; }
-            set { m_colorspace = value; }
+            if (parameters == null)
+                throw new ArgumentNullException("parameters");
+
+            m_quality = parameters.m_quality;
+            m_smoothingFactor = parameters.m_smoothingFactor;
+            m_forceBaseline = parameters.m_forceBaseline;
+            m_simpleProgressive = parameters.m_simpleProgressive;
         }
 
-        public bool OptimizeCoding
+        public override bool Equals(object obj)
         {
-            get { return m_optimizeCoding; }
-            set { m_optimizeCoding = value; }
+            CompressionParameters parameters = obj as CompressionParameters;
+            if (parameters == null)
+                return false;
+
+            return (m_quality == parameters.m_quality &&
+                    m_smoothingFactor == parameters.m_smoothingFactor &&
+                    m_forceBaseline == parameters.m_forceBaseline &&
+                    m_simpleProgressive == parameters.m_simpleProgressive);
         }
 
-        public int RestartInterval
+        public override int GetHashCode()
         {
-            get { return m_restartInterval; }
-            set { m_restartInterval = value; }
+            return base.GetHashCode();
         }
 
-        public int RestartInRows
+        public int Quality
         {
-            get { return m_restartInRows; }
-            set { m_restartInRows = value; }
+            get { return m_quality; }
+            set { m_quality = value; }
         }
 
         public int SmoothingFactor
@@ -65,12 +64,6 @@ namespace BitMiracle.LibJpeg
         {
             get { return m_forceBaseline; }
             set { m_forceBaseline = value; }
-        }
-
-        public int Quality
-        {
-            get { return m_quality; }
-            set { m_quality = value; }
         }
 
         public bool SimpleProgressive

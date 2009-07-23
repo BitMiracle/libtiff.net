@@ -16,10 +16,10 @@ namespace BitMiracle.LibJpeg
  class JpegImage
     {
         private Bitmap m_bitmap;
-        private MemoryStream m_compressedData = new MemoryStream();
+        private MemoryStream m_compressedData;
+        private CompressionParameters m_compressionParameters;
 
         private List<SampleRow> m_rows = new List<SampleRow>();
-
         private byte m_bitsPerComponent;
         private byte m_componentsPerSample;
         private Colorspace m_colorspace;
@@ -33,8 +33,6 @@ namespace BitMiracle.LibJpeg
         {
             createFromStream(imageData);
         }
-
-        
 
         public JpegImage(string fileName)
         {
@@ -62,7 +60,7 @@ namespace BitMiracle.LibJpeg
             m_componentsPerSample = firstSample.ComponentCount;
             m_colorspace = colorspace;
 
-            compressFromSamples();
+            compressFromSamples(new CompressionParameters());
             m_bitmap = new Bitmap(m_compressedData);
         }
 
@@ -130,6 +128,12 @@ namespace BitMiracle.LibJpeg
 
         public void WriteJpeg(Stream output)
         {
+            WriteJpeg(output, new CompressionParameters());
+        }
+
+        public void WriteJpeg(Stream output, CompressionParameters parameters)
+        {
+            compressFromBitmap(parameters);
             m_compressedData.WriteTo(output);
         }
 
@@ -177,7 +181,7 @@ namespace BitMiracle.LibJpeg
         private void createFromBitmap(System.Drawing.Bitmap bitmap)
         {
             initializeFromBitmap(bitmap);
-            compressFromBitmap();
+            compressFromBitmap(new CompressionParameters());
         }
 
         private void createFromStream(Stream imageData)
@@ -206,22 +210,35 @@ namespace BitMiracle.LibJpeg
             fillSamplesFromBitmap();
         }
 
-        private void compressFromBitmap()
+        private void compressFromBitmap(CompressionParameters parameters)
         {
             Debug.Assert(m_bitmap != null);
 
             DotNetBitmapSource bitmapSource = new DotNetBitmapSource(m_bitmap);
-            Jpeg jpeg = new Jpeg();
-            jpeg.Compress(bitmapSource, m_compressedData);
+            compress(bitmapSource, parameters);
         }
 
-        private void compressFromSamples()
+        private void compressFromSamples(CompressionParameters parameters)
         {
             Debug.Assert(m_rows != null);
             Debug.Assert(m_rows.Count != 0);
 
             RawImage source = new RawImage(m_rows, m_colorspace);
+            compress(source, parameters);
+        }
+
+        private void compress(INonCompressedImage source, CompressionParameters parameters)
+        {
+            Debug.Assert(source != null);
+
+            if (m_compressedData != null && m_compressionParameters != null && m_compressionParameters.Equals(parameters))
+                return;
+
+            m_compressedData = new MemoryStream();
+            m_compressionParameters = new CompressionParameters(parameters);
+
             Jpeg jpeg = new Jpeg();
+            jpeg.CompressionParameters = m_compressionParameters;
             jpeg.Compress(source, m_compressedData);
         }
 
