@@ -62,9 +62,11 @@ namespace BitMiracle.LibJpeg
 
             BitStream bits = new BitStream();
             for (int i = 0; i < sampleCount; ++i)
-                bits.Write(row[i], bitsPerComponent);
+                for (int j = 0; j < componentsPerSample; ++j)
+                    bits.Write(row[i * componentsPerSample + j], bitsPerComponent);
 
             m_bytes = new byte[bits.UnderlyingStream.Length];
+            bits.UnderlyingStream.Seek(0, System.IO.SeekOrigin.Begin);
             bits.UnderlyingStream.Read(m_bytes, 0, (int)bits.UnderlyingStream.Length);
         }
 

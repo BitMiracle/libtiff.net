@@ -70,6 +70,7 @@ namespace BitMiracle.LibJpeg
                 for (int j = 0; j < sample.ComponentCount; ++j)
                     result.Add((byte)sample[j]);
             }
+            ++m_currentRow;
             return result.ToArray();
         }
 

@@ -8,6 +8,42 @@ using BitMiracle.LibJpeg.Classic;
 namespace BitMiracle.LibJpeg
 {
     /// <summary>
+    /// Common interface for processing of decompression.
+    /// </summary>
+    interface IDecompressDestination
+    {
+        /// <summary>
+        /// Strean with decompressed data
+        /// </summary>
+        Stream Output
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Implementor of this interface should process image properties received from decompressor.
+        /// </summary>
+        /// <param name="parameters">Image properties</param>
+        void SetImageParameters(ImageParameters parameters);
+
+        /// <summary>
+        /// Called before decompression
+        /// </summary>
+        void Start();
+
+        /// <summary>
+        /// It called during decompression - pass row of pixels from JPEG
+        /// </summary>
+        /// <param name="row"></param>
+        void ProcessPixelsRow(byte[] row);
+
+        /// <summary>
+        /// Called after decompression
+        /// </summary>
+        void Finish();
+    }
+
+    /// <summary>
     /// Holds parameters of image for decompression (IDecomressDesination)
     /// </summary>
     class ImageParameters
@@ -123,7 +159,7 @@ namespace BitMiracle.LibJpeg
 
         // number of entries in use
         public int ActualNumberOfColors
-        {   
+        {
             get
             {
                 return m_actualNumberOfColors;
@@ -188,41 +224,5 @@ namespace BitMiracle.LibJpeg
                 m_densityY = value;
             }
         }
-    }
-
-    /// <summary>
-    /// Common interface for processing of decompression.
-    /// </summary>
-    interface IDecompressDestination
-    {
-        /// <summary>
-        /// Strean with decompressed data
-        /// </summary>
-        Stream Output
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Implementor of this interface should process image properties received from decompressor.
-        /// </summary>
-        /// <param name="parameters">Image properties</param>
-        void SetImageParameters(ImageParameters parameters);
-
-        /// <summary>
-        /// Called before decompression
-        /// </summary>
-        void Start();
-
-        /// <summary>
-        /// It called during decompression - pass row of pixels from JPEG
-        /// </summary>
-        /// <param name="row"></param>
-        void ProcessPixelsRow(byte[] row);
-
-        /// <summary>
-        /// Called after decompression
-        /// </summary>
-        void Finish();
     }
 }

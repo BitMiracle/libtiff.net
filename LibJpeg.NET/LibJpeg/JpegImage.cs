@@ -15,8 +15,6 @@ namespace BitMiracle.LibJpeg
 #endif
  class JpegImage
     {
-        private bool m_createdFromBitmap;
-
         private Bitmap m_bitmap;
         private MemoryStream m_compressedData;
         private CompressionParameters m_compressionParameters;
@@ -62,7 +60,7 @@ namespace BitMiracle.LibJpeg
             m_componentsPerSample = firstSample.ComponentCount;
             m_colorspace = colorspace;
 
-            compressFromSamples(new CompressionParameters());
+            compress(new CompressionParameters());
             m_bitmap = new Bitmap(m_compressedData);
         }
 
@@ -135,11 +133,7 @@ namespace BitMiracle.LibJpeg
 
         public void WriteJpeg(Stream output, CompressionParameters parameters)
         {
-            if (m_createdFromBitmap)
-                compressFromBitmap(parameters);
-            else
-                compressFromSamples(parameters);
-
+            compress(parameters);
             m_compressedData.WriteTo(output);
         }
 
@@ -186,10 +180,8 @@ namespace BitMiracle.LibJpeg
 
         private void createFromBitmap(System.Drawing.Bitmap bitmap)
         {
-            m_createdFromBitmap = true;
-
             initializeFromBitmap(bitmap);
-            compressFromBitmap(new CompressionParameters());
+            compress(new CompressionParameters());
         }
 
         private void createFromStream(Stream imageData)
@@ -199,8 +191,6 @@ namespace BitMiracle.LibJpeg
 
             if (isCompressed(imageData))
             {
-                m_createdFromBitmap = false;
-
                 m_compressedData = Utils.CopyStream(imageData);
                 decompress();
             }
@@ -220,15 +210,7 @@ namespace BitMiracle.LibJpeg
             fillSamplesFromBitmap();
         }
 
-        private void compressFromBitmap(CompressionParameters parameters)
-        {
-            Debug.Assert(m_bitmap != null);
-
-            DotNetBitmapSource bitmapSource = new DotNetBitmapSource(m_bitmap);
-            compress(bitmapSource, parameters);
-        }
-
-        private void compressFromSamples(CompressionParameters parameters)
+        private void compress(CompressionParameters parameters)
         {
             Debug.Assert(m_rows != null);
             Debug.Assert(m_rows.Count != 0);
