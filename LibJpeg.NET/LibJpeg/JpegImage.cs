@@ -62,10 +62,6 @@ namespace BitMiracle.LibJpeg
             m_bitsPerComponent = firstSample.BitsPerComponent;
             m_componentsPerSample = firstSample.ComponentCount;
             m_colorspace = colorspace;
-
-            compress(new CompressionParameters());
-            m_bitmap = new Bitmap(m_compressedData);
-            fillDecompressedData();
         }
 
         public static JpegImage FromBitmap(Bitmap bitmap)
@@ -77,7 +73,7 @@ namespace BitMiracle.LibJpeg
         {
             get
             {
-                return m_bitmap.Width;
+                return bitmap.Width;
             }
         }
 
@@ -85,7 +81,7 @@ namespace BitMiracle.LibJpeg
         {
             get
             {
-                return m_bitmap.Height;
+                return bitmap.Height;
             }
         }
 
@@ -137,17 +133,13 @@ namespace BitMiracle.LibJpeg
 
         public void WriteJpeg(Stream output, CompressionParameters parameters)
         {
-            Debug.Assert(m_compressedData != null);
-
             compress(parameters);
-            m_compressedData.WriteTo(output);
+            compressedData.WriteTo(output);
         }
 
         public void WriteBitmap(Stream output)
         {
-            Debug.Assert(m_decompressedData != null);
-
-            m_decompressedData.WriteTo(output);
+            decompressedData.WriteTo(output);
         }
 
         public System.Drawing.Bitmap ToBitmap()
@@ -156,15 +148,49 @@ namespace BitMiracle.LibJpeg
         }
 
 
-        internal List<SampleRow> samples
+        private MemoryStream compressedData
         {
             get
             {
-                return m_rows;
+                if (m_compressedData == null)
+                    compress(new CompressionParameters());
+
+                Debug.Assert(m_compressedData != null);
+                Debug.Assert(m_compressedData.Length != 0);
+
+                return m_compressedData;
             }
         }
 
-        internal void addRowOfSamples(SampleRow row)
+        private MemoryStream decompressedData
+        {
+            get
+            {
+                if (m_decompressedData == null)
+                    fillDecompressedData();
+
+                Debug.Assert(m_decompressedData != null);
+
+                return m_decompressedData;
+            }
+        }
+
+        private Bitmap bitmap
+        {
+            get
+            {
+                if (m_bitmap == null)
+                {
+                    long position = compressedData.Position;
+                    m_bitmap = new Bitmap(compressedData);
+                    compressedData.Seek(position, SeekOrigin.Begin);
+                }
+
+                return m_bitmap;
+            }
+        }
+
+        internal void addSampleRow(SampleRow row)
         {
             if (row == null)
                 throw new ArgumentNullException("row");
@@ -190,8 +216,6 @@ namespace BitMiracle.LibJpeg
         {
             initializeFromBitmap(bitmap);
             compress(new CompressionParameters());
-
-            fillDecompressedData();
         }
 
         private void createFromStream(Stream imageData)
@@ -203,8 +227,6 @@ namespace BitMiracle.LibJpeg
             {
                 m_compressedData = Utils.CopyStream(imageData);
                 decompress();
-
-                fillDecompressedData();
             }
             else
             {
@@ -218,7 +240,7 @@ namespace BitMiracle.LibJpeg
                 throw new ArgumentNullException("bitmap");
 
             m_bitmap = bitmap;
-            processPixelFormat(m_bitmap.PixelFormat);
+            processPixelFormat(bitmap.PixelFormat);
             fillSamplesFromBitmap();
         }
 
@@ -248,19 +270,12 @@ namespace BitMiracle.LibJpeg
 
         private void decompress()
         {
-            Debug.Assert(m_compressedData != null);
-            Debug.Assert(m_compressedData.Length != 0);
-
-            m_bitmap = new Bitmap(m_compressedData);
-
             Jpeg jpeg = new Jpeg();
-            jpeg.Decompress(m_compressedData, new DecompressorToJpegImage(this));
+            jpeg.Decompress(compressedData, new DecompressorToJpegImage(this));
         }
 
         private void fillDecompressedData()
         {
-            Debug.Assert(m_compressedData != null);
-            Debug.Assert(m_bitmap != null);
             Debug.Assert(m_decompressedData == null);
 
             m_decompressedData = new MemoryStream();
@@ -268,11 +283,11 @@ namespace BitMiracle.LibJpeg
             {
                 BitmapDestination dest = new BitmapDestination(m_decompressedData, false);
                 Jpeg jpeg = new Jpeg();
-                jpeg.Decompress(m_compressedData, dest);
+                jpeg.Decompress(compressedData, dest);
             }
             else
             {
-                m_bitmap.Save(m_decompressedData, ImageFormat.Bmp);
+                bitmap.Save(m_decompressedData, ImageFormat.Bmp);
             }
         }
 
@@ -314,6 +329,8 @@ namespace BitMiracle.LibJpeg
 
         private void fillSamplesFromBitmap()
         {
+            Debug.Assert(m_bitmap != null);
+
             for (int y = 0; y < Height; ++y)
             {
                 short[] samples = new short[Width * 3];

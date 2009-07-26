@@ -36,7 +36,7 @@ namespace BitMiracle.LibJpeg
         public void ProcessPixelsRow(byte[] row)
         {
             SampleRow samplesRow = new SampleRow(row, m_jpegImage.Width, m_jpegImage.BitsPerComponent, m_jpegImage.ComponentsPerSample);
-            m_jpegImage.addRowOfSamples(samplesRow);
+            m_jpegImage.addSampleRow(samplesRow);
         }
 
         public void Finish()
