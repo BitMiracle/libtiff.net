@@ -15,28 +15,45 @@ namespace BitMiracle.LibJpeg
 #endif
  class JpegImage
     {
-        private List<SampleRow> m_rows = new List<SampleRow>();
+        private List<SampleRow> m_rows = new List<SampleRow>();         //!< Description of image pixels (samples)
+
+        private int m_width;
+        private int m_height;
         private byte m_bitsPerComponent;
         private byte m_componentsPerSample;
         private Colorspace m_colorspace;
 
-        private MemoryStream m_compressedData;
-        private CompressionParameters m_compressionParameters;
+        // Fields below (m_compressedData, m_decompressedData, m_bitmap) are not initializes in constructors necessarily.
+        // Instead direct access to these field you should use corresponding properties (compressedData, decompressedData, bitmap)
+        // Such agreement allows to load required data (e.g. compress image) only by request.
 
-        private MemoryStream m_decompressedData;
+        private MemoryStream m_compressedData;                          //!< Bytes of jpeg image. Refreshed when m_compressionParameters changed.
+        private CompressionParameters m_compressionParameters;          //!< Current compression parameters corresponding with compressed data.
 
-        private Bitmap m_bitmap;
+        private MemoryStream m_decompressedData;                        //!< Bytes of decompressed image (bitmap)
 
+        private Bitmap m_bitmap;                                        //!< .NET bitmap associated with this image
+
+
+        /// <summary>
+        /// Creates JpegImage from .NET bitmap
+        /// </summary>
         public JpegImage(System.Drawing.Bitmap bitmap)
         {
             createFromBitmap(bitmap);
         }
 
+        /// <summary>
+        /// Creates JpegImage from stream with an arbitrary image data
+        /// </summary>
         public JpegImage(Stream imageData)
         {
             createFromStream(imageData);
         }
 
+        /// <summary>
+        /// Creates JpegImage from file with an arbitrary image
+        /// </summary>
         public JpegImage(string fileName)
         {
             if (fileName == null)
@@ -46,6 +63,11 @@ namespace BitMiracle.LibJpeg
                 createFromStream(input);
         }
 
+        /// <summary>
+        /// Create JpegImage from pixels
+        /// </summary>
+        /// <param name="sampleData">Pixels</param>
+        /// <param name="colorspace">Colorspace</param>
         public JpegImage(SampleRow[] sampleData, Colorspace colorspace)
         {
             if (sampleData == null)
@@ -58,12 +80,20 @@ namespace BitMiracle.LibJpeg
                 throw new ArgumentException("Unknown colorspace");
 
             m_rows = new List<SampleRow>(sampleData);
-            Sample firstSample = m_rows[0][0];
+
+            SampleRow firstRow = m_rows[0];
+            m_width = firstRow.Length;
+            m_height = m_rows.Count;
+
+            Sample firstSample = firstRow[0];
             m_bitsPerComponent = firstSample.BitsPerComponent;
             m_componentsPerSample = firstSample.ComponentCount;
             m_colorspace = colorspace;
         }
 
+        /// <summary>
+        /// Factory method, constructs JpegImage from .NET Bitmap
+        /// </summary>
         public static JpegImage FromBitmap(Bitmap bitmap)
         {
             return new JpegImage(bitmap);
@@ -73,7 +103,11 @@ namespace BitMiracle.LibJpeg
         {
             get
             {
-                return bitmap.Width;
+                return m_width;
+            }
+            internal set
+            {
+                m_width = value;
             }
         }
 
@@ -81,7 +115,11 @@ namespace BitMiracle.LibJpeg
         {
             get
             {
-                return bitmap.Height;
+                return m_height;
+            }
+            internal set
+            {
+                m_height = value;
             }
         }
 
@@ -190,6 +228,9 @@ namespace BitMiracle.LibJpeg
             }
         }
 
+        /// <summary>
+        /// Needs for DecompressorToJpegImage class
+        /// </summary>
         internal void addSampleRow(SampleRow row)
         {
             if (row == null)
@@ -198,6 +239,9 @@ namespace BitMiracle.LibJpeg
             m_rows.Add(row);
         }
 
+        /// <summary>
+        /// Checks if imageData contains jpeg image
+        /// </summary>
         private static bool isCompressed(Stream imageData)
         {
             if (imageData == null)
@@ -240,6 +284,8 @@ namespace BitMiracle.LibJpeg
                 throw new ArgumentNullException("bitmap");
 
             m_bitmap = bitmap;
+            m_width = m_bitmap.Width;
+            m_height = m_bitmap.Height;
             processPixelFormat(bitmap.PixelFormat);
             fillSamplesFromBitmap();
         }
@@ -257,7 +303,7 @@ namespace BitMiracle.LibJpeg
         {
             Debug.Assert(source != null);
 
-            if (m_compressedData != null && m_compressionParameters != null && m_compressionParameters.Equals(parameters))
+            if (!needCompressWith(parameters))
                 return;
 
             m_compressedData = new MemoryStream();
@@ -266,6 +312,13 @@ namespace BitMiracle.LibJpeg
             Jpeg jpeg = new Jpeg();
             jpeg.CompressionParameters = m_compressionParameters;
             jpeg.Compress(source, m_compressedData);
+        }
+
+        private bool needCompressWith(CompressionParameters parameters)
+        {
+            return m_compressedData == null || 
+                   m_compressionParameters == null || 
+                   !m_compressionParameters.Equals(parameters);
         }
 
         private void decompress()
@@ -279,6 +332,9 @@ namespace BitMiracle.LibJpeg
             Debug.Assert(m_decompressedData == null);
 
             m_decompressedData = new MemoryStream();
+
+            //At the moment we can't convert CMYK images to bitmaps correctly. 
+            //So in this case let's use .NET Bitmap output for decompression
             if (Colorspace != Colorspace.CMYK)
             {
                 BitmapDestination dest = new BitmapDestination(m_decompressedData, false);

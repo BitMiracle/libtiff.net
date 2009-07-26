@@ -24,6 +24,8 @@ namespace BitMiracle.LibJpeg
 
         public void SetImageParameters(ImageParameters parameters)
         {
+            m_jpegImage.Width = parameters.Width;
+            m_jpegImage.Height = parameters.Height;
             m_jpegImage.BitsPerComponent = 8;
             m_jpegImage.ComponentsPerSample = (byte)parameters.ComponentsPerSample;
             m_jpegImage.Colorspace = parameters.Colorspace;
