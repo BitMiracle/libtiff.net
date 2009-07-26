@@ -15,14 +15,17 @@ namespace BitMiracle.LibJpeg
 #endif
  class JpegImage
     {
-        private Bitmap m_bitmap;
-        private MemoryStream m_compressedData;
-        private CompressionParameters m_compressionParameters;
-
         private List<SampleRow> m_rows = new List<SampleRow>();
         private byte m_bitsPerComponent;
         private byte m_componentsPerSample;
         private Colorspace m_colorspace;
+
+        private MemoryStream m_compressedData;
+        private CompressionParameters m_compressionParameters;
+
+        private MemoryStream m_decompressedData;
+
+        private Bitmap m_bitmap;
 
         public JpegImage(System.Drawing.Bitmap bitmap)
         {
@@ -62,6 +65,7 @@ namespace BitMiracle.LibJpeg
 
             compress(new CompressionParameters());
             m_bitmap = new Bitmap(m_compressedData);
+            fillDecompressedData();
         }
 
         public static JpegImage FromBitmap(Bitmap bitmap)
@@ -133,13 +137,17 @@ namespace BitMiracle.LibJpeg
 
         public void WriteJpeg(Stream output, CompressionParameters parameters)
         {
+            Debug.Assert(m_compressedData != null);
+
             compress(parameters);
             m_compressedData.WriteTo(output);
         }
 
         public void WriteBitmap(Stream output)
         {
-            m_bitmap.Save(output, System.Drawing.Imaging.ImageFormat.Bmp);
+            Debug.Assert(m_decompressedData != null);
+
+            m_decompressedData.WriteTo(output);
         }
 
         public System.Drawing.Bitmap ToBitmap()
@@ -182,6 +190,8 @@ namespace BitMiracle.LibJpeg
         {
             initializeFromBitmap(bitmap);
             compress(new CompressionParameters());
+
+            fillDecompressedData();
         }
 
         private void createFromStream(Stream imageData)
@@ -193,6 +203,8 @@ namespace BitMiracle.LibJpeg
             {
                 m_compressedData = Utils.CopyStream(imageData);
                 decompress();
+
+                fillDecompressedData();
             }
             else
             {
@@ -243,6 +255,25 @@ namespace BitMiracle.LibJpeg
 
             Jpeg jpeg = new Jpeg();
             jpeg.Decompress(m_compressedData, new DecompressorToJpegImage(this));
+        }
+
+        private void fillDecompressedData()
+        {
+            Debug.Assert(m_compressedData != null);
+            Debug.Assert(m_bitmap != null);
+            Debug.Assert(m_decompressedData == null);
+
+            m_decompressedData = new MemoryStream();
+            if (Colorspace != Colorspace.CMYK)
+            {
+                BitmapDestination dest = new BitmapDestination(m_decompressedData, false);
+                Jpeg jpeg = new Jpeg();
+                jpeg.Decompress(m_compressedData, dest);
+            }
+            else
+            {
+                m_bitmap.Save(m_decompressedData, ImageFormat.Bmp);
+            }
         }
 
         private void processPixelFormat(PixelFormat pixelFormat)
