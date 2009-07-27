@@ -299,7 +299,7 @@ namespace BitMiracle.LibJpeg
             compress(source, parameters);
         }
 
-        private void compress(INonCompressedImage source, CompressionParameters parameters)
+        private void compress(IRawImage source, CompressionParameters parameters)
         {
             Debug.Assert(source != null);
 

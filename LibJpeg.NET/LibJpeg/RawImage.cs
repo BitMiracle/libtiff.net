@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BitMiracle.LibJpeg
 {
-    class RawImage : INonCompressedImage
+    class RawImage : IRawImage
     {
         private List<SampleRow> m_samples;
         private Colorspace m_colorspace;
@@ -55,7 +55,7 @@ namespace BitMiracle.LibJpeg
             }
         }
 
-        public void Start()
+        public void BeginRead()
         {
             m_currentRow = 0;
         }
@@ -74,7 +74,7 @@ namespace BitMiracle.LibJpeg
             return result.ToArray();
         }
 
-        public void Finish()
+        public void EndRead()
         {
         }
     }

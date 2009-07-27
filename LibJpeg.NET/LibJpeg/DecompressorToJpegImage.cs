@@ -22,7 +22,7 @@ namespace BitMiracle.LibJpeg
             }
         }
 
-        public void SetImageParameters(ImageParameters parameters)
+        public void SetImageAttributes(LoadedImageAttributes parameters)
         {
             m_jpegImage.Width = parameters.Width;
             m_jpegImage.Height = parameters.Height;
@@ -31,7 +31,7 @@ namespace BitMiracle.LibJpeg
             m_jpegImage.Colorspace = parameters.Colorspace;
         }
 
-        public void Start()
+        public void BeginWrite()
         {
         }
 
@@ -41,7 +41,7 @@ namespace BitMiracle.LibJpeg
             m_jpegImage.addSampleRow(samplesRow);
         }
 
-        public void Finish()
+        public void EndWrite()
         {
         }
     }

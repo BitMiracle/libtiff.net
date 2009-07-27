@@ -10,7 +10,7 @@ using BitMiracle.LibJpeg.Classic;
 
 namespace BitMiracle.LibJpeg
 {
-    interface INonCompressedImage
+    interface IRawImage
     {
         int Width
         { get; }
@@ -24,8 +24,8 @@ namespace BitMiracle.LibJpeg
         int ComponentsPerPixel
         { get; }
 
-        void Start();
+        void BeginRead();
         byte[] GetPixelRow();
-        void Finish();
+        void EndRead();
     }
 }

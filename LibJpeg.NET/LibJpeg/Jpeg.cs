@@ -62,7 +62,7 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         /// <param name="source">Contains description of input image</param>
         /// <param name="output">Stream for output of compressed JPEG</param>
-        public void Compress(INonCompressedImage source, Stream output)
+        public void Compress(IRawImage source, Stream output)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
@@ -92,7 +92,7 @@ namespace BitMiracle.LibJpeg
             m_compressor.jpeg_start_compress(true);
 
             // Process  pixels
-            source.Start();
+            source.BeginRead();
             while (m_compressor.Next_scanline < m_compressor.Image_height)
             {
                 byte[] row = source.GetPixelRow();
@@ -103,7 +103,7 @@ namespace BitMiracle.LibJpeg
                 rowForDecompressor[0] = row;
                 m_compressor.jpeg_write_scanlines(rowForDecompressor, 1);
             }
-            source.Finish();
+            source.EndRead();
 
             // Finish compression and release memory
             m_compressor.jpeg_finish_compress();
@@ -127,9 +127,9 @@ namespace BitMiracle.LibJpeg
             // Start decompression
             m_decompressor.jpeg_start_decompress();
 
-            ImageParameters parameters = getImageParametersFromDecompressor();
-            destination.SetImageParameters(parameters);
-            destination.Start();
+            LoadedImageAttributes parameters = getImageParametersFromDecompressor();
+            destination.SetImageAttributes(parameters);
+            destination.BeginWrite();
 
             /* Process data */
             while (m_decompressor.Output_scanline < m_decompressor.Output_height)
@@ -139,7 +139,7 @@ namespace BitMiracle.LibJpeg
                 destination.ProcessPixelsRow(row[0]);
             }
 
-            destination.Finish();
+            destination.EndWrite();
 
             // Finish decompression and release memory.
             m_decompressor.jpeg_finish_decompress();
@@ -159,9 +159,9 @@ namespace BitMiracle.LibJpeg
             m_decompressor.jpeg_calc_output_dimensions();
         }
 
-        private ImageParameters getImageParametersFromDecompressor()
+        private LoadedImageAttributes getImageParametersFromDecompressor()
         {
-            ImageParameters result = new ImageParameters();
+            LoadedImageAttributes result = new LoadedImageAttributes();
             result.Colorspace = (Colorspace)m_decompressor.Out_color_space;
             result.QuantizeColors = m_decompressor.Quantize_colors;
             result.Width = m_decompressor.Output_width;

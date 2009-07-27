@@ -107,7 +107,7 @@
     <Compile Include="DecompressorToJpegImage.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="IDecompressDestination.cs" />
-    <Compile Include="INonCompressedImage.cs" />
+    <Compile Include="IRawImage.cs" />
     <Compile Include="Jpeg.cs" />
     <Compile Include="JpegImage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

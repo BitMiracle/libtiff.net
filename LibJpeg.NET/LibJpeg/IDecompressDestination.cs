@@ -24,12 +24,12 @@ namespace BitMiracle.LibJpeg
         /// Implementor of this interface should process image properties received from decompressor.
         /// </summary>
         /// <param name="parameters">Image properties</param>
-        void SetImageParameters(ImageParameters parameters);
+        void SetImageAttributes(LoadedImageAttributes parameters);
 
         /// <summary>
         /// Called before decompression
         /// </summary>
-        void Start();
+        void BeginWrite();
 
         /// <summary>
         /// It called during decompression - pass row of pixels from JPEG
@@ -40,13 +40,13 @@ namespace BitMiracle.LibJpeg
         /// <summary>
         /// Called after decompression
         /// </summary>
-        void Finish();
+        void EndWrite();
     }
 
     /// <summary>
     /// Holds parameters of image for decompression (IDecomressDesination)
     /// </summary>
-    class ImageParameters
+    class LoadedImageAttributes
     {
         private Colorspace m_colorspace;
         private bool m_quantizeColors;

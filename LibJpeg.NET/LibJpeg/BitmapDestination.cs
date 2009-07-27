@@ -26,7 +26,7 @@ namespace BitMiracle.LibJpeg
         private int m_rowWidth = 0;       /* physical width of one row in the BMP file */
         private int m_padBytes = 0;      /* number of padding bytes needed per row */
         private int m_currentOutputRow = 0;  /* next row# to write to virtual array */
-        private ImageParameters m_parameters;
+        private LoadedImageAttributes m_parameters;
 
         public BitmapDestination(Stream output, bool is_os2)
         {
@@ -42,7 +42,7 @@ namespace BitMiracle.LibJpeg
             }
         }
 
-        public void SetImageParameters(ImageParameters parameters)
+        public void SetImageAttributes(LoadedImageAttributes parameters)
         {
             if (parameters == null)
                 throw new ArgumentNullException("parameters");
@@ -54,7 +54,7 @@ namespace BitMiracle.LibJpeg
         /// Startup: normally writes the file header.
         /// In this module we may as well postpone everything until finish_output.
         /// </summary>
-        public void Start()
+        public void BeginWrite()
         {
             if (m_parameters.Colorspace == Colorspace.Grayscale)
                 m_putGrayRows = true;
@@ -95,7 +95,7 @@ namespace BitMiracle.LibJpeg
         /// Finish up at the end of the file.
         /// Here is where we really output the BMP file.
         /// </summary>
-        public void Finish()
+        public void EndWrite()
         {
             /* Write the header and colormap */
             if (m_isOS2)
