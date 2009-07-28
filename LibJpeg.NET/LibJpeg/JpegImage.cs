@@ -332,19 +332,10 @@ namespace BitMiracle.LibJpeg
             Debug.Assert(m_decompressedData == null);
 
             m_decompressedData = new MemoryStream();
+            BitmapDestination dest = new BitmapDestination(m_decompressedData);
 
-            //At the moment we can't convert CMYK images to bitmaps correctly. 
-            //So in this case let's use .NET Bitmap output for decompression
-            if (Colorspace != Colorspace.CMYK)
-            {
-                BitmapDestination dest = new BitmapDestination(m_decompressedData);
-                Jpeg jpeg = new Jpeg();
-                jpeg.Decompress(compressedData, dest);
-            }
-            else
-            {
-                bitmap.Save(m_decompressedData, ImageFormat.Bmp);
-            }
+            Jpeg jpeg = new Jpeg();
+            jpeg.Decompress(compressedData, dest);
         }
 
         private void processPixelFormat(PixelFormat pixelFormat)

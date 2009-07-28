@@ -138,8 +138,10 @@ namespace BitMiracle.LibJpeg
             for (int i = 0; i < m_parameters.Width; ++i)
             {
                 int firstComponent = i * 4;
-                for (int j = 0; j < 4; ++j)
-                    m_pixels[firstComponent + j, m_currentRow] = row[firstComponent + j];
+                m_pixels[firstComponent, m_currentRow] = row[firstComponent + 2];
+                m_pixels[firstComponent + 1, m_currentRow] = row[firstComponent + 1];
+                m_pixels[firstComponent + 2, m_currentRow] = row[firstComponent + 0];
+                m_pixels[firstComponent + 3, m_currentRow] = row[firstComponent + 3];
             }
         }
 
@@ -182,10 +184,10 @@ namespace BitMiracle.LibJpeg
             int offsetToPixels = fileHeaderSize + infoHeaderSize + paletteSize; /* Header and colormap */
             int fileSize = offsetToPixels + (int)m_rowWidth * (int)m_parameters.Height;
 
-            byte[] bmpfileheader = createBitmapFileHeader(offsetToPixels, fileSize);
+            byte[] fileHeader = createBitmapFileHeader(offsetToPixels, fileSize);
 
-            m_output.Write(bmpfileheader, 0, 14);
-            m_output.Write(infoHeader, 0, 40);
+            m_output.Write(fileHeader, 0, fileHeader.Length);
+            m_output.Write(infoHeader, 0, infoHeader.Length);
 
             if (cmap_entries > 0)
                 writeColormap(cmap_entries, 4);
@@ -212,7 +214,7 @@ namespace BitMiracle.LibJpeg
         private void fillBitmapInfoHeader(int bitsPerPixel, int cmap_entries, byte[] infoHeader)
         {
             /* Fill the info header (Microsoft calls this a BITMAPINFOHEADER) */
-            PUT_2B(infoHeader, 0, 40);   /* biSize */
+            PUT_2B(infoHeader, 0, infoHeader.Length);   /* biSize */
             PUT_4B(infoHeader, 4, m_parameters.Width); /* biWidth */
             PUT_4B(infoHeader, 8, m_parameters.Height); /* biHeight */
             PUT_2B(infoHeader, 12, 1);   /* biPlanes - must be 1 */
