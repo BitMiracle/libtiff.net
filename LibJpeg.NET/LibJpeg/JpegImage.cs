@@ -337,7 +337,7 @@ namespace BitMiracle.LibJpeg
             //So in this case let's use .NET Bitmap output for decompression
             if (Colorspace != Colorspace.CMYK)
             {
-                BitmapDestination dest = new BitmapDestination(m_decompressedData, false);
+                BitmapDestination dest = new BitmapDestination(m_decompressedData);
                 Jpeg jpeg = new Jpeg();
                 jpeg.Decompress(compressedData, dest);
             }

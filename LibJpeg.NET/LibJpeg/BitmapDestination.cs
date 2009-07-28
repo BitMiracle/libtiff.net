@@ -13,25 +13,18 @@ namespace BitMiracle.LibJpeg
         /* Target file spec; filled in by djpeg.c after object is created. */
         private Stream m_output;
 
-        /* Output pixel-row buffer.  Created by module init or start_output.
-         * Width is cinfo.output_width * cinfo.output_components;
-         * height is buffer_height.
-         */
-        private byte[][] m_buffer = null;
+        private byte[,] m_pixels;
 
         private bool m_putGrayRows = false;
-        private bool m_isOS2 = false;        /* saves the OS2 format request flag */
 
-        private jvirt_sarray_control m_wholeImage = null;  /* needed to reverse row order */
         private int m_rowWidth = 0;       /* physical width of one row in the BMP file */
-        private int m_padBytes = 0;      /* number of padding bytes needed per row */
-        private int m_currentOutputRow = 0;  /* next row# to write to virtual array */
+
+        private int m_currentRow = 0;  /* next row# to write to virtual array */
         private LoadedImageAttributes m_parameters;
 
-        public BitmapDestination(Stream output, bool is_os2)
+        public BitmapDestination(Stream output)
         {
             m_output = output;
-            m_isOS2 = is_os2;
         }
 
         public Stream Output
@@ -67,14 +60,9 @@ namespace BitMiracle.LibJpeg
             while ((m_rowWidth & 3) != 0)
                 m_rowWidth++;
 
-            m_padBytes = (int)(m_rowWidth - dataWidth);
+            m_pixels = new byte[m_rowWidth, m_parameters.Height];
 
-            //Allocate space for inversion array, prepare for write pass
-            m_wholeImage = new jvirt_sarray_control(m_rowWidth, m_parameters.Height);
-            m_currentOutputRow = 0;
-
-            //Create decompressor output buffer.
-            m_buffer = jpeg_common_struct.AllocJpegSamples(m_rowWidth, 1);
+            m_currentRow = 0;
         }
 
         /// <summary>
@@ -82,13 +70,12 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         public void ProcessPixelsRow(byte[] row)
         {
-            for (int i = 0; i < row.Length; ++i)
-                m_buffer[0][i] = row[i];
-
             if (m_putGrayRows)
-                put_gray_row();
+                putGrayRow(row);
             else
-                put_24bit_row();
+                putRgbRow(row);
+
+            m_currentRow++;
         }
 
         /// <summary>
@@ -98,19 +85,16 @@ namespace BitMiracle.LibJpeg
         public void EndWrite()
         {
             /* Write the header and colormap */
-            if (m_isOS2)
-                write_os2_header();
-            else
-                write_bmp_header();
+            writeHeader();
 
             /* Write the file body from our virtual array */
             for (int row = m_parameters.Height; row > 0; row--)
             {
-                byte[][] image_ptr = m_wholeImage.access_virt_sarray(row - 1, 1);
+                //byte[][] image_ptr = m_wholeImage.access_virt_sarray(row - 1, 1);
                 int imageIndex = 0;
                 for (int col = m_rowWidth; col > 0; col--)
                 {
-                    m_output.WriteByte(image_ptr[0][imageIndex]);
+                    m_output.WriteByte(m_pixels[imageIndex, row - 1]);
                     imageIndex++;
                 }
             }
@@ -119,73 +103,44 @@ namespace BitMiracle.LibJpeg
             m_output.Flush();
         }
 
-        /// <summary>
-        /// Write some pixel data.
-        /// 
-        /// This version is for writing 24-bit pixels
-        /// </summary>
-        private void put_24bit_row()
-        {
-            /* Access next row in virtual array */
-            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_currentOutputRow, 1);
-            m_currentOutputRow++;
-
-            /* Transfer data.  Note destination values must be in BGR order
-             * (even though Microsoft's own documents say the opposite).
-             */
-            int bufferIndex = 0;
-            int imageIndex = 0;
-            for (int col = m_parameters.Width; col > 0; --col, imageIndex += 3, bufferIndex += 3)
-            {
-                byte red = m_buffer[0][bufferIndex];
-                byte green = m_buffer[0][bufferIndex + 1];
-                byte blue = m_buffer[0][bufferIndex + 2];
-                image_ptr[0][imageIndex] = blue;    /* can omit GETJSAMPLE() safely */
-                image_ptr[0][imageIndex + 1] = green;
-                image_ptr[0][imageIndex + 2] = red;
-            }
-
-            /* Zero out the pad bytes. */
-            int pad = m_padBytes;
-            while (--pad >= 0)
-            {
-                image_ptr[0][imageIndex] = 0;
-                imageIndex++;
-            }
-        }
 
         /// <summary>
         /// Write some pixel data.
         /// 
         /// This version is for grayscale OR quantized color output
         /// </summary>
-        private void put_gray_row()
+        private void putGrayRow(byte[] row)
         {
-            /* Access next row in virtual array */
-            byte[][] image_ptr = m_wholeImage.access_virt_sarray(m_currentOutputRow, 1);
-            m_currentOutputRow++;
+            for (int i = 0; i < m_parameters.Height; ++i)
+                m_pixels[i, m_currentRow] = row[i];
+        }
 
-            /* Transfer data. */
-            int index = 0;
-            for (int col = m_parameters.Width; col > 0; col--)
+        /// <summary>
+        /// Write some pixel data.
+        /// 
+        /// This version is for writing 24-bit pixels
+        /// </summary>
+        private void putRgbRow(byte[] row)
+        {
+            /* Transfer data.  Note destination values must be in BGR order
+             * (even though Microsoft's own documents say the opposite).
+             */
+            for (int i = 0; i < m_parameters.Width; ++i)
             {
-                image_ptr[0][index] = m_buffer[0][index];/* can omit GETJSAMPLE() safely */
-                index++;
-            }
-
-            /* Zero out the pad bytes. */
-            int pad = m_padBytes;
-            while (--pad >= 0)
-            {
-                image_ptr[0][index] = 0;
-                index++;
+                int firstComponent = i * 3;
+                byte red = row[firstComponent];
+                byte green = row[firstComponent + 1];
+                byte blue = row[firstComponent + 2];
+                m_pixels[firstComponent, m_currentRow] = blue;
+                m_pixels[firstComponent + 1, m_currentRow] = green;
+                m_pixels[firstComponent + 2, m_currentRow] = red;
             }
         }
 
         /// <summary>
         /// Write a Windows-style BMP file header, including colormap if needed
         /// </summary>
-        private void write_bmp_header()
+        private void writeHeader()
         {
             int bits_per_pixel;
             int cmap_entries;
@@ -250,74 +205,14 @@ namespace BitMiracle.LibJpeg
             m_output.Write(bmpinfoheader, 0, 40);
 
             if (cmap_entries > 0)
-                write_colormap(cmap_entries, 4);
-        }
-
-        /// <summary>
-        /// Write an OS2-style BMP file header, including colormap if needed
-        /// </summary>
-        private void write_os2_header()
-        {
-            int bits_per_pixel;
-            int cmap_entries;
-
-            /* Compute colormap size and total file size */
-            if (m_parameters.Colorspace == Colorspace.RGB)
-            {
-                if (m_parameters.QuantizeColors)
-                {
-                    /* Colormapped RGB */
-                    bits_per_pixel = 8;
-                    cmap_entries = 256;
-                }
-                else
-                {
-                    /* Unquantized, full color RGB */
-                    bits_per_pixel = 24;
-                    cmap_entries = 0;
-                }
-            }
-            else
-            {
-                /* Grayscale output.  We need to fake a 256-entry colormap. */
-                bits_per_pixel = 8;
-                cmap_entries = 256;
-            }
-
-            /* File size */
-            int headersize = 14 + 12 + cmap_entries * 3; /* Header and colormap */
-            int bfSize = headersize + (int)m_rowWidth * m_parameters.Height;
-
-            /* Set unused fields of header to 0 */
-            byte[] bmpfileheader = new byte[14];
-            byte[] bmpcoreheader = new byte[12];
-
-            /* Fill the file header */
-            bmpfileheader[0] = 0x42;    /* first 2 bytes are ASCII 'B', 'M' */
-            bmpfileheader[1] = 0x4D;
-            PUT_4B(bmpfileheader, 2, bfSize); /* bfSize */
-            /* we leave bfReserved1 & bfReserved2 = 0 */
-            PUT_4B(bmpfileheader, 10, headersize); /* bfOffBits */
-
-            /* Fill the info header (Microsoft calls this a BITMAPCOREHEADER) */
-            PUT_2B(bmpcoreheader, 0, 12);   /* bcSize */
-            PUT_2B(bmpcoreheader, 4, m_parameters.Width); /* bcWidth */
-            PUT_2B(bmpcoreheader, 6, m_parameters.Height); /* bcHeight */
-            PUT_2B(bmpcoreheader, 8, 1);    /* bcPlanes - must be 1 */
-            PUT_2B(bmpcoreheader, 10, bits_per_pixel); /* bcBitCount */
-
-            m_output.Write(bmpfileheader, 0, 14);
-            m_output.Write(bmpcoreheader, 0, 12);
-
-            if (cmap_entries > 0)
-                write_colormap(cmap_entries, 3);
+                writeColormap(cmap_entries, 4);
         }
 
         /// <summary>
         /// Write the colormap.
         /// Windows uses BGR0 map entries; OS/2 uses BGR entries.
         /// </summary>
-        private void write_colormap(int map_colors, int map_entry_size)
+        private void writeColormap(int map_colors, int map_entry_size)
         {
             byte[][] colormap = m_parameters.Colormap;
             int num_colors = m_parameters.ActualNumberOfColors;
