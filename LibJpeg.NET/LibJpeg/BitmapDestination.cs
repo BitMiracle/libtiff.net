@@ -56,8 +56,7 @@ namespace BitMiracle.LibJpeg
 
             //Determine width of rows in the BMP file (padded to 4-byte boundary).
             m_rowWidth = m_parameters.Width * m_parameters.Components;
-            int dataWidth = m_rowWidth;
-            while ((m_rowWidth & 3) != 0)
+            while (m_rowWidth % 4 != 0)
                 m_rowWidth++;
 
             m_pixels = new byte[m_rowWidth, m_parameters.Height];
@@ -70,12 +69,19 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         public void ProcessPixelsRow(byte[] row)
         {
-            if (m_putGrayRows)
+            if (m_parameters.Colorspace == Colorspace.Grayscale || m_parameters.QuantizeColors)
+            {
                 putGrayRow(row);
+            }
             else
-                putRgbRow(row);
+            {
+                if (m_parameters.Colorspace == Colorspace.CMYK)
+                    putCmykRow(row);
+                else
+                    putRgbRow(row);
+            }
 
-            m_currentRow++;
+            ++m_currentRow;
         }
 
         /// <summary>
@@ -84,20 +90,8 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         public void EndWrite()
         {
-            /* Write the header and colormap */
             writeHeader();
-
-            /* Write the file body from our virtual array */
-            for (int row = m_parameters.Height; row > 0; row--)
-            {
-                //byte[][] image_ptr = m_wholeImage.access_virt_sarray(row - 1, 1);
-                int imageIndex = 0;
-                for (int col = m_rowWidth; col > 0; col--)
-                {
-                    m_output.WriteByte(m_pixels[imageIndex, row - 1]);
-                    imageIndex++;
-                }
-            }
+            writePixels();
 
             /* Make sure we wrote the output file OK */
             m_output.Flush();
@@ -105,8 +99,6 @@ namespace BitMiracle.LibJpeg
 
 
         /// <summary>
-        /// Write some pixel data.
-        /// 
         /// This version is for grayscale OR quantized color output
         /// </summary>
         private void putGrayRow(byte[] row)
@@ -116,8 +108,6 @@ namespace BitMiracle.LibJpeg
         }
 
         /// <summary>
-        /// Write some pixel data.
-        /// 
         /// This version is for writing 24-bit pixels
         /// </summary>
         private void putRgbRow(byte[] row)
@@ -138,6 +128,22 @@ namespace BitMiracle.LibJpeg
         }
 
         /// <summary>
+        /// This version is for writing 24-bit pixels
+        /// </summary>
+        private void putCmykRow(byte[] row)
+        {
+            /* Transfer data.  Note destination values must be in BGR order
+             * (even though Microsoft's own documents say the opposite).
+             */
+            for (int i = 0; i < m_parameters.Width; ++i)
+            {
+                int firstComponent = i * 4;
+                for (int j = 0; j < 4; ++j)
+                    m_pixels[firstComponent + j, m_currentRow] = row[firstComponent + j];
+            }
+        }
+
+        /// <summary>
         /// Write a Windows-style BMP file header, including colormap if needed
         /// </summary>
         private void writeHeader()
@@ -146,66 +152,92 @@ namespace BitMiracle.LibJpeg
             int cmap_entries;
 
             /* Compute colormap size and total file size */
-            if (m_parameters.Colorspace == Colorspace.RGB)
+            if (m_parameters.Colorspace == Colorspace.Grayscale || m_parameters.QuantizeColors)
             {
-                if (m_parameters.QuantizeColors)
-                {
-                    /* Colormapped RGB */
-                    bits_per_pixel = 8;
-                    cmap_entries = 256;
-                }
-                else
-                {
-                    /* Unquantized, full color RGB */
-                    bits_per_pixel = 24;
-                    cmap_entries = 0;
-                }
-            }
-            else
-            {
-                /* Grayscale output.  We need to fake a 256-entry colormap. */
                 bits_per_pixel = 8;
                 cmap_entries = 256;
             }
+            else
+            {
+                cmap_entries = 0;
+
+                if (m_parameters.Colorspace == Colorspace.RGB)
+                    bits_per_pixel = 24;
+                else if (m_parameters.Colorspace == Colorspace.CMYK)
+                    bits_per_pixel = 32;
+                else
+                    throw new InvalidOperationException();
+            }
+
+            byte[] infoHeader = null;
+            if (m_parameters.Colorspace == Colorspace.RGB)
+                infoHeader = createBitmapInfoHeader(bits_per_pixel, cmap_entries);
+            else
+                infoHeader = createBitmapV4InfoHeader(bits_per_pixel);
 
             /* File size */
-            int headersize = 14 + 40 + cmap_entries * 4; /* Header and colormap */
-            int bfSize = headersize + (int)m_rowWidth * (int)m_parameters.Height;
+            const int fileHeaderSize = 14;
+            int infoHeaderSize = infoHeader.Length;
+            int paletteSize = cmap_entries * 4;
+            int offsetToPixels = fileHeaderSize + infoHeaderSize + paletteSize; /* Header and colormap */
+            int fileSize = offsetToPixels + (int)m_rowWidth * (int)m_parameters.Height;
 
-            /* Set unused fields of header to 0 */
+            byte[] bmpfileheader = createBitmapFileHeader(offsetToPixels, fileSize);
+
+            m_output.Write(bmpfileheader, 0, 14);
+            m_output.Write(infoHeader, 0, 40);
+
+            if (cmap_entries > 0)
+                writeColormap(cmap_entries, 4);
+        }
+
+        private static byte[] createBitmapFileHeader(int offsetToPixels, int fileSize)
+        {
             byte[] bmpfileheader = new byte[14];
-            byte[] bmpinfoheader = new byte[40];
-
-            /* Fill the file header */
             bmpfileheader[0] = 0x42;    /* first 2 bytes are ASCII 'B', 'M' */
             bmpfileheader[1] = 0x4D;
-            PUT_4B(bmpfileheader, 2, bfSize); /* bfSize */
+            PUT_4B(bmpfileheader, 2, fileSize);
             /* we leave bfReserved1 & bfReserved2 = 0 */
-            PUT_4B(bmpfileheader, 10, headersize); /* bfOffBits */
+            PUT_4B(bmpfileheader, 10, offsetToPixels); /* bfOffBits */
+            return bmpfileheader;
+        }
 
+        private byte[] createBitmapInfoHeader(int bits_per_pixel, int cmap_entries)
+        {
+            byte[] bmpinfoheader = new byte[40];
+            fillBitmapInfoHeader(bits_per_pixel, cmap_entries, bmpinfoheader);
+            return bmpinfoheader;
+        }
+
+        private void fillBitmapInfoHeader(int bitsPerPixel, int cmap_entries, byte[] infoHeader)
+        {
             /* Fill the info header (Microsoft calls this a BITMAPINFOHEADER) */
-            PUT_2B(bmpinfoheader, 0, 40);   /* biSize */
-            PUT_4B(bmpinfoheader, 4, m_parameters.Width); /* biWidth */
-            PUT_4B(bmpinfoheader, 8, m_parameters.Height); /* biHeight */
-            PUT_2B(bmpinfoheader, 12, 1);   /* biPlanes - must be 1 */
-            PUT_2B(bmpinfoheader, 14, bits_per_pixel); /* biBitCount */
+            PUT_2B(infoHeader, 0, 40);   /* biSize */
+            PUT_4B(infoHeader, 4, m_parameters.Width); /* biWidth */
+            PUT_4B(infoHeader, 8, m_parameters.Height); /* biHeight */
+            PUT_2B(infoHeader, 12, 1);   /* biPlanes - must be 1 */
+            PUT_2B(infoHeader, 14, bitsPerPixel); /* biBitCount */
             /* we leave biCompression = 0, for none */
             /* we leave biSizeImage = 0; this is correct for uncompressed data */
 
             if (m_parameters.DensityUnit == 2)
             {
                 /* if have density in dots/cm, then */
-                PUT_4B(bmpinfoheader, 24, m_parameters.DensityX * 100); /* XPels/M */
-                PUT_4B(bmpinfoheader, 28, m_parameters.DensityY * 100); /* XPels/M */
+                PUT_4B(infoHeader, 24, m_parameters.DensityX * 100); /* XPels/M */
+                PUT_4B(infoHeader, 28, m_parameters.DensityY * 100); /* XPels/M */
             }
-            PUT_2B(bmpinfoheader, 32, cmap_entries); /* biClrUsed */
+            PUT_2B(infoHeader, 32, cmap_entries); /* biClrUsed */
             /* we leave biClrImportant = 0 */
+        }
 
-            m_output.Write(bmpfileheader, 0, 14);
-            m_output.Write(bmpinfoheader, 0, 40);
+        private byte[] createBitmapV4InfoHeader(int bitsPerPixel)
+        {
+            byte[] infoHeader = new byte[40 + 68];
+            fillBitmapInfoHeader(bitsPerPixel, 0, infoHeader);
 
-            if (cmap_entries > 0)
-                writeColormap(cmap_entries, 4);
+            PUT_4B(infoHeader, 56, 0x02); /* CSType == 0x02 (CMYK) */
+
+            return infoHeader;
         }
 
         /// <summary>
@@ -271,6 +303,14 @@ namespace BitMiracle.LibJpeg
                     m_output.WriteByte(0);
             }
         }
+
+        private void writePixels()
+        {
+            for (int row = m_parameters.Height - 1; row >= 0; --row)
+                for (int col = 0; col < m_rowWidth; ++col)
+                    m_output.WriteByte(m_pixels[col, row]);
+        }
+
 
         private static void PUT_2B(byte[] array, int offset, int value)
         {
