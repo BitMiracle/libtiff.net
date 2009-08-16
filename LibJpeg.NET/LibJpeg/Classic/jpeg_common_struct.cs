@@ -28,7 +28,7 @@ namespace BitMiracle.LibJpeg.Classic
 #if EXPOSE_LIBJPEG
     public
 #endif
-    class jpeg_common_struct
+    abstract class jpeg_common_struct
     {
         internal enum JpegState
         {

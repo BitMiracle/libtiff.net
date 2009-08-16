@@ -27,7 +27,6 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-                JBLOCK block = new JBLOCK();
                 return data[i];
             }
             set
