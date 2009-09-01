@@ -73,16 +73,43 @@ namespace BitMiracle.LibJpeg.Classic
         
         internal JpegState m_global_state;     /* For checking call sequence validity */
 
-        public jpeg_progress_mgr Progress
+        public jpeg_common_struct() : this(new jpeg_error_mgr())
         {
-            get { return m_progress; }
-            set { m_progress = value; }
         }
 
-        public LibJpeg.Classic.jpeg_error_mgr Err
+        public jpeg_common_struct(jpeg_error_mgr errorManager)
         {
-            get { return m_err; }
-            set { m_err = value; }
+            Err = errorManager;
+        }
+
+        public jpeg_progress_mgr Progress
+        {
+            get
+            {
+                return m_progress;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
+                m_progress = value;
+            }
+        }
+
+        public jpeg_error_mgr Err
+        {
+            get
+            {
+                return m_err;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+
+                m_err = value;
+            }
         }
 
         // Creation of 2-D sample arrays.

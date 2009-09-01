@@ -489,19 +489,14 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_unread_marker; }
         }
 
-        public jpeg_decompress_struct() : this(new jpeg_error_mgr())
+        public jpeg_decompress_struct()
         {
-        }
-
-        public jpeg_decompress_struct(jpeg_error_mgr errorManager)
-        {
-            m_err = errorManager;
             initialize();
         }
 
-        public void SetErrorManager(jpeg_error_mgr errorManager)
+        public jpeg_decompress_struct(jpeg_error_mgr errorManager) : base(errorManager)
         {
-            m_err = errorManager;
+            initialize();
         }
 
         /// <summary>

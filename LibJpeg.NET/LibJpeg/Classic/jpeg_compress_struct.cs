@@ -393,19 +393,12 @@ namespace BitMiracle.LibJpeg.Classic
 
         public jpeg_compress_struct()
         {
-            m_err = new jpeg_error_mgr();
             initialize();
         }
 
-        public jpeg_compress_struct(jpeg_error_mgr errorManager)
+        public jpeg_compress_struct(jpeg_error_mgr errorManager) : base(errorManager)
         {
-            m_err = errorManager;
             initialize();
-        }
-
-        public void SetErrorManager(jpeg_error_mgr errorManager)
-        {
-            m_err = errorManager;
         }
 
         /// <summary>
