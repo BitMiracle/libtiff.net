@@ -56,7 +56,7 @@ namespace BitMiracle.LibJpeg
         private int m_components;
         private int m_actualNumberOfColors;
         private byte[][] m_colormap;
-        private byte m_densityUnit;
+        private DensityUnit m_densityUnit;
         private int m_densityX;
         private int m_densityY;
 
@@ -187,7 +187,7 @@ namespace BitMiracle.LibJpeg
         // recognized by the JPEG library.
 
         // JFIF code for pixel size units
-        public byte DensityUnit
+        public DensityUnit DensityUnit
         {
             get
             {

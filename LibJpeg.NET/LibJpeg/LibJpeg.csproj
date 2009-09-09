@@ -43,6 +43,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BitStream.cs" />
+    <Compile Include="Classic\DensityUnit.cs" />
     <Compile Include="Classic\Internal\bitread_perm_state.cs" />
     <Compile Include="Classic\Internal\bitread_working_state.cs" />
     <Compile Include="Classic\Internal\d_derived_tbl.cs" />

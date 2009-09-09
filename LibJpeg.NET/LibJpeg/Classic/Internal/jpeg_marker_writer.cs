@@ -469,7 +469,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             emit_byte(0);
             emit_byte(m_cinfo.m_JFIF_major_version); /* Version fields */
             emit_byte(m_cinfo.m_JFIF_minor_version);
-            emit_byte(m_cinfo.m_density_unit); /* Pixel size information */
+            emit_byte((int)m_cinfo.m_density_unit); /* Pixel size information */
             emit_2bytes(m_cinfo.m_X_density);
             emit_2bytes(m_cinfo.m_Y_density);
             emit_byte(0);        /* No thumbnail image */

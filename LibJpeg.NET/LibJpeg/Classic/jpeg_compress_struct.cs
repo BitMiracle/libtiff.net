@@ -139,7 +139,7 @@ namespace BitMiracle.LibJpeg.Classic
         internal byte m_JFIF_major_version;   /* What to write for the JFIF version number */
         internal byte m_JFIF_minor_version;
         
-        internal byte m_density_unit;     /* JFIF code for pixel size units */
+        internal DensityUnit m_density_unit;     /* JFIF code for pixel size units */
         internal short m_X_density;       /* Horizontal pixel density */
         internal short m_Y_density;       /* Vertical pixel density */
         internal bool m_write_Adobe_marker;    /* should an Adobe marker be written? */
@@ -353,7 +353,7 @@ namespace BitMiracle.LibJpeg.Classic
         /* ratio is defined by X_density/Y_density even when density_unit=0. */
         
         // JFIF code for pixel size units
-        public byte Density_unit
+        public DensityUnit Density_unit
         {
             get { return m_density_unit; }
             set { m_density_unit = value; }
@@ -648,7 +648,7 @@ namespace BitMiracle.LibJpeg.Classic
             */
             m_JFIF_major_version = 1; /* Default JFIF version = 1.01 */
             m_JFIF_minor_version = 1;
-            m_density_unit = 0;    /* Pixel size is unknown by default */
+            m_density_unit = DensityUnit.Unknown;    /* Pixel size is unknown by default */
             m_X_density = 1;       /* Pixel aspect ratio is square by default */
             m_Y_density = 1;
 

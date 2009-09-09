@@ -680,7 +680,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 cinfo.m_saw_JFIF_marker = true;
                 cinfo.m_JFIF_major_version = data[5];
                 cinfo.m_JFIF_minor_version = data[6];
-                cinfo.m_density_unit = data[7];
+                cinfo.m_density_unit = (DensityUnit)data[7];
                 cinfo.m_X_density = (short)((data[8] << 8) + data[9]);
                 cinfo.m_Y_density = (short)((data[10] << 8) + data[11]);
 
@@ -816,7 +816,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             m_cinfo.m_saw_JFIF_marker = false;
             m_cinfo.m_JFIF_major_version = 1; /* set default JFIF APP0 values */
             m_cinfo.m_JFIF_minor_version = 1;
-            m_cinfo.m_density_unit = 0;
+            m_cinfo.m_density_unit = DensityUnit.Unknown;
             m_cinfo.m_X_density = 1;
             m_cinfo.m_Y_density = 1;
             m_cinfo.m_saw_Adobe_marker = false;

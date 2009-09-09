@@ -222,7 +222,7 @@ namespace BitMiracle.LibJpeg
             /* we leave biCompression = 0, for none */
             /* we leave biSizeImage = 0; this is correct for uncompressed data */
 
-            if (m_parameters.DensityUnit == 2)
+            if (m_parameters.DensityUnit == DensityUnit.DotsCm)
             {
                 /* if have density in dots/cm, then */
                 PUT_4B(infoHeader, 24, m_parameters.DensityX * 100); /* XPels/M */

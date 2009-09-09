@@ -109,7 +109,7 @@ namespace BitMiracle.LibJpeg.Classic
         internal byte m_JFIF_major_version;   /* JFIF version number */
         internal byte m_JFIF_minor_version;
 
-        internal byte m_density_unit;     /* JFIF code for pixel size units */
+        internal DensityUnit m_density_unit;     /* JFIF code for pixel size units */
         internal short m_X_density;       /* Horizontal pixel density */
         internal short m_Y_density;       /* Vertical pixel density */
 
@@ -465,7 +465,7 @@ namespace BitMiracle.LibJpeg.Classic
         // recognized by the JPEG library.
 
         // JFIF code for pixel size units
-        public byte Density_unit
+        public DensityUnit Density_unit
         {
             get { return m_density_unit; }
         }
