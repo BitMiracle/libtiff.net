@@ -769,7 +769,7 @@ namespace BitMiracle.LibJpeg.Classic
             if (max_lines < lines_per_iMCU_row)
                 ERREXIT(J_MESSAGE_CODE.JERR_BUFFER_SIZE);
 
-            int componentCount = data.Length;
+            int componentCount = data.Length; // maybe we should use max_lines here
             ComponentBuffer[] cb = new ComponentBuffer[componentCount];
             for (int i = 0; i < componentCount; i++)
                 cb[i].SetBuffer(data[i], null, 0);
