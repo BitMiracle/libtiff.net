@@ -25,7 +25,7 @@ using System.IO;
 namespace BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
-    /// Expanded data destination object for stdio output
+    /// Expanded data destination object for output to Stream
     /// </summary>
     class my_destination_mgr : jpeg_destination_mgr
     {
@@ -50,7 +50,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             /* Allocate the output buffer --- it will be released when done with image */
             m_buffer = new byte[OUTPUT_BUF_SIZE];
-            initInternalBuffer(m_buffer, OUTPUT_BUF_SIZE);
+            initInternalBuffer(m_buffer);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             try
             {
-                m_outfile.Write(m_buffer, 0, OUTPUT_BUF_SIZE);
+                m_outfile.Write(m_buffer, 0, m_buffer.Length);
             }
             catch (Exception e)
             {
@@ -87,7 +87,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
-            initInternalBuffer(m_buffer, OUTPUT_BUF_SIZE);
+            initInternalBuffer(m_buffer);
             return true;
         }
 
@@ -101,7 +101,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public override void term_destination()
         {
-            int datacount = OUTPUT_BUF_SIZE - freeInBuffer();
+            int datacount = m_buffer.Length - freeInBuffer;
 
             /* Write any data remaining in the buffer */
             if (datacount > 0)

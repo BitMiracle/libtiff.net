@@ -459,10 +459,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
         private bool emit_byte(int val)
         {
-            if (m_cinfo.m_dest.emit_byte(val))
-                return true;
-
-            return false;
+            return m_cinfo.m_dest.emit_byte(val);
         }
 
         /// <summary>

@@ -46,16 +46,19 @@ namespace BitMiracle.LibJpeg.Classic
             return true;
         }
 
-        protected void initInternalBuffer(byte[] buffer, int size)
+        protected void initInternalBuffer(byte[] buffer)
         {
             m_next_output_byte = buffer;
-            m_free_in_buffer = size;
+            m_free_in_buffer = buffer.Length;
             m_position = 0;
         }
 
-        protected int freeInBuffer()
+        protected int freeInBuffer
         {
-            return m_free_in_buffer;
+            get
+            {
+                return m_free_in_buffer;
+            }
         }
     }
 }
