@@ -201,13 +201,6 @@ namespace BitMiracle.LibJpeg.Classic
         internal jpeg_scan_info[] m_script_space; /* workspace for jpeg_simple_progression */
         internal int m_script_space_size;
 
-        // Destination for compressed data
-        public LibJpeg.Classic.jpeg_destination_mgr Dest
-        {
-            get { return m_dest; }
-            set { m_dest = value; }
-        }
-
         /* Description of source image --- these fields must be filled in by
          * outer application before starting compression.  in_color_space must
          * be correct before you can even call jpeg_set_defaults().

@@ -50,6 +50,7 @@
     <Compile Include="Classic\Internal\huff_entropy_decoder.cs" />
     <Compile Include="Classic\Internal\jpeg_color_deconverter.cs" />
     <Compile Include="Classic\Internal\jpeg_color_quantizer.cs" />
+    <Compile Include="Classic\Internal\jpeg_destination_mgr.cs" />
     <Compile Include="Classic\Internal\jpeg_d_post_controller.cs" />
     <Compile Include="Classic\Internal\ComponentBuffer.cs" />
     <Compile Include="Classic\JpegConstants.cs" />
@@ -67,7 +68,6 @@
     <Compile Include="Classic\Internal\jpeg_c_prep_controller.cs" />
     <Compile Include="Classic\jpeg_decompress_struct.cs" />
     <Compile Include="Classic\Internal\jpeg_decomp_master.cs" />
-    <Compile Include="Classic\jpeg_destination_mgr.cs" />
     <Compile Include="Classic\Internal\jpeg_downsampler.cs" />
     <Compile Include="Classic\Internal\jpeg_d_coef_controller.cs" />
     <Compile Include="Classic\Internal\jpeg_d_main_controller.cs" />
