@@ -112,16 +112,6 @@ namespace BitMiracle.LibJpeg.Classic
             }
         }
 
-        // Creation of 2-D sample arrays.
-        public static byte[][] AllocJpegSamples(int samplesPerRow, int numberOfRows)
-        {
-            byte[][] result = new byte[numberOfRows][];
-            for (int i = 0; i < numberOfRows; i++)
-                result[i] = new byte[samplesPerRow];
-
-            return result;
-        }
-
         public static string Version
         {
             get
@@ -142,6 +132,16 @@ namespace BitMiracle.LibJpeg.Classic
             {
                 return "Copyright (C) 2008-2009, Bit Miracle";
             }
+        }
+
+        // Creation of 2-D sample arrays.
+        public static byte[][] AllocJpegSamples(int samplesPerRow, int numberOfRows)
+        {
+            byte[][] result = new byte[numberOfRows][];
+            for (int i = 0; i < numberOfRows; i++)
+                result[i] = new byte[samplesPerRow];
+
+            return result;
         }
 
         // Generic versions of jpeg_abort and jpeg_destroy that work on either
@@ -190,12 +190,6 @@ namespace BitMiracle.LibJpeg.Classic
             ERREXIT((int)code);
         }
 
-        public void ERREXIT(int code)
-        {
-            m_err.m_msg_code = code;
-            m_err.error_exit();
-        }
-
         public void ERREXIT(J_MESSAGE_CODE code, params object[] args)
         {
             ERREXIT((int)code, args);
@@ -215,12 +209,6 @@ namespace BitMiracle.LibJpeg.Classic
             WARNMS((int)code);
         }
 
-        public void WARNMS(int code)
-        {
-            m_err.m_msg_code = code;
-            m_err.emit_message(-1);
-        }
-
         public void WARNMS(J_MESSAGE_CODE code, params object[] args)
         {
             WARNMS((int)code, args);
@@ -238,12 +226,6 @@ namespace BitMiracle.LibJpeg.Classic
         public void TRACEMS(int lvl, J_MESSAGE_CODE code)
         {
             TRACEMS(lvl, (int)code);
-        }
-
-        public void TRACEMS(int lvl, int code)
-        {
-            m_err.m_msg_code = code;
-            m_err.emit_message(lvl);
         }
 
         public void TRACEMS(int lvl, J_MESSAGE_CODE code, params object[] args)
