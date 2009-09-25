@@ -11,13 +11,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
-    /// Data destination object for compression. 
-    /// At the moment this class is marked internal because in the current version "I/O compression" and 
-    /// "Output to storage different from System.IO.Stream" are undocumented features.
+    /// Data destination object for compression
     /// </summary>
+#if EXPOSE_LIBJPEG
+    public
+#endif
     abstract class jpeg_destination_mgr
     {
         private byte[] m_next_output_byte;   /* => next byte to write in buffer */
