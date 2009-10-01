@@ -501,14 +501,14 @@ namespace BitMiracle.LibJpeg.Classic
         /// Must be called after jpeg_start_compress() and before first call to 
         /// jpeg_write_scanlines() or jpeg_write_raw_data().
         /// </summary>
-        public void jpeg_write_marker(int marker, byte[] data, int datalen)
+        public void jpeg_write_marker(int marker, byte[] data)
         {
             if (m_next_scanline != 0 || (m_global_state != JpegState.CSTATE_SCANNING && m_global_state != JpegState.CSTATE_RAW_OK && m_global_state != JpegState.CSTATE_WRCOEFS))
                 ERREXIT(J_MESSAGE_CODE.JERR_BAD_STATE, (int)m_global_state);
 
-            m_marker.write_marker_header(marker, datalen);
+            m_marker.write_marker_header(marker, data.Length);
 
-            for (int i = 0; i < datalen; i++)
+            for (int i = 0; i < data.Length; i++)
                 m_marker.write_marker_byte(data[i]);
         }
 

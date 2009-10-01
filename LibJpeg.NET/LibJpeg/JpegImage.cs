@@ -253,7 +253,7 @@ namespace BitMiracle.LibJpeg
             imageData.Seek(0, SeekOrigin.Begin);
             int first = imageData.ReadByte();
             int second = imageData.ReadByte();
-            return (first == 0xFF && second == (int)JPEG_MARKER.M_SOI);
+            return (first == 0xFF && second == (int)JPEG_MARKER.SOI);
         }
 
         private void createFromBitmap(System.Drawing.Bitmap bitmap)

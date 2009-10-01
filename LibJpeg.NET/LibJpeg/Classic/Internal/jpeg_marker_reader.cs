@@ -125,121 +125,121 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                  */
                 switch ((JPEG_MARKER)m_cinfo.m_unread_marker)
                 {
-                    case JPEG_MARKER.M_SOI:
+                    case JPEG_MARKER.SOI:
                         if (!get_soi())
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_SOF0:
+                    case JPEG_MARKER.SOF0:
                     /* Baseline */
-                    case JPEG_MARKER.M_SOF1:
+                    case JPEG_MARKER.SOF1:
                         /* Extended sequential, Huffman */
                         if (!get_sof(false))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_SOF2:
+                    case JPEG_MARKER.SOF2:
                         /* Progressive, Huffman */
                         if (!get_sof(true))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
                     /* Currently unsupported SOFn types */
-                    case JPEG_MARKER.M_SOF3:
+                    case JPEG_MARKER.SOF3:
                     /* Lossless, Huffman */
-                    case JPEG_MARKER.M_SOF5:
+                    case JPEG_MARKER.SOF5:
                     /* Differential sequential, Huffman */
-                    case JPEG_MARKER.M_SOF6:
+                    case JPEG_MARKER.SOF6:
                     /* Differential progressive, Huffman */
-                    case JPEG_MARKER.M_SOF7:
+                    case JPEG_MARKER.SOF7:
                     /* Differential lossless, Huffman */
-                    case JPEG_MARKER.M_SOF9:
+                    case JPEG_MARKER.SOF9:
                     /* Extended sequential, arithmetic */
-                    case JPEG_MARKER.M_SOF10:
+                    case JPEG_MARKER.SOF10:
                     /* Progressive, arithmetic */
-                    case JPEG_MARKER.M_JPG:
+                    case JPEG_MARKER.JPG:
                     /* Reserved for JPEG extensions */
-                    case JPEG_MARKER.M_SOF11:
+                    case JPEG_MARKER.SOF11:
                     /* Lossless, arithmetic */
-                    case JPEG_MARKER.M_SOF13:
+                    case JPEG_MARKER.SOF13:
                     /* Differential sequential, arithmetic */
-                    case JPEG_MARKER.M_SOF14:
+                    case JPEG_MARKER.SOF14:
                     /* Differential progressive, arithmetic */
-                    case JPEG_MARKER.M_SOF15:
+                    case JPEG_MARKER.SOF15:
                         /* Differential lossless, arithmetic */
                         m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED, m_cinfo.m_unread_marker);
                         break;
 
-                    case JPEG_MARKER.M_SOS:
+                    case JPEG_MARKER.SOS:
                         if (!get_sos())
                             return ReadResult.JPEG_SUSPENDED;
                         m_cinfo.m_unread_marker = 0;   /* processed the marker */
                         return ReadResult.JPEG_REACHED_SOS;
 
-                    case JPEG_MARKER.M_EOI:
+                    case JPEG_MARKER.EOI:
                         m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_EOI);
                         m_cinfo.m_unread_marker = 0;   /* processed the marker */
                         return ReadResult.JPEG_REACHED_EOI;
 
-                    case JPEG_MARKER.M_DAC:
+                    case JPEG_MARKER.DAC:
                         if (!skip_variable(m_cinfo))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_DHT:
+                    case JPEG_MARKER.DHT:
                         if (!get_dht())
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_DQT:
+                    case JPEG_MARKER.DQT:
                         if (!get_dqt())
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_DRI:
+                    case JPEG_MARKER.DRI:
                         if (!get_dri())
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_APP0:
-                    case JPEG_MARKER.M_APP1:
-                    case JPEG_MARKER.M_APP2:
-                    case JPEG_MARKER.M_APP3:
-                    case JPEG_MARKER.M_APP4:
-                    case JPEG_MARKER.M_APP5:
-                    case JPEG_MARKER.M_APP6:
-                    case JPEG_MARKER.M_APP7:
-                    case JPEG_MARKER.M_APP8:
-                    case JPEG_MARKER.M_APP9:
-                    case JPEG_MARKER.M_APP10:
-                    case JPEG_MARKER.M_APP11:
-                    case JPEG_MARKER.M_APP12:
-                    case JPEG_MARKER.M_APP13:
-                    case JPEG_MARKER.M_APP14:
-                    case JPEG_MARKER.M_APP15:
-                        if (!m_cinfo.m_marker.m_process_APPn[m_cinfo.m_unread_marker - (int)JPEG_MARKER.M_APP0](m_cinfo))
+                    case JPEG_MARKER.APP0:
+                    case JPEG_MARKER.APP1:
+                    case JPEG_MARKER.APP2:
+                    case JPEG_MARKER.APP3:
+                    case JPEG_MARKER.APP4:
+                    case JPEG_MARKER.APP5:
+                    case JPEG_MARKER.APP6:
+                    case JPEG_MARKER.APP7:
+                    case JPEG_MARKER.APP8:
+                    case JPEG_MARKER.APP9:
+                    case JPEG_MARKER.APP10:
+                    case JPEG_MARKER.APP11:
+                    case JPEG_MARKER.APP12:
+                    case JPEG_MARKER.APP13:
+                    case JPEG_MARKER.APP14:
+                    case JPEG_MARKER.APP15:
+                        if (!m_cinfo.m_marker.m_process_APPn[m_cinfo.m_unread_marker - (int)JPEG_MARKER.APP0](m_cinfo))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_COM:
+                    case JPEG_MARKER.COM:
                         if (!m_cinfo.m_marker.m_process_COM(m_cinfo))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.M_RST0:
+                    case JPEG_MARKER.RST0:
                     /* these are all parameterless */
-                    case JPEG_MARKER.M_RST1:
-                    case JPEG_MARKER.M_RST2:
-                    case JPEG_MARKER.M_RST3:
-                    case JPEG_MARKER.M_RST4:
-                    case JPEG_MARKER.M_RST5:
-                    case JPEG_MARKER.M_RST6:
-                    case JPEG_MARKER.M_RST7:
-                    case JPEG_MARKER.M_TEM:
+                    case JPEG_MARKER.RST1:
+                    case JPEG_MARKER.RST2:
+                    case JPEG_MARKER.RST3:
+                    case JPEG_MARKER.RST4:
+                    case JPEG_MARKER.RST5:
+                    case JPEG_MARKER.RST6:
+                    case JPEG_MARKER.RST7:
+                    case JPEG_MARKER.TEM:
                         m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_PARMLESS_MARKER, m_cinfo.m_unread_marker);
                         break;
 
-                    case JPEG_MARKER.M_DNL:
+                    case JPEG_MARKER.DNL:
                         /* Ignore DNL ... perhaps the wrong thing */
                         if (!skip_variable(m_cinfo))
                             return ReadResult.JPEG_SUSPENDED;
@@ -284,7 +284,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     return false;
             }
 
-            if (m_cinfo.m_unread_marker == ((int)JPEG_MARKER.M_RST0 + m_cinfo.m_marker.m_next_restart_num))
+            if (m_cinfo.m_unread_marker == ((int)JPEG_MARKER.RST0 + m_cinfo.m_marker.m_next_restart_num))
             {
                 /* Normal case --- swallow the marker and let entropy decoder continue */
                 m_cinfo.TRACEMS(3, J_MESSAGE_CODE.JTRC_RST, m_cinfo.m_marker.m_next_restart_num);
@@ -371,10 +371,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public void jpeg_set_marker_processor(int marker_code, jpeg_decompress_struct.jpeg_marker_parser_method routine)
         {
-            if (marker_code == (int)JPEG_MARKER.M_COM)
+            if (marker_code == (int)JPEG_MARKER.COM)
                 m_process_COM = routine;
-            else if (marker_code >= (int)JPEG_MARKER.M_APP0 && marker_code <= (int)JPEG_MARKER.M_APP15)
-                m_process_APPn[marker_code - (int)JPEG_MARKER.M_APP0] = routine;
+            else if (marker_code >= (int)JPEG_MARKER.APP0 && marker_code <= (int)JPEG_MARKER.APP15)
+                m_process_APPn[marker_code - (int)JPEG_MARKER.APP0] = routine;
             else
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
         }
@@ -389,28 +389,28 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 processor = save_marker;
                 /* If saving APP0/APP14, save at least enough for our internal use. */
-                if (marker_code == (int)JPEG_MARKER.M_APP0 && length_limit < APP0_DATA_LEN)
+                if (marker_code == (int)JPEG_MARKER.APP0 && length_limit < APP0_DATA_LEN)
                     length_limit = APP0_DATA_LEN;
-                else if (marker_code == (int)JPEG_MARKER.M_APP14 && length_limit < APP14_DATA_LEN)
+                else if (marker_code == (int)JPEG_MARKER.APP14 && length_limit < APP14_DATA_LEN)
                     length_limit = APP14_DATA_LEN;
             }
             else
             {
                 processor = skip_variable;
                 /* If discarding APP0/APP14, use our regular on-the-fly processor. */
-                if (marker_code == (int)JPEG_MARKER.M_APP0 || marker_code == (int)JPEG_MARKER.M_APP14)
+                if (marker_code == (int)JPEG_MARKER.APP0 || marker_code == (int)JPEG_MARKER.APP14)
                     processor = get_interesting_appn;
             }
 
-            if (marker_code == (int)JPEG_MARKER.M_COM)
+            if (marker_code == (int)JPEG_MARKER.COM)
             {
                 m_process_COM = processor;
                 m_length_limit_COM = length_limit;
             }
-            else if (marker_code >= (int)JPEG_MARKER.M_APP0 && marker_code <= (int)JPEG_MARKER.M_APP15)
+            else if (marker_code >= (int)JPEG_MARKER.APP0 && marker_code <= (int)JPEG_MARKER.APP15)
             {
-                m_process_APPn[marker_code - (int)JPEG_MARKER.M_APP0] = processor;
-                m_length_limit_APPn[marker_code - (int)JPEG_MARKER.M_APP0] = length_limit;
+                m_process_APPn[marker_code - (int)JPEG_MARKER.APP0] = processor;
+                m_length_limit_APPn[marker_code - (int)JPEG_MARKER.APP0] = length_limit;
             }
             else
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, marker_code);
@@ -469,10 +469,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* watch out for bogus length word */
                     /* figure out how much we want to save */
                     int limit;
-                    if (cinfo.m_unread_marker == (int)JPEG_MARKER.M_COM)
+                    if (cinfo.m_unread_marker == (int)JPEG_MARKER.COM)
                         limit = cinfo.m_marker.m_length_limit_COM;
                     else
-                        limit = cinfo.m_marker.m_length_limit_APPn[cinfo.m_unread_marker - (int)JPEG_MARKER.M_APP0];
+                        limit = cinfo.m_marker.m_length_limit_APPn[cinfo.m_unread_marker - (int)JPEG_MARKER.APP0];
 
                     if (length < limit)
                         limit = length;
@@ -555,7 +555,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             cinfo.m_marker.m_cur_marker = null;
 
             JPEG_MARKER currentMarker = (JPEG_MARKER)cinfo.m_unread_marker;
-            if (data_length != 0 && (currentMarker == JPEG_MARKER.M_APP0 || currentMarker == JPEG_MARKER.M_APP14))
+            if (data_length != 0 && (currentMarker == JPEG_MARKER.APP0 || currentMarker == JPEG_MARKER.APP14))
             {
                 tempData = new byte[data.Length];
                 Array.Copy(data, dataOffset, tempData, 0, data.Length - dataOffset);
@@ -564,10 +564,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Process the marker if interesting; else just make a generic trace msg */
             switch ((JPEG_MARKER)cinfo.m_unread_marker)
             {
-                case JPEG_MARKER.M_APP0:
+                case JPEG_MARKER.APP0:
                     examine_app0(cinfo, tempData, data_length, length);
                     break;
-                case JPEG_MARKER.M_APP14:
+                case JPEG_MARKER.APP14:
                     examine_app14(cinfo, tempData, data_length, length);
                     break;
                 default:
@@ -634,10 +634,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* process it */
             switch ((JPEG_MARKER)cinfo.m_unread_marker)
             {
-            case JPEG_MARKER.M_APP0:
+            case JPEG_MARKER.APP0:
                 examine_app0(cinfo, b, numtoread, length);
                 break;
-            case JPEG_MARKER.M_APP14:
+            case JPEG_MARKER.APP14:
                 examine_app14(cinfo, b, numtoread, length);
                 break;
             default:
@@ -1187,7 +1187,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (!m_cinfo.m_src.GetByte(out c2))
                 return false;
 
-            if (c != 0xFF || c2 != (int)JPEG_MARKER.M_SOI)
+            if (c != 0xFF || c2 != (int)JPEG_MARKER.SOI)
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_SOI, c, c2);
 
             m_cinfo.m_unread_marker = c2;

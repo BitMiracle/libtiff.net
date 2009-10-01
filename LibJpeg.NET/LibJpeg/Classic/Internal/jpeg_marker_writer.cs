@@ -45,7 +45,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public void write_file_header()
         {
-            emit_marker(JPEG_MARKER.M_SOI);  /* first the SOI */
+            emit_marker(JPEG_MARKER.SOI);  /* first the SOI */
 
             /* SOI is defined to reset restart interval to 0 */
             m_last_restart_interval = 0;
@@ -101,11 +101,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             /* Emit the proper SOF marker */
             if (m_cinfo.m_progressive_mode)
-                emit_sof(JPEG_MARKER.M_SOF2);    /* SOF code for progressive Huffman */
+                emit_sof(JPEG_MARKER.SOF2);    /* SOF code for progressive Huffman */
             else if (is_baseline)
-                emit_sof(JPEG_MARKER.M_SOF0);    /* SOF code for baseline implementation */
+                emit_sof(JPEG_MARKER.SOF0);    /* SOF code for baseline implementation */
             else
-                emit_sof(JPEG_MARKER.M_SOF1);    /* SOF code for non-baseline Huffman file */
+                emit_sof(JPEG_MARKER.SOF1);    /* SOF code for non-baseline Huffman file */
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public void write_file_trailer()
         {
-            emit_marker(JPEG_MARKER.M_EOI);
+            emit_marker(JPEG_MARKER.EOI);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public void write_tables_only()
         {
-            emit_marker(JPEG_MARKER.M_SOI);
+            emit_marker(JPEG_MARKER.SOI);
 
             for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
             {
@@ -190,7 +190,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     emit_dht(i, true);
             }
 
-            emit_marker(JPEG_MARKER.M_EOI);
+            emit_marker(JPEG_MARKER.EOI);
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -230,7 +230,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         private void emit_sos()
         {
-            emit_marker(JPEG_MARKER.M_SOS);
+            emit_marker(JPEG_MARKER.SOS);
 
             emit_2bytes(2 * m_cinfo.m_comps_in_scan + 2 + 1 + 3); /* length */
 
@@ -324,7 +324,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * whether the encoder performed a transformation, which is pretty useless.
              */
 
-            emit_marker(JPEG_MARKER.M_APP14);
+            emit_marker(JPEG_MARKER.APP14);
 
             emit_2bytes(2 + 5 + 2 + 2 + 2 + 1); /* length */
 
@@ -355,7 +355,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         private void emit_dri()
         {
-            emit_marker(JPEG_MARKER.M_DRI);
+            emit_marker(JPEG_MARKER.DRI);
 
             emit_2bytes(4);  /* fixed length */
 
@@ -379,7 +379,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             if (!htbl.sent_table)
             {
-                emit_marker(JPEG_MARKER.M_DHT);
+                emit_marker(JPEG_MARKER.DHT);
 
                 int length = 0;
                 for (int i = 1; i <= 16; i++)
@@ -418,7 +418,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             if (!qtbl.sent_table)
             {
-                emit_marker(JPEG_MARKER.M_DQT);
+                emit_marker(JPEG_MARKER.DQT);
 
                 emit_2bytes(prec != 0 ? JpegConstants.DCTSIZE2 * 2 + 1 + 2 : JpegConstants.DCTSIZE2 + 1 + 2);
 
@@ -458,7 +458,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * Thumbnail Y size     (1 byte)
              */
 
-            emit_marker(JPEG_MARKER.M_APP0);
+            emit_marker(JPEG_MARKER.APP0);
 
             emit_2bytes(2 + 4 + 1 + 2 + 1 + 2 + 2 + 1 + 1); /* length */
 

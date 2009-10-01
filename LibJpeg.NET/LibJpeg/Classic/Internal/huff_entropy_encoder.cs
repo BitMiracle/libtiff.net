@@ -528,7 +528,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (!emit_byte(0xFF))
                 return false;
 
-            if (!emit_byte((int)(JPEG_MARKER.M_RST0 + restart_num)))
+            if (!emit_byte((int)(JPEG_MARKER.RST0 + restart_num)))
                 return false;
 
             /* Re-initialize DC predictions to 0 */

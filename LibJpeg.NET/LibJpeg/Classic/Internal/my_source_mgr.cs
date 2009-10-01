@@ -106,7 +106,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_JPEG_EOF);
                 /* Insert a fake EOI marker */
                 m_buffer[0] = (byte)0xFF;
-                m_buffer[1] = (byte)JPEG_MARKER.M_EOI;
+                m_buffer[1] = (byte)JPEG_MARKER.EOI;
                 nbytes = 2;
             }
 

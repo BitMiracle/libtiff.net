@@ -741,7 +741,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 flush_bits();
                 emit_byte(0xFF);
-                emit_byte((int)(JPEG_MARKER.M_RST0 + restart_num));
+                emit_byte((int)(JPEG_MARKER.RST0 + restart_num));
             }
 
             if (m_cinfo.m_Ss == 0)

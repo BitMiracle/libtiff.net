@@ -127,27 +127,27 @@ namespace BitMiracle.LibJpeg.Classic
             int action = 1;
             for (; ; )
             {
-                if (cinfo.m_unread_marker < (int)JPEG_MARKER.M_SOF0)
+                if (cinfo.m_unread_marker < (int)JPEG_MARKER.SOF0)
                 {
                     /* invalid marker */
                     action = 2;
                 }
-                else if (cinfo.m_unread_marker < (int)JPEG_MARKER.M_RST0 ||
-                    cinfo.m_unread_marker > (int)JPEG_MARKER.M_RST7)
+                else if (cinfo.m_unread_marker < (int)JPEG_MARKER.RST0 ||
+                    cinfo.m_unread_marker > (int)JPEG_MARKER.RST7)
                 {
                     /* valid non-restart marker */
                     action = 3;
                 }
                 else
                 {
-                    if (cinfo.m_unread_marker == ((int)JPEG_MARKER.M_RST0 + ((desired + 1) & 7))
-                        || cinfo.m_unread_marker == ((int)JPEG_MARKER.M_RST0 + ((desired + 2) & 7)))
+                    if (cinfo.m_unread_marker == ((int)JPEG_MARKER.RST0 + ((desired + 1) & 7))
+                        || cinfo.m_unread_marker == ((int)JPEG_MARKER.RST0 + ((desired + 2) & 7)))
                     {
                         /* one of the next two expected restarts */
                         action = 3;
                     }
-                    else if (cinfo.m_unread_marker == ((int)JPEG_MARKER.M_RST0 + ((desired - 1) & 7)) ||
-                        cinfo.m_unread_marker == ((int)JPEG_MARKER.M_RST0 + ((desired - 2) & 7)))
+                    else if (cinfo.m_unread_marker == ((int)JPEG_MARKER.RST0 + ((desired - 1) & 7)) ||
+                        cinfo.m_unread_marker == ((int)JPEG_MARKER.RST0 + ((desired - 2) & 7)))
                     {
                         /* a prior restart, so advance */
                         action = 2;
