@@ -79,8 +79,8 @@
     <Compile Include="Classic\Internal\jpeg_inverse_dct.cs" />
     <Compile Include="Classic\JPEG_MARKER.cs" />
     <Compile Include="Classic\Internal\jpeg_marker_reader.cs" />
-    <Compile Include="Classic\Internal\jpeg_marker_struct.cs" />
     <Compile Include="Classic\Internal\jpeg_marker_writer.cs" />
+    <Compile Include="Classic\jpeg_marker_struct.cs" />
     <Compile Include="Classic\jpeg_progress_mgr.cs" />
     <Compile Include="Classic\Internal\jpeg_scan_info.cs" />
     <Compile Include="Classic\jpeg_source_mgr.cs" />

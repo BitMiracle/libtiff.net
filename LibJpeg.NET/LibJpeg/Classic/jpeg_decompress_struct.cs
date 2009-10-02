@@ -118,12 +118,8 @@ namespace BitMiracle.LibJpeg.Classic
 
         internal bool m_CCIR601_sampling;  /* true=first samples are cosited */
 
-        /* Aside from the specific data retained from APPn markers known to the
-         * library, the uninterpreted contents of any or all APPn and COM markers
-         * can be saved in a list for examination by the application.
-         */
         internal jpeg_marker_struct m_marker_list; /* Head of list of saved markers */
-
+	
         /* Remaining fields are known throughout decompressor, but generally
          * should not be touched by a surrounding application.
          */
@@ -224,6 +220,15 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get { return m_jpeg_color_space; }
         }
+
+        /* Aside from the specific data retained from APPn markers known to the
+         * library, the uninterpreted contents of any or all APPn and COM markers
+         * can be saved in a list for examination by the application.
+         */
+        public jpeg_marker_struct Marker_list
+	    {
+		    get { return m_marker_list; }
+	    }
 
         /* Decompression processing parameters --- these fields must be set before
          * calling jpeg_start_decompress().  Note that jpeg_read_header() initializes

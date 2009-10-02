@@ -11,11 +11,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// The decompressor can save APPn and COM markers in a list of these:
     /// </summary>
+#if EXPOSE_LIBJPEG
+    public
+#endif
     class jpeg_marker_struct
     {
         public jpeg_marker_struct next;   /* next in list, or null */
