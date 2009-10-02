@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.IO;
 
@@ -118,7 +119,7 @@ namespace BitMiracle.LibJpeg.Classic
 
         internal bool m_CCIR601_sampling;  /* true=first samples are cosited */
 
-        internal jpeg_marker_struct m_marker_list; /* Head of list of saved markers */
+        internal List<jpeg_marker_struct> m_marker_list; /* Head of list of saved markers */
 	
         /* Remaining fields are known throughout decompressor, but generally
          * should not be touched by a surrounding application.
@@ -225,9 +226,9 @@ namespace BitMiracle.LibJpeg.Classic
          * library, the uninterpreted contents of any or all APPn and COM markers
          * can be saved in a list for examination by the application.
          */
-        public jpeg_marker_struct Marker_list
+        public ReadOnlyCollection<jpeg_marker_struct> Marker_list
 	    {
-		    get { return m_marker_list; }
+		    get { return m_marker_list.AsReadOnly(); }
 	    }
 
         /* Decompression processing parameters --- these fields must be set before
@@ -1300,7 +1301,7 @@ namespace BitMiracle.LibJpeg.Classic
             /* Initialize marker processor so application can override methods
             * for COM, APPn markers before calling jpeg_read_header.
             */
-            m_marker_list = null;
+            m_marker_list = new List<jpeg_marker_struct>();
             m_marker = new jpeg_marker_reader(this);
 
             /* And initialize the overall input controller. */

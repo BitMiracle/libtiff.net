@@ -16,16 +16,45 @@ namespace BitMiracle.LibJpeg.Classic
     /// <summary>
     /// The decompressor can save APPn and COM markers in a list of these:
     /// </summary>
+    /// <remarks>The marker length word is not counted in Data.Length or OriginalLength</remarks>
 #if EXPOSE_LIBJPEG
     public
 #endif
     class jpeg_marker_struct
     {
-        public jpeg_marker_struct next;   /* next in list, or null */
-        public byte marker;           /* marker code: JPEG_COM, or JPEG_APP0+n */
-        public int original_length;   /* # bytes of data in the file */
-        public int data_length;   /* # bytes of data saved at data[] */
-        public byte[] data;       /* the data contained in the marker */
-        /* the marker length word is not counted in data_length or original_length */
+        private byte m_marker;           /* marker code: JPEG_COM, or JPEG_APP0+n */
+        private int m_originalLength;   /* # bytes of data in the file */
+        private byte[] m_data;       /* the data contained in the marker */
+
+        public jpeg_marker_struct(byte marker, int originalDataLength, int lengthLimit)
+        {
+            m_marker = marker;
+            m_originalLength = originalDataLength;
+            m_data = new byte[lengthLimit];
+        }
+
+        public byte Marker
+        {
+            get
+            {
+                return m_marker;
+            }
+        }
+
+        public int OriginalLength
+        {
+            get
+            {
+                return m_originalLength;
+            }
+        }
+
+        public byte[] Data
+        {
+            get
+            {
+                return m_data;
+            }
+        }
     }
 }

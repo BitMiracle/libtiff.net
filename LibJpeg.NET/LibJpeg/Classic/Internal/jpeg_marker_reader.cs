@@ -478,15 +478,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         limit = length;
                     
                     /* allocate and initialize the marker item */
-                    cur_marker = new jpeg_marker_struct();
-                    cur_marker.data = new byte[limit];
-                    cur_marker.next = null;
-                    cur_marker.marker = (byte) cinfo.m_unread_marker;
-                    cur_marker.original_length = length;
-                    cur_marker.data_length = limit;
+                    cur_marker = new jpeg_marker_struct((byte)cinfo.m_unread_marker, length, limit);
                     
                     /* data area is just beyond the jpeg_marker_struct */
-                    data = cur_marker.data;
+                    data = cur_marker.Data;
                     cinfo.m_marker.m_cur_marker = cur_marker;
                     cinfo.m_marker.m_bytes_read = 0;
                     bytes_read = 0;
@@ -503,8 +498,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 /* resume reading a marker */
                 bytes_read = cinfo.m_marker.m_bytes_read;
-                data_length = cur_marker.data_length;
-                data = cur_marker.data;
+                data_length = cur_marker.Data.Length;
+                data = cur_marker.Data;
                 dataOffset = bytes_read;
             }
 
@@ -532,23 +527,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 /* will be null if bogus length word */
                 /* Add new marker to end of list */
-                if (cinfo.m_marker_list == null)
-                {
-                    cinfo.m_marker_list = cur_marker;
-                }
-                else
-                {
-                    jpeg_marker_struct prev = cinfo.m_marker_list;
-                    while (prev.next != null)
-                        prev = prev.next;
-
-                    prev.next = cur_marker;
-                }
+                cinfo.m_marker_list.Add(cur_marker);
 
                 /* Reset pointer & calc remaining data length */
-                data = cur_marker.data;
+                data = cur_marker.Data;
                 dataOffset = 0;
-                length = cur_marker.original_length - data_length;
+                length = cur_marker.OriginalLength - data_length;
             }
 
             /* Reset to initial state for next marker */
