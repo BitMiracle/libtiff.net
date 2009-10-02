@@ -520,7 +520,7 @@ namespace BitMiracle.LibJpeg.Classic
             m_marker.write_marker_header(marker, datalen);
         }
 
-        public void jpeg_write_m_byte(int val)
+        public void jpeg_write_m_byte(byte val)
         {
             m_marker.write_marker_byte(val);
         }

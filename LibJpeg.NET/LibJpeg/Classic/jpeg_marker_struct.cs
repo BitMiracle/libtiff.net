@@ -26,7 +26,7 @@ namespace BitMiracle.LibJpeg.Classic
         private int m_originalLength;   /* # bytes of data in the file */
         private byte[] m_data;       /* the data contained in the marker */
 
-        public jpeg_marker_struct(byte marker, int originalDataLength, int lengthLimit)
+        internal jpeg_marker_struct(byte marker, int originalDataLength, int lengthLimit)
         {
             m_marker = marker;
             m_originalLength = originalDataLength;

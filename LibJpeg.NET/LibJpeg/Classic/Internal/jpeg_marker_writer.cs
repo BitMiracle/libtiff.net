@@ -216,7 +216,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// <summary>
         /// Emit one byte of marker parameters following write_marker_header
         /// </summary>
-        public void write_marker_byte(int val)
+        public void write_marker_byte(byte val)
         {
             emit_byte(val);
         }

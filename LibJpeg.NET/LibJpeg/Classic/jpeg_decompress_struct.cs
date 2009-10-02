@@ -228,7 +228,10 @@ namespace BitMiracle.LibJpeg.Classic
          */
         public ReadOnlyCollection<jpeg_marker_struct> Marker_list
 	    {
-		    get { return m_marker_list.AsReadOnly(); }
+		    get
+            {
+                return m_marker_list.AsReadOnly();
+            }
 	    }
 
         /* Decompression processing parameters --- these fields must be set before
