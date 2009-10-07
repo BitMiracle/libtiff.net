@@ -1053,7 +1053,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Returns null if suspended.  This case need be checked only if
         /// a suspending data source is used.
         /// </summary>
-        public jvirt_barray_control[] jpeg_read_coefficients()
+        public jvirt_array<JBLOCK>[] jpeg_read_coefficients()
         {
             if (m_global_state == JpegState.DSTATE_READY)
             {

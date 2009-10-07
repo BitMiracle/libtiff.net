@@ -39,7 +39,7 @@ namespace BitMiracle.LibJpeg.Classic
 #endif
     class jvirt_array<T>
     {
-        public delegate T[][] Allocator(int width, int height);
+        internal delegate T[][] Allocator(int width, int height);
 
         private jpeg_common_struct m_cinfo;
 
@@ -50,7 +50,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         /// <param name="width">Width of array</param>
         /// <param name="height">Total virtual array height</param>
-        public jvirt_array(int width, int height, Allocator allocator)
+        internal jvirt_array(int width, int height, Allocator allocator)
         {
             m_cinfo = null;
             m_buffer = allocator(width, height);
@@ -68,7 +68,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Access the part of a virtual sample array starting at start_row
         /// and extending for num_rows rows.
         /// </summary>
-        public T[][] access_virt_sarray(int startRow, int numberOfRows)
+        public T[][] Access(int startRow, int numberOfRows)
         {
             /* debugging check */
             if (startRow + numberOfRows > m_buffer.Length)

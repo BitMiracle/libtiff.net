@@ -87,8 +87,6 @@
     <Compile Include="Classic\Internal\jpeg_upsampler.cs" />
     <Compile Include="Classic\Internal\JQUANT_TBL.cs" />
     <Compile Include="Classic\jvirt_array.cs" />
-    <Compile Include="Classic\jvirt_barray_control.cs" />
-    <Compile Include="Classic\jvirt_sarray_control.cs" />
     <Compile Include="Classic\Internal\J_BUF_MODE.cs" />
     <Compile Include="Classic\J_COLOR_SPACE.cs" />
     <Compile Include="Classic\J_DCT_METHOD.cs" />

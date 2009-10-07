@@ -134,6 +134,16 @@ namespace BitMiracle.LibJpeg.Classic
             }
         }
 
+        public static jvirt_array<byte> CreateSamplesArray(int samplesPerRow, int numberOfRows)
+        {
+            return new jvirt_array<byte>(samplesPerRow, numberOfRows, AllocJpegSamples);
+        }
+
+        public static jvirt_array<JBLOCK> CreateBlocksArray(int blocksPerRow, int numberOfRows)
+        {
+            return new jvirt_array<JBLOCK>(blocksPerRow, numberOfRows, allocJpegBlocks);
+        }
+
         // Creation of 2-D sample arrays.
         public static byte[][] AllocJpegSamples(int samplesPerRow, int numberOfRows)
         {
@@ -145,13 +155,13 @@ namespace BitMiracle.LibJpeg.Classic
         }
 
         // Creation of 2-D block arrays.
-        public static JBLOCK[][] AllocJpegBlocks(int samplesPerRow, int numberOfRows)
+        private static JBLOCK[][] allocJpegBlocks(int blocksPerRow, int numberOfRows)
         {
             JBLOCK[][] result = new JBLOCK[numberOfRows][];
             for (int i = 0; i < numberOfRows; ++i)
             {
-                result[i] = new JBLOCK[samplesPerRow];
-                for (int j = 0; j < samplesPerRow; ++j)
+                result[i] = new JBLOCK[blocksPerRow];
+                for (int j = 0; j < blocksPerRow; ++j)
                     result[i][j] = new JBLOCK();
             }
             return result;

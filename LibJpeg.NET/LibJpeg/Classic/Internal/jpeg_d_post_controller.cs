@@ -47,7 +47,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         * For two-pass color quantization, we need a full-image buffer;
         * for one-pass operation, a strip buffer is sufficient.
         */
-        private jvirt_sarray_control m_whole_image;  /* virtual array, or null if one-pass */
+        private jvirt_array<byte> m_whole_image;  /* virtual array, or null if one-pass */
         private byte[][] m_buffer;       /* strip buffer, or current strip of virtual */
         private int m_strip_height;    /* buffer size in rows */
         /* for two-pass mode only: */
@@ -77,7 +77,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 {
                     /* Two-pass color quantization: need full-image storage. */
                     /* We round up the number of rows to a multiple of the strip height. */
-                    m_whole_image = new jvirt_sarray_control(cinfo.m_output_width * cinfo.m_out_color_components,
+                    m_whole_image = jpeg_common_struct.CreateSamplesArray(cinfo.m_output_width * cinfo.m_out_color_components,
                         JpegUtils.jround_up(cinfo.m_output_height, m_strip_height));
                     m_whole_image.ErrorProcessor = cinfo;
                 }
@@ -106,7 +106,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                          * allocate a strip buffer.  Use the virtual-array buffer as workspace.
                          */
                         if (m_buffer == null)
-                            m_buffer = m_whole_image.access_virt_sarray(0, m_strip_height);
+                            m_buffer = m_whole_image.Access(0, m_strip_height);
                     }
                     else
                     {
@@ -188,7 +188,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             /* Reposition virtual buffer if at start of strip. */
             if (m_next_row == 0)
-                m_buffer = m_whole_image.access_virt_sarray(m_starting_row, m_strip_height);
+                m_buffer = m_whole_image.Access(m_starting_row, m_strip_height);
 
             /* Upsample some data (up to a strip height's worth). */
             old_next_row = m_next_row;
@@ -220,7 +220,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             /* Reposition virtual buffer if at start of strip. */
             if (m_next_row == 0)
-                m_buffer = m_whole_image.access_virt_sarray(m_starting_row, m_strip_height);
+                m_buffer = m_whole_image.Access(m_starting_row, m_strip_height);
 
             /* Determine number of rows to emit. */
             num_rows = m_strip_height - m_next_row; /* available in strip */

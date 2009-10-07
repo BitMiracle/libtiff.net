@@ -35,7 +35,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private int m_MCU_rows_per_iMCU_row;  /* number of such rows needed */
 
         /* Virtual block array for each component. */
-        private jvirt_barray_control[] m_whole_image;
+        private jvirt_array<JBLOCK>[] m_whole_image;
 
         /* Workspace for constructing dummy blocks at right/bottom edges. */
         private JBLOCK[][] m_dummy_buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU][];
@@ -47,7 +47,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// coefficient: width_in_blocks wide and height_in_blocks high,
         /// with unit height at least v_samp_factor.
         /// </summary>
-        public my_trans_c_coef_controller(jpeg_compress_struct cinfo, jvirt_barray_control[] coef_arrays)
+        public my_trans_c_coef_controller(jpeg_compress_struct cinfo, jvirt_array<JBLOCK>[] coef_arrays)
         {
             m_cinfo = cinfo;
 
@@ -95,7 +95,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
-                buffer[ci] = m_whole_image[componentInfo.component_index].access_virt_barray(
+                buffer[ci] = m_whole_image[componentInfo.component_index].Access(
                     m_iMCU_row_num * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
             }
 

@@ -74,8 +74,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private JBLOCK[] m_MCU_buffer = new JBLOCK[JpegConstants.D_MAX_BLOCKS_IN_MCU];
 
         /* In multi-pass modes, we need a virtual block array for each component. */
-        private jvirt_barray_control[] m_whole_image = new jvirt_barray_control[JpegConstants.MAX_COMPONENTS];
-        private jvirt_barray_control[] m_coef_arrays;
+        private jvirt_array<JBLOCK>[] m_whole_image = new jvirt_array<JBLOCK>[JpegConstants.MAX_COMPONENTS];
+        private jvirt_array<JBLOCK>[] m_coef_arrays;
 
         /* When doing block smoothing, we latch coefficient Al values here */
         private int[] m_coef_bits_latch;
@@ -95,9 +95,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* Note we ask for a pre-zeroed array. */
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
-                    m_whole_image[ci] = new jvirt_barray_control(cinfo, 
+                    m_whole_image[ci] = jpeg_common_struct.CreateBlocksArray(
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor), 
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
+                    m_whole_image[ci].ErrorProcessor = cinfo;
                 }
 
                 m_useDummyConsumeData = false;
@@ -149,9 +150,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
                 
-                buffer[ci] = m_whole_image[componentInfo.component_index].access_virt_barray(
-                    m_cinfo.m_input_iMCU_row * componentInfo.v_samp_factor,
-                    componentInfo.v_samp_factor);
+                buffer[ci] = m_whole_image[componentInfo.component_index].Access(
+                    m_cinfo.m_input_iMCU_row * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
 
                 /* Note: entropy decoder expects buffer to be zeroed,
                  * but this is handled automatically by the memory manager
@@ -243,7 +243,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         }
 
         /* Pointer to array of coefficient virtual arrays, or null if none */
-        public jvirt_barray_control[] GetCoefArrays()
+        public jvirt_array<JBLOCK>[] GetCoefArrays()
         {
             return m_coef_arrays;
         }
@@ -368,8 +368,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     continue;
 
                 /* Align the virtual buffer for this component. */
-                JBLOCK[][] buffer = m_whole_image[ci].access_virt_barray(
-                    m_cinfo.m_output_iMCU_row * componentInfo.v_samp_factor,
+                JBLOCK[][] buffer = m_whole_image[ci].Access(m_cinfo.m_output_iMCU_row * componentInfo.v_samp_factor,
                     componentInfo.v_samp_factor);
 
                 /* Count non-dummy DCT block rows in this iMCU row. */
@@ -470,13 +469,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 if (m_cinfo.m_output_iMCU_row > 0)
                 {
                     access_rows += componentInfo.v_samp_factor; /* prior iMCU row too */
-                    buffer = m_whole_image[ci].access_virt_barray((m_cinfo.m_output_iMCU_row - 1) * componentInfo.v_samp_factor, access_rows);
+                    buffer = m_whole_image[ci].Access((m_cinfo.m_output_iMCU_row - 1) * componentInfo.v_samp_factor, access_rows);
                     bufferRowOffset = componentInfo.v_samp_factor; /* point to current iMCU row */
                     first_row = false;
                 }
                 else
                 {
-                    buffer = m_whole_image[ci].access_virt_barray(0, access_rows);
+                    buffer = m_whole_image[ci].Access(0, access_rows);
                     first_row = true;
                 }
 

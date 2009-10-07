@@ -47,7 +47,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private JBLOCK[][] m_MCU_buffer = new JBLOCK[JpegConstants.C_MAX_BLOCKS_IN_MCU][];
 
         /* In multi-pass modes, we need a virtual block array for each component. */
-        private jvirt_barray_control[] m_whole_image = new jvirt_barray_control[JpegConstants.MAX_COMPONENTS];
+        private jvirt_array<JBLOCK>[] m_whole_image = new jvirt_array<JBLOCK>[JpegConstants.MAX_COMPONENTS];
 
         public my_c_coef_controller(jpeg_compress_struct cinfo, bool need_full_buffer)
         {
@@ -60,9 +60,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* padded to a multiple of samp_factor DCT blocks in each direction. */
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
-                    m_whole_image[ci] = new jvirt_barray_control(cinfo, 
+                    m_whole_image[ci] = jpeg_common_struct.CreateBlocksArray(
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor),
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
+                    m_whole_image[ci].ErrorProcessor = cinfo;
                 }
             }
             else
@@ -251,8 +252,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
 
                 /* Align the virtual buffer for this component. */
-                JBLOCK[][] buffer = m_whole_image[ci].access_virt_barray(
-                    m_iMCU_row_num * componentInfo.v_samp_factor,
+                JBLOCK[][] buffer = m_whole_image[ci].Access(m_iMCU_row_num * componentInfo.v_samp_factor,
                     componentInfo.v_samp_factor);
 
                 /* Count non-dummy DCT block rows in this iMCU row. */
@@ -348,7 +348,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
                 jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
-                buffer[ci] = m_whole_image[componentInfo.component_index].access_virt_barray(
+                buffer[ci] = m_whole_image[componentInfo.component_index].Access(
                     m_iMCU_row_num * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
             }
 
