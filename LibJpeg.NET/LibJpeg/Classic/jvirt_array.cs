@@ -15,13 +15,11 @@
 /*
  * About virtual array management:
  *
- * Full-image-sized buffers
- * are handled as "virtual" arrays.  The array is still accessed a strip at a
+ * Full-image-sized buffers are handled as "virtual" arrays.  The array is still accessed a strip at a
  * time, but the memory manager must save the whole array for repeated
  * accesses.
  *
- * The access_virt_array routines are responsible for making a specific strip
- * area accessible.
+ * The Access method is responsible for making a specific strip area accessible.
  */
 
 using System;
@@ -32,7 +30,7 @@ using System.Text;
 namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
-    /// JPEG memory management routine for binary arrays.
+    /// JPEG virtual array.
     /// </summary>
 #if EXPOSE_LIBJPEG
     public
@@ -46,7 +44,7 @@ namespace BitMiracle.LibJpeg.Classic
         private T[][] m_buffer;   /* => the in-memory buffer */
 
         /// <summary>
-        /// Request a virtual 2-D sample array
+        /// Request a virtual 2-D array
         /// </summary>
         /// <param name="width">Width of array</param>
         /// <param name="height">Total virtual array height</param>
@@ -65,8 +63,7 @@ namespace BitMiracle.LibJpeg.Classic
         }
 
         /// <summary>
-        /// Access the part of a virtual sample array starting at start_row
-        /// and extending for num_rows rows.
+        /// Access the part of a virtual array starting at startRow and extending for numberOfRows rows.
         /// </summary>
         public T[][] Access(int startRow, int numberOfRows)
         {
