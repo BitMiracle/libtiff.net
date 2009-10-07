@@ -17,41 +17,47 @@ namespace BitMiracle.LibJpeg.Classic
 #if EXPOSE_LIBJPEG
     public
 #endif
-    abstract class jpeg_progress_mgr
+    class jpeg_progress_mgr
     {
-        internal int m_pass_counter;
-        internal int m_pass_limit;
-        internal int m_completed_passes;
-        internal int m_total_passes;
+        private int m_passCounter;
+        private int m_passLimit;
+        private int m_completedPasses;
+        private int m_totalPasses;
+
+        public event EventHandler OnProgress;
 
         // work units completed in this pass
         public int Pass_counter
         {
-            get { return m_pass_counter; }
-            set { m_pass_counter = value; }
+            get { return m_passCounter; }
+            set { m_passCounter = value; }
         }
         
         // total number of work units in this pass
         public int Pass_limit
         {
-            get { return m_pass_limit; }
-            set { m_pass_limit = value; }
+            get { return m_passLimit; }
+            set { m_passLimit = value; }
         }
         
         // passes completed so far
         public int Completed_passes
         {
-            get { return m_completed_passes; }
-            set { m_completed_passes = value; }
+            get { return m_completedPasses; }
+            set { m_completedPasses = value; }
         }
         
         // total number of passes expected
         public int Total_passes
         {
-            get { return m_total_passes; }
-            set { m_total_passes = value; }
+            get { return m_totalPasses; }
+            set { m_totalPasses = value; }
         }
 
-        public abstract void progress_monitor();
+        public void Updated()
+        {
+            if (OnProgress != null)
+                OnProgress(this, new EventArgs());
+        }
     }
 }

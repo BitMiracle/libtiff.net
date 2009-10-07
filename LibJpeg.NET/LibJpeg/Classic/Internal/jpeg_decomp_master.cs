@@ -97,14 +97,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Set up progress monitor's pass info if present */
             if (m_cinfo.m_progress != null)
             {
-                m_cinfo.m_progress.m_completed_passes = m_pass_number;
-                m_cinfo.m_progress.m_total_passes = m_pass_number + (m_is_dummy_pass ? 2 : 1);
+                m_cinfo.m_progress.Completed_passes = m_pass_number;
+                m_cinfo.m_progress.Total_passes = m_pass_number + (m_is_dummy_pass ? 2 : 1);
 
                 /* In buffered-image mode, we assume one more output pass if EOI not
                  * yet reached, but no more passes if EOI has been reached.
                  */
                 if (m_cinfo.m_buffered_image && !m_cinfo.m_inputctl.EOIReached())
-                    m_cinfo.m_progress.m_total_passes += (m_cinfo.m_enable_2pass_quant ? 2 : 1);
+                    m_cinfo.m_progress.Total_passes += (m_cinfo.m_enable_2pass_quant ? 2 : 1);
             }
         }
 
@@ -253,10 +253,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     nscans = m_cinfo.m_num_components;
                 }
 
-                m_cinfo.m_progress.m_pass_counter = 0;
-                m_cinfo.m_progress.m_pass_limit = m_cinfo.m_total_iMCU_rows * nscans;
-                m_cinfo.m_progress.m_completed_passes = 0;
-                m_cinfo.m_progress.m_total_passes = (m_cinfo.m_enable_2pass_quant ? 3 : 2);
+                m_cinfo.m_progress.Pass_counter = 0;
+                m_cinfo.m_progress.Pass_limit = m_cinfo.m_total_iMCU_rows * nscans;
+                m_cinfo.m_progress.Completed_passes = 0;
+                m_cinfo.m_progress.Total_passes = (m_cinfo.m_enable_2pass_quant ? 3 : 2);
 
                 /* Count the input pass as done */
                 m_pass_number++;

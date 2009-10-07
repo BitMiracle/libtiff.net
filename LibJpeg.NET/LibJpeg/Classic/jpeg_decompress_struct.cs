@@ -631,7 +631,7 @@ namespace BitMiracle.LibJpeg.Classic
                         ReadResult retcode;
                         /* Call progress monitor hook if present */
                         if (m_progress != null)
-                            m_progress.progress_monitor();
+                            m_progress.Updated();
 
                         /* Absorb some more input */
                         retcode = m_inputctl.consume_input();
@@ -644,11 +644,11 @@ namespace BitMiracle.LibJpeg.Classic
                         /* Advance progress counter if appropriate */
                         if (m_progress != null && (retcode == ReadResult.JPEG_ROW_COMPLETED || retcode == ReadResult.JPEG_REACHED_SOS))
                         {
-                            m_progress.m_pass_counter++;
-                            if (m_progress.m_pass_counter >= m_progress.m_pass_limit)
+                            m_progress.Pass_counter++;
+                            if (m_progress.Pass_counter >= m_progress.Pass_limit)
                             {
                                 /* underestimated number of scans; ratchet up one scan */
-                                m_progress.m_pass_limit += m_total_iMCU_rows;
+                                m_progress.Pass_limit += m_total_iMCU_rows;
                             }
                         }
                     }
@@ -689,9 +689,9 @@ namespace BitMiracle.LibJpeg.Classic
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = m_output_scanline;
-                m_progress.m_pass_limit = m_output_height;
-                m_progress.progress_monitor();
+                m_progress.Pass_counter = m_output_scanline;
+                m_progress.Pass_limit = m_output_height;
+                m_progress.Updated();
             }
 
             /* Process some data */
@@ -768,9 +768,9 @@ namespace BitMiracle.LibJpeg.Classic
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = m_output_scanline;
-                m_progress.m_pass_limit = m_output_height;
-                m_progress.progress_monitor();
+                m_progress.Pass_counter = m_output_scanline;
+                m_progress.Pass_limit = m_output_height;
+                m_progress.Updated();
             }
 
             /* Verify that at least one iMCU row can be returned. */
@@ -1070,7 +1070,7 @@ namespace BitMiracle.LibJpeg.Classic
                     ReadResult retcode;
                     /* Call progress monitor hook if present */
                     if (m_progress != null)
-                        m_progress.progress_monitor();
+                        m_progress.Updated();
 
                     /* Absorb some more input */
                     retcode = m_inputctl.consume_input();
@@ -1083,11 +1083,11 @@ namespace BitMiracle.LibJpeg.Classic
                     /* Advance progress counter if appropriate */
                     if (m_progress != null && (retcode == ReadResult.JPEG_ROW_COMPLETED || retcode == ReadResult.JPEG_REACHED_SOS))
                     {
-                        m_progress.m_pass_counter++;
-                        if (m_progress.m_pass_counter >= m_progress.m_pass_limit)
+                        m_progress.Pass_counter++;
+                        if (m_progress.Pass_counter >= m_progress.Pass_limit)
                         {
                             /* startup underestimated number of scans; ratchet up one scan */
-                            m_progress.m_pass_limit += m_total_iMCU_rows;
+                            m_progress.Pass_limit += m_total_iMCU_rows;
                         }
                     }
                 }
@@ -1351,10 +1351,10 @@ namespace BitMiracle.LibJpeg.Classic
                     nscans = m_num_components;
                 }
 
-                m_progress.m_pass_counter = 0;
-                m_progress.m_pass_limit = m_total_iMCU_rows * nscans;
-                m_progress.m_completed_passes = 0;
-                m_progress.m_total_passes = 1;
+                m_progress.Pass_counter = 0;
+                m_progress.Pass_limit = m_total_iMCU_rows * nscans;
+                m_progress.Completed_passes = 0;
+                m_progress.Total_passes = 1;
             }
         }
 
@@ -1385,9 +1385,9 @@ namespace BitMiracle.LibJpeg.Classic
                     /* Call progress monitor hook if present */
                     if (m_progress != null)
                     {
-                        m_progress.m_pass_counter = m_output_scanline;
-                        m_progress.m_pass_limit = m_output_height;
-                        m_progress.progress_monitor();
+                        m_progress.Pass_counter = m_output_scanline;
+                        m_progress.Pass_limit = m_output_height;
+                        m_progress.Updated();
                     }
 
                     /* Process some data */

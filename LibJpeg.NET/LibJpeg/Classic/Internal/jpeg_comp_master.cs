@@ -101,8 +101,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Set up progress monitor's pass info if present */
             if (m_cinfo.m_progress != null)
             {
-                m_cinfo.m_progress.m_completed_passes = m_pass_number;
-                m_cinfo.m_progress.m_total_passes = m_total_passes;
+                m_cinfo.m_progress.Completed_passes = m_pass_number;
+                m_cinfo.m_progress.Total_passes = m_total_passes;
             }
         }
 

@@ -471,9 +471,9 @@ namespace BitMiracle.LibJpeg.Classic
                 {
                     if (m_progress != null)
                     {
-                        m_progress.m_pass_counter = iMCU_row;
-                        m_progress.m_pass_limit = m_total_iMCU_rows;
-                        m_progress.progress_monitor();
+                        m_progress.Pass_counter = iMCU_row;
+                        m_progress.Pass_limit = m_total_iMCU_rows;
+                        m_progress.Updated();
                     }
 
                     /* We bypass the main controller and invoke coef controller directly;
@@ -1028,9 +1028,9 @@ namespace BitMiracle.LibJpeg.Classic
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = m_next_scanline;
-                m_progress.m_pass_limit = m_image_height;
-                m_progress.progress_monitor();
+                m_progress.Pass_counter = m_next_scanline;
+                m_progress.Pass_limit = m_image_height;
+                m_progress.Updated();
             }
 
             /* Give master control module another chance if this is first call to
@@ -1072,9 +1072,9 @@ namespace BitMiracle.LibJpeg.Classic
             /* Call progress monitor hook if present */
             if (m_progress != null)
             {
-                m_progress.m_pass_counter = m_next_scanline;
-                m_progress.m_pass_limit = m_image_height;
-                m_progress.progress_monitor();
+                m_progress.Pass_counter = m_next_scanline;
+                m_progress.Pass_limit = m_image_height;
+                m_progress.Updated();
             }
 
             /* Give master control module another chance if this is first call to
