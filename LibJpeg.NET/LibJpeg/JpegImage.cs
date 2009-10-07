@@ -8,6 +8,8 @@ using System.Text;
 
 using BitMiracle.LibJpeg.Classic;
 
+[assembly: CLSCompliant(true)]
+
 namespace BitMiracle.LibJpeg
 {
 #if EXPOSE_LIBJPEG
