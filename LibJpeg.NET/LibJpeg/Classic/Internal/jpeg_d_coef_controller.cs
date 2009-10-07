@@ -95,7 +95,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* Note we ask for a pre-zeroed array. */
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
-                    m_whole_image[ci] = new jvirt_barray_control(cinfo, true,
+                    m_whole_image[ci] = new jvirt_barray_control(cinfo, 
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor), 
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
                 }

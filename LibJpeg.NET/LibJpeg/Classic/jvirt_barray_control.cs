@@ -26,26 +26,13 @@ namespace BitMiracle.LibJpeg.Classic
 #endif
     class jvirt_barray_control
     {
-        private jpeg_common_struct m_cinfo;
-        private JBLOCK[][] m_mem_buffer;    /* => the in-memory buffer */
-        private int m_rows_in_array;   /* total virtual array height */
-        private int m_blocksperrow;    /* width of array (and of memory buffer) */
+        private jvirt_array<JBLOCK> m_implementation;
 
         // Request a virtual 2-D coefficient-block array
-        public jvirt_barray_control(jpeg_common_struct cinfo, bool pre_zero, int blocksperrow, int numrows)
+        public jvirt_barray_control(jpeg_common_struct cinfo, int blocksperrow, int numrows)
         {
-            m_cinfo = cinfo;
-            m_mem_buffer = null;  /* marks array not yet realized */
-            m_rows_in_array = numrows;
-            m_blocksperrow = blocksperrow;
-
-            m_mem_buffer = new JBLOCK[m_rows_in_array][];
-            for (int i = 0; i < m_rows_in_array; i++)
-            {
-                m_mem_buffer[i] = new JBLOCK[m_blocksperrow];
-                for (int j = 0; j < m_blocksperrow; j++)
-                    m_mem_buffer[i][j] = new JBLOCK();
-            }
+            m_implementation = new jvirt_array<JBLOCK>(blocksperrow, numrows, jpeg_common_struct.AllocJpegBlocks);
+            m_implementation.ErrorProcessor = cinfo;
         }
 
         /// <summary>
@@ -54,18 +41,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         public JBLOCK[][] access_virt_barray(int start_row, int num_rows)
         {
-            int end_row = start_row + num_rows;
-
-            /* debugging check */
-            if (end_row > m_rows_in_array || m_mem_buffer == null)
-                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
-
-            /* Return proper part of the buffer */
-            JBLOCK[][] ret = new JBLOCK[num_rows][];
-            for (int i = 0; i < num_rows; i++)
-                ret[i] = m_mem_buffer[start_row + i];
-
-            return ret;
+            return m_implementation.access_virt_sarray(start_row, num_rows);
         }
     }
 }

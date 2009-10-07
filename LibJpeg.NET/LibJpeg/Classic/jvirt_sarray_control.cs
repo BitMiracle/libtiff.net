@@ -38,24 +38,18 @@ namespace BitMiracle.LibJpeg.Classic
 #endif
     class jvirt_sarray_control
     {
-        private jpeg_common_struct m_cinfo;
-        private byte[][] m_mem_buffer;   /* => the in-memory buffer */
-        private int m_rows_in_array;   /* total virtual array height */
-        private int m_samplesperrow;   /* width of array (and of memory buffer) */
-
-        // Request a virtual 2-D sample array
-        public jvirt_sarray_control(jpeg_common_struct cinfo, int samplesperrow, int numrows) : this(samplesperrow, numrows)
-        {
-            m_cinfo = cinfo;
-        }
+        private jvirt_array<byte> m_implementation;
 
         // Request a virtual 2-D sample array
         public jvirt_sarray_control(int samplesperrow, int numrows)
         {
-            m_cinfo = null;
-            m_rows_in_array = numrows;
-            m_samplesperrow = samplesperrow;
-            m_mem_buffer = jpeg_common_struct.AllocJpegSamples(m_samplesperrow, m_rows_in_array);
+            m_implementation = new jvirt_array<byte>(samplesperrow, numrows, jpeg_common_struct.AllocJpegSamples);
+        }
+
+        public jpeg_common_struct ErrorProcessor
+        {
+            get { return m_implementation.ErrorProcessor; }
+            set { m_implementation.ErrorProcessor = value; }
         }
 
         /// <summary>
@@ -64,23 +58,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         public byte[][] access_virt_sarray(int start_row, int num_rows)
         {
-            int end_row = start_row + num_rows;
-
-            /* debugging check */
-            if (end_row > m_rows_in_array || m_mem_buffer == null)
-            {
-                if (m_cinfo != null)
-                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_VIRTUAL_ACCESS);
-                else
-                    throw new InvalidOperationException("Bogus virtual array access");
-            }
-
-            /* Return proper part of the buffer */
-            byte[][] ret = new byte[num_rows][];
-            for (int i = 0; i < num_rows; i++)
-                ret[i] = m_mem_buffer[start_row + i];
-
-            return ret;
+            return m_implementation.access_virt_sarray(start_row, num_rows);
         }
     }
 }

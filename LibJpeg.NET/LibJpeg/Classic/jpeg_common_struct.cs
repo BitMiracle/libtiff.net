@@ -138,9 +138,22 @@ namespace BitMiracle.LibJpeg.Classic
         public static byte[][] AllocJpegSamples(int samplesPerRow, int numberOfRows)
         {
             byte[][] result = new byte[numberOfRows][];
-            for (int i = 0; i < numberOfRows; i++)
+            for (int i = 0; i < numberOfRows; ++i)
                 result[i] = new byte[samplesPerRow];
 
+            return result;
+        }
+
+        // Creation of 2-D block arrays.
+        public static JBLOCK[][] AllocJpegBlocks(int samplesPerRow, int numberOfRows)
+        {
+            JBLOCK[][] result = new JBLOCK[numberOfRows][];
+            for (int i = 0; i < numberOfRows; ++i)
+            {
+                result[i] = new JBLOCK[samplesPerRow];
+                for (int j = 0; j < samplesPerRow; ++j)
+                    result[i][j] = new JBLOCK();
+            }
             return result;
         }
 

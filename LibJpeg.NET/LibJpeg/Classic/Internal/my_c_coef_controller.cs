@@ -60,7 +60,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* padded to a multiple of samp_factor DCT blocks in each direction. */
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
-                    m_whole_image[ci] = new jvirt_barray_control(cinfo, false, 
+                    m_whole_image[ci] = new jvirt_barray_control(cinfo, 
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor),
                         JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
                 }
