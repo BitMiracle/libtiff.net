@@ -23,15 +23,15 @@ namespace BitMiracle.LibJpeg.Classic
     {
         internal short[] data = new short[JpegConstants.DCTSIZE2];
 
-        public short this[int i]
+        public short this[int index]
         {
             get
             {
-                return data[i];
+                return data[index];
             }
             set
             {
-                data[i] = value;
+                data[index] = value;
             }
         }
     }
