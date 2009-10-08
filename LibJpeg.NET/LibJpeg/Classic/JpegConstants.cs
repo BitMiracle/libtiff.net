@@ -30,7 +30,7 @@ namespace BitMiracle.LibJpeg.Classic
         public const int DCTSIZE = 8;
 
         // DCTSIZE squared; # of elements in a block
-        public const int DCTSIZE2 = 64;
+        public const int DCTSIZE2 = DCTSIZE * DCTSIZE;
 
         // Quantization tables are numbered 0..3
         public const int NUM_QUANT_TBLS = 4;
