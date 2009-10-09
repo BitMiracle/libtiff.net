@@ -13,7 +13,6 @@ namespace BitMiracle.LibJpeg
     {
         private int m_quality = 75;
         private int m_smoothingFactor = 0;
-        private bool m_forceBaseline = true;
         private bool m_simpleProgressive = false;
 
         public CompressionParameters()
@@ -27,7 +26,6 @@ namespace BitMiracle.LibJpeg
 
             m_quality = parameters.m_quality;
             m_smoothingFactor = parameters.m_smoothingFactor;
-            m_forceBaseline = parameters.m_forceBaseline;
             m_simpleProgressive = parameters.m_simpleProgressive;
         }
 
@@ -39,7 +37,6 @@ namespace BitMiracle.LibJpeg
 
             return (m_quality == parameters.m_quality &&
                     m_smoothingFactor == parameters.m_smoothingFactor &&
-                    m_forceBaseline == parameters.m_forceBaseline &&
                     m_simpleProgressive == parameters.m_simpleProgressive);
         }
 
@@ -58,12 +55,6 @@ namespace BitMiracle.LibJpeg
         {
             get { return m_smoothingFactor; }
             set { m_smoothingFactor = value; }
-        }
-
-        public bool ForceBaseline
-        {
-            get { return m_forceBaseline; }
-            set { m_forceBaseline = value; }
         }
 
         public bool SimpleProgressive

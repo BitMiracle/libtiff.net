@@ -234,7 +234,7 @@ namespace BitMiracle.LibJpeg
             Debug.Assert(parameters != null);
 
             m_compressor.Smoothing_factor = parameters.SmoothingFactor;
-            m_compressor.jpeg_set_quality(parameters.Quality, parameters.ForceBaseline);
+            m_compressor.jpeg_set_quality(parameters.Quality, true);
             if (parameters.SimpleProgressive)
                 m_compressor.jpeg_simple_progression();
         }

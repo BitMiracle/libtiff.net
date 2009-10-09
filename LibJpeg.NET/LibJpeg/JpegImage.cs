@@ -25,7 +25,7 @@ namespace BitMiracle.LibJpeg
         private byte m_componentsPerSample;
         private Colorspace m_colorspace;
 
-        // Fields below (m_compressedData, m_decompressedData, m_bitmap) are not initializes in constructors necessarily.
+        // Fields below (m_compressedData, m_decompressedData, m_bitmap) are not initialized in constructors necessarily.
         // Instead direct access to these field you should use corresponding properties (compressedData, decompressedData, bitmap)
         // Such agreement allows to load required data (e.g. compress image) only by request.
 
