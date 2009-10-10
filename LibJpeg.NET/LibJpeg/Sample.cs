@@ -4,6 +4,9 @@ using System.Text;
 
 namespace BitMiracle.LibJpeg
 {
+    /// <summary>
+    /// Represents a "sample" (you can understand it as "pixel") of image.
+    /// </summary>
 #if EXPOSE_LIBJPEG
     public
 #endif
@@ -47,6 +50,9 @@ namespace BitMiracle.LibJpeg
             Array.Copy(components, m_components, components.Length);
         }
 
+        /// <summary>
+        /// Gets the number of bits per color component.
+        /// </summary>
         public byte BitsPerComponent
         {
             get
@@ -55,6 +61,9 @@ namespace BitMiracle.LibJpeg
             }
         }
 
+        /// <summary>
+        /// Gets the number of color components.
+        /// </summary>
         public byte ComponentCount
         {
             get
@@ -63,17 +72,27 @@ namespace BitMiracle.LibJpeg
             }
         }
 
-        public short GetComponent(int componentNumber)
-        {
-            return m_components[componentNumber];
-        }
-
+        /// <summary>
+        /// Indexer, gets the color component at the specified index.
+        /// </summary>
+        /// <param name="componentNumber">The number of color component.</param>
+        /// <returns>Value of color component.</returns>
         public short this[int componentNumber]
         {
             get
             {
                 return GetComponent(componentNumber);
             }
+        }
+
+        /// <summary>
+        /// Retrieves the required color component.
+        /// </summary>
+        /// <param name="componentNumber">The number of color component.</param>
+        /// <returns>Value of color component.</returns>
+        public short GetComponent(int componentNumber)
+        {
+            return m_components[componentNumber];
         }
     }
 }
