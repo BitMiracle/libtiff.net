@@ -12,6 +12,9 @@ using BitMiracle.LibJpeg.Classic;
 
 namespace BitMiracle.LibJpeg
 {
+    /// <summary>
+    /// Main class for work with JPEG images.
+    /// </summary>
 #if EXPOSE_LIBJPEG
     public
 #endif
@@ -66,7 +69,7 @@ namespace BitMiracle.LibJpeg
         }
 
         /// <summary>
-        /// Create JpegImage from pixels
+        /// Creates JpegImage from pixels
         /// </summary>
         /// <param name="sampleData">Pixels</param>
         /// <param name="colorspace">Colorspace</param>
@@ -101,6 +104,9 @@ namespace BitMiracle.LibJpeg
             return new JpegImage(bitmap);
         }
 
+        /// <summary>
+        /// Gets the width of image in samples.
+        /// </summary>
         public int Width
         {
             get
@@ -113,6 +119,9 @@ namespace BitMiracle.LibJpeg
             }
         }
 
+        /// <summary>
+        /// Gets the height of image in samples.
+        /// </summary>
         public int Height
         {
             get
@@ -125,18 +134,9 @@ namespace BitMiracle.LibJpeg
             }
         }
 
-        public byte BitsPerComponent
-        {
-            get
-            {
-                return m_bitsPerComponent;
-            }
-            internal set
-            {
-                m_bitsPerComponent = value;
-            }
-        }
-
+        /// <summary>
+        /// Gets the number of color components per sample.
+        /// </summary>
         public byte ComponentsPerSample
         {
             get
@@ -149,6 +149,24 @@ namespace BitMiracle.LibJpeg
             }
         }
 
+        /// <summary>
+        /// Gets the number of bits per color component of sample.
+        /// </summary>
+        public byte BitsPerComponent
+        {
+            get
+            {
+                return m_bitsPerComponent;
+            }
+            internal set
+            {
+                m_bitsPerComponent = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the colorspace of image.
+        /// </summary>
         public Colorspace Colorspace
         {
             get
@@ -161,30 +179,50 @@ namespace BitMiracle.LibJpeg
             }
         }
 
+        /// <summary>
+        /// Retrieves the required row of image.
+        /// </summary>
+        /// <param name="rowNumber">The number of row.</param>
         public SampleRow GetRow(int rowNumber)
         {
             return m_rows[rowNumber];
         }
 
+        /// <summary>
+        /// Writes compressed JPEG image to stream.
+        /// </summary>
+        /// <param name="output">Output stream.</param>
         public void WriteJpeg(Stream output)
         {
             WriteJpeg(output, new CompressionParameters());
         }
 
+        /// <summary>
+        /// Compresses image to JPEG with given parameters and writes it to stream.
+        /// </summary>
+        /// <param name="output">Output stream.</param>
+        /// <param name="parameters">The parameters of compression.</param>
         public void WriteJpeg(Stream output, CompressionParameters parameters)
         {
             compress(parameters);
             compressedData.WriteTo(output);
         }
 
+        /// <summary>
+        /// Writes decompressed image data as bitmap to stream.
+        /// </summary>
+        /// <param name="output">Output stream.</param>
         public void WriteBitmap(Stream output)
         {
             decompressedData.WriteTo(output);
         }
 
-        public System.Drawing.Bitmap ToBitmap()
+        /// <summary>
+        /// Retrieves image as .NET Bitmap.
+        /// </summary>
+        public Bitmap ToBitmap()
         {
-            return m_bitmap;
+            return bitmap;
         }
 
 
