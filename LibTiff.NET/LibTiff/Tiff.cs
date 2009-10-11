@@ -1,4 +1,15 @@
-﻿using System;
+﻿/* Copyright (C) 2008-2009, Bit Miracle
+ * http://www.bitmiracle.com
+ * 
+ * This software is based in part on the work of the Sam Leffler, Silicon 
+ * Graphics, Inc. and contributors.
+ *
+ * Copyright (c) 1988-1997 Sam Leffler
+ * Copyright (c) 1991-1997 Silicon Graphics, Inc.
+ * For conditions of distribution and use, see the accompanying README file.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -9,1411 +20,4344 @@ using thandle_t = System.Object;
 
 namespace BitMiracle.LibTiff
 {
-    public class Tiff
+    /// <summary>
+    /// Tag Image File Format (TIFF)
+    /// 
+    /// Based on Rev 6.0 from:
+    ///     Developer's Desk
+    ///     Aldus Corporation
+    ///     411 First Ave. South
+    ///     Suite 200
+    ///     Seattle, WA  98104
+    ///     206-622-5500
+    ///
+    /// (http://partners.adobe.com/asn/developer/PDFS/TN/TIFF6.pdf)
+    /// 
+    /// For Big TIFF design notes see the following link
+    /// http://gdal.maptools.org/twiki/bin/view/libtiff/BigTIFFDesign
+    /// </summary>
+    public partial class Tiff
     {
+        /// <summary>
+        /// Support strip chopping (whether or not to convert single-strip 
+        /// uncompressed images to mutiple strips of ~8Kb to reduce memory usage)
+        /// </summary>
+        internal const uint STRIPCHOP_DEFAULT = TIFF_STRIPCHOP;
+
+        /// <summary>
+        /// Treat extra sample as alpha (default enabled). The RGBA interface 
+        /// will treat a fourth sample with no EXTRASAMPLE_ value as being 
+        /// ASSOCALPHA. Many packages produce RGBA files but don't mark the 
+        /// alpha properly.
+        /// </summary>
+        internal const bool DEFAULT_EXTRASAMPLE_AS_ALPHA = true;
+
+        /// <summary>
+        /// Pick up YCbCr subsampling info from the JPEG data stream to support 
+        /// files lacking the tag (default enabled).
+        /// </summary>
+        internal const bool CHECK_JPEG_YCBCR_SUBSAMPLING = true;
+
+        internal const string TIFFLIB_VERSION_STR = "LIBTIFF, Version 3.9.1\nCopyright (c) 1988-1996 Sam Leffler\nCopyright (c) 1991-1996 Silicon Graphics, Inc.";
+
+        /*
+         * These constants can be used in code that requires
+         * compilation-related definitions specific to a
+         * version or versions of the library.  Runtime
+         * version checking should be done based on the
+         * string returned by TIFFGetVersion.
+         */
+
+        public const int TIFF_VERSION = 42;
+        public const int TIFF_BIGTIFF_VERSION = 43;
+
+        public const int TIFF_BIGENDIAN = 0x4d4d;
+        public const int TIFF_LITTLEENDIAN = 0x4949;
+        public const int MDI_LITTLEENDIAN = 0x5045;
+
         //public ~Tiff();
 
-    public static string GetVersion();
+        public static string GetVersion()
+        {
+            return m_version;
+        }
 
-    /*
-    * Macros for extracting components from the
-    * packed ABGR form returned by ReadRGBAImage.
-    */
-    public static uint GetR(uint abgr);
-    public static uint GetG(uint abgr);
-    public static uint GetB(uint abgr);
-    public static uint GetA(uint abgr);
+        /*
+        * Macros for extracting components from the
+        * packed ABGR form returned by ReadRGBAImage.
+        */
+        public static uint GetR(uint abgr)
+        {
+            return (abgr & 0xff);
+        }
 
-    /*
-    * Other compression schemes may be registered.  Registered
-    * schemes can also override the builtin versions provided
-    * by this library.
-    */
-    public TiffCodec FindCodec(UInt16 scheme);
-    public bool RegisterCodec(TiffCodec codec);
-    public void UnRegisterCodec(TiffCodec c);
+        public static uint GetG(uint abgr)
+        {
+            return ((abgr >> 8) & 0xff);
+        }
 
-    /**
-    * Check whether we have working codec for the specific coding scheme.
-    * @return returns true if the codec is configured and working. Otherwise
-    * false will be returned.
-    */
-    public bool IsCodecConfigured(UInt16 scheme);
+        public static uint GetB(uint abgr)
+        {
+            return ((abgr >> 16) & 0xff);
+        }
 
-    /**
-    * Get array of configured codecs, both built-in and registered by user.
-    * Caller is responsible to free this array (but not codecs).
-    * @return returns array of TiffCodec records (the last record should be NULL)
-    * or NULL if function failed.
-    */
-    public TiffCodec[] GetConfiguredCodecs();
+        public static uint GetA(uint abgr)
+        {
+            return ((abgr >> 24) & 0xff);
+        }
 
-    /*
-     * Auxiliary functions.
-     */
+        /*
+        * Other compression schemes may be registered.  Registered
+        * schemes can also override the built in versions provided
+        * by this library.
+        */
+        public TiffCodec FindCodec(UInt16 scheme)
+        {
+            for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
+            {
+                if (cd.codec.m_scheme == scheme)
+                    return cd.codec;
+            }
 
-    /**
-    * Re-allocates array and copies data from old to new array. 
-    * Size is in elements, not bytes!
-    * Also frees old array. Returns new allocated array.
-    */
-    public static byte[] Realloc(byte[] oldBuffer, int elementCount, int newElementCount);
-    public static uint[] Realloc(uint[] oldBuffer, int elementCount, int newElementCount);      
+            for (int i = 0; m_builtInCodecs[i] != null; i++)
+            {
+                TiffCodec c = m_builtInCodecs[i];
+                if (c.m_scheme == scheme)
+                    return c;
+            }
 
-    public static int Compare(UInt16[] p1, UInt16[] p2, int elementCount);
+            return null;
+        }
 
-    /*
-    * Open a TIFF file for read/writing.
-    */
-    public static Tiff Open(string name, string mode);
+        public bool RegisterCodec(TiffCodec codec)
+        {
+            if (codec == null)
+                return false;
 
-    /*
-    * Open a TIFF file descriptor for read/writing.
-    */
-    public static Tiff FdOpen(int ifd, string name, string mode);
+            codecList* cd = new codecList();
+            if (cd != null)
+            {
+                cd.codec = codec;
+                cd.next = m_registeredCodecs;
+                m_registeredCodecs = cd;
+            }
+            else
+            {
+                ErrorExt(this, 0, "RegisterCodec", "No space to register compression scheme %s", codec.m_name);
+                return false;
+            }
 
-    public static Tiff ClientOpen(string name, string mode, thandle_t clientdata, TiffStream stream);
+            return true;
+        }
 
-    /*
-     ** Stuff, related to tag handling and creating custom tags.
-     */
-    public int GetTagListCount();
-    public uint GetTagListEntry(int tag_index);
+        public void UnRegisterCodec(TiffCodec c)
+        {
+            if (m_registeredCodecs == null)
+                return;
 
-    public void MergeFieldInfo(TiffFieldInfo[] info, int n);
-    public TiffFieldInfo FindFieldInfo(uint tag, TiffDataType dt);
-    public TiffFieldInfo FindFieldInfoByName(string field_name, TiffDataType dt);
-    public TiffFieldInfo FieldWithTag(uint tag);
-    public TiffFieldInfo FieldWithName(string field_name);
+            codecList* temp;
+            if (m_registeredCodecs.codec == c)
+            {
+                temp = m_registeredCodecs.next;
+                delete m_registeredCodecs;
+                m_registeredCodecs = temp;
+                return;
+            }
 
-    public TiffTagMethods GetTagMethods();
-    public TiffTagMethods SetTagMethods(TiffTagMethods tagMethods);
+            for (codecList* cd = m_registeredCodecs; cd != null; cd = cd.next)
+            {
+                if (cd.next != null)
+                {
+                    if (cd.next.codec == c)
+                    {
+                        temp = cd.next.next;
+                        delete cd.next;
+                        cd.next = temp;
+                        return;
+                    }
+                }
+            }
 
-    public object GetClientInfo(string name);
-    public void SetClientInfo(object data, string name);
+            ErrorExt(this, 0, "UnRegisterCodec", "Cannot remove compression scheme %s; not registered", c.m_name);
+        }
 
-    public bool Flush();
+        /**
+        * Check whether we have working codec for the specific coding scheme.
+        * @return returns true if the codec is configured and working. Otherwise
+        * false will be returned.
+        */
+        public bool IsCodecConfigured(UInt16 scheme)
+        {
+            TiffCodec* codec = FindCodec(scheme);
+
+            if (codec == null)
+                return false;
+
+            if (codec.CanEncode() != false || codec.CanDecode() != false)
+                return true;
+
+            return false;
+        }
+
+        /**
+        * Get array of configured codecs, both built-in and registered by user.
+        * Caller is responsible to free this array (but not codecs).
+        * @return returns array of TiffCodec records (the last record should be null)
+        * or null if function failed.
+        */
+        public TiffCodec[] GetConfiguredCodecs()
+        {
+            int totalCodecs = 0;
+            for (int i = 0; m_builtInCodecs[i] != null; i++)
+            {
+                if (m_builtInCodecs[i] && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
+                    totalCodecs++;
+            }
+
+            for (codecList* cd = m_registeredCodecs; cd; cd = cd.next)
+                totalCodecs++;
+
+            TiffCodec** codecs = new TiffCodec*[totalCodecs + 1];
+            if (codecs == null)
+                return null;
+
+            int codecPos = 0;
+            for (codecList* cd = m_registeredCodecs; cd; cd = cd.next)
+                codecs[codecPos++] = cd.codec;
+
+            for (int i = 0; m_builtInCodecs[i] != null; i++)
+            {
+                if (m_builtInCodecs[i] && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
+                    codecs[codecPos++] = m_builtInCodecs[i];
+            }
+
+            codecs[codecPos] = null;
+            return codecs;
+        }
+
+        /*
+         * Auxiliary functions.
+         */
+
+        /**
+        * Re-allocates array and copies data from old to new array. 
+        * Size is in elements, not bytes!
+        * Also frees old array. Returns new allocated array.
+        */
+        public static byte[] Realloc(byte[] oldBuffer, int elementCount, int newElementCount)
+        {
+            byte* newBuffer = new byte[newElementCount];
+            memset(newBuffer, 0, newElementCount * sizeof(byte));
+
+            if (oldBuffer == null)
+                return newBuffer;
+
+            if (newBuffer != null)
+            {
+                int copyLength = min(elementCount, newElementCount);
+                memcpy(newBuffer, oldBuffer, copyLength);
+            }
+
+            return newBuffer;
+        }
+
+        public static uint[] Realloc(uint[] oldBuffer, int elementCount, int newElementCount)
+        {
+            uint* newBuffer = new uint[newElementCount];
+            memset(newBuffer, 0, newElementCount * sizeof(uint));
+
+            if (oldBuffer == null)
+                return newBuffer;
+
+            if (newBuffer != null)
+            {
+                int copyLength = min(elementCount, newElementCount);
+                memcpy(newBuffer, oldBuffer, copyLength * sizeof(uint));
+            }
+
+            return newBuffer;
+        }
+
+        public static int Compare(UInt16[] p1, UInt16[] p2, int elementCount)
+        {
+            for (int i = 0; i < elementCount; i++)
+            {
+                if (p1[i] != p2[i])
+                    return p1[i] - p2[i];
+            }
+
+            return 0;
+        }
+
+        /*
+        * Open a TIFF file for read/writing.
+        */
+        public static Tiff Open(string name, string mode)
+        {
+            static const char module[] = "Open";
+
+            DWORD dwMode;
+            int m = Tiff::getMode(mode, module);
+            switch (m)
+            {
+                case O_RDONLY:
+                    dwMode = OPEN_EXISTING;
+                    break;
+                case O_RDWR:
+                    dwMode = OPEN_ALWAYS;
+                    break;
+                case O_RDWR | O_CREAT: 
+                    dwMode = OPEN_ALWAYS;
+                    break;
+                case O_RDWR | O_TRUNC: 
+                    dwMode = CREATE_ALWAYS;
+                    break;
+                case O_RDWR | O_CREAT | O_TRUNC: 
+                    dwMode = CREATE_ALWAYS;
+                    break;
+                default:
+                    return null;
+            }
+
+            thandle_t fd = (thandle_t)CreateFileA(name, (m == O_RDONLY) ? GENERIC_READ: (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ | FILE_SHARE_WRITE, null, dwMode, (m == O_RDONLY) ? FILE_ATTRIBUTE_READONLY: FILE_ATTRIBUTE_NORMAL, null);
+            if (fd == INVALID_HANDLE_VALUE)
+            {
+                ErrorExt(null, 0, module, "%s: Cannot open", name);
+                return null;
+            }
+
+            Tiff* tif = FdOpen((int)fd, name, mode);
+            if (tif == null)
+                CloseHandle(fd);
+
+            return tif;
+        }
+
+        /*
+        * Open a TIFF file descriptor for read/writing.
+        */
+        public static Tiff FdOpen(int ifd, string name, string mode)
+        {
+            Tiff* tif = ClientOpen(name, mode, (thandle_t)ifd, new TiffStream());
+            if (tif != null)
+                tif.m_userStream = false; // clear flag, so stream will be deleted
+
+            return tif;
+        }
+
+        public static Tiff ClientOpen(string name, string mode, thandle_t clientdata, TiffStream stream)
+        {
+            static const char module[] = "ClientOpen";
     
-    /*
-    * Flush buffered data to the file.
-    *
-    * Frank Warmerdam'2000: I modified this to return false if TIFF_BEENWRITING
-    * is not set, so that TIFFFlush() will proceed to write out the directory.
-    * The documentation says returning false is an error indicator, but not having
-    * been writing isn't exactly a an error.  Hopefully this doesn't cause
-    * problems for other people. 
-    */
-    public bool FlushData();
+            int m = Tiff::getMode(mode, module);
+            if (m == -1)
+                return null;
+
+            Tiff* tif = new Tiff();
+            if (tif == null)
+            {
+                ErrorExt(tif, clientdata, module, "%s: Out of memory (TIFF structure)", name);
+                return null;
+            }
+
+            tif.m_name = new char[strlen(name) + 1];
+            strcpy(tif.m_name, name);
+
+            tif.m_mode = m & ~(O_CREAT | O_TRUNC);
+            tif.m_curdir = (UInt16)-1; /* non-existent directory */
+            tif.m_curoff = 0;
+            tif.m_curstrip = (uint)-1; /* invalid strip */
+            tif.m_row = (uint)-1; /* read/write pre-increment */
+            tif.m_clientdata = clientdata;
+
+            if (stream == null)
+            {
+                ErrorExt(tif, clientdata, module, "TiffStream is null pointer.");
+                return null;
+            }
+
+            tif.m_stream = stream;
+            tif.m_userStream = true;
+
+            /* setup default state */
+            tif.m_currentCodec = tif.m_builtInCodecs[0];
+
+            /*
+             * Default is to return data MSB2LSB and enable the
+             * use of memory-mapped files and strip chopping when
+             * a file is opened read-only.
+             */
+            tif.m_flags = FILLORDER_MSB2LSB;
+
+            if (m == O_RDONLY || m == O_RDWR)
+                tif.m_flags |= STRIPCHOP_DEFAULT;
+
+            /*
+             * Process library-specific flags in the open mode string.
+             * The following flags may be used to control intrinsic library
+             * behaviour that may or may not be desirable (usually for
+             * compatibility with some application that claims to support
+             * TIFF but only supports some braindead idea of what the
+             * vendor thinks TIFF is):
+             *
+             * 'l'      use little-endian byte order for creating a file
+             * 'b'      use big-endian byte order for creating a file
+             * 'L'      read/write information using LSB2MSB bit order
+             * 'B'      read/write information using MSB2LSB bit order
+             * 'H'      read/write information using host bit order
+             * 'C'      enable strip chopping support when reading
+             * 'c'      disable strip chopping support
+             * 'h'      read TIFF header only, do not load the first IFD
+             *
+             * The use of the 'l' and 'b' flags is strongly discouraged.
+             * These flags are provided solely because numerous vendors,
+             * typically on the PC, do not correctly support TIFF; they
+             * only support the Intel little-endian byte order.  This
+             * support is not configured by default because it supports
+             * the violation of the TIFF spec that says that readers *MUST*
+             * support both byte orders.  It is strongly recommended that
+             * you not use this feature except to deal with busted apps
+             * that write invalid TIFF.  And even in those cases you should
+             * bang on the vendors to fix their software.
+             *
+             * The 'L', 'B', and 'H' flags are intended for applications
+             * that can optimize operations on data by using a particular
+             * bit order.  By default the library returns data in MSB2LSB
+             * bit order for compatibiltiy with older versions of this
+             * library.  Returning data in the bit order of the native cpu
+             * makes the most sense but also requires applications to check
+             * the value of the FillOrder tag; something they probably do
+             * not do right now.
+             *
+             * The 'C' and 'c' flags are provided because the library support
+             * for chopping up large strips into multiple smaller strips is not
+             * application-transparent and as such can cause problems.  The 'c'
+             * option permits applications that only want to look at the tags,
+             * for example, to get the unadulterated TIFF tag information.
+             */
+            size_t modelength = strlen(mode);
+            for (size_t i = 0; i < modelength; i++)
+            {
+                switch (mode[i])
+                {
+                    case 'b':
+                        if ((m & O_CREAT) != 0)
+                            tif.m_flags |= TIFF_SWAB;
+                        break;
+                    case 'l':
+                        break;
+                    case 'B':
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | FILLORDER_MSB2LSB;
+                        break;
+                    case 'L':
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | FILLORDER_LSB2MSB;
+                        break;
+                    case 'H':
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | FILLORDER_LSB2MSB;
+                        break;
+                    case 'C':
+                        if (m == O_RDONLY)
+                            tif.m_flags |= TIFF_STRIPCHOP;
+                        break;
+                    case 'c':
+                        if (m == O_RDONLY)
+                            tif.m_flags &= ~TIFF_STRIPCHOP;
+                        break;
+                    case 'h':
+                        tif.m_flags |= TIFF_HEADERONLY;
+                        break;
+                }
+            }
+
+            /*
+             * Read in TIFF header.
+             */
+
+            if ((tif.m_mode & O_TRUNC) != 0 || !tif.readHeaderOk(tif.m_header))
+            {
+                if (tif.m_mode == O_RDONLY)
+                {
+                    Tiff::ErrorExt(tif, tif.m_clientdata, name, "Cannot read TIFF header");
+                    return tif.safeOpenFailed();
+                }
+
+                /*
+                 * Setup header and write.
+                 */
+                tif.m_header.tiff_magic = (tif.m_flags & TIFF_SWAB) != 0 ? TIFF_BIGENDIAN : TIFF_LITTLEENDIAN;
+                tif.m_header.tiff_version = TIFF_VERSION;
+                if ((tif.m_flags & TIFF_SWAB) != 0)
+                    SwabShort(tif.m_header.tiff_version);
+
+                tif.m_header.tiff_diroff = 0; /* filled in later */
+
+                /*
+                 * The doc for "fopen" for some STD_C_LIBs says that if you 
+                 * open a file for modify ("+"), then you must fseek (or 
+                 * fflush?) between any freads and fwrites.  This is not
+                 * necessary on most systems, but has been shown to be needed
+                 * on Solaris. 
+                 */
+                tif.seekFile(0, SEEK_SET);
+
+                if (!tif.writeHeaderOK(tif.m_header))
+                {
+                    Tiff::ErrorExt(tif, tif.m_clientdata, name, "Error writing TIFF header");
+                    return tif.safeOpenFailed();
+                }
+                /*
+                 * Setup the byte order handling.
+                 */
+                tif.initOrder(tif.m_header.tiff_magic);
+
+                /*
+                 * Setup default directory.
+                 */
+                tif.setupDefaultDirectory();
+                tif.m_diroff = 0;
+                tif.m_dirlist = null;
+                tif.m_dirlistsize = 0;
+                tif.m_dirnumber = 0;
+                return tif;
+            }
+
+            /*
+             * Setup the byte order handling.
+             */
+            if (tif.m_header.tiff_magic != TIFF_BIGENDIAN && tif.m_header.tiff_magic != TIFF_LITTLEENDIAN && tif.m_header.tiff_magic != MDI_LITTLEENDIAN)
+            {
+                Tiff::ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF or MDI file, bad magic number %d (0x%x)", tif.m_header.tiff_magic, tif.m_header.tiff_magic);
+                return tif.safeOpenFailed();
+            }
+
+            tif.initOrder(tif.m_header.tiff_magic);
+
+            /*
+             * Swap header if required.
+             */
+            if ((tif.m_flags & TIFF_SWAB) != 0)
+            {
+                SwabShort(tif.m_header.tiff_version);
+                SwabLong(tif.m_header.tiff_diroff);
+            }
+            /*
+             * Now check version (if needed, it's been byte-swapped).
+             * Note that this isn't actually a version number, it's a
+             * magic number that doesn't change (stupid).
+             */
+            if (tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION)
+            {
+                Tiff::ErrorExt(tif, tif.m_clientdata, name, "This is a BigTIFF file.  This format not supported\n""by this version of libtiff.");
+                return tif.safeOpenFailed();
+            }
+
+            if (tif.m_header.tiff_version != TIFF_VERSION)
+            {
+                Tiff::ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF file, bad version number %d (0x%x)", tif.m_header.tiff_version, tif.m_header.tiff_version);
+                return tif.safeOpenFailed();
+            }
+
+            tif.m_flags |= TIFF_MYBUFFER;
+            tif.m_rawcp = 0;
+            tif.m_rawdata = 0;
+            tif.m_rawdatasize = 0;
+
+            /*
+             * Sometimes we do not want to read the first directory (for example,
+             * it may be broken) and want to proceed to other directories. I this
+             * case we use the TIFF_HEADERONLY flag to open file and return
+             * immediately after reading TIFF header.
+             */
+            if ((tif.m_flags & TIFF_HEADERONLY) != 0)
+                return tif;
+
+            /*
+             * Setup initial directory.
+             */
+            switch (mode[0])
+            {
+                case 'r':
+                    tif.m_nextdiroff = tif.m_header.tiff_diroff;
+                    
+                    if (tif.ReadDirectory())
+                    {
+                        tif.m_rawcc = -1;
+                        tif.m_flags |= TIFF_BUFFERSETUP;
+                        return tif;
+                    }
+                    break;
+                case 'a':
+                    /*
+                     * New directories are automatically append
+                     * to the end of the directory chain when they
+                     * are written out (see TIFFWriteDirectory).
+                     */
+                    tif.setupDefaultDirectory();
+                    return tif;
+            }
+
+            return tif.safeOpenFailed();
+        }
+
+        /*
+         ** Stuff, related to tag handling and creating custom tags.
+         */
+        public int GetTagListCount()
+        {
+            return m_dir.td_customValueCount;
+        }
+
+        public uint GetTagListEntry(int tag_index)
+        {
+            if (tag_index < 0 || tag_index >= m_dir.td_customValueCount)
+                return (uint)-1;
+            else
+                return m_dir.td_customValues[tag_index].info.field_tag;
+        }
+
+        public void MergeFieldInfo(TiffFieldInfo[] info, int n)
+        {
+            m_foundfield = null;
+
+            if (m_nfields > 0)
+                m_fieldinfo = Tiff::Realloc(m_fieldinfo, m_nfields, m_nfields + n);
+            else
+                m_fieldinfo = new TiffFieldInfo* [n];
+
+            for (int i = 0; i < n; i++)
+            {
+                const TiffFieldInfo* fip = FindFieldInfo(info[i].field_tag, info[i].field_type);
+
+                /* only add definitions that aren't already present */
+                if (fip == null)
+                {
+                    m_fieldinfo[m_nfields] = (TiffFieldInfo*)&info[i];
+                    m_nfields++;
+                }
+            }
+
+            /* Sort the field info by tag number */
+            qsort(m_fieldinfo, m_nfields, sizeof(TiffFieldInfo*), tagCompare);
+        }
+
+        public TiffFieldInfo FindFieldInfo(uint tag, TiffDataType dt)
+        {
+            if (m_foundfield && m_foundfield.field_tag == tag && (dt == TIFF_ANY || dt == m_foundfield.field_type))
+                return m_foundfield;
+
+            /* If we are invoked with no field information, then just return. */
+            if (m_fieldinfo == null)
+                return null;
+
+            /* NB: use sorted search (e.g. binary search) */
+            TiffFieldInfo key(0, 0, 0, TIFF_NOTYPE, 0, false, false, null);
+            key.field_tag = tag;
+            key.field_type = dt;
+            TiffFieldInfo* pkey = &key;
+
+            const TiffFieldInfo** ret = (const TiffFieldInfo **) bsearch(&pkey, m_fieldinfo, m_nfields, sizeof(TiffFieldInfo*), tagCompare);
+            return m_foundfield = (ret ? *ret : null);
+        }
+
+        public TiffFieldInfo FindFieldInfoByName(string field_name, TiffDataType dt)
+        {
+            if (m_foundfield && (strcmp(m_foundfield.field_name, field_name) == 0) && (dt == TIFF_ANY || dt == m_foundfield.field_type))
+                return m_foundfield;
+
+            /* If we are invoked with no field information, then just return. */
+            if (m_fieldinfo == null)
+                return null;
+
+            /* NB: use sorted search (e.g. binary search) */
+            TiffFieldInfo key(0, 0, 0, TIFF_NOTYPE, 0, false, false, null);
+            key.field_name = (char*)field_name;
+            key.field_type = dt;
+            TiffFieldInfo* pkey = &key;
+
+            const TiffFieldInfo** ret = (const TiffFieldInfo**)_lfind(&pkey, m_fieldinfo, &m_nfields, sizeof(TiffFieldInfo*), tagNameCompare);
+            return m_foundfield = (ret ? *ret : null);
+        }
+
+        public TiffFieldInfo FieldWithTag(uint tag)
+        {
+            const TiffFieldInfo* fip = FindFieldInfo(tag, TIFF_ANY);
+            if (fip == null)
+            {
+                ErrorExt(this, m_clientdata, "FieldWithTag", "Internal error, unknown tag 0x%x", tag);
+                assert(false);
+                /*NOTREACHED*/
+            }
+
+            return fip;
+        }
+
+        public TiffFieldInfo FieldWithName(string field_name)
+        {
+            const TiffFieldInfo* fip = FindFieldInfoByName(field_name, TIFF_ANY);
+            if (fip == null)
+            {
+                ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag %s", field_name);
+                assert(false);
+                /*NOTREACHED*/
+            }
+
+            return fip;
+        }
+
+        public TiffTagMethods GetTagMethods()
+        {
+            return m_tagmethods;
+        }
+
+        public TiffTagMethods SetTagMethods(TiffTagMethods tagMethods)
+        {
+            TiffTagMethods* oldTagMethods = m_tagmethods;
+
+            if (tagMethods != null)
+                m_tagmethods = tagMethods;
+
+            return oldTagMethods;
+        }
+
+        public object GetClientInfo(string name)
+        {
+            // should get copy
+            clientInfoLink* link = m_clientinfo;
+
+            while (link != null && strcmp(link.name, name) != 0)
+                link = link.next;
+
+            if (link != null)
+                return link.data;
+
+            return null;
+        }
+
+        public void SetClientInfo(object data, string name)
+        {
+            clientInfoLink* link = m_clientinfo;
+
+            /*
+             ** Do we have an existing link with this name?  If so, just
+             ** set it.
+             */
+            while (link != null && strcmp(link.name, name) != 0)
+                link = link.next;
+
+            if (link != null)
+            {
+                link.data = data;
+                return;
+            }
+
+            /*
+             ** Create a new link.
+             */
+
+            link = new clientInfoLink();
+            assert(link != null);
+            link.next = m_clientinfo;
+            link.name = new char[strlen(name) + 1];
+            assert(link.name != null);
+            strcpy(link.name, name);
+            link.data = data;
+
+            m_clientinfo = link;
+        }
+
+        public bool Flush()
+        {
+            if (m_mode != O_RDONLY)
+            {
+                if (!FlushData())
+                    return false;
+
+                if ((m_flags & TIFF_DIRTYDIRECT) != 0 && !WriteDirectory())
+                    return false;
+            }
+
+            return true;
+        }
+        
+        /*
+        * Flush buffered data to the file.
+        *
+        * Frank Warmerdam'2000: I modified this to return false if TIFF_BEENWRITING
+        * is not set, so that TIFFFlush() will proceed to write out the directory.
+        * The documentation says returning false is an error indicator, but not having
+        * been writing isn't exactly a an error.  Hopefully this doesn't cause
+        * problems for other people. 
+        */
+        public bool FlushData()
+        {
+            if ((m_flags & TIFF_BEENWRITING) == 0)
+                return false;
+
+            if ((m_flags & TIFF_POSTENCODE) != 0)
+            {
+                m_flags &= ~TIFF_POSTENCODE;
+                if (!m_currentCodec.tif_postencode())
+                    return false;
+            }
+
+            return flushData1();
+        }
+        
+        /*
+        * Return the value of a field in the
+        * internal directory structure.
+        */
+        //public bool GetField(uint tag, ...);
+        
+        /*
+        * Like GetField, but taking a varargs
+        * parameter list.  This routine is useful
+        * for building higher-level interfaces on
+        * top of the library.
+        */
+        //public bool VGetField(uint tag, va_list ap);
+        
+        /*
+        * Like GetField, but return any default
+        * value if the tag is not present in the directory.
+        */
+        //public bool GetFieldDefaulted(uint tag, ...);
+        
+        /*
+        * Like GetField, but return any default
+        * value if the tag is not present in the directory.
+        *
+        * NB:  We use the value in the directory, rather than
+        *  explicit values so that defaults exist only one
+        *  place in the library -- in setupDefaultDirectory.
+        */
+        //public bool VGetFieldDefaulted(uint tag, va_list ap);
+
+        /*
+        * Read the next TIFF directory from a file
+        * and convert it to the internal format.
+        * We read directories sequentially.
+        */
+        public bool ReadDirectory()
+        {
+            static const char module[] = "ReadDirectory";
+
+            m_diroff = m_nextdiroff;
+            if (m_diroff == 0)
+            {
+                /* no more directories */
+                return false;
+            }
+
+            /*
+            * Check whether we have the last offset or bad offset (IFD looping).
+            */
+            if (!checkDirOffset(m_nextdiroff))
+                return false;
+
+            /*
+             * Cleanup any previous compression state.
+             */
+            m_currentCodec.tif_cleanup();
+            m_curdir++;
+            TiffDirEntry* dir = null;
+            UInt16 dircount = fetchDirectory(m_nextdiroff, dir, m_nextdiroff);
+            if (dircount == 0)
+            {
+                ErrorExt(this, m_clientdata, module, "%s: Failed to read directory at offset %u", m_name, m_nextdiroff);
+                return false;
+            }
+
+            m_flags &= ~TIFF_BEENWRITING; /* reset before new dir */
+
+            /*
+             * Setup default value and then make a pass over
+             * the fields to check type and tag information,
+             * and to extract info required to size data
+             * structures.  A second pass is made afterwards
+             * to read in everthing not taken in the first pass.
+             */
+            
+            /* free any old stuff and reinit */
+            FreeDirectory();
+            setupDefaultDirectory();
+
+            /*
+             * Electronic Arts writes gray-scale TIFF files
+             * without a PlanarConfiguration directory entry.
+             * Thus we setup a default value here, even though
+             * the TIFF spec says there is no default value.
+             */
+            SetField(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+
+            /*
+             * Sigh, we must make a separate pass through the
+             * directory for the following reason:
+             *
+             * We must process the Compression tag in the first pass
+             * in order to merge in codec-private tag definitions (otherwise
+             * we may get complaints about unknown tags).  However, the
+             * Compression tag may be dependent on the SamplesPerPixel
+             * tag value because older TIFF specs permited Compression
+             * to be written as a SamplesPerPixel-count tag entry.
+             * Thus if we don't first figure out the correct SamplesPerPixel
+             * tag value then we may end up ignoring the Compression tag
+             * value because it has an incorrect count value (if the
+             * true value of SamplesPerPixel is not 1).
+             *
+             * It sure would have been nice if Aldus had really thought
+             * this stuff through carefully.
+             */
+            for (int i = 0; i < dircount; i++)
+            {
+                TiffDirEntry* dp = &dir[i];
+                if ((m_flags & TIFF_SWAB) != 0)
+                {
+                    SwabShort(dp.tdir_tag);
+                    SwabShort(dp.tdir_type);
+                    SwabLong(dp.tdir_count);
+                    SwabLong(dp.tdir_offset);
+                }
+                
+                if (dp.tdir_tag == TIFFTAG_SAMPLESPERPIXEL)
+                {
+                    if (!fetchNormalTag(dir[i]))
+                        return readDirectoryFailed(dir);
+
+                    dp.tdir_tag = TIFFTAG_IGNORE;
+                }
+            }
+
+            /*
+             * First real pass over the directory.
+             */
+            size_t fix = 0;
+            bool diroutoforderwarning = false;
+            for (int i = 0; i < dircount; i++)
+            {
+                if (fix >= m_nfields || dir[i].tdir_tag == TIFFTAG_IGNORE)
+                    continue;
+
+                /*
+                 * Silicon Beach (at least) writes unordered
+                 * directory tags (violating the spec).  Handle
+                 * it here, but be obnoxious (maybe they'll fix it?).
+                 */
+                if (dir[i].tdir_tag < m_fieldinfo[fix].field_tag)
+                {
+                    if (!diroutoforderwarning)
+                    {
+                        Tiff::WarningExt(this, m_clientdata, module, "%s: invalid TIFF directory; tags are not sorted in ascending order", m_name);
+                        diroutoforderwarning = true;
+                    }
+
+                    fix = 0; /* O(n^2) */
+                }
+
+                while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                    fix++;
+
+                if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
+                {
+                    Tiff::WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+
+                    MergeFieldInfo(createAnonFieldInfo(dir[i].tdir_tag, (TiffDataType)dir[i].tdir_type), 1);
+                    fix = 0;
+                    while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                        fix++;
+                }
+
+                /*
+                 * null out old tags that we ignore.
+                 */
+                if (m_fieldinfo[fix].field_bit == FIELD_IGNORE)
+                {
+                    dir[i].tdir_tag = TIFFTAG_IGNORE;
+                    continue;
+                }
+
+                /*
+                 * Check data type.
+                 */
+                const TiffFieldInfo* fip = m_fieldinfo[fix];
+                while (dir[i].tdir_type != (unsigned short)fip.field_type && fix < m_nfields)
+                {
+                    if (fip.field_type == TIFF_ANY)
+                    {
+                        /* wildcard */
+                        break;
+                    }
+
+                    fip = m_fieldinfo[++fix];
+                    if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
+                    {
+                        Tiff::WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        dir[i].tdir_tag = TIFFTAG_IGNORE;
+                        continue;
+                    }
+                }
+
+                /*
+                 * Check count if known in advance.
+                 */
+                if (fip.field_readcount != TIFF_VARIABLE && fip.field_readcount != TIFF_VARIABLE2)
+                {
+                    uint expected = (fip.field_readcount == TIFF_SPP) ? m_dir.td_samplesperpixel : fip.field_readcount;
+                    if (!checkDirCount(dir[i], expected))
+                    {
+                        dir[i].tdir_tag = TIFFTAG_IGNORE;
+                        continue;
+                    }
+                }
+
+                switch (dir[i].tdir_tag)
+                {
+                    case TIFFTAG_COMPRESSION:
+                        /*
+                         * The 5.0 spec says the Compression tag has
+                         * one value, while earlier specs say it has
+                         * one value per sample.  Because of this, we
+                         * accept the tag if one value is supplied.
+                         */
+                        if (dir[i].tdir_count == 1)
+                        {
+                            uint v = extractData(dir[i]);
+                            if (!SetField(dir[i].tdir_tag, (UInt16)v))
+                                return readDirectoryFailed(dir);
+                            
+                            break;
+                            /* XXX: workaround for broken TIFFs */
+                        }
+                        else if (dir[i].tdir_type == TIFF_LONG)
+                        {
+                            uint v;
+                            if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (UInt16)v))
+                                return readDirectoryFailed(dir);
+                        }
+                        else
+                        {
+                            UInt16 iv;
+                            if (!fetchPerSampleShorts(dir[i], iv) || !SetField(dir[i].tdir_tag, iv))
+                                return readDirectoryFailed(dir);
+                        }
+                        dir[i].tdir_tag = TIFFTAG_IGNORE;
+                        break;
+                    case TIFFTAG_STRIPOFFSETS:
+                    case TIFFTAG_STRIPBYTECOUNTS:
+                    case TIFFTAG_TILEOFFSETS:
+                    case TIFFTAG_TILEBYTECOUNTS:
+                        setFieldBit(fip.field_bit);
+                        break;
+                    case TIFFTAG_IMAGEWIDTH:
+                    case TIFFTAG_IMAGELENGTH:
+                    case TIFFTAG_IMAGEDEPTH:
+                    case TIFFTAG_TILELENGTH:
+                    case TIFFTAG_TILEWIDTH:
+                    case TIFFTAG_TILEDEPTH:
+                    case TIFFTAG_PLANARCONFIG:
+                    case TIFFTAG_ROWSPERSTRIP:
+                    case TIFFTAG_EXTRASAMPLES:
+                        if (!fetchNormalTag(dir[i]))
+                            return readDirectoryFailed(dir);
+                        dir[i].tdir_tag = TIFFTAG_IGNORE;
+                        break;
+                }
+            }
+
+            /*
+            * XXX: OJPEG hack.
+            * If a) compression is OJPEG, b) planarconfig tag says it's separate,
+            * c) strip offsets/bytecounts tag are both present and
+            * d) both contain exactly one value, then we consistently find
+            * that the buggy implementation of the buggy compression scheme
+            * matches contig planarconfig best. So we 'fix-up' the tag here
+            */
+            if ((m_dir.td_compression == COMPRESSION_OJPEG) && (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)) 
+            {
+                int dpIndex = readDirectoryFind(dir, dircount, TIFFTAG_STRIPOFFSETS);
+                if (dpIndex != -1 && dir[dpIndex].tdir_count == 1) 
+                {
+                    dpIndex = readDirectoryFind(dir, dircount, TIFFTAG_STRIPBYTECOUNTS);
+                    if (dpIndex != -1 && dir[dpIndex].tdir_count == 1) 
+                    {
+                        m_dir.td_planarconfig = PLANARCONFIG_CONTIG;
+                        WarningExt(this, m_clientdata, "ReadDirectory", "Planarconfig tag value assumed incorrect, assuming data is contig instead of chunky");
+                    }
+                }
+            }
+
+            /*
+             * Allocate directory structure and setup defaults.
+             */
+            if (!fieldSet(FIELD_IMAGEDIMENSIONS))
+            {
+                missingRequired("ImageLength");
+                return readDirectoryFailed(dir);
+            }
+
+            /* 
+             * Setup appropriate structures (by strip or by tile)
+             */
+            if (!fieldSet(FIELD_TILEDIMENSIONS))
+            {
+                m_dir.td_nstrips = NumberOfStrips();
+                m_dir.td_tilewidth = m_dir.td_imagewidth;
+                m_dir.td_tilelength = m_dir.td_rowsperstrip;
+                m_dir.td_tiledepth = m_dir.td_imagedepth;
+                m_flags &= ~TIFF_ISTILED;
+            }
+            else
+            {
+                m_dir.td_nstrips = NumberOfTiles();
+                m_flags |= TIFF_ISTILED;
+            }
+
+            if (m_dir.td_nstrips == 0)
+            {
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero number of %s", m_name, IsTiled() ? "tiles" : "strips");
+                return readDirectoryFailed(dir);
+            }
+
+            m_dir.td_stripsperimage = m_dir.td_nstrips;
+            if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
+
+            if (!fieldSet(FIELD_STRIPOFFSETS))
+            {
+                if ((m_dir.td_compression == COMPRESSION_OJPEG) && !IsTiled() && (m_dir.td_nstrips == 1)) 
+                {
+                    /*
+                    * XXX: OJPEG hack.
+                    * If a) compression is OJPEG, b) it's not a tiled TIFF,
+                    * and c) the number of strips is 1,
+                    * then we tolerate the absence of stripoffsets tag,
+                    * because, presumably, all required data is in the
+                    * JpegInterchangeFormat stream.
+                    */
+                    setFieldBit(FIELD_STRIPOFFSETS);
+                } 
+                else 
+                {
+                    missingRequired(IsTiled() ? "TileOffsets" : "StripOffsets");
+                    return readDirectoryFailed(dir);
+                }
+            }
+
+            /*
+             * Second pass: extract other information.
+             */
+            for (int i = 0; i < dircount; i++)
+            {
+                if (dir[i].tdir_tag == TIFFTAG_IGNORE)
+                    continue;
+                
+                switch (dir[i].tdir_tag)
+                {
+                    case TIFFTAG_MINSAMPLEVALUE:
+                    case TIFFTAG_MAXSAMPLEVALUE:
+                    case TIFFTAG_BITSPERSAMPLE:
+                    case TIFFTAG_DATATYPE:
+                    case TIFFTAG_SAMPLEFORMAT:
+                        /*
+                         * The 5.0 spec says the Compression tag has
+                         * one value, while earlier specs say it has
+                         * one value per sample.  Because of this, we
+                         * accept the tag if one value is supplied.
+                         *
+                         * The MinSampleValue, MaxSampleValue, BitsPerSample
+                         * DataType and SampleFormat tags are supposed to be
+                         * written as one value/sample, but some vendors
+                         * incorrectly write one value only -- so we accept
+                         * that as well (yech). Other vendors write correct
+                         * value for NumberOfSamples, but incorrect one for
+                         * BitsPerSample and friends, and we will read this
+                         * too.
+                         */
+                        if (dir[i].tdir_count == 1)
+                        {
+                            uint v = extractData(dir[i]);
+                            if (!SetField(dir[i].tdir_tag, (UInt16)v))
+                                return readDirectoryFailed(dir);
+                            /* XXX: workaround for broken TIFFs */
+                        }
+                        else if (dir[i].tdir_tag == TIFFTAG_BITSPERSAMPLE && dir[i].tdir_type == TIFF_LONG)
+                        {
+                            uint v;
+                            if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (UInt16)v))
+                                return readDirectoryFailed(dir);
+                        }
+                        else
+                        {
+                            UInt16 iv;
+                            if (!fetchPerSampleShorts(dir[i], iv) || !SetField(dir[i].tdir_tag, iv))
+                                return readDirectoryFailed(dir);
+                        }
+                        break;
+                    case TIFFTAG_SMINSAMPLEVALUE:
+                    case TIFFTAG_SMAXSAMPLEVALUE:
+                        {
+                            double dv = 0.0;
+                            if (!fetchPerSampleAnys(dir[i], dv) || !SetField(dir[i].tdir_tag, dv))
+                                return readDirectoryFailed(dir);
+                        }
+                        break;
+                    case TIFFTAG_STRIPOFFSETS:
+                    case TIFFTAG_TILEOFFSETS:
+                        if (!fetchStripThing(dir[i], m_dir.td_nstrips, m_dir.td_stripoffset))
+                            return readDirectoryFailed(dir);
+                        break;
+                    case TIFFTAG_STRIPBYTECOUNTS:
+                    case TIFFTAG_TILEBYTECOUNTS:
+                        if (!fetchStripThing(dir[i], m_dir.td_nstrips, m_dir.td_stripbytecount))
+                            return readDirectoryFailed(dir);
+                        break;
+                    case TIFFTAG_COLORMAP:
+                    case TIFFTAG_TRANSFERFUNCTION:
+                        {
+                            /*
+                             * TransferFunction can have either 1x or 3x
+                             * data values; Colormap can have only 3x
+                             * items.
+                             */
+                            uint v = 1L << m_dir.td_bitspersample;
+                            if (dir[i].tdir_tag == TIFFTAG_COLORMAP || dir[i].tdir_count != v)
+                            {
+                                if (!checkDirCount(dir[i], 3 * v))
+                                    break;
+                            }
+
+                            byte* cp = new byte [dir[i].tdir_count * sizeof(UInt16)];
+                            if (cp == null)
+                                ErrorExt(this, m_clientdata, m_name, "No space to read \"TransferFunction\" tag");
+
+                            if (cp != null)
+                            {
+                                if (fetchData(dir[i], cp))
+                                {
+                                    uint c = 1L << m_dir.td_bitspersample;
+                                    if (dir[i].tdir_count == c)
+                                    {
+                                        /*
+                                        * This deals with there being
+                                        * only one array to apply to
+                                        * all samples.
+                                        */
+                                        UInt16* u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(UInt16));
+                                        SetField(dir[i].tdir_tag, u, u, u);
+                                        delete[] u;
+                                    }
+                                    else
+                                    {
+                                        v *= sizeof(UInt16);
+                                        UInt16* u0 = byteArrayToUInt16(cp, 0, v);
+                                        UInt16* u1 = byteArrayToUInt16(cp, v, v);
+                                        UInt16* u2 = byteArrayToUInt16(cp, 2 * v, v);
+                                        SetField(dir[i].tdir_tag, u0, u1, u2);
+                                        delete[] u0;
+                                        delete[] u1;
+                                        delete[] u2;
+                                    }
+                                }
+
+                                delete cp;
+                            }
+                            break;
+                        }
+                    case TIFFTAG_PAGENUMBER:
+                    case TIFFTAG_HALFTONEHINTS:
+                    case TIFFTAG_YCBCRSUBSAMPLING:
+                    case TIFFTAG_DOTRANGE:
+                        fetchShortPair(dir[i]);
+                        break;
+                    case TIFFTAG_REFERENCEBLACKWHITE:
+                        fetchRefBlackWhite(dir[i]);
+                        break;
+                        /* BEGIN REV 4.0 COMPATIBILITY */
+                    case TIFFTAG_OSUBFILETYPE:
+                        {
+                            uint v = 0L;
+                            switch (extractData(dir[i]))
+                            {
+                                case OFILETYPE_REDUCEDIMAGE:
+                                    v = FILETYPE_REDUCEDIMAGE;
+                                    break;
+                                case OFILETYPE_PAGE:
+                                    v = FILETYPE_PAGE;
+                                    break;
+                            }
+
+                            if (v != 0)
+                                SetField(TIFFTAG_SUBFILETYPE, v);
+                        }
+                        break;
+                        /* END REV 4.0 COMPATIBILITY */
+                    default:
+                        fetchNormalTag(dir[i]);
+                        break;
+                }
+            }
+
+            /*
+            * OJPEG hack:
+            * - If a) compression is OJPEG, and b) photometric tag is missing,
+            * then we consistently find that photometric should be YCbCr
+            * - If a) compression is OJPEG, and b) photometric tag says it's RGB,
+            * then we consistently find that the buggy implementation of the
+            * buggy compression scheme matches photometric YCbCr instead.
+            * - If a) compression is OJPEG, and b) bitspersample tag is missing,
+            * then we consistently find bitspersample should be 8.
+            * - If a) compression is OJPEG, b) samplesperpixel tag is missing,
+            * and c) photometric is RGB or YCbCr, then we consistently find
+            * samplesperpixel should be 3
+            * - If a) compression is OJPEG, b) samplesperpixel tag is missing,
+            * and c) photometric is MINISWHITE or MINISBLACK, then we consistently
+            * find samplesperpixel should be 3
+            */
+            if (m_dir.td_compression == COMPRESSION_OJPEG)
+            {
+                if (!fieldSet(FIELD_PHOTOMETRIC))
+                {
+                    WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag is missing, assuming data is YCbCr");
+                    if (!SetField(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_YCBCR))
+                        return readDirectoryFailed(dir);
+                }
+                else if (m_dir.td_photometric == PHOTOMETRIC_RGB)
+                {
+                    m_dir.td_photometric = PHOTOMETRIC_YCBCR;
+                    WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag value assumed incorrect, assuming data is YCbCr instead of RGB");
+                }
+                
+                if (!fieldSet(FIELD_BITSPERSAMPLE))
+                {
+                    WarningExt(this, m_clientdata, "ReadDirectory", "BitsPerSample tag is missing, assuming 8 bits per sample");
+                    if (!SetField(TIFFTAG_BITSPERSAMPLE, 8))
+                        return readDirectoryFailed(dir);
+                }
+
+                if (!fieldSet(FIELD_SAMPLESPERPIXEL))
+                {
+                    if ((m_dir.td_photometric == PHOTOMETRIC_RGB) || (m_dir.td_photometric == PHOTOMETRIC_YCBCR))
+                    {
+                        WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 3");
+                        if (!SetField(TIFFTAG_SAMPLESPERPIXEL, 3))
+                            return readDirectoryFailed(dir);
+                    }
+                    else if ((m_dir.td_photometric == PHOTOMETRIC_MINISWHITE) || (m_dir.td_photometric == PHOTOMETRIC_MINISBLACK))
+                    {
+                        WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 1");
+                        if (!SetField(TIFFTAG_SAMPLESPERPIXEL, 1))
+                            return readDirectoryFailed(dir);
+                    }
+                }
+            }
+
+            /*
+             * Verify Palette image has a Colormap.
+             */
+            if (m_dir.td_photometric == PHOTOMETRIC_PALETTE && !fieldSet(FIELD_COLORMAP))
+            {
+                missingRequired("Colormap");
+                return readDirectoryFailed(dir);
+            }
+
+            /*
+            * OJPEG hack:
+            * We do no further messing with strip/tile offsets/bytecounts in OJPEG
+            * TIFFs
+            */
+            if (m_dir.td_compression != COMPRESSION_OJPEG)
+            {
+                /*
+                 * Attempt to deal with a missing StripByteCounts tag.
+                 */
+                if (!fieldSet(FIELD_STRIPBYTECOUNTS))
+                {
+                    /*
+                     * Some manufacturers violate the spec by not giving
+                     * the size of the strips.  In this case, assume there
+                     * is one uncompressed strip of data.
+                     */
+                    if ((m_dir.td_planarconfig == PLANARCONFIG_CONTIG && m_dir.td_nstrips > 1) || 
+                        (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE && m_dir.td_nstrips != m_dir.td_samplesperpixel))
+                    {
+                        missingRequired("StripByteCounts");
+                        return readDirectoryFailed(dir);
+                    }
+
+                    Tiff::WarningExt(this, m_clientdata, module, "%s: TIFF directory is missing required ""\"%s\" field, calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    if (!estimateStripByteCounts(dir, dircount))
+                        return readDirectoryFailed(dir);
+                }
+                else if (m_dir.td_nstrips == 1 && m_dir.td_stripoffset[0] != 0 && byteCountLooksBad(m_dir))
+                {
+                    /*
+                     * XXX: Plexus (and others) sometimes give a value of zero for
+                     * a tag when they don't know what the correct value is!  Try
+                     * and handle the simple case of estimating the size of a one
+                     * strip image.
+                     */
+                    Tiff::WarningExt(this, m_clientdata, module, "%s: Bogus \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    if (!estimateStripByteCounts(dir, dircount))
+                        return readDirectoryFailed(dir);
+                }
+                else if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG && m_dir.td_nstrips > 2 && m_dir.td_compression == COMPRESSION_NONE && m_dir.td_stripbytecount[0] != m_dir.td_stripbytecount[1])
+                {
+                    /*
+                     * XXX: Some vendors fill StripByteCount array with absolutely
+                     * wrong values (it can be equal to StripOffset array, for
+                     * example). Catch this case here.
+                     */
+                    Tiff::WarningExt(this, m_clientdata, module, "%s: Wrong \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    if (!estimateStripByteCounts(dir, dircount))
+                        return readDirectoryFailed(dir);
+                }
+            }
+
+            delete dir;
+            dir = null;
+
+            if (!fieldSet(FIELD_MAXSAMPLEVALUE))
+                m_dir.td_maxsamplevalue = (UInt16)((1L << m_dir.td_bitspersample) - 1);
+
+            /*
+             * Setup default compression scheme.
+             */
+
+            /*
+             * XXX: We can optimize checking for the strip bounds using the sorted
+             * bytecounts array. See also comments for appendToStrip() function.
+             */
+            if (m_dir.td_nstrips > 1)
+            {
+                m_dir.td_stripbytecountsorted = 1;
+                for (uint strip = 1; strip < m_dir.td_nstrips; strip++)
+                {
+                    if (m_dir.td_stripoffset[strip - 1] > m_dir.td_stripoffset[strip])
+                    {
+                        m_dir.td_stripbytecountsorted = 0;
+                        break;
+                    }
+                }
+            }
+
+            if (!fieldSet(FIELD_COMPRESSION))
+                SetField(TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+
+            /*
+             * Some manufacturers make life difficult by writing
+             * large amounts of uncompressed data as a single strip.
+             * This is contrary to the recommendations of the spec.
+             * The following makes an attempt at breaking such images
+             * into strips closer to the recommended 8k bytes.  A
+             * side effect, however, is that the RowsPerStrip tag
+             * value may be changed.
+             */
+            if (m_dir.td_nstrips == 1 && m_dir.td_compression == COMPRESSION_NONE && (m_flags & (TIFF_STRIPCHOP | TIFF_ISTILED)) == TIFF_STRIPCHOP)
+                chopUpSingleUncompressedStrip();
+
+            /*
+             * Reinitialize i/o since we are starting on a new directory.
+             */
+            m_row = (uint)-1;
+            m_curstrip = (uint)-1;
+            m_col = (uint)-1;
+            m_curtile = (uint)-1;
+            m_tilesize = (int)-1;
+
+            m_scanlinesize = ScanlineSize();
+            if (m_scanlinesize == 0)
+            {
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero scanline size", m_name);
+                return false;
+            }
+
+            if (IsTiled())
+            {
+                m_tilesize = TileSize();
+                if (m_tilesize == 0)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero tile size", m_name);
+                    return false;
+                }
+            }
+            else
+            {
+                if (StripSize() == 0)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero strip size", m_name);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
+        /* 
+        * Read custom directory from the arbitrary offset.
+        * The code is very similar to ReadDirectory().
+        */
+        public bool ReadCustomDirectory(uint diroff, TiffFieldInfo[] info, uint n)
+        {
+            static const char module[] = "ReadCustomDirectory";
+
+            setupFieldInfo(info, n);
+
+            uint dummyNextDirOff;
+            TiffDirEntry* dir = null;
+            UInt16 dircount = fetchDirectory(diroff, dir, dummyNextDirOff);
+            if (dircount == 0)
+            {
+                ErrorExt(this, m_clientdata, module, "%s: Failed to read custom directory at offset %u", m_name, diroff);
+                return false;
+            }
+
+            FreeDirectory();
+            m_dir = new TiffDirectory();
+
+            size_t fix = 0;
+            for (UInt16 i = 0; i < dircount; i++)
+            {
+                if ((m_flags & TIFF_SWAB) != 0)
+                {
+                    SwabShort(dir[i].tdir_tag);
+                    SwabShort(dir[i].tdir_type);
+                    SwabLong(dir[i].tdir_count);
+                    SwabLong(dir[i].tdir_offset);
+                }
+
+                if (fix >= m_nfields || dir[i].tdir_tag == TIFFTAG_IGNORE)
+                    continue;
+
+                while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                    fix++;
+
+                if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
+                {
+                    Tiff::WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+
+                    MergeFieldInfo(createAnonFieldInfo(dir[i].tdir_tag, (TiffDataType)dir[i].tdir_type), 1);
+
+                    fix = 0;
+                    while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                        fix++;
+                }
+
+                /*
+                 * null out old tags that we ignore.
+                 */
+                if (m_fieldinfo[fix].field_bit == FIELD_IGNORE)
+                {
+                    dir[i].tdir_tag = TIFFTAG_IGNORE;
+                    continue;
+                }
+
+                /*
+                 * Check data type.
+                 */
+                const TiffFieldInfo* fip = m_fieldinfo[fix];
+                while (dir[i].tdir_type != (unsigned short)fip.field_type && fix < m_nfields)
+                {
+                    if (fip.field_type == TIFF_ANY)
+                    {
+                        /* wildcard */
+                        break;
+                    }
+
+                    fip = m_fieldinfo[++fix];
+                    if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
+                    {
+                        Tiff::WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        dir[i].tdir_tag = TIFFTAG_IGNORE;
+                        continue;
+                    }
+                }
+
+                /*
+                 * Check count if known in advance.
+                 */
+                if (fip.field_readcount != TIFF_VARIABLE && fip.field_readcount != TIFF_VARIABLE2)
+                {
+                    uint expected = (fip.field_readcount == TIFF_SPP) ? m_dir.td_samplesperpixel : fip.field_readcount;
+
+                    if (!checkDirCount(dir[i], expected))
+                    {
+                        dir[i].tdir_tag = TIFFTAG_IGNORE;
+                        continue;
+                    }
+                }
+            
+                /*
+                * EXIF tags which need to be specifically processed.
+                */
+                switch (dir[i].tdir_tag) 
+                {
+                    case EXIFTAG_SUBJECTDISTANCE:
+                        fetchSubjectDistance(dir[i]);
+                        break;
+                    default:
+                        fetchNormalTag(dir[i]);
+                        break;
+                }
+            }
+
+            delete dir;
+            return true;
+        }
+
+        public bool WriteCustomDirectory(out uint pdiroff)
+        {
+            if (m_mode == O_RDONLY)
+                return true;
+
+            /*
+            * Size the directory so that we can calculate
+            * offsets for the data items that aren't kept
+            * in-place in each field.
+            */
+            uint nfields = 0;
+            for (unsigned int b = 0; b <= FIELD_LAST; b++)
+            {
+                if (fieldSet(b) && b != FIELD_CUSTOM)
+                    nfields += (b < FIELD_SUBFILETYPE ? 2 : 1);
+            }
+
+            nfields += m_dir.td_customValueCount;
+            int dirsize = nfields * sizeof (TiffDirEntry);
+            TiffDirEntry* data = new TiffDirEntry[nfields];
+            if (data == null) 
+            {
+                ErrorExt(this, m_clientdata, m_name, "Cannot write directory, out of space");
+                return false;
+            }
+
+            /*
+            * Put the directory  at the end of the file.
+            */
+            m_diroff = (seekFile(0, SEEK_END) + 1) & ~1;
+            m_dataoff = (uint)(m_diroff + sizeof(UInt16) + dirsize + sizeof(uint));
+            if ((m_dataoff & 1) != 0)
+                m_dataoff++;
+
+            seekFile(m_dataoff, SEEK_SET);
+            TiffDirEntry* dir = data;
+            
+            /*
+            * Setup external form of directory
+            * entries and write data items.
+            */
+            unsigned int fields[TiffDirectory::FIELD_SETLONGS];
+            memcpy(fields, m_dir.td_fieldsset, sizeof(unsigned int) * TiffDirectory::FIELD_SETLONGS);
+
+            for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
+            {
+                const TiffFieldInfo* fip = m_fieldinfo[fi];
+
+                /*
+                * For custom fields, we test to see if the custom field
+                * is set or not.  For normal fields, we just use the
+                * FieldSet test.
+                */
+                if (fip.field_bit == FIELD_CUSTOM)
+                {
+                    bool is_set = false;
+                    for (int ci = 0; ci < m_dir.td_customValueCount; ci++)
+                        is_set |= (m_dir.td_customValues[ci].info == fip);
+
+                    if (!is_set)
+                        continue;
+                }
+                else if (!fieldSet(fields, fip.field_bit))
+                    continue;
+
+                if (fip.field_bit != FIELD_CUSTOM)
+                    resetFieldBit(fields, fip.field_bit);
+            }
+
+            /*
+            * Write directory.
+            */
+            UInt16 dircount = (UInt16)nfields;
+            pdiroff = m_nextdiroff;
+            if ((m_flags & TIFF_SWAB) != 0)
+            {
+                /*
+                * The file's byte order is opposite to the
+                * native machine architecture.  We overwrite
+                * the directory information with impunity
+                * because it'll be released below after we
+                * write it to the file.  Note that all the
+                * other tag construction routines assume that
+                * we do this byte-swapping; i.e. they only
+                * byte-swap indirect data.
+                */
+                for (dir = data; dircount; dir++, dircount--)
+                {
+                    SwabShort(dir.tdir_tag);
+                    SwabShort(dir.tdir_type);
+                    SwabLong(dir.tdir_count);
+                    SwabLong(dir.tdir_offset);
+                }
+                
+                dircount = (UInt16) nfields;
+                SwabShort(dircount);
+                SwabLong(pdiroff);
+            }
+
+            seekFile(m_diroff, SEEK_SET);
+            if (!writeUInt16OK(dircount))
+            {
+                ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
+                delete[] data;
+                return false;
+            }
+
+            if (!writeDirEntryOK(data, dirsize / sizeof(TiffDirEntry)))
+            {
+                ErrorExt(this, m_clientdata, m_name, "Error writing directory contents");
+                delete[] data;
+                return false;
+            }
+
+            if (!writeUInt32OK(pdiroff))
+            {
+                ErrorExt(this, m_clientdata, m_name, "Error writing directory link");
+                delete[] data;
+                return false;
+            }
+
+            delete[] data;
+            return true;
+        }
+
+        /*
+        * EXIF is important special case of custom IFD, so we have a special
+        * function to read it.
+        */
+        public bool ReadEXIFDirectory(uint diroff)
+        {
+            size_t exifFieldInfoCount;
+            const TiffFieldInfo* exifFieldInfo = getExifFieldInfo(exifFieldInfoCount);
+            return ReadCustomDirectory(diroff, exifFieldInfo, exifFieldInfoCount);
+        }
+
+        /*
+        * Return the number of bytes to read/write in a call to
+        * one of the scanline-oriented i/o routines.  Note that
+        * this number may be 1/samples-per-pixel if data is
+        * stored as separate planes.
+        */
+        public int ScanlineSize()
+        {
+            int scanline;
+            if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG)
+            {
+                if (m_dir.td_photometric == PHOTOMETRIC_YCBCR && !IsUpSampled())
+                {
+                    UInt16 ycbcrsubsampling[2];
+                    GetField(TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
+
+                    if (ycbcrsubsampling[0] == 0)
+                    {
+                        ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
+                        return 0;
+                    }
+
+                    scanline = Tiff::roundUp(m_dir.td_imagewidth, ycbcrsubsampling[0]);
+                    scanline = Tiff::howMany8(multiply(scanline, m_dir.td_bitspersample, "ScanlineSize"));
+                    return summarize(scanline, multiply(2, scanline / ycbcrsubsampling[0], "VStripSize"), "VStripSize");
+                }
+                else
+                {
+                    scanline = multiply(m_dir.td_imagewidth, m_dir.td_samplesperpixel, "ScanlineSize");
+                }
+            }
+            else
+                scanline = m_dir.td_imagewidth;
+
+            return Tiff::howMany8(multiply(scanline, m_dir.td_bitspersample, "ScanlineSize"));
+        }
+
+        /*
+        * Return the number of bytes required to store a complete
+        * decoded and packed raster scanline (as opposed to the
+        * I/O size returned by ScanlineSize which may be less
+        * if data is store as separate planes).
+        */
+        public int RasterScanlineSize()
+        {
+            int scanline = multiply(m_dir.td_bitspersample, m_dir.td_imagewidth, "RasterScanlineSize");
+            if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG)
+            {
+                scanline = multiply(scanline, m_dir.td_samplesperpixel, "RasterScanlineSize");
+                return Tiff::howMany8(scanline);
+            }
+            
+            return multiply(Tiff::howMany8(scanline), m_dir.td_samplesperpixel, "RasterScanlineSize");
+        }
+        
+        /*
+        * Compute the # bytes in a (row-aligned) strip.
+        *
+        * Note that if RowsPerStrip is larger than the
+        * recorded ImageLength, then the strip size is
+        * truncated to reflect the actual space required
+        * to hold the strip.
+        */
+        public int StripSize()
+        {
+            uint rps = m_dir.td_rowsperstrip;
+            if (rps > m_dir.td_imagelength)
+                rps = m_dir.td_imagelength;
+
+            return VStripSize(rps);
+        }
+        
+        /*
+        * Compute the # bytes in a raw strip.
+        */
+        public int RawStripSize(uint strip)
+        {
+            int bytecount = m_dir.td_stripbytecount[strip];
+            if (bytecount <= 0)
+            {
+                ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
+                bytecount = (int)-1;
+            }
+
+            return bytecount;
+        }
+        
+        /*
+        * Compute the # bytes in a variable height, row-aligned strip.
+        */
+        public int VStripSize(uint nrows)
+        {
+            if (nrows == (uint)-1)
+                nrows = m_dir.td_imagelength;
+
+            if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG && m_dir.td_photometric == PHOTOMETRIC_YCBCR && !IsUpSampled())
+            {
+                /*
+                 * Packed YCbCr data contain one Cb+Cr for every
+                 * HorizontalSampling * VerticalSampling Y values.
+                 * Must also roundup width and height when calculating
+                 * since images that are not a multiple of the
+                 * horizontal/vertical subsampling area include
+                 * YCbCr data for the extended image.
+                 */
+                UInt16 ycbcrsubsampling[2];
+                GetField(TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
+
+                int samplingarea = ycbcrsubsampling[0] * ycbcrsubsampling[1];
+                if (samplingarea == 0)
+                {
+                    ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
+                    return 0;
+                }
+
+                int w = Tiff::roundUp(m_dir.td_imagewidth, ycbcrsubsampling[0]);
+                int scanline = Tiff::howMany8(multiply(w, m_dir.td_bitspersample, "VStripSize"));
+                nrows = Tiff::roundUp(nrows, ycbcrsubsampling[1]);
+                /* NB: don't need howMany here 'cuz everything is rounded */
+                scanline = multiply(nrows, scanline, "VStripSize");
+                return summarize(scanline, multiply(2, scanline / samplingarea, "VStripSize"), "VStripSize");
+            }
+
+            return multiply(nrows, ScanlineSize(), "VStripSize");
+        }
+
+        /*
+        * Compute the # bytes in each row of a tile.
+        */
+        public int TileRowSize()
+        {
+            if (m_dir.td_tilelength == 0 || m_dir.td_tilewidth == 0)
+                return 0;
+
+            int rowsize = multiply(m_dir.td_bitspersample, m_dir.td_tilewidth, "TileRowSize");
+            if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG)
+                rowsize = multiply(rowsize, m_dir.td_samplesperpixel, "TileRowSize");
+
+            return Tiff::howMany8(rowsize);
+        }
+
+        /*
+        * Compute the # bytes in a row-aligned tile.
+        */
+        public int TileSize()
+        {
+            return VTileSize(m_dir.td_tilelength);
+        }
+                
+        /*
+        * Compute the # bytes in a variable length, row-aligned tile.
+        */
+        public int VTileSize(uint nrows)
+        {
+            if (m_dir.td_tilelength == 0 || m_dir.td_tilewidth == 0 || m_dir.td_tiledepth == 0)
+                return 0;
+
+            int tilesize;
+            if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG && m_dir.td_photometric == PHOTOMETRIC_YCBCR && !IsUpSampled())
+            {
+                /*
+                 * Packed YCbCr data contain one Cb+Cr for every
+                 * HorizontalSampling*VerticalSampling Y values.
+                 * Must also roundup width and height when calculating
+                 * since images that are not a multiple of the
+                 * horizontal/vertical subsampling area include
+                 * YCbCr data for the extended image.
+                 */
+                int w = Tiff::roundUp(m_dir.td_tilewidth, m_dir.td_ycbcrsubsampling[0]);
+                int rowsize = Tiff::howMany8(multiply(w, m_dir.td_bitspersample, "VTileSize"));
+                int samplingarea = m_dir.td_ycbcrsubsampling[0] * m_dir.td_ycbcrsubsampling[1];
+                if (samplingarea == 0)
+                {
+                    ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
+                    return 0;
+                }
+
+                nrows = Tiff::roundUp(nrows, m_dir.td_ycbcrsubsampling[1]);
+                /* NB: don't need howMany here 'cuz everything is rounded */
+                tilesize = multiply(nrows, rowsize, "VTileSize");
+                tilesize = summarize(tilesize, multiply(2, tilesize / samplingarea, "VTileSize"), "VTileSize");
+            }
+            else
+                tilesize = multiply(nrows, TileRowSize(), "VTileSize");
+
+            return multiply(tilesize, m_dir.td_tiledepth, "VTileSize");
+        }
+
+        /*
+        * Compute a default strip size based on the image
+        * characteristics and a requested value.  If the
+        * request is <1 then we choose a strip size according
+        * to certain heuristics.
+        */
+        public uint DefaultStripSize(uint request)
+        {
+            return m_currentCodec.tif_defstripsize(request);
+        }
+
+        /*
+        * Compute a default tile size based on the image
+        * characteristics and a requested value.  If a
+        * request is <1 then we choose a size according
+        * to certain heuristics.
+        */
+        public void DefaultTileSize(ref uint tw, ref uint th)
+        {
+            m_currentCodec.tif_deftilesize(tw, th);
+        }
+        
+        /*
+        * Return open file's clientdata.
+        */
+        public thandle_t Clientdata()
+        {
+            return m_clientdata;
+        }
+
+        /*
+        * Set open file's clientdata, and return previous value.
+        */
+        public thandle_t SetClientdata(thandle_t newvalue)
+        {
+            thandle_t m = m_clientdata;
+            m_clientdata = newvalue;
+            return m;
+        }
+
+        /*
+        * Return read/write mode.
+        */
+        public int GetMode()
+        {
+            return m_mode;
+        }
+
+        /*
+        * Return read/write mode.
+        */
+        public int SetMode(int mode)
+        {
+            int old_mode = m_mode;
+            m_mode = mode;
+            return old_mode;
+        }
+
+        /*
+        * Return nonzero if file is organized in
+        * tiles; zero if organized as strips.
+        */
+        public bool IsTiled()
+        {
+            return ((m_flags & TIFF_ISTILED) != 0);
+        }
+
+        /*
+        * Return nonzero if the file has byte-swapped data.
+        */
+        public bool IsByteSwapped()
+        {
+            return ((m_flags & TIFF_SWAB) != 0);
+        }
+
+        /*
+        * Return nonzero if the data is returned up-sampled.
+        */
+        public bool IsUpSampled()
+        {
+            return ((m_flags & TIFF_UPSAMPLED) != 0);
+        }
+
+        /*
+        * Return nonzero if the data is returned in MSB-to-LSB bit order.
+        */
+        public bool IsMSB2LSB()
+        {
+            return isFillOrder(FILLORDER_MSB2LSB);
+        }
+
+        /*
+        * Return nonzero if given file was written in big-endian order.
+        */
+        public bool IsBigEndian()
+        {
+            return (m_header.tiff_magic == TIFF_BIGENDIAN);
+        }
+
+        public TiffStream GetStream()
+        {
+            return m_stream;
+        }
+
+        /*
+        * Return current row being read/written.
+        */
+        public uint CurrentRow()
+        {
+            return m_row;
+        }
+
+        /*
+        * Return index of the current directory.
+        */
+        public UInt16 CurrentDirectory()
+        {
+            return m_curdir;
+        }
+
+        /*
+        * Count the number of directories in a file.
+        */
+        public UInt16 NumberOfDirectories()
+        {
+            uint nextdir = m_header.tiff_diroff;
+            UInt16 n = 0;
+            uint dummyOff;
+            while (nextdir != 0 && advanceDirectory(nextdir, dummyOff))
+                n++;
+
+            return n;
+        }
+
+        /*
+        * Return file offset of the current directory.
+        */
+        public uint CurrentDirOffset()
+        {
+            return m_diroff;
+        }
+
+        /*
+        * Return current strip.
+        */
+        public uint CurrentStrip()
+        {
+            return m_curstrip;
+        }
+
+        /*
+        * Return current tile.
+        */
+        public uint CurrentTile()
+        {
+            return m_curtile;
+        }
+
+        /*
+        * Setup the raw data buffer in preparation for
+        * reading a strip of raw data.  If the buffer
+        * is specified as zero, then a buffer of appropriate
+        * size is allocated by the library.  Otherwise,
+        * the client must guarantee that the buffer is
+        * large enough to hold any individual strip of
+        * raw data.
+        */
+        public bool ReadBufferSetup(byte[] bp, int size)
+        {
+            static const char module[] = "ReadBufferSetup";
+            
+            assert((m_flags & TIFF_NOREADRAW) == 0);
+
+            if (m_rawdata != null)
+            {
+                if ((m_flags & TIFF_MYBUFFER) != 0)
+                    delete m_rawdata;
+
+                m_rawdata = null;
+            }
+            
+            if (bp != null)
+            {
+                m_rawdatasize = size;
+                m_rawdata = bp;
+                m_flags &= ~TIFF_MYBUFFER;
+            }
+            else
+            {
+                m_rawdatasize = Tiff::roundUp(size, 1024);
+                m_rawdata = new byte [m_rawdatasize];
+                m_flags |= TIFF_MYBUFFER;
+            }
+            
+            if (m_rawdata == null)
+            {
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: No space for data buffer at scanline %ld", m_name, m_row);
+                m_rawdatasize = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        /*
+        * Setup the raw data buffer used for encoding.
+        */
+        public bool WriteBufferSetup(byte[] bp, int size)
+        {
+            static const char module[] = "WriteBufferSetup";
+
+            if (m_rawdata != null)
+            {
+                if ((m_flags & TIFF_MYBUFFER) != 0)
+                {
+                    delete m_rawdata;
+                    m_flags &= ~TIFF_MYBUFFER;
+                }
+
+                m_rawdata = null;
+            }
+            
+            if (size == (int)-1)
+            {
+                size = (IsTiled() ? m_tilesize : StripSize());
+
+                /*
+                 * Make raw data buffer at least 8K
+                 */
+                if (size < 8 * 1024)
+                    size = 8 * 1024;
+
+                bp = null; /* NB: force allocation */
+            }
+            
+            if (bp == null)
+            {
+                bp = new byte [size];
+                if (bp == null)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, module, "%s: No space for output buffer", m_name);
+                    return false;
+                }
+
+                m_flags |= TIFF_MYBUFFER;
+            }
+            else
+                m_flags &= ~TIFF_MYBUFFER;
+            
+            m_rawdata = bp;
+            m_rawdatasize = size;
+            m_rawcc = 0;
+            m_rawcp = 0;
+            m_flags |= TIFF_BUFFERSETUP;
+            return true;
+        }
+
+        public bool SetupStrips()
+        {
+            if (IsTiled())
+                m_dir.td_stripsperimage = isUnspecified(FIELD_TILEDIMENSIONS) ? m_dir.td_samplesperpixel : NumberOfTiles();
+            else
+                m_dir.td_stripsperimage = isUnspecified(FIELD_ROWSPERSTRIP) ? m_dir.td_samplesperpixel : NumberOfStrips();
+
+            m_dir.td_nstrips = m_dir.td_stripsperimage;
+
+            if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
+
+            m_dir.td_stripoffset = new uint[m_dir.td_nstrips];
+            m_dir.td_stripbytecount = new uint[m_dir.td_nstrips];
+            if (m_dir.td_stripoffset == null || m_dir.td_stripbytecount == null)
+                return false;
+
+            /*
+             * Place data at the end-of-file
+             * (by setting offsets to zero).
+             */
+            memset(m_dir.td_stripoffset, 0, m_dir.td_nstrips * sizeof(uint));
+            memset(m_dir.td_stripbytecount, 0, m_dir.td_nstrips * sizeof(uint));
+            setFieldBit(FIELD_STRIPOFFSETS);
+            setFieldBit(FIELD_STRIPBYTECOUNTS);
+            return true;
+        }
+        
+        /*
+        * Verify file is writable and that the directory
+        * information is setup properly.  In doing the latter
+        * we also "freeze" the state of the directory so
+        * that important information is not changed.
+        */
+        public bool WriteCheck(int tiles, string module)
+        {
+            if (m_mode == O_RDONLY)
+            {
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: File not open for writing", m_name);
+                return false;
+            }
+
+            if (tiles ^ (int)IsTiled())
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, tiles ? "Can not write tiles to a stripped image": "Can not write scanlines to a tiled image");
+                return false;
+            }
+
+            /*
+             * On the first write verify all the required information
+             * has been setup and initialize any data structures that
+             * had to wait until directory information was set.
+             * Note that a lot of our work is assumed to remain valid
+             * because we disallow any of the important parameters
+             * from changing after we start writing (i.e. once
+             * TIFF_BEENWRITING is set, TIFFSetField will only allow
+             * the image's length to be changed).
+             */
+            if (!fieldSet(FIELD_IMAGEDIMENSIONS))
+            {
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: Must set \"ImageWidth\" before writing data", m_name);
+                return false;
+            }
+
+            if (m_dir.td_samplesperpixel == 1)
+            {
+                /* 
+                 * Planarconfiguration is irrelevant in case of single band
+                 * images and need not be included. We will set it anyway,
+                 * because this field is used in other parts of library even
+                 * in the single band case.
+                 */
+                if (!fieldSet(FIELD_PLANARCONFIG))
+                    m_dir.td_planarconfig = PLANARCONFIG_CONTIG;
+            }
+            else
+            {
+                if (!fieldSet(FIELD_PLANARCONFIG))
+                {
+                    Tiff::ErrorExt(this, m_clientdata, module, "%s: Must set \"PlanarConfiguration\" before writing data", m_name);
+                    return false;
+                }
+            }
+
+            if (m_dir.td_stripoffset == null && !SetupStrips())
+            {
+                m_dir.td_nstrips = 0;
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: No space for %s arrays", m_name, IsTiled() ? "tile" : "strip");
+                return false;
+            }
+
+            m_tilesize = IsTiled() ? TileSize() : (int)-1;
+            m_scanlinesize = ScanlineSize();
+            m_flags |= TIFF_BEENWRITING;
+            return true;
+        }
+        
+        /*
+        * Release storage associated with a directory.
+        */
+        public void FreeDirectory()
+        {
+            if (m_dir != null)
+            {
+                clearFieldBit(FIELD_YCBCRSUBSAMPLING);
+                clearFieldBit(FIELD_YCBCRPOSITIONING);
+
+                delete m_dir;
+                m_dir = null;
+            }
+        }
+
+        /*
+        * Setup for a new directory.  Should we automatically call
+        * WriteDirectory() if the current one is dirty?
+        *
+        * The newly created directory will not exist on the file till
+        * WriteDirectory(), Flush() or Close() is called.
+        */
+        public void CreateDirectory()
+        {
+            setupDefaultDirectory();
+            m_diroff = 0;
+            m_nextdiroff = 0;
+            m_curoff = 0;
+            m_row = (uint)-1;
+            m_curstrip = (uint)-1;
+        }
+        
+        /*
+        * Return an indication of whether or not we are
+        * at the last directory in the file.
+        */
+        public bool LastDirectory()
+        {
+            return (m_nextdiroff == 0);
+        }
+        
+        /*
+        * Set the n-th directory as the current directory.
+        * NB: Directories are numbered starting at 0.
+        */
+        public bool SetDirectory(UInt16 dirn)
+        {
+            UInt16 n;
+            uint dummyOff;
+            uint nextdir = m_header.tiff_diroff;
+            for (n = dirn; n > 0 && nextdir != 0; n--)
+            {
+                if (!advanceDirectory(nextdir, dummyOff))
+                    return false;
+            }
+
+            m_nextdiroff = nextdir;
+
+            /*
+             * Set curdir to the actual directory index.  The
+             * -1 is because ReadDirectory will increment
+             * m_curdir after successfully reading the directory.
+             */
+            m_curdir = (dirn - n) - 1;
+
+            /*
+             * Reset m_dirnumber counter and start new list of seen directories.
+             * We need this to prevent IFD loops.
+             */
+            m_dirnumber = 0;
+            return ReadDirectory();
+        }
+
+        /*
+        * Set the current directory to be the directory
+        * located at the specified file offset.  This interface
+        * is used mainly to access directories linked with
+        * the SubIFD tag (e.g. thumbnail images).
+        */
+        public bool SetSubDirectory(uint diroff)
+        {
+            m_nextdiroff = diroff;
+            /*
+             * Reset m_dirnumber counter and start new list of seen directories.
+             * We need this to prevent IFD loops.
+             */
+            m_dirnumber = 0;
+            return ReadDirectory();
+        }
+
+        /*
+        * Unlink the specified directory from the directory chain.
+        */
+        public bool UnlinkDirectory(UInt16 dirn)
+        {
+            static const char module[] = "UnlinkDirectory";
+
+            if (m_mode == O_RDONLY)
+            {
+                ErrorExt(this, m_clientdata, module, "Can not unlink directory in read-only file");
+                return false;
+            }
+
+            /*
+             * Go to the directory before the one we want
+             * to unlink and nab the offset of the link
+             * field we'll need to patch.
+             */
+            uint nextdir = m_header.tiff_diroff;
+            uint off = sizeof(UInt16) + sizeof(UInt16);
+            for (UInt16 n = dirn - 1; n > 0; n--)
+            {
+                if (nextdir == 0)
+                {
+                    ErrorExt(this, m_clientdata, module, "Directory %d does not exist", dirn);
+                    return false;
+                }
+
+                if (!advanceDirectory(nextdir, off))
+                    return false;
+            }
+
+            /*
+             * Advance to the directory to be unlinked and fetch
+             * the offset of the directory that follows.
+             */
+            uint dummyOff;
+            if (!advanceDirectory(nextdir, dummyOff))
+                return false;
+
+            /*
+             * Go back and patch the link field of the preceding
+             * directory to point to the offset of the directory
+             * that follows.
+             */
+            seekFile(off, SEEK_SET);
+            if ((m_flags & TIFF_SWAB) != 0)
+                SwabLong(nextdir);
+            
+            if (!writeUInt32OK(nextdir))
+            {
+                ErrorExt(this, m_clientdata, module, "Error writing directory link");
+                return false;
+            }
+
+            /*
+             * Leave directory state setup safely.  We don't have
+             * facilities for doing inserting and removing directories,
+             * so it's safest to just invalidate everything.  This
+             * means that the caller can only append to the directory
+             * chain.
+             */
+            m_currentCodec.tif_cleanup();
+            if ((m_flags & TIFF_MYBUFFER) != 0 && m_rawdata != null)
+            {
+                delete m_rawdata;
+                m_rawdata = null;
+                m_rawcc = 0;
+            }
+            
+            m_flags &= ~(TIFF_BEENWRITING | TIFF_BUFFERSETUP | TIFF_POSTENCODE);
+            FreeDirectory();
+            setupDefaultDirectory();
+            m_diroff = 0; /* force link on next write */
+            m_nextdiroff = 0; /* next write must be at end */
+            m_curoff = 0;
+            m_row = (uint)-1;
+            m_curstrip = (uint)-1;
+            return true;
+        }
+        
+        /*
+        * Record the value of a field in the
+        * internal directory structure.  The
+        * field will be written to the file
+        * when/if the directory structure is
+        * updated.
+        */
+        public bool SetField(uint tag, params object[] ap)
+        {
+            va_list ap;
+
+            va_start(ap, tag);
+            bool status = VSetField(tag, ap);
+            va_end(ap);
+            return status;
+        }
+
+        /*
+        * Like SetField, but taking a varargs
+        * parameter list.  This routine is useful
+        * for building higher-level interfaces on
+        * top of the library.
+        */
+        //public bool VSetField(uint tag, va_list ap);
+
+        public bool WriteDirectory()
+        {
+            return writeDirectory(true);
+        }
+        
+        /*
+        * Similar to WriteDirectory(), writes the directory out
+        * but leaves all data structures in memory so that it can be
+        * written again.  This will make a partially written TIFF file
+        * readable before it is successfully completed/closed.
+        */
+        public bool CheckpointDirectory()
+        {
+            /* Setup the strips arrays, if they haven't already been. */
+            if (m_dir.td_stripoffset == null)
+                SetupStrips();
+
+            bool rc = writeDirectory(false);
+            SetWriteOffset(seekFile(0, SEEK_END));
+            return rc;
+        }
+
+        /*
+        * Similar to WriteDirectory(), but if the directory has already
+        * been written once, it is relocated to the end of the file, in case it
+        * has changed in size.  Note that this will result in the loss of the 
+        * previously used directory space. 
+        */
+        public bool RewriteDirectory()
+        {
+            static const char module[] = "RewriteDirectory";
+
+            /* We don't need to do anything special if it hasn't been written. */
+            if (m_diroff == 0)
+                return WriteDirectory();
+
+            /*
+             ** Find and zero the pointer to this directory, so that linkDirectory
+             ** will cause it to be added after this directories current pre-link.
+             */
+
+            /* Is it the first directory in the file? */
+            if (m_header.tiff_diroff == m_diroff)
+            {
+                m_header.tiff_diroff = 0;
+                m_diroff = 0;
+
+                seekFile((uint)(TiffHeader::TIFF_MAGIC_SIZE + TiffHeader::TIFF_VERSION_SIZE), SEEK_SET);
+                if (!writeUInt32OK(m_header.tiff_diroff))
+                {
+                    Tiff::ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
+                    return false;
+                }
+            }
+            else
+            {
+                uint nextdir = m_header.tiff_diroff;
+                do
+                {
+                    UInt16 dircount;
+                    if (!seekOK(nextdir) || !readUInt16OK(dircount))
+                    {
+                        Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory count");
+                        return false;
+                    }
+                    
+                    if ((m_flags & TIFF_SWAB) != 0)
+                        SwabShort(dircount);
+
+                    seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
+                    
+                    if (!readUInt32OK(nextdir))
+                    {
+                        Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory link");
+                        return false;
+                    }
+
+                    if ((m_flags & TIFF_SWAB) != 0)
+                        SwabLong(nextdir);
+                }
+                while (nextdir != m_diroff && nextdir != 0);
+
+                uint off = seekFile(0, SEEK_CUR); /* get current offset */
+                seekFile(off - (uint)sizeof(uint), SEEK_SET);
+                m_diroff = 0;
+                
+                if (!writeUInt32OK(m_diroff))
+                {
+                    Tiff::ErrorExt(this, m_clientdata, module, "Error writing directory link");
+                    return false;
+                }
+            }
+
+            /*
+             ** Now use WriteDirectory() normally.
+             */
+            return WriteDirectory();
+        }
+        
+        /*
+        * Print the contents of the current directory
+        * to the specified stdio file stream.
+        */
+        public void PrintDirectory(Stream fd)
+        {
+            PrintDirectory(fd, TIFFPRINT_NONE);
+        }
+
+        public void PrintDirectory(Stream fd, TiffPrintDirectoryFlags flags)
+        {
+            fprintf(fd, "TIFF Directory at offset 0x%lx (%lu)\n", m_diroff, m_diroff);
     
-    /*
-    * Return the value of a field in the
-    * internal directory structure.
-    */
-    //public bool GetField(uint tag, ...);
+            if (fieldSet(FIELD_SUBFILETYPE))
+            {
+                fprintf(fd, "  Subfile Type:");
+                char* sep = " ";
+                if (m_dir.td_subfiletype & FILETYPE_REDUCEDIMAGE)
+                {
+                    fprintf(fd, "%sreduced-resolution image", sep);
+                    sep = "/";
+                }
+
+                if (m_dir.td_subfiletype & FILETYPE_PAGE)
+                {
+                    fprintf(fd, "%smulti-page document", sep);
+                    sep = "/";
+                }
+                
+                if (m_dir.td_subfiletype & FILETYPE_MASK)
+                    fprintf(fd, "%stransparency mask", sep);
+                
+                fprintf(fd, " (%lu = 0x%lx)\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
+            }
+
+            if (fieldSet(FIELD_IMAGEDIMENSIONS))
+            {
+                fprintf(fd, "  Image Width: %lu Image Length: %lu", m_dir.td_imagewidth, m_dir.td_imagelength);
+                if (fieldSet(FIELD_IMAGEDEPTH))
+                    fprintf(fd, " Image Depth: %lu", m_dir.td_imagedepth);
+                fprintf(fd, "\n");
+            }
+
+            if (fieldSet(FIELD_TILEDIMENSIONS))
+            {
+                fprintf(fd, "  Tile Width: %lu Tile Length: %lu", m_dir.td_tilewidth, m_dir.td_tilelength);
+                if (fieldSet(FIELD_TILEDEPTH))
+                    fprintf(fd, " Tile Depth: %lu", m_dir.td_tiledepth);
+                fprintf(fd, "\n");
+            }
+
+            if (fieldSet(FIELD_RESOLUTION))
+            {
+                fprintf(fd, "  Resolution: %g, %g", m_dir.td_xresolution, m_dir.td_yresolution);
+                if (fieldSet(FIELD_RESOLUTIONUNIT))
+                {
+                    switch (m_dir.td_resolutionunit)
+                    {
+                        case RESUNIT_NONE:
+                            fprintf(fd, " (unitless)");
+                            break;
+                        case RESUNIT_INCH:
+                            fprintf(fd, " pixels/inch");
+                            break;
+                        case RESUNIT_CENTIMETER:
+                            fprintf(fd, " pixels/cm");
+                            break;
+                        default:
+                            fprintf(fd, " (unit %u = 0x%x)", m_dir.td_resolutionunit, m_dir.td_resolutionunit);
+                            break;
+                    }
+                }
+                fprintf(fd, "\n");
+            }
+
+            if (fieldSet(FIELD_POSITION))
+                fprintf(fd, "  Position: %g, %g\n", m_dir.td_xposition, m_dir.td_yposition);
+            
+            if (fieldSet(FIELD_BITSPERSAMPLE))
+                fprintf(fd, "  Bits/Sample: %u\n", m_dir.td_bitspersample);
+            
+            if (fieldSet(FIELD_SAMPLEFORMAT))
+            {
+                fprintf(fd, "  Sample Format: ");
+                switch (m_dir.td_sampleformat)
+                {
+                    case SAMPLEFORMAT_VOID:
+                        fprintf(fd, "void\n");
+                        break;
+                    case SAMPLEFORMAT_INT:
+                        fprintf(fd, "signed integer\n");
+                        break;
+                    case SAMPLEFORMAT_UINT:
+                        fprintf(fd, "unsigned integer\n");
+                        break;
+                    case SAMPLEFORMAT_IEEEFP:
+                        fprintf(fd, "IEEE floating point\n");
+                        break;
+                    case SAMPLEFORMAT_COMPLEXINT:
+                        fprintf(fd, "complex signed integer\n");
+                        break;
+                    case SAMPLEFORMAT_COMPLEXIEEEFP:
+                        fprintf(fd, "complex IEEE floating point\n");
+                        break;
+                    default:
+                        fprintf(fd, "%u (0x%x)\n", m_dir.td_sampleformat, m_dir.td_sampleformat);
+                        break;
+                }
+            }
+
+            if (fieldSet(FIELD_COMPRESSION))
+            {
+                const TiffCodec* c = Tiff::FindCodec(m_dir.td_compression);
+                fprintf(fd, "  Compression Scheme: ");
+                if (c != null)
+                    fprintf(fd, "%s\n", c.m_name);
+                else
+                    fprintf(fd, "%u (0x%x)\n", m_dir.td_compression, m_dir.td_compression);
+            }
+
+            if (fieldSet(FIELD_PHOTOMETRIC))
+            {
+                fprintf(fd, "  Photometric Interpretation: ");
+                if (m_dir.td_photometric < (sizeof(photoNames) / sizeof(photoNames[0])))
+                    fprintf(fd, "%s\n", photoNames[m_dir.td_photometric]);
+                else
+                {
+                    switch (m_dir.td_photometric)
+                    {
+                        case PHOTOMETRIC_LOGL:
+                            fprintf(fd, "CIE Log2(L)\n");
+                            break;
+                        case PHOTOMETRIC_LOGLUV:
+                            fprintf(fd, "CIE Log2(L) (u',v')\n");
+                            break;
+                        default:
+                            fprintf(fd, "%u (0x%x)\n", m_dir.td_photometric, m_dir.td_photometric);
+                            break;
+                    }
+                }
+            }
+
+            if (fieldSet(FIELD_EXTRASAMPLES) && m_dir.td_extrasamples)
+            {
+                fprintf(fd, "  Extra Samples: %u<", m_dir.td_extrasamples);
+                char* sep = "";
+                for (UInt16 i = 0; i < m_dir.td_extrasamples; i++)
+                {
+                    switch (m_dir.td_sampleinfo[i])
+                    {
+                        case EXTRASAMPLE_UNSPECIFIED:
+                            fprintf(fd, "%sunspecified", sep);
+                            break;
+                        case EXTRASAMPLE_ASSOCALPHA:
+                            fprintf(fd, "%sassoc-alpha", sep);
+                            break;
+                        case EXTRASAMPLE_UNASSALPHA:
+                            fprintf(fd, "%sunassoc-alpha", sep);
+                            break;
+                        default:
+                            fprintf(fd, "%s%u (0x%x)", sep, m_dir.td_sampleinfo[i], m_dir.td_sampleinfo[i]);
+                            break;
+                    }
+                    sep = ", ";
+                }
+                fprintf(fd, ">\n");
+            }
+
+            if (fieldSet(FIELD_INKNAMES))
+            {
+                char* cp;
+                fprintf(fd, "  Ink Names: ");
+                UInt16 i = m_dir.td_samplesperpixel;
+                char* sep = "";
+                for (cp = m_dir.td_inknames; i > 0; cp = strchr(cp, '\0') + 1, i--)
+                {
+                    fputs(sep, fd);
+                    Tiff::printAscii(fd, cp);
+                    sep = ", ";
+                }
+                fputs("\n", fd);
+            }
+
+            if (fieldSet(FIELD_THRESHHOLDING))
+            {
+                fprintf(fd, "  Thresholding: ");
+                switch (m_dir.td_threshholding)
+                {
+                    case THRESHHOLD_BILEVEL:
+                        fprintf(fd, "bilevel art scan\n");
+                        break;
+                    case THRESHHOLD_HALFTONE:
+                        fprintf(fd, "halftone or dithered scan\n");
+                        break;
+                    case THRESHHOLD_ERRORDIFFUSE:
+                        fprintf(fd, "error diffused\n");
+                        break;
+                    default:
+                        fprintf(fd, "%u (0x%x)\n", m_dir.td_threshholding, m_dir.td_threshholding);
+                        break;
+                }
+            }
+
+            if (fieldSet(FIELD_FILLORDER))
+            {
+                fprintf(fd, "  FillOrder: ");
+                switch (m_dir.td_fillorder)
+                {
+                    case FILLORDER_MSB2LSB:
+                        fprintf(fd, "msb-to-lsb\n");
+                        break;
+                    case FILLORDER_LSB2MSB:
+                        fprintf(fd, "lsb-to-msb\n");
+                        break;
+                    default:
+                        fprintf(fd, "%u (0x%x)\n", m_dir.td_fillorder, m_dir.td_fillorder);
+                        break;
+                }
+            }
+
+            if (fieldSet(FIELD_YCBCRSUBSAMPLING))
+            {
+                /*
+                 * For hacky reasons (see tif_jpeg.c - JPEGFixupTestSubsampling),
+                 * we need to fetch this rather than trust what is in our
+                 * structures.
+                 */
+                UInt16 subsampling[2];
+                GetField(TIFFTAG_YCBCRSUBSAMPLING, &subsampling[0], &subsampling[1]);
+                fprintf(fd, "  YCbCr Subsampling: %u, %u\n", subsampling[0], subsampling[1]);
+            }
+
+            if (fieldSet(FIELD_YCBCRPOSITIONING))
+            {
+                fprintf(fd, "  YCbCr Positioning: ");
+                switch (m_dir.td_ycbcrpositioning)
+                {
+                    case YCBCRPOSITION_CENTERED:
+                        fprintf(fd, "centered\n");
+                        break;
+                    case YCBCRPOSITION_COSITED:
+                        fprintf(fd, "cosited\n");
+                        break;
+                    default:
+                        fprintf(fd, "%u (0x%x)\n", m_dir.td_ycbcrpositioning, m_dir.td_ycbcrpositioning);
+                        break;
+                }
+            }
+
+            if (fieldSet(FIELD_HALFTONEHINTS))
+                fprintf(fd, "  Halftone Hints: light %u dark %u\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
+            
+            if (fieldSet(FIELD_ORIENTATION))
+            {
+                fprintf(fd, "  Orientation: ");
+                if (m_dir.td_orientation < (sizeof(orientNames) / sizeof(orientNames[0])))
+                    fprintf(fd, "%s\n", orientNames[m_dir.td_orientation]);
+                else
+                    fprintf(fd, "%u (0x%x)\n", m_dir.td_orientation, m_dir.td_orientation);
+            }
+
+            if (fieldSet(FIELD_SAMPLESPERPIXEL))
+                fprintf(fd, "  Samples/Pixel: %u\n", m_dir.td_samplesperpixel);
+            
+            if (fieldSet(FIELD_ROWSPERSTRIP))
+            {
+                fprintf(fd, "  Rows/Strip: ");
+                if (m_dir.td_rowsperstrip == (uint)-1)
+                    fprintf(fd, "(infinite)\n");
+                else
+                    fprintf(fd, "%lu\n", m_dir.td_rowsperstrip);
+            }
+
+            if (fieldSet(FIELD_MINSAMPLEVALUE))
+                fprintf(fd, "  Min Sample Value: %u\n", m_dir.td_minsamplevalue);
+            
+            if (fieldSet(FIELD_MAXSAMPLEVALUE))
+                fprintf(fd, "  Max Sample Value: %u\n", m_dir.td_maxsamplevalue);
+            
+            if (fieldSet(FIELD_SMINSAMPLEVALUE))
+                fprintf(fd, "  SMin Sample Value: %g\n", m_dir.td_sminsamplevalue);
+            
+            if (fieldSet(FIELD_SMAXSAMPLEVALUE))
+                fprintf(fd, "  SMax Sample Value: %g\n", m_dir.td_smaxsamplevalue);
+            
+            if (fieldSet(FIELD_PLANARCONFIG))
+            {
+                fprintf(fd, "  Planar Configuration: ");
+                switch (m_dir.td_planarconfig)
+                {
+                    case PLANARCONFIG_CONTIG:
+                        fprintf(fd, "single image plane\n");
+                        break;
+                    case PLANARCONFIG_SEPARATE:
+                        fprintf(fd, "separate image planes\n");
+                        break;
+                    default:
+                        fprintf(fd, "%u (0x%x)\n", m_dir.td_planarconfig, m_dir.td_planarconfig);
+                        break;
+                }
+            }
+
+            if (fieldSet(FIELD_PAGENUMBER))
+                fprintf(fd, "  Page Number: %u-%u\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
+            
+            if (fieldSet(FIELD_COLORMAP))
+            {
+                fprintf(fd, "  Color Map: ");
+                if ((flags & TIFFPRINT_COLORMAP) != 0)
+                {
+                    fprintf(fd, "\n");
+                    int n = 1L << m_dir.td_bitspersample;
+                    for (int l = 0; l < n; l++)
+                        fprintf(fd, "   %5lu: %5u %5u %5u\n", l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
+                }
+                else
+                    fprintf(fd, "(present)\n");
+            }
+
+            if (fieldSet(FIELD_TRANSFERFUNCTION))
+            {
+                fprintf(fd, "  Transfer Function: ");
+                if ((flags & TIFFPRINT_CURVES) != null)
+                {
+                    fprintf(fd, "\n");
+                    int n = 1L << m_dir.td_bitspersample;
+                    for (int l = 0; l < n; l++)
+                    {
+                        fprintf(fd, "    %2lu: %5u", l, m_dir.td_transferfunction[0][l]);
+                        for (UInt16 i = 1; i < m_dir.td_samplesperpixel; i++)
+                            fprintf(fd, " %5u", m_dir.td_transferfunction[i][l]);
+                        fputc('\n', fd);
+                    }
+                }
+                else
+                    fprintf(fd, "(present)\n");
+            }
+
+            if (fieldSet(FIELD_SUBIFD) && m_dir.td_subifd != null)
+            {
+                fprintf(fd, "  SubIFD Offsets:");
+                for (UInt16 i = 0; i < m_dir.td_nsubifd; i++)
+                    fprintf(fd, " %5lu", m_dir.td_subifd[i]);
+                fputc('\n', fd);
+            }
+
+            /*
+             ** Custom tag support.
+             */
+            int count = GetTagListCount();
+            for (int i = 0; i < count; i++)
+            {
+                uint tag = GetTagListEntry(i);
+                const TiffFieldInfo* fip = FieldWithTag(tag);
+                if (fip == null)
+                    continue;
+
+                bool mem_alloc = false;
+                byte* raw_data = null;
+                uint value_count;
+                if (fip.field_passcount)
+                {
+                    if (GetField(tag, &value_count, &raw_data) != 1)
+                        continue;
+                }
+                else
+                {
+                    if (fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2)
+                        value_count = 1;
+                    else if (fip.field_readcount == TIFF_SPP)
+                        value_count = m_dir.td_samplesperpixel;
+                    else
+                        value_count = fip.field_readcount;
+
+                    if ((fip.field_type == TIFF_ASCII || fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2 || fip.field_readcount == TIFF_SPP || value_count > 1) && fip.field_tag != TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG_DOTRANGE)
+                    {
+                        if (GetField(tag, &raw_data) != 1)
+                            continue;
+                    }
+                    else if (fip.field_tag != TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG_DOTRANGE)
+                    {
+                        raw_data = new byte [Tiff::dataSize(fip.field_type) * value_count];
+                        mem_alloc = true;
+                        if (GetField(tag, raw_data) != 1)
+                        {
+                            delete raw_data;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        /* 
+                         * XXX: Should be fixed and removed, see the
+                         * notes related to TIFFTAG_PAGENUMBER,
+                         * TIFFTAG_HALFTONEHINTS,
+                         * TIFFTAG_YCBCRSUBSAMPLING and
+                         * TIFFTAG_DOTRANGE tags in tif_dir.c. */
+                        raw_data = new byte [Tiff::dataSize(fip.field_type) * value_count];
+                        mem_alloc = true;
+                        if (GetField(tag, raw_data, &raw_data[Tiff::dataSize(fip.field_type)]) != 1)
+                        {
+                            delete raw_data;
+                            continue;
+                        }
+                    }
+                }
+
+                /*
+                 * Catch the tags which needs to be specially handled and
+                 * pretty print them. If tag not handled in
+                 * prettyPrintField() fall down and print it as any other
+                 * tag.
+                 */
+                if (prettyPrintField(fd, tag, value_count, raw_data))
+                {
+                    if (mem_alloc)
+                        delete raw_data;
+                    continue;
+                }
+                else
+                    printField(fd, fip, value_count, raw_data);
+
+                if (mem_alloc)
+                    delete raw_data;
+            }
+
+            m_tagmethods.printdir(this, fd, flags);
+
+            if ((flags & TIFFPRINT_STRIPS) != 0 && fieldSet(FIELD_STRIPOFFSETS))
+            {
+                fprintf(fd, "  %lu %s:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
+                for (uint s = 0; s < m_dir.td_nstrips; s++)
+                    fprintf(fd, "    %3lu: [%8lu, %8lu]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
+            }
+        }
+
+        public bool ReadScanline(byte[] buf, uint row)
+        {
+            return ReadScanline(buf, row, 0);
+        }
+
+        public bool ReadScanline(byte[] buf, uint row, UInt16 sample)
+        {
+            if (!checkRead(0))
+                return false;
+
+            bool e = seek(row, sample);
+            if (e)
+            {
+                /*
+                 * Decompress desired row into user buffer.
+                 */
+                e = m_currentCodec.tif_decoderow(buf, m_scanlinesize, sample);
+
+                /* we are now poised at the beginning of the next row */
+                m_row = row + 1;
+
+                if (e)
+                    postDecode(buf, m_scanlinesize);
+            }
+
+            return e;
+        }
+
+        public bool WriteScanline(byte[] buf, uint row)
+        {
+            return WriteScanline(buf, row, 0);
+        }
+
+        public bool WriteScanline(byte[] buf, uint row, UInt16 sample)
+        {
+            static const char module[] = "WriteScanline";
+
+            if (!writeCheckStrips(module))
+                return false;
+
+            /*
+             * Handle delayed allocation of data buffer.  This
+             * permits it to be sized more intelligently (using
+             * directory information).
+             */
+            if (!bufferCheck())
+                return false;
+            
+            /*
+             * Extend image length if needed
+             * (but only for PlanarConfig=1).
+             */
+            bool imagegrew = false;
+            if (row >= m_dir.td_imagelength)
+            {
+                /* extend image */
+                if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, m_name, "Can not change \"ImageLength\" when using separate planes");
+                    return false;
+                }
+
+                m_dir.td_imagelength = row + 1;
+                imagegrew = true;
+            }
+            /*
+             * Calculate strip and check for crossings.
+             */
+            uint strip;
+            if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+            {
+                if (sample >= m_dir.td_samplesperpixel)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, m_name, "%d: Sample out of range, max %d", sample, m_dir.td_samplesperpixel);
+                    return false;
+                }
+
+                strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
+            }
+            else
+                strip = row / m_dir.td_rowsperstrip;
+            /*
+             * Check strip array to make sure there's space. We don't support
+             * dynamically growing files that have data organized in separate
+             * bitplanes because it's too painful.  In that case we require that
+             * the imagelength be set properly before the first write (so that the
+             * strips array will be fully allocated above).
+             */
+            if (strip >= m_dir.td_nstrips && !growStrips(1, module))
+                return false;
+
+            if (strip != m_curstrip)
+            {
+                /*
+                 * Changing strips -- flush any data present.
+                 */
+                if (!FlushData())
+                    return false;
+
+                m_curstrip = strip;
+
+                /*
+                 * Watch out for a growing image.  The value of strips/image
+                 * will initially be 1 (since it can't be deduced until the
+                 * imagelength is known).
+                 */
+                if (strip >= m_dir.td_stripsperimage && imagegrew)
+                    m_dir.td_stripsperimage = Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
+                
+                m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
+                if ((m_flags & TIFF_CODERSETUP) == 0)
+                {
+                    if (!m_currentCodec.tif_setupencode())
+                        return false;
+
+                    m_flags |= TIFF_CODERSETUP;
+                }
+
+                m_rawcc = 0;
+                m_rawcp = 0;
+
+                if (m_dir.td_stripbytecount[strip] > 0)
+                {
+                    /* if we are writing over existing tiles, zero length */
+                    m_dir.td_stripbytecount[strip] = 0;
+
+                    /* this forces appendToStrip() to do a seek */
+                    m_curoff = 0;
+                }
+
+                if (!m_currentCodec.tif_preencode(sample))
+                    return false;
+
+                m_flags |= TIFF_POSTENCODE;
+            }
+
+            /*
+             * Ensure the write is either sequential or at the
+             * beginning of a strip (or that we can randomly
+             * access the data -- i.e. no encoding).
+             */
+            if (row != m_row)
+            {
+                if (row < m_row)
+                {
+                    /*
+                     * Moving backwards within the same strip:
+                     * backup to the start and then decode
+                     * forward (below).
+                     */
+                    m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
+                    m_rawcp = 0;
+                }
+                /*
+                 * Seek forward to the desired row.
+                 */
+                if (!m_currentCodec.tif_seek(row - m_row))
+                    return false;
+
+                m_row = row;
+            }
+
+            /* swab if needed - note that source buffer will be altered */
+            postDecode(buf, m_scanlinesize);
+
+            bool status = m_currentCodec.tif_encoderow(buf, m_scanlinesize, sample);
+
+            /* we are now poised at the beginning of the next row */
+            m_row = row + 1;
+            return status;
+        }
+        
+        /*
+        * Read the specified image into an ABGR-format raster. Use bottom left
+        * origin for raster by default.
+        */
+        public bool ReadRGBAImage(uint rwidth, uint rheight, uint[] raster)
+        {
+            return ReadRGBAImage(rwidth, rheight, raster, false);
+        }
+
+        public bool ReadRGBAImage(uint rwidth, uint rheight, uint[] raster, bool stop)
+        {
+            return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION_BOTLEFT, stop);
+        }
+        
+        /*
+        * Read the specified image into an ABGR-format raster taking in account
+        * specified orientation.
+        */
+        public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster)
+        {
+            return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION_BOTLEFT, false);
+        }
+
+        public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster, int orientation)
+        {
+            return ReadRGBAImageOriented(rwidth, rheight, raster, orientation, false);
+        }
+
+        public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster, int orientation, bool stop)
+        {
+            char emsg[1024] = "";
+            bool ok = true;
+            if (RGBAImageOK(emsg))
+            {
+                TiffRGBAImage* img = TiffRGBAImage::Create(this, stop, emsg);
+                if (img != null)
+                {
+                    img.req_orientation = (UInt16)orientation;
+                    /* XXX verify rwidth and rheight against width and height */
+                    ok = img.Get(raster, (rheight - img.height) * rwidth, rwidth, img.height);
+                    delete img;
+                }
+            }
+            else
+            {
+                Tiff::ErrorExt(this, m_clientdata, FileName(), emsg);
+                ok = false;
+            }
+
+            return ok;
+        }
+
+        /*
+        * Read a whole strip off data from the file, and convert to RGBA form.
+        * If this is the last strip, then it will only contain the portion of
+        * the strip that is actually within the image space.  The result is
+        * organized in bottom to top form.
+        */
+        public bool ReadRGBAStrip(uint row, uint[] raster)
+        {
+            if (IsTiled())
+            {
+                Tiff::ErrorExt(this, m_clientdata, FileName(), "Can't use ReadRGBAStrip() with tiled file.");
+                return false;
+            }
+
+            uint rowsperstrip;
+            GetFieldDefaulted(TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
+            if ((row % rowsperstrip) != 0)
+            {
+                Tiff::ErrorExt(this, m_clientdata, FileName(), "Row passed to ReadRGBAStrip() must be first in a strip.");
+                return false;
+            }
+
+            bool ok = false;
+            char emsg[1024] = "";
+            if (RGBAImageOK(emsg))
+            {
+                TiffRGBAImage* img = TiffRGBAImage::Create(this, 0, emsg);
+                if (img != null)
+                {
+                    img.row_offset = row;
+                    img.col_offset = 0;
+
+                    uint rows_to_read = rowsperstrip;
+                    if (row + rowsperstrip > img.height)
+                        rows_to_read = img.height - row;
+
+                    ok = img.Get(raster, 0, img.width, rows_to_read);
+
+                    delete img;
+                }
+
+                return true;
+            }
+
+            Tiff::ErrorExt(this, m_clientdata, FileName(), emsg);
+            return false;
+        }
+
+        /*
+        * Read a whole tile off data from the file, and convert to RGBA form.
+        * The returned RGBA data is organized from bottom to top of tile,
+        * and may include zeroed areas if the tile extends off the image.
+        */
+        public bool ReadRGBATile(uint col, uint row, uint[] raster)
+        {
+            /*
+             * Verify that our request is legal - on a tile file, and on a
+             * tile boundary.
+             */
+
+            if (!IsTiled())
+            {
+                Tiff::ErrorExt(this, m_clientdata, FileName(), "Can't use ReadRGBATile() with stripped file.");
+                return false;
+            }
+
+            uint tile_xsize;
+            GetFieldDefaulted(TIFFTAG_TILEWIDTH, &tile_xsize);
+            uint tile_ysize;
+            GetFieldDefaulted(TIFFTAG_TILELENGTH, &tile_ysize);
+
+            if ((col % tile_xsize) != 0 || (row % tile_ysize) != 0)
+            {
+                Tiff::ErrorExt(this, m_clientdata, FileName(), "Row/col passed to ReadRGBATile() must be top""left corner of a tile.");
+                return false;
+            }
+
+            /*
+             * Setup the RGBA reader.
+             */
+            char emsg[1024] = "";
+            TiffRGBAImage* img = TiffRGBAImage::Create(this, 0, emsg);
+            if (!RGBAImageOK(emsg) || !img)
+            {
+                if (img != null)
+                    delete img;
+
+                Tiff::ErrorExt(this, m_clientdata, FileName(), emsg);
+                return false;
+            }
+
+            /*
+             * The TIFFRGBAImageGet() function doesn't allow us to get off the
+             * edge of the image, even to fill an otherwise valid tile.  So we
+             * figure out how much we can read, and fix up the tile buffer to
+             * a full tile configuration afterwards.
+             */
+            uint read_ysize;
+            if (row + tile_ysize > img.height)
+                read_ysize = img.height - row;
+            else
+                read_ysize = tile_ysize;
+
+            uint read_xsize;
+            if (col + tile_xsize > img.width)
+                read_xsize = img.width - col;
+            else
+                read_xsize = tile_xsize;
+
+            /*
+             * Read the chunk of imagery.
+             */
+
+            img.row_offset = row;
+            img.col_offset = col;
+
+            bool ok = img.Get(raster, 0, read_xsize, read_ysize);
+
+            delete img;
+
+            /*
+             * If our read was incomplete we will need to fix up the tile by
+             * shifting the data around as if a full tile of data is being returned.
+             *
+             * This is all the more complicated because the image is organized in
+             * bottom to top format. 
+             */
+
+            if (read_xsize == tile_xsize && read_ysize == tile_ysize)
+                return ok;
+
+            for (uint i_row = 0; i_row < read_ysize; i_row++)
+            {
+                memmove(&raster[(tile_ysize - i_row - 1) * tile_xsize], &raster[(read_ysize - i_row - 1) * read_xsize], read_xsize * sizeof(uint));
+                memset(&raster[(tile_ysize - i_row - 1) * tile_xsize + read_xsize], 0, sizeof(uint) * (tile_xsize - read_xsize));
+            }
+
+            for (uint i_row = read_ysize; i_row < tile_ysize; i_row++)
+            {
+                memset(&raster[(tile_ysize - i_row - 1) * tile_xsize], 0, sizeof(uint) * tile_xsize);
+            }
+
+            return ok;
+        }
+        
+        /*
+        * Check the image to see if ReadRGBAImage can deal with it.
+        * true/false is returned according to whether or not the image can
+        * be handled.  If false is returned, emsg contains the reason
+        * why it is being rejected.
+        */
+        public bool RGBAImageOK(out string emsg)
+        {
+            if (!m_decodestatus)
+            {
+                sprintf(emsg, "Sorry, requested compression method is not configured");
+                return false;
+            }
+
+            switch (m_dir.td_bitspersample)
+            {
+                case 1:
+                case 2:
+                case 4:
+                case 8:
+                case 16:
+                    break;
+                default:
+                    sprintf(emsg, "Sorry, can not handle images with %d-bit samples", m_dir.td_bitspersample);
+                    return false;
+            }
+            
+            int colorchannels = m_dir.td_samplesperpixel - m_dir.td_extrasamples;
+            UInt16 photometric;
+            if (!GetField(TIFFTAG_PHOTOMETRIC, &photometric))
+            {
+                switch (colorchannels)
+                {
+                    case 1:
+                        photometric = PHOTOMETRIC_MINISBLACK;
+                        break;
+                    case 3:
+                        photometric = PHOTOMETRIC_RGB;
+                        break;
+                    default:
+                        sprintf(emsg, "Missing needed %s tag", TiffRGBAImage::photoTag);
+                        return false;
+                }
+            }
+
+            switch (photometric)
+            {
+                case PHOTOMETRIC_MINISWHITE:
+                case PHOTOMETRIC_MINISBLACK:
+                case PHOTOMETRIC_PALETTE:
+                    if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
+                    {
+                        sprintf(emsg, "Sorry, can not handle contiguous data with %s=%d, ""and %s=%d and Bits/Sample=%d", TiffRGBAImage::photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel, m_dir.td_bitspersample);
+                        return false;
+                    }
+                    /*
+                     * We should likely validate that any extra samples are either
+                     * to be ignored, or are alpha, and if alpha we should try to use
+                     * them.  But for now we won't bother with this. 
+                     */
+                    break;
+                case PHOTOMETRIC_YCBCR:
+                    /*
+                    * TODO: if at all meaningful and useful, make more complete
+                    * support check here, or better still, refactor to let supporting
+                    * code decide whether there is support and what meaningfull
+                    * error to return
+                    */
+                    break;
+                case PHOTOMETRIC_RGB:
+                    if (colorchannels < 3)
+                    {
+                        sprintf(emsg, "Sorry, can not handle RGB image with %s=%d", "Color channels", colorchannels);
+                        return false;
+                    }
+                    break;
+                case PHOTOMETRIC_SEPARATED:
+                    {
+                        UInt16 inkset;
+                        GetFieldDefaulted(TIFFTAG_INKSET, &inkset);
+                        if (inkset != INKSET_CMYK)
+                        {
+                            sprintf(emsg, "Sorry, can not handle separated image with %s=%d", "InkSet", inkset);
+                            return false;
+                        }
+                        if (m_dir.td_samplesperpixel < 4)
+                        {
+                            sprintf(emsg, "Sorry, can not handle separated image with %s=%d", "Samples/pixel", m_dir.td_samplesperpixel);
+                            return false;
+                        }
+                        break;
+                    }
+                case PHOTOMETRIC_LOGL:
+                    if (m_dir.td_compression != COMPRESSION_SGILOG)
+                    {
+                        sprintf(emsg, "Sorry, LogL data must have %s=%d", "Compression", COMPRESSION_SGILOG);
+                        return false;
+                    }
+                    break;
+                case PHOTOMETRIC_LOGLUV:
+                    if (m_dir.td_compression != COMPRESSION_SGILOG && m_dir.td_compression != COMPRESSION_SGILOG24)
+                    {
+                        sprintf(emsg, "Sorry, LogLuv data must have %s=%d or %d", "Compression", COMPRESSION_SGILOG, COMPRESSION_SGILOG24);
+                        return false;
+                    }
+                    if (m_dir.td_planarconfig != PLANARCONFIG_CONTIG)
+                    {
+                        sprintf(emsg, "Sorry, can not handle LogLuv images with %s=%d", "Planarconfiguration", m_dir.td_planarconfig);
+                        return false;
+                    }
+                    break;
+                case PHOTOMETRIC_CIELAB:
+                    break;
+                default:
+                    sprintf(emsg, "Sorry, can not handle image with %s=%d", TiffRGBAImage::photoTag, photometric);
+                    return false;
+            }
+
+            return true;
+        }
+
+        /*
+        * Return open file's name.
+        */
+        public string FileName()
+        {
+            return m_name;
+        }
+
+        /*
+        * Set the file name.
+        */
+        public string SetFileName(string name)
+        {
+            const char* old_name = m_name;
+            m_name = (char*)name;
+            return old_name;
+        }
+
+        // "tif" parameter can be null
+        public static void Error(Tiff tif, string module, string fmt, params object[] ap)
+        {
+            va_list ap;
+            va_start(ap, fmt);
+
+            Tiff::m_errorHandler.ErrorHandler(tif, module, fmt, ap);
+            Tiff::m_errorHandler.ErrorHandlerExt(tif, 0, module, fmt, ap);
+
+            va_end(ap);
+        }
+
+        public static void ErrorExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
+        {
+            va_list ap;
+            va_start(ap, fmt);
+
+            Tiff::m_errorHandler.ErrorHandler(tif, module, fmt, ap);
+            Tiff::m_errorHandler.ErrorHandlerExt(tif, fd, module, fmt, ap);
+
+            va_end(ap);
+        }
+
+        public static void Warning(Tiff tif, string module, string fmt, params object[] ap)
+        {
+            va_list ap;
+            va_start(ap, fmt);
+
+            Tiff::m_errorHandler.WarningHandler(tif, module, fmt, ap);
+            Tiff::m_errorHandler.WarningHandlerExt(tif, 0, module, fmt, ap);
+
+            va_end(ap);
+        }
+
+        public static void WarningExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
+        {
+            va_list ap;
+            va_start(ap, fmt);
+
+            Tiff::m_errorHandler.WarningHandler(tif, module, fmt, ap);
+            Tiff::m_errorHandler.WarningHandlerExt(tif, fd, module, fmt, ap);
+
+            va_end(ap);
+        }
+
+        public static void Error(string module, string fmt, params object[] ap)
+        {
+            Error(null, module, fmt, ap);
+        }
+
+        public static void ErrorExt(thandle_t fd, string module, string fmt, params object[] ap)
+        {
+            ErrorExt(null, fd, module, fmt, ap);
+        }
+
+        public static void Warning(string module, string fmt, params object[] ap)
+        {
+            Warning(null, module, fmt, ap);
+        }
+
+        public static void WarningExt(thandle_t fd, string module, string fmt, params object[] ap)
+        {
+            WarningExt(null, fd, module, fmt, ap);
+        }
+
+        public static TiffErrorHandler SetErrorHandler(TiffErrorHandler errorHandler)
+        {
+            TiffErrorHandler* prev = m_errorHandler;
+            m_errorHandler = errorHandler;
+            return prev;
+        }
+
+        //public static TiffExtendProc SetTagExtender(TiffExtendProc);
+
+        /*
+        * Compute which tile an (x,y,z,s) value is in.
+        */
+        public uint ComputeTile(uint x, uint y, uint z, UInt16 s)
+        {
+            if (m_dir.td_imagedepth == 1)
+                z = 0;
+
+            uint dx = m_dir.td_tilewidth;
+            if (dx == (uint)-1)
+                dx = m_dir.td_imagewidth;
+
+            uint dy = m_dir.td_tilelength;
+            if (dy == (uint)-1)
+                dy = m_dir.td_imagelength;
+
+            uint dz = m_dir.td_tiledepth;
+            if (dz == (uint)-1)
+                dz = m_dir.td_imagedepth;
+
+            uint tile = 1;
+            if (dx != 0 && dy != 0 && dz != 0)
+            {
+                uint xpt = Tiff::howMany(m_dir.td_imagewidth, dx);
+                uint ypt = Tiff::howMany(m_dir.td_imagelength, dy);
+                uint zpt = Tiff::howMany(m_dir.td_imagedepth, dz);
+
+                if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                    tile = (xpt * ypt * zpt) * s + (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
+                else
+                    tile = (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
+            }
+
+            return tile;
+        }
+
+        /*
+        * Check an (x,y,z,s) coordinate
+        * against the image bounds.
+        */
+        public bool CheckTile(uint x, uint y, uint z, UInt16 s)
+        {
+            if (x >= m_dir.td_imagewidth)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Col out of range, max %lu", x, m_dir.td_imagewidth - 1);
+                return false;
+            }
+
+            if (y >= m_dir.td_imagelength)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Row out of range, max %lu", y, m_dir.td_imagelength - 1);
+                return false;
+            }
+
+            if (z >= m_dir.td_imagedepth)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Depth out of range, max %lu", z, m_dir.td_imagedepth - 1);
+                return false;
+            }
+
+            if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE && s >= m_dir.td_samplesperpixel)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", s, m_dir.td_samplesperpixel - 1);
+                return false;
+            }
+
+            return true;
+        }
+
+        /*
+        * Compute how many tiles are in an image.
+        */
+        public uint NumberOfTiles()
+        {
+            uint dx = m_dir.td_tilewidth;
+            if (dx == (uint)-1)
+                dx = m_dir.td_imagewidth;
+            
+            uint dy = m_dir.td_tilelength;
+            if (dy == (uint)-1)
+                dy = m_dir.td_imagelength;
+            
+            uint dz = m_dir.td_tiledepth;
+            if (dz == (uint)-1)
+                dz = m_dir.td_imagedepth;
+            
+            uint ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(Tiff::howMany(m_dir.td_imagewidth, dx), Tiff::howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), Tiff::howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
+            if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
+            
+            return ntiles;
+        }
+        
+        /*
+        * Tile-oriented Read Support
+        * Contributed by Nancy Cam (Silicon Graphics).
+        */
+
+        /*
+        * Read and decompress a tile of data.  The
+        * tile is selected by the (x,y,z,s) coordinates.
+        */
+        public int ReadTile(byte[] buf, int offset, uint x, uint y, uint z, UInt16 s)
+        {
+            if (!checkRead(1) || !CheckTile(x, y, z, s))
+                return -1;
+
+            return ReadEncodedTile(ComputeTile(x, y, z, s), buf, offset, -1);
+        }
+
+        /*
+        * Read a tile of data and decompress the specified
+        * amount into the user-supplied buffer.
+        */
+        public int ReadEncodedTile(uint tile, byte[] buf, int offset, int size)
+        {
+            if (!checkRead(1))
+                return -1;
+
+            if (tile >= m_dir.td_nstrips)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%ld: Tile out of range, max %ld", tile, m_dir.td_nstrips);
+                return -1;
+            }
+            
+            if (size == (int)-1)
+                size = m_tilesize;
+            else if (size > m_tilesize)
+                size = m_tilesize;
+            
+            byte* tempBuf = new byte [size];
+            memcpy(tempBuf, &buf[offset], size);
+
+            if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (UInt16)(tile / m_dir.td_stripsperimage)))
+            {
+                postDecode(tempBuf, size);
+                memcpy(&buf[offset], tempBuf, size);
+                delete[] tempBuf;
+                return size;
+            }
+
+            delete tempBuf;
+            return -1;
+        }
+
+        /*
+        * Read a tile of data from the file.
+        */
+        public int ReadRawTile(uint tile, byte[] buf, int offset, int size)
+        {
+            static const char module[] = "ReadRawTile";
     
-    /*
-    * Like GetField, but taking a varargs
-    * parameter list.  This routine is useful
-    * for building higher-level interfaces on
-    * top of the library.
-    */
-    //public bool VGetField(uint tag, va_list ap);
+            /*
+            * FIXME: bytecount should have int type, but for now libtiff
+            * defines int as a signed 32-bit integer and we are losing
+            * ability to read arrays larger than 2^31 bytes. So we are using
+            * uint instead of int here.
+            */
+            if (!checkRead(1))
+                return -1;
+            
+            if (tile >= m_dir.td_nstrips)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Tile out of range, max %lu", tile, m_dir.td_nstrips);
+                return -1;
+            }
+            
+            if ((m_flags & TIFF_NOREADRAW) != 0)
+            {
+                Tiff::ErrorExt(m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
+                return -1;
+            }
+
+            uint bytecount = m_dir.td_stripbytecount[tile];
+            if (size != (int)-1 && (uint)size < bytecount)
+                bytecount = size;
+            
+            return readRawTile1(tile, buf, offset, bytecount, module);
+        }
+
+        /*
+        * Write and compress a tile of data.  The
+        * tile is selected by the (x,y,z,s) coordinates.
+        */
+        public int WriteTile(byte[] buf, uint x, uint y, uint z, UInt16 s)
+        {
+            if (!CheckTile(x, y, z, s))
+                return -1;
+
+            /*
+             * NB: A tile size of -1 is used instead of m_tilesize knowing
+             *     that WriteEncodedTile will clamp this to the tile size.
+             *     This is done because the tile size may not be defined until
+             *     after the output buffer is setup in WriteBufferSetup.
+             */
+            return WriteEncodedTile(ComputeTile(x, y, z, s), buf, -1);
+        }
+        
+        /*
+        * Compute which strip a (row,sample) value is in.
+        */
+        public uint ComputeStrip(uint row, UInt16 sample)
+        {
+            uint strip = row / m_dir.td_rowsperstrip;
+            if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+            {
+                if (sample >= m_dir.td_samplesperpixel)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", sample, m_dir.td_samplesperpixel);
+                    return 0;
+                }
+
+                strip += sample * m_dir.td_stripsperimage;
+            }
+
+            return strip;
+        }
+
+        /*
+        * Compute how many strips are in an image.
+        */
+        public uint NumberOfStrips()
+        {
+            uint nstrips = (m_dir.td_rowsperstrip == (uint)-1 ? 1: Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
+            if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                nstrips = multiply(nstrips, m_dir.td_samplesperpixel, "NumberOfStrips");
+
+            return nstrips;
+        }
+        
+        /*
+        * Read a strip of data and decompress the specified
+        * amount into the user-supplied buffer.
+        */
+        public int ReadEncodedStrip(uint strip, byte[] buf, int offset, int size)
+        {
+            if (!checkRead(0))
+                return -1;
+
+            if (strip >= m_dir.td_nstrips)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%ld: Strip out of range, max %ld", strip, m_dir.td_nstrips);
+                return -1;
+            }
+
+            /*
+             * Calculate the strip size according to the number of
+             * rows in the strip (check for truncated last strip on any
+             * of the separations).
+             */
+            uint strips_per_sep;
+            if (m_dir.td_rowsperstrip >= m_dir.td_imagelength)
+                strips_per_sep = 1;
+            else
+                strips_per_sep = (m_dir.td_imagelength + m_dir.td_rowsperstrip - 1) / m_dir.td_rowsperstrip;
+
+            uint sep_strip = strip % strips_per_sep;
+
+            uint nrows = m_dir.td_imagelength % m_dir.td_rowsperstrip;
+            if (sep_strip != strips_per_sep - 1 || nrows == 0)
+                nrows = m_dir.td_rowsperstrip;
+
+            int stripsize = VStripSize(nrows);
+            if (size == (int)-1)
+                size = stripsize;
+            else if (size > stripsize)
+                size = stripsize;
+            
+            byte* tempBuf = new byte[size];
+            memcpy(tempBuf, &buf[offset], size);
+
+            if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (UInt16)(strip / m_dir.td_stripsperimage)))
+            {
+                postDecode(tempBuf, size);
+                memcpy(&buf[offset], tempBuf, size);
+                delete[] tempBuf;
+                return size;
+            }
+
+            delete[] tempBuf;
+            return -1;
+        }
+
+        /*
+        * Read a strip of data from the file.
+        */
+        public int ReadRawStrip(uint strip, byte[] buf, int offset, int size)
+        {
+            static const char module[] = "ReadRawStrip";
+
+            /*
+            * FIXME: bytecount should have int type, but for now libtiff
+            * defines int as a signed 32-bit integer and we are losing
+            * ability to read arrays larger than 2^31 bytes. So we are using
+            * uint instead of int here.
+            */
+            if (!checkRead(0))
+                return -1;
+            
+            if (strip >= m_dir.td_nstrips)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Strip out of range, max %lu", strip, m_dir.td_nstrips);
+                return -1;
+            }
+
+            if ((m_flags & TIFF_NOREADRAW) != 0)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
+                return -1;
+            }
+
+            uint bytecount = m_dir.td_stripbytecount[strip];
+            if (bytecount <= 0)
+            {
+                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
+                return -1;
+            }
+
+            if (size != (int)-1 && (uint)size < bytecount)
+                bytecount = size;
+            
+            return readRawStrip1(strip, buf, offset, bytecount, module);
+        }
+
+        /*
+        * Encode the supplied data and write it to the
+        * specified strip.
+        *
+        * NB: Image length must be setup before writing.
+        */
+        public int WriteEncodedStrip(uint strip, byte[] data, int cc)
+        {
+            static const char module[] = "WriteEncodedStrip";
     
-    /*
-    * Like GetField, but return any default
-    * value if the tag is not present in the directory.
-    */
-    //public bool GetFieldDefaulted(uint tag, ...);
+            if (!writeCheckStrips(module))
+                return -1;
+
+            /*
+             * Check strip array to make sure there's space.
+             * We don't support dynamically growing files that
+             * have data organized in separate bitplanes because
+             * it's too painful.  In that case we require that
+             * the imagelength be set properly before the first
+             * write (so that the strips array will be fully
+             * allocated above).
+             */
+            if (strip >= m_dir.td_nstrips)
+            {
+                if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
+                    return -1;
+                }
+
+                if (!growStrips(1, module))
+                    return -1;
+
+                m_dir.td_stripsperimage = Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
+            }
+
+            /*
+             * Handle delayed allocation of data buffer.  This
+             * permits it to be sized according to the directory
+             * info.
+             */
+            if (!bufferCheck())
+                return -1;
+
+            m_curstrip = strip;
+            m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
+            if ((m_flags & TIFF_CODERSETUP) == 0)
+            {
+                if (!m_currentCodec.tif_setupencode())
+                    return -1;
+
+                m_flags |= TIFF_CODERSETUP;
+            }
+
+            m_rawcc = 0;
+            m_rawcp = 0;
+
+            if (m_dir.td_stripbytecount[strip] > 0)
+            {
+                /* this forces appendToStrip() to do a seek */
+                m_curoff = 0;
+            }
+
+            m_flags &= ~TIFF_POSTENCODE;
+            UInt16 sample = (UInt16)(strip / m_dir.td_stripsperimage);
+            if (!m_currentCodec.tif_preencode(sample))
+                return -1;
+
+            /* swab if needed - note that source buffer will be altered */
+            postDecode(data, cc);
+
+            if (!m_currentCodec.tif_encodestrip(data, cc, sample))
+                return 0;
+
+            if (!m_currentCodec.tif_postencode())
+                return -1;
+
+            if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
+                ReverseBits(m_rawdata, m_rawcc);
+
+            if (m_rawcc > 0 && !appendToStrip(strip, m_rawdata, m_rawcc))
+                return -1;
+
+            m_rawcc = 0;
+            m_rawcp = 0;
+            return cc;
+        }
+
+        /*
+        * Write the supplied data to the specified strip.
+        *
+        * NB: Image length must be setup before writing.
+        */
+        public int WriteRawStrip(uint strip, byte[] data, int cc)
+        {
+            static const char module[] = "WriteRawStrip";
+
+            if (!writeCheckStrips(module))
+                return -1;
+
+            /*
+             * Check strip array to make sure there's space.
+             * We don't support dynamically growing files that
+             * have data organized in separate bitplanes because
+             * it's too painful.  In that case we require that
+             * the imagelength be set properly before the first
+             * write (so that the strips array will be fully
+             * allocated above).
+             */
+            if (strip >= m_dir.td_nstrips)
+            {
+                if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                {
+                    Tiff::ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
+                    return -1;
+                }
+
+                /*
+                 * Watch out for a growing image.  The value of
+                 * strips/image will initially be 1 (since it
+                 * can't be deduced until the imagelength is known).
+                 */
+                if (strip >= m_dir.td_stripsperimage)
+                    m_dir.td_stripsperimage = Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
+
+                if (!growStrips(1, module))
+                    return -1;
+            }
+
+            m_curstrip = strip;
+            m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
+            return (appendToStrip(strip, data, cc) ? cc: -1);
+        }
+
+        /*
+        * Encode the supplied data and write it to the
+        * specified tile.  There must be space for the
+        * data.  The function clamps individual writes
+        * to a tile to the tile size, but does not (and
+        * can not) check that multiple writes to the same
+        * tile do not write more than tile size data.
+        *
+        * NB: Image length must be setup before writing; this
+        *     interface does not support automatically growing
+        *     the image on each write (as WriteScanline does).
+        */
+        public int WriteEncodedTile(uint tile, byte[] data, int cc)
+        {
+            static const char module[] = "WriteEncodedTile";
     
-    /*
-    * Like GetField, but return any default
-    * value if the tag is not present in the directory.
-    *
-    * NB:  We use the value in the directory, rather than
-    *  explicit values so that defaults exist only one
-    *  place in the library -- in setupDefaultDirectory.
-    */
-    //public bool VGetFieldDefaulted(uint tag, va_list ap);
-
-    /*
-    * Read the next TIFF directory from a file
-    * and convert it to the internal format.
-    * We read directories sequentially.
-    */
-    public bool ReadDirectory();
-
-    /* 
-    * Read custom directory from the arbitrary offset.
-    * The code is very similar to ReadDirectory().
-    */
-    public bool ReadCustomDirectory(uint diroff, TiffFieldInfo[] info, uint n);
-    
-    public bool WriteCustomDirectory(out uint pdiroff);
-
-    /*
-    * EXIF is important special case of custom IFD, so we have a special
-    * function to read it.
-    */
-    public bool ReadEXIFDirectory(uint diroff);
-
-    /*
-    * Return the number of bytes to read/write in a call to
-    * one of the scanline-oriented i/o routines.  Note that
-    * this number may be 1/samples-per-pixel if data is
-    * stored as separate planes.
-    */
-    public int ScanlineSize();
-
-    /*
-    * Return the number of bytes required to store a complete
-    * decoded and packed raster scanline (as opposed to the
-    * I/O size returned by ScanlineSize which may be less
-    * if data is store as separate planes).
-    */
-    public int RasterScanlineSize();
-    
-    /*
-    * Compute the # bytes in a (row-aligned) strip.
-    *
-    * Note that if RowsPerStrip is larger than the
-    * recorded ImageLength, then the strip size is
-    * truncated to reflect the actual space required
-    * to hold the strip.
-    */
-    public int StripSize();
-    
-    /*
-    * Compute the # bytes in a raw strip.
-    */
-    public int RawStripSize(uint strip);
-    
-    /*
-    * Compute the # bytes in a variable height, row-aligned strip.
-    */
-    public int VStripSize(uint nrows);
-
-    /*
-    * Compute the # bytes in each row of a tile.
-    */
-    public int TileRowSize();
-
-    /*
-    * Compute the # bytes in a row-aligned tile.
-    */
-    public int TileSize();
-    
-    /*
-    * Compute the # bytes in a variable length, row-aligned tile.
-    */
-    public int VTileSize(uint nrows);
-
-    /*
-    * Compute a default strip size based on the image
-    * characteristics and a requested value.  If the
-    * request is <1 then we choose a strip size according
-    * to certain heuristics.
-    */
-    public uint DefaultStripSize(uint request);
-
-    /*
-    * Compute a default tile size based on the image
-    * characteristics and a requested value.  If a
-    * request is <1 then we choose a size according
-    * to certain heuristics.
-    */
-    public void DefaultTileSize(ref uint tw, ref uint th);
-    
-    /*
-    * Return open file's clientdata.
-    */
-    public thandle_t Clientdata();
-
-    /*
-    * Set open file's clientdata, and return previous value.
-    */
-    public thandle_t SetClientdata(thandle_t newvalue); // should become object reference
-
-    /*
-    * Return read/write mode.
-    */
-    public int GetMode();
-
-    /*
-    * Return read/write mode.
-    */
-    public int SetMode(int mode);
-
-    /*
-    * Return nonzero if file is organized in
-    * tiles; zero if organized as strips.
-    */
-    public bool IsTiled();
-
-    /*
-    * Return nonzero if the file has byte-swapped data.
-    */
-    public bool IsByteSwapped();
-
-    /*
-    * Return nonzero if the data is returned up-sampled.
-    */
-    public bool IsUpSampled();
-
-    /*
-    * Return nonzero if the data is returned in MSB-to-LSB bit order.
-    */
-    public bool IsMSB2LSB();
-
-    /*
-    * Return nonzero if given file was written in big-endian order.
-    */
-    public bool IsBigEndian();
-
-    public TiffStream GetStream();
-
-    /*
-    * Return current row being read/written.
-    */
-    public uint CurrentRow();
-
-    /*
-    * Return index of the current directory.
-    */
-    public UInt16 CurrentDirectory();
-
-    /*
-    * Count the number of directories in a file.
-    */
-    public UInt16 NumberOfDirectories();
-
-    /*
-    * Return file offset of the current directory.
-    */
-    public uint CurrentDirOffset();
-
-    /*
-    * Return current strip.
-    */
-    public uint CurrentStrip();
-
-    /*
-    * Return current tile.
-    */
-    public uint CurrentTile();
-
-    /*
-    * Setup the raw data buffer in preparation for
-    * reading a strip of raw data.  If the buffer
-    * is specified as zero, then a buffer of appropriate
-    * size is allocated by the library.  Otherwise,
-    * the client must guarantee that the buffer is
-    * large enough to hold any individual strip of
-    * raw data.
-    */
-    public bool ReadBufferSetup(byte[] bp, int size);
-
-    /*
-    * Setup the raw data buffer used for encoding.
-    */
-    public bool WriteBufferSetup(byte[] bp, int size);
-
-    public bool SetupStrips();
-    
-    /*
-    * Verify file is writable and that the directory
-    * information is setup properly.  In doing the latter
-    * we also "freeze" the state of the directory so
-    * that important information is not changed.
-    */
-    public bool WriteCheck(int tiles, string module);
-    
-    /*
-    * Release storage associated with a directory.
-    */
-    public void FreeDirectory();
-
-    /*
-    * Setup for a new directory.  Should we automatically call
-    * WriteDirectory() if the current one is dirty?
-    *
-    * The newly created directory will not exist on the file till
-    * WriteDirectory(), Flush() or Close() is called.
-    */
-    public void CreateDirectory();
-    
-    /*
-    * Return an indication of whether or not we are
-    * at the last directory in the file.
-    */
-    public bool LastDirectory();
-    
-    /*
-    * Set the n-th directory as the current directory.
-    * NB: Directories are numbered starting at 0.
-    */
-    public bool SetDirectory(UInt16 dirn);
-
-    /*
-    * Set the current directory to be the directory
-    * located at the specified file offset.  This interface
-    * is used mainly to access directories linked with
-    * the SubIFD tag (e.g. thumbnail images).
-    */
-    public bool SetSubDirectory(uint diroff);
-
-    /*
-    * Unlink the specified directory from the directory chain.
-    */
-    public bool UnlinkDirectory(UInt16 dirn);
-    
-    /*
-    * Record the value of a field in the
-    * internal directory structure.  The
-    * field will be written to the file
-    * when/if the directory structure is
-    * updated.
-    */
-    public bool SetField(uint tag, params object[] ap);
-
-    /*
-    * Like SetField, but taking a varargs
-    * parameter list.  This routine is useful
-    * for building higher-level interfaces on
-    * top of the library.
-    */
-    //public bool VSetField(uint tag, va_list ap);
-
-    public bool WriteDirectory();
-    
-    /*
-    * Similar to WriteDirectory(), writes the directory out
-    * but leaves all data structures in memory so that it can be
-    * written again.  This will make a partially written TIFF file
-    * readable before it is successfully completed/closed.
-    */
-    public bool CheckpointDirectory();
-
-    /*
-    * Similar to WriteDirectory(), but if the directory has already
-    * been written once, it is relocated to the end of the file, in case it
-    * has changed in size.  Note that this will result in the loss of the 
-    * previously used directory space. 
-    */
-    public bool RewriteDirectory();
-    
-    /*
-    * Print the contents of the current directory
-    * to the specified stdio file stream.
-    */
-    public void PrintDirectory(Stream fd)
-    {
-        PrintDirectory(fd, TIFFPRINT_NONE);
-    }
-
-    public void PrintDirectory(Stream fd, TiffPrintDirectoryFlags flags);
-
-    public bool ReadScanline(byte[] buf, uint row)
-    {
-        return ReadScanline(buf, row, 0);
-    }
-
-    public bool ReadScanline(byte[] buf, uint row, UInt16 sample);
-
-    public bool WriteScanline(byte[] buf, uint row)
-    {
-        return WriteScanline(buf, row, 0);
-    }
-
-    public bool WriteScanline(byte[] buf, uint row, UInt16 sample);
-    
-    /*
-    * Read the specified image into an ABGR-format raster. Use bottom left
-    * origin for raster by default.
-    */
-    public bool ReadRGBAImage(uint rwidth, uint rheight, uint[] raster)
-    {
-        return ReadRGBAImage(rwidth, rheight, raster, false);
-    }
-
-    public bool ReadRGBAImage(uint rwidth, uint rheight, uint[] raster, bool stop);
-    
-    /*
-    * Read the specified image into an ABGR-format raster taking in account
-    * specified orientation.
-    */
-    public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster)
-    {
-        return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION_BOTLEFT, false);
-    }
-
-    public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster, int orientation)
-    {
-        return ReadRGBAImageOriented(rwidth, rheight, raster, orientation, false);
-    }
-
-    public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster, int orientation, bool stop);
-
-    /*
-    * Read a whole strip off data from the file, and convert to RGBA form.
-    * If this is the last strip, then it will only contain the portion of
-    * the strip that is actually within the image space.  The result is
-    * organized in bottom to top form.
-    */
-    public bool ReadRGBAStrip(uint row, uint[] raster);
-
-    /*
-    * Read a whole tile off data from the file, and convert to RGBA form.
-    * The returned RGBA data is organized from bottom to top of tile,
-    * and may include zeroed areas if the tile extends off the image.
-    */
-    public bool ReadRGBATile(uint col, uint row, uint[] raster);
-    
-    /*
-    * Check the image to see if ReadRGBAImage can deal with it.
-    * true/false is returned according to whether or not the image can
-    * be handled.  If false is returned, emsg contains the reason
-    * why it is being rejected.
-    */
-    public bool RGBAImageOK(out string emsg);
-
-    /*
-    * Return open file's name.
-    */
-    public string FileName();
-
-    /*
-    * Set the file name.
-    */
-    public string SetFileName(string name);
-
-    // "tif" parameter can be NULL
-    public static void Error(Tiff tif, string module, string fmt, params object[] ap);
-    public static void ErrorExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap);
-    public static void Warning(Tiff tif, string module, string fmt, params object[] ap);
-    public static void WarningExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap);
-    
-    public static void Error(string module, string fmt, params object[] ap);
-    public static void ErrorExt(thandle_t fd, string module, string fmt, params object[] ap);
-    public static void Warning(string module, string fmt, params object[] ap);
-    public static void WarningExt(thandle_t fd, string module, string fmt, params object[] ap);
-
-    public static TiffErrorHandler SetErrorHandler(TiffErrorHandler errorHandler);
-
-    //public static TiffExtendProc SetTagExtender(TiffExtendProc);
-
-    /*
-    * Compute which tile an (x,y,z,s) value is in.
-    */
-    public uint ComputeTile(uint x, uint y, uint z, UInt16 s);
-
-    /*
-    * Check an (x,y,z,s) coordinate
-    * against the image bounds.
-    */
-    public bool CheckTile(uint x, uint y, uint z, UInt16 s);
-
-    /*
-    * Compute how many tiles are in an image.
-    */
-    public uint NumberOfTiles();
-    
-    /*
-    * Tile-oriented Read Support
-    * Contributed by Nancy Cam (Silicon Graphics).
-    */
-
-    /*
-    * Read and decompress a tile of data.  The
-    * tile is selected by the (x,y,z,s) coordinates.
-    */
-    public int ReadTile(byte[] buf, int offset, uint x, uint y, uint z, UInt16 s);
-
-    /*
-    * Read a tile of data and decompress the specified
-    * amount into the user-supplied buffer.
-    */
-    public int ReadEncodedTile(uint tile, byte[] buf, int offset, int size);
-
-    /*
-    * Read a tile of data from the file.
-    */
-    public int ReadRawTile(uint tile, byte[] buf, int offset, int size);
-
-    /*
-    * Write and compress a tile of data.  The
-    * tile is selected by the (x,y,z,s) coordinates.
-    */
-    public int WriteTile(byte[] buf, uint x, uint y, uint z, UInt16 s);
-    
-    /*
-    * Compute which strip a (row,sample) value is in.
-    */
-    public uint ComputeStrip(uint row, UInt16 sample);
-
-    /*
-    * Compute how many strips are in an image.
-    */
-    public uint NumberOfStrips();
-    
-    /*
-    * Read a strip of data and decompress the specified
-    * amount into the user-supplied buffer.
-    */
-    public int ReadEncodedStrip(uint strip, byte[] buf, int offset, int size);
-
-    /*
-    * Read a strip of data from the file.
-    */
-    public int ReadRawStrip(uint strip, byte[] buf, int offset, int size);
-
-    /*
-    * Encode the supplied data and write it to the
-    * specified strip.
-    *
-    * NB: Image length must be setup before writing.
-    */
-    public int WriteEncodedStrip(uint strip, byte[] data, int cc);
-
-    /*
-    * Write the supplied data to the specified strip.
-    *
-    * NB: Image length must be setup before writing.
-    */
-    public int WriteRawStrip(uint strip, byte[] data, int cc);
-
-    /*
-    * Encode the supplied data and write it to the
-    * specified tile.  There must be space for the
-    * data.  The function clamps individual writes
-    * to a tile to the tile size, but does not (and
-    * can not) check that multiple writes to the same
-    * tile do not write more than tile size data.
-    *
-    * NB: Image length must be setup before writing; this
-    *     interface does not support automatically growing
-    *     the image on each write (as WriteScanline does).
-    */
-    public int WriteEncodedTile(uint tile, byte[] data, int cc);
-
-    /*
-    * Write the supplied data to the specified strip.
-    * There must be space for the data; we don't check
-    * if strips overlap!
-    *
-    * NB: Image length must be setup before writing; this
-    *     interface does not support automatically growing
-    *     the image on each write (as WriteScanline does).
-    */
-    public int WriteRawTile(uint tile, byte[] data, int cc);
-
-    /*
-    * Set the current write offset.  This should only be
-    * used to set the offset to a known previous location
-    * (very carefully), or to 0 so that the next write gets
-    * appended to the end of the file.
-    */
-    public void SetWriteOffset(uint off);
-
-    /*
-    * Return size of TiffDataType in bytes
-    */
-    public static int DataWidth(TiffDataType type);
-
-    /*
-    * TIFF Library Bit & Byte Swapping Support.
-    *
-    * XXX We assume short = 16-bits and long = 32-bits XXX
-    */
-    public static void SwabShort(ref UInt16 wp);
-    public static void SwabLong(ref uint lp);
-    public static void SwabDouble(ref double dp);
-    public static void SwabArrayOfShort(UInt16[] wp, int n);
-    public static void SwabArrayOfTriples(byte[] tp, int n);
-    public static void SwabArrayOfLong(uint[] lp, int n);
-    public static void SwabArrayOfDouble(double[] dp, int n);
-    
-    public static void ReverseBits(byte[] cp, int n);
-    
-    public static byte[] GetBitRevTable(bool reversed);
-
-    internal const int STRIP_SIZE_DEFAULT = 8192;
-
-    internal static TiffFieldInfo[] Realloc(TiffFieldInfo[] oldBuffer, int elementCount, int newElementCount);
-    internal static TiffTagValue[] Realloc(TiffTagValue[] oldBuffer, int elementCount, int newElementCount);
-
-    /*
-    * Read the specified strip and setup for decoding. 
-    * The data buffer is expanded, as necessary, to
-    * hold the strip's data.
-    */
-    internal bool fillStrip(uint strip);
-
-    /*
-    * Read the specified tile and setup for decoding. 
-    * The data buffer is expanded, as necessary, to
-    * hold the tile's data.
-    */
-    internal bool fillTile(uint tile);
-
-    internal static uint roundUp(uint x, uint y);
-    internal static uint howMany(uint x, uint y);
-
-    internal static void setString(out string cpp, string cp);
-    internal static void setShortArray(out UInt16[] wpp, UInt16[] wp, uint n);
-    internal static void setLongArray(out uint[] lpp, uint[] lp, uint n);
-
-    /*
-    * Internal version of FlushData that can be
-    * called by ``encodestrip routines'' w/o concern
-    * for infinite recursion.
-    */
-    internal bool flushData1();
-
-    /*
-    * Return size of TiffDataType in bytes.
-    *
-    * XXX: We need a separate function to determine the space needed
-    * to store the value. For TIFF_RATIONAL values DataWidth() returns 8,
-    * but we use 4-byte float to represent rationals.
-    */
-    internal static int dataSize(TiffDataType type);
-    
-    internal bool setCompressionScheme(int scheme);
-
-    internal bool fieldSet(int field);
-    internal void setFieldBit(int field);
-    internal void clearFieldBit(int field);
-
-    /*
-    * Return the number of bytes to read/write in a call to
-    * one of the scanline-oriented i/o routines.  Note that
-    * this number may be 1/samples-per-pixel if data is
-    * stored as separate planes.
-    * The ScanlineSize in case of YCbCrSubsampling is defined as the
-    * strip size divided by the strip height, i.e. the size of a pack of vertical
-    * subsampling lines divided by vertical subsampling. It should thus make
-    * sense when multiplied by a multiple of vertical subsampling.
-    * Some stuff depends on this newer version of TIFFScanlineSize
-    * TODO: resolve this
-    */
-    internal int newScanlineSize();
-
-    /*
-    * Some stuff depends on this older version of TIFFScanlineSize
-    * TODO: resolve this
-    */
-    internal int oldScanlineSize();
-
-    internal static int[] byteArrayToInt(byte[] b, int byteStartOffset, int byteCount);
-    internal static void intToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset);
-
-    internal static uint[] byteArrayToUInt(byte[] b, int byteStartOffset, int byteCount);
-    internal static void uintToByteArray(uint[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset);
-
-    internal static Int16[] byteArrayToInt16(byte[] b, int byteStartOffset, int byteCount);
-    internal static void int16ToByteArray(Int16[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset);
-
-    internal static UInt16[] byteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount);
-    internal static void uint16ToByteArray(UInt16[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset);
-
-    internal uint readUInt32(byte[] b, int byteStartOffset);
-    internal void writeUInt32(uint value, byte[] b, int byteStartOffset);
-    internal UInt16 readUInt16(byte[] b, int byteStartOffset);
-
-//////////////////////////////////////////////////////////////////////////
-
-    internal const uint TIFF_FILLORDER = 0x0003;  /* natural bit fill order for machine */
-    internal const uint TIFF_DIRTYDIRECT = 0x0008;  /* current directory must be written */
-    internal const uint TIFF_BUFFERSETUP = 0x0010;  /* data buffers setup */
-    internal const uint TIFF_CODERSETUP = 0x0020;  /* encoder/decoder setup done */
-    internal const uint TIFF_BEENWRITING = 0x0040;  /* written 1+ scanlines to file */
-    internal const uint TIFF_SWAB = 0x0080;  /* byte swap file information */
-    internal const uint TIFF_NOBITREV = 0x0100;  /* inhibit bit reversal logic */
-    internal const uint TIFF_MYBUFFER = 0x0200;  /* my raw data buffer; free on close */
-    internal const uint TIFF_ISTILED = 0x0400;  /* file is tile, not strip- based */
-    internal const uint TIFF_POSTENCODE = 0x1000;  /* need call to postencode routine */
-    internal const uint TIFF_INSUBIFD = 0x2000;  /* currently writing a subifd */
-    internal const uint TIFF_UPSAMPLED = 0x4000;  /* library is doing data up-sampling */ 
-    internal const uint TIFF_STRIPCHOP = 0x8000;  /* enable strip chopping support */
-    internal const uint TIFF_HEADERONLY = 0x10000; /* read header only, do not process the first directory*/
-    internal const uint TIFF_NOREADRAW = 0x20000; /* skip reading of raw uncompressed image data*/
-
-    internal enum PostDecodeMethodType
-    {
-        pdmNone,
-        pdmSwab16Bit,
-        pdmSwab24Bit,
-        pdmSwab32Bit,
-        pdmSwab64Bit
-    };
-    
-    internal string m_name; /* name of open file */
-    internal int m_mode; /* open mode (O_*) */
-    internal uint m_flags;
-
-    /* the first directory */
-    internal uint m_diroff; /* file offset of current directory */
-
-    /* directories to prevent IFD looping */
-    internal TiffDirectory m_dir; /* internal rep of current directory */
-    internal uint m_row; /* current scanline */
-    internal uint m_curstrip; /* current strip for read/write */
-
-    /* tiling support */
-    internal uint m_curtile; /* current tile for read/write */
-    internal int m_tilesize; /* # of bytes in a tile */
-
-    /* compression scheme hooks */
-    internal TiffCodec m_currentCodec;
-
-    /* input/output buffering */
-    internal int m_scanlinesize; /* # of bytes in a scanline */
-    internal byte[] m_rawdata; /* raw data buffer */
-    internal int m_rawdatasize; /* # of bytes in raw data buffer */
-    internal int m_rawcp; /* current spot in raw buffer */
-    internal int m_rawcc; /* bytes unread from raw buffer */
-
-    internal thandle_t m_clientdata; /* callback parameter */ // should become object reference
-
-    /* post-decoding support */
-    internal PostDecodeMethodType m_postDecodeMethod;  /* post decoding method type */
-
-    /* tag support */
-    internal TiffTagMethods m_tagmethods; /* tag get/set/print routines */
-
-    private class codecList
-    {
-        public codecList next;
-        public TiffCodec codec;
-    };
-
-    private class clientInfoLink
-    {
-        public clientInfoLink next;
-        public object data;
-        public string name;
-    };
-
-    /* the first directory */
-    private uint m_nextdiroff; /* file offset of following directory */
-    private uint[] m_dirlist; /* list of offsets to already seen directories to prevent IFD looping */
-    private int	m_dirlistsize; /* number of entires in offset list */
-    private UInt16 m_dirnumber; /* number of already seen directories */
-    private TiffHeader m_header; /* file's header block */
-    private int[] m_typeshift; /* data type shift counts */
-    private int[] m_typemask; /* data type masks */
-    private UInt16 m_curdir; /* current directory (index) */
-    private uint m_curoff; /* current offset for read/write */
-    private uint m_dataoff; /* current offset for writing dir */
-    
-    /* SubIFD support */
-    private UInt16 m_nsubifd; /* remaining subifds to write */
-    private uint m_subifdoff; /* offset for patching SubIFD link */
-    
-    /* tiling support */
-    private uint m_col; /* current column (offset by row too) */
-    
-    /* compression scheme hooks */
-    private bool m_decodestatus;
-    
-    /* tag support */
-    private TiffFieldInfo[] m_fieldinfo; /* sorted table of registered tags */
-    private uint m_nfields; /* # entries in registered tag table */
-    private TiffFieldInfo m_foundfield; /* cached pointer to already found tag */
-    
-    private clientInfoLink m_clientinfo; /* extra client information. */
-
-    private TiffCodec[] m_builtInCodecs;
-    private codecList m_registeredCodecs;
-
-    private TiffTagMethods m_defaultTagMethods;
-
-    private static TiffErrorHandler m_errorHandler;
-    private TiffErrorHandler m_defaultErrorHandler;
-
-    /*
-    * Client Tag extension support (from Niles Ritter).
-    */
-    //private static TiffExtendProc m_extender;
-
-    private TiffStream m_stream; // stream used for read|write|etc.
-    private bool m_userStream; // if true, then stream in use is provided by user.
-
-    //private const string m_version = TIFFLIB_VERSION_STR;
-
-    // tiff.cpp
-    private Tiff();
-    private void cleanUp();
-    private void postDecode(byte[] buf, int cc); /* post decoding routine */
-
-    // tif_aux.cpp 
-    private static bool defaultTransferFunction(TiffDirectory td);   
-
-    // tif_codec.cpp 
-    private void setupBuiltInCodecs();
-    private void freeCodecs();
-
-    // tif_dir.cpp 
-    
-    /* is tag value normal or pseudo */
-    private static bool isPseudoTag(uint t);
-    private bool isFillOrder(UInt16 o);
-    private static uint BITn(int n);
-
-    /*
-    * Return true / false according to whether or not
-    * it is permissible to set the tag's value.
-    * Note that we allow ImageLength to be changed
-    * so that we can append and extend to images.
-    * Any other tag may not be altered once writing
-    * has commenced, unless its value has no effect
-    * on the format of the data that is written.
-    */
-    private bool okToChangeTag(uint tag);
-    
-    /*
-    * Setup a default directory structure.
-    */
-    private void setupDefaultDirectory();
-
-    private bool advanceDirectory(ref uint nextdir, out uint off);
-
-    // tif_dirinfo.cpp 
-    private TiffFieldInfo getFieldInfo(out uint size);
-    private TiffFieldInfo getExifFieldInfo(out uint size);
-    private void setupFieldInfo(TiffFieldInfo[] info, uint n);
-    
-    //private static int tagCompare(const void* a, const void* b);
-    //private static int tagNameCompare(const void* a, const void* b);
-
-    private void printFieldInfo(Stream fd);
-
-    /*
-    * Return nearest TiffDataType to the sample type of an image.
-    */
-    private TiffDataType sampleToTagType();
-
-    private TiffFieldInfo findOrRegisterFieldInfo(uint tag, TiffDataType dt);
-    private TiffFieldInfo createAnonFieldInfo(uint tag, TiffDataType field_type);
-
-    // tif_dirread.cpp 
-    private const UInt16 TIFFTAG_IGNORE = 0;       /* tag placeholder used below */
-    
-    private uint extractData(TiffDirEntry dir);
-    private bool byteCountLooksBad(TiffDirectory td);
-    private static uint howMany8(uint x);
-    private bool readDirectoryFailed(TiffDirEntry dir);
-    private bool estimateStripByteCounts(TiffDirEntry dir, UInt16 dircount);
-    private void missingRequired(string tagname);
-    private int fetchFailed(TiffDirEntry dir);
-    private static int readDirectoryFind(TiffDirEntry dir, UInt16 dircount, UInt16 tagid);
-    
-    /*
-    * Check the directory offset against the list of already seen directory
-    * offsets. This is a trick to prevent IFD looping. The one can create TIFF
-    * file with looped directory pointers. We will maintain a list of already
-    * seen directories and check every IFD offset against that list.
-    */
-    private bool checkDirOffset(uint diroff);
-
-    /*
-    * Read IFD structure from the specified offset. If the pointer to
-    * nextdiroff variable has been specified, read it too. Function returns a
-    * number of fields in the directory or 0 if failed.
-    */
-    private UInt16 fetchDirectory(uint diroff, out TiffDirEntry[] pdir, out uint nextdiroff);
-
-    /*
-    * Fetch and set the SubjectDistance EXIF tag.
-    */
-    private bool fetchSubjectDistance(TiffDirEntry dir);
-
-    /*
-    * Check the count field of a directory
-    * entry against a known value.  The caller
-    * is expected to skip/ignore the tag if
-    * there is a mismatch.
-    */
-    private bool checkDirCount(TiffDirEntry dir, uint count);
-
-    /*
-    * Fetch a contiguous directory item.
-    */
-    private int fetchData(TiffDirEntry dir, byte[] cp);
-
-    /*
-    * Fetch an ASCII item from the file.
-    */
-    private int fetchString(TiffDirEntry dir, out string cp);
-
-    /*
-    * Convert numerator+denominator to float.
-    */
-    private bool cvtRational(TiffDirEntry dir, uint num, uint denom, out float rv);
-
-    /*
-    * Fetch a rational item from the file
-    * at offset off and return the value
-    * as a floating point number.
-    */
-    private float fetchRational(TiffDirEntry dir);
-
-    /*
-    * Fetch a single floating point value
-    * from the offset field and return it
-    * as a native float.
-    */
-    private float fetchFloat(TiffDirEntry dir);
-
-    /*
-    * Fetch an array of BYTE or SBYTE values.
-    */
-    private bool fetchByteArray(TiffDirEntry dir, byte[] v);
-
-    /*
-    * Fetch an array of SHORT or SSHORT values.
-    */
-    private bool fetchShortArray(TiffDirEntry dir, UInt16[] v);
-
-    /*
-    * Fetch a pair of SHORT or BYTE values. Some tags may have either BYTE
-    * or SHORT type and this function works with both ones.
-    */
-    private bool fetchShortPair(TiffDirEntry dir);
-
-    /*
-    * Fetch an array of LONG or SLONG values.
-    */
-    private bool fetchLongArray(TiffDirEntry dir, uint[] v);
-
-    /*
-    * Fetch an array of RATIONAL or SRATIONAL values.
-    */
-    private bool fetchRationalArray(TiffDirEntry dir, float[] v);
-    
-    /*
-    * Fetch an array of FLOAT values.
-    */
-    private bool fetchFloatArray(TiffDirEntry dir, float[] v);
-
-    /*
-    * Fetch an array of DOUBLE values.
-    */
-    private bool fetchDoubleArray(TiffDirEntry dir, double[] v);
-
-    /*
-    * Fetch an array of ANY values.  The actual values are
-    * returned as doubles which should be able hold all the
-    * types.  Yes, there really should be an tany_t to avoid
-    * this potential non-portability ...  Note in particular
-    * that we assume that the double return value vector is
-    * large enough to read in any fundamental type.  We use
-    * that vector as a buffer to read in the base type vector
-    * and then convert it in place to double (from end
-    * to front of course).
-    */
-    private bool fetchAnyArray(TiffDirEntry dir, double[] v);
-
-    /*
-    * Fetch a tag that is not handled by special case code.
-    */
-    private bool fetchNormalTag(TiffDirEntry dir);
-
-    /*
-    * Fetch samples/pixel short values for 
-    * the specified tag and verify that
-    * all values are the same.
-    */
-    private bool fetchPerSampleShorts(TiffDirEntry dir, out UInt16 pl);
-
-    /*
-    * Fetch samples/pixel long values for 
-    * the specified tag and verify that
-    * all values are the same.
-    */
-    private bool fetchPerSampleLongs(TiffDirEntry dir, out uint pl);
-
-    /*
-    * Fetch samples/pixel ANY values for the specified tag and verify that all
-    * values are the same.
-    */
-    private bool fetchPerSampleAnys(TiffDirEntry dir, out double pl);
-
-    /*
-    * Fetch a set of offsets or lengths.
-    * While this routine says "strips", in fact it's also used for tiles.
-    */
-    private bool fetchStripThing(TiffDirEntry dir, int nstrips, ref uint[] lpp);
-
-    /*
-    * Fetch and set the RefBlackWhite tag.
-    */
-    private bool fetchRefBlackWhite(TiffDirEntry dir);
-
-    /*
-    * Replace a single strip (tile) of uncompressed data by
-    * multiple strips (tiles), each approximately 8Kbytes.
-    * This is useful for dealing with large images or
-    * for dealing with machines with a limited amount
-    * memory.
-    */
-    private void chopUpSingleUncompressedStrip();
-
-    // tif_dirwrite.cpp     
-
-    private uint insertData(UInt16 type, uint v);
-    private static void resetFieldBit(uint[] fields, ushort f);
-    private static bool fieldSet(uint[] fields, ushort f);
-
-    private bool writeRational(TiffDataType type, UInt16 tag, ref TiffDirEntry dir, float v);
-    private bool writeRationalPair(TiffDirEntry[] entries, int dirOffset, TiffDataType type, UInt16 tag1, float v1, UInt16 tag2, float v2);
-
-    /*
-    * Write the contents of the current directory
-    * to the specified file.  This routine doesn't
-    * handle overwriting a directory with auxiliary
-    * storage that's been changed.
-    */
-    private bool writeDirectory(bool done);
-
-    /*
-    * Process tags that are not special cased.
-    */
-    private bool writeNormalTag(ref TiffDirEntry dir, TiffFieldInfo fip);
-
-    /*
-    * Setup a directory entry with either a SHORT
-    * or LONG type according to the value.
-    */
-    private void setupShortLong(uint tag, ref TiffDirEntry dir, uint v);
-
-    /*
-    * Setup a SHORT directory entry
-    */
-    private void setupShort(uint tag, ref TiffDirEntry dir, UInt16 v);
-
-    /*
-    * Setup a directory entry that references a
-    * samples/pixel array of SHORT values and
-    * (potentially) write the associated indirect
-    * values.
-    */
-    private bool writePerSampleShorts(uint tag, ref TiffDirEntry dir);
-
-    /*
-    * Setup a directory entry that references a samples/pixel array of ``type''
-    * values and (potentially) write the associated indirect values.  The source
-    * data from GetField() for the specified tag must be returned as double.
-    */
-    private bool writePerSampleAnys(TiffDataType type, uint tag, ref TiffDirEntry dir);
-
-    /*
-    * Setup a pair of shorts that are returned by
-    * value, rather than as a reference to an array.
-    */
-    private bool setupShortPair(uint tag, ref TiffDirEntry dir);
-
-    /*
-    * Setup a directory entry for an NxM table of shorts,
-    * where M is known to be 2**bitspersample, and write
-    * the associated indirect data.
-    */
-    private bool writeShortTable(uint tag, ref TiffDirEntry dir, uint n, UInt16[][] table);
-
-    /*
-    * Write/copy data associated with an ASCII or opaque tag value.
-    */
-    private bool writeByteArray(ref TiffDirEntry dir, byte[] cp);
-
-    /*
-    * Setup a directory entry of an array of SHORT
-    * or SSHORT and write the associated indirect values.
-    */
-    private bool writeShortArray(ref TiffDirEntry dir, UInt16[] v);
-
-    /*
-    * Setup a directory entry of an array of LONG
-    * or SLONG and write the associated indirect values.
-    */
-    private bool writeLongArray(ref TiffDirEntry dir, uint[] v);
-
-    /*
-    * Setup a directory entry of an array of RATIONAL
-    * or SRATIONAL and write the associated indirect values.
-    */
-    private bool writeRationalArray(ref TiffDirEntry dir, float[] v);
-    private bool writeFloatArray(ref TiffDirEntry dir, float[] v);
-    private bool writeDoubleArray(ref TiffDirEntry dir, double[] v);
-
-    /*
-    * Write an array of ``type'' values for a specified tag (i.e. this is a tag
-    * which is allowed to have different types, e.g. SMaxSampleType).
-    * Internally the data values are represented as double since a double can
-    * hold any of the TIFF tag types (yes, this should really be an abstract
-    * type tany_t for portability).  The data is converted into the specified
-    * type in a temporary buffer and then handed off to the appropriate array
-    * writer.
-    */
-    private bool writeAnyArray(TiffDataType type, uint tag, ref TiffDirEntry dir, int n, double[] v);
-
-    private bool writeTransferFunction(ref TiffDirEntry dir);
-    private bool writeInkNames(ref TiffDirEntry dir);
-
-    /*
-    * Write a contiguous directory item.
-    */
-    private bool writeData(ref TiffDirEntry dir, byte[] cp, int cc);
-    private bool writeData(ref TiffDirEntry dir, UInt16[] cp, uint cc);
-    private bool writeData(ref TiffDirEntry dir, uint[] cp, uint cc);
-    private bool writeData(ref TiffDirEntry dir, float[] cp, uint cc);
-    private bool writeData(ref TiffDirEntry dir, double[] cp, uint cc);
-
-    /*
-    * Link the current directory into the
-    * directory chain for the file.
-    */
-    private bool linkDirectory();
-
-
-    // tif_open.cpp 
-
-    private static readonly int[] typemask = 
-    {
-        0,           /* TIFF_NOTYPE */
-        0x000000ff,  /* TIFF_BYTE */
-        0xffffffff,  /* TIFF_ASCII */
-        0x0000ffff,  /* TIFF_SHORT */
-        0xffffffff,  /* TIFF_LONG */
-        0xffffffff,  /* TIFF_RATIONAL */
-        0x000000ff,  /* TIFF_SBYTE */
-        0x000000ff,  /* TIFF_UNDEFINED */
-        0x0000ffff,  /* TIFF_SSHORT */
-        0xffffffff,  /* TIFF_SLONG */
-        0xffffffff,  /* TIFF_SRATIONAL */
-        0xffffffff,  /* TIFF_FLOAT */
-        0xffffffff,  /* TIFF_DOUBLE */
-    };
-
-    private static readonly int[] bigTypeshift = 
-    {
-        0,  /* TIFF_NOTYPE */
-        24,  /* TIFF_BYTE */
-        0,  /* TIFF_ASCII */
-        16,  /* TIFF_SHORT */
-        0,  /* TIFF_LONG */
-        0,  /* TIFF_RATIONAL */
-        24,  /* TIFF_SBYTE */
-        24,  /* TIFF_UNDEFINED */
-        16,  /* TIFF_SSHORT */
-        0,  /* TIFF_SLONG */
-        0,  /* TIFF_SRATIONAL */
-        0,  /* TIFF_FLOAT */
-        0,  /* TIFF_DOUBLE */
-    };
-
-    private static readonly int[] litTypeshift = 
-    {
-        0,  /* TIFF_NOTYPE */
-        0,  /* TIFF_BYTE */
-        0,  /* TIFF_ASCII */
-        0,  /* TIFF_SHORT */
-        0,  /* TIFF_LONG */
-        0,  /* TIFF_RATIONAL */
-        0,  /* TIFF_SBYTE */
-        0,  /* TIFF_UNDEFINED */
-        0,  /* TIFF_SSHORT */
-        0,  /* TIFF_SLONG */
-        0,  /* TIFF_SRATIONAL */
-        0,  /* TIFF_FLOAT */
-        0,  /* TIFF_DOUBLE */
-    };
-
-    /*
-    * Initialize the shift & mask tables, and the
-    * byte swapping state according to the file
-    * contents and the machine architecture.
-    */
-    private void initOrder(int magic);
-
-    private static int getMode(string mode, string module);
-    private Tiff safeOpenFailed();
-
-
-    // tif_print.cpp 
-
-    private static readonly string[] photoNames = 
-    {
-        "min-is-white", /* PHOTOMETRIC_MINISWHITE */
-        "min-is-black",  /* PHOTOMETRIC_MINISBLACK */
-        "RGB color",  /* PHOTOMETRIC_RGB */
-        "palette color (RGB from colormap)",  /* PHOTOMETRIC_PALETTE */
-        "transparency mask",  /* PHOTOMETRIC_MASK */
-        "separated",  /* PHOTOMETRIC_SEPARATED */
-        "YCbCr",  /* PHOTOMETRIC_YCBCR */
-        "7 (0x7)",
-        "CIE L*a*b*",  /* PHOTOMETRIC_CIELAB */
-    };
-
-    private static readonly string[] orientNames = 
-    {
-        "0 (0x0)",
-        "row 0 top, col 0 lhs", /* ORIENTATION_TOPLEFT */
-        "row 0 top, col 0 rhs",  /* ORIENTATION_TOPRIGHT */
-        "row 0 bottom, col 0 rhs",  /* ORIENTATION_BOTRIGHT */
-        "row 0 bottom, col 0 lhs",  /* ORIENTATION_BOTLEFT */
-        "row 0 lhs, col 0 top",  /* ORIENTATION_LEFTTOP */
-        "row 0 rhs, col 0 top",  /* ORIENTATION_RIGHTTOP */
-        "row 0 rhs, col 0 bottom",  /* ORIENTATION_RIGHTBOT */
-        "row 0 lhs, col 0 bottom",  /* ORIENTATION_LEFTBOT */
-    };
-
-    private static void printField(Stream fd, TiffFieldInfo fip, uint value_count, object raw_data);
-    private bool prettyPrintField(Stream fd, uint tag, uint value_count, object raw_data);
-    private static void printAscii(Stream fd, string cp);
-    private static void printAsciiTag(Stream fd, string name, string value);
-
-
-    // tif_read.cpp 
-
-    //private const uint NOSTRIP = ((uint) -1);         /* undefined state */
-    //private const uint NOTILE = ((uint) -1);          /* undefined state */
-
-    /*
-    * Default Read/Seek/Write definitions.
-    */
-    private int readFile(byte[] buf, int offset, int size);
-    private uint seekFile(uint off, int whence);
-    private bool closeFile();
-    private uint getFileSize();
-    
-    private bool readOK(byte[] buf, int size);
-    private bool readUInt16OK(out UInt16 value);
-    private bool readUInt32OK(out uint value);
-    private bool readDirEntryOk(TiffDirEntry[] dir, UInt16 dircount);
-    private void readDirEntry(TiffDirEntry[] dir, UInt16 dircount, byte[] bytes, uint offset);
-    private bool readHeaderOk(out TiffHeader header);
-
-    private bool seekOK(uint off);
-
-    /*
-    * Seek to a random row+sample in a file.
-    */
-    private bool seek(uint row, UInt16 sample);
-
-    private int readRawStrip1(uint strip, byte[] buf, int offset, int size, string module);
-    private int readRawTile1(uint tile, byte[] buf, int offset, int size, string module);
-
-    /*
-    * Set state to appear as if a
-    * strip has just been read in.
-    */
-    private bool startStrip(uint strip);
-
-    /*
-    * Set state to appear as if a
-    * tile has just been read in.
-    */
-    private bool startTile(uint tile);
-
-    private bool checkRead(int tiles);
-
-    private static void swab16BitData(byte[] buf, int cc);
-    private static void swab24BitData(byte[] buf, int cc);
-    private static void swab32BitData(byte[] buf, int cc);
-    private static void swab64BitData(byte[] buf, int cc);
-
-    // tif_strip.cpp 
-
-    private uint summarize(uint summand1, uint summand2, string where);
-    private uint multiply(uint nmemb, uint elem_size, string where);
-    
-    // tif_swab.cpp 
-
-    /*
-    * Bit reversal tables.  TIFFBitRevTable[<byte>] gives
-    * the bit reversed value of <byte>.  Used in various
-    * places in the library when the FillOrder requires
-    * bit reversal of byte values (e.g. CCITT Fax 3
-    * encoding/decoding).  TIFFNoBitRevTable is provided
-    * for algorithms that want an equivalent table that
-    * do not reverse bit values.
-    */
-    private static readonly byte[] TIFFBitRevTable = 
-    {
-        0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 
-        0x30, 0xb0, 0x70, 0xf0, 0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8, 
-        0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8, 0x04, 0x84, 0x44, 0xc4, 
-        0x24, 0xa4, 0x64, 0xe4, 0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4, 
-        0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec, 0x1c, 0x9c, 0x5c, 0xdc, 
-        0x3c, 0xbc, 0x7c, 0xfc, 0x02, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2, 
-        0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2, 0x0a, 0x8a, 0x4a, 0xca, 
-        0x2a, 0xaa, 0x6a, 0xea, 0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa, 
-        0x06, 0x86, 0x46, 0xc6, 0x26, 0xa6, 0x66, 0xe6, 0x16, 0x96, 0x56, 0xd6, 
-        0x36, 0xb6, 0x76, 0xf6, 0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee, 
-        0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe, 0x01, 0x81, 0x41, 0xc1, 
-        0x21, 0xa1, 0x61, 0xe1, 0x11, 0x91, 0x51, 0xd1, 0x31, 0xb1, 0x71, 0xf1, 
-        0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9, 0x19, 0x99, 0x59, 0xd9, 
-        0x39, 0xb9, 0x79, 0xf9, 0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5, 
-        0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5, 0x0d, 0x8d, 0x4d, 0xcd, 
-        0x2d, 0xad, 0x6d, 0xed, 0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd, 
-        0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3, 0x13, 0x93, 0x53, 0xd3, 
-        0x33, 0xb3, 0x73, 0xf3, 0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb, 
-        0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb, 0x07, 0x87, 0x47, 0xc7, 
-        0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7, 
-        0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 
-        0x3f, 0xbf, 0x7f, 0xff
-    };
-
-    private static readonly byte[] TIFFNoBitRevTable = 
-    {
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 
-        0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 
-        0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 
-        0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 
-        0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 
-        0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 
-        0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 
-        0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 
-        0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 
-        0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 
-        0x78, 0x79, 0x7a, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f, 0x80, 0x81, 0x82, 0x83, 
-        0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 
-        0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b, 
-        0x9c, 0x9d, 0x9e, 0x9f, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 
-        0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf, 0xb0, 0xb1, 0xb2, 0xb3, 
-        0xb4, 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xbb, 0xbc, 0xbd, 0xbe, 0xbf, 
-        0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 
-        0xcc, 0xcd, 0xce, 0xcf, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 
-        0xd8, 0xd9, 0xda, 0xdb, 0xdc, 0xdd, 0xde, 0xdf, 0xe0, 0xe1, 0xe2, 0xe3, 
-        0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef, 
-        0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 
-        0xfc, 0xfd, 0xfe, 0xff, 
-    };
-
-    // tif_write.cpp 
-
-    private bool writeCheckStrips(string module);
-    private bool writeCheckTiles(string module);
-    private bool bufferCheck();
-
-    private int writeFile(byte[] buf, int size);
-    private bool writeOK(byte[] buf, int size);
-    private bool writeHeaderOK(TiffHeader header);
-    private bool writeDirEntryOK(TiffDirEntry[] entries, int count);
-    private bool writeUInt16OK(UInt16 value);
-    private bool writeUInt32OK(uint value);
-
-    private bool isUnspecified(int f);
-
-    /*
-    * Grow the strip data structures by delta strips.
-    */
-    private bool growStrips(int delta, string module);
-
-    /*
-    * Append the data to the specified strip.
-    */
-    private bool appendToStrip(uint strip, byte[] data, int cc);
-
+            if (!writeCheckTiles(module))
+                return -1;
+
+            if (tile >= m_dir.td_nstrips)
+            {
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
+                return -1;
+            }
+
+            /*
+             * Handle delayed allocation of data buffer.  This
+             * permits it to be sized more intelligently (using
+             * directory information).
+             */
+            if (!bufferCheck())
+                return -1;
+
+            m_curtile = tile;
+
+            m_rawcc = 0;
+            m_rawcp = 0;
+
+            if (m_dir.td_stripbytecount[tile] > 0)
+            {
+                /* this forces appendToStrip() to do a seek */
+                m_curoff = 0;
+            }
+
+            /* 
+             * Compute tiles per row & per column to compute
+             * current row and column
+             */
+            m_row = (tile % Tiff::howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilelength;
+            m_col = (tile % Tiff::howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilewidth;
+
+            if ((m_flags & TIFF_CODERSETUP) == 0)
+            {
+                if (!m_currentCodec.tif_setupencode())
+                    return -1;
+
+                m_flags |= TIFF_CODERSETUP;
+            }
+
+            m_flags &= ~TIFF_POSTENCODE;
+            UInt16 sample = (UInt16)(tile / m_dir.td_stripsperimage);
+            if (!m_currentCodec.tif_preencode(sample))
+                return -1;
+
+            /*
+             * Clamp write amount to the tile size.  This is mostly
+             * done so that callers can pass in some large number
+             * (e.g. -1) and have the tile size used instead.
+             */
+            if (cc < 1 || cc > m_tilesize)
+                cc = m_tilesize;
+
+            /* swab if needed - note that source buffer will be altered */
+            postDecode(data, cc);
+
+            if (!m_currentCodec.tif_encodetile(data, cc, sample))
+                return 0;
+
+            if (!m_currentCodec.tif_postencode())
+                return -1;
+
+            if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
+                ReverseBits(m_rawdata, m_rawcc);
+
+            if (m_rawcc > 0 && !appendToStrip(tile, m_rawdata, m_rawcc))
+                return -1;
+
+            m_rawcc = 0;
+            m_rawcp = 0;
+            return cc;
+        }
+
+        /*
+        * Write the supplied data to the specified strip.
+        * There must be space for the data; we don't check
+        * if strips overlap!
+        *
+        * NB: Image length must be setup before writing; this
+        *     interface does not support automatically growing
+        *     the image on each write (as WriteScanline does).
+        */
+        public int WriteRawTile(uint tile, byte[] data, int cc)
+        {
+            static const char module[] = "WriteRawTile";
+
+            if (!writeCheckTiles(module))
+                return -1;
+
+            if (tile >= m_dir.td_nstrips)
+            {
+                Tiff::ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
+                return -1;
+            }
+
+            return (appendToStrip(tile, data, cc) ? cc: -1);
+        }
+
+        /*
+        * Set the current write offset.  This should only be
+        * used to set the offset to a known previous location
+        * (very carefully), or to 0 so that the next write gets
+        * appended to the end of the file.
+        */
+        public void SetWriteOffset(uint off)
+        {
+            m_curoff = off;
+        }
+
+        /*
+        * Return size of TiffDataType in bytes
+        */
+        public static int DataWidth(TiffDataType type)
+        {
+            switch (type)
+            {
+                case 0: /* nothing */
+                case 1: /* TIFF_BYTE */
+                case 2: /* TIFF_ASCII */
+                case 6: /* TIFF_SBYTE */
+                case 7: /* TIFF_UNDEFINED */
+                    return 1;
+                case 3: /* TIFF_SHORT */
+                case 8: /* TIFF_SSHORT */
+                    return 2;
+                case 4: /* TIFF_LONG */
+                case 9: /* TIFF_SLONG */
+                case 11: /* TIFF_FLOAT */
+                case 13: /* TIFF_IFD */
+                    return 4;
+                case 5: /* TIFF_RATIONAL */
+                case 10: /* TIFF_SRATIONAL */
+                case 12: /* TIFF_DOUBLE */
+                    return 8;
+                default:
+                    return 0; /* will return 0 for unknown types */
+            }
+        }
+
+        /*
+        * TIFF Library Bit & Byte Swapping Support.
+        *
+        * XXX We assume short = 16-bits and long = 32-bits XXX
+        */
+        public static void SwabShort(ref UInt16 wp)
+        {
+            byte cp[2];
+            cp[0] = (byte)wp;
+            cp[1] = (byte)(wp >> 8);
+
+            byte t = cp[1];
+            cp[1] = cp[0];
+            cp[0] = t;
+
+            wp = cp[0] & 0xFF;
+            wp += (cp[1] & 0xFF) << 8;
+        }
+
+        public static void SwabLong(ref uint lp)
+        {
+            byte cp[4];
+            cp[0] = (byte)lp;
+            cp[1] = (byte)(lp >> 8);
+            cp[2] = (byte)(lp >> 16);
+            cp[3] = (byte)(lp >> 24);
+
+            byte t = cp[3];
+            cp[3] = cp[0];
+            cp[0] = t;
+
+            t = cp[2];
+            cp[2] = cp[1];
+            cp[1] = t;
+
+            lp = cp[0] & 0xFF;
+            lp += (cp[1] & 0xFF) << 8;
+            lp += (cp[2] & 0xFF) << 16;
+            lp += cp[3] << 24;
+        }
+
+        public static void SwabDouble(ref double dp)
+        {
+            uint* lp = (uint*)dp;
+            SwabArrayOfLong(lp, 2);
+
+            uint t = lp[0];
+            lp[0] = lp[1];
+            lp[1] = t;
+        }
+
+        public static void SwabArrayOfShort(UInt16[] wp, int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                byte cp[2];
+                cp[0] = (byte)wp[i];
+                cp[1] = (byte)(wp[i] >> 8);
+
+                byte t = cp[1];
+                cp[1] = cp[0];
+                cp[0] = t;
+
+                wp[i] = cp[0] & 0xFF;
+                wp[i] += (cp[1] & 0xFF) << 8;
+            }
+        }
+
+        public static void SwabArrayOfTriples(byte[] tp, int n)
+        {
+            /* XXX unroll loop some */
+            int tpPos = 0;
+            while (n-- > 0)
+            {
+                byte t = tp[tpPos + 2];
+                tp[tpPos + 2] = tp[tpPos];
+                tp[tpPos] = t;
+                tpPos += 3;
+            }
+        }
+
+        public static void SwabArrayOfLong(uint[] lp, int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                byte cp[4];
+                cp[0] = (byte)lp[i];
+                cp[1] = (byte)(lp[i] >> 8);
+                cp[2] = (byte)(lp[i] >> 16);
+                cp[3] = (byte)(lp[i] >> 24);
+
+                byte t = cp[3];
+                cp[3] = cp[0];
+                cp[0] = t;
+
+                t = cp[2];
+                cp[2] = cp[1];
+                cp[1] = t;
+
+                lp[i] = cp[0] & 0xFF;
+                lp[i] += (cp[1] & 0xFF) << 8;
+                lp[i] += (cp[2] & 0xFF) << 16;
+                lp[i] += cp[3] << 24;
+            }
+        }
+
+        public static void SwabArrayOfDouble(double[] dp, int n)
+        {
+            uint* lp = (uint*)dp;
+            SwabArrayOfLong(lp, n + n);
+
+            int lpPos = 0;
+            while (n-- > 0)
+            {
+                uint t = lp[lpPos];
+                lp[lpPos] = lp[lpPos + 1];
+                lp[lpPos + 1] = t;
+                lpPos += 2;
+            }
+        }
+
+        public static void ReverseBits(byte[] cp, int n)
+        {
+            int cpPos = 0;
+            for (; n > 8; n -= 8)
+            {
+                cp[cpPos + 0] = TIFFBitRevTable[cp[cpPos + 0]];
+                cp[cpPos + 1] = TIFFBitRevTable[cp[cpPos + 1]];
+                cp[cpPos + 2] = TIFFBitRevTable[cp[cpPos + 2]];
+                cp[cpPos + 3] = TIFFBitRevTable[cp[cpPos + 3]];
+                cp[cpPos + 4] = TIFFBitRevTable[cp[cpPos + 4]];
+                cp[cpPos + 5] = TIFFBitRevTable[cp[cpPos + 5]];
+                cp[cpPos + 6] = TIFFBitRevTable[cp[cpPos + 6]];
+                cp[cpPos + 7] = TIFFBitRevTable[cp[cpPos + 7]];
+                cpPos += 8;
+            }
+
+            while (n-- > 0)
+            {
+                cp[cpPos] = TIFFBitRevTable[cp[cpPos]];
+                cpPos++;
+            }
+        }
+
+        public static byte[] GetBitRevTable(bool reversed)
+        {
+            return (reversed ? TIFFBitRevTable : TIFFNoBitRevTable);
+        }
     }
 }

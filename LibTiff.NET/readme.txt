@@ -3,6 +3,8 @@ The Bit Miracle's software for Tiff files
 =========================================
 Please send bug reports, offers of help, etc. to support@bitmiracle.com
 
+License
+=======
 In plain English:
 
 * We don't promise that this software works. (But if you find any bugs, 
