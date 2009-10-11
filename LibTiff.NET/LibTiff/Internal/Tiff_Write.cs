@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using BitMiracle.LibTiff.Internal;
+using System.Diagnostics;
 
 namespace BitMiracle.LibTiff
 {
@@ -114,9 +115,9 @@ namespace BitMiracle.LibTiff
         */
         private bool growStrips(int delta, string module)
         {
-            assert(m_dir.td_planarconfig == PLANARCONFIG_CONTIG);
-            uint* new_stripoffset = Tiff::Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
-            uint* new_stripbytecount = Tiff::Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            Debug.Assert(m_dir.td_planarconfig == PLANARCONFIG_CONTIG);
+            uint[] new_stripoffset = Tiff::Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            uint[] new_stripbytecount = Tiff::Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             if (new_stripoffset == null || new_stripbytecount == null)
             {
                 delete new_stripoffset;
@@ -140,11 +141,11 @@ namespace BitMiracle.LibTiff
         */
         private bool appendToStrip(uint strip, byte[] data, int cc)
         {
-            static const char module[] = "appendToStrip";
+            const string module = "appendToStrip";
 
             if (m_dir.td_stripoffset[strip] == 0 || m_curoff == 0)
             {
-                assert(m_dir.td_nstrips > 0);
+                Debug.Assert(m_dir.td_nstrips > 0);
                 if (m_dir.td_stripbytecount[strip] != 0 && m_dir.td_stripoffset[strip] != 0 && (int)m_dir.td_stripbytecount[strip] >= cc)
                 {
                     /* 

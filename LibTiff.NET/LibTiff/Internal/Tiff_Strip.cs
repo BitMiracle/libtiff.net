@@ -24,14 +24,14 @@ namespace BitMiracle.LibTiff
         private uint summarize(uint summand1, uint summand2, string where)
         {
             /*
-             * XXX: We are using casting to uint here, bacause sizeof(size_t)
+             * XXX: We are using casting to uint here, bacause sizeof(uint)
              * may be larger than sizeof(uint) on 64-bit architectures.
              */
             uint bytes = summand1 + summand2;
 
             if (bytes - summand1 != summand2)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "Integer overflow in %s", where);
+                ErrorExt(this, m_clientdata, m_name, "Integer overflow in %s", where);
                 bytes = 0;
             }
 
@@ -44,7 +44,7 @@ namespace BitMiracle.LibTiff
 
             if (elem_size != 0 && bytes / elem_size != nmemb)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "Integer overflow in %s", where);
+                ErrorExt(this, m_clientdata, m_name, "Integer overflow in %s", where);
                 bytes = 0;
             }
 
@@ -70,7 +70,7 @@ namespace BitMiracle.LibTiff
             {
                 if (m_dir.td_photometric == PHOTOMETRIC_YCBCR && !IsUpSampled())
                 {
-                    UInt16 ycbcrsubsampling[2];
+                    UInt16[] ycbcrsubsampling = new ushort[2];
                     GetField(TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
 
                     if (ycbcrsubsampling[0] * ycbcrsubsampling[1] == 0)
@@ -89,7 +89,7 @@ namespace BitMiracle.LibTiff
             else
                 scanline = m_dir.td_imagewidth;
 
-            return Tiff::howMany8(multiply(scanline, m_dir.td_bitspersample, "TIFFScanlineSize"));
+            return howMany8(multiply(scanline, m_dir.td_bitspersample, "TIFFScanlineSize"));
         }
 
         /*

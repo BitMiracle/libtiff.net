@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 using BitMiracle.LibTiff.Internal;
 
@@ -23,8 +24,8 @@ namespace BitMiracle.LibTiff
 {
     public partial class Tiff
     {
-        //private const uint NOSTRIP = ((uint) -1);         /* undefined state */
-        //private const uint NOTILE = ((uint) -1);          /* undefined state */
+        private const int NOSTRIP = -1;         /* undefined state */
+        private const int NOTILE = -1;          /* undefined state */
 
         /*
         * Default Read/Seek/Write definitions.
@@ -56,12 +57,13 @@ namespace BitMiracle.LibTiff
 
         private bool readUInt16OK(out UInt16 value)
         {
-            byte bytes[2];
+            byte[] bytes = new byte[2];
             bool res = readOK(bytes, 2);
+            value = 0;
             if (res)
             {
-                value = bytes[0] & 0xFF;
-                value += (bytes[1] & 0xFF) << 8;
+                value = (ushort)(bytes[0] & 0xFF);
+                value += (ushort)((bytes[1] & 0xFF) << 8);
             }
 
             return res;
@@ -69,14 +71,15 @@ namespace BitMiracle.LibTiff
 
         private bool readUInt32OK(out uint value)
         {
-            byte cp[4];
+            byte[] cp = new byte[4];
             bool res = readOK(cp, 4);
+            value = 0;
             if (res)
             {
-                value = cp[0] & 0xFF;
-                value += (cp[1] & 0xFF) << 8;
-                value += (cp[2] & 0xFF) << 16;
-                value += cp[3] << 24;
+                value = (uint)(cp[0] & 0xFF);
+                value += (uint)((cp[1] & 0xFF) << 8);
+                value += (uint)((cp[2] & 0xFF) << 16);
+                value += (uint)(cp[3] << 24);
             }
 
             return res;
@@ -86,21 +89,20 @@ namespace BitMiracle.LibTiff
         {
             int entrySize = sizeof(UInt16) * 2 + sizeof(uint) * 2;
             int totalSize = entrySize * dircount;
-            byte* bytes = new byte[totalSize];
+            byte[] bytes = new byte[totalSize];
             bool res = readOK(bytes, totalSize);
             if (res)
                 readDirEntry(dir, dircount, bytes, 0);
 
-            delete[] bytes;
             return res;
         }
 
         private void readDirEntry(TiffDirEntry[] dir, UInt16 dircount, byte[] bytes, uint offset)
         {
-            int pos = offset;
+            int pos = (int)offset;
             for (int i = 0; i < dircount; i++)
             {
-                TiffDirEntry* entry = &dir[i];
+                TiffDirEntry entry = dir[i];
                 entry.tdir_tag = readUInt16(bytes, pos);
                 pos += sizeof(UInt16);
                 entry.tdir_type = readUInt16(bytes, pos);
@@ -112,15 +114,15 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        private bool readHeaderOk(out TiffHeader header)
+        private bool readHeaderOk(ref TiffHeader header)
         {
-            bool res = readUInt16OK(header.tiff_magic);
+            bool res = readUInt16OK(out header.tiff_magic);
 
             if (res)
-                res = readUInt16OK(header.tiff_version);
+                res = readUInt16OK(out header.tiff_version);
 
             if (res)
-                res = readUInt32OK(header.tiff_diroff);
+                res = readUInt32OK(out header.tiff_diroff);
 
             return res;
         }
@@ -138,7 +140,7 @@ namespace BitMiracle.LibTiff
             if (row >= m_dir.td_imagelength)
             {
                 /* out of range */
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Row out of range, max %lu", row, m_dir.td_imagelength);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Row out of range, max %lu", row, m_dir.td_imagelength);
                 return false;
             }
 
@@ -147,7 +149,7 @@ namespace BitMiracle.LibTiff
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", sample, m_dir.td_samplesperpixel);
+                    ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", sample, m_dir.td_samplesperpixel);
                     return false;
                 }
 
@@ -192,18 +194,18 @@ namespace BitMiracle.LibTiff
 
         private int readRawStrip1(uint strip, byte[] buf, int offset, int size, string module)
         {
-            assert((m_flags & TIFF_NOREADRAW) == 0);
+            Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
 
             if (!seekOK(m_dir.td_stripoffset[strip]))
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Seek error at scanline %lu, strip %lu", m_name, m_row, strip);
+                ErrorExt(this, m_clientdata, module, "%s: Seek error at scanline %lu, strip %lu", m_name, m_row, strip);
                 return -1;
             }
 
             int cc = readFile(buf, offset, size);
             if (cc != size)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Read error at scanline %lu; got %lu bytes, expected %lu", m_name, m_row, cc, size);
+                ErrorExt(this, m_clientdata, module, "%s: Read error at scanline %lu; got %lu bytes, expected %lu", m_name, m_row, cc, size);
                 return -1;
             }
 
@@ -212,18 +214,18 @@ namespace BitMiracle.LibTiff
 
         private int readRawTile1(uint tile, byte[] buf, int offset, int size, string module)
         {
-            assert((m_flags & TIFF_NOREADRAW) == 0);
+            Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
 
             if (!seekOK(m_dir.td_stripoffset[tile]))
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Seek error at row %ld, col %ld, tile %ld", m_name, m_row, m_col, tile);
+                ErrorExt(this, m_clientdata, module, "%s: Seek error at row %ld, col %ld, tile %ld", m_name, m_row, m_col, tile);
                 return -1;
             }
 
             int cc = readFile(buf, offset, size);
             if (cc != size)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Read error at row %ld, col %ld; got %lu bytes, expected %lu", m_name, m_row, m_col, cc, size);
+                ErrorExt(this, m_clientdata, module, "%s: Read error at row %ld, col %ld; got %lu bytes, expected %lu", m_name, m_row, m_col, cc, size);
                 return -1;
             }
 
@@ -251,7 +253,7 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_NOREADRAW) != 0)
                 m_rawcc = 0;
             else
-                m_rawcc = m_dir.td_stripbytecount[strip];
+                m_rawcc = (int)m_dir.td_stripbytecount[strip];
 
             return m_currentCodec.tif_predecode((UInt16)(strip / m_dir.td_stripsperimage));
         }
@@ -271,13 +273,13 @@ namespace BitMiracle.LibTiff
             }
 
             m_curtile = tile;
-            m_row = (tile % Tiff::howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilelength;
-            m_col = (tile % Tiff::howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilewidth;
+            m_row = (tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilelength;
+            m_col = (tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilewidth;
             m_rawcp = 0;
             if ((m_flags & TIFF_NOREADRAW) != 0)
                 m_rawcc = 0;
             else
-                m_rawcc = m_dir.td_stripbytecount[tile];
+                m_rawcc = (int)m_dir.td_stripbytecount[tile];
 
             return m_currentCodec.tif_predecode((UInt16)(tile / m_dir.td_stripsperimage));
         }
@@ -286,13 +288,17 @@ namespace BitMiracle.LibTiff
         {
             if (m_mode == O_WRONLY)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "File not open for reading");
+                ErrorExt(this, m_clientdata, m_name, "File not open for reading");
                 return false;
             }
-            
-            if (tiles ^ (int)IsTiled())
+
+            int temp = 0;
+            if (IsTiled())
+                temp = 1;
+
+            if ((tiles ^ temp) != 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, tiles ? "Can not read tiles from a stripped image": "Can not read scanlines from a tiled image");
+                ErrorExt(this, m_clientdata, m_name, tiles != 0 ? "Can not read tiles from a stripped image": "Can not read scanlines from a tiled image");
                 return false;
             }
 
@@ -301,32 +307,30 @@ namespace BitMiracle.LibTiff
 
         private static void swab16BitData(byte[] buf, int cc)
         {
-            assert((cc & 1) == 0);
-            UInt16* swabee = byteArrayToUInt16(buf, 0, cc);
+            Debug.Assert((cc & 1) == 0);
+            UInt16[] swabee = byteArrayToUInt16(buf, 0, cc);
             SwabArrayOfShort(swabee, cc / 2);
             uint16ToByteArray(swabee, 0, cc / 2, buf, 0);
-            delete[] swabee;
         }
 
         private static void swab24BitData(byte[] buf, int cc)
         {
-            assert((cc % 3) == 0);
-            SwabArrayOfTriples((byte*)buf, cc / 3);
+            Debug.Assert((cc % 3) == 0);
+            SwabArrayOfTriples(buf, cc / 3);
         }
 
         private static void swab32BitData(byte[] buf, int cc)
         {
-            assert((cc & 3) == 0);
-            uint* swabee = byteArrayToUInt(buf, 0, cc);
+            Debug.Assert((cc & 3) == 0);
+            uint[] swabee = byteArrayToUInt(buf, 0, cc);
             SwabArrayOfLong(swabee, cc / 4);
             uintToByteArray(swabee, 0, cc / 4, buf, 0);
-            delete[] swabee;
         }
 
         private static void swab64BitData(byte[] buf, int cc)
         {
-            assert((cc & 7) == 0);
-            SwabArrayOfDouble((double*)buf, cc / 8);
+            Debug.Assert((cc & 7) == 0);
+            SwabArrayOfDouble(buf, cc / 8);
         }
 
         /*
@@ -336,7 +340,7 @@ namespace BitMiracle.LibTiff
         */
         internal bool fillStrip(uint strip)
         {
-            static const char module[] = "fillStrip";
+            const string module = "fillStrip";
     
             if ((m_flags & TIFF_NOREADRAW) == 0)
             {
@@ -350,7 +354,7 @@ namespace BitMiracle.LibTiff
                 uint bytecount = m_dir.td_stripbytecount[strip];
                 if (bytecount <= 0)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
+                    ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
                     return false;
                 }
 
@@ -365,11 +369,11 @@ namespace BitMiracle.LibTiff
                     m_curstrip = NOSTRIP;
                     if ((m_flags & TIFF_MYBUFFER) == 0)
                     {
-                        Tiff::ErrorExt(this, m_clientdata, module, "%s: Data buffer too small to hold strip %lu", m_name, strip);
+                        ErrorExt(this, m_clientdata, module, "%s: Data buffer too small to hold strip %lu", m_name, strip);
                         return false;
                     }
                     
-                    if (!ReadBufferSetup(0, Tiff::roundUp(bytecount, 1024)))
+                    if (!ReadBufferSetup(null, roundUp(bytecount, 1024)))
                         return false;
                 }
                 
@@ -377,7 +381,7 @@ namespace BitMiracle.LibTiff
                     return false;
                 
                 if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
-                    Tiff::ReverseBits(m_rawdata, bytecount);
+                    ReverseBits(m_rawdata, bytecount);
             }
 
             return startStrip(strip);
@@ -390,7 +394,7 @@ namespace BitMiracle.LibTiff
         */
         internal bool fillTile(uint tile)
         {
-            static const char module[] = "fillTile";
+            const string module = "fillTile";
 
             if ((m_flags & TIFF_NOREADRAW) == 0)
             {
@@ -404,7 +408,7 @@ namespace BitMiracle.LibTiff
                 uint bytecount = m_dir.td_stripbytecount[tile];
                 if (bytecount <= 0)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Invalid tile byte count, tile %lu", bytecount, tile);
+                    ErrorExt(this, m_clientdata, m_name, "%lu: Invalid tile byte count, tile %lu", bytecount, tile);
                     return false;
                 }
 
@@ -419,11 +423,11 @@ namespace BitMiracle.LibTiff
                     m_curtile = NOTILE;
                     if ((m_flags & TIFF_MYBUFFER) == 0)
                     {
-                        Tiff::ErrorExt(this, m_clientdata, module, "%s: Data buffer too small to hold tile %ld", m_name, tile);
+                        ErrorExt(this, m_clientdata, module, "%s: Data buffer too small to hold tile %ld", m_name, tile);
                         return false;
                     }
 
-                    if (!ReadBufferSetup(0, Tiff::roundUp(bytecount, 1024)))
+                    if (!ReadBufferSetup(null, roundUp(bytecount, 1024)))
                         return false;
                 }
 
@@ -431,7 +435,7 @@ namespace BitMiracle.LibTiff
                     return false;
 
                 if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
-                    Tiff::ReverseBits(m_rawdata, bytecount);
+                    ReverseBits(m_rawdata, bytecount);
             }
 
             return startTile(tile);

@@ -18,6 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using BitMiracle.LibTiff.Internal;
+
 namespace BitMiracle.LibTiff
 {
     public partial class Tiff
@@ -35,7 +37,7 @@ namespace BitMiracle.LibTiff
 
         private static uint BITn(int n)
         {
-            return (((unsigned int)1L) << (n & 0x1f));
+            return (((uint)1L) << (n & 0x1f));
         }
 
         /*
@@ -49,11 +51,11 @@ namespace BitMiracle.LibTiff
         */
         private bool okToChangeTag(uint tag)
         {
-            const TiffFieldInfo* fip = FindFieldInfo(tag, TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfo(tag, TIFF_ANY);
             if (fip == null)
             {
                 /* unknown tag */
-                Tiff::ErrorExt(this, m_clientdata, "SetField", "%s: Unknown %stag %u", m_name, isPseudoTag(tag) ? "pseudo-" : "", tag);
+                ErrorExt(this, m_clientdata, "SetField", "%s: Unknown %stag %u", m_name, isPseudoTag(tag) ? "pseudo-" : "", tag);
                 return false;
             }
 
@@ -65,7 +67,7 @@ namespace BitMiracle.LibTiff
                  * to those tags that don't/shouldn't affect the
                  * compression and/or format of the data.
                  */
-                Tiff::ErrorExt(this, m_clientdata, "SetField", "%s: Cannot modify tag \"%s\" while writing", m_name, fip.field_name);
+                ErrorExt(this, m_clientdata, "SetField", "%s: Cannot modify tag \"%s\" while writing", m_name, fip.field_name);
                 return false;
             }
 
@@ -77,12 +79,12 @@ namespace BitMiracle.LibTiff
         */
         private void setupDefaultDirectory()
         {
-            size_t tiffFieldInfoCount;
-            const TiffFieldInfo* tiffFieldInfo = getFieldInfo(tiffFieldInfoCount);
+            uint tiffFieldInfoCount;
+            TiffFieldInfo tiffFieldInfo = getFieldInfo(out tiffFieldInfoCount);
             setupFieldInfo(tiffFieldInfo, tiffFieldInfoCount);
 
             m_dir = new TiffDirectory();
-            m_postDecodeMethod = Tiff::pdmNone;
+            m_postDecodeMethod = PostDecodeMethodType.pdmNone;
             m_foundfield = null;
             
             m_tagmethods = m_defaultTagMethods;
@@ -91,7 +93,7 @@ namespace BitMiracle.LibTiff
              *  Give client code a chance to install their own
              *  tag extensions & methods, prior to compression overloads.
              */
-            if (m_extender)
+            if (m_extender != null)
                 (*m_extender)(this);
             
             SetField(TIFFTAG_COMPRESSION, COMPRESSION_NONE);
@@ -115,60 +117,50 @@ namespace BitMiracle.LibTiff
 
         private bool advanceDirectory(ref uint nextdir, out uint off)
         {
-            static const char module[] = "advanceDirectory";
+            const string module = "advanceDirectory";
             UInt16 dircount;
             
-            if (!seekOK(nextdir) || !readUInt16OK(dircount))
+            if (!seekOK(nextdir) || !readUInt16OK(out dircount))
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Error fetching directory count", m_name);
+                ErrorExt(this, m_clientdata, module, "%s: Error fetching directory count", m_name);
                 return false;
             }
 
             if ((m_flags & TIFF_SWAB) != 0)
-                Tiff::SwabShort(dircount);
+                SwabShort(ref dircount);
 
             if (off != null)
                 off = seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
             else
                 seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
 
-            if (!readUInt32OK(nextdir))
+            if (!readUInt32OK(out nextdir))
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Error fetching directory link", m_name);
+                ErrorExt(this, m_clientdata, module, "%s: Error fetching directory link", m_name);
                 return false;
             }
 
             if ((m_flags & TIFF_SWAB) != 0)
-                Tiff::SwabLong(nextdir);
+                SwabLong(ref nextdir);
             
             return true;
         }
 
         internal static void setString(out string cpp, string cp)
         {
-            delete cpp;
-
-            size_t sz = strlen(cp) + 1;
-            cpp = new char[sz];
-
-            strcpy(cpp, cp);
-            cpp[sz - 1] = 0;
+            cpp = cp.Clone() as string;
         }
 
         internal static void setShortArray(out UInt16[] wpp, UInt16[] wp, uint n)
         {
-            delete wpp;
             wpp = new UInt16[n];
-
             for (uint i = 0; i < n; i++)
                 wpp[i] = wp[i];
         }
 
         internal static void setLongArray(out uint[] lpp, uint[] lp, uint n)
         {
-            delete lpp;
             lpp = new uint[n];
-
             for (uint i = 0; i < n; i++)
                 lpp[i] = lp[i];
         }

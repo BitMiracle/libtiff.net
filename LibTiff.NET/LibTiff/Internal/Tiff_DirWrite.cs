@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using BitMiracle.LibTiff.Internal;
+using System.Diagnostics;
 
 namespace BitMiracle.LibTiff
 {
@@ -174,7 +175,7 @@ namespace BitMiracle.LibTiff
 
             for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
             {
-                const TiffFieldInfo* fip = m_fieldinfo[fi];
+                TiffFieldInfo fip = m_fieldinfo[fi];
 
                 /*
                  * For custom fields, we test to see if the custom field
@@ -361,7 +362,7 @@ namespace BitMiracle.LibTiff
                                 m_subifdoff = data[dir].tdir_offset;
                             else
                             {
-                                assert(false);
+                                Debug.Assert(false);
                                 m_subifdoff = (uint)(m_diroff + sizeof(UInt16) + dir * sizeof(TiffDirEntry) + sizeof(UInt16) * 2 + sizeof(uint));
                             }
                         }
@@ -410,15 +411,15 @@ namespace BitMiracle.LibTiff
                  */
                 for (dir = 0; dircount; dir++, dircount--)
                 {
-                    SwabShort(data[dir].tdir_tag);
-                    SwabShort(data[dir].tdir_type);
-                    SwabLong(data[dir].tdir_count);
-                    SwabLong(data[dir].tdir_offset);
+                    SwabShort(ref data[dir].tdir_tag);
+                    SwabShort(ref data[dir].tdir_type);
+                    SwabLong(ref data[dir].tdir_count);
+                    SwabLong(ref data[dir].tdir_offset);
                 }
 
                 dircount = (UInt16)nfields;
-                Tiff::SwabShort(dircount);
-                Tiff::SwabLong(diroff);
+                Tiff::SwabShort(ref dircount);
+                Tiff::SwabLong(ref diroff);
             }
             
             seekFile(m_diroff, SEEK_SET);
@@ -515,7 +516,7 @@ namespace BitMiracle.LibTiff
                 case TIFF_IFD:
                     if (fip.field_passcount)
                     {
-                        uint* lp;
+                        uint[] lp;
                         uint wc2;
                         if (wc == (UInt16)TIFF_VARIABLE2)
                         {
@@ -541,7 +542,7 @@ namespace BitMiracle.LibTiff
                         }
                         else
                         {
-                            uint* lp;
+                            uint[] lp;
                             GetField(fip.field_tag, &lp);
                             if (!writeLongArray(dir, lp))
                                 return false;
@@ -552,7 +553,7 @@ namespace BitMiracle.LibTiff
                 case TIFF_SRATIONAL:
                     if (fip.field_passcount)
                     {
-                        float* fp;
+                        float[] fp;
                         uint wc2;
                         if (wc == (UInt16)TIFF_VARIABLE2)
                         {
@@ -580,7 +581,7 @@ namespace BitMiracle.LibTiff
                         }
                         else
                         {
-                            float* fp;
+                            float[] fp;
                             GetField(fip.field_tag, &fp);
                             if (!writeRationalArray(dir, fp))
                                 return false;
@@ -590,7 +591,7 @@ namespace BitMiracle.LibTiff
                 case TIFF_FLOAT:
                     if (fip.field_passcount)
                     {
-                        float* fp;
+                        float[] fp;
                         uint wc2;
                         if (wc == (UInt16)TIFF_VARIABLE2)
                         {
@@ -618,7 +619,7 @@ namespace BitMiracle.LibTiff
                         }
                         else
                         {
-                            float* fp;
+                            float[] fp;
                             GetField(fip.field_tag, &fp);
                             if (!writeFloatArray(dir, fp))
                                 return false;
@@ -961,7 +962,7 @@ namespace BitMiracle.LibTiff
         */
         private bool writeRationalArray(ref TiffDirEntry dir, float[] v)
         {
-            uint* t = new uint [2 * dir.tdir_count];
+            uint[] t = new uint [2 * dir.tdir_count];
             if (t == null)
             {
                 Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write RATIONAL array");
@@ -1042,7 +1043,7 @@ namespace BitMiracle.LibTiff
             {
                 case TIFF_BYTE:
                     {
-                        byte* bp = new byte [n];
+                        byte[] bp = new byte [n];
                         if (bp == null)
                         {
                             Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
@@ -1060,7 +1061,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFF_SBYTE:
                     {
-                        sbyte* bp = new sbyte [n];
+                        sbyte[] bp = new sbyte [n];
                         if (bp == null)
                         {
                             Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
@@ -1114,7 +1115,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFF_LONG:
                     {
-                        uint* bp = new uint [n];
+                        uint[] bp = new uint [n];
                         if (bp == null)
                         {
                             Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
@@ -1150,7 +1151,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFF_FLOAT:
                     {
-                        float* bp = new float [n];
+                        float[] bp = new float [n];
                         if (bp == null)
                         {
                             Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
@@ -1246,7 +1247,7 @@ namespace BitMiracle.LibTiff
                 Tiff::SwabArrayOfShort(cp, cc);
 
             int byteCount = cc * sizeof(UInt16);
-            byte* bytes = new byte [byteCount];
+            byte[] bytes = new byte [byteCount];
             uint16ToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(dir, bytes, byteCount);
             delete[] bytes;
@@ -1259,7 +1260,7 @@ namespace BitMiracle.LibTiff
                 Tiff::SwabArrayOfLong(cp, cc);
 
             int byteCount = cc * sizeof(uint);
-            byte* bytes = new byte [byteCount];
+            byte[] bytes = new byte [byteCount];
             uintToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(dir, bytes, byteCount);
             delete[] bytes;
@@ -1278,7 +1279,7 @@ namespace BitMiracle.LibTiff
                 Tiff::SwabArrayOfDouble(cp, cc);
 
             int byteCount = cc * sizeof(double);
-            byte* bytes = new byte [byteCount];
+            byte[] bytes = new byte [byteCount];
             memcpy(bytes, cp, byteCount);
             bool res = writeData(dir, bytes, byteCount);
             delete[] bytes;
@@ -1291,12 +1292,12 @@ namespace BitMiracle.LibTiff
         */
         private bool linkDirectory()
         {
-            static const char module[] = "linkDirectory";
+            const string module = "linkDirectory";
 
             m_diroff = (seekFile(0, SEEK_END) + 1) & ~1;
             uint diroff = m_diroff;
             if ((m_flags & TIFF_SWAB) != 0)
-                Tiff::SwabLong(diroff);
+                Tiff::SwabLong(ref diroff);
 
             /*
              * Handle SubIFDs
@@ -1348,24 +1349,24 @@ namespace BitMiracle.LibTiff
             do
             {
                 UInt16 dircount;
-                if (!seekOK(nextdir) || !readUInt16OK(dircount))
+                if (!seekOK(nextdir) || !readUInt16OK(out dircount))
                 {
                     Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                     return false;
                 }
                 
                 if ((m_flags & TIFF_SWAB) != 0)
-                    Tiff::SwabShort(dircount);
+                    Tiff::SwabShort(ref dircount);
                 
                 seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
-                if (!readUInt32OK(nextdir))
+                if (!readUInt32OK(out nextdir))
                 {
                     Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory link");
                     return false;
                 }
 
                 if ((m_flags & TIFF_SWAB) != 0)
-                    Tiff::SwabLong(nextdir);
+                    Tiff::SwabLong(ref nextdir);
             }
             while (nextdir != 0);
 

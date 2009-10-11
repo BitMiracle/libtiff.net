@@ -51,20 +51,18 @@ namespace BitMiracle.LibTiff
 
         private static uint howMany8(uint x)
         {
-            return ((x & 0x07) ? (x >> 3) + 1 : x >> 3);
+            return ((x & 0x07) != 0 ? (x >> 3) + 1 : x >> 3);
         }
 
         private bool readDirectoryFailed(TiffDirEntry dir)
         {
-            delete dir;
             return false;
         }
 
-        private bool estimateStripByteCounts(TiffDirEntry dir, UInt16 dircount)
+        private bool estimateStripByteCounts(TiffDirEntry[] dir, UInt16 dircount)
         {
-            static const char module[] = "estimateStripByteCounts";
+            const string module = "estimateStripByteCounts";
 
-            delete m_dir.td_stripbytecount;
             m_dir.td_stripbytecount = new uint [m_dir.td_nstrips];
             if (m_dir.td_stripbytecount == null)
             {
@@ -80,10 +78,10 @@ namespace BitMiracle.LibTiff
                 /* calculate amount of space used by indirect values */
                 for (UInt16 n = 0; n < dircount; n++)
                 {
-                    uint cc = Tiff::DataWidth((TiffDataType)dir[n].tdir_type);
+                    uint cc = DataWidth((TiffDataType)dir[n].tdir_type);
                     if (cc == 0)
                     {
-                        Tiff::ErrorExt(this, m_clientdata, module, "%s: Cannot determine size of unknown tag type %d", m_name, dir[n].tdir_type);
+                        ErrorExt(this, m_clientdata, module, "%s: Cannot determine size of unknown tag type %d", m_name, dir[n].tdir_type);
                         return false;
                     }
 
@@ -135,17 +133,17 @@ namespace BitMiracle.LibTiff
 
         private void missingRequired(string tagname)
         {
-            static const char module[] = "missingRequired";
-            Tiff::ErrorExt(this, m_clientdata, module, "%s: TIFF directory is missing required \"%s\" field", m_name, tagname);
+            const string module = "missingRequired";
+            ErrorExt(this, m_clientdata, module, "%s: TIFF directory is missing required \"%s\" field", m_name, tagname);
         }
 
         private int fetchFailed(TiffDirEntry dir)
         {
-            Tiff::ErrorExt(this, m_clientdata, m_name, "Error fetching data for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+            ErrorExt(this, m_clientdata, m_name, "Error fetching data for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
             return 0;
         }
 
-        private static int readDirectoryFind(TiffDirEntry dir, UInt16 dircount, UInt16 tagid)
+        private static int readDirectoryFind(TiffDirEntry[] dir, UInt16 dircount, UInt16 tagid)
         {
             for (UInt16 n = 0; n < dircount; n++)
             {
@@ -183,7 +181,7 @@ namespace BitMiracle.LibTiff
                 /*
                 * XXX: Reduce memory allocation granularity of the dirlist array.
                 */
-                uint* new_dirlist = Realloc(m_dirlist, m_dirnumber - 1, 2 * m_dirnumber);
+                uint[] new_dirlist = Realloc(m_dirlist, m_dirnumber - 1, 2 * m_dirnumber);
                 if (new_dirlist == null)
                     return false;
 
@@ -202,27 +200,29 @@ namespace BitMiracle.LibTiff
         */
         private UInt16 fetchDirectory(uint diroff, out TiffDirEntry[] pdir, out uint nextdiroff)
         {
-            static const char module[] = "fetchDirectory";
+            const string module = "fetchDirectory";
 
             m_diroff = diroff;
             nextdiroff = 0;
 
             UInt16 dircount;
-            TiffDirEntry* dir = null;
+            TiffDirEntry[] dir = null;
+            pdir = null;
+
             if (!seekOK(m_diroff)) 
             {
                 ErrorExt(this, m_clientdata, module, "%s: Seek error accessing TIFF directory", m_name);
                 return 0;
             }
             
-            if (!readUInt16OK(dircount)) 
+            if (!readUInt16OK(out dircount)) 
             {
                 ErrorExt(this, m_clientdata, module, "%s: Can not read TIFF directory count", m_name);
                 return 0;
             }
             
             if ((m_flags & TIFF_SWAB) != 0)
-                SwabShort(dircount);
+                SwabShort(ref dircount);
 
             dir = new TiffDirEntry [dircount];
             if (dir == null)
@@ -234,17 +234,16 @@ namespace BitMiracle.LibTiff
             if (!readDirEntryOk(dir, dircount))
             {
                 ErrorExt(this, m_clientdata, module, "%.100s: Can not read TIFF directory", m_name);
-                delete dir;
                 return 0;
             }
 
             /*
             * Read offset to next directory for sequential scans.
             */
-            readUInt32OK(nextdiroff);
+            readUInt32OK(out nextdiroff);
 
             if ((m_flags & TIFF_SWAB) != 0)
-                SwabLong(nextdiroff);
+                SwabLong(ref nextdiroff);
 
             pdir = dir;
             return dircount;
@@ -257,16 +256,16 @@ namespace BitMiracle.LibTiff
         {
             bool ok = false;
 
-            byte b[2 * sizeof(uint)];
+            byte[] b = new byte[2 * sizeof(uint)];
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                uint l[2];
+                uint[] l = new uint[2];
                 l[0] = readUInt32(b, 0);
                 l[1] = readUInt32(b, sizeof(uint));
 
                 float v;
-                if (cvtRational(dir, l[0], l[1], v)) 
+                if (cvtRational(dir, l[0], l[1], out v)) 
                 {
                     /*
                     * XXX: Numerator 0xFFFFFFFF means that we have infinite
@@ -290,12 +289,12 @@ namespace BitMiracle.LibTiff
         {
             if (count > dir.tdir_count)
             {
-                Tiff::WarningExt(this, m_clientdata, m_name, "incorrect count for field \"%s\" (%u, expecting %u); tag ignored", FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
+                WarningExt(this, m_clientdata, m_name, "incorrect count for field \"%s\" (%u, expecting %u); tag ignored", FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
                 return false;
             }
             else if (count < dir.tdir_count)
             {
-                Tiff::WarningExt(this, m_clientdata, m_name, "incorrect count for field \"%s\" (%u, expecting %u); tag trimmed", FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
+                WarningExt(this, m_clientdata, m_name, "incorrect count for field \"%s\" (%u, expecting %u); tag trimmed", FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
                 return true;
             }
 
@@ -314,7 +313,7 @@ namespace BitMiracle.LibTiff
             * uint instead of int here.
             */
 
-            uint w = Tiff::DataWidth((TiffDataType)dir.tdir_type);
+            uint w = DataWidth((TiffDataType)dir.tdir_type);
             uint cc = dir.tdir_count * w;
 
             /* Check for overflow. */
@@ -334,33 +333,30 @@ namespace BitMiracle.LibTiff
                     case TIFF_SHORT:
                     case TIFF_SSHORT:
                         {
-                            UInt16* u = byteArrayToUInt16(cp, 0, cc);
-                            Tiff::SwabArrayOfShort(u, dir.tdir_count);
+                            UInt16[] u = byteArrayToUInt16(cp, 0, cc);
+                            SwabArrayOfShort(u, dir.tdir_count);
                             uint16ToByteArray(u, 0, dir.tdir_count, cp, 0);
-                            delete[] u;
                         }
                         break;
                     case TIFF_LONG:
                     case TIFF_SLONG:
                     case TIFF_FLOAT:
                         {
-                            uint* u = byteArrayToUInt(cp, 0, cc);
-                            Tiff::SwabArrayOfLong(u, dir.tdir_count);
+                            uint[] u = byteArrayToUInt(cp, 0, cc);
+                            SwabArrayOfLong(u, dir.tdir_count);
                             uintToByteArray(u, 0, dir.tdir_count, cp, 0);
-                            delete[] u;
                         }
                         break;
                     case TIFF_RATIONAL:
                     case TIFF_SRATIONAL:
                         {
-                            uint* u = byteArrayToUInt(cp, 0, cc);
-                            Tiff::SwabArrayOfLong(u, 2 * dir.tdir_count);
+                            uint[] u = byteArrayToUInt(cp, 0, cc);
+                            SwabArrayOfLong(u, 2 * dir.tdir_count);
                             uintToByteArray(u, 0, 2 * dir.tdir_count, cp, 0);
-                            delete[] u;
                         }
                         break;
                     case TIFF_DOUBLE:
-                        Tiff::swab64BitData(cp, cc);
+                        swab64BitData(cp, cc);
                         break;
                 }
             }
@@ -377,15 +373,15 @@ namespace BitMiracle.LibTiff
             {
                 uint l = dir.tdir_offset;
                 if ((m_flags & TIFF_SWAB) != 0)
-                    Tiff::SwabLong(l);
+                    SwabLong(ref l);
 
-                byte bytes[sizeof(uint)];
+                byte[] bytes = new byte[sizeof(uint)];
                 writeUInt32(l, bytes, 0);
                 memcpy(cp, bytes, dir.tdir_count);
                 return 1;
             }
 
-            return fetchData(dir, (byte*)cp);
+            return fetchData(dir, cp);
         }
 
         /*
@@ -395,7 +391,7 @@ namespace BitMiracle.LibTiff
         {
             if (denom == 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%s: Rational with zero denominator (num = %u)", FieldWithTag(dir.tdir_tag).field_name, num);
+                ErrorExt(this, m_clientdata, m_name, "%s: Rational with zero denominator (num = %u)", FieldWithTag(dir.tdir_tag).field_name, num);
                 return false;
             }
             else
@@ -416,16 +412,16 @@ namespace BitMiracle.LibTiff
         */
         private float fetchRational(TiffDirEntry dir)
         {
-            byte bytes[sizeof(uint) * 2];
+            byte[] bytes = new byte[sizeof(uint) * 2];
             int read = fetchData(dir, bytes);
             if (read != 0)
             {
-                uint l[2];
+                uint[] l = new uint[2];
                 l[0] = readUInt32(bytes, 0);
                 l[1] = readUInt32(bytes, sizeof(uint));
 
                 float v;
-                bool res = cvtRational(dir, l[0], l[1], v);
+                bool res = cvtRational(dir, l[0], l[1], out v);
                 if (res)
                     return v;
             }
@@ -462,30 +458,30 @@ namespace BitMiracle.LibTiff
                 if (m_header.tiff_magic == TIFF_BIGENDIAN)
                 {
                     if (count == 4)
-                        v[3] = dir.tdir_offset & 0xff;
+                        v[3] = (byte)(dir.tdir_offset & 0xff);
 
                     if (count >= 3)
-                        v[2] = (dir.tdir_offset >> 8) & 0xff;
+                        v[2] = (byte)((dir.tdir_offset >> 8) & 0xff);
 
                     if (count >= 2)
-                        v[1] = (dir.tdir_offset >> 16) & 0xff;
+                        v[1] = (byte)((dir.tdir_offset >> 16) & 0xff);
 
                     if (count >= 1)
-                        v[0] = dir.tdir_offset >> 24;
+                        v[0] = (byte)(dir.tdir_offset >> 24);
                 }
                 else
                 {
                     if (count == 4)
-                        v[3] = dir.tdir_offset >> 24;
+                        v[3] = (byte)(dir.tdir_offset >> 24);
 
                     if (count >= 3)
-                        v[2] = (dir.tdir_offset >> 16) & 0xff;
+                        v[2] = (byte)((dir.tdir_offset >> 16) & 0xff);
 
                     if (count >= 2)
-                        v[1] = (dir.tdir_offset >> 8) & 0xff;
+                        v[1] = (byte)((dir.tdir_offset >> 8) & 0xff);
 
                     if (count >= 1)
-                        v[0] = dir.tdir_offset & 0xff;
+                        v[0] = (byte)(dir.tdir_offset & 0xff);
                 }
 
                 return true;
@@ -524,13 +520,12 @@ namespace BitMiracle.LibTiff
             }
 
             uint cc = dir.tdir_count * sizeof(UInt16);
-            byte* b = new byte[cc];
+            byte[] b = new byte[cc];
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                UInt16* u = byteArrayToUInt16(b, 0, read);
+                UInt16[] u = byteArrayToUInt16(b, 0, read);
                 memcpy(v, u, read);
-                delete[] u;
             }
 
             return (read != 0);
@@ -583,11 +578,11 @@ namespace BitMiracle.LibTiff
             }
 
             uint cc = dir.tdir_count * sizeof(uint);
-            byte* b = new byte[cc];
+            byte[] b = new byte[cc];
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                uint* u = byteArrayToUInt(b, 0, read);
+                uint[] u = byteArrayToUInt(b, 0, read);
                 memcpy(v, u, read);
                 delete[] u;
             }
@@ -600,10 +595,10 @@ namespace BitMiracle.LibTiff
         */
         private bool fetchRationalArray(TiffDirEntry dir, float[] v)
         {
-            assert(sizeof(float) == sizeof(uint));
+            Debug.Assert(sizeof(float) == sizeof(uint));
 
             bool ok = false;
-            byte* l = new byte [dir.tdir_count * Tiff::DataWidth((TiffDataType)dir.tdir_type)];
+            byte[] l = new byte [dir.tdir_count * DataWidth((TiffDataType)dir.tdir_type)];
             if (l == null)
                 ErrorExt(this, m_clientdata, m_name, "No space to fetch array of rationals");
 
@@ -643,9 +638,9 @@ namespace BitMiracle.LibTiff
                 return true;
             }
 
-            uint w = Tiff::DataWidth((TiffDataType)dir.tdir_type);
+            uint w = DataWidth((TiffDataType)dir.tdir_type);
             uint cc = dir.tdir_count * w;
-            byte* b = new byte [cc];
+            byte[] b = new byte [cc];
             int read = fetchData(dir, b);
             if (read != 0)
                 memcpy(v, b, read);
@@ -658,9 +653,9 @@ namespace BitMiracle.LibTiff
         */
         private bool fetchDoubleArray(TiffDirEntry dir, double[] v)
         {
-            uint w = Tiff::DataWidth((TiffDataType)dir.tdir_type);
+            uint w = DataWidth((TiffDataType)dir.tdir_type);
             uint cc = dir.tdir_count * w;
-            byte* b = new byte [cc];
+            byte[] b = new byte [cc];
             int read = fetchData(dir, b);
             if (read != 0)
                 memcpy(v, b, read);
@@ -686,7 +681,7 @@ namespace BitMiracle.LibTiff
                 case TIFF_BYTE:
                 case TIFF_SBYTE:
                     {
-                        byte* b = new byte[dir.tdir_count];
+                        byte[] b = new byte[dir.tdir_count];
                         bool res = fetchByteArray(dir, b);
                         if (res)
                         {
@@ -717,7 +712,7 @@ namespace BitMiracle.LibTiff
                 case TIFF_LONG:
                 case TIFF_SLONG:
                     {
-                        uint* l = new uint[dir.tdir_count];
+                        uint[] l = new uint[dir.tdir_count];
                         bool res = fetchLongArray(dir, l);
                         if (res)
                         {
@@ -733,7 +728,7 @@ namespace BitMiracle.LibTiff
                 case TIFF_RATIONAL:
                 case TIFF_SRATIONAL:
                     {
-                        float* f = new float[dir.tdir_count];
+                        float[] f = new float[dir.tdir_count];
                         bool res = fetchRationalArray(dir, f);
                         if (res)
                         {
@@ -748,7 +743,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFF_FLOAT:
                     {
-                        float* f = new float[dir.tdir_count];
+                        float[] f = new float[dir.tdir_count];
                         bool res = fetchFloatArray(dir, f);
                         if (res)
                         {
@@ -767,7 +762,7 @@ namespace BitMiracle.LibTiff
                     /* TIFF_NOTYPE */
                     /* TIFF_ASCII */
                     /* TIFF_UNDEFINED */
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "cannot read TIFF_ANY type %d for field \"%s\"", dir.tdir_type, FieldWithTag(dir.tdir_tag).field_name);
+                    ErrorExt(this, m_clientdata, m_name, "cannot read TIFF_ANY type %d for field \"%s\"", dir.tdir_type, FieldWithTag(dir.tdir_tag).field_name);
                     return false;
             }
 
@@ -781,7 +776,7 @@ namespace BitMiracle.LibTiff
         {
             static const char mesg[] = "to fetch tag value";
             bool ok = false;
-            const TiffFieldInfo* fip = FieldWithTag(dir.tdir_tag);
+            TiffFieldInfo fip = FieldWithTag(dir.tdir_tag);
 
             if (dir.tdir_count > 1)
             {
@@ -790,7 +785,7 @@ namespace BitMiracle.LibTiff
                     case TIFF_BYTE:
                     case TIFF_SBYTE:
                         {
-                            byte* cp = new byte [dir.tdir_count];
+                            byte[] cp = new byte [dir.tdir_count];
                             if (cp == null)
                                 ErrorExt(this, m_clientdata, m_name, "No space %s", mesg);
 
@@ -828,7 +823,7 @@ namespace BitMiracle.LibTiff
                     case TIFF_LONG:
                     case TIFF_SLONG:
                         {
-                            uint* cp = new uint [dir.tdir_count];
+                            uint[] cp = new uint [dir.tdir_count];
                             if (cp == null)
                                 ErrorExt(this, m_clientdata, m_name, "No space %s", mesg);
 
@@ -847,7 +842,7 @@ namespace BitMiracle.LibTiff
                     case TIFF_RATIONAL:
                     case TIFF_SRATIONAL:
                         {
-                            float* cp = new float [dir.tdir_count];
+                            float[] cp = new float [dir.tdir_count];
                             if (cp == null)
                                 ErrorExt(this, m_clientdata, m_name, "No space %s", mesg);
 
@@ -865,7 +860,7 @@ namespace BitMiracle.LibTiff
                         break;
                     case TIFF_FLOAT:
                         {
-                            float* cp = new float [dir.tdir_count];
+                            float[] cp = new float [dir.tdir_count];
                             if (cp == null)
                                 ErrorExt(this, m_clientdata, m_name, "No space %s", mesg);
 
@@ -1071,7 +1066,7 @@ namespace BitMiracle.LibTiff
                     {
                         if (v[i] != v[0])
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+                            ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
                             failed = true;
                             break;
                         }
@@ -1102,7 +1097,7 @@ namespace BitMiracle.LibTiff
 
             if (checkDirCount(dir, samples))
             {
-                uint* v = new uint [dir.tdir_count];
+                uint[] v = new uint [dir.tdir_count];
                 if (v == null)
                     ErrorExt(this, m_clientdata, m_name, "No space to fetch per-sample values");
 
@@ -1117,7 +1112,7 @@ namespace BitMiracle.LibTiff
                     {
                         if (v[i] != v[0])
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+                            ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
                             failed = true;
                             break;
                         }
@@ -1162,7 +1157,7 @@ namespace BitMiracle.LibTiff
                     {
                         if (v[i] != v[0])
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+                            ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
                             failed = true;
                             break;
                         }
@@ -1230,7 +1225,7 @@ namespace BitMiracle.LibTiff
             {
                 /* Special case to correct length */
 
-                uint* dp = new uint[dir.tdir_count];
+                uint[] dp = new uint[dir.tdir_count];
                 if (dp == null)
                 {
                     ErrorExt(this, m_clientdata, m_name, "No space to fetch strip tag");
@@ -1265,14 +1260,14 @@ namespace BitMiracle.LibTiff
             /*
              * Handle LONG's for backward compatibility.
              */
-            uint* cp = new uint [dir.tdir_count];
+            uint[] cp = new uint [dir.tdir_count];
             if (cp == null)
                 ErrorExt(this, m_clientdata, m_name, "No space %s", mesg);
 
             bool ok = (cp != null) && fetchLongArray(dir, cp);
             if (ok)
             {
-                float* fp = new float [dir.tdir_count];
+                float[] fp = new float [dir.tdir_count];
                 if (fp == null)
                 {
                     delete cp;
@@ -1333,18 +1328,18 @@ namespace BitMiracle.LibTiff
             if (rowsperstrip >= m_dir.td_rowsperstrip)
                 return ;
             
-            uint nstrips = Tiff::howMany(bytecount, stripbytes);
+            uint nstrips = howMany(bytecount, stripbytes);
             if (nstrips == 0)
             {
                 /* something is wonky, do nothing. */
                 return ;
             }
 
-            uint* newcounts = new uint [nstrips];
+            uint[] newcounts = new uint [nstrips];
             if (newcounts == null)
                 ErrorExt(this, m_clientdata, m_name, "No space for chopped \"StripByteCounts\" array");
 
-            uint* newoffsets = new uint [nstrips];
+            uint[] newoffsets = new uint [nstrips];
             if (newoffsets == null)
                 ErrorExt(this, m_clientdata, m_name, "No space for chopped \"StripOffsets\" array");
 

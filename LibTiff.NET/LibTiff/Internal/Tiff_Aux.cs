@@ -116,7 +116,7 @@ namespace BitMiracle.LibTiff
         internal static uint[] byteArrayToUInt(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 4;
-            uint* integers = new uint[intCount];
+            uint[] integers = new uint[intCount];
 
             int byteStopPos = byteStartOffset + intCount * 4;
             int intPos = 0;

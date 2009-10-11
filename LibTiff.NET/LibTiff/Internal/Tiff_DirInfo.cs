@@ -36,22 +36,7 @@ namespace BitMiracle.LibTiff
 
         private void setupFieldInfo(TiffFieldInfo[] info, uint n)
         {
-            if (m_fieldinfo != null)
-            {
-                for (size_t i = 0; i < m_nfields; i++)
-                {
-                    TiffFieldInfo* fld = m_fieldinfo[i];
-                    if (fld.field_bit == FIELD_CUSTOM && strncmp("Tag ", fld.field_name, 4) == 0)
-                    {
-                        delete fld.field_name;
-                        delete fld;
-                    }
-                }
-
-                delete m_fieldinfo;
-                m_nfields = 0;
-            }
-
+            m_nfields = 0;
             MergeFieldInfo(info, n);
         }
 
@@ -60,12 +45,12 @@ namespace BitMiracle.LibTiff
 
         private void printFieldInfo(Stream fd)
         {
-            size_t i;
+            uint i;
 
             fprintf(fd, "%s: \n", m_name);
             for (i = 0; i < m_nfields; i++)
             {
-                const TiffFieldInfo* fip = m_fieldinfo[i];
+                TiffFieldInfo fip = m_fieldinfo[i];
                 fprintf(fd, "field[%2d] %5lu, %2d, %2d, %d, %2d, %5s, %5s, %s\n", i, fip.field_tag, fip.field_readcount, fip.field_writecount, fip.field_type, fip.field_bit, fip.field_oktochange ? "TRUE" : "FALSE", fip.field_passcount ? "TRUE" : "FALSE", fip.field_name);
             }
         }
@@ -75,7 +60,7 @@ namespace BitMiracle.LibTiff
         */
         private TiffDataType sampleToTagType()
         {
-            uint bps = Tiff::howMany8(m_dir.td_bitspersample);
+            uint bps = howMany8(m_dir.td_bitspersample);
 
             switch (m_dir.td_sampleformat)
             {
@@ -94,11 +79,12 @@ namespace BitMiracle.LibTiff
 
         private TiffFieldInfo findOrRegisterFieldInfo(uint tag, TiffDataType dt)
         {
-            const TiffFieldInfo* fld = FindFieldInfo(tag, dt);
+            TiffFieldInfo fld = FindFieldInfo(tag, dt);
             if (fld == null)
             {
                 fld = createAnonFieldInfo(tag, dt);
-                MergeFieldInfo(fld, 1);
+                TiffFieldInfo[] array = { fld };
+                MergeFieldInfo(array, 1);
             }
 
             return fld;
@@ -106,22 +92,15 @@ namespace BitMiracle.LibTiff
 
         private TiffFieldInfo createAnonFieldInfo(uint tag, TiffDataType field_type)
         {
-            TiffFieldInfo* fld = new TiffFieldInfo(tag, TIFF_VARIABLE2, TIFF_VARIABLE2, field_type, FIELD_CUSTOM, true, true, null);
+            TiffFieldInfo fld = new TiffFieldInfo(tag, TIFF_VARIABLE2, TIFF_VARIABLE2, field_type, FIELD_CUSTOM, true, true, null);
 
             if (fld == null)
                 return null;
 
-            fld.field_name = new char[32];
-            if (fld.field_name == null)
-            {
-                delete fld;
-                return null;
-            }
-
-            /* note that this name is a special sign to TIFFClose() and
+            /* note that this name is a special sign to Close() and
              * setupFieldInfo() to free the field
              */
-            sprintf(fld.field_name, "Tag %d", tag);
+            fld.field_name = string.Format("Tag %d", tag);
             return fld;
         }
         

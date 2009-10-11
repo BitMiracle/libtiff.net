@@ -150,14 +150,14 @@ namespace BitMiracle.LibTiff
 
             m_diroff = 0;
             m_nextdiroff = 0;
-            m_dirlist = 0;
+            m_dirlist = null;
             m_dirlistsize = 0;
 
             m_dirnumber = 0;
             m_dir = null;
             //tif_header;
-            m_typeshift = 0;
-            m_typemask = 0;
+            m_typeshift = null;
+            m_typemask = null;
             m_row = 0;
             m_curdir = 0;
             m_curstrip = 0;
@@ -176,7 +176,7 @@ namespace BitMiracle.LibTiff
             m_currentCodec = null;
 
             m_scanlinesize = 0;
-            m_rawdata = 0;
+            m_rawdata = null;
             m_rawdatasize = 0;
             m_rawcp = 0;
             m_rawcc = 0;
@@ -186,7 +186,7 @@ namespace BitMiracle.LibTiff
 
             m_clientdata = 0;
 
-            m_postDecodeMethod = pdmNone;
+            m_postDecodeMethod = PostDecodeMethodType.pdmNone;
 
             m_fieldinfo = null;
             m_nfields = 0;
@@ -212,16 +212,16 @@ namespace BitMiracle.LibTiff
 
         internal static TiffFieldInfo[] Realloc(TiffFieldInfo[] oldBuffer, int elementCount, int newElementCount)
         {
-            TiffFieldInfo** newBuffer = new TiffFieldInfo*[newElementCount];
-            memset(newBuffer, 0, newElementCount * sizeof(TiffFieldInfo*));
+            TiffFieldInfo[] newBuffer = new TiffFieldInfo [newElementCount];
+            //memset(newBuffer, 0, newElementCount * sizeof(TiffFieldInfo*));
 
             if (oldBuffer == null)
                 return newBuffer;
 
             if (newBuffer != null)
             {
-                int copyLength = min(elementCount, newElementCount);
-                memcpy(newBuffer, oldBuffer, copyLength * sizeof(TiffFieldInfo*));
+                int copyLength = Math.Min(elementCount, newElementCount);
+                Array.Copy(oldBuffer, newBuffer, copyLength);
             }
 
             return newBuffer;
@@ -229,16 +229,16 @@ namespace BitMiracle.LibTiff
 
         internal static TiffTagValue[] Realloc(TiffTagValue[] oldBuffer, int elementCount, int newElementCount)
         {
-            TiffTagValue* newBuffer = new TiffTagValue[newElementCount];
-            memset(newBuffer, 0, newElementCount * sizeof(TiffTagValue));
+            TiffTagValue[] newBuffer = new TiffTagValue[newElementCount];
+            //memset(newBuffer, 0, newElementCount * sizeof(TiffTagValue));
 
             if (oldBuffer == null)
                 return newBuffer;
 
             if (newBuffer != null)
             {
-                int copyLength = min(elementCount, newElementCount);
-                memcpy(newBuffer, oldBuffer, copyLength * sizeof(TiffTagValue));
+                int copyLength = Math.Min(elementCount, newElementCount);
+                Array.Copy(oldBuffer, newBuffer, copyLength);
             }
 
             return newBuffer;
@@ -246,7 +246,7 @@ namespace BitMiracle.LibTiff
 
         internal bool setCompressionScheme(int scheme)
         {
-            TiffCodec* c = FindCodec((UInt16)scheme);
+            TiffCodec c = FindCodec((ushort)scheme);
             if (c == null)
             {
                 /*
@@ -278,36 +278,7 @@ namespace BitMiracle.LibTiff
             m_currentCodec.tif_cleanup();
             FreeDirectory();
 
-            delete m_dirlist;
-
-            /* Clean up client info links */
-            while (m_clientinfo != null)
-            {
-                clientInfoLink* link = m_clientinfo;
-
-                m_clientinfo = link.next;
-                delete link.name;
-                delete link;
-            }
-
-            if (m_rawdata != null && (m_flags & TIFF_MYBUFFER) != 0)
-                delete m_rawdata;
-
-            /* Clean up custom fields */
-            if (m_nfields > 0)
-            {
-                for (size_t i = 0; i < m_nfields; i++)
-                {
-                    TiffFieldInfo* fld = m_fieldinfo[i];
-                    if (fld.field_bit == FIELD_CUSTOM && strncmp("Tag ", fld.field_name, 4) == 0)
-                    {
-                        delete fld.field_name;
-                        delete fld;
-                    }
-                }
-
-                delete m_fieldinfo;
-            }
+            m_clientinfo = null;
         }
 
         /* post decoding routine */  
@@ -315,16 +286,16 @@ namespace BitMiracle.LibTiff
         {
             switch (m_postDecodeMethod)
             {
-                case pdmSwab16Bit:
+                case PostDecodeMethodType.pdmSwab16Bit:
                     swab16BitData(buf, cc);
                     break;
-                case pdmSwab24Bit:
+                case PostDecodeMethodType.pdmSwab24Bit:
                     swab24BitData(buf, cc);
                     break;
-                case pdmSwab32Bit:
+                case PostDecodeMethodType.pdmSwab32Bit:
                     swab32BitData(buf, cc);
                     break;
-                case pdmSwab64Bit:
+                case PostDecodeMethodType.pdmSwab64Bit:
                     swab64BitData(buf, cc);
                     break;
             }

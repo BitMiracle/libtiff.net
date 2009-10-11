@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
 
 using BitMiracle.LibTiff.Internal;
 
@@ -71,9 +72,9 @@ namespace BitMiracle.LibTiff
         public const int TIFF_VERSION = 42;
         public const int TIFF_BIGTIFF_VERSION = 43;
 
-        public const int TIFF_BIGENDIAN = 0x4d4d;
-        public const int TIFF_LITTLEENDIAN = 0x4949;
-        public const int MDI_LITTLEENDIAN = 0x5045;
+        public const ushort TIFF_BIGENDIAN = 0x4d4d;
+        public const ushort TIFF_LITTLEENDIAN = 0x4949;
+        public const ushort MDI_LITTLEENDIAN = 0x5045;
 
         //public ~Tiff();
 
@@ -134,7 +135,7 @@ namespace BitMiracle.LibTiff
             if (codec == null)
                 return false;
 
-            codecList* cd = new codecList();
+            codecList cd = new codecList();
             if (cd != null)
             {
                 cd.codec = codec;
@@ -155,23 +156,21 @@ namespace BitMiracle.LibTiff
             if (m_registeredCodecs == null)
                 return;
 
-            codecList* temp;
+            codecList temp;
             if (m_registeredCodecs.codec == c)
             {
                 temp = m_registeredCodecs.next;
-                delete m_registeredCodecs;
                 m_registeredCodecs = temp;
                 return;
             }
 
-            for (codecList* cd = m_registeredCodecs; cd != null; cd = cd.next)
+            for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
             {
                 if (cd.next != null)
                 {
                     if (cd.next.codec == c)
                     {
                         temp = cd.next.next;
-                        delete cd.next;
                         cd.next = temp;
                         return;
                     }
@@ -188,7 +187,7 @@ namespace BitMiracle.LibTiff
         */
         public bool IsCodecConfigured(UInt16 scheme)
         {
-            TiffCodec* codec = FindCodec(scheme);
+            TiffCodec codec = FindCodec(scheme);
 
             if (codec == null)
                 return false;
@@ -210,24 +209,24 @@ namespace BitMiracle.LibTiff
             int totalCodecs = 0;
             for (int i = 0; m_builtInCodecs[i] != null; i++)
             {
-                if (m_builtInCodecs[i] && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
+                if (m_builtInCodecs[i] != null && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
                     totalCodecs++;
             }
 
-            for (codecList* cd = m_registeredCodecs; cd; cd = cd.next)
+            for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
                 totalCodecs++;
 
-            TiffCodec** codecs = new TiffCodec*[totalCodecs + 1];
+            TiffCodec[] codecs = new TiffCodec [totalCodecs + 1];
             if (codecs == null)
                 return null;
 
             int codecPos = 0;
-            for (codecList* cd = m_registeredCodecs; cd; cd = cd.next)
+            for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
                 codecs[codecPos++] = cd.codec;
 
             for (int i = 0; m_builtInCodecs[i] != null; i++)
             {
-                if (m_builtInCodecs[i] && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
+                if (m_builtInCodecs[i] != null && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
                     codecs[codecPos++] = m_builtInCodecs[i];
             }
 
@@ -246,16 +245,16 @@ namespace BitMiracle.LibTiff
         */
         public static byte[] Realloc(byte[] oldBuffer, int elementCount, int newElementCount)
         {
-            byte* newBuffer = new byte[newElementCount];
-            memset(newBuffer, 0, newElementCount * sizeof(byte));
+            byte[] newBuffer = new byte[newElementCount];
+            //memset(newBuffer, 0, newElementCount * sizeof(byte));
 
             if (oldBuffer == null)
                 return newBuffer;
 
             if (newBuffer != null)
             {
-                int copyLength = min(elementCount, newElementCount);
-                memcpy(newBuffer, oldBuffer, copyLength);
+                int copyLength = Math.Min(elementCount, newElementCount);
+                Array.Copy(oldBuffer, newBuffer, copyLength);
             }
 
             return newBuffer;
@@ -263,16 +262,16 @@ namespace BitMiracle.LibTiff
 
         public static uint[] Realloc(uint[] oldBuffer, int elementCount, int newElementCount)
         {
-            uint* newBuffer = new uint[newElementCount];
-            memset(newBuffer, 0, newElementCount * sizeof(uint));
+            uint[] newBuffer = new uint[newElementCount];
+            //memset(newBuffer, 0, newElementCount * sizeof(uint));
 
             if (oldBuffer == null)
                 return newBuffer;
 
             if (newBuffer != null)
             {
-                int copyLength = min(elementCount, newElementCount);
-                memcpy(newBuffer, oldBuffer, copyLength * sizeof(uint));
+                int copyLength = Math.Min(elementCount, newElementCount);
+                Array.Copy(oldBuffer, newBuffer, copyLength);
             }
 
             return newBuffer;
@@ -294,43 +293,44 @@ namespace BitMiracle.LibTiff
         */
         public static Tiff Open(string name, string mode)
         {
-            static const char module[] = "Open";
+            //const string module = "Open";
 
-            DWORD dwMode;
-            int m = Tiff::getMode(mode, module);
-            switch (m)
-            {
-                case O_RDONLY:
-                    dwMode = OPEN_EXISTING;
-                    break;
-                case O_RDWR:
-                    dwMode = OPEN_ALWAYS;
-                    break;
-                case O_RDWR | O_CREAT: 
-                    dwMode = OPEN_ALWAYS;
-                    break;
-                case O_RDWR | O_TRUNC: 
-                    dwMode = CREATE_ALWAYS;
-                    break;
-                case O_RDWR | O_CREAT | O_TRUNC: 
-                    dwMode = CREATE_ALWAYS;
-                    break;
-                default:
-                    return null;
-            }
+            return null;
+            //DWORD dwMode;
+            //int m = getMode(mode, module);
+            //switch (m)
+            //{
+            //    case O_RDONLY:
+            //        dwMode = OPEN_EXISTING;
+            //        break;
+            //    case O_RDWR:
+            //        dwMode = OPEN_ALWAYS;
+            //        break;
+            //    case O_RDWR | O_CREAT: 
+            //        dwMode = OPEN_ALWAYS;
+            //        break;
+            //    case O_RDWR | O_TRUNC: 
+            //        dwMode = CREATE_ALWAYS;
+            //        break;
+            //    case O_RDWR | O_CREAT | O_TRUNC: 
+            //        dwMode = CREATE_ALWAYS;
+            //        break;
+            //    default:
+            //        return null;
+            //}
 
-            thandle_t fd = (thandle_t)CreateFileA(name, (m == O_RDONLY) ? GENERIC_READ: (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ | FILE_SHARE_WRITE, null, dwMode, (m == O_RDONLY) ? FILE_ATTRIBUTE_READONLY: FILE_ATTRIBUTE_NORMAL, null);
-            if (fd == INVALID_HANDLE_VALUE)
-            {
-                ErrorExt(null, 0, module, "%s: Cannot open", name);
-                return null;
-            }
+            //thandle_t fd = (thandle_t)CreateFileA(name, (m == O_RDONLY) ? GENERIC_READ: (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ | FILE_SHARE_WRITE, null, dwMode, (m == O_RDONLY) ? FILE_ATTRIBUTE_READONLY: FILE_ATTRIBUTE_NORMAL, null);
+            //if (fd == INVALID_HANDLE_VALUE)
+            //{
+            //    ErrorExt(null, 0, module, "%s: Cannot open", name);
+            //    return null;
+            //}
 
-            Tiff* tif = FdOpen((int)fd, name, mode);
-            if (tif == null)
-                CloseHandle(fd);
+            //Tiff tif = FdOpen((int)fd, name, mode);
+            //if (tif == null)
+            //    CloseHandle(fd);
 
-            return tif;
+            //return tif;
         }
 
         /*
@@ -338,7 +338,7 @@ namespace BitMiracle.LibTiff
         */
         public static Tiff FdOpen(int ifd, string name, string mode)
         {
-            Tiff* tif = ClientOpen(name, mode, (thandle_t)ifd, new TiffStream());
+            Tiff tif = ClientOpen(name, mode, (thandle_t)ifd, new TiffStream());
             if (tif != null)
                 tif.m_userStream = false; // clear flag, so stream will be deleted
 
@@ -347,27 +347,26 @@ namespace BitMiracle.LibTiff
 
         public static Tiff ClientOpen(string name, string mode, thandle_t clientdata, TiffStream stream)
         {
-            static const char module[] = "ClientOpen";
+            const string module = "ClientOpen";
     
-            int m = Tiff::getMode(mode, module);
+            int m = getMode(mode, module);
             if (m == -1)
                 return null;
 
-            Tiff* tif = new Tiff();
+            Tiff tif = new Tiff();
             if (tif == null)
             {
                 ErrorExt(tif, clientdata, module, "%s: Out of memory (TIFF structure)", name);
                 return null;
             }
 
-            tif.m_name = new char[strlen(name) + 1];
-            strcpy(tif.m_name, name);
+            tif.m_name = name.Clone() as string;
 
             tif.m_mode = m & ~(O_CREAT | O_TRUNC);
-            tif.m_curdir = (UInt16)-1; /* non-existent directory */
+            tif.m_curdir = -1; /* non-existent directory */
             tif.m_curoff = 0;
-            tif.m_curstrip = (uint)-1; /* invalid strip */
-            tif.m_row = (uint)-1; /* read/write pre-increment */
+            tif.m_curstrip = -1; /* invalid strip */
+            tif.m_row = -1; /* read/write pre-increment */
             tif.m_clientdata = clientdata;
 
             if (stream == null)
@@ -435,8 +434,8 @@ namespace BitMiracle.LibTiff
              * option permits applications that only want to look at the tags,
              * for example, to get the unadulterated TIFF tag information.
              */
-            size_t modelength = strlen(mode);
-            for (size_t i = 0; i < modelength; i++)
+            int modelength = mode.Length;
+            for (int i = 0; i < modelength; i++)
             {
                 switch (mode[i])
                 {
@@ -477,7 +476,7 @@ namespace BitMiracle.LibTiff
             {
                 if (tif.m_mode == O_RDONLY)
                 {
-                    Tiff::ErrorExt(tif, tif.m_clientdata, name, "Cannot read TIFF header");
+                    ErrorExt(tif, tif.m_clientdata, name, "Cannot read TIFF header");
                     return tif.safeOpenFailed();
                 }
 
@@ -487,7 +486,7 @@ namespace BitMiracle.LibTiff
                 tif.m_header.tiff_magic = (tif.m_flags & TIFF_SWAB) != 0 ? TIFF_BIGENDIAN : TIFF_LITTLEENDIAN;
                 tif.m_header.tiff_version = TIFF_VERSION;
                 if ((tif.m_flags & TIFF_SWAB) != 0)
-                    SwabShort(tif.m_header.tiff_version);
+                    SwabShort(ref tif.m_header.tiff_version);
 
                 tif.m_header.tiff_diroff = 0; /* filled in later */
 
@@ -502,7 +501,7 @@ namespace BitMiracle.LibTiff
 
                 if (!tif.writeHeaderOK(tif.m_header))
                 {
-                    Tiff::ErrorExt(tif, tif.m_clientdata, name, "Error writing TIFF header");
+                    ErrorExt(tif, tif.m_clientdata, name, "Error writing TIFF header");
                     return tif.safeOpenFailed();
                 }
                 /*
@@ -526,7 +525,7 @@ namespace BitMiracle.LibTiff
              */
             if (tif.m_header.tiff_magic != TIFF_BIGENDIAN && tif.m_header.tiff_magic != TIFF_LITTLEENDIAN && tif.m_header.tiff_magic != MDI_LITTLEENDIAN)
             {
-                Tiff::ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF or MDI file, bad magic number %d (0x%x)", tif.m_header.tiff_magic, tif.m_header.tiff_magic);
+                ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF or MDI file, bad magic number %d (0x%x)", tif.m_header.tiff_magic, tif.m_header.tiff_magic);
                 return tif.safeOpenFailed();
             }
 
@@ -537,8 +536,8 @@ namespace BitMiracle.LibTiff
              */
             if ((tif.m_flags & TIFF_SWAB) != 0)
             {
-                SwabShort(tif.m_header.tiff_version);
-                SwabLong(tif.m_header.tiff_diroff);
+                SwabShort(ref tif.m_header.tiff_version);
+                SwabLong(ref tif.m_header.tiff_diroff);
             }
             /*
              * Now check version (if needed, it's been byte-swapped).
@@ -547,19 +546,19 @@ namespace BitMiracle.LibTiff
              */
             if (tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
-                Tiff::ErrorExt(tif, tif.m_clientdata, name, "This is a BigTIFF file.  This format not supported\n""by this version of libtiff.");
+                ErrorExt(tif, tif.m_clientdata, name, "This is a BigTIFF file.  This format not supported\nby this version of libtiff.");
                 return tif.safeOpenFailed();
             }
 
             if (tif.m_header.tiff_version != TIFF_VERSION)
             {
-                Tiff::ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF file, bad version number %d (0x%x)", tif.m_header.tiff_version, tif.m_header.tiff_version);
+                ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF file, bad version number %d (0x%x)", tif.m_header.tiff_version, tif.m_header.tiff_version);
                 return tif.safeOpenFailed();
             }
 
             tif.m_flags |= TIFF_MYBUFFER;
             tif.m_rawcp = 0;
-            tif.m_rawdata = 0;
+            tif.m_rawdata = null;
             tif.m_rawdatasize = 0;
 
             /*
@@ -620,18 +619,18 @@ namespace BitMiracle.LibTiff
             m_foundfield = null;
 
             if (m_nfields > 0)
-                m_fieldinfo = Tiff::Realloc(m_fieldinfo, m_nfields, m_nfields + n);
+                m_fieldinfo = Realloc(m_fieldinfo, m_nfields, m_nfields + n);
             else
-                m_fieldinfo = new TiffFieldInfo* [n];
+                m_fieldinfo = new TiffFieldInfo [n];
 
             for (int i = 0; i < n; i++)
             {
-                const TiffFieldInfo* fip = FindFieldInfo(info[i].field_tag, info[i].field_type);
+                const TiffFieldInfo fip = FindFieldInfo(info[i].field_tag, info[i].field_type);
 
                 /* only add definitions that aren't already present */
                 if (fip == null)
                 {
-                    m_fieldinfo[m_nfields] = (TiffFieldInfo*)&info[i];
+                    m_fieldinfo[m_nfields] = info[i];
                     m_nfields++;
                 }
             }
@@ -650,7 +649,7 @@ namespace BitMiracle.LibTiff
                 return null;
 
             /* NB: use sorted search (e.g. binary search) */
-            TiffFieldInfo key(0, 0, 0, TIFF_NOTYPE, 0, false, false, null);
+            TiffFieldInfo key = new TiffFieldInfo(0, 0, 0, TIFF_NOTYPE, 0, false, false, null);
             key.field_tag = tag;
             key.field_type = dt;
             TiffFieldInfo* pkey = &key;
@@ -680,11 +679,11 @@ namespace BitMiracle.LibTiff
 
         public TiffFieldInfo FieldWithTag(uint tag)
         {
-            const TiffFieldInfo* fip = FindFieldInfo(tag, TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfo(tag, TIFF_ANY);
             if (fip == null)
             {
                 ErrorExt(this, m_clientdata, "FieldWithTag", "Internal error, unknown tag 0x%x", tag);
-                assert(false);
+                Debug.Assert(false);
                 /*NOTREACHED*/
             }
 
@@ -693,11 +692,11 @@ namespace BitMiracle.LibTiff
 
         public TiffFieldInfo FieldWithName(string field_name)
         {
-            const TiffFieldInfo* fip = FindFieldInfoByName(field_name, TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfoByName(field_name, TIFF_ANY);
             if (fip == null)
             {
                 ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag %s", field_name);
-                assert(false);
+                Debug.Assert(false);
                 /*NOTREACHED*/
             }
 
@@ -711,7 +710,7 @@ namespace BitMiracle.LibTiff
 
         public TiffTagMethods SetTagMethods(TiffTagMethods tagMethods)
         {
-            TiffTagMethods* oldTagMethods = m_tagmethods;
+            TiffTagMethods oldTagMethods = m_tagmethods;
 
             if (tagMethods != null)
                 m_tagmethods = tagMethods;
@@ -722,7 +721,7 @@ namespace BitMiracle.LibTiff
         public object GetClientInfo(string name)
         {
             // should get copy
-            clientInfoLink* link = m_clientinfo;
+            clientInfoLink link = m_clientinfo;
 
             while (link != null && strcmp(link.name, name) != 0)
                 link = link.next;
@@ -735,7 +734,7 @@ namespace BitMiracle.LibTiff
 
         public void SetClientInfo(object data, string name)
         {
-            clientInfoLink* link = m_clientinfo;
+            clientInfoLink link = m_clientinfo;
 
             /*
              ** Do we have an existing link with this name?  If so, just
@@ -755,10 +754,10 @@ namespace BitMiracle.LibTiff
              */
 
             link = new clientInfoLink();
-            assert(link != null);
+            Debug.Assert(link != null);
             link.next = m_clientinfo;
-            link.name = new char[strlen(name) + 1];
-            assert(link.name != null);
+            link.name = new char[name.Length + 1];
+            Debug.Assert(link.name != null);
             strcpy(link.name, name);
             link.data = data;
 
@@ -840,7 +839,7 @@ namespace BitMiracle.LibTiff
         */
         public bool ReadDirectory()
         {
-            static const char module[] = "ReadDirectory";
+            const string module = "ReadDirectory";
 
             m_diroff = m_nextdiroff;
             if (m_diroff == 0)
@@ -913,10 +912,10 @@ namespace BitMiracle.LibTiff
                 TiffDirEntry* dp = &dir[i];
                 if ((m_flags & TIFF_SWAB) != 0)
                 {
-                    SwabShort(dp.tdir_tag);
-                    SwabShort(dp.tdir_type);
-                    SwabLong(dp.tdir_count);
-                    SwabLong(dp.tdir_offset);
+                    SwabShort(ref dp.tdir_tag);
+                    SwabShort(ref dp.tdir_type);
+                    SwabLong(ref dp.tdir_count);
+                    SwabLong(ref dp.tdir_offset);
                 }
                 
                 if (dp.tdir_tag == TIFFTAG_SAMPLESPERPIXEL)
@@ -931,7 +930,7 @@ namespace BitMiracle.LibTiff
             /*
              * First real pass over the directory.
              */
-            size_t fix = 0;
+            uint fix = 0;
             bool diroutoforderwarning = false;
             for (int i = 0; i < dircount; i++)
             {
@@ -947,7 +946,7 @@ namespace BitMiracle.LibTiff
                 {
                     if (!diroutoforderwarning)
                     {
-                        Tiff::WarningExt(this, m_clientdata, module, "%s: invalid TIFF directory; tags are not sorted in ascending order", m_name);
+                        WarningExt(this, m_clientdata, module, "%s: invalid TIFF directory; tags are not sorted in ascending order", m_name);
                         diroutoforderwarning = true;
                     }
 
@@ -959,7 +958,7 @@ namespace BitMiracle.LibTiff
 
                 if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
                 {
-                    Tiff::WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+                    WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
 
                     MergeFieldInfo(createAnonFieldInfo(dir[i].tdir_tag, (TiffDataType)dir[i].tdir_type), 1);
                     fix = 0;
@@ -979,7 +978,7 @@ namespace BitMiracle.LibTiff
                 /*
                  * Check data type.
                  */
-                const TiffFieldInfo* fip = m_fieldinfo[fix];
+                TiffFieldInfo fip = m_fieldinfo[fix];
                 while (dir[i].tdir_type != (unsigned short)fip.field_type && fix < m_nfields)
                 {
                     if (fip.field_type == TIFF_ANY)
@@ -991,7 +990,7 @@ namespace BitMiracle.LibTiff
                     fip = m_fieldinfo[++fix];
                     if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
                     {
-                        Tiff::WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
                         dir[i].tdir_tag = TIFFTAG_IGNORE;
                         continue;
                     }
@@ -1114,7 +1113,7 @@ namespace BitMiracle.LibTiff
 
             if (m_dir.td_nstrips == 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero number of %s", m_name, IsTiled() ? "tiles" : "strips");
+                ErrorExt(this, m_clientdata, module, "%s: cannot handle zero number of %s", m_name, IsTiled() ? "tiles" : "strips");
                 return readDirectoryFailed(dir);
             }
 
@@ -1226,7 +1225,7 @@ namespace BitMiracle.LibTiff
                                     break;
                             }
 
-                            byte* cp = new byte [dir[i].tdir_count * sizeof(UInt16)];
+                            byte[] cp = new byte [dir[i].tdir_count * sizeof(UInt16)];
                             if (cp == null)
                                 ErrorExt(this, m_clientdata, m_name, "No space to read \"TransferFunction\" tag");
 
@@ -1384,7 +1383,7 @@ namespace BitMiracle.LibTiff
                         return readDirectoryFailed(dir);
                     }
 
-                    Tiff::WarningExt(this, m_clientdata, module, "%s: TIFF directory is missing required ""\"%s\" field, calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "%s: TIFF directory is missing required ""\"%s\" field, calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return readDirectoryFailed(dir);
                 }
@@ -1396,7 +1395,7 @@ namespace BitMiracle.LibTiff
                      * and handle the simple case of estimating the size of a one
                      * strip image.
                      */
-                    Tiff::WarningExt(this, m_clientdata, module, "%s: Bogus \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "%s: Bogus \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return readDirectoryFailed(dir);
                 }
@@ -1407,7 +1406,7 @@ namespace BitMiracle.LibTiff
                      * wrong values (it can be equal to StripOffset array, for
                      * example). Catch this case here.
                      */
-                    Tiff::WarningExt(this, m_clientdata, module, "%s: Wrong \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "%s: Wrong \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return readDirectoryFailed(dir);
                 }
@@ -1467,7 +1466,7 @@ namespace BitMiracle.LibTiff
             m_scanlinesize = ScanlineSize();
             if (m_scanlinesize == 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero scanline size", m_name);
+                ErrorExt(this, m_clientdata, module, "%s: cannot handle zero scanline size", m_name);
                 return false;
             }
 
@@ -1476,7 +1475,7 @@ namespace BitMiracle.LibTiff
                 m_tilesize = TileSize();
                 if (m_tilesize == 0)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero tile size", m_name);
+                    ErrorExt(this, m_clientdata, module, "%s: cannot handle zero tile size", m_name);
                     return false;
                 }
             }
@@ -1484,7 +1483,7 @@ namespace BitMiracle.LibTiff
             {
                 if (StripSize() == 0)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "%s: cannot handle zero strip size", m_name);
+                    ErrorExt(this, m_clientdata, module, "%s: cannot handle zero strip size", m_name);
                     return false;
                 }
             }
@@ -1498,7 +1497,7 @@ namespace BitMiracle.LibTiff
         */
         public bool ReadCustomDirectory(uint diroff, TiffFieldInfo[] info, uint n)
         {
-            static const char module[] = "ReadCustomDirectory";
+            const string module = "ReadCustomDirectory";
 
             setupFieldInfo(info, n);
 
@@ -1514,15 +1513,15 @@ namespace BitMiracle.LibTiff
             FreeDirectory();
             m_dir = new TiffDirectory();
 
-            size_t fix = 0;
+            uint fix = 0;
             for (UInt16 i = 0; i < dircount; i++)
             {
                 if ((m_flags & TIFF_SWAB) != 0)
                 {
-                    SwabShort(dir[i].tdir_tag);
-                    SwabShort(dir[i].tdir_type);
-                    SwabLong(dir[i].tdir_count);
-                    SwabLong(dir[i].tdir_offset);
+                    SwabShort(ref dir[i].tdir_tag);
+                    SwabShort(ref dir[i].tdir_type);
+                    SwabLong(ref dir[i].tdir_count);
+                    SwabLong(ref dir[i].tdir_offset);
                 }
 
                 if (fix >= m_nfields || dir[i].tdir_tag == TIFFTAG_IGNORE)
@@ -1533,7 +1532,7 @@ namespace BitMiracle.LibTiff
 
                 if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
                 {
-                    Tiff::WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+                    WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
 
                     MergeFieldInfo(createAnonFieldInfo(dir[i].tdir_tag, (TiffDataType)dir[i].tdir_type), 1);
 
@@ -1554,7 +1553,7 @@ namespace BitMiracle.LibTiff
                 /*
                  * Check data type.
                  */
-                const TiffFieldInfo* fip = m_fieldinfo[fix];
+                TiffFieldInfo fip = m_fieldinfo[fix];
                 while (dir[i].tdir_type != (unsigned short)fip.field_type && fix < m_nfields)
                 {
                     if (fip.field_type == TIFF_ANY)
@@ -1566,7 +1565,7 @@ namespace BitMiracle.LibTiff
                     fip = m_fieldinfo[++fix];
                     if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
                     {
-                        Tiff::WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
                         dir[i].tdir_tag = TIFFTAG_IGNORE;
                         continue;
                     }
@@ -1650,7 +1649,7 @@ namespace BitMiracle.LibTiff
 
             for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
             {
-                const TiffFieldInfo* fip = m_fieldinfo[fi];
+                TiffFieldInfo fip = m_fieldinfo[fi];
 
                 /*
                 * For custom fields, we test to see if the custom field
@@ -1692,15 +1691,15 @@ namespace BitMiracle.LibTiff
                 */
                 for (dir = data; dircount; dir++, dircount--)
                 {
-                    SwabShort(dir.tdir_tag);
-                    SwabShort(dir.tdir_type);
-                    SwabLong(dir.tdir_count);
-                    SwabLong(dir.tdir_offset);
+                    SwabShort(ref dir.tdir_tag);
+                    SwabShort(ref dir.tdir_type);
+                    SwabLong(ref dir.tdir_count);
+                    SwabLong(ref dir.tdir_offset);
                 }
                 
                 dircount = (UInt16) nfields;
-                SwabShort(dircount);
-                SwabLong(pdiroff);
+                SwabShort(ref dircount);
+                SwabLong(ref pdiroff);
             }
 
             seekFile(m_diroff, SEEK_SET);
@@ -1735,7 +1734,7 @@ namespace BitMiracle.LibTiff
         */
         public bool ReadEXIFDirectory(uint diroff)
         {
-            size_t exifFieldInfoCount;
+            uint exifFieldInfoCount;
             const TiffFieldInfo* exifFieldInfo = getExifFieldInfo(exifFieldInfoCount);
             return ReadCustomDirectory(diroff, exifFieldInfo, exifFieldInfoCount);
         }
@@ -1762,8 +1761,8 @@ namespace BitMiracle.LibTiff
                         return 0;
                     }
 
-                    scanline = Tiff::roundUp(m_dir.td_imagewidth, ycbcrsubsampling[0]);
-                    scanline = Tiff::howMany8(multiply(scanline, m_dir.td_bitspersample, "ScanlineSize"));
+                    scanline = roundUp(m_dir.td_imagewidth, ycbcrsubsampling[0]);
+                    scanline = howMany8(multiply(scanline, m_dir.td_bitspersample, "ScanlineSize"));
                     return summarize(scanline, multiply(2, scanline / ycbcrsubsampling[0], "VStripSize"), "VStripSize");
                 }
                 else
@@ -1774,7 +1773,7 @@ namespace BitMiracle.LibTiff
             else
                 scanline = m_dir.td_imagewidth;
 
-            return Tiff::howMany8(multiply(scanline, m_dir.td_bitspersample, "ScanlineSize"));
+            return howMany8(multiply(scanline, m_dir.td_bitspersample, "ScanlineSize"));
         }
 
         /*
@@ -1789,10 +1788,10 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG)
             {
                 scanline = multiply(scanline, m_dir.td_samplesperpixel, "RasterScanlineSize");
-                return Tiff::howMany8(scanline);
+                return howMany8(scanline);
             }
             
-            return multiply(Tiff::howMany8(scanline), m_dir.td_samplesperpixel, "RasterScanlineSize");
+            return multiply(howMany8(scanline), m_dir.td_samplesperpixel, "RasterScanlineSize");
         }
         
         /*
@@ -1855,9 +1854,9 @@ namespace BitMiracle.LibTiff
                     return 0;
                 }
 
-                int w = Tiff::roundUp(m_dir.td_imagewidth, ycbcrsubsampling[0]);
-                int scanline = Tiff::howMany8(multiply(w, m_dir.td_bitspersample, "VStripSize"));
-                nrows = Tiff::roundUp(nrows, ycbcrsubsampling[1]);
+                int w = roundUp(m_dir.td_imagewidth, ycbcrsubsampling[0]);
+                int scanline = howMany8(multiply(w, m_dir.td_bitspersample, "VStripSize"));
+                nrows = roundUp(nrows, ycbcrsubsampling[1]);
                 /* NB: don't need howMany here 'cuz everything is rounded */
                 scanline = multiply(nrows, scanline, "VStripSize");
                 return summarize(scanline, multiply(2, scanline / samplingarea, "VStripSize"), "VStripSize");
@@ -1878,7 +1877,7 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_planarconfig == PLANARCONFIG_CONTIG)
                 rowsize = multiply(rowsize, m_dir.td_samplesperpixel, "TileRowSize");
 
-            return Tiff::howMany8(rowsize);
+            return howMany8(rowsize);
         }
 
         /*
@@ -1908,8 +1907,8 @@ namespace BitMiracle.LibTiff
                  * horizontal/vertical subsampling area include
                  * YCbCr data for the extended image.
                  */
-                int w = Tiff::roundUp(m_dir.td_tilewidth, m_dir.td_ycbcrsubsampling[0]);
-                int rowsize = Tiff::howMany8(multiply(w, m_dir.td_bitspersample, "VTileSize"));
+                int w = roundUp(m_dir.td_tilewidth, m_dir.td_ycbcrsubsampling[0]);
+                int rowsize = howMany8(multiply(w, m_dir.td_bitspersample, "VTileSize"));
                 int samplingarea = m_dir.td_ycbcrsubsampling[0] * m_dir.td_ycbcrsubsampling[1];
                 if (samplingarea == 0)
                 {
@@ -1917,7 +1916,7 @@ namespace BitMiracle.LibTiff
                     return 0;
                 }
 
-                nrows = Tiff::roundUp(nrows, m_dir.td_ycbcrsubsampling[1]);
+                nrows = roundUp(nrows, m_dir.td_ycbcrsubsampling[1]);
                 /* NB: don't need howMany here 'cuz everything is rounded */
                 tilesize = multiply(nrows, rowsize, "VTileSize");
                 tilesize = summarize(tilesize, multiply(2, tilesize / samplingarea, "VTileSize"), "VTileSize");
@@ -2097,9 +2096,9 @@ namespace BitMiracle.LibTiff
         */
         public bool ReadBufferSetup(byte[] bp, int size)
         {
-            static const char module[] = "ReadBufferSetup";
+            const string module = "ReadBufferSetup";
             
-            assert((m_flags & TIFF_NOREADRAW) == 0);
+            Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
 
             if (m_rawdata != null)
             {
@@ -2117,14 +2116,14 @@ namespace BitMiracle.LibTiff
             }
             else
             {
-                m_rawdatasize = Tiff::roundUp(size, 1024);
+                m_rawdatasize = roundUp(size, 1024);
                 m_rawdata = new byte [m_rawdatasize];
                 m_flags |= TIFF_MYBUFFER;
             }
             
             if (m_rawdata == null)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: No space for data buffer at scanline %ld", m_name, m_row);
+                ErrorExt(this, m_clientdata, module, "%s: No space for data buffer at scanline %ld", m_name, m_row);
                 m_rawdatasize = 0;
                 return false;
             }
@@ -2137,7 +2136,7 @@ namespace BitMiracle.LibTiff
         */
         public bool WriteBufferSetup(byte[] bp, int size)
         {
-            static const char module[] = "WriteBufferSetup";
+            const string module = "WriteBufferSetup";
 
             if (m_rawdata != null)
             {
@@ -2168,7 +2167,7 @@ namespace BitMiracle.LibTiff
                 bp = new byte [size];
                 if (bp == null)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "%s: No space for output buffer", m_name);
+                    ErrorExt(this, m_clientdata, module, "%s: No space for output buffer", m_name);
                     return false;
                 }
 
@@ -2223,13 +2222,13 @@ namespace BitMiracle.LibTiff
         {
             if (m_mode == O_RDONLY)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: File not open for writing", m_name);
+                ErrorExt(this, m_clientdata, module, "%s: File not open for writing", m_name);
                 return false;
             }
 
             if (tiles ^ (int)IsTiled())
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, tiles ? "Can not write tiles to a stripped image": "Can not write scanlines to a tiled image");
+                ErrorExt(this, m_clientdata, m_name, tiles ? "Can not write tiles to a stripped image": "Can not write scanlines to a tiled image");
                 return false;
             }
 
@@ -2245,7 +2244,7 @@ namespace BitMiracle.LibTiff
              */
             if (!fieldSet(FIELD_IMAGEDIMENSIONS))
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Must set \"ImageWidth\" before writing data", m_name);
+                ErrorExt(this, m_clientdata, module, "%s: Must set \"ImageWidth\" before writing data", m_name);
                 return false;
             }
 
@@ -2264,7 +2263,7 @@ namespace BitMiracle.LibTiff
             {
                 if (!fieldSet(FIELD_PLANARCONFIG))
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "%s: Must set \"PlanarConfiguration\" before writing data", m_name);
+                    ErrorExt(this, m_clientdata, module, "%s: Must set \"PlanarConfiguration\" before writing data", m_name);
                     return false;
                 }
             }
@@ -2272,7 +2271,7 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_stripoffset == null && !SetupStrips())
             {
                 m_dir.td_nstrips = 0;
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: No space for %s arrays", m_name, IsTiled() ? "tile" : "strip");
+                ErrorExt(this, m_clientdata, module, "%s: No space for %s arrays", m_name, IsTiled() ? "tile" : "strip");
                 return false;
             }
 
@@ -2377,7 +2376,7 @@ namespace BitMiracle.LibTiff
         */
         public bool UnlinkDirectory(UInt16 dirn)
         {
-            static const char module[] = "UnlinkDirectory";
+            const string module = "UnlinkDirectory";
 
             if (m_mode == O_RDONLY)
             {
@@ -2419,7 +2418,7 @@ namespace BitMiracle.LibTiff
              */
             seekFile(off, SEEK_SET);
             if ((m_flags & TIFF_SWAB) != 0)
-                SwabLong(nextdir);
+                SwabLong(ref nextdir);
             
             if (!writeUInt32OK(nextdir))
             {
@@ -2508,7 +2507,7 @@ namespace BitMiracle.LibTiff
         */
         public bool RewriteDirectory()
         {
-            static const char module[] = "RewriteDirectory";
+            const string module = "RewriteDirectory";
 
             /* We don't need to do anything special if it hasn't been written. */
             if (m_diroff == 0)
@@ -2528,7 +2527,7 @@ namespace BitMiracle.LibTiff
                 seekFile((uint)(TiffHeader::TIFF_MAGIC_SIZE + TiffHeader::TIFF_VERSION_SIZE), SEEK_SET);
                 if (!writeUInt32OK(m_header.tiff_diroff))
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
+                    ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
                     return false;
                 }
             }
@@ -2538,25 +2537,25 @@ namespace BitMiracle.LibTiff
                 do
                 {
                     UInt16 dircount;
-                    if (!seekOK(nextdir) || !readUInt16OK(dircount))
+                    if (!seekOK(nextdir) || !readUInt16OK(out dircount))
                     {
-                        Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory count");
+                        ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                         return false;
                     }
                     
                     if ((m_flags & TIFF_SWAB) != 0)
-                        SwabShort(dircount);
+                        SwabShort(ref dircount);
 
                     seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
                     
-                    if (!readUInt32OK(nextdir))
+                    if (!readUInt32OK(out nextdir))
                     {
-                        Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory link");
+                        ErrorExt(this, m_clientdata, module, "Error fetching directory link");
                         return false;
                     }
 
                     if ((m_flags & TIFF_SWAB) != 0)
-                        SwabLong(nextdir);
+                        SwabLong(ref nextdir);
                 }
                 while (nextdir != m_diroff && nextdir != 0);
 
@@ -2566,7 +2565,7 @@ namespace BitMiracle.LibTiff
                 
                 if (!writeUInt32OK(m_diroff))
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "Error writing directory link");
+                    ErrorExt(this, m_clientdata, module, "Error writing directory link");
                     return false;
                 }
             }
@@ -2689,7 +2688,7 @@ namespace BitMiracle.LibTiff
 
             if (fieldSet(FIELD_COMPRESSION))
             {
-                const TiffCodec* c = Tiff::FindCodec(m_dir.td_compression);
+                const TiffCodec* c = FindCodec(m_dir.td_compression);
                 fprintf(fd, "  Compression Scheme: ");
                 if (c != null)
                     fprintf(fd, "%s\n", c.m_name);
@@ -2754,7 +2753,7 @@ namespace BitMiracle.LibTiff
                 for (cp = m_dir.td_inknames; i > 0; cp = strchr(cp, '\0') + 1, i--)
                 {
                     fputs(sep, fd);
-                    Tiff::printAscii(fd, cp);
+                    printAscii(fd, cp);
                     sep = ", ";
                 }
                 fputs("\n", fd);
@@ -2930,12 +2929,12 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < count; i++)
             {
                 uint tag = GetTagListEntry(i);
-                const TiffFieldInfo* fip = FieldWithTag(tag);
+                TiffFieldInfo fip = FieldWithTag(tag);
                 if (fip == null)
                     continue;
 
                 bool mem_alloc = false;
-                byte* raw_data = null;
+                byte[] raw_data = null;
                 uint value_count;
                 if (fip.field_passcount)
                 {
@@ -2958,7 +2957,7 @@ namespace BitMiracle.LibTiff
                     }
                     else if (fip.field_tag != TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG_DOTRANGE)
                     {
-                        raw_data = new byte [Tiff::dataSize(fip.field_type) * value_count];
+                        raw_data = new byte [dataSize(fip.field_type) * value_count];
                         mem_alloc = true;
                         if (GetField(tag, raw_data) != 1)
                         {
@@ -2974,9 +2973,9 @@ namespace BitMiracle.LibTiff
                          * TIFFTAG_HALFTONEHINTS,
                          * TIFFTAG_YCBCRSUBSAMPLING and
                          * TIFFTAG_DOTRANGE tags in tif_dir.c. */
-                        raw_data = new byte [Tiff::dataSize(fip.field_type) * value_count];
+                        raw_data = new byte [dataSize(fip.field_type) * value_count];
                         mem_alloc = true;
-                        if (GetField(tag, raw_data, &raw_data[Tiff::dataSize(fip.field_type)]) != 1)
+                        if (GetField(tag, raw_data, &raw_data[dataSize(fip.field_type)]) != 1)
                         {
                             delete raw_data;
                             continue;
@@ -3048,7 +3047,7 @@ namespace BitMiracle.LibTiff
 
         public bool WriteScanline(byte[] buf, uint row, UInt16 sample)
         {
-            static const char module[] = "WriteScanline";
+            const string module = "WriteScanline";
 
             if (!writeCheckStrips(module))
                 return false;
@@ -3071,7 +3070,7 @@ namespace BitMiracle.LibTiff
                 /* extend image */
                 if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "Can not change \"ImageLength\" when using separate planes");
+                    ErrorExt(this, m_clientdata, m_name, "Can not change \"ImageLength\" when using separate planes");
                     return false;
                 }
 
@@ -3086,7 +3085,7 @@ namespace BitMiracle.LibTiff
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "%d: Sample out of range, max %d", sample, m_dir.td_samplesperpixel);
+                    ErrorExt(this, m_clientdata, m_name, "%d: Sample out of range, max %d", sample, m_dir.td_samplesperpixel);
                     return false;
                 }
 
@@ -3120,7 +3119,7 @@ namespace BitMiracle.LibTiff
                  * imagelength is known).
                  */
                 if (strip >= m_dir.td_stripsperimage && imagegrew)
-                    m_dir.td_stripsperimage = Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
+                    m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
                 
                 m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
                 if ((m_flags & TIFF_CODERSETUP) == 0)
@@ -3230,7 +3229,7 @@ namespace BitMiracle.LibTiff
             }
             else
             {
-                Tiff::ErrorExt(this, m_clientdata, FileName(), emsg);
+                ErrorExt(this, m_clientdata, FileName(), emsg);
                 ok = false;
             }
 
@@ -3247,7 +3246,7 @@ namespace BitMiracle.LibTiff
         {
             if (IsTiled())
             {
-                Tiff::ErrorExt(this, m_clientdata, FileName(), "Can't use ReadRGBAStrip() with tiled file.");
+                ErrorExt(this, m_clientdata, FileName(), "Can't use ReadRGBAStrip() with tiled file.");
                 return false;
             }
 
@@ -3255,7 +3254,7 @@ namespace BitMiracle.LibTiff
             GetFieldDefaulted(TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
             if ((row % rowsperstrip) != 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, FileName(), "Row passed to ReadRGBAStrip() must be first in a strip.");
+                ErrorExt(this, m_clientdata, FileName(), "Row passed to ReadRGBAStrip() must be first in a strip.");
                 return false;
             }
 
@@ -3281,7 +3280,7 @@ namespace BitMiracle.LibTiff
                 return true;
             }
 
-            Tiff::ErrorExt(this, m_clientdata, FileName(), emsg);
+            ErrorExt(this, m_clientdata, FileName(), emsg);
             return false;
         }
 
@@ -3299,7 +3298,7 @@ namespace BitMiracle.LibTiff
 
             if (!IsTiled())
             {
-                Tiff::ErrorExt(this, m_clientdata, FileName(), "Can't use ReadRGBATile() with stripped file.");
+                ErrorExt(this, m_clientdata, FileName(), "Can't use ReadRGBATile() with stripped file.");
                 return false;
             }
 
@@ -3310,7 +3309,7 @@ namespace BitMiracle.LibTiff
 
             if ((col % tile_xsize) != 0 || (row % tile_ysize) != 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, FileName(), "Row/col passed to ReadRGBATile() must be top""left corner of a tile.");
+                ErrorExt(this, m_clientdata, FileName(), "Row/col passed to ReadRGBATile() must be top""left corner of a tile.");
                 return false;
             }
 
@@ -3324,7 +3323,7 @@ namespace BitMiracle.LibTiff
                 if (img != null)
                     delete img;
 
-                Tiff::ErrorExt(this, m_clientdata, FileName(), emsg);
+                ErrorExt(this, m_clientdata, FileName(), emsg);
                 return false;
             }
 
@@ -3527,8 +3526,8 @@ namespace BitMiracle.LibTiff
             va_list ap;
             va_start(ap, fmt);
 
-            Tiff::m_errorHandler.ErrorHandler(tif, module, fmt, ap);
-            Tiff::m_errorHandler.ErrorHandlerExt(tif, 0, module, fmt, ap);
+            m_errorHandler.ErrorHandler(tif, module, fmt, ap);
+            m_errorHandler.ErrorHandlerExt(tif, 0, module, fmt, ap);
 
             va_end(ap);
         }
@@ -3538,8 +3537,8 @@ namespace BitMiracle.LibTiff
             va_list ap;
             va_start(ap, fmt);
 
-            Tiff::m_errorHandler.ErrorHandler(tif, module, fmt, ap);
-            Tiff::m_errorHandler.ErrorHandlerExt(tif, fd, module, fmt, ap);
+            m_errorHandler.ErrorHandler(tif, module, fmt, ap);
+            m_errorHandler.ErrorHandlerExt(tif, fd, module, fmt, ap);
 
             va_end(ap);
         }
@@ -3549,8 +3548,8 @@ namespace BitMiracle.LibTiff
             va_list ap;
             va_start(ap, fmt);
 
-            Tiff::m_errorHandler.WarningHandler(tif, module, fmt, ap);
-            Tiff::m_errorHandler.WarningHandlerExt(tif, 0, module, fmt, ap);
+            m_errorHandler.WarningHandler(tif, module, fmt, ap);
+            m_errorHandler.WarningHandlerExt(tif, 0, module, fmt, ap);
 
             va_end(ap);
         }
@@ -3560,8 +3559,8 @@ namespace BitMiracle.LibTiff
             va_list ap;
             va_start(ap, fmt);
 
-            Tiff::m_errorHandler.WarningHandler(tif, module, fmt, ap);
-            Tiff::m_errorHandler.WarningHandlerExt(tif, fd, module, fmt, ap);
+            m_errorHandler.WarningHandler(tif, module, fmt, ap);
+            m_errorHandler.WarningHandlerExt(tif, fd, module, fmt, ap);
 
             va_end(ap);
         }
@@ -3618,9 +3617,9 @@ namespace BitMiracle.LibTiff
             uint tile = 1;
             if (dx != 0 && dy != 0 && dz != 0)
             {
-                uint xpt = Tiff::howMany(m_dir.td_imagewidth, dx);
-                uint ypt = Tiff::howMany(m_dir.td_imagelength, dy);
-                uint zpt = Tiff::howMany(m_dir.td_imagedepth, dz);
+                uint xpt = howMany(m_dir.td_imagewidth, dx);
+                uint ypt = howMany(m_dir.td_imagelength, dy);
+                uint zpt = howMany(m_dir.td_imagedepth, dz);
 
                 if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
                     tile = (xpt * ypt * zpt) * s + (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
@@ -3639,25 +3638,25 @@ namespace BitMiracle.LibTiff
         {
             if (x >= m_dir.td_imagewidth)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Col out of range, max %lu", x, m_dir.td_imagewidth - 1);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Col out of range, max %lu", x, m_dir.td_imagewidth - 1);
                 return false;
             }
 
             if (y >= m_dir.td_imagelength)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Row out of range, max %lu", y, m_dir.td_imagelength - 1);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Row out of range, max %lu", y, m_dir.td_imagelength - 1);
                 return false;
             }
 
             if (z >= m_dir.td_imagedepth)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Depth out of range, max %lu", z, m_dir.td_imagedepth - 1);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Depth out of range, max %lu", z, m_dir.td_imagedepth - 1);
                 return false;
             }
 
             if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE && s >= m_dir.td_samplesperpixel)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", s, m_dir.td_samplesperpixel - 1);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", s, m_dir.td_samplesperpixel - 1);
                 return false;
             }
 
@@ -3681,7 +3680,7 @@ namespace BitMiracle.LibTiff
             if (dz == (uint)-1)
                 dz = m_dir.td_imagedepth;
             
-            uint ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(Tiff::howMany(m_dir.td_imagewidth, dx), Tiff::howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), Tiff::howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
+            uint ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
             if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
                 ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
             
@@ -3716,7 +3715,7 @@ namespace BitMiracle.LibTiff
 
             if (tile >= m_dir.td_nstrips)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%ld: Tile out of range, max %ld", tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "%ld: Tile out of range, max %ld", tile, m_dir.td_nstrips);
                 return -1;
             }
             
@@ -3725,7 +3724,7 @@ namespace BitMiracle.LibTiff
             else if (size > m_tilesize)
                 size = m_tilesize;
             
-            byte* tempBuf = new byte [size];
+            byte[] tempBuf = new byte [size];
             memcpy(tempBuf, &buf[offset], size);
 
             if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (UInt16)(tile / m_dir.td_stripsperimage)))
@@ -3745,7 +3744,7 @@ namespace BitMiracle.LibTiff
         */
         public int ReadRawTile(uint tile, byte[] buf, int offset, int size)
         {
-            static const char module[] = "ReadRawTile";
+            const string module = "ReadRawTile";
     
             /*
             * FIXME: bytecount should have int type, but for now libtiff
@@ -3758,13 +3757,13 @@ namespace BitMiracle.LibTiff
             
             if (tile >= m_dir.td_nstrips)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Tile out of range, max %lu", tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Tile out of range, max %lu", tile, m_dir.td_nstrips);
                 return -1;
             }
             
             if ((m_flags & TIFF_NOREADRAW) != 0)
             {
-                Tiff::ErrorExt(m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
+                ErrorExt(m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
                 return -1;
             }
 
@@ -3803,7 +3802,7 @@ namespace BitMiracle.LibTiff
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", sample, m_dir.td_samplesperpixel);
+                    ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", sample, m_dir.td_samplesperpixel);
                     return 0;
                 }
 
@@ -3818,7 +3817,7 @@ namespace BitMiracle.LibTiff
         */
         public uint NumberOfStrips()
         {
-            uint nstrips = (m_dir.td_rowsperstrip == (uint)-1 ? 1: Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
+            uint nstrips = (m_dir.td_rowsperstrip == (uint)-1 ? 1: howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
             if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
                 nstrips = multiply(nstrips, m_dir.td_samplesperpixel, "NumberOfStrips");
 
@@ -3836,7 +3835,7 @@ namespace BitMiracle.LibTiff
 
             if (strip >= m_dir.td_nstrips)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%ld: Strip out of range, max %ld", strip, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "%ld: Strip out of range, max %ld", strip, m_dir.td_nstrips);
                 return -1;
             }
 
@@ -3863,7 +3862,7 @@ namespace BitMiracle.LibTiff
             else if (size > stripsize)
                 size = stripsize;
             
-            byte* tempBuf = new byte[size];
+            byte[] tempBuf = new byte[size];
             memcpy(tempBuf, &buf[offset], size);
 
             if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (UInt16)(strip / m_dir.td_stripsperimage)))
@@ -3883,7 +3882,7 @@ namespace BitMiracle.LibTiff
         */
         public int ReadRawStrip(uint strip, byte[] buf, int offset, int size)
         {
-            static const char module[] = "ReadRawStrip";
+            const string module = "ReadRawStrip";
 
             /*
             * FIXME: bytecount should have int type, but for now libtiff
@@ -3896,20 +3895,20 @@ namespace BitMiracle.LibTiff
             
             if (strip >= m_dir.td_nstrips)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Strip out of range, max %lu", strip, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Strip out of range, max %lu", strip, m_dir.td_nstrips);
                 return -1;
             }
 
             if ((m_flags & TIFF_NOREADRAW) != 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
+                ErrorExt(this, m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
                 return -1;
             }
 
             uint bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
+                ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
                 return -1;
             }
 
@@ -3927,7 +3926,7 @@ namespace BitMiracle.LibTiff
         */
         public int WriteEncodedStrip(uint strip, byte[] data, int cc)
         {
-            static const char module[] = "WriteEncodedStrip";
+            const string module = "WriteEncodedStrip";
     
             if (!writeCheckStrips(module))
                 return -1;
@@ -3945,14 +3944,14 @@ namespace BitMiracle.LibTiff
             {
                 if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
+                    ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
                     return -1;
                 }
 
                 if (!growStrips(1, module))
                     return -1;
 
-                m_dir.td_stripsperimage = Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
+                m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
             }
 
             /*
@@ -4014,7 +4013,7 @@ namespace BitMiracle.LibTiff
         */
         public int WriteRawStrip(uint strip, byte[] data, int cc)
         {
-            static const char module[] = "WriteRawStrip";
+            const string module = "WriteRawStrip";
 
             if (!writeCheckStrips(module))
                 return -1;
@@ -4032,7 +4031,7 @@ namespace BitMiracle.LibTiff
             {
                 if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
+                    ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
                     return -1;
                 }
 
@@ -4042,7 +4041,7 @@ namespace BitMiracle.LibTiff
                  * can't be deduced until the imagelength is known).
                  */
                 if (strip >= m_dir.td_stripsperimage)
-                    m_dir.td_stripsperimage = Tiff::howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
+                    m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
 
                 if (!growStrips(1, module))
                     return -1;
@@ -4067,14 +4066,14 @@ namespace BitMiracle.LibTiff
         */
         public int WriteEncodedTile(uint tile, byte[] data, int cc)
         {
-            static const char module[] = "WriteEncodedTile";
+            const string module = "WriteEncodedTile";
     
             if (!writeCheckTiles(module))
                 return -1;
 
             if (tile >= m_dir.td_nstrips)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
                 return -1;
             }
 
@@ -4101,8 +4100,8 @@ namespace BitMiracle.LibTiff
              * Compute tiles per row & per column to compute
              * current row and column
              */
-            m_row = (tile % Tiff::howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilelength;
-            m_col = (tile % Tiff::howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilewidth;
+            m_row = (tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilelength;
+            m_col = (tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilewidth;
 
             if ((m_flags & TIFF_CODERSETUP) == 0)
             {
@@ -4156,14 +4155,14 @@ namespace BitMiracle.LibTiff
         */
         public int WriteRawTile(uint tile, byte[] data, int cc)
         {
-            static const char module[] = "WriteRawTile";
+            const string module = "WriteRawTile";
 
             if (!writeCheckTiles(module))
                 return -1;
 
             if (tile >= m_dir.td_nstrips)
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
                 return -1;
             }
 
@@ -4254,7 +4253,7 @@ namespace BitMiracle.LibTiff
 
         public static void SwabDouble(ref double dp)
         {
-            uint* lp = (uint*)dp;
+            uint[] lp = (uint*)dp;
             SwabArrayOfLong(lp, 2);
 
             uint t = lp[0];
@@ -4319,7 +4318,7 @@ namespace BitMiracle.LibTiff
 
         public static void SwabArrayOfDouble(double[] dp, int n)
         {
-            uint* lp = (uint*)dp;
+            uint[] lp = (uint*)dp;
             SwabArrayOfLong(lp, n + n);
 
             int lpPos = 0;
