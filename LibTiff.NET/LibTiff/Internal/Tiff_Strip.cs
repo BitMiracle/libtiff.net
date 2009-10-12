@@ -38,9 +38,9 @@ namespace BitMiracle.LibTiff
             return bytes;
         }
 
-        private uint multiply(uint nmemb, uint elem_size, string where)
+        private int multiply(int nmemb, int elem_size, string where)
         {
-            uint bytes = nmemb * elem_size;
+            int bytes = nmemb * elem_size;
 
             if (elem_size != 0 && bytes / elem_size != nmemb)
             {

@@ -22,19 +22,19 @@ namespace BitMiracle.LibTiff
 {
     public partial class Tiff
     {
-        private TiffFieldInfo getFieldInfo(out uint size)
+        private TiffFieldInfo[] getFieldInfo(out int size)
         {
             size = sizeof(tiffFieldInfo) / sizeof(tiffFieldInfo[0]);
             return tiffFieldInfo;
         }
 
-        private TiffFieldInfo getExifFieldInfo(out uint size)
+        private TiffFieldInfo[] getExifFieldInfo(out int size)
         {
             size = sizeof(exifFieldInfo) / sizeof(exifFieldInfo[0]);
             return exifFieldInfo;
         }
 
-        private void setupFieldInfo(TiffFieldInfo[] info, uint n)
+        private void setupFieldInfo(TiffFieldInfo[] info, int n)
         {
             m_nfields = 0;
             MergeFieldInfo(info, n);
@@ -60,21 +60,21 @@ namespace BitMiracle.LibTiff
         */
         private TiffDataType sampleToTagType()
         {
-            uint bps = howMany8(m_dir.td_bitspersample);
+            int bps = howMany8(m_dir.td_bitspersample);
 
             switch (m_dir.td_sampleformat)
             {
                 case SAMPLEFORMAT_IEEEFP:
-                    return (bps == 4 ? TIFF_FLOAT : TIFF_DOUBLE);
+                    return (bps == 4 ? TiffDataType.TIFF_FLOAT : TiffDataType.TIFF_DOUBLE);
                 case SAMPLEFORMAT_INT:
-                    return (bps <= 1 ? TIFF_SBYTE : bps <= 2 ? TIFF_SSHORT : TIFF_SLONG);
+                    return (bps <= 1 ? TiffDataType.TIFF_SBYTE : bps <= 2 ? TiffDataType.TIFF_SSHORT : TiffDataType.TIFF_SLONG);
                 case SAMPLEFORMAT_UINT:
-                    return (bps <= 1 ? TIFF_BYTE : bps <= 2 ? TIFF_SHORT : TIFF_LONG);
+                    return (bps <= 1 ? TiffDataType.TIFF_BYTE : bps <= 2 ? TiffDataType.TIFF_SHORT : TiffDataType.TIFF_LONG);
                 case SAMPLEFORMAT_VOID:
-                    return TIFF_UNDEFINED;
+                    return TiffDataType.TIFF_UNDEFINED;
             }
             
-            return TIFF_UNDEFINED;
+            return TiffDataType.TIFF_UNDEFINED;
         }
 
         private TiffFieldInfo findOrRegisterFieldInfo(uint tag, TiffDataType dt)
@@ -108,29 +108,29 @@ namespace BitMiracle.LibTiff
         * Return size of TiffDataType in bytes.
         *
         * XXX: We need a separate function to determine the space needed
-        * to store the value. For TIFF_RATIONAL values DataWidth() returns 8,
-        * but we use 4-byte float to represent rationals.
+        * to store the value. For TiffDataType.TIFF_RATIONAL values DataWidth()
+        * returns 8, but we use 4-byte float to represent rationals.
         */
         internal static int dataSize(TiffDataType type)
         {
             switch (type)
             {
-                case TIFF_BYTE:
-                case TIFF_SBYTE:
-                case TIFF_ASCII:
-                case TIFF_UNDEFINED:
+                case TiffDataType.TIFF_BYTE:
+                case TiffDataType.TIFF_SBYTE:
+                case TiffDataType.TIFF_ASCII:
+                case TiffDataType.TIFF_UNDEFINED:
                     return 1;
-                case TIFF_SHORT:
-                case TIFF_SSHORT:
+                case TiffDataType.TIFF_SHORT:
+                case TiffDataType.TIFF_SSHORT:
                     return 2;
-                case TIFF_LONG:
-                case TIFF_SLONG:
-                case TIFF_FLOAT:
-                case TIFF_IFD:
-                case TIFF_RATIONAL:
-                case TIFF_SRATIONAL:
+                case TiffDataType.TIFF_LONG:
+                case TiffDataType.TIFF_SLONG:
+                case TiffDataType.TIFF_FLOAT:
+                case TiffDataType.TIFF_IFD:
+                case TiffDataType.TIFF_RATIONAL:
+                case TiffDataType.TIFF_SRATIONAL:
                     return 4;
-                case TIFF_DOUBLE:
+                case TiffDataType.TIFF_DOUBLE:
                     return 8;
                 default:
                     return 0;

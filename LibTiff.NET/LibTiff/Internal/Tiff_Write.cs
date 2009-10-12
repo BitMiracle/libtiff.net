@@ -57,7 +57,7 @@ namespace BitMiracle.LibTiff
                 res = writeUInt16OK(header.tiff_version);
 
             if (res)
-                res = writeUInt32OK(header.tiff_diroff);
+                res = writeIntOK(header.tiff_diroff);
 
             return res;
         }
@@ -73,10 +73,10 @@ namespace BitMiracle.LibTiff
                     res = writeUInt16OK(entries[i].tdir_type);
 
                 if (res)
-                    res = writeUInt32OK(entries[i].tdir_count);
+                    res = writeIntOK(entries[i].tdir_count);
 
                 if (res)
-                    res = writeUInt32OK(entries[i].tdir_offset);
+                    res = writeIntOK(entries[i].tdir_offset);
 
                 if (!res)
                     break;
@@ -87,16 +87,16 @@ namespace BitMiracle.LibTiff
 
         private bool writeUInt16OK(UInt16 value)
         {
-            byte cp[2];
+            byte[] cp = new byte[2];
             cp[0] = (byte)value;
             cp[1] = (byte)(value >> 8);
 
             return writeOK(cp, 2);
         }
 
-        private bool writeUInt32OK(uint value)
+        private bool writeIntOK(int value)
         {
-            byte cp[4];
+            byte[] cp = new byte[4];
             cp[0] = (byte)value;
             cp[1] = (byte)(value >> 8);
             cp[2] = (byte)(value >> 16);
@@ -116,22 +116,19 @@ namespace BitMiracle.LibTiff
         private bool growStrips(int delta, string module)
         {
             Debug.Assert(m_dir.td_planarconfig == PLANARCONFIG_CONTIG);
-            uint[] new_stripoffset = Tiff::Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
-            uint[] new_stripbytecount = Tiff::Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            int[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            int[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             if (new_stripoffset == null || new_stripbytecount == null)
             {
-                delete new_stripoffset;
-                delete new_stripbytecount;
-
                 m_dir.td_nstrips = 0;
-                Tiff::ErrorExt(this, m_clientdata, module, "%s: No space to expand strip arrays", m_name);
+                ErrorExt(this, m_clientdata, module, "%s: No space to expand strip arrays", m_name);
                 return false;
             }
 
             m_dir.td_stripoffset = new_stripoffset;
             m_dir.td_stripbytecount = new_stripbytecount;
-            memset(m_dir.td_stripoffset + m_dir.td_nstrips, 0, delta * sizeof(uint));
-            memset(m_dir.td_stripbytecount + m_dir.td_nstrips, 0, delta * sizeof(uint));
+            Array.Clear(m_dir.td_stripoffset, m_dir.td_nstrips, delta);
+            Array.Clear(m_dir.td_stripbytecount, m_dir.td_nstrips, delta);
             m_dir.td_nstrips += delta;
             return true;
         }
@@ -139,7 +136,7 @@ namespace BitMiracle.LibTiff
         /*
         * Append the data to the specified strip.
         */
-        private bool appendToStrip(uint strip, byte[] data, int cc)
+        private bool appendToStrip(int strip, byte[] data, int cc)
         {
             const string module = "appendToStrip";
 
@@ -157,7 +154,7 @@ namespace BitMiracle.LibTiff
                     */
                     if (!seekOK(m_dir.td_stripoffset[strip]))
                     {
-                        Tiff::ErrorExt(this, m_clientdata, module, "Seek error at scanline %lu", m_row);
+                        ErrorExt(this, m_clientdata, module, "Seek error at scanline %lu", m_row);
                         return false;
                     }
                 }
@@ -180,7 +177,7 @@ namespace BitMiracle.LibTiff
 
             if (!writeOK(data, cc))
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "Write error at scanline %lu", m_row);
+                ErrorExt(this, m_clientdata, module, "Write error at scanline %lu", m_row);
                 return false;
             }
 

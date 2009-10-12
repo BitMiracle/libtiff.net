@@ -53,15 +53,15 @@ namespace BitMiracle.LibTiff
         internal uint m_flags;
 
         /* the first directory */
-        internal uint m_diroff; /* file offset of current directory */
+        internal int m_diroff; /* file offset of current directory */
 
         /* directories to prevent IFD looping */
         internal TiffDirectory m_dir; /* internal rep of current directory */
         internal uint m_row; /* current scanline */
-        internal uint m_curstrip; /* current strip for read/write */
+        internal int m_curstrip; /* current strip for read/write */
 
         /* tiling support */
-        internal uint m_curtile; /* current tile for read/write */
+        internal int m_curtile; /* current tile for read/write */
         internal int m_tilesize; /* # of bytes in a tile */
 
         /* compression scheme hooks */
@@ -97,19 +97,19 @@ namespace BitMiracle.LibTiff
 
         /* the first directory */
         private uint m_nextdiroff; /* file offset of following directory */
-        private uint[] m_dirlist; /* list of offsets to already seen directories to prevent IFD looping */
+        private int[] m_dirlist; /* list of offsets to already seen directories to prevent IFD looping */
         private int m_dirlistsize; /* number of entires in offset list */
         private UInt16 m_dirnumber; /* number of already seen directories */
         private TiffHeader m_header; /* file's header block */
         private int[] m_typeshift; /* data type shift counts */
         private int[] m_typemask; /* data type masks */
         private UInt16 m_curdir; /* current directory (index) */
-        private uint m_curoff; /* current offset for read/write */
-        private uint m_dataoff; /* current offset for writing dir */
+        private int m_curoff; /* current offset for read/write */
+        private int m_dataoff; /* current offset for writing dir */
 
         /* SubIFD support */
         private UInt16 m_nsubifd; /* remaining subifds to write */
-        private uint m_subifdoff; /* offset for patching SubIFD link */
+        private int m_subifdoff; /* offset for patching SubIFD link */
 
         /* tiling support */
         private uint m_col; /* current column (offset by row too) */
@@ -119,7 +119,7 @@ namespace BitMiracle.LibTiff
 
         /* tag support */
         private TiffFieldInfo[] m_fieldinfo; /* sorted table of registered tags */
-        private uint m_nfields; /* # entries in registered tag table */
+        private int m_nfields; /* # entries in registered tag table */
         private TiffFieldInfo m_foundfield; /* cached pointer to already found tag */
 
         private clientInfoLink m_clientinfo; /* extra client information. */
@@ -267,13 +267,13 @@ namespace BitMiracle.LibTiff
 
         private void cleanUp()
         {
-            if (m_mode != O_RDONLY)
-            {
-                /*
-                * Flush buffered data and directory (if dirty).
-                */
-                Flush();
-            }
+            //if (m_mode != O_RDONLY)
+            //{
+            //    /*
+            //    * Flush buffered data and directory (if dirty).
+            //    */
+            //    Flush();
+            //}
 
             m_currentCodec.tif_cleanup();
             FreeDirectory();

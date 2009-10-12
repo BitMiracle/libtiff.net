@@ -23,6 +23,6 @@ namespace BitMiracle.LibTiff.Internal
 
         public UInt16 tiff_magic; /* magic number (defines byte order) */
         public UInt16 tiff_version; /* TIFF version number */
-        public uint tiff_diroff; /* byte offset to first directory */
+        public int tiff_diroff; /* byte offset to first directory */
     }
 }

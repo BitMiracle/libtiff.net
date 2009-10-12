@@ -29,8 +29,8 @@ namespace BitMiracle.LibTiff.Internal
     class TiffDirEntry
     {
         public UInt16 tdir_tag; /* see below */
-        public UInt16 tdir_type; /* data type; see below */
-        public uint tdir_count; /* number of items; length in spec */
-        public uint tdir_offset; /* byte offset to field data */
+        public TiffDataType tdir_type; /* data type; see below */
+        public int tdir_count; /* number of items; length in spec */
+        public int tdir_offset; /* byte offset to field data */
     }
 }

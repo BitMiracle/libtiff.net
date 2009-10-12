@@ -45,9 +45,9 @@ namespace BitMiracle.LibTiff
             return m_stream.Close(m_clientdata);
         }
 
-        private uint getFileSize()
+        private int getFileSize()
         {
-            return m_stream.Size(m_clientdata);
+            return (int)m_stream.Size(m_clientdata);
         }
 
         private bool readOK(byte[] buf, int size)
@@ -69,17 +69,17 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private bool readUInt32OK(out uint value)
+        private bool readIntOK(out int value)
         {
             byte[] cp = new byte[4];
             bool res = readOK(cp, 4);
             value = 0;
             if (res)
             {
-                value = (uint)(cp[0] & 0xFF);
-                value += (uint)((cp[1] & 0xFF) << 8);
-                value += (uint)((cp[2] & 0xFF) << 16);
-                value += (uint)(cp[3] << 24);
+                value = (cp[0] & 0xFF);
+                value += (int)((cp[1] & 0xFF) << 8);
+                value += (int)((cp[2] & 0xFF) << 16);
+                value += (int)(cp[3] << 24);
             }
 
             return res;
@@ -105,11 +105,11 @@ namespace BitMiracle.LibTiff
                 TiffDirEntry entry = dir[i];
                 entry.tdir_tag = readUInt16(bytes, pos);
                 pos += sizeof(UInt16);
-                entry.tdir_type = readUInt16(bytes, pos);
+                entry.tdir_type = (TiffDataType)readUInt16(bytes, pos);
                 pos += sizeof(UInt16);
-                entry.tdir_count = readUInt32(bytes, pos);
+                entry.tdir_count = readInt(bytes, pos);
                 pos += sizeof(uint);
-                entry.tdir_offset = readUInt32(bytes, pos);
+                entry.tdir_offset = readInt(bytes, pos);
                 pos += sizeof(uint);
             }
         }
@@ -122,14 +122,15 @@ namespace BitMiracle.LibTiff
                 res = readUInt16OK(out header.tiff_version);
 
             if (res)
-                res = readUInt32OK(out header.tiff_diroff);
+                res = readIntOK(out header.tiff_diroff);
 
             return res;
         }
 
-        private bool seekOK(uint off)
+        private bool seekOK(int off)
         {
-            return (seekFile(off, SEEK_SET) == off);
+            //return (seekFile(off, SEEK_SET) == off);
+            return false;
         }
 
         /*
@@ -144,7 +145,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            uint strip;
+            int strip;
             if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
             {
                 if (sample >= m_dir.td_samplesperpixel)
@@ -153,10 +154,10 @@ namespace BitMiracle.LibTiff
                     return false;
                 }
 
-                strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
+                strip = (int)(sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip);
             }
             else
-                strip = row / m_dir.td_rowsperstrip;
+                strip = (int)(row / m_dir.td_rowsperstrip);
             
             if (strip != m_curstrip)
             {
@@ -192,7 +193,7 @@ namespace BitMiracle.LibTiff
             return true;
         }
 
-        private int readRawStrip1(uint strip, byte[] buf, int offset, int size, string module)
+        private int readRawStrip1(int strip, byte[] buf, int offset, int size, string module)
         {
             Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
 
@@ -212,7 +213,7 @@ namespace BitMiracle.LibTiff
             return size;
         }
 
-        private int readRawTile1(uint tile, byte[] buf, int offset, int size, string module)
+        private int readRawTile1(int tile, byte[] buf, int offset, int size, string module)
         {
             Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
 
@@ -236,7 +237,7 @@ namespace BitMiracle.LibTiff
         * Set state to appear as if a
         * strip has just been read in.
         */
-        private bool startStrip(uint strip)
+        private bool startStrip(int strip)
         {
             if ((m_flags & TIFF_CODERSETUP) == 0)
             {
@@ -247,7 +248,7 @@ namespace BitMiracle.LibTiff
             }
 
             m_curstrip = strip;
-            m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
+            m_row = (uint)((strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip);
             m_rawcp = 0;
 
             if ((m_flags & TIFF_NOREADRAW) != 0)
@@ -262,7 +263,7 @@ namespace BitMiracle.LibTiff
         * Set state to appear as if a
         * tile has just been read in.
         */
-        private bool startTile(uint tile)
+        private bool startTile(int tile)
         {
             if ((m_flags & TIFF_CODERSETUP) == 0)
             {
@@ -273,8 +274,8 @@ namespace BitMiracle.LibTiff
             }
 
             m_curtile = tile;
-            m_row = (tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilelength;
-            m_col = (tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilewidth;
+            m_row = (uint)((tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilelength);
+            m_col = (uint)((tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilewidth);
             m_rawcp = 0;
             if ((m_flags & TIFF_NOREADRAW) != 0)
                 m_rawcc = 0;
@@ -286,11 +287,11 @@ namespace BitMiracle.LibTiff
 
         private bool checkRead(int tiles)
         {
-            if (m_mode == O_WRONLY)
-            {
-                ErrorExt(this, m_clientdata, m_name, "File not open for reading");
-                return false;
-            }
+            //if (m_mode == O_WRONLY)
+            //{
+            //    ErrorExt(this, m_clientdata, m_name, "File not open for reading");
+            //    return false;
+            //}
 
             int temp = 0;
             if (IsTiled())
@@ -330,7 +331,25 @@ namespace BitMiracle.LibTiff
         private static void swab64BitData(byte[] buf, int cc)
         {
             Debug.Assert((cc & 7) == 0);
-            SwabArrayOfDouble(buf, cc / 8);
+
+            int doubleCount = cc / 8;
+            double[] doubles = new double[doubleCount];
+            int byteOffset = 0;
+            for (int i = 0; i < doubleCount; i++)
+            {
+                doubles[i] = BitConverter.ToDouble(buf, byteOffset);
+                byteOffset += 8;
+            }
+
+            SwabArrayOfDouble(doubles, doubleCount);
+
+            byteOffset = 0;
+            for (int i = 0; i < doubleCount; i++)
+            {
+                byte[] bytes = BitConverter.GetBytes(doubles[i]);
+                Array.Copy(bytes, 0, buf, byteOffset, bytes.Length);
+                byteOffset += bytes.Length;
+            }
         }
 
         /*
@@ -338,7 +357,7 @@ namespace BitMiracle.LibTiff
         * The data buffer is expanded, as necessary, to
         * hold the strip's data.
         */
-        internal bool fillStrip(uint strip)
+        internal bool fillStrip(int strip)
         {
             const string module = "fillStrip";
     
@@ -351,7 +370,7 @@ namespace BitMiracle.LibTiff
                 * So we are using uint instead of int here.
                 */
 
-                uint bytecount = m_dir.td_stripbytecount[strip];
+                int bytecount = m_dir.td_stripbytecount[strip];
                 if (bytecount <= 0)
                 {
                     ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
@@ -392,7 +411,7 @@ namespace BitMiracle.LibTiff
         * The data buffer is expanded, as necessary, to
         * hold the tile's data.
         */
-        internal bool fillTile(uint tile)
+        internal bool fillTile(int tile)
         {
             const string module = "fillTile";
 
@@ -405,7 +424,7 @@ namespace BitMiracle.LibTiff
                 * So we are using uint instead of int here.
                 */
 
-                uint bytecount = m_dir.td_stripbytecount[tile];
+                int bytecount = m_dir.td_stripbytecount[tile];
                 if (bytecount <= 0)
                 {
                     ErrorExt(this, m_clientdata, m_name, "%lu: Invalid tile byte count, tile %lu", bytecount, tile);

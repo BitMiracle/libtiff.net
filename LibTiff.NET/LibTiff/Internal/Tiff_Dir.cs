@@ -79,8 +79,8 @@ namespace BitMiracle.LibTiff
         */
         private void setupDefaultDirectory()
         {
-            uint tiffFieldInfoCount;
-            TiffFieldInfo tiffFieldInfo = getFieldInfo(out tiffFieldInfoCount);
+            int tiffFieldInfoCount;
+            TiffFieldInfo[] tiffFieldInfo = getFieldInfo(out tiffFieldInfoCount);
             setupFieldInfo(tiffFieldInfo, tiffFieldInfoCount);
 
             m_dir = new TiffDirectory();
@@ -93,8 +93,8 @@ namespace BitMiracle.LibTiff
              *  Give client code a chance to install their own
              *  tag extensions & methods, prior to compression overloads.
              */
-            if (m_extender != null)
-                (*m_extender)(this);
+            //if (m_extender != null)
+            //    (*m_extender)(this);
             
             SetField(TIFFTAG_COMPRESSION, COMPRESSION_NONE);
             
@@ -115,8 +115,10 @@ namespace BitMiracle.LibTiff
             m_flags &= ~TIFF_ISTILED;
         }
 
-        private bool advanceDirectory(ref uint nextdir, out uint off)
+        private bool advanceDirectory(ref int nextdir, out uint off)
         {
+            off = 0;
+
             const string module = "advanceDirectory";
             UInt16 dircount;
             
@@ -129,12 +131,9 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_SWAB) != 0)
                 SwabShort(ref dircount);
 
-            if (off != null)
-                off = seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
-            else
-                seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
+            //off = seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
 
-            if (!readUInt32OK(out nextdir))
+            if (!readIntOK(out nextdir))
             {
                 ErrorExt(this, m_clientdata, module, "%s: Error fetching directory link", m_name);
                 return false;

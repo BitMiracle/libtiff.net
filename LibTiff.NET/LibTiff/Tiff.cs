@@ -260,9 +260,9 @@ namespace BitMiracle.LibTiff
             return newBuffer;
         }
 
-        public static uint[] Realloc(uint[] oldBuffer, int elementCount, int newElementCount)
+        public static int[] Realloc(int[] oldBuffer, int elementCount, int newElementCount)
         {
-            uint[] newBuffer = new uint[newElementCount];
+            int[] newBuffer = new int[newElementCount];
             //memset(newBuffer, 0, newElementCount * sizeof(uint));
 
             if (oldBuffer == null)
@@ -1027,7 +1027,7 @@ namespace BitMiracle.LibTiff
                             break;
                             /* XXX: workaround for broken TIFFs */
                         }
-                        else if (dir[i].tdir_type == TIFF_LONG)
+                        else if (dir[i].tdir_type == TiffDataType.TIFF_LONG)
                         {
                             uint v;
                             if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (UInt16)v))
@@ -1179,7 +1179,7 @@ namespace BitMiracle.LibTiff
                                 return readDirectoryFailed(dir);
                             /* XXX: workaround for broken TIFFs */
                         }
-                        else if (dir[i].tdir_tag == TIFFTAG_BITSPERSAMPLE && dir[i].tdir_type == TIFF_LONG)
+                        else if (dir[i].tdir_tag == TIFFTAG_BITSPERSAMPLE && dir[i].tdir_type == TiffDataType.TIFF_LONG)
                         {
                             uint v;
                             if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (UInt16)v))
@@ -1241,24 +1241,18 @@ namespace BitMiracle.LibTiff
                                         * only one array to apply to
                                         * all samples.
                                         */
-                                        UInt16* u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(UInt16));
+                                        UInt16[] u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(UInt16));
                                         SetField(dir[i].tdir_tag, u, u, u);
-                                        delete[] u;
                                     }
                                     else
                                     {
                                         v *= sizeof(UInt16);
-                                        UInt16* u0 = byteArrayToUInt16(cp, 0, v);
-                                        UInt16* u1 = byteArrayToUInt16(cp, v, v);
-                                        UInt16* u2 = byteArrayToUInt16(cp, 2 * v, v);
+                                        UInt16[] u0 = byteArrayToUInt16(cp, 0, v);
+                                        UInt16[] u1 = byteArrayToUInt16(cp, v, v);
+                                        UInt16[] u2 = byteArrayToUInt16(cp, 2 * v, v);
                                         SetField(dir[i].tdir_tag, u0, u1, u2);
-                                        delete[] u0;
-                                        delete[] u1;
-                                        delete[] u2;
                                     }
                                 }
-
-                                delete cp;
                             }
                             break;
                         }
@@ -1412,7 +1406,6 @@ namespace BitMiracle.LibTiff
                 }
             }
 
-            delete dir;
             dir = null;
 
             if (!fieldSet(FIELD_MAXSAMPLEVALUE))
@@ -1599,7 +1592,6 @@ namespace BitMiracle.LibTiff
                 }
             }
 
-            delete dir;
             return true;
         }
 
@@ -1706,25 +1698,21 @@ namespace BitMiracle.LibTiff
             if (!writeUInt16OK(dircount))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
-                delete[] data;
                 return false;
             }
 
             if (!writeDirEntryOK(data, dirsize / sizeof(TiffDirEntry)))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory contents");
-                delete[] data;
                 return false;
             }
 
-            if (!writeUInt32OK(pdiroff))
+            if (!writeIntOK(pdiroff))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory link");
-                delete[] data;
                 return false;
             }
 
-            delete[] data;
             return true;
         }
 
@@ -2100,13 +2088,7 @@ namespace BitMiracle.LibTiff
             
             Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
 
-            if (m_rawdata != null)
-            {
-                if ((m_flags & TIFF_MYBUFFER) != 0)
-                    delete m_rawdata;
-
-                m_rawdata = null;
-            }
+            m_rawdata = null;
             
             if (bp != null)
             {
@@ -2141,10 +2123,7 @@ namespace BitMiracle.LibTiff
             if (m_rawdata != null)
             {
                 if ((m_flags & TIFF_MYBUFFER) != 0)
-                {
-                    delete m_rawdata;
                     m_flags &= ~TIFF_MYBUFFER;
-                }
 
                 m_rawdata = null;
             }
@@ -2291,7 +2270,6 @@ namespace BitMiracle.LibTiff
                 clearFieldBit(FIELD_YCBCRSUBSAMPLING);
                 clearFieldBit(FIELD_YCBCRPOSITIONING);
 
-                delete m_dir;
                 m_dir = null;
             }
         }
@@ -2420,7 +2398,7 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_SWAB) != 0)
                 SwabLong(ref nextdir);
             
-            if (!writeUInt32OK(nextdir))
+            if (!writeIntOK(nextdir))
             {
                 ErrorExt(this, m_clientdata, module, "Error writing directory link");
                 return false;
@@ -2436,7 +2414,6 @@ namespace BitMiracle.LibTiff
             m_currentCodec.tif_cleanup();
             if ((m_flags & TIFF_MYBUFFER) != 0 && m_rawdata != null)
             {
-                delete m_rawdata;
                 m_rawdata = null;
                 m_rawcc = 0;
             }
@@ -2525,7 +2502,7 @@ namespace BitMiracle.LibTiff
                 m_diroff = 0;
 
                 seekFile((uint)(TiffHeader::TIFF_MAGIC_SIZE + TiffHeader::TIFF_VERSION_SIZE), SEEK_SET);
-                if (!writeUInt32OK(m_header.tiff_diroff))
+                if (!writeIntOK(m_header.tiff_diroff))
                 {
                     ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
                     return false;
@@ -2548,7 +2525,7 @@ namespace BitMiracle.LibTiff
 
                     seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
                     
-                    if (!readUInt32OK(out nextdir))
+                    if (!readIntOK(out nextdir))
                     {
                         ErrorExt(this, m_clientdata, module, "Error fetching directory link");
                         return false;
@@ -2563,7 +2540,7 @@ namespace BitMiracle.LibTiff
                 seekFile(off - (uint)sizeof(uint), SEEK_SET);
                 m_diroff = 0;
                 
-                if (!writeUInt32OK(m_diroff))
+                if (!writeIntOK(m_diroff))
                 {
                     ErrorExt(this, m_clientdata, module, "Error writing directory link");
                     return false;
@@ -2950,7 +2927,7 @@ namespace BitMiracle.LibTiff
                     else
                         value_count = fip.field_readcount;
 
-                    if ((fip.field_type == TIFF_ASCII || fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2 || fip.field_readcount == TIFF_SPP || value_count > 1) && fip.field_tag != TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG_DOTRANGE)
+                    if ((fip.field_type == TiffDataType.TIFF_ASCII || fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2 || fip.field_readcount == TIFF_SPP || value_count > 1) && fip.field_tag != TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG_DOTRANGE)
                     {
                         if (GetField(tag, &raw_data) != 1)
                             continue;
@@ -2961,7 +2938,6 @@ namespace BitMiracle.LibTiff
                         mem_alloc = true;
                         if (GetField(tag, raw_data) != 1)
                         {
-                            delete raw_data;
                             continue;
                         }
                     }
@@ -2977,7 +2953,6 @@ namespace BitMiracle.LibTiff
                         mem_alloc = true;
                         if (GetField(tag, raw_data, &raw_data[dataSize(fip.field_type)]) != 1)
                         {
-                            delete raw_data;
                             continue;
                         }
                     }
@@ -2991,15 +2966,10 @@ namespace BitMiracle.LibTiff
                  */
                 if (prettyPrintField(fd, tag, value_count, raw_data))
                 {
-                    if (mem_alloc)
-                        delete raw_data;
                     continue;
                 }
                 else
                     printField(fd, fip, value_count, raw_data);
-
-                if (mem_alloc)
-                    delete raw_data;
             }
 
             m_tagmethods.printdir(this, fd, flags);
@@ -3731,11 +3701,9 @@ namespace BitMiracle.LibTiff
             {
                 postDecode(tempBuf, size);
                 memcpy(&buf[offset], tempBuf, size);
-                delete[] tempBuf;
                 return size;
             }
 
-            delete tempBuf;
             return -1;
         }
 
@@ -3869,11 +3837,9 @@ namespace BitMiracle.LibTiff
             {
                 postDecode(tempBuf, size);
                 memcpy(&buf[offset], tempBuf, size);
-                delete[] tempBuf;
                 return size;
             }
 
-            delete[] tempBuf;
             return -1;
         }
 
@@ -4229,7 +4195,7 @@ namespace BitMiracle.LibTiff
             wp += (cp[1] & 0xFF) << 8;
         }
 
-        public static void SwabLong(ref uint lp)
+        public static void SwabLong(ref int lp)
         {
             byte cp[4];
             cp[0] = (byte)lp;

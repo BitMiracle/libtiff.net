@@ -68,9 +68,6 @@ namespace BitMiracle.LibTiff
 
             if (failed)
             {
-                delete tf[0];
-                delete tf[1];
-                delete tf[2];
                 tf[0] = null;
                 tf[1] = null;
                 tf[2] = null;
@@ -83,7 +80,7 @@ namespace BitMiracle.LibTiff
         internal static int[] byteArrayToInt(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 4;
-            int* integers = new int[intCount];
+            int[] integers = new int[intCount];
 
             int byteStopPos = byteStartOffset + intCount * 4;
             int intPos = 0;
@@ -149,7 +146,7 @@ namespace BitMiracle.LibTiff
         internal static Int16[] byteArrayToInt16(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 2;
-            Int16* integers = new Int16[intCount];
+            Int16[] integers = new Int16[intCount];
 
             int byteStopPos = byteStartOffset + intCount * 2;
             int intPos = 0;
@@ -178,7 +175,7 @@ namespace BitMiracle.LibTiff
         internal static UInt16[] byteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 2;
-            UInt16* integers = new UInt16[intCount];
+            UInt16[] integers = new UInt16[intCount];
 
             int byteStopPos = byteStartOffset + intCount * 2;
             int intPos = 0;
@@ -204,16 +201,16 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        internal uint readUInt32(byte[] b, int byteStartOffset)
+        internal int readInt(byte[] b, int byteStartOffset)
         {
-            uint value = b[byteStartOffset++] & 0xFF;
+            int value = b[byteStartOffset++] & 0xFF;
             value += (b[byteStartOffset++] & 0xFF) << 8;
             value += (b[byteStartOffset++] & 0xFF) << 16;
             value += b[byteStartOffset++] << 24;
             return value;
         }
 
-        internal void writeUInt32(uint value, byte[] b, int byteStartOffset)
+        internal void writeInt(int value, byte[] b, int byteStartOffset)
         {
             b[byteStartOffset++] = (byte)value;
             b[byteStartOffset++] = (byte)(value >> 8);

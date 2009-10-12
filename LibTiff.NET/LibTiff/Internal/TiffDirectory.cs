@@ -25,11 +25,11 @@ namespace BitMiracle.LibTiff.Internal
         /* bit vector of fields that are set */
         public uint[] td_fieldsset = new uint[FIELD_SETLONGS];
 
-        public uint td_imagewidth;
-        public uint td_imagelength;
+        public int td_imagewidth;
+        public int td_imagelength;
         public uint td_imagedepth;
-        public uint td_tilewidth;
-        public uint td_tilelength;
+        public int td_tilewidth;
+        public int td_tilelength;
         public uint td_tiledepth;
         public uint td_subfiletype;
         public UInt16 td_bitspersample;
@@ -40,7 +40,7 @@ namespace BitMiracle.LibTiff.Internal
         public UInt16 td_fillorder;
         public UInt16 td_orientation;
         public UInt16 td_samplesperpixel;
-        public uint td_rowsperstrip;
+        public int td_rowsperstrip;
         public UInt16 td_minsamplevalue;
         public UInt16 td_maxsamplevalue;
         public double td_sminsamplevalue;
@@ -56,13 +56,13 @@ namespace BitMiracle.LibTiff.Internal
         public UInt16[] td_halftonehints = new ushort[2];
         public UInt16 td_extrasamples;
         public UInt16[] td_sampleinfo;
-        public uint td_stripsperimage;
-        public uint td_nstrips; /* size of offset & bytecount arrays */
-        public uint[] td_stripoffset;
-        public uint[] td_stripbytecount;
+        public int td_stripsperimage;
+        public int td_nstrips; /* size of offset & bytecount arrays */
+        public int[] td_stripoffset;
+        public int[] td_stripbytecount;
         public int td_stripbytecountsorted; /* is the bytecount array sorted ascending? */
         public UInt16 td_nsubifd;
-        public uint[] td_subifd;
+        public int[] td_subifd;
         /* YCbCr parameters */
         public UInt16[] td_ycbcrsubsampling = new ushort[2];
         public UInt16 td_ycbcrpositioning;
@@ -99,20 +99,20 @@ namespace BitMiracle.LibTiff.Internal
             memset(td_halftonehints, 0, sizeof(UInt16) * 2);
 
             td_extrasamples = 0;
-            td_sampleinfo = NULL;
+            td_sampleinfo = null;
             td_stripsperimage = 0;
             td_nstrips = 0;
-            td_stripoffset = NULL;
-            td_stripbytecount = NULL;
+            td_stripoffset = null;
+            td_stripbytecount = null;
             td_nsubifd = 0;
-            td_subifd = NULL;
+            td_subifd = null;
 
             memset(td_transferfunction, 0, sizeof(UInt16*) * 3);
             td_inknameslen = 0;
-            td_inknames = NULL;
+            td_inknames = null;
 
             td_customValueCount = 0;
-            td_customValues = NULL;
+            td_customValues = null;
 
             td_fillorder = FILLORDER_MSB2LSB;
             td_bitspersample = 1;

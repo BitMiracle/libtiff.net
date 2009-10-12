@@ -134,7 +134,7 @@ namespace BitMiracle.LibTiff
          */
         public virtual bool tif_seek(uint off)
         {
-            Tiff::ErrorExt(m_tif, m_tif->m_clientdata, m_tif->m_name, "Compression algorithm does not support random access");
+            ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression algorithm does not support random access");
             return false;
         }
 
@@ -153,8 +153,8 @@ namespace BitMiracle.LibTiff
                 * image up into strips that are approximately
                 * STRIP_SIZE_DEFAULT bytes long.
                 */
-                int scanline = m_tif->ScanlineSize();
-                s = (uint)Tiff::STRIP_SIZE_DEFAULT / (scanline == 0 ? 1 : scanline);
+                int scanline = m_tif.ScanlineSize();
+                s = (uint)STRIP_SIZE_DEFAULT / (scanline == 0 ? 1 : scanline);
                 if (s == 0)
                 {
                     /* very wide images */
@@ -176,31 +176,31 @@ namespace BitMiracle.LibTiff
             
             /* roundup to a multiple of 16 per the spec */
             if ((tw & 0xf) != 0)
-                tw = Tiff::roundUp(tw, 16);
+                tw = roundUp(tw, 16);
 
             if ((th & 0xf) != 0)
-                th = Tiff::roundUp(th, 16);
+                th = roundUp(th, 16);
         }
 
         private bool noEncode(string method)
         {
-            const TiffCodec* c = m_tif->FindCodec(m_tif->m_dir->td_compression);
-            if (c != NULL)
-                Tiff::ErrorExt(m_tif, m_tif->m_clientdata, m_tif->m_name, "%s %s encoding is not implemented", c->m_name, method);
+            const TiffCodec* c = m_tif.FindCodec(m_tif.m_dir.td_compression);
+            if (c != null)
+                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s encoding is not implemented", c.m_name, method);
             else
-                Tiff::ErrorExt(m_tif, m_tif->m_clientdata, m_tif->m_name, "Compression scheme %u %s encoding is not implemented", m_tif->m_dir->td_compression, method);
+                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s encoding is not implemented", m_tif.m_dir.td_compression, method);
 
             return false;
         }
 
         private bool noDecode(string method)
         {
-            const TiffCodec* c = m_tif->FindCodec(m_tif->m_dir->td_compression);
+            const TiffCodec* c = m_tif.FindCodec(m_tif.m_dir.td_compression);
 
-            if (c != NULL)
-                Tiff::ErrorExt(m_tif, m_tif->m_clientdata, m_tif->m_name, "%s %s decoding is not implemented", c->m_name, method);
+            if (c != null)
+                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s decoding is not implemented", c.m_name, method);
             else
-                Tiff::ErrorExt(m_tif, m_tif->m_clientdata, m_tif->m_name, "Compression scheme %u %s decoding is not implemented", m_tif->m_dir->td_compression, method);
+                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s decoding is not implemented", m_tif.m_dir.td_compression, method);
 
             return false;
         }

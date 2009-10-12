@@ -54,32 +54,32 @@ namespace BitMiracle.LibTiff
 
             for (uint j = 0; j < value_count; j++)
             {
-                if (fip.field_type == TIFF_BYTE)
+                if (fip.field_type == TiffDataType.TIFF_BYTE)
                     fprintf(fd, "%u", ((byte*)raw_data)[j]);
-                else if (fip.field_type == TIFF_UNDEFINED)
+                else if (fip.field_type == TiffDataType.TIFF_UNDEFINED)
                     fprintf(fd, "0x%x", (unsigned int)((byte*)raw_data)[j]);
-                else if (fip.field_type == TIFF_SBYTE)
+                else if (fip.field_type == TiffDataType.TIFF_SBYTE)
                     fprintf(fd, "%d", ((sbyte*)raw_data)[j]);
-                else if (fip.field_type == TIFF_SHORT)
+                else if (fip.field_type == TiffDataType.TIFF_SHORT)
                     fprintf(fd, "%u", ((UInt16*)raw_data)[j]);
-                else if (fip.field_type == TIFF_SSHORT)
+                else if (fip.field_type == TiffDataType.TIFF_SSHORT)
                     fprintf(fd, "%d", ((Int16*)raw_data)[j]);
-                else if (fip.field_type == TIFF_LONG)
+                else if (fip.field_type == TiffDataType.TIFF_LONG)
                     fprintf(fd, "%lu", (unsigned int)((uint*)raw_data)[j]);
-                else if (fip.field_type == TIFF_SLONG)
+                else if (fip.field_type == TiffDataType.TIFF_SLONG)
                     fprintf(fd, "%ld", (int)((int*)raw_data)[j]);
-                else if (fip.field_type == TIFF_RATIONAL || fip.field_type == TIFF_SRATIONAL || fip.field_type == TIFF_FLOAT)
+                else if (fip.field_type == TiffDataType.TIFF_RATIONAL || fip.field_type == TiffDataType.TIFF_SRATIONAL || fip.field_type == TiffDataType.TIFF_FLOAT)
                     fprintf(fd, "%f", ((float*)raw_data)[j]);
-                else if (fip.field_type == TIFF_IFD)
+                else if (fip.field_type == TiffDataType.TIFF_IFD)
                     fprintf(fd, "0x%ulx", ((uint*)raw_data)[j]);
-                else if (fip.field_type == TIFF_ASCII)
+                else if (fip.field_type == TiffDataType.TIFF_ASCII)
                 {
                     fprintf(fd, "%s", (char*)raw_data);
                     break;
                 }
-                else if (fip.field_type == TIFF_DOUBLE)
+                else if (fip.field_type == TiffDataType.TIFF_DOUBLE)
                     fprintf(fd, "%f", ((double*)raw_data)[j]);
-                else if (fip.field_type == TIFF_FLOAT)
+                else if (fip.field_type == TiffDataType.TIFF_FLOAT)
                     fprintf(fd, "%f", ((float*)raw_data)[j]);
                 else
                 {

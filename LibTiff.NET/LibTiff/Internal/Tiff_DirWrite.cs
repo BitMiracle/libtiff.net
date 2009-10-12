@@ -42,12 +42,12 @@ namespace BitMiracle.LibTiff
         private bool writeRational(TiffDataType type, UInt16 tag, ref TiffDirEntry dir, float v)
         {
             dir.tdir_tag = tag;
-            dir.tdir_type = (UInt16)type;
+            dir.tdir_type = type;
             dir.tdir_count = 1;
 
-            float a[1];
+            float[] a = new float[1];
             a[0] = v;
-            if (!writeRationalArray(dir, a))
+            if (!writeRationalArray(ref dir, a))
                 return false;
 
             return true;
@@ -55,10 +55,10 @@ namespace BitMiracle.LibTiff
 
         private bool writeRationalPair(TiffDirEntry[] entries, int dirOffset, TiffDataType type, UInt16 tag1, float v1, UInt16 tag2, float v2)
         {
-            if (!writeRational(type, tag1, entries[dirOffset], v1))
+            if (!writeRational(type, tag1, ref entries[dirOffset], v1))
                 return false;
 
-            if (!writeRational(type, tag2, entries[dirOffset + 1], v2))
+            if (!writeRational(type, tag2, ref entries[dirOffset + 1], v2))
                 return false;
 
             return true;
@@ -87,7 +87,7 @@ namespace BitMiracle.LibTiff
                     m_flags &= ~TIFF_POSTENCODE;
                     if (!m_currentCodec.tif_postencode())
                     {
-                        Tiff::ErrorExt(this, m_clientdata, m_name, "Error post-encoding before directory write");
+                        ErrorExt(this, m_clientdata, m_name, "Error post-encoding before directory write");
                         return false;
                     }
                 }
@@ -100,13 +100,12 @@ namespace BitMiracle.LibTiff
                  */
                 if (m_rawcc > 0 && (m_flags & TIFF_BEENWRITING) != 0 && !flushData1())
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "Error flushing data before directory write");
+                    ErrorExt(this, m_clientdata, m_name, "Error flushing data before directory write");
                     return false;
                 }
 
-                if ((m_flags & TIFF_MYBUFFER) != 0 && m_rawdata)
+                if ((m_flags & TIFF_MYBUFFER) != 0 && m_rawdata != null)
                 {
-                    delete[] m_rawdata;
                     m_rawdata = null;
                     m_rawcc = 0;
                     m_rawdatasize = 0;
@@ -120,8 +119,8 @@ namespace BitMiracle.LibTiff
              * offsets for the data items that aren't kept
              * in-place in each field.
              */
-            uint nfields = 0;
-            for (unsigned int b = 0; b <= FIELD_LAST; b++)
+            int nfields = 0;
+            for (int b = 0; b <= FIELD_LAST; b++)
             {
                 if (fieldSet(b) && b != FIELD_CUSTOM)
                     nfields += (b < FIELD_SUBFILETYPE ? 2 : 1);
@@ -129,10 +128,10 @@ namespace BitMiracle.LibTiff
 
             nfields += m_dir.td_customValueCount;
             int dirsize = nfields * sizeof(TiffDirEntry);
-            TiffDirEntry* data = new TiffDirEntry [nfields];
+            TiffDirEntry[] data = new TiffDirEntry [nfields];
             if (data == null)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "Cannot write directory, out of space");
+                ErrorExt(this, m_clientdata, m_name, "Cannot write directory, out of space");
                 return false;
             }
 
@@ -143,12 +142,11 @@ namespace BitMiracle.LibTiff
              */
             if (m_diroff == 0 && !linkDirectory())
             {
-                delete[] data;
                 return false;
             }
 
             m_dataoff = (uint)(m_diroff + sizeof(UInt16) + dirsize + sizeof(uint));
-            if (m_dataoff & 1)
+            if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
             seekFile(m_dataoff, SEEK_SET);
@@ -159,8 +157,8 @@ namespace BitMiracle.LibTiff
              * Setup external form of directory
              * entries and write data items.
              */
-            unsigned int fields[TiffDirectory::FIELD_SETLONGS];
-            memcpy(fields, m_dir.td_fieldsset, sizeof(unsigned int) * TiffDirectory::FIELD_SETLONGS);
+            uint[] fields = new uint[TiffDirectory.FIELD_SETLONGS];
+            Array.Copy(m_dir.td_fieldsset, fields, TiffDirectory.FIELD_SETLONGS);
 
             /*
              * Write out ExtraSamples tag only if
@@ -213,13 +211,10 @@ namespace BitMiracle.LibTiff
                             continue;
 
                         data[dir].tdir_tag = (UInt16)tag;
-                        data[dir].tdir_type = (UInt16)TIFF_LONG;
-                        data[dir].tdir_count = (uint)m_dir.td_nstrips;
-                        if (!writeLongArray(data[dir], m_dir.td_stripoffset))
-                        {
-                            delete[] data;
+                        data[dir].tdir_type = TiffDataType.TIFF_LONG;
+                        data[dir].tdir_count = m_dir.td_nstrips;
+                        if (!writeLongArray(ref data[dir], m_dir.td_stripoffset))
                             return false;
-                        }
 
                         break;
                     case FIELD_STRIPBYTECOUNTS:
@@ -234,13 +229,10 @@ namespace BitMiracle.LibTiff
                             continue;
 
                         data[dir].tdir_tag = (UInt16)tag;
-                        data[dir].tdir_type = (UInt16)TIFF_LONG;
-                        data[dir].tdir_count = (uint)m_dir.td_nstrips;
-                        if (!writeLongArray(data[dir], m_dir.td_stripbytecount))
-                        {
-                            delete[] data;
+                        data[dir].tdir_type = TiffDataType.TIFF_LONG;
+                        data[dir].tdir_count = m_dir.td_nstrips;
+                        if (!writeLongArray(ref data[dir], m_dir.td_stripbytecount))
                             return false;
-                        }
 
                         break;
                     case FIELD_ROWSPERSTRIP:
@@ -248,10 +240,7 @@ namespace BitMiracle.LibTiff
                         break;
                     case FIELD_COLORMAP:
                         if (!writeShortTable(TIFFTAG_COLORMAP, data[dir], 3, m_dir.td_colormap))
-                        {
-                            delete[] data;
                             return false;
-                        }
 
                         break;
                     case FIELD_IMAGEDIMENSIONS:
@@ -269,20 +258,14 @@ namespace BitMiracle.LibTiff
                         setupShort(TIFFTAG_PHOTOMETRIC, data[dir], m_dir.td_photometric);
                         break;
                     case FIELD_POSITION:
-                        if (!writeRationalPair(data, dir, TIFF_RATIONAL, TIFFTAG_XPOSITION, m_dir.td_xposition, TIFFTAG_YPOSITION, m_dir.td_yposition))
-                        {
-                            delete[] data;
+                        if (!writeRationalPair(data, dir, TiffDataType.TIFF_RATIONAL, TIFFTAG_XPOSITION, m_dir.td_xposition, TIFFTAG_YPOSITION, m_dir.td_yposition))
                             return false;
-                        }
 
                         dir++;
                         break;
                     case FIELD_RESOLUTION:
-                        if (!writeRationalPair(data, dir, TIFF_RATIONAL, TIFFTAG_XRESOLUTION, m_dir.td_xresolution, TIFFTAG_YRESOLUTION, m_dir.td_yresolution))
-                        {
-                            delete[] data;
+                        if (!writeRationalPair(data, dir, TiffDataType.TIFF_RATIONAL, TIFFTAG_XRESOLUTION, m_dir.td_xresolution, TIFFTAG_YRESOLUTION, m_dir.td_yresolution))
                             return false;
-                        }
 
                         dir++;
                         break;
@@ -290,46 +273,31 @@ namespace BitMiracle.LibTiff
                     case FIELD_MINSAMPLEVALUE:
                     case FIELD_MAXSAMPLEVALUE:
                     case FIELD_SAMPLEFORMAT:
-                        if (!writePerSampleShorts(fip.field_tag, data[dir]))
-                        {
-                            delete[] data;
+                        if (!writePerSampleShorts(fip.field_tag, ref data[dir]))
                             return false;
-                        }
 
                         break;
                     case FIELD_SMINSAMPLEVALUE:
                     case FIELD_SMAXSAMPLEVALUE:
-                        if (!writePerSampleAnys(sampleToTagType(), fip.field_tag, data[dir]))
-                        {
-                            delete[] data;
+                        if (!writePerSampleAnys(sampleToTagType(), fip.field_tag, ref data[dir]))
                             return false;
-                        }
 
                         break;
                     case FIELD_PAGENUMBER:
                     case FIELD_HALFTONEHINTS:
                     case FIELD_YCBCRSUBSAMPLING:
-                        if (!setupShortPair(fip.field_tag, data[dir]))
-                        {
-                            delete[] data;
+                        if (!setupShortPair(fip.field_tag, ref data[dir]))
                             return false;
-                        }
 
                         break;
                     case FIELD_INKNAMES:
-                        if (!writeInkNames(data[dir]))
-                        {
-                            delete[] data;
+                        if (!writeInkNames(ref data[dir]))
                             return false;
-                        }
 
                         break;
                     case FIELD_TRANSFERFUNCTION:
-                        if (!writeTransferFunction(data[dir]))
-                        {
-                            delete[] data;
+                        if (!writeTransferFunction(ref data[dir]))
                             return false;
-                        }
 
                         break;
                     case FIELD_SUBIFD:
@@ -338,13 +306,10 @@ namespace BitMiracle.LibTiff
                          * for backward compatibility.
                          */
                         data[dir].tdir_tag = (UInt16)fip.field_tag;
-                        data[dir].tdir_type = (UInt16)TIFF_LONG;
-                        data[dir].tdir_count = (uint)m_dir.td_nsubifd;
-                        if (!writeLongArray(data[dir], m_dir.td_subifd))
-                        {
-                            delete[] data;
+                        data[dir].tdir_type = TiffDataType.TIFF_LONG;
+                        data[dir].tdir_count = m_dir.td_nsubifd;
+                        if (!writeLongArray(ref data[dir], m_dir.td_subifd))
                             return false;
-                        }
 
                         /*
                          * Total hack: if this directory includes a SubIFD
@@ -363,7 +328,7 @@ namespace BitMiracle.LibTiff
                             else
                             {
                                 Debug.Assert(false);
-                                m_subifdoff = (uint)(m_diroff + sizeof(UInt16) + dir * sizeof(TiffDirEntry) + sizeof(UInt16) * 2 + sizeof(uint));
+                                m_subifdoff = m_diroff + sizeof(UInt16) + dir * sizeof(TiffDirEntry) + sizeof(UInt16) * 2 + sizeof(uint);
                             }
                         }
                         break;
@@ -371,17 +336,11 @@ namespace BitMiracle.LibTiff
                         /* XXX: Should be fixed and removed. */
                         if (fip.field_tag == TIFFTAG_DOTRANGE)
                         {
-                            if (!setupShortPair(fip.field_tag, data[dir]))
-                            {
-                                delete[] data;
+                            if (!setupShortPair(fip.field_tag, ref data[dir]))
                                 return false;
-                            }
                         }
-                        else if (!writeNormalTag(data[dir], fip))
-                        {
-                            delete[] data;
+                        else if (!writeNormalTag(ref data[dir], fip))
                             return false;
-                        }
 
                         break;
                 }
@@ -396,7 +355,7 @@ namespace BitMiracle.LibTiff
              * Write directory.
              */
             UInt16 dircount = (UInt16)nfields;
-            uint diroff = (uint)m_nextdiroff;
+            int diroff = (uint)m_nextdiroff;
             if ((m_flags & TIFF_SWAB) != 0)
             {
                 /*
@@ -409,7 +368,7 @@ namespace BitMiracle.LibTiff
                  * we do this byte-swapping; i.e. they only
                  * byte-swap indirect data.
                  */
-                for (dir = 0; dircount; dir++, dircount--)
+                for (dir = 0; dircount != 0; dir++, dircount--)
                 {
                     SwabShort(ref data[dir].tdir_tag);
                     SwabShort(ref data[dir].tdir_type);
@@ -418,29 +377,26 @@ namespace BitMiracle.LibTiff
                 }
 
                 dircount = (UInt16)nfields;
-                Tiff::SwabShort(ref dircount);
-                Tiff::SwabLong(ref diroff);
+                SwabShort(ref dircount);
+                SwabLong(ref diroff);
             }
             
             seekFile(m_diroff, SEEK_SET);
             if (!writeUInt16OK(dircount))
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
-                delete[] data;
+                ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
                 return false;
             }
             
             if (!writeDirEntryOK(data, dirsize / sizeof(TiffDirEntry)))
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "Error writing directory contents");
-                delete[] data;
+                ErrorExt(this, m_clientdata, m_name, "Error writing directory contents");
                 return false;
             }
             
-            if (!writeUInt32OK(diroff))
+            if (!writeIntOK(diroff))
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "Error writing directory link");
-                delete[] data;
+                ErrorExt(this, m_clientdata, m_name, "Error writing directory link");
                 return false;
             }
             
@@ -457,7 +413,6 @@ namespace BitMiracle.LibTiff
                 CreateDirectory();
             }
 
-            delete[] data;
             return true;
         }
 
@@ -473,11 +428,11 @@ namespace BitMiracle.LibTiff
 
             switch (fip.field_type)
             {
-                case TIFF_SHORT:
-                case TIFF_SSHORT:
+                case TiffDataType.TIFF_SHORT:
+                case TiffDataType.TIFF_SSHORT:
                     if (fip.field_passcount)
                     {
-                        UInt16* wp;
+                        UInt16[] wp;
                         uint wc2;
                         if (wc == (UInt16)TIFF_VARIABLE2)
                         {
@@ -504,16 +459,16 @@ namespace BitMiracle.LibTiff
                         }
                         else
                         {
-                            UInt16* wp;
+                            UInt16[] wp;
                             GetField(fip.field_tag, &wp);
                             if (!writeShortArray(dir, wp))
                                 return false;
                         }
                     }
                     break;
-                case TIFF_LONG:
-                case TIFF_SLONG:
-                case TIFF_IFD:
+                case TiffDataType.TIFF_LONG:
+                case TiffDataType.TIFF_SLONG:
+                case TiffDataType.TIFF_IFD:
                     if (fip.field_passcount)
                     {
                         uint[] lp;
@@ -549,8 +504,8 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TIFF_RATIONAL:
-                case TIFF_SRATIONAL:
+                case TiffDataType.TIFF_RATIONAL:
+                case TiffDataType.TIFF_SRATIONAL:
                     if (fip.field_passcount)
                     {
                         float[] fp;
@@ -574,7 +529,7 @@ namespace BitMiracle.LibTiff
                     {
                         if (wc == 1)
                         {
-                            float fv[1];
+                            float[] fv = new float[1];
                             GetField(fip.field_tag, &fv[0]);
                             if (!writeRationalArray(dir, fv))
                                 return false;
@@ -588,7 +543,7 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TIFF_FLOAT:
+                case TiffDataType.TIFF_FLOAT:
                     if (fip.field_passcount)
                     {
                         float[] fp;
@@ -612,7 +567,7 @@ namespace BitMiracle.LibTiff
                     {
                         if (wc == 1)
                         {
-                            float fv[1];
+                            float[] fv = new float[1];
                             GetField(fip.field_tag, &fv[0]);
                             if (!writeFloatArray(dir, fv))
                                 return false;
@@ -626,10 +581,10 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TIFF_DOUBLE:
+                case TiffDataType.TIFF_DOUBLE:
                     if (fip.field_passcount)
                     {
-                        double* dp;
+                        double[] dp;
                         uint wc2;
                         if (wc == (UInt16)TIFF_VARIABLE2)
                         {
@@ -650,21 +605,21 @@ namespace BitMiracle.LibTiff
                     {
                         if (wc == 1)
                         {
-                            double dv[1];
+                            double[] dv = new double[1];
                             GetField(fip.field_tag, &dv[0]);
                             if (!writeDoubleArray(dir, dv))
                                 return false;
                         }
                         else
                         {
-                            double* dp;
+                            double[] dp;
                             GetField(fip.field_tag, &dp);
                             if (!writeDoubleArray(dir, dp))
                                 return false;
                         }
                     }
                     break;
-                case TIFF_ASCII:
+                case TiffDataType.TIFF_ASCII:
                     {
                         char* cp;
                         uint wc2;
@@ -684,8 +639,8 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case TIFF_BYTE:
-                case TIFF_SBYTE:
+                case TiffDataType.TIFF_BYTE:
+                case TiffDataType.TIFF_SBYTE:
                     if (fip.field_passcount)
                     {
                         char* cp;
@@ -724,16 +679,16 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case TIFF_UNDEFINED:
+                case TiffDataType.TIFF_UNDEFINED:
                     {
                         char* cp;
                         uint wc2;
-                        if (wc == (unsigned short)TIFF_VARIABLE)
+                        if (wc == (ushort)TIFF_VARIABLE)
                         {
                             GetField(fip.field_tag, &wc, &cp);
                             dir.tdir_count = wc;
                         }
-                        else if (wc == (unsigned short)TIFF_VARIABLE2)
+                        else if (wc == (ushort)TIFF_VARIABLE2)
                         {
                             GetField(fip.field_tag, &wc2, &cp);
                             dir.tdir_count = wc2;
@@ -757,19 +712,19 @@ namespace BitMiracle.LibTiff
         * Setup a directory entry with either a SHORT
         * or LONG type according to the value.
         */
-        private void setupShortLong(uint tag, ref TiffDirEntry dir, uint v)
+        private void setupShortLong(uint tag, ref TiffDirEntry dir, int v)
         {
             dir.tdir_tag = (UInt16)tag;
             dir.tdir_count = 1;
             if (v > 0xffffL)
             {
-                dir.tdir_type = (short)TIFF_LONG;
+                dir.tdir_type = TiffDataType.TIFF_LONG;
                 dir.tdir_offset = v;
             }
             else
             {
-                dir.tdir_type = (short)TIFF_SHORT;
-                dir.tdir_offset = insertData(TIFF_SHORT, v);
+                dir.tdir_type = TiffDataType.TIFF_SHORT;
+                dir.tdir_offset = insertData(TiffDataType.TIFF_SHORT, v);
             }
         }
 
@@ -780,8 +735,8 @@ namespace BitMiracle.LibTiff
         {
             dir.tdir_tag = (UInt16)tag;
             dir.tdir_count = 1;
-            dir.tdir_type = (short)TIFF_SHORT;
-            dir.tdir_offset = insertData(TIFF_SHORT, v);
+            dir.tdir_type = TiffDataType.TIFF_SHORT;
+            dir.tdir_offset = insertData(TiffDataType.TIFF_SHORT, v);
         }
 
         /*
@@ -792,10 +747,10 @@ namespace BitMiracle.LibTiff
         */
         private bool writePerSampleShorts(uint tag, ref TiffDirEntry dir)
         {
-            UInt16* w = new UInt16 [m_dir.td_samplesperpixel];
+            UInt16[] w = new UInt16 [m_dir.td_samplesperpixel];
             if (w == null)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write per-sample shorts");
+                ErrorExt(this, m_clientdata, m_name, "No space to write per-sample shorts");
                 return false;
             }
 
@@ -805,11 +760,9 @@ namespace BitMiracle.LibTiff
                 w[i] = v;
 
             dir.tdir_tag = (UInt16)tag;
-            dir.tdir_type = (UInt16)TIFF_SHORT;
+            dir.tdir_type = TiffDataType.TIFF_SHORT;
             dir.tdir_count = m_dir.td_samplesperpixel;
-            bool status = writeShortArray(dir, w);
-            delete[] w;
-            
+            bool status = writeShortArray(ref dir, w);
             return status;
         }
 
@@ -820,10 +773,10 @@ namespace BitMiracle.LibTiff
         */
         private bool writePerSampleAnys(TiffDataType type, uint tag, ref TiffDirEntry dir)
         {
-            double* w = new double [m_dir.td_samplesperpixel];
+            double[] w = new double [m_dir.td_samplesperpixel];
             if (w == null)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write per-sample values");
+                ErrorExt(this, m_clientdata, m_name, "No space to write per-sample values");
                 return false;
             }
 
@@ -832,9 +785,7 @@ namespace BitMiracle.LibTiff
             for (UInt16 i = 0; i < m_dir.td_samplesperpixel; i++)
                 w[i] = v;
             
-            bool status = writeAnyArray(type, tag, dir, m_dir.td_samplesperpixel, w);
-            delete[] w;
-            
+            bool status = writeAnyArray(type, tag, ref dir, m_dir.td_samplesperpixel, w);
             return status;
         }
 
@@ -844,11 +795,11 @@ namespace BitMiracle.LibTiff
         */
         private bool setupShortPair(uint tag, ref TiffDirEntry dir)
         {
-            UInt16 v[2];
+            UInt16[] v = new ushort[2];
             GetField(tag, &v[0], &v[1]);
 
             dir.tdir_tag = (UInt16)tag;
-            dir.tdir_type = (UInt16)TIFF_SHORT;
+            dir.tdir_type = TiffDataType.TIFF_SHORT;
             dir.tdir_count = 2;
             return writeShortArray(dir, v);
         }
@@ -858,16 +809,16 @@ namespace BitMiracle.LibTiff
         * where M is known to be 2**bitspersample, and write
         * the associated indirect data.
         */
-        private bool writeShortTable(uint tag, ref TiffDirEntry dir, uint n, UInt16[][] table)
+        private bool writeShortTable(uint tag, ref TiffDirEntry dir, int n, UInt16[][] table)
         {
             dir.tdir_tag = (UInt16)tag;
-            dir.tdir_type = (short)TIFF_SHORT;
+            dir.tdir_type = TiffDataType.TIFF_SHORT;
             /* XXX -- yech, fool writeData */
-            dir.tdir_count = (uint)(1L << m_dir.td_bitspersample);
+            dir.tdir_count = 1L << m_dir.td_bitspersample;
             uint off = m_dataoff;
             for (uint i = 0; i < n; i++)
             {
-                if (!writeData(dir, table[i], dir.tdir_count))
+                if (!writeData(ref dir, table[i], dir.tdir_count))
                     return false;
             }
 
@@ -945,7 +896,7 @@ namespace BitMiracle.LibTiff
         * Setup a directory entry of an array of LONG
         * or SLONG and write the associated indirect values.
         */
-        private bool writeLongArray(ref TiffDirEntry dir, uint[] v)
+        private bool writeLongArray(ref TiffDirEntry dir, int[] v)
         {
             if (dir.tdir_count == 1)
             {
@@ -965,7 +916,7 @@ namespace BitMiracle.LibTiff
             uint[] t = new uint [2 * dir.tdir_count];
             if (t == null)
             {
-                Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write RATIONAL array");
+                ErrorExt(this, m_clientdata, m_name, "No space to write RATIONAL array");
                 return false;
             }
 
@@ -975,9 +926,9 @@ namespace BitMiracle.LibTiff
                 float fv = v[i];
                 if (fv < 0)
                 {
-                    if (dir.tdir_type == TIFF_RATIONAL)
+                    if (dir.tdir_type == TiffDataType.TIFF_RATIONAL)
                     {
-                        Tiff::WarningExt(this, m_clientdata, m_name, "\"%s\": Information lost writing value (%g) as (unsigned) RATIONAL", FieldWithTag(dir.tdir_tag).field_name, fv);
+                        WarningExt(this, m_clientdata, m_name, "\"%s\": Information lost writing value (%g) as (unsigned) RATIONAL", FieldWithTag(dir.tdir_tag).field_name, fv);
                         fv = 0;
                     }
                     else
@@ -1003,7 +954,6 @@ namespace BitMiracle.LibTiff
             }
 
             bool status = writeData(dir, t, 2 * dir.tdir_count);
-            delete[] t;
             return status;
         }
 
@@ -1041,12 +991,12 @@ namespace BitMiracle.LibTiff
             bool failed = false;
             switch (type)
             {
-                case TIFF_BYTE:
+                case TiffDataType.TIFF_BYTE:
                     {
                         byte[] bp = new byte [n];
                         if (bp == null)
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
+                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
                             return false;
                         }
 
@@ -1055,16 +1005,14 @@ namespace BitMiracle.LibTiff
 
                         if (!writeByteArray(dir, bp))
                             failed = true;
-
-                        delete[] bp;
                     }
                     break;
-                case TIFF_SBYTE:
+                case TiffDataType.TIFF_SBYTE:
                     {
                         sbyte[] bp = new sbyte [n];
                         if (bp == null)
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
+                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
                             return false;
                         }
                         
@@ -1073,16 +1021,14 @@ namespace BitMiracle.LibTiff
                         
                         if (!writeByteArray(dir, (byte*)bp))
                             failed = true;
-
-                        delete[] bp;
                     }
                     break;
-                case TIFF_SHORT:
+                case TiffDataType.TIFF_SHORT:
                     {
-                        UInt16* bp = new UInt16 [n];
+                        UInt16[] bp = new UInt16 [n];
                         if (bp == null)
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
+                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
                             return false;
                         }
                         
@@ -1091,16 +1037,14 @@ namespace BitMiracle.LibTiff
                         
                         if (!writeShortArray(dir, bp))
                             failed = true;
-
-                        delete[] bp;
                     }
                     break;
-                case TIFF_SSHORT:
+                case TiffDataType.TIFF_SSHORT:
                     {
-                        Int16* bp = new Int16 [n];
+                        Int16[] bp = new Int16 [n];
                         if (bp == null)
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
+                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
                             return false;
                         }
                         
@@ -1109,16 +1053,14 @@ namespace BitMiracle.LibTiff
                         
                         if (!writeShortArray(dir, (UInt16*)bp))
                             failed = true;
-
-                        delete[] bp;
                     }
                     break;
-                case TIFF_LONG:
+                case TiffDataType.TIFF_LONG:
                     {
                         uint[] bp = new uint [n];
                         if (bp == null)
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
+                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
                             return false;
                         }
                         
@@ -1127,16 +1069,14 @@ namespace BitMiracle.LibTiff
                         
                         if (!writeLongArray(dir, bp))
                             failed = true;
-
-                        delete[] bp;
                     }
                     break;
-                case TIFF_SLONG:
+                case TiffDataType.TIFF_SLONG:
                     {
                         int* bp = new int [n];
                         if (bp == null)
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
+                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
                             return false;
                         }
                         
@@ -1145,16 +1085,14 @@ namespace BitMiracle.LibTiff
                         
                         if (!writeLongArray(dir, (uint*)bp))
                             failed = true;
-
-                        delete[] bp;
                     }
                     break;
-                case TIFF_FLOAT:
+                case TiffDataType.TIFF_FLOAT:
                     {
                         float[] bp = new float [n];
                         if (bp == null)
                         {
-                            Tiff::ErrorExt(this, m_clientdata, m_name, "No space to write array");
+                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
                             return false;
                         }
                         
@@ -1163,11 +1101,9 @@ namespace BitMiracle.LibTiff
                         
                         if (!writeFloatArray(dir, bp))
                             failed = true;
-
-                        delete[] bp;
                     }
                     break;
-                case TIFF_DOUBLE:
+                case TiffDataType.TIFF_DOUBLE:
                     if (!writeDoubleArray(dir, v))
                         failed = true;
                         
@@ -1201,7 +1137,7 @@ namespace BitMiracle.LibTiff
 
             if (u < 0 || u > 2)
             {
-                if (Tiff::Compare(m_dir.td_transferfunction[0], m_dir.td_transferfunction[2], n))
+                if (Compare(m_dir.td_transferfunction[0], m_dir.td_transferfunction[2], n))
                     ncols = 3;
                 else
                     reCheck = true;
@@ -1209,7 +1145,7 @@ namespace BitMiracle.LibTiff
 
             if (u == 2 || reCheck)
             {
-                if (Tiff::Compare(m_dir.td_transferfunction[0], m_dir.td_transferfunction[1], n))
+                if (Compare(m_dir.td_transferfunction[0], m_dir.td_transferfunction[1], n))
                     ncols = 3;
             }
             
@@ -1219,7 +1155,7 @@ namespace BitMiracle.LibTiff
         private bool writeInkNames(ref TiffDirEntry dir)
         {
             dir.tdir_tag = TIFFTAG_INKNAMES;
-            dir.tdir_type = (short)TIFF_ASCII;
+            dir.tdir_type = TiffDataType.TIFF_ASCII;
             dir.tdir_count = m_dir.td_inknameslen;
             return writeByteArray(dir, (byte*)m_dir.td_inknames);
         }
@@ -1230,40 +1166,38 @@ namespace BitMiracle.LibTiff
         private bool writeData(ref TiffDirEntry dir, byte[] cp, int cc)
         {
             dir.tdir_offset = m_dataoff;
-            cc = dir.tdir_count * Tiff::DataWidth((TiffDataType)dir.tdir_type);
+            cc = dir.tdir_count * DataWidth(dir.tdir_type);
             if (seekOK(dir.tdir_offset) && writeOK(cp, cc))
             {
                 m_dataoff += (cc + 1) & ~1;
                 return true;
             }
 
-            Tiff::ErrorExt(this, m_clientdata, m_name, "Error writing data for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+            ErrorExt(this, m_clientdata, m_name, "Error writing data for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
             return false;
         }
 
         private bool writeData(ref TiffDirEntry dir, UInt16[] cp, uint cc)
         {
             if ((m_flags & TIFF_SWAB) != 0)
-                Tiff::SwabArrayOfShort(cp, cc);
+                SwabArrayOfShort(cp, cc);
 
             int byteCount = cc * sizeof(UInt16);
             byte[] bytes = new byte [byteCount];
             uint16ToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(dir, bytes, byteCount);
-            delete[] bytes;
             return res;
         }
 
         private bool writeData(ref TiffDirEntry dir, uint[] cp, uint cc)
         {
             if ((m_flags & TIFF_SWAB) != 0)
-                Tiff::SwabArrayOfLong(cp, cc);
+                SwabArrayOfLong(cp, cc);
 
             int byteCount = cc * sizeof(uint);
             byte[] bytes = new byte [byteCount];
             uintToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(dir, bytes, byteCount);
-            delete[] bytes;
             return res;
         }
 
@@ -1276,13 +1210,12 @@ namespace BitMiracle.LibTiff
         private bool writeData(ref TiffDirEntry dir, double[] cp, uint cc)
         {
             if ((m_flags & TIFF_SWAB) != 0)
-                Tiff::SwabArrayOfDouble(cp, cc);
+                SwabArrayOfDouble(cp, cc);
 
             int byteCount = cc * sizeof(double);
             byte[] bytes = new byte [byteCount];
             memcpy(bytes, cp, byteCount);
             bool res = writeData(dir, bytes, byteCount);
-            delete[] bytes;
             return res;
         }
 
@@ -1297,7 +1230,7 @@ namespace BitMiracle.LibTiff
             m_diroff = (seekFile(0, SEEK_END) + 1) & ~1;
             uint diroff = m_diroff;
             if ((m_flags & TIFF_SWAB) != 0)
-                Tiff::SwabLong(ref diroff);
+                SwabLong(ref diroff);
 
             /*
              * Handle SubIFDs
@@ -1305,9 +1238,9 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_INSUBIFD) != 0)
             {
                 seekFile(m_subifdoff, SEEK_SET);
-                if (!writeUInt32OK(diroff))
+                if (!writeIntOK(diroff))
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "%s: Error writing SubIFD directory link", m_name);
+                    ErrorExt(this, m_clientdata, module, "%s: Error writing SubIFD directory link", m_name);
                     return false;
                 }
 
@@ -1333,9 +1266,9 @@ namespace BitMiracle.LibTiff
                  */
                 m_header.tiff_diroff = m_diroff;
                 seekFile((uint)(TiffHeader::TIFF_MAGIC_SIZE + TiffHeader::TIFF_VERSION_SIZE), SEEK_SET);
-                if (!writeUInt32OK(diroff))
+                if (!writeIntOK(diroff))
                 {
-                    Tiff::ErrorExt(this, m_clientdata, m_name, "Error writing TIFF header");
+                    ErrorExt(this, m_clientdata, m_name, "Error writing TIFF header");
                     return false;
                 }
 
@@ -1351,30 +1284,30 @@ namespace BitMiracle.LibTiff
                 UInt16 dircount;
                 if (!seekOK(nextdir) || !readUInt16OK(out dircount))
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory count");
+                    ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                     return false;
                 }
                 
                 if ((m_flags & TIFF_SWAB) != 0)
-                    Tiff::SwabShort(ref dircount);
+                    SwabShort(ref dircount);
                 
                 seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
-                if (!readUInt32OK(out nextdir))
+                if (!readIntOK(out nextdir))
                 {
-                    Tiff::ErrorExt(this, m_clientdata, module, "Error fetching directory link");
+                    ErrorExt(this, m_clientdata, module, "Error fetching directory link");
                     return false;
                 }
 
                 if ((m_flags & TIFF_SWAB) != 0)
-                    Tiff::SwabLong(ref nextdir);
+                    SwabLong(ref nextdir);
             }
             while (nextdir != 0);
 
             uint off = seekFile(0, SEEK_CUR); /* get current offset */
             seekFile(off - (uint)sizeof(uint), SEEK_SET);
-            if (!writeUInt32OK(diroff))
+            if (!writeIntOK(diroff))
             {
-                Tiff::ErrorExt(this, m_clientdata, module, "Error writing directory link");
+                ErrorExt(this, m_clientdata, module, "Error writing directory link");
                 return false;
             }
 

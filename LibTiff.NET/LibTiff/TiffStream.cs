@@ -22,7 +22,7 @@ namespace BitMiracle.LibTiff
         public virtual int Read(thandle_t fd, byte[] buf, int offset, int size)
         {
             DWORD dwSizeRead;
-            if (!ReadFile(fd, &buf[offset], size, &dwSizeRead, NULL))
+            if (!ReadFile(fd, &buf[offset], size, &dwSizeRead, null))
                 return 0;
 
             return dwSizeRead;
@@ -31,7 +31,7 @@ namespace BitMiracle.LibTiff
         public virtual int Write(thandle_t fd, byte[] buf, int size)
         {
             DWORD dwSizeWritten;
-            if (!WriteFile(fd, buf, size, &dwSizeWritten, NULL))
+            if (!WriteFile(fd, buf, size, &dwSizeWritten, null))
                 return 0;
 
             return dwSizeWritten;
@@ -68,7 +68,7 @@ namespace BitMiracle.LibTiff
 
         public virtual uint Size(thandle_t fd)
         {
-            return GetFileSize(fd, NULL);
+            return GetFileSize(fd, null);
         }
     }
 }
