@@ -30,9 +30,9 @@ namespace BitMiracle.LibTiff
             return ((int)t > 0xffff);
         }
 
-        private bool isFillOrder(ushort o)
+        private bool isFillOrder(FILLORDER o)
         {
-            return ((m_flags & o) != 0);
+            return ((m_flags & (ushort)o) != 0);
         }
 
         private static uint BITn(int n)
@@ -115,7 +115,7 @@ namespace BitMiracle.LibTiff
             m_flags &= ~TIFF_ISTILED;
         }
 
-        private bool advanceDirectory(ref int nextdir, out uint off)
+        private bool advanceDirectory(ref int nextdir, out int off)
         {
             off = 0;
 

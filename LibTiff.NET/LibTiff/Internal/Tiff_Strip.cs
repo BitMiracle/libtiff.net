@@ -21,13 +21,13 @@ namespace BitMiracle.LibTiff
 {
     public partial class Tiff
     {
-        private uint summarize(uint summand1, uint summand2, string where)
+        private int summarize(int summand1, int summand2, string where)
         {
             /*
              * XXX: We are using casting to uint here, bacause sizeof(uint)
              * may be larger than sizeof(uint) on 64-bit architectures.
              */
-            uint bytes = summand1 + summand2;
+            int bytes = summand1 + summand2;
 
             if (bytes - summand1 != summand2)
             {

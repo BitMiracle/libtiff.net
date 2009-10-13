@@ -25,17 +25,17 @@ namespace BitMiracle.LibTiff.Internal
 
         public int td_imagewidth;
         public int td_imagelength;
-        public uint td_imagedepth;
+        public int td_imagedepth;
         public int td_tilewidth;
         public int td_tilelength;
-        public uint td_tiledepth;
-        public uint td_subfiletype;
+        public int td_tiledepth;
+        public FILETYPE td_subfiletype;
         public ushort td_bitspersample;
         public SAMPLEFORMAT td_sampleformat;
         public COMPRESSION td_compression;
         public PHOTOMETRIC td_photometric;
-        public ushort td_threshholding;
-        public ushort td_fillorder;
+        public THRESHHOLD td_threshholding;
+        public FILLORDER td_fillorder;
         public ushort td_orientation;
         public ushort td_samplesperpixel;
         public int td_rowsperstrip;
@@ -45,7 +45,7 @@ namespace BitMiracle.LibTiff.Internal
         public double td_smaxsamplevalue;
         public float td_xresolution;
         public float td_yresolution;
-        public ushort td_resolutionunit;
+        public RESUNIT td_resolutionunit;
         public PLANARCONFIG td_planarconfig;
         public float td_xposition;
         public float td_yposition;
@@ -53,7 +53,7 @@ namespace BitMiracle.LibTiff.Internal
         public ushort[][] td_colormap = { null, null, null };
         public ushort[] td_halftonehints = new ushort[2];
         public ushort td_extrasamples;
-        public ushort[] td_sampleinfo;
+        public EXTRASAMPLE[] td_sampleinfo;
         public int td_stripsperimage;
         public int td_nstrips; /* size of offset & bytecount arrays */
         public int[] td_stripoffset;
@@ -63,7 +63,7 @@ namespace BitMiracle.LibTiff.Internal
         public int[] td_subifd;
         /* YCbCr parameters */
         public ushort[] td_ycbcrsubsampling = new ushort[2];
-        public ushort td_ycbcrpositioning;
+        public YCBCRPOSITION td_ycbcrpositioning;
         /* Colorimetry parameters */
         public ushort[][] td_transferfunction = { null, null, null };
         /* CMYK parameters */
@@ -75,7 +75,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public TiffDirectory()
         {
-            memset(td_fieldsset, 0, sizeof(unsigned int) * FIELD.FIELD_SETLONGS);
+            memset(td_fieldsset, 0, sizeof(uint) * FIELD.FIELD_SETLONGS);
 
             td_imagewidth = 0;
             td_imagelength = 0;
@@ -112,22 +112,22 @@ namespace BitMiracle.LibTiff.Internal
             td_customValueCount = 0;
             td_customValues = null;
 
-            td_fillorder = FILLORDER_MSB2LSB;
+            td_fillorder = FILLORDER.FILLORDER_MSB2LSB;
             td_bitspersample = 1;
-            td_threshholding = THRESHHOLD_BILEVEL;
-            td_orientation = ORIENTATION_TOPLEFT;
+            td_threshholding = THRESHHOLD.THRESHHOLD_BILEVEL;
+            td_orientation = ORIENTATION.ORIENTATION_TOPLEFT;
             td_samplesperpixel = 1;
-            td_rowsperstrip = (uint)-1;
+            td_rowsperstrip = -1;
             td_tilewidth = 0;
             td_tilelength = 0;
             td_tiledepth = 1;
             td_stripbytecountsorted = 1; /* Our own arrays always sorted. */
-            td_resolutionunit = RESUNIT_INCH;
+            td_resolutionunit = RESUNIT.RESUNIT_INCH;
             td_sampleformat = SAMPLEFORMAT.SAMPLEFORMAT_UINT;
             td_imagedepth = 1;
             td_ycbcrsubsampling[0] = 2;
             td_ycbcrsubsampling[1] = 2;
-            td_ycbcrpositioning = YCBCRPOSITION_CENTERED;
+            td_ycbcrpositioning = YCBCRPOSITION.YCBCRPOSITION_CENTERED;
         }
     }
 }

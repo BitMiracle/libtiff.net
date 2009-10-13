@@ -132,7 +132,7 @@ namespace BitMiracle.LibTiff
         /* position within a strip routine
          * Seek forwards nrows in the current strip.
          */
-        public virtual bool tif_seek(uint off)
+        public virtual bool tif_seek(int off)
         {
             ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression algorithm does not support random access");
             return false;

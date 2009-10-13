@@ -24,8 +24,6 @@ namespace BitMiracle.LibTiff
 {
     public partial class Tiff
     {
-        private const ushort TIFFTAG_IGNORE = 0;       /* tag placeholder used below */
-
         private int extractData(TiffDirEntry dir)
         {
             return (m_header.tiff_magic == TIFF_BIGENDIAN ?
@@ -58,7 +56,7 @@ namespace BitMiracle.LibTiff
             return ((x & 0x07) != 0 ? (x >> 3) + 1 : x >> 3);
         }
 
-        private bool readDirectoryFailed(TiffDirEntry dir)
+        private bool readDirectoryFailed(TiffDirEntry[] dir)
         {
             return false;
         }

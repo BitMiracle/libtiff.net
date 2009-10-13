@@ -48,7 +48,7 @@ namespace BitMiracle.LibTiff
             "row 0 lhs, col 0 bottom",  /* ORIENTATION_LEFTBOT */
         };
 
-        private static void printField(Stream fd, TiffFieldInfo fip, uint value_count, object raw_data)
+        private static void printField(Stream fd, TiffFieldInfo fip, int value_count, object raw_data)
         {
             fprintf(fd, "  %s: ", fip.field_name);
 
@@ -94,7 +94,7 @@ namespace BitMiracle.LibTiff
             fprintf(fd, "\n");
         }
 
-        private bool prettyPrintField(Stream fd, TIFFTAG tag, uint value_count, object raw_data)
+        private bool prettyPrintField(Stream fd, TIFFTAG tag, int value_count, object raw_data)
         {
             switch (tag)
             {

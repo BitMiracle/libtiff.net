@@ -147,7 +147,7 @@ namespace BitMiracle.LibTiff
         /*
         * Seek to a random row+sample in a file.
         */
-        private bool seek(uint row, ushort sample)
+        private bool seek(int row, ushort sample)
         {
             if (row >= m_dir.td_imagelength)
             {
@@ -259,7 +259,7 @@ namespace BitMiracle.LibTiff
             }
 
             m_curstrip = strip;
-            m_row = (uint)((strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip);
+            m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
             m_rawcp = 0;
 
             if ((m_flags & TIFF_NOREADRAW) != 0)
@@ -285,8 +285,8 @@ namespace BitMiracle.LibTiff
             }
 
             m_curtile = tile;
-            m_row = (uint)((tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilelength);
-            m_col = (uint)((tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilewidth);
+            m_row = (tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilelength;
+            m_col = (tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilewidth;
             m_rawcp = 0;
             if ((m_flags & TIFF_NOREADRAW) != 0)
                 m_rawcc = 0;

@@ -57,7 +57,7 @@ namespace BitMiracle.LibTiff
 
         /* directories to prevent IFD looping */
         internal TiffDirectory m_dir; /* internal rep of current directory */
-        internal uint m_row; /* current scanline */
+        internal int m_row; /* current scanline */
         internal int m_curstrip; /* current strip for read/write */
 
         /* tiling support */
@@ -103,7 +103,7 @@ namespace BitMiracle.LibTiff
         private TiffHeader m_header; /* file's header block */
         private int[] m_typeshift; /* data type shift counts */
         private int[] m_typemask; /* data type masks */
-        private ushort m_curdir; /* current directory (index) */
+        private short m_curdir; /* current directory (index) */
         private int m_curoff; /* current offset for read/write */
         private int m_dataoff; /* current offset for writing dir */
 
@@ -112,7 +112,7 @@ namespace BitMiracle.LibTiff
         private int m_subifdoff; /* offset for patching SubIFD link */
 
         /* tiling support */
-        private uint m_col; /* current column (offset by row too) */
+        private int m_col; /* current column (offset by row too) */
 
         /* compression scheme hooks */
         private bool m_decodestatus;

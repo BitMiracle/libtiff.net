@@ -98,13 +98,13 @@ namespace BitMiracle.LibTiff
         THRESHHOLD_ERRORDIFFUSE = 3,  /* usually floyd-steinberg */
     };
 
-    enum FILLORDER
+    enum FILLORDER : short
     {
         FILLORDER_MSB2LSB = 1,  /* most significant -> least */
         FILLORDER_LSB2MSB = 2,  /* least significant -> most */
     };
 
-    enum ORIENTATION
+    public enum ORIENTATION
     {
         ORIENTATION_TOPLEFT = 1,  /* row 0 top, col 0 lhs */
         ORIENTATION_TOPRIGHT = 2,  /* row 0 top, col 0 rhs */
@@ -277,6 +277,7 @@ namespace BitMiracle.LibTiff
 
     public enum TIFFTAG : int
     {
+        TIFFTAG_IGNORE = 0, /* tag placeholder */
         TIFFTAG_SUBFILETYPE = 254, /* subfile data descriptor. see SubFileType */
         TIFFTAG_OSUBFILETYPE = 255, /* +kind of data in subfile. see SubFileDataType */
         TIFFTAG_IMAGEWIDTH = 256, /* image width in pixels */
