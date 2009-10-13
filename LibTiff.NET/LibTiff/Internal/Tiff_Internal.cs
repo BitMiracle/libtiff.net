@@ -244,9 +244,9 @@ namespace BitMiracle.LibTiff
             return newBuffer;
         }
 
-        internal bool setCompressionScheme(int scheme)
+        internal bool setCompressionScheme(COMPRESSION scheme)
         {
-            TiffCodec c = FindCodec((ushort)scheme);
+            TiffCodec c = FindCodec(scheme);
             if (c == null)
             {
                 /*

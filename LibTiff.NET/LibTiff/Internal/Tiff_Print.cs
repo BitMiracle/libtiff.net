@@ -98,7 +98,7 @@ namespace BitMiracle.LibTiff
         {
             switch (tag)
             {
-                case TIFFTAG_INKSET:
+                case TIFFTAG.TIFFTAG_INKSET:
                     fprintf(fd, "  Ink Set: ");
                     switch (*((UInt16*)raw_data))
                     {
@@ -110,13 +110,13 @@ namespace BitMiracle.LibTiff
                             break;
                     }
                     return true;
-                case TIFFTAG_DOTRANGE:
+                case TIFFTAG.TIFFTAG_DOTRANGE:
                     fprintf(fd, "  Dot Range: %u-%u\n", ((UInt16*)raw_data)[0], ((UInt16*)raw_data)[1]);
                     return true;
-                case TIFFTAG_WHITEPOINT:
+                case TIFFTAG.TIFFTAG_WHITEPOINT:
                     fprintf(fd, "  White Point: %g-%g\n", ((float*)raw_data)[0], ((float*)raw_data)[1]);
                     return true;
-                case TIFFTAG_REFERENCEBLACKWHITE:
+                case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
                     {
                         UInt16 i;
 
@@ -125,7 +125,7 @@ namespace BitMiracle.LibTiff
                             fprintf(fd, "    %2d: %5g %5g\n", i, ((float*)raw_data)[2 * i + 0], ((float*)raw_data)[2 * i + 1]);
                         return true;
                     }
-                case TIFFTAG_XMLPACKET:
+                case TIFFTAG.TIFFTAG_XMLPACKET:
                     {
                         uint i;
 
@@ -135,20 +135,20 @@ namespace BitMiracle.LibTiff
                         fprintf(fd, "\n");
                         return true;
                     }
-                case TIFFTAG_RICHTIFFIPTC:
+                case TIFFTAG.TIFFTAG_RICHTIFFIPTC:
                     /*
                      * XXX: for some weird reason RichTIFFIPTC tag
                      * defined as array of LONG values.
                      */
                     fprintf(fd, "  RichTIFFIPTC Data: <present>, %lu bytes\n", value_count * 4);
                     return true;
-                case TIFFTAG_PHOTOSHOP:
+                case TIFFTAG.TIFFTAG_PHOTOSHOP:
                     fprintf(fd, "  Photoshop Data: <present>, %lu bytes\n", value_count);
                     return true;
-                case TIFFTAG_ICCPROFILE:
+                case TIFFTAG.TIFFTAG_ICCPROFILE:
                     fprintf(fd, "  ICC Profile: <present>, %lu bytes\n", value_count);
                     return true;
-                case TIFFTAG_STONITS:
+                case TIFFTAG.TIFFTAG_STONITS:
                     fprintf(fd, "  Sample to Nits conversion factor: %.4e\n", *((double*)raw_data));
                     return true;
             }

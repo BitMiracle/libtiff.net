@@ -17,7 +17,7 @@ namespace BitMiracle.LibTiff
 {
     public class TiffFieldInfo
     {
-        public uint field_tag; /* field's tag */
+        public TIFFTAG field_tag; /* field's tag */
         public short field_readcount; /* read count/TIFF_VARIABLE/TIFF_SPP */
         public short field_writecount; /* write count/TIFF_VARIABLE */
         public TiffDataType field_type; /* type of associated data */
@@ -26,7 +26,7 @@ namespace BitMiracle.LibTiff
         public bool field_passcount; /* if true, pass dir count on set */
         public string field_name; /* ASCII name */
 
-        public TiffFieldInfo(uint fieldTag, short fieldReadCount, short fieldWriteCount, TiffDataType fieldType,
+        public TiffFieldInfo(TIFFTAG fieldTag, short fieldReadCount, short fieldWriteCount, TiffDataType fieldType,
             ushort fieldBit, bool fieldOkToChange, bool fieldPassCount, string fieldName)
         {
             field_tag = fieldTag;

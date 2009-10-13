@@ -64,13 +64,13 @@ namespace BitMiracle.LibTiff
 
             switch (m_dir.td_sampleformat)
             {
-                case SAMPLEFORMAT_IEEEFP:
+                case SAMPLEFORMAT.SAMPLEFORMAT_IEEEFP:
                     return (bps == 4 ? TiffDataType.TIFF_FLOAT : TiffDataType.TIFF_DOUBLE);
-                case SAMPLEFORMAT_INT:
+                case SAMPLEFORMAT.SAMPLEFORMAT_INT:
                     return (bps <= 1 ? TiffDataType.TIFF_SBYTE : bps <= 2 ? TiffDataType.TIFF_SSHORT : TiffDataType.TIFF_SLONG);
-                case SAMPLEFORMAT_UINT:
+                case SAMPLEFORMAT.SAMPLEFORMAT_UINT:
                     return (bps <= 1 ? TiffDataType.TIFF_BYTE : bps <= 2 ? TiffDataType.TIFF_SHORT : TiffDataType.TIFF_LONG);
-                case SAMPLEFORMAT_VOID:
+                case SAMPLEFORMAT.SAMPLEFORMAT_VOID:
                     return TiffDataType.TIFF_UNDEFINED;
             }
             

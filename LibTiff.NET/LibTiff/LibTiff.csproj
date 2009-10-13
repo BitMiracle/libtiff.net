@@ -55,6 +55,7 @@
     <Compile Include="Internal\Tiff_Swab.cs" />
     <Compile Include="Internal\Tiff_Write.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TagDefinitions.cs" />
     <Compile Include="Tiff.cs" />
     <Compile Include="TiffCodec.cs" />
     <Compile Include="TiffDataType.cs" />

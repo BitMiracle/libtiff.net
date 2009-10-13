@@ -33,9 +33,9 @@ namespace BitMiracle.LibTiff.Internal
         public uint td_tiledepth;
         public uint td_subfiletype;
         public UInt16 td_bitspersample;
-        public UInt16 td_sampleformat;
-        public UInt16 td_compression;
-        public UInt16 td_photometric;
+        public SAMPLEFORMAT td_sampleformat;
+        public COMPRESSION td_compression;
+        public PHOTOMETRIC td_photometric;
         public UInt16 td_threshholding;
         public UInt16 td_fillorder;
         public UInt16 td_orientation;
@@ -48,7 +48,7 @@ namespace BitMiracle.LibTiff.Internal
         public float td_xresolution;
         public float td_yresolution;
         public UInt16 td_resolutionunit;
-        public UInt16 td_planarconfig;
+        public PLANARCONFIG td_planarconfig;
         public float td_xposition;
         public float td_yposition;
         public UInt16[] td_pagenumber = new ushort[2];
@@ -125,7 +125,7 @@ namespace BitMiracle.LibTiff.Internal
             td_tiledepth = 1;
             td_stripbytecountsorted = 1; /* Our own arrays always sorted. */
             td_resolutionunit = RESUNIT_INCH;
-            td_sampleformat = SAMPLEFORMAT_UINT;
+            td_sampleformat = SAMPLEFORMAT.SAMPLEFORMAT_UINT;
             td_imagedepth = 1;
             td_ycbcrsubsampling[0] = 2;
             td_ycbcrsubsampling[1] = 2;

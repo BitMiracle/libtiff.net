@@ -25,10 +25,10 @@ namespace BitMiracle.LibTiff
     public class TiffCodec
     {
         protected Tiff m_tif;
-        public int m_scheme;
+        public COMPRESSION m_scheme;
         public string m_name;
 
-        public TiffCodec(Tiff tif, int scheme, string name)
+        public TiffCodec(Tiff tif, COMPRESSION scheme, string name)
         {
             m_scheme = scheme;
             m_tif = tif;
@@ -184,7 +184,7 @@ namespace BitMiracle.LibTiff
 
         private bool noEncode(string method)
         {
-            const TiffCodec* c = m_tif.FindCodec(m_tif.m_dir.td_compression);
+            TiffCodec c = m_tif.FindCodec(m_tif.m_dir.td_compression);
             if (c != null)
                 ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s encoding is not implemented", c.m_name, method);
             else
@@ -195,7 +195,7 @@ namespace BitMiracle.LibTiff
 
         private bool noDecode(string method)
         {
-            const TiffCodec* c = m_tif.FindCodec(m_tif.m_dir.td_compression);
+            TiffCodec c = m_tif.FindCodec(m_tif.m_dir.td_compression);
 
             if (c != null)
                 ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s decoding is not implemented", c.m_name, method);

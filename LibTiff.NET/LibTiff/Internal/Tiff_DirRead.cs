@@ -46,8 +46,8 @@ namespace BitMiracle.LibTiff
              *     until the whole image will be written and directory dumped out.
              */
             return ((td.td_stripbytecount[0] == 0 && td.td_stripoffset[0] != 0) ||
-                (td.td_compression == COMPRESSION_NONE && td.td_stripbytecount[0] > getFileSize() - td.td_stripoffset[0]) ||
-                (m_mode == O_RDONLY && td.td_compression == COMPRESSION_NONE && td.td_stripbytecount[0] < ScanlineSize() * td.td_imagelength));
+                (td.td_compression == COMPRESSION.COMPRESSION_NONE && td.td_stripbytecount[0] > getFileSize() - td.td_stripoffset[0]) ||
+                (m_mode == O_RDONLY && td.td_compression == COMPRESSION.COMPRESSION_NONE && td.td_stripbytecount[0] < ScanlineSize() * td.td_imagelength));
         }
 
         private static int howMany8(int x)
@@ -71,7 +71,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            if (m_dir.td_compression != COMPRESSION_NONE)
+            if (m_dir.td_compression != COMPRESSION.COMPRESSION_NONE)
             {
                 int space = sizeof(TiffHeader) + sizeof(UInt16) + (dircount * sizeof(TiffDirEntry)) + sizeof(uint);
                 int filesize = getFileSize();
@@ -92,7 +92,7 @@ namespace BitMiracle.LibTiff
                 }
 
                 space = filesize - space;
-                if (m_dir.td_planarconfig == PLANARCONFIG_SEPARATE)
+                if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
                     space /= m_dir.td_samplesperpixel;
                 
                 uint strip = 0;
@@ -144,7 +144,7 @@ namespace BitMiracle.LibTiff
             return 0;
         }
 
-        private static int readDirectoryFind(TiffDirEntry[] dir, UInt16 dircount, UInt16 tagid)
+        private static int readDirectoryFind(TiffDirEntry[] dir, UInt16 dircount, TIFFTAG tagid)
         {
             for (UInt16 n = 0; n < dircount; n++)
             {
@@ -1343,7 +1343,7 @@ namespace BitMiracle.LibTiff
              */
             m_dir.td_nstrips = nstrips;
             m_dir.td_stripsperimage = nstrips;
-            SetField(TIFFTAG_ROWSPERSTRIP, rowsperstrip);
+            SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, rowsperstrip);
 
             m_dir.td_stripbytecount = newcounts;
             m_dir.td_stripoffset = newoffsets;

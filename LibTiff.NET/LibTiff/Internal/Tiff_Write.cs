@@ -67,10 +67,10 @@ namespace BitMiracle.LibTiff
             bool res = true;
             for (int i = 0; i < count; i++)
             {
-                res = writeUInt16OK(entries[i].tdir_tag);
+                res = writeUInt16OK((ushort)entries[i].tdir_tag);
 
                 if (res)
-                    res = writeUInt16OK(entries[i].tdir_type);
+                    res = writeUInt16OK((ushort)entries[i].tdir_type);
 
                 if (res)
                     res = writeIntOK(entries[i].tdir_count);
@@ -115,7 +115,7 @@ namespace BitMiracle.LibTiff
         */
         private bool growStrips(int delta, string module)
         {
-            Debug.Assert(m_dir.td_planarconfig == PLANARCONFIG_CONTIG);
+            Debug.Assert(m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG);
             int[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             int[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             if (new_stripoffset == null || new_stripbytecount == null)
