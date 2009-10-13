@@ -61,7 +61,7 @@ namespace BitMiracle.LibTiff
                 else if (fip.field_type == TiffDataType.TIFF_SBYTE)
                     fprintf(fd, "%d", ((sbyte*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SHORT)
-                    fprintf(fd, "%u", ((UInt16*)raw_data)[j]);
+                    fprintf(fd, "%u", ((ushort*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SSHORT)
                     fprintf(fd, "%d", ((Int16*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_LONG)
@@ -100,25 +100,25 @@ namespace BitMiracle.LibTiff
             {
                 case TIFFTAG.TIFFTAG_INKSET:
                     fprintf(fd, "  Ink Set: ");
-                    switch (*((UInt16*)raw_data))
+                    switch (*((ushort*)raw_data))
                     {
                         case INKSET_CMYK:
                             fprintf(fd, "CMYK\n");
                             break;
                         default:
-                            fprintf(fd, "%u (0x%x)\n", *((UInt16*)raw_data), *((UInt16*)raw_data));
+                            fprintf(fd, "%u (0x%x)\n", *((ushort*)raw_data), *((ushort*)raw_data));
                             break;
                     }
                     return true;
                 case TIFFTAG.TIFFTAG_DOTRANGE:
-                    fprintf(fd, "  Dot Range: %u-%u\n", ((UInt16*)raw_data)[0], ((UInt16*)raw_data)[1]);
+                    fprintf(fd, "  Dot Range: %u-%u\n", ((ushort*)raw_data)[0], ((ushort*)raw_data)[1]);
                     return true;
                 case TIFFTAG.TIFFTAG_WHITEPOINT:
                     fprintf(fd, "  White Point: %g-%g\n", ((float*)raw_data)[0], ((float*)raw_data)[1]);
                     return true;
                 case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
                     {
-                        UInt16 i;
+                        ushort i;
 
                         fprintf(fd, "  Reference Black/White:\n");
                         for (i = 0; i < m_dir.td_samplesperpixel; i++)

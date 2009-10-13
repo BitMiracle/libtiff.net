@@ -67,7 +67,7 @@ namespace BitMiracle.LibTiff
             return (readFile(buf, 0, size) == size);
         }
 
-        private bool readUInt16OK(out UInt16 value)
+        private bool readUInt16OK(out ushort value)
         {
             byte[] bytes = new byte[2];
             bool res = readOK(bytes, 2);
@@ -97,9 +97,9 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private bool readDirEntryOk(TiffDirEntry[] dir, UInt16 dircount)
+        private bool readDirEntryOk(TiffDirEntry[] dir, ushort dircount)
         {
-            int entrySize = sizeof(UInt16) * 2 + sizeof(uint) * 2;
+            int entrySize = sizeof(ushort) * 2 + sizeof(uint) * 2;
             int totalSize = entrySize * dircount;
             byte[] bytes = new byte[totalSize];
             bool res = readOK(bytes, totalSize);
@@ -109,16 +109,16 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private void readDirEntry(TiffDirEntry[] dir, UInt16 dircount, byte[] bytes, uint offset)
+        private void readDirEntry(TiffDirEntry[] dir, ushort dircount, byte[] bytes, uint offset)
         {
             int pos = (int)offset;
             for (int i = 0; i < dircount; i++)
             {
                 TiffDirEntry entry = dir[i];
                 entry.tdir_tag = (TIFFTAG)readUInt16(bytes, pos);
-                pos += sizeof(UInt16);
+                pos += sizeof(ushort);
                 entry.tdir_type = (TiffDataType)readUInt16(bytes, pos);
-                pos += sizeof(UInt16);
+                pos += sizeof(ushort);
                 entry.tdir_count = readInt(bytes, pos);
                 pos += sizeof(uint);
                 entry.tdir_offset = readInt(bytes, pos);
@@ -147,7 +147,7 @@ namespace BitMiracle.LibTiff
         /*
         * Seek to a random row+sample in a file.
         */
-        private bool seek(uint row, UInt16 sample)
+        private bool seek(uint row, ushort sample)
         {
             if (row >= m_dir.td_imagelength)
             {
@@ -267,7 +267,7 @@ namespace BitMiracle.LibTiff
             else
                 m_rawcc = (int)m_dir.td_stripbytecount[strip];
 
-            return m_currentCodec.tif_predecode((UInt16)(strip / m_dir.td_stripsperimage));
+            return m_currentCodec.tif_predecode((ushort)(strip / m_dir.td_stripsperimage));
         }
 
         /*
@@ -293,7 +293,7 @@ namespace BitMiracle.LibTiff
             else
                 m_rawcc = (int)m_dir.td_stripbytecount[tile];
 
-            return m_currentCodec.tif_predecode((UInt16)(tile / m_dir.td_stripsperimage));
+            return m_currentCodec.tif_predecode((ushort)(tile / m_dir.td_stripsperimage));
         }
 
         private bool checkRead(int tiles)
@@ -320,7 +320,7 @@ namespace BitMiracle.LibTiff
         private static void swab16BitData(byte[] buf, int cc)
         {
             Debug.Assert((cc & 1) == 0);
-            UInt16[] swabee = byteArrayToUInt16(buf, 0, cc);
+            ushort[] swabee = byteArrayToUInt16(buf, 0, cc);
             SwabArrayOfShort(swabee, cc / 2);
             uint16ToByteArray(swabee, 0, cc / 2, buf, 0);
         }
@@ -334,9 +334,9 @@ namespace BitMiracle.LibTiff
         private static void swab32BitData(byte[] buf, int cc)
         {
             Debug.Assert((cc & 3) == 0);
-            uint[] swabee = byteArrayToUInt(buf, 0, cc);
+            int[] swabee = byteArrayToInt(buf, 0, cc);
             SwabArrayOfLong(swabee, cc / 4);
-            uintToByteArray(swabee, 0, cc / 4, buf, 0);
+            intToByteArray(swabee, 0, cc / 4, buf, 0);
         }
 
         private static void swab64BitData(byte[] buf, int cc)

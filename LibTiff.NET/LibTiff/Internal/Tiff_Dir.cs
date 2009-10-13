@@ -30,7 +30,7 @@ namespace BitMiracle.LibTiff
             return ((int)t > 0xffff);
         }
 
-        private bool isFillOrder(UInt16 o)
+        private bool isFillOrder(ushort o)
         {
             return ((m_flags & o) != 0);
         }
@@ -120,7 +120,7 @@ namespace BitMiracle.LibTiff
             off = 0;
 
             const string module = "advanceDirectory";
-            UInt16 dircount;
+            ushort dircount;
             
             if (!seekOK(nextdir) || !readUInt16OK(out dircount))
             {
@@ -150,9 +150,9 @@ namespace BitMiracle.LibTiff
             cpp = cp.Clone() as string;
         }
 
-        internal static void setShortArray(out UInt16[] wpp, UInt16[] wp, uint n)
+        internal static void setShortArray(out ushort[] wpp, ushort[] wp, uint n)
         {
-            wpp = new UInt16[n];
+            wpp = new ushort[n];
             for (uint i = 0; i < n; i++)
                 wpp[i] = wp[i];
         }

@@ -24,7 +24,7 @@ namespace BitMiracle.LibTiff
 {
     public partial class Tiff
     {
-        private const UInt16 TIFFTAG_IGNORE = 0;       /* tag placeholder used below */
+        private const ushort TIFFTAG_IGNORE = 0;       /* tag placeholder used below */
 
         private int extractData(TiffDirEntry dir)
         {
@@ -63,7 +63,7 @@ namespace BitMiracle.LibTiff
             return false;
         }
 
-        private bool estimateStripByteCounts(TiffDirEntry[] dir, UInt16 dircount)
+        private bool estimateStripByteCounts(TiffDirEntry[] dir, ushort dircount)
         {
             const string module = "estimateStripByteCounts";
 
@@ -76,11 +76,11 @@ namespace BitMiracle.LibTiff
 
             if (m_dir.td_compression != COMPRESSION.COMPRESSION_NONE)
             {
-                int space = TiffHeader.SizeInBytes + sizeof(UInt16) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(uint);
+                int space = TiffHeader.SizeInBytes + sizeof(ushort) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(uint);
                 int filesize = getFileSize();
 
                 /* calculate amount of space used by indirect values */
-                for (UInt16 n = 0; n < dircount; n++)
+                for (ushort n = 0; n < dircount; n++)
                 {
                     int cc = DataWidth((TiffDataType)dir[n].tdir_type);
                     if (cc == 0)
@@ -147,9 +147,9 @@ namespace BitMiracle.LibTiff
             return 0;
         }
 
-        private static int readDirectoryFind(TiffDirEntry[] dir, UInt16 dircount, TIFFTAG tagid)
+        private static int readDirectoryFind(TiffDirEntry[] dir, ushort dircount, TIFFTAG tagid)
         {
-            for (UInt16 n = 0; n < dircount; n++)
+            for (ushort n = 0; n < dircount; n++)
             {
                 if (dir[n].tdir_tag == tagid)
                     return n;
@@ -172,7 +172,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            for (UInt16 n = 0; n < m_dirnumber && m_dirlist != null; n++)
+            for (ushort n = 0; n < m_dirnumber && m_dirlist != null; n++)
             {
                 if (m_dirlist[n] == diroff)
                     return false;
@@ -202,14 +202,14 @@ namespace BitMiracle.LibTiff
         * nextdiroff variable has been specified, read it too. Function returns a
         * number of fields in the directory or 0 if failed.
         */
-        private UInt16 fetchDirectory(int diroff, out TiffDirEntry[] pdir, out int nextdiroff)
+        private ushort fetchDirectory(int diroff, out TiffDirEntry[] pdir, out int nextdiroff)
         {
             const string module = "fetchDirectory";
 
             m_diroff = diroff;
             nextdiroff = 0;
 
-            UInt16 dircount;
+            ushort dircount;
             TiffDirEntry[] dir = null;
             pdir = null;
 
@@ -337,7 +337,7 @@ namespace BitMiracle.LibTiff
                     case TiffDataType.TIFF_SHORT:
                     case TiffDataType.TIFF_SSHORT:
                         {
-                            UInt16[] u = byteArrayToUInt16(cp, 0, cc);
+                            ushort[] u = byteArrayToUInt16(cp, 0, cc);
                             SwabArrayOfShort(u, dir.tdir_count);
                             uint16ToByteArray(u, 0, dir.tdir_count, cp, 0);
                         }
@@ -346,17 +346,17 @@ namespace BitMiracle.LibTiff
                     case TiffDataType.TIFF_SLONG:
                     case TiffDataType.TIFF_FLOAT:
                         {
-                            uint[] u = byteArrayToUInt(cp, 0, cc);
+                            int[] u = byteArrayToInt(cp, 0, cc);
                             SwabArrayOfLong(u, dir.tdir_count);
-                            uintToByteArray(u, 0, dir.tdir_count, cp, 0);
+                            intToByteArray(u, 0, dir.tdir_count, cp, 0);
                         }
                         break;
                     case TiffDataType.TIFF_RATIONAL:
                     case TiffDataType.TIFF_SRATIONAL:
                         {
-                            uint[] u = byteArrayToUInt(cp, 0, cc);
+                            int[] u = byteArrayToInt(cp, 0, cc);
                             SwabArrayOfLong(u, 2 * dir.tdir_count);
-                            uintToByteArray(u, 0, 2 * dir.tdir_count, cp, 0);
+                            intToByteArray(u, 0, 2 * dir.tdir_count, cp, 0);
                         }
                         break;
                     case TiffDataType.TIFF_DOUBLE:
@@ -373,19 +373,24 @@ namespace BitMiracle.LibTiff
         */
         private int fetchString(TiffDirEntry dir, out string cp)
         {
+            byte[] bytes = null;
+
             if (dir.tdir_count <= 4)
             {
                 int l = dir.tdir_offset;
                 if ((m_flags & TIFF_SWAB) != 0)
                     SwabLong(ref l);
 
-                byte[] bytes = new byte[sizeof(uint)];
+                bytes = new byte[sizeof(uint)];
                 writeInt(l, bytes, 0);
                 cp = Encoding.ASCII.GetString(bytes, 0, dir.tdir_count);
                 return 1;
             }
 
-            return fetchData(dir, cp);
+            bytes = new byte[dir.tdir_count];
+            int res = fetchData(dir, bytes);
+            cp = Encoding.ASCII.GetString(bytes, 0, dir.tdir_count);
+            return res;
         }
 
         /*
@@ -492,7 +497,7 @@ namespace BitMiracle.LibTiff
         /*
         * Fetch an array of SHORT or SSHORT values.
         */
-        private bool fetchShortArray(TiffDirEntry dir, UInt16[] v)
+        private bool fetchShortArray(TiffDirEntry dir, ushort[] v)
         {
             if (dir.tdir_count <= 2)
             {
@@ -501,29 +506,29 @@ namespace BitMiracle.LibTiff
                 if (m_header.tiff_magic == TIFF_BIGENDIAN)
                 {
                     if (count == 2)
-                        v[1] = (UInt16)(dir.tdir_offset & 0xffff);
+                        v[1] = (ushort)(dir.tdir_offset & 0xffff);
 
                     if (count >= 1)
-                        v[0] = (UInt16)(dir.tdir_offset >> 16);
+                        v[0] = (ushort)(dir.tdir_offset >> 16);
                 }
                 else
                 {
                     if (count == 2)
-                        v[1] = (UInt16)(dir.tdir_offset >> 16);
+                        v[1] = (ushort)(dir.tdir_offset >> 16);
 
                     if (count >= 1)
-                        v[0] = (UInt16)(dir.tdir_offset & 0xffff);
+                        v[0] = (ushort)(dir.tdir_offset & 0xffff);
                 }
 
                 return true;
             }
 
-            int cc = dir.tdir_count * sizeof(UInt16);
+            int cc = dir.tdir_count * sizeof(ushort);
             byte[] b = new byte[cc];
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                UInt16[] u = byteArrayToUInt16(b, 0, read);
+                ushort[] u = byteArrayToUInt16(b, 0, read);
                 Array.Copy(u, v, u.Length);
             }
 
@@ -557,7 +562,7 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
                     {
-                        UInt16[] v = new ushort[2];
+                        ushort[] v = new ushort[2];
                         return fetchShortArray(dir, v) && SetField(dir.tdir_tag, v[0], v[1]);
                     }
             }
@@ -706,7 +711,7 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
                     {
-                        UInt16[] u = new UInt16[dir.tdir_count];
+                        ushort[] u = new ushort[dir.tdir_count];
                         bool res = fetchShortArray(dir, u);
                         if (res)
                         {
@@ -808,7 +813,7 @@ namespace BitMiracle.LibTiff
                     case TiffDataType.TIFF_SHORT:
                     case TiffDataType.TIFF_SSHORT:
                         {
-                            UInt16[] cp = new UInt16 [dir.tdir_count];
+                            ushort[] cp = new ushort [dir.tdir_count];
                             if (cp == null)
                                 ErrorExt(this, m_clientdata, m_name, "No space %s", mesg);
 
@@ -935,10 +940,10 @@ namespace BitMiracle.LibTiff
                             TiffDataType type = fip.field_type;
                             if (type != TiffDataType.TIFF_LONG && type != TiffDataType.TIFF_SLONG)
                             {
-                                UInt16 v = (UInt16)extractData(dir);
+                                ushort v = (ushort)extractData(dir);
                                 if (fip.field_passcount)
                                 {
-                                    UInt16[] a = new ushort[1];
+                                    ushort[] a = new ushort[1];
                                     a[0] = v;
                                     ok = SetField(dir.tdir_tag, 1, a);
                                 }
@@ -1028,15 +1033,15 @@ namespace BitMiracle.LibTiff
         * the specified tag and verify that
         * all values are the same.
         */
-        private bool fetchPerSampleShorts(TiffDirEntry dir, out UInt16 pl)
+        private bool fetchPerSampleShorts(TiffDirEntry dir, out ushort pl)
         {
             pl = 0;
-            UInt16 samples = m_dir.td_samplesperpixel;
+            ushort samples = m_dir.td_samplesperpixel;
             bool status = false;
 
             if (checkDirCount(dir, samples))
             {
-                UInt16[] v = new UInt16 [dir.tdir_count];
+                ushort[] v = new ushort [dir.tdir_count];
                 if (v == null)
                     ErrorExt(this, m_clientdata, m_name, "No space to fetch per-sample values");
 
@@ -1047,7 +1052,7 @@ namespace BitMiracle.LibTiff
                         check_count = samples;
 
                     bool failed = false;
-                    for (UInt16 i = 1; i < check_count; i++)
+                    for (ushort i = 1; i < check_count; i++)
                     {
                         if (v[i] != v[0])
                         {
@@ -1076,7 +1081,7 @@ namespace BitMiracle.LibTiff
         private bool fetchPerSampleLongs(TiffDirEntry dir, out int pl)
         {
             pl = 0;
-            UInt16 samples = m_dir.td_samplesperpixel;
+            ushort samples = m_dir.td_samplesperpixel;
             bool status = false;
 
             if (checkDirCount(dir, samples))
@@ -1092,7 +1097,7 @@ namespace BitMiracle.LibTiff
                         check_count = samples;
 
                     bool failed = false;
-                    for (UInt16 i = 1; i < check_count; i++)
+                    for (ushort i = 1; i < check_count; i++)
                     {
                         if (v[i] != v[0])
                         {
@@ -1120,7 +1125,7 @@ namespace BitMiracle.LibTiff
         private bool fetchPerSampleAnys(TiffDirEntry dir, out double pl)
         {
             pl = 0;
-            UInt16 samples = m_dir.td_samplesperpixel;
+            ushort samples = m_dir.td_samplesperpixel;
             bool status = false;
 
             if (checkDirCount(dir, samples))
@@ -1136,7 +1141,7 @@ namespace BitMiracle.LibTiff
                         check_count = samples;
 
                     bool failed = false;
-                    for (UInt16 i = 1; i < check_count; i++)
+                    for (ushort i = 1; i < check_count; i++)
                     {
                         if (v[i] != v[0])
                         {
@@ -1186,7 +1191,7 @@ namespace BitMiracle.LibTiff
                 /*
                  * Handle uint16->uint expansion.
                  */
-                UInt16[] dp = new UInt16[dir.tdir_count];
+                ushort[] dp = new ushort[dir.tdir_count];
                 if (dp == null)
                 {
                     ErrorExt(this, m_clientdata, m_name, "No space to fetch strip tag");

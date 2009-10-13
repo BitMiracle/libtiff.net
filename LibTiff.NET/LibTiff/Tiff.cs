@@ -189,7 +189,7 @@ namespace BitMiracle.LibTiff
         * @return returns true if the codec is configured and working. Otherwise
         * false will be returned.
         */
-        public bool IsCodecConfigured(UInt16 scheme)
+        public bool IsCodecConfigured(COMPRESSION scheme)
         {
             TiffCodec codec = FindCodec(scheme);
 
@@ -213,7 +213,7 @@ namespace BitMiracle.LibTiff
             int totalCodecs = 0;
             for (int i = 0; m_builtInCodecs[i] != null; i++)
             {
-                if (m_builtInCodecs[i] != null && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
+                if (m_builtInCodecs[i] != null && IsCodecConfigured(m_builtInCodecs[i].m_scheme))
                     totalCodecs++;
             }
 
@@ -230,7 +230,7 @@ namespace BitMiracle.LibTiff
 
             for (int i = 0; m_builtInCodecs[i] != null; i++)
             {
-                if (m_builtInCodecs[i] != null && IsCodecConfigured((UInt16)m_builtInCodecs[i].m_scheme))
+                if (m_builtInCodecs[i] != null && IsCodecConfigured((ushort)m_builtInCodecs[i].m_scheme))
                     codecs[codecPos++] = m_builtInCodecs[i];
             }
 
@@ -281,7 +281,7 @@ namespace BitMiracle.LibTiff
             return newBuffer;
         }
 
-        public static int Compare(UInt16[] p1, UInt16[] p2, int elementCount)
+        public static int Compare(ushort[] p1, ushort[] p2, int elementCount)
         {
             for (int i = 0; i < elementCount; i++)
             {
@@ -653,7 +653,7 @@ namespace BitMiracle.LibTiff
                 return null;
 
             /* NB: use sorted search (e.g. binary search) */
-            TiffFieldInfo key = new TiffFieldInfo(0, 0, 0, TIFF_NOTYPE, 0, false, false, null);
+            TiffFieldInfo key = new TiffFieldInfo(0, 0, 0, TiffDataType.TIFF_NOTYPE, 0, false, false, null);
             key.field_tag = tag;
             key.field_type = dt;
             TiffFieldInfo* pkey = &key;
@@ -672,7 +672,7 @@ namespace BitMiracle.LibTiff
                 return null;
 
             /* NB: use sorted search (e.g. binary search) */
-            TiffFieldInfo key(0, 0, 0, TIFF_NOTYPE, 0, false, false, null);
+            TiffFieldInfo key(0, 0, 0, TiffDataType.TIFF_NOTYPE, 0, false, false, null);
             key.field_name = (char*)field_name;
             key.field_type = dt;
             TiffFieldInfo* pkey = &key;
@@ -871,7 +871,7 @@ namespace BitMiracle.LibTiff
             m_currentCodec.tif_cleanup();
             m_curdir++;
             TiffDirEntry* dir = null;
-            UInt16 dircount = fetchDirectory(m_nextdiroff, dir, m_nextdiroff);
+            ushort dircount = fetchDirectory(m_nextdiroff, dir, m_nextdiroff);
             if (dircount == 0)
             {
                 ErrorExt(this, m_clientdata, module, "%s: Failed to read directory at offset %u", m_name, m_nextdiroff);
@@ -1032,7 +1032,7 @@ namespace BitMiracle.LibTiff
                         if (dir[i].tdir_count == 1)
                         {
                             uint v = extractData(dir[i]);
-                            if (!SetField(dir[i].tdir_tag, (UInt16)v))
+                            if (!SetField(dir[i].tdir_tag, (ushort)v))
                                 return readDirectoryFailed(dir);
                             
                             break;
@@ -1041,12 +1041,12 @@ namespace BitMiracle.LibTiff
                         else if (dir[i].tdir_type == TiffDataType.TIFF_LONG)
                         {
                             uint v;
-                            if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (UInt16)v))
+                            if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (ushort)v))
                                 return readDirectoryFailed(dir);
                         }
                         else
                         {
-                            UInt16 iv;
+                            ushort iv;
                             if (!fetchPerSampleShorts(dir[i], iv) || !SetField(dir[i].tdir_tag, iv))
                                 return readDirectoryFailed(dir);
                         }
@@ -1186,19 +1186,19 @@ namespace BitMiracle.LibTiff
                         if (dir[i].tdir_count == 1)
                         {
                             uint v = extractData(dir[i]);
-                            if (!SetField(dir[i].tdir_tag, (UInt16)v))
+                            if (!SetField(dir[i].tdir_tag, (ushort)v))
                                 return readDirectoryFailed(dir);
                             /* XXX: workaround for broken TIFFs */
                         }
                         else if (dir[i].tdir_tag == TIFFTAG.TIFFTAG_BITSPERSAMPLE && dir[i].tdir_type == TiffDataType.TIFF_LONG)
                         {
                             uint v;
-                            if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (UInt16)v))
+                            if (!fetchPerSampleLongs(dir[i], v) || !SetField(dir[i].tdir_tag, (ushort)v))
                                 return readDirectoryFailed(dir);
                         }
                         else
                         {
-                            UInt16 iv;
+                            ushort iv;
                             if (!fetchPerSampleShorts(dir[i], iv) || !SetField(dir[i].tdir_tag, iv))
                                 return readDirectoryFailed(dir);
                         }
@@ -1236,7 +1236,7 @@ namespace BitMiracle.LibTiff
                                     break;
                             }
 
-                            byte[] cp = new byte [dir[i].tdir_count * sizeof(UInt16)];
+                            byte[] cp = new byte [dir[i].tdir_count * sizeof(ushort)];
                             if (cp == null)
                                 ErrorExt(this, m_clientdata, m_name, "No space to read \"TransferFunction\" tag");
 
@@ -1252,15 +1252,15 @@ namespace BitMiracle.LibTiff
                                         * only one array to apply to
                                         * all samples.
                                         */
-                                        UInt16[] u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(UInt16));
+                                        ushort[] u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(ushort));
                                         SetField(dir[i].tdir_tag, u, u, u);
                                     }
                                     else
                                     {
-                                        v *= sizeof(UInt16);
-                                        UInt16[] u0 = byteArrayToUInt16(cp, 0, v);
-                                        UInt16[] u1 = byteArrayToUInt16(cp, v, v);
-                                        UInt16[] u2 = byteArrayToUInt16(cp, 2 * v, v);
+                                        v *= sizeof(ushort);
+                                        ushort[] u0 = byteArrayToUInt16(cp, 0, v);
+                                        ushort[] u1 = byteArrayToUInt16(cp, v, v);
+                                        ushort[] u2 = byteArrayToUInt16(cp, 2 * v, v);
                                         SetField(dir[i].tdir_tag, u0, u1, u2);
                                     }
                                 }
@@ -1420,7 +1420,7 @@ namespace BitMiracle.LibTiff
             dir = null;
 
             if (!fieldSet(FIELD.FIELD_MAXSAMPLEVALUE))
-                m_dir.td_maxsamplevalue = (UInt16)((1L << m_dir.td_bitspersample) - 1);
+                m_dir.td_maxsamplevalue = (ushort)((1L << m_dir.td_bitspersample) - 1);
 
             /*
              * Setup default compression scheme.
@@ -1507,7 +1507,7 @@ namespace BitMiracle.LibTiff
 
             uint dummyNextDirOff;
             TiffDirEntry* dir = null;
-            UInt16 dircount = fetchDirectory(diroff, dir, dummyNextDirOff);
+            ushort dircount = fetchDirectory(diroff, dir, dummyNextDirOff);
             if (dircount == 0)
             {
                 ErrorExt(this, m_clientdata, module, "%s: Failed to read custom directory at offset %u", m_name, diroff);
@@ -1518,7 +1518,7 @@ namespace BitMiracle.LibTiff
             m_dir = new TiffDirectory();
 
             uint fix = 0;
-            for (UInt16 i = 0; i < dircount; i++)
+            for (ushort i = 0; i < dircount; i++)
             {
                 if ((m_flags & TIFF_SWAB) != 0)
                 {
@@ -1636,7 +1636,7 @@ namespace BitMiracle.LibTiff
             * Put the directory  at the end of the file.
             */
             m_diroff = (seekFile(0, SEEK_END) + 1) & ~1;
-            m_dataoff = (uint)(m_diroff + sizeof(UInt16) + dirsize + sizeof(uint));
+            m_dataoff = (uint)(m_diroff + sizeof(ushort) + dirsize + sizeof(uint));
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
@@ -1678,7 +1678,7 @@ namespace BitMiracle.LibTiff
             /*
             * Write directory.
             */
-            UInt16 dircount = (UInt16)nfields;
+            ushort dircount = (ushort)nfields;
             pdiroff = m_nextdiroff;
             if ((m_flags & TIFF_SWAB) != 0)
             {
@@ -1700,7 +1700,7 @@ namespace BitMiracle.LibTiff
                     SwabLong(ref dir.tdir_offset);
                 }
                 
-                dircount = (UInt16) nfields;
+                dircount = (ushort) nfields;
                 SwabShort(ref dircount);
                 SwabLong(ref pdiroff);
             }
@@ -1751,7 +1751,7 @@ namespace BitMiracle.LibTiff
             {
                 if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
                 {
-                    UInt16 ycbcrsubsampling[2];
+                    ushort ycbcrsubsampling[2];
                     GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
 
                     if (ycbcrsubsampling[0] == 0)
@@ -1843,7 +1843,7 @@ namespace BitMiracle.LibTiff
                  * horizontal/vertical subsampling area include
                  * YCbCr data for the extended image.
                  */
-                UInt16 ycbcrsubsampling[2];
+                ushort ycbcrsubsampling[2];
                 GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
 
                 int samplingarea = ycbcrsubsampling[0] * ycbcrsubsampling[1];
@@ -2041,7 +2041,7 @@ namespace BitMiracle.LibTiff
         /*
         * Return index of the current directory.
         */
-        public UInt16 CurrentDirectory()
+        public ushort CurrentDirectory()
         {
             return m_curdir;
         }
@@ -2049,10 +2049,10 @@ namespace BitMiracle.LibTiff
         /*
         * Count the number of directories in a file.
         */
-        public UInt16 NumberOfDirectories()
+        public ushort NumberOfDirectories()
         {
             uint nextdir = m_header.tiff_diroff;
-            UInt16 n = 0;
+            ushort n = 0;
             uint dummyOff;
             while (nextdir != 0 && advanceDirectory(nextdir, dummyOff))
                 n++;
@@ -2315,9 +2315,9 @@ namespace BitMiracle.LibTiff
         * Set the n-th directory as the current directory.
         * NB: Directories are numbered starting at 0.
         */
-        public bool SetDirectory(UInt16 dirn)
+        public bool SetDirectory(ushort dirn)
         {
-            UInt16 n;
+            ushort n;
             uint dummyOff;
             uint nextdir = m_header.tiff_diroff;
             for (n = dirn; n > 0 && nextdir != 0; n--)
@@ -2363,7 +2363,7 @@ namespace BitMiracle.LibTiff
         /*
         * Unlink the specified directory from the directory chain.
         */
-        public bool UnlinkDirectory(UInt16 dirn)
+        public bool UnlinkDirectory(ushort dirn)
         {
             const string module = "UnlinkDirectory";
 
@@ -2379,8 +2379,8 @@ namespace BitMiracle.LibTiff
              * field we'll need to patch.
              */
             uint nextdir = m_header.tiff_diroff;
-            uint off = sizeof(UInt16) + sizeof(UInt16);
-            for (UInt16 n = dirn - 1; n > 0; n--)
+            uint off = sizeof(ushort) + sizeof(ushort);
+            for (ushort n = dirn - 1; n > 0; n--)
             {
                 if (nextdir == 0)
                 {
@@ -2524,7 +2524,7 @@ namespace BitMiracle.LibTiff
                 uint nextdir = m_header.tiff_diroff;
                 do
                 {
-                    UInt16 dircount;
+                    ushort dircount;
                     if (!seekOK(nextdir) || !readUInt16OK(out dircount))
                     {
                         ErrorExt(this, m_clientdata, module, "Error fetching directory count");
@@ -2710,7 +2710,7 @@ namespace BitMiracle.LibTiff
             {
                 fprintf(fd, "  Extra Samples: %u<", m_dir.td_extrasamples);
                 char* sep = "";
-                for (UInt16 i = 0; i < m_dir.td_extrasamples; i++)
+                for (ushort i = 0; i < m_dir.td_extrasamples; i++)
                 {
                     switch (m_dir.td_sampleinfo[i])
                     {
@@ -2736,7 +2736,7 @@ namespace BitMiracle.LibTiff
             {
                 char* cp;
                 fprintf(fd, "  Ink Names: ");
-                UInt16 i = m_dir.td_samplesperpixel;
+                ushort i = m_dir.td_samplesperpixel;
                 char* sep = "";
                 for (cp = m_dir.td_inknames; i > 0; cp = strchr(cp, '\0') + 1, i--)
                 {
@@ -2791,7 +2791,7 @@ namespace BitMiracle.LibTiff
                  * we need to fetch this rather than trust what is in our
                  * structures.
                  */
-                UInt16 subsampling[2];
+                ushort subsampling[2];
                 GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, &subsampling[0], &subsampling[1]);
                 fprintf(fd, "  YCbCr Subsampling: %u, %u\n", subsampling[0], subsampling[1]);
             }
@@ -2893,7 +2893,7 @@ namespace BitMiracle.LibTiff
                     for (int l = 0; l < n; l++)
                     {
                         fprintf(fd, "    %2lu: %5u", l, m_dir.td_transferfunction[0][l]);
-                        for (UInt16 i = 1; i < m_dir.td_samplesperpixel; i++)
+                        for (ushort i = 1; i < m_dir.td_samplesperpixel; i++)
                             fprintf(fd, " %5u", m_dir.td_transferfunction[i][l]);
                         fputc('\n', fd);
                     }
@@ -2905,7 +2905,7 @@ namespace BitMiracle.LibTiff
             if (fieldSet(FIELD.FIELD_SUBIFD) && m_dir.td_subifd != null)
             {
                 fprintf(fd, "  SubIFD Offsets:");
-                for (UInt16 i = 0; i < m_dir.td_nsubifd; i++)
+                for (ushort i = 0; i < m_dir.td_nsubifd; i++)
                     fprintf(fd, " %5lu", m_dir.td_subifd[i]);
                 fputc('\n', fd);
             }
@@ -2998,7 +2998,7 @@ namespace BitMiracle.LibTiff
             return ReadScanline(buf, row, 0);
         }
 
-        public bool ReadScanline(byte[] buf, uint row, UInt16 sample)
+        public bool ReadScanline(byte[] buf, uint row, ushort sample)
         {
             if (!checkRead(0))
                 return false;
@@ -3026,7 +3026,7 @@ namespace BitMiracle.LibTiff
             return WriteScanline(buf, row, 0);
         }
 
-        public bool WriteScanline(byte[] buf, uint row, UInt16 sample)
+        public bool WriteScanline(byte[] buf, uint row, ushort sample)
         {
             const string module = "WriteScanline";
 
@@ -3202,7 +3202,7 @@ namespace BitMiracle.LibTiff
                 TiffRGBAImage* img = TiffRGBAImage::Create(this, stop, emsg);
                 if (img != null)
                 {
-                    img.req_orientation = (UInt16)orientation;
+                    img.req_orientation = (ushort)orientation;
                     /* XXX verify rwidth and rheight against width and height */
                     ok = img.Get(raster, (rheight - img.height) * rwidth, rwidth, img.height);
                     delete img;
@@ -3390,7 +3390,7 @@ namespace BitMiracle.LibTiff
             }
             
             int colorchannels = m_dir.td_samplesperpixel - m_dir.td_extrasamples;
-            UInt16 photometric;
+            ushort photometric;
             if (!GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, &photometric))
             {
                 switch (colorchannels)
@@ -3440,7 +3440,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
                     {
-                        UInt16 inkset;
+                        ushort inkset;
                         GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET, &inkset);
                         if (inkset != INKSET_CMYK)
                         {
@@ -3578,7 +3578,7 @@ namespace BitMiracle.LibTiff
         /*
         * Compute which tile an (x,y,z,s) value is in.
         */
-        public uint ComputeTile(uint x, uint y, uint z, UInt16 s)
+        public uint ComputeTile(uint x, uint y, uint z, ushort s)
         {
             if (m_dir.td_imagedepth == 1)
                 z = 0;
@@ -3615,7 +3615,7 @@ namespace BitMiracle.LibTiff
         * Check an (x,y,z,s) coordinate
         * against the image bounds.
         */
-        public bool CheckTile(uint x, uint y, uint z, UInt16 s)
+        public bool CheckTile(uint x, uint y, uint z, ushort s)
         {
             if (x >= m_dir.td_imagewidth)
             {
@@ -3677,7 +3677,7 @@ namespace BitMiracle.LibTiff
         * Read and decompress a tile of data.  The
         * tile is selected by the (x,y,z,s) coordinates.
         */
-        public int ReadTile(byte[] buf, int offset, uint x, uint y, uint z, UInt16 s)
+        public int ReadTile(byte[] buf, int offset, uint x, uint y, uint z, ushort s)
         {
             if (!checkRead(1) || !CheckTile(x, y, z, s))
                 return -1;
@@ -3708,7 +3708,7 @@ namespace BitMiracle.LibTiff
             byte[] tempBuf = new byte [size];
             memcpy(tempBuf, &buf[offset], size);
 
-            if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (UInt16)(tile / m_dir.td_stripsperimage)))
+            if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (ushort)(tile / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
                 memcpy(&buf[offset], tempBuf, size);
@@ -3757,7 +3757,7 @@ namespace BitMiracle.LibTiff
         * Write and compress a tile of data.  The
         * tile is selected by the (x,y,z,s) coordinates.
         */
-        public int WriteTile(byte[] buf, uint x, uint y, uint z, UInt16 s)
+        public int WriteTile(byte[] buf, uint x, uint y, uint z, ushort s)
         {
             if (!CheckTile(x, y, z, s))
                 return -1;
@@ -3774,7 +3774,7 @@ namespace BitMiracle.LibTiff
         /*
         * Compute which strip a (row,sample) value is in.
         */
-        public uint ComputeStrip(uint row, UInt16 sample)
+        public uint ComputeStrip(uint row, ushort sample)
         {
             uint strip = row / m_dir.td_rowsperstrip;
             if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
@@ -3844,7 +3844,7 @@ namespace BitMiracle.LibTiff
             byte[] tempBuf = new byte[size];
             memcpy(tempBuf, &buf[offset], size);
 
-            if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (UInt16)(strip / m_dir.td_stripsperimage)))
+            if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (ushort)(strip / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
                 memcpy(&buf[offset], tempBuf, size);
@@ -3959,7 +3959,7 @@ namespace BitMiracle.LibTiff
             }
 
             m_flags &= ~TIFF_POSTENCODE;
-            UInt16 sample = (UInt16)(strip / m_dir.td_stripsperimage);
+            ushort sample = (ushort)(strip / m_dir.td_stripsperimage);
             if (!m_currentCodec.tif_preencode(sample))
                 return -1;
 
@@ -4089,7 +4089,7 @@ namespace BitMiracle.LibTiff
             }
 
             m_flags &= ~TIFF_POSTENCODE;
-            UInt16 sample = (UInt16)(tile / m_dir.td_stripsperimage);
+            ushort sample = (ushort)(tile / m_dir.td_stripsperimage);
             if (!m_currentCodec.tif_preencode(sample))
                 return -1;
 
@@ -4192,7 +4192,7 @@ namespace BitMiracle.LibTiff
         *
         * XXX We assume short = 16-bits and long = 32-bits XXX
         */
-        public static void SwabShort(ref UInt16 wp)
+        public static void SwabShort(ref ushort wp)
         {
             byte cp[2];
             cp[0] = (byte)wp;
@@ -4238,7 +4238,7 @@ namespace BitMiracle.LibTiff
             lp[1] = t;
         }
 
-        public static void SwabArrayOfShort(UInt16[] wp, int n)
+        public static void SwabArrayOfShort(ushort[] wp, int n)
         {
             for (int i = 0; i < n; i++)
             {
@@ -4268,11 +4268,12 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public static void SwabArrayOfLong(uint[] lp, int n)
+        public static void SwabArrayOfLong(int[] lp, int n)
         {
+            byte[] cp = new byte[4];
+
             for (int i = 0; i < n; i++)
             {
-                byte cp[4];
                 cp[0] = (byte)lp[i];
                 cp[1] = (byte)(lp[i] >> 8);
                 cp[2] = (byte)(lp[i] >> 16);

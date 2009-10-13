@@ -30,42 +30,42 @@ namespace BitMiracle.LibTiff.Internal
         public int td_tilelength;
         public uint td_tiledepth;
         public uint td_subfiletype;
-        public UInt16 td_bitspersample;
+        public ushort td_bitspersample;
         public SAMPLEFORMAT td_sampleformat;
         public COMPRESSION td_compression;
         public PHOTOMETRIC td_photometric;
-        public UInt16 td_threshholding;
-        public UInt16 td_fillorder;
-        public UInt16 td_orientation;
-        public UInt16 td_samplesperpixel;
+        public ushort td_threshholding;
+        public ushort td_fillorder;
+        public ushort td_orientation;
+        public ushort td_samplesperpixel;
         public int td_rowsperstrip;
-        public UInt16 td_minsamplevalue;
-        public UInt16 td_maxsamplevalue;
+        public ushort td_minsamplevalue;
+        public ushort td_maxsamplevalue;
         public double td_sminsamplevalue;
         public double td_smaxsamplevalue;
         public float td_xresolution;
         public float td_yresolution;
-        public UInt16 td_resolutionunit;
+        public ushort td_resolutionunit;
         public PLANARCONFIG td_planarconfig;
         public float td_xposition;
         public float td_yposition;
-        public UInt16[] td_pagenumber = new ushort[2];
-        public UInt16[][] td_colormap = { null, null, null };
-        public UInt16[] td_halftonehints = new ushort[2];
-        public UInt16 td_extrasamples;
-        public UInt16[] td_sampleinfo;
+        public ushort[] td_pagenumber = new ushort[2];
+        public ushort[][] td_colormap = { null, null, null };
+        public ushort[] td_halftonehints = new ushort[2];
+        public ushort td_extrasamples;
+        public ushort[] td_sampleinfo;
         public int td_stripsperimage;
         public int td_nstrips; /* size of offset & bytecount arrays */
         public int[] td_stripoffset;
         public int[] td_stripbytecount;
         public int td_stripbytecountsorted; /* is the bytecount array sorted ascending? */
-        public UInt16 td_nsubifd;
+        public ushort td_nsubifd;
         public int[] td_subifd;
         /* YCbCr parameters */
-        public UInt16[] td_ycbcrsubsampling = new ushort[2];
-        public UInt16 td_ycbcrpositioning;
+        public ushort[] td_ycbcrsubsampling = new ushort[2];
+        public ushort td_ycbcrpositioning;
         /* Colorimetry parameters */
-        public UInt16[][] td_transferfunction = { null, null, null };
+        public ushort[][] td_transferfunction = { null, null, null };
         /* CMYK parameters */
         public int td_inknameslen;
         public string td_inknames;
@@ -92,9 +92,9 @@ namespace BitMiracle.LibTiff.Internal
             td_xposition = 0;
             td_yposition = 0;
 
-            memset(td_pagenumber, 0, sizeof(UInt16) * 2);
-            memset(td_colormap, 0, sizeof(UInt16*) * 3);
-            memset(td_halftonehints, 0, sizeof(UInt16) * 2);
+            memset(td_pagenumber, 0, sizeof(ushort) * 2);
+            memset(td_colormap, 0, sizeof(ushort*) * 3);
+            memset(td_halftonehints, 0, sizeof(ushort) * 2);
 
             td_extrasamples = 0;
             td_sampleinfo = null;
@@ -105,7 +105,7 @@ namespace BitMiracle.LibTiff.Internal
             td_nsubifd = 0;
             td_subifd = null;
 
-            memset(td_transferfunction, 0, sizeof(UInt16*) * 3);
+            memset(td_transferfunction, 0, sizeof(ushort*) * 3);
             td_inknameslen = 0;
             td_inknames = null;
 

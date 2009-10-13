@@ -71,8 +71,8 @@ namespace BitMiracle.LibTiff
                 if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
                 {
                     object[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                    UInt16 ycbcrsubsampling0 = (ushort)result[0];
-                    UInt16 ycbcrsubsampling1 = (ushort)result[1];
+                    ushort ycbcrsubsampling0 = (ushort)result[0];
+                    ushort ycbcrsubsampling1 = (ushort)result[1];
 
                     if (ycbcrsubsampling0 * ycbcrsubsampling1 == 0)
                     {
