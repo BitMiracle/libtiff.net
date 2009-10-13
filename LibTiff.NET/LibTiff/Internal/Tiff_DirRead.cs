@@ -45,9 +45,12 @@ namespace BitMiracle.LibTiff
              *     writing new image, because we may do not know the exact strip size
              *     until the whole image will be written and directory dumped out.
              */
-            return ((td.td_stripbytecount[0] == 0 && td.td_stripoffset[0] != 0) ||
+            return
+            (
+                (td.td_stripbytecount[0] == 0 && td.td_stripoffset[0] != 0) ||
                 (td.td_compression == COMPRESSION.COMPRESSION_NONE && td.td_stripbytecount[0] > getFileSize() - td.td_stripoffset[0]) ||
-                (m_mode == O_RDONLY && td.td_compression == COMPRESSION.COMPRESSION_NONE && td.td_stripbytecount[0] < ScanlineSize() * td.td_imagelength));
+                (m_mode == O_RDONLY && td.td_compression == COMPRESSION.COMPRESSION_NONE && td.td_stripbytecount[0] < ScanlineSize() * td.td_imagelength)
+            );
         }
 
         private static int howMany8(int x)
@@ -73,7 +76,7 @@ namespace BitMiracle.LibTiff
 
             if (m_dir.td_compression != COMPRESSION.COMPRESSION_NONE)
             {
-                int space = sizeof(TiffHeader) + sizeof(UInt16) + (dircount * sizeof(TiffDirEntry)) + sizeof(uint);
+                int space = TiffHeader.SizeInBytes + sizeof(UInt16) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(uint);
                 int filesize = getFileSize();
 
                 /* calculate amount of space used by indirect values */
@@ -125,8 +128,8 @@ namespace BitMiracle.LibTiff
                     m_dir.td_stripbytecount[strip] = rowbytes * rowsperstrip;
             }
             
-            setFieldBit(FIELD_STRIPBYTECOUNTS);
-            if (!fieldSet(FIELD_ROWSPERSTRIP))
+            setFieldBit(FIELD.FIELD_STRIPBYTECOUNTS);
+            if (!fieldSet(FIELD.FIELD_ROWSPERSTRIP))
                 m_dir.td_rowsperstrip = m_dir.td_imagelength;
 
             return true;

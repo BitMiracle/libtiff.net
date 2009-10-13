@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyVersion.cs" />
+    <Compile Include="Internal\Field.cs" />
     <Compile Include="Internal\TiffDirectory.cs" />
     <Compile Include="Internal\TiffDirEntry.cs" />
     <Compile Include="Internal\TiffHeader.cs" />

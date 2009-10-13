@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 using BitMiracle.LibTiff.Internal;
 
@@ -223,6 +224,13 @@ namespace BitMiracle.LibTiff
             UInt16 value = b[byteStartOffset] & 0xFF;
             value += (b[byteStartOffset + 1] & 0xFF) << 8;
             return value;
+        }
+
+        internal void fprintf(Stream fd, string format, params object[] list)
+        {
+            string s = string.Format(format, list);
+            byte[] bytes = Encoding.ASCII.GetBytes(s);
+            fd.Write(bytes, 0, bytes.Length);
         }
     }
 }

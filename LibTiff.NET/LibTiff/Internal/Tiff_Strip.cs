@@ -70,16 +70,17 @@ namespace BitMiracle.LibTiff
             {
                 if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
                 {
-                    UInt16[] ycbcrsubsampling = new ushort[2];
-                    GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
+                    object[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                    UInt16 ycbcrsubsampling0 = (ushort)result[0];
+                    UInt16 ycbcrsubsampling1 = (ushort)result[1];
 
-                    if (ycbcrsubsampling[0] * ycbcrsubsampling[1] == 0)
+                    if (ycbcrsubsampling0 * ycbcrsubsampling1 == 0)
                     {
                         ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
                         return 0;
                     }
 
-                    return ((((m_dir.td_imagewidth + ycbcrsubsampling[0] - 1) / ycbcrsubsampling[0]) * (ycbcrsubsampling[0] * ycbcrsubsampling[1] + 2) * m_dir.td_bitspersample + 7) / 8) / ycbcrsubsampling[1];
+                    return ((((m_dir.td_imagewidth + ycbcrsubsampling0 - 1) / ycbcrsubsampling0) * (ycbcrsubsampling0 * ycbcrsubsampling1 + 2) * m_dir.td_bitspersample + 7) / 8) / ycbcrsubsampling1;
                 }
                 else
                 {

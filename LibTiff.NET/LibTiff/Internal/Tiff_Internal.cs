@@ -96,7 +96,7 @@ namespace BitMiracle.LibTiff
         };
 
         /* the first directory */
-        private uint m_nextdiroff; /* file offset of following directory */
+        private int m_nextdiroff; /* file offset of following directory */
         private int[] m_dirlist; /* list of offsets to already seen directories to prevent IFD looping */
         private int m_dirlistsize; /* number of entires in offset list */
         private UInt16 m_dirnumber; /* number of already seen directories */
@@ -267,13 +267,13 @@ namespace BitMiracle.LibTiff
 
         private void cleanUp()
         {
-            //if (m_mode != O_RDONLY)
-            //{
-            //    /*
-            //    * Flush buffered data and directory (if dirty).
-            //    */
-            //    Flush();
-            //}
+            if (m_mode != O_RDONLY)
+            {
+                /*
+                * Flush buffered data and directory (if dirty).
+                */
+                Flush();
+            }
 
             m_currentCodec.tif_cleanup();
             FreeDirectory();

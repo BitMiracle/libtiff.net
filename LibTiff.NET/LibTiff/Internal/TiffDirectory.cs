@@ -20,10 +20,8 @@ namespace BitMiracle.LibTiff.Internal
     /// </summary>
     class TiffDirectory
     {
-        public const int FIELD_SETLONGS = 4;
-
         /* bit vector of fields that are set */
-        public uint[] td_fieldsset = new uint[FIELD_SETLONGS];
+        public uint[] td_fieldsset = new uint[FIELD.FIELD_SETLONGS];
 
         public int td_imagewidth;
         public int td_imagelength;
@@ -77,7 +75,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public TiffDirectory()
         {
-            memset(td_fieldsset, 0, sizeof(unsigned int) * FIELD_SETLONGS);
+            memset(td_fieldsset, 0, sizeof(unsigned int) * FIELD.FIELD_SETLONGS);
 
             td_imagewidth = 0;
             td_imagelength = 0;

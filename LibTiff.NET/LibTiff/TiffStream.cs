@@ -37,7 +37,7 @@ namespace BitMiracle.LibTiff
             return dwSizeWritten;
         }
 
-        public virtual uint Seek(thandle_t fd, uint off, int whence)
+        public virtual int Seek(thandle_t fd, int off, int whence)
         {
             /* we use this as a special code, so avoid accepting it */
             if (off == 0xFFFFFFFF)
@@ -46,13 +46,13 @@ namespace BitMiracle.LibTiff
             DWORD dwMoveMethod = FILE_BEGIN;
             switch (whence)
             {
-                case SEEK_SET:
+                case Tiff.SEEK_SET:
                     dwMoveMethod = FILE_BEGIN;
                     break;
-                case SEEK_CUR:
+                case Tiff.SEEK_CUR:
                     dwMoveMethod = FILE_CURRENT;
                     break;
-                case SEEK_END:
+                case Tiff.SEEK_END:
                     dwMoveMethod = FILE_END;
                     break;
             }

@@ -21,13 +21,13 @@ namespace BitMiracle.LibTiff
         public short field_readcount; /* read count/TIFF_VARIABLE/TIFF_SPP */
         public short field_writecount; /* write count/TIFF_VARIABLE */
         public TiffDataType field_type; /* type of associated data */
-        public ushort field_bit; /* bit in fieldsset bit vector */
+        public short field_bit; /* bit in fieldsset bit vector */
         public bool field_oktochange; /* if true, can change while writing */
         public bool field_passcount; /* if true, pass dir count on set */
         public string field_name; /* ASCII name */
 
         public TiffFieldInfo(TIFFTAG fieldTag, short fieldReadCount, short fieldWriteCount, TiffDataType fieldType,
-            ushort fieldBit, bool fieldOkToChange, bool fieldPassCount, string fieldName)
+            short fieldBit, bool fieldOkToChange, bool fieldPassCount, string fieldName)
         {
             field_tag = fieldTag;
             field_readcount = fieldReadCount;

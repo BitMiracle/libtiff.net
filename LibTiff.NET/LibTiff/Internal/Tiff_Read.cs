@@ -27,6 +27,18 @@ namespace BitMiracle.LibTiff
         private const int NOSTRIP = -1;         /* undefined state */
         private const int NOTILE = -1;          /* undefined state */
 
+        // remove this
+        internal const int SEEK_SET = 0;
+        internal const int SEEK_CUR = 1;
+        internal const int SEEK_END = 2;
+
+        internal const int O_RDONLY = 0;
+        internal const int O_WRONLY = 0x0001;
+        internal const int O_CREAT = 0x0100;
+        internal const int O_TRUNC = 0x0200;
+        internal const int O_RDWR = 0x0002;
+        // end remove
+
         /*
         * Default Read/Seek/Write definitions.
         */
@@ -35,7 +47,7 @@ namespace BitMiracle.LibTiff
             return m_stream.Read(m_clientdata, buf, offset, size);
         }
 
-        private uint seekFile(uint off, int whence)
+        private int seekFile(int off, int whence)
         {
             return m_stream.Seek(m_clientdata, off, whence);
         }
@@ -129,8 +141,7 @@ namespace BitMiracle.LibTiff
 
         private bool seekOK(int off)
         {
-            //return (seekFile(off, SEEK_SET) == off);
-            return false;
+            return (seekFile(off, SEEK_SET) == off);
         }
 
         /*
@@ -287,11 +298,11 @@ namespace BitMiracle.LibTiff
 
         private bool checkRead(int tiles)
         {
-            //if (m_mode == O_WRONLY)
-            //{
-            //    ErrorExt(this, m_clientdata, m_name, "File not open for reading");
-            //    return false;
-            //}
+            if (m_mode == O_WRONLY)
+            {
+                ErrorExt(this, m_clientdata, m_name, "File not open for reading");
+                return false;
+            }
 
             int temp = 0;
             if (IsTiled())

@@ -42,7 +42,7 @@ namespace BitMiracle.LibTiff
         OFILETYPE_PAGE = 3 /* one page of many */
     };
 
-    public enum COMPRESSION
+    public enum COMPRESSION : int
     {
         COMPRESSION_NONE = 1,  /* dump mode */
         COMPRESSION_CCITTRLE = 2,  /* CCITT modified Huffman RLE */

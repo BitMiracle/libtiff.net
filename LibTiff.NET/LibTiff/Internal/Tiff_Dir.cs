@@ -51,7 +51,7 @@ namespace BitMiracle.LibTiff
         */
         private bool okToChangeTag(TIFFTAG tag)
         {
-            TiffFieldInfo fip = FindFieldInfo(tag, TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfo(tag, TiffDataType.TIFF_ANY);
             if (fip == null)
             {
                 /* unknown tag */
@@ -131,7 +131,7 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_SWAB) != 0)
                 SwabShort(ref dircount);
 
-            //off = seekFile(dircount * sizeof(TiffDirEntry), SEEK_CUR);
+            off = seekFile(dircount * TiffDirEntry.SizeInBytes, SEEK_CUR);
 
             if (!readIntOK(out nextdir))
             {

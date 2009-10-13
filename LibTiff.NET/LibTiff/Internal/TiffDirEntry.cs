@@ -28,6 +28,8 @@ namespace BitMiracle.LibTiff.Internal
     /// </summary>
     class TiffDirEntry
     {
+        public const int SizeInBytes = 12;
+
         public TIFFTAG tdir_tag; /* see below */
         public TiffDataType tdir_type; /* data type; see below */
         public int tdir_count; /* number of items; length in spec */

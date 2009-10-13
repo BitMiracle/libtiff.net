@@ -57,7 +57,7 @@ namespace BitMiracle.LibTiff
                 if (fip.field_type == TiffDataType.TIFF_BYTE)
                     fprintf(fd, "%u", ((byte*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_UNDEFINED)
-                    fprintf(fd, "0x%x", (unsigned int)((byte*)raw_data)[j]);
+                    fprintf(fd, "0x%x", (uint)((byte*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SBYTE)
                     fprintf(fd, "%d", ((sbyte*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SHORT)
@@ -65,7 +65,7 @@ namespace BitMiracle.LibTiff
                 else if (fip.field_type == TiffDataType.TIFF_SSHORT)
                     fprintf(fd, "%d", ((Int16*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_LONG)
-                    fprintf(fd, "%lu", (unsigned int)((uint*)raw_data)[j]);
+                    fprintf(fd, "%lu", (uint)((uint*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SLONG)
                     fprintf(fd, "%ld", (int)((int*)raw_data)[j]);
                 else if (fip.field_type == TiffDataType.TIFF_RATIONAL || fip.field_type == TiffDataType.TIFF_SRATIONAL || fip.field_type == TiffDataType.TIFF_FLOAT)
@@ -94,7 +94,7 @@ namespace BitMiracle.LibTiff
             fprintf(fd, "\n");
         }
 
-        private bool prettyPrintField(Stream fd, uint tag, uint value_count, object raw_data)
+        private bool prettyPrintField(Stream fd, TIFFTAG tag, uint value_count, object raw_data)
         {
             switch (tag)
             {

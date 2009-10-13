@@ -22,6 +22,7 @@ namespace BitMiracle.LibTiff
     public enum TiffDataType : short
     {
         TIFF_NOTYPE = 0, /* placeholder */
+        TIFF_ANY = TIFF_NOTYPE, /* for field descriptor searching */
         TIFF_BYTE = 1, /* 8-bit unsigned integer */
         TIFF_ASCII = 2, /* 8-bit bytes w/ last byte null */
         TIFF_SHORT = 3, /* 16-bit unsigned integer */
