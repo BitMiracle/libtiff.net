@@ -463,7 +463,7 @@ namespace BitMiracle.LibTiff
                             * passed as a list of separate values. This behavior
                             * must be changed in the future!
                             */
-                            byte* val = td->td_customValues[tvIndex].value;
+                            byte[] val = td->td_customValues[tvIndex].value;
                             int valPos = 0;
                             for (int i = 0; i < td->td_customValues[tvIndex].count; i++, valPos += tv_size)
                             {
@@ -761,7 +761,7 @@ namespace BitMiracle.LibTiff
                             }
                             else
                             {
-                                byte* val = (byte*)tv->value;
+                                byte[] val = (byte*)tv->value;
                                 int valPos = 0;
                                 for (int j = 0; j < tv->count; j++, valPos += Tiff::dataSize(tv->info->field_type))
                                 {
@@ -841,7 +841,7 @@ namespace BitMiracle.LibTiff
             if (v > td->td_samplesperpixel)
                 return 0;
 
-            UInt16* va = va_arg(ap, UInt16*);
+            UInt16[] va = va_arg(ap, UInt16*);
             if (v > 0 && va == NULL)
             {
                 /* typically missing param */

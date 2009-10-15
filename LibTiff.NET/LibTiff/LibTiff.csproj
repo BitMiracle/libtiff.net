@@ -58,13 +58,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TagDefinitions.cs" />
     <Compile Include="Tiff.cs" />
+    <Compile Include="TiffCIELabToRGB.cs" />
     <Compile Include="TiffCodec.cs" />
     <Compile Include="TiffDataType.cs" />
+    <Compile Include="TiffDisplay.cs" />
     <Compile Include="TiffErrorHandler.cs" />
     <Compile Include="TiffFieldInfo.cs" />
     <Compile Include="TiffPrintDirectoryFlags.cs" />
+    <Compile Include="TiffRGBAImage.cs" />
     <Compile Include="TiffStream.cs" />
     <Compile Include="TiffTagMethods.cs" />
+    <Compile Include="TiffYCbCrToRGB.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

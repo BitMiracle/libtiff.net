@@ -819,31 +819,165 @@ namespace BitMiracle.LibTiff
             
             return null;
         }
-        
-        /*
-        * Like GetField, but taking a varargs
-        * parameter list.  This routine is useful
-        * for building higher-level interfaces on
-        * top of the library.
-        */
-        //public bool VGetField(uint tag, va_list ap);
-        
+
         /*
         * Like GetField, but return any default
         * value if the tag is not present in the directory.
-        */
-        //public bool GetFieldDefaulted(uint tag, ...);
-        
-        /*
-        * Like GetField, but return any default
-        * value if the tag is not present in the directory.
-        *
-        * NB:  We use the value in the directory, rather than
+        *  
+        *  NB: We use the value in the directory, rather than
         *  explicit values so that defaults exist only one
         *  place in the library -- in setupDefaultDirectory.
         */
-        //public bool VGetFieldDefaulted(uint tag, va_list ap);
+        public object[] GetFieldDefaulted(TIFFTAG tag)
+        {
+            TiffDirectory* td = m_dir;
 
+            if (VGetField(tag, ap))
+                return true;
+
+            switch (tag)
+            {
+                case TIFFTAG_SUBFILETYPE:
+                    *va_arg(ap, uint*) = td->td_subfiletype;
+                    return true;
+                case TIFFTAG_BITSPERSAMPLE:
+                    *va_arg(ap, UInt16*) = td->td_bitspersample;
+                    return true;
+                case TIFFTAG_THRESHHOLDING:
+                    *va_arg(ap, UInt16*) = td->td_threshholding;
+                    return true;
+                case TIFFTAG_FILLORDER:
+                    *va_arg(ap, UInt16*) = td->td_fillorder;
+                    return true;
+                case TIFFTAG_ORIENTATION:
+                    *va_arg(ap, UInt16*) = td->td_orientation;
+                    return true;
+                case TIFFTAG_SAMPLESPERPIXEL:
+                    *va_arg(ap, UInt16*) = td->td_samplesperpixel;
+                    return true;
+                case TIFFTAG_ROWSPERSTRIP:
+                    *va_arg(ap, uint*) = td->td_rowsperstrip;
+                    return true;
+                case TIFFTAG_MINSAMPLEVALUE:
+                    *va_arg(ap, UInt16*) = td->td_minsamplevalue;
+                    return true;
+                case TIFFTAG_MAXSAMPLEVALUE:
+                    *va_arg(ap, UInt16*) = td->td_maxsamplevalue;
+                    return true;
+                case TIFFTAG_PLANARCONFIG:
+                    *va_arg(ap, UInt16*) = td->td_planarconfig;
+                    return true;
+                case TIFFTAG_RESOLUTIONUNIT:
+                    *va_arg(ap, UInt16*) = td->td_resolutionunit;
+                    return true;
+                case TIFFTAG_PREDICTOR:
+                    {
+                        CodecWithPredictor* sp = (CodecWithPredictor*)m_currentCodec;
+                        *va_arg(ap, UInt16*) = (UInt16)sp->GetPredictorValue();
+                        return true;
+                    }
+                case TIFFTAG_DOTRANGE:
+                    *va_arg(ap, UInt16*) = 0;
+                    *va_arg(ap, UInt16*) = (1 << td->td_bitspersample) - 1;
+                    return true;
+                case TIFFTAG_INKSET:
+                    *va_arg(ap, UInt16*) = INKSET_CMYK;
+                    return true;
+                case TIFFTAG_NUMBEROFINKS:
+                    *va_arg(ap, UInt16*) = 4;
+                    return true;
+                case TIFFTAG_EXTRASAMPLES:
+                    *va_arg(ap, UInt16*) = td->td_extrasamples;
+                    *va_arg(ap, UInt16**) = td->td_sampleinfo;
+                    return true;
+                case TIFFTAG_MATTEING:
+                    *va_arg(ap, UInt16*) = (td->td_extrasamples == 1 && td->td_sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA);
+                    return true;
+                case TIFFTAG_TILEDEPTH:
+                    *va_arg(ap, uint*) = td->td_tiledepth;
+                    return true;
+                case TIFFTAG_DATATYPE:
+                    *va_arg(ap, UInt16*) = td->td_sampleformat - 1;
+                    return true;
+                case TIFFTAG_SAMPLEFORMAT:
+                    *va_arg(ap, UInt16*) = td->td_sampleformat;
+                    return true;
+                case TIFFTAG_IMAGEDEPTH:
+                    *va_arg(ap, uint*) = td->td_imagedepth;
+                    return true;
+                case TIFFTAG_YCBCRCOEFFICIENTS:
+                    {
+                        /* defaults are from CCIR Recommendation 601-1 */
+                        static float ycbcrcoeffs[] = { 0.299f, 0.587f, 0.114f };
+                        *va_arg(ap, float**) = ycbcrcoeffs;
+                        return true;
+                    }
+                case TIFFTAG_YCBCRSUBSAMPLING:
+                    *va_arg(ap, UInt16*) = td->td_ycbcrsubsampling[0];
+                    *va_arg(ap, UInt16*) = td->td_ycbcrsubsampling[1];
+                    return true;
+                case TIFFTAG_YCBCRPOSITIONING:
+                    *va_arg(ap, UInt16*) = td->td_ycbcrpositioning;
+                    return true;
+                case TIFFTAG_WHITEPOINT:
+                    {
+                        /* TIFF 6.0 specification tells that it is no default
+                        value for the WhitePoint, but AdobePhotoshop TIFF
+                        Technical Note tells that it should be CIE D50. */
+                        static float whitepoint[2];
+                        whitepoint[0] = D50_X0 / (D50_X0 + D50_Y0 + D50_Z0);
+                        whitepoint[1] = D50_Y0 / (D50_X0 + D50_Y0 + D50_Z0);
+                        *va_arg(ap, float**) = whitepoint;
+                        return true;
+                    }
+                case TIFFTAG_TRANSFERFUNCTION:
+                    if (!td->td_transferfunction[0] && !defaultTransferFunction(td))
+                    {
+                        ErrorExt(this, m_clientdata, m_name, "No space for \"TransferFunction\" tag");
+                        return false;
+                    }
+                    *va_arg(ap, UInt16**) = td->td_transferfunction[0];
+                    if (td->td_samplesperpixel - td->td_extrasamples > 1)
+                    {
+                        *va_arg(ap, UInt16**) = td->td_transferfunction[1];
+                        *va_arg(ap, UInt16**) = td->td_transferfunction[2];
+                    }
+                    return true;
+                case TIFFTAG_REFERENCEBLACKWHITE:
+                    {
+                        static float ycbcr_refblackwhite[] = { 0.0F, 255.0F, 128.0F, 255.0F, 128.0F, 255.0F };
+                        static float rgb_refblackwhite[6];
+
+                        for (int i = 0; i < 3; i++)
+                        {
+                            rgb_refblackwhite[2 * i + 0] = 0.0F;
+                            rgb_refblackwhite[2 * i + 1] = (float)((1L << td->td_bitspersample) - 1L);
+                        }
+
+                        if (td->td_photometric == PHOTOMETRIC_YCBCR)
+                        {
+                            /*
+                             * YCbCr (Class Y) images must have the
+                             * ReferenceBlackWhite tag set. Fix the
+                             * broken images, which lacks that tag.
+                             */
+                            *va_arg(ap, float**) = ycbcr_refblackwhite;
+                        }
+                        else
+                        {
+                            /*
+                             * Assume RGB (Class R)
+                             */
+                            *va_arg(ap, float**) = rgb_refblackwhite;
+                        }
+
+                        return true;
+                    }
+            }
+
+            return false;
+        }
+        
         /*
         * Read the next TIFF directory from a file
         * and convert it to the internal format.
@@ -3198,12 +3332,12 @@ namespace BitMiracle.LibTiff
         * Read the specified image into an ABGR-format raster. Use bottom left
         * origin for raster by default.
         */
-        public bool ReadRGBAImage(uint rwidth, uint rheight, uint[] raster)
+        public bool ReadRGBAImage(int rwidth, int rheight, uint[] raster)
         {
             return ReadRGBAImage(rwidth, rheight, raster, false);
         }
 
-        public bool ReadRGBAImage(uint rwidth, uint rheight, uint[] raster, bool stop)
+        public bool ReadRGBAImage(int rwidth, int rheight, uint[] raster, bool stop)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION.ORIENTATION_BOTLEFT, stop);
         }
@@ -3212,29 +3346,28 @@ namespace BitMiracle.LibTiff
         * Read the specified image into an ABGR-format raster taking in account
         * specified orientation.
         */
-        public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, uint[] raster)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION.ORIENTATION_BOTLEFT, false);
         }
 
-        public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster, ORIENTATION orientation)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, uint[] raster, ORIENTATION orientation)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, orientation, false);
         }
 
-        public bool ReadRGBAImageOriented(uint rwidth, uint rheight, uint[] raster, ORIENTATION orientation, bool stop)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, uint[] raster, ORIENTATION orientation, bool stop)
         {
-            string emsg = "";
             bool ok = true;
-            if (RGBAImageOK(emsg))
+            string emsg;
+            if (RGBAImageOK(out emsg))
             {
-                TiffRGBAImage* img = TiffRGBAImage::Create(this, stop, emsg);
+                TiffRGBAImage img = TiffRGBAImage.Create(this, stop, out emsg);
                 if (img != null)
                 {
                     img.req_orientation = (ushort)orientation;
                     /* XXX verify rwidth and rheight against width and height */
                     ok = img.Get(raster, (rheight - img.height) * rwidth, rwidth, img.height);
-                    delete img;
                 }
             }
             else
@@ -3252,7 +3385,7 @@ namespace BitMiracle.LibTiff
         * the strip that is actually within the image space.  The result is
         * organized in bottom to top form.
         */
-        public bool ReadRGBAStrip(uint row, uint[] raster)
+        public bool ReadRGBAStrip(int row, uint[] raster)
         {
             if (IsTiled())
             {
@@ -3260,7 +3393,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            uint rowsperstrip;
+            int rowsperstrip;
             GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
             if ((row % rowsperstrip) != 0)
             {
@@ -3269,22 +3402,20 @@ namespace BitMiracle.LibTiff
             }
 
             bool ok = false;
-            char emsg[1024] = "";
-            if (RGBAImageOK(emsg))
+            string emsg;
+            if (RGBAImageOK(out emsg))
             {
-                TiffRGBAImage* img = TiffRGBAImage::Create(this, 0, emsg);
+                TiffRGBAImage img = TiffRGBAImage.Create(this, false, out emsg);
                 if (img != null)
                 {
                     img.row_offset = row;
                     img.col_offset = 0;
 
-                    uint rows_to_read = rowsperstrip;
+                    int rows_to_read = rowsperstrip;
                     if (row + rowsperstrip > img.height)
                         rows_to_read = img.height - row;
 
                     ok = img.Get(raster, 0, img.width, rows_to_read);
-
-                    delete img;
                 }
 
                 return true;
@@ -3319,20 +3450,17 @@ namespace BitMiracle.LibTiff
 
             if ((col % tile_xsize) != 0 || (row % tile_ysize) != 0)
             {
-                ErrorExt(this, m_clientdata, FileName(), "Row/col passed to ReadRGBATile() must be top""left corner of a tile.");
+                ErrorExt(this, m_clientdata, FileName(), "Row/col passed to ReadRGBATile() must be topleft corner of a tile.");
                 return false;
             }
 
             /*
              * Setup the RGBA reader.
              */
-            char emsg[1024] = "";
-            TiffRGBAImage* img = TiffRGBAImage::Create(this, 0, emsg);
-            if (!RGBAImageOK(emsg) || !img)
+            string emsg;
+            TiffRGBAImage img = TiffRGBAImage.Create(this, 0, out emsg);
+            if (!RGBAImageOK(out emsg) || !img)
             {
-                if (img != null)
-                    delete img;
-
                 ErrorExt(this, m_clientdata, FileName(), emsg);
                 return false;
             }
