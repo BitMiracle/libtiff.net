@@ -76,6 +76,11 @@ namespace BitMiracle.LibTiff
         public const ushort TIFF_LITTLEENDIAN = 0x4949;
         public const ushort MDI_LITTLEENDIAN = 0x5045;
 
+        /* reference white */
+        public const float D50_X0 = 96.4250F;
+        public const float D50_Y0 = 100.0F;
+        public const float D50_Z0 = 82.4680F;
+
         internal const short TIFF_VARIABLE = -1; /* marker for variable length tags */
         internal const short TIFF_SPP = -2; /* marker for SamplesPerPixel tags */
         internal const short TIFF_VARIABLE2 = -3; /* marker for uint var-length tags */
@@ -830,152 +835,193 @@ namespace BitMiracle.LibTiff
         */
         public object[] GetFieldDefaulted(TIFFTAG tag)
         {
-            TiffDirectory* td = m_dir;
+            TiffDirectory td = m_dir;
 
-            if (VGetField(tag, ap))
-                return true;
+            object[] result = GetField(tag);
+            if (result != null)
+                return result;
 
             switch (tag)
             {
-                case TIFFTAG_SUBFILETYPE:
-                    *va_arg(ap, uint*) = td->td_subfiletype;
-                    return true;
-                case TIFFTAG_BITSPERSAMPLE:
-                    *va_arg(ap, UInt16*) = td->td_bitspersample;
-                    return true;
-                case TIFFTAG_THRESHHOLDING:
-                    *va_arg(ap, UInt16*) = td->td_threshholding;
-                    return true;
-                case TIFFTAG_FILLORDER:
-                    *va_arg(ap, UInt16*) = td->td_fillorder;
-                    return true;
-                case TIFFTAG_ORIENTATION:
-                    *va_arg(ap, UInt16*) = td->td_orientation;
-                    return true;
-                case TIFFTAG_SAMPLESPERPIXEL:
-                    *va_arg(ap, UInt16*) = td->td_samplesperpixel;
-                    return true;
-                case TIFFTAG_ROWSPERSTRIP:
-                    *va_arg(ap, uint*) = td->td_rowsperstrip;
-                    return true;
-                case TIFFTAG_MINSAMPLEVALUE:
-                    *va_arg(ap, UInt16*) = td->td_minsamplevalue;
-                    return true;
-                case TIFFTAG_MAXSAMPLEVALUE:
-                    *va_arg(ap, UInt16*) = td->td_maxsamplevalue;
-                    return true;
-                case TIFFTAG_PLANARCONFIG:
-                    *va_arg(ap, UInt16*) = td->td_planarconfig;
-                    return true;
-                case TIFFTAG_RESOLUTIONUNIT:
-                    *va_arg(ap, UInt16*) = td->td_resolutionunit;
-                    return true;
-                case TIFFTAG_PREDICTOR:
+                case TIFFTAG.TIFFTAG_SUBFILETYPE:
+                    result = new object[1];
+                    result[0] = td.td_subfiletype;
+                    break;
+                case TIFFTAG.TIFFTAG_BITSPERSAMPLE:
+                    result = new object[1];
+                    result[0] = td.td_bitspersample;
+                    break;
+                case TIFFTAG.TIFFTAG_THRESHHOLDING:
+                    result = new object[1];
+                    result[0] = td.td_threshholding;
+                    break;
+                case TIFFTAG.TIFFTAG_FILLORDER:
+                    result = new object[1];
+                    result[0] = td.td_fillorder;
+                    break;
+                case TIFFTAG.TIFFTAG_ORIENTATION:
+                    result = new object[1];
+                    result[0] = td.td_orientation;
+                    break;
+                case TIFFTAG.TIFFTAG_SAMPLESPERPIXEL:
+                    result = new object[1];
+                    result[0] = td.td_samplesperpixel;
+                    break;
+                case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
+                    result = new object[1];
+                    result[0] = td.td_rowsperstrip;
+                    break;
+                case TIFFTAG.TIFFTAG_MINSAMPLEVALUE:
+                    result = new object[1];
+                    result[0] = td.td_minsamplevalue;
+                    break;
+                case TIFFTAG.TIFFTAG_MAXSAMPLEVALUE:
+                    result = new object[1];
+                    result[0] = td.td_maxsamplevalue;
+                    break;
+                case TIFFTAG.TIFFTAG_PLANARCONFIG:
+                    result = new object[1];
+                    result[0] = td.td_planarconfig;
+                    break;
+                case TIFFTAG.TIFFTAG_RESOLUTIONUNIT:
+                    result = new object[1];
+                    result[0] = td.td_resolutionunit;
+                    break;
+                case TIFFTAG.TIFFTAG_PREDICTOR:
+                    CodecWithPredictor sp = m_currentCodec as CodecWithPredictor;
+                    if (sp != null)
                     {
-                        CodecWithPredictor* sp = (CodecWithPredictor*)m_currentCodec;
-                        *va_arg(ap, UInt16*) = (UInt16)sp->GetPredictorValue();
-                        return true;
+                        result = new object[1];
+                        result[0] = sp.GetPredictorValue();
                     }
-                case TIFFTAG_DOTRANGE:
-                    *va_arg(ap, UInt16*) = 0;
-                    *va_arg(ap, UInt16*) = (1 << td->td_bitspersample) - 1;
-                    return true;
-                case TIFFTAG_INKSET:
-                    *va_arg(ap, UInt16*) = INKSET_CMYK;
-                    return true;
-                case TIFFTAG_NUMBEROFINKS:
-                    *va_arg(ap, UInt16*) = 4;
-                    return true;
-                case TIFFTAG_EXTRASAMPLES:
-                    *va_arg(ap, UInt16*) = td->td_extrasamples;
-                    *va_arg(ap, UInt16**) = td->td_sampleinfo;
-                    return true;
-                case TIFFTAG_MATTEING:
-                    *va_arg(ap, UInt16*) = (td->td_extrasamples == 1 && td->td_sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA);
-                    return true;
-                case TIFFTAG_TILEDEPTH:
-                    *va_arg(ap, uint*) = td->td_tiledepth;
-                    return true;
-                case TIFFTAG_DATATYPE:
-                    *va_arg(ap, UInt16*) = td->td_sampleformat - 1;
-                    return true;
-                case TIFFTAG_SAMPLEFORMAT:
-                    *va_arg(ap, UInt16*) = td->td_sampleformat;
-                    return true;
-                case TIFFTAG_IMAGEDEPTH:
-                    *va_arg(ap, uint*) = td->td_imagedepth;
-                    return true;
-                case TIFFTAG_YCBCRCOEFFICIENTS:
+                    break;
+                case TIFFTAG.TIFFTAG_DOTRANGE:
+                    result = new object[2];
+                    result[0] = 0;
+                    result[1] = (1 << td.td_bitspersample) - 1;
+                    break;
+                case TIFFTAG.TIFFTAG_INKSET:
+                    result = new object[1];
+                    result[0] = INKSET.INKSET_CMYK;
+                    break;
+                case TIFFTAG.TIFFTAG_NUMBEROFINKS:
+                    result = new object[1];
+                    result[0] = 4;
+                    break;
+                case TIFFTAG.TIFFTAG_EXTRASAMPLES:
+                    result = new object[2];
+                    result[0] = td.td_extrasamples;
+                    result[1] = td.td_sampleinfo;
+                    break;
+                case TIFFTAG.TIFFTAG_MATTEING:
+                    result = new object[1];
+                    result[0] = (td.td_extrasamples == 1 && td.td_sampleinfo[0] == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA);
+                    break;
+                case TIFFTAG.TIFFTAG_TILEDEPTH:
+                    result = new object[1];
+                    result[0] = td.td_tiledepth;
+                    break;
+                case TIFFTAG.TIFFTAG_DATATYPE:
+                    result = new object[1];
+                    result[0] = td.td_sampleformat - 1;
+                    break;
+                case TIFFTAG.TIFFTAG_SAMPLEFORMAT:
+                    result = new object[1];
+                    result[0] = td.td_sampleformat;
+                    break;
+                case TIFFTAG.TIFFTAG_IMAGEDEPTH:
+                    result = new object[1];
+                    result[0] = td.td_imagedepth;
+                    break;
+                case TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS:
                     {
                         /* defaults are from CCIR Recommendation 601-1 */
-                        static float ycbcrcoeffs[] = { 0.299f, 0.587f, 0.114f };
-                        *va_arg(ap, float**) = ycbcrcoeffs;
-                        return true;
+                        float[] ycbcrcoeffs = new float [3];
+                        ycbcrcoeffs[0] = 0.299f;
+                        ycbcrcoeffs[1] = 0.587f;
+                        ycbcrcoeffs[2] = 0.114f;
+
+                        result = new object[1];
+                        result[0] = ycbcrcoeffs;
+                        break;
                     }
-                case TIFFTAG_YCBCRSUBSAMPLING:
-                    *va_arg(ap, UInt16*) = td->td_ycbcrsubsampling[0];
-                    *va_arg(ap, UInt16*) = td->td_ycbcrsubsampling[1];
-                    return true;
-                case TIFFTAG_YCBCRPOSITIONING:
-                    *va_arg(ap, UInt16*) = td->td_ycbcrpositioning;
-                    return true;
-                case TIFFTAG_WHITEPOINT:
+                case TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING:
+                    result = new object[2];
+                    result[0] = td.td_ycbcrsubsampling[0];
+                    result[1] = td.td_ycbcrsubsampling[1];
+                    break;
+                case TIFFTAG.TIFFTAG_YCBCRPOSITIONING:
+                    result = new object[1];
+                    result[0] = td.td_ycbcrpositioning;
+                    break;
+                case TIFFTAG.TIFFTAG_WHITEPOINT:
                     {
                         /* TIFF 6.0 specification tells that it is no default
                         value for the WhitePoint, but AdobePhotoshop TIFF
                         Technical Note tells that it should be CIE D50. */
-                        static float whitepoint[2];
+                        float[] whitepoint = new float[2];
                         whitepoint[0] = D50_X0 / (D50_X0 + D50_Y0 + D50_Z0);
                         whitepoint[1] = D50_Y0 / (D50_X0 + D50_Y0 + D50_Z0);
-                        *va_arg(ap, float**) = whitepoint;
-                        return true;
+
+                        result = new object[1];
+                        result[0] = whitepoint;
+                        break;
                     }
-                case TIFFTAG_TRANSFERFUNCTION:
-                    if (!td->td_transferfunction[0] && !defaultTransferFunction(td))
+                case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
+                    if (td.td_transferfunction[0] == null && !defaultTransferFunction(td))
                     {
                         ErrorExt(this, m_clientdata, m_name, "No space for \"TransferFunction\" tag");
-                        return false;
+                        return null;
                     }
-                    *va_arg(ap, UInt16**) = td->td_transferfunction[0];
-                    if (td->td_samplesperpixel - td->td_extrasamples > 1)
-                    {
-                        *va_arg(ap, UInt16**) = td->td_transferfunction[1];
-                        *va_arg(ap, UInt16**) = td->td_transferfunction[2];
-                    }
-                    return true;
-                case TIFFTAG_REFERENCEBLACKWHITE:
-                    {
-                        static float ycbcr_refblackwhite[] = { 0.0F, 255.0F, 128.0F, 255.0F, 128.0F, 255.0F };
-                        static float rgb_refblackwhite[6];
 
+                    result = new object[3];
+                    result[0] = td.td_transferfunction[0];
+                    if (td.td_samplesperpixel - td.td_extrasamples > 1)
+                    {
+                        result[1] = td.td_transferfunction[1];
+                        result[2] = td.td_transferfunction[2];
+                    }
+                    break;
+                case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
+                    {
+                        float[] ycbcr_refblackwhite = new float [6];
+                        ycbcr_refblackwhite[0] = 0.0F;
+                        ycbcr_refblackwhite[1] = 255.0F;
+                        ycbcr_refblackwhite[2] = 128.0F;
+                        ycbcr_refblackwhite[3] = 255.0F;
+                        ycbcr_refblackwhite[4] = 128.0F;
+                        ycbcr_refblackwhite[5] = 255.0F;
+                        
+                        float[] rgb_refblackwhite = new float[6];
                         for (int i = 0; i < 3; i++)
                         {
                             rgb_refblackwhite[2 * i + 0] = 0.0F;
-                            rgb_refblackwhite[2 * i + 1] = (float)((1L << td->td_bitspersample) - 1L);
+                            rgb_refblackwhite[2 * i + 1] = (float)((1L << td.td_bitspersample) - 1L);
                         }
 
-                        if (td->td_photometric == PHOTOMETRIC_YCBCR)
+                        result = new object[1];
+                        if (td.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
                         {
                             /*
                              * YCbCr (Class Y) images must have the
                              * ReferenceBlackWhite tag set. Fix the
                              * broken images, which lacks that tag.
                              */
-                            *va_arg(ap, float**) = ycbcr_refblackwhite;
+                            result[0] = ycbcr_refblackwhite;
                         }
                         else
                         {
                             /*
                              * Assume RGB (Class R)
                              */
-                            *va_arg(ap, float**) = rgb_refblackwhite;
+                            result[0] = rgb_refblackwhite;
                         }
 
-                        return true;
+                        break;
                     }
             }
 
-            return false;
+            return result;
         }
         
         /*
@@ -3393,8 +3439,8 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            int rowsperstrip;
-            GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
+            object[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = (int)result[0];
             if ((row % rowsperstrip) != 0)
             {
                 ErrorExt(this, m_clientdata, FileName(), "Row passed to ReadRGBAStrip() must be first in a strip.");
@@ -3430,7 +3476,7 @@ namespace BitMiracle.LibTiff
         * The returned RGBA data is organized from bottom to top of tile,
         * and may include zeroed areas if the tile extends off the image.
         */
-        public bool ReadRGBATile(uint col, uint row, uint[] raster)
+        public bool ReadRGBATile(int col, int row, uint[] raster)
         {
             /*
              * Verify that our request is legal - on a tile file, and on a
@@ -3443,10 +3489,10 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            uint tile_xsize;
-            GetFieldDefaulted(TIFFTAG.TIFFTAG_TILEWIDTH, &tile_xsize);
-            uint tile_ysize;
-            GetFieldDefaulted(TIFFTAG.TIFFTAG_TILELENGTH, &tile_ysize);
+            object[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tile_xsize = (int)result[0];
+            result = GetFieldDefaulted(TIFFTAG.TIFFTAG_TILELENGTH);
+            int tile_ysize = (int)result[0];
 
             if ((col % tile_xsize) != 0 || (row % tile_ysize) != 0)
             {
@@ -3458,8 +3504,8 @@ namespace BitMiracle.LibTiff
              * Setup the RGBA reader.
              */
             string emsg;
-            TiffRGBAImage img = TiffRGBAImage.Create(this, 0, out emsg);
-            if (!RGBAImageOK(out emsg) || !img)
+            TiffRGBAImage img = TiffRGBAImage.Create(this, false, out emsg);
+            if (!RGBAImageOK(out emsg) || img == null)
             {
                 ErrorExt(this, m_clientdata, FileName(), emsg);
                 return false;
@@ -3471,13 +3517,13 @@ namespace BitMiracle.LibTiff
              * figure out how much we can read, and fix up the tile buffer to
              * a full tile configuration afterwards.
              */
-            uint read_ysize;
+            int read_ysize;
             if (row + tile_ysize > img.height)
                 read_ysize = img.height - row;
             else
                 read_ysize = tile_ysize;
 
-            uint read_xsize;
+            int read_xsize;
             if (col + tile_xsize > img.width)
                 read_xsize = img.width - col;
             else
@@ -3492,8 +3538,6 @@ namespace BitMiracle.LibTiff
 
             bool ok = img.Get(raster, 0, read_xsize, read_ysize);
 
-            delete img;
-
             /*
              * If our read was incomplete we will need to fix up the tile by
              * shifting the data around as if a full tile of data is being returned.
@@ -3505,15 +3549,15 @@ namespace BitMiracle.LibTiff
             if (read_xsize == tile_xsize && read_ysize == tile_ysize)
                 return ok;
 
-            for (uint i_row = 0; i_row < read_ysize; i_row++)
+            for (int i_row = 0; i_row < read_ysize; i_row++)
             {
-                memmove(&raster[(tile_ysize - i_row - 1) * tile_xsize], &raster[(read_ysize - i_row - 1) * read_xsize], read_xsize * sizeof(uint));
-                memset(&raster[(tile_ysize - i_row - 1) * tile_xsize + read_xsize], 0, sizeof(uint) * (tile_xsize - read_xsize));
+                Array.Copy(raster, (read_ysize - i_row - 1) * read_xsize, raster, (tile_ysize - i_row - 1) * tile_xsize, read_xsize);
+                Array.Clear(raster, (tile_ysize - i_row - 1) * tile_xsize + read_xsize, tile_xsize - read_xsize);
             }
 
-            for (uint i_row = read_ysize; i_row < tile_ysize; i_row++)
+            for (int i_row = read_ysize; i_row < tile_ysize; i_row++)
             {
-                memset(&raster[(tile_ysize - i_row - 1) * tile_xsize], 0, sizeof(uint) * tile_xsize);
+                Array.Clear(raster, (tile_ysize - i_row - 1) * tile_xsize, tile_xsize);
             }
 
             return ok;
@@ -3527,9 +3571,11 @@ namespace BitMiracle.LibTiff
         */
         public bool RGBAImageOK(out string emsg)
         {
+            emsg = null;
+
             if (!m_decodestatus)
             {
-                sprintf(emsg, "Sorry, requested compression method is not configured");
+                emsg = "Sorry, requested compression method is not configured";
                 return false;
             }
 
@@ -3542,13 +3588,14 @@ namespace BitMiracle.LibTiff
                 case 16:
                     break;
                 default:
-                    sprintf(emsg, "Sorry, can not handle images with %d-bit samples", m_dir.td_bitspersample);
+                    emsg = string.Format("Sorry, can not handle images with %d-bit samples", m_dir.td_bitspersample);
                     return false;
             }
             
             int colorchannels = m_dir.td_samplesperpixel - m_dir.td_extrasamples;
-            ushort photometric;
-            if (!GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, &photometric))
+            PHOTOMETRIC photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
+            object[] result = GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+            if (result == null)
             {
                 switch (colorchannels)
                 {
@@ -3559,7 +3606,7 @@ namespace BitMiracle.LibTiff
                         photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
                         break;
                     default:
-                        sprintf(emsg, "Missing needed %s tag", TiffRGBAImage::photoTag);
+                        emsg = string.Format("Missing needed %s tag", TiffRGBAImage.photoTag);
                         return false;
                 }
             }
@@ -3571,7 +3618,7 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
                     if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
                     {
-                        sprintf(emsg, "Sorry, can not handle contiguous data with %s=%d, ""and %s=%d and Bits/Sample=%d", TiffRGBAImage::photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel, m_dir.td_bitspersample);
+                        emsg = string.Format("Sorry, can not handle contiguous data with %s=%d, and %s=%d and Bits/Sample=%d", TiffRGBAImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel, m_dir.td_bitspersample);
                         return false;
                     }
                     /*
@@ -3591,22 +3638,22 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_RGB:
                     if (colorchannels < 3)
                     {
-                        sprintf(emsg, "Sorry, can not handle RGB image with %s=%d", "Color channels", colorchannels);
+                        emsg = string.Format("Sorry, can not handle RGB image with %s=%d", "Color channels", colorchannels);
                         return false;
                     }
                     break;
                 case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
                     {
-                        ushort inkset;
-                        GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET, &inkset);
-                        if (inkset != INKSET_CMYK)
+                        result = GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET);
+                        INKSET inkset = (INKSET)result[0];
+                        if (inkset != INKSET.INKSET_CMYK)
                         {
-                            sprintf(emsg, "Sorry, can not handle separated image with %s=%d", "InkSet", inkset);
+                            emsg = string.Format("Sorry, can not handle separated image with %s=%d", "InkSet", inkset);
                             return false;
                         }
                         if (m_dir.td_samplesperpixel < 4)
                         {
-                            sprintf(emsg, "Sorry, can not handle separated image with %s=%d", "Samples/pixel", m_dir.td_samplesperpixel);
+                            emsg = string.Format("Sorry, can not handle separated image with %s=%d", "Samples/pixel", m_dir.td_samplesperpixel);
                             return false;
                         }
                         break;
@@ -3614,26 +3661,26 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_LOGL:
                     if (m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG)
                     {
-                        sprintf(emsg, "Sorry, LogL data must have %s=%d", "Compression", COMPRESSION.COMPRESSION_SGILOG);
+                        emsg = string.Format("Sorry, LogL data must have %s=%d", "Compression", COMPRESSION.COMPRESSION_SGILOG);
                         return false;
                     }
                     break;
                 case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
                     if (m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG && m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG24)
                     {
-                        sprintf(emsg, "Sorry, LogLuv data must have %s=%d or %d", "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
+                        emsg = string.Format("Sorry, LogLuv data must have %s=%d or %d", "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
                         return false;
                     }
                     if (m_dir.td_planarconfig != PLANARCONFIG.PLANARCONFIG_CONTIG)
                     {
-                        sprintf(emsg, "Sorry, can not handle LogLuv images with %s=%d", "Planarconfiguration", m_dir.td_planarconfig);
+                        emsg = string.Format("Sorry, can not handle LogLuv images with %s=%d", "Planarconfiguration", m_dir.td_planarconfig);
                         return false;
                     }
                     break;
                 case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
                     break;
                 default:
-                    sprintf(emsg, "Sorry, can not handle image with %s=%d", TiffRGBAImage::photoTag, photometric);
+                    emsg = string.Format("Sorry, can not handle image with %s=%d", TiffRGBAImage.photoTag, photometric);
                     return false;
             }
 
@@ -3653,54 +3700,34 @@ namespace BitMiracle.LibTiff
         */
         public string SetFileName(string name)
         {
-            const char* old_name = m_name;
-            m_name = (char*)name;
+            string old_name = m_name.Clone() as string;
+            m_name = name.Clone() as string;
             return old_name;
         }
 
         // "tif" parameter can be null
         public static void Error(Tiff tif, string module, string fmt, params object[] ap)
         {
-            va_list ap;
-            va_start(ap, fmt);
-
             m_errorHandler.ErrorHandler(tif, module, fmt, ap);
             m_errorHandler.ErrorHandlerExt(tif, 0, module, fmt, ap);
-
-            va_end(ap);
         }
 
         public static void ErrorExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
         {
-            va_list ap;
-            va_start(ap, fmt);
-
             m_errorHandler.ErrorHandler(tif, module, fmt, ap);
             m_errorHandler.ErrorHandlerExt(tif, fd, module, fmt, ap);
-
-            va_end(ap);
         }
 
         public static void Warning(Tiff tif, string module, string fmt, params object[] ap)
         {
-            va_list ap;
-            va_start(ap, fmt);
-
             m_errorHandler.WarningHandler(tif, module, fmt, ap);
             m_errorHandler.WarningHandlerExt(tif, 0, module, fmt, ap);
-
-            va_end(ap);
         }
 
         public static void WarningExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
         {
-            va_list ap;
-            va_start(ap, fmt);
-
             m_errorHandler.WarningHandler(tif, module, fmt, ap);
             m_errorHandler.WarningHandlerExt(tif, fd, module, fmt, ap);
-
-            va_end(ap);
         }
 
         public static void Error(string module, string fmt, params object[] ap)
@@ -3725,7 +3752,7 @@ namespace BitMiracle.LibTiff
 
         public static TiffErrorHandler SetErrorHandler(TiffErrorHandler errorHandler)
         {
-            TiffErrorHandler* prev = m_errorHandler;
+            TiffErrorHandler prev = m_errorHandler;
             m_errorHandler = errorHandler;
             return prev;
         }
@@ -3735,29 +3762,29 @@ namespace BitMiracle.LibTiff
         /*
         * Compute which tile an (x,y,z,s) value is in.
         */
-        public uint ComputeTile(uint x, uint y, uint z, ushort s)
+        public int ComputeTile(int x, int y, int z, ushort s)
         {
             if (m_dir.td_imagedepth == 1)
                 z = 0;
 
-            uint dx = m_dir.td_tilewidth;
+            int dx = m_dir.td_tilewidth;
             if (dx == -1)
                 dx = m_dir.td_imagewidth;
 
-            uint dy = m_dir.td_tilelength;
+            int dy = m_dir.td_tilelength;
             if (dy == -1)
                 dy = m_dir.td_imagelength;
 
-            uint dz = m_dir.td_tiledepth;
+            int dz = m_dir.td_tiledepth;
             if (dz == -1)
                 dz = m_dir.td_imagedepth;
 
-            uint tile = 1;
+            int tile = 1;
             if (dx != 0 && dy != 0 && dz != 0)
             {
-                uint xpt = howMany(m_dir.td_imagewidth, dx);
-                uint ypt = howMany(m_dir.td_imagelength, dy);
-                uint zpt = howMany(m_dir.td_imagedepth, dz);
+                int xpt = howMany(m_dir.td_imagewidth, dx);
+                int ypt = howMany(m_dir.td_imagelength, dy);
+                int zpt = howMany(m_dir.td_imagedepth, dz);
 
                 if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
                     tile = (xpt * ypt * zpt) * s + (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
@@ -3772,7 +3799,7 @@ namespace BitMiracle.LibTiff
         * Check an (x,y,z,s) coordinate
         * against the image bounds.
         */
-        public bool CheckTile(uint x, uint y, uint z, ushort s)
+        public bool CheckTile(int x, int y, int z, ushort s)
         {
             if (x >= m_dir.td_imagewidth)
             {
@@ -3806,19 +3833,19 @@ namespace BitMiracle.LibTiff
         */
         public int NumberOfTiles()
         {
-            uint dx = m_dir.td_tilewidth;
+            int dx = m_dir.td_tilewidth;
             if (dx == -1)
                 dx = m_dir.td_imagewidth;
             
-            uint dy = m_dir.td_tilelength;
+            int dy = m_dir.td_tilelength;
             if (dy == -1)
                 dy = m_dir.td_imagelength;
             
-            uint dz = m_dir.td_tiledepth;
+            int dz = m_dir.td_tiledepth;
             if (dz == -1)
                 dz = m_dir.td_imagedepth;
             
-            uint ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
+            int ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
             if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
                 ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
             
@@ -3834,7 +3861,7 @@ namespace BitMiracle.LibTiff
         * Read and decompress a tile of data.  The
         * tile is selected by the (x,y,z,s) coordinates.
         */
-        public int ReadTile(byte[] buf, int offset, uint x, uint y, uint z, ushort s)
+        public int ReadTile(byte[] buf, int offset, int x, int y, int z, ushort s)
         {
             if (!checkRead(1) || !CheckTile(x, y, z, s))
                 return -1;
@@ -3846,7 +3873,7 @@ namespace BitMiracle.LibTiff
         * Read a tile of data and decompress the specified
         * amount into the user-supplied buffer.
         */
-        public int ReadEncodedTile(uint tile, byte[] buf, int offset, int size)
+        public int ReadEncodedTile(int tile, byte[] buf, int offset, int size)
         {
             if (!checkRead(1))
                 return -1;
@@ -3863,12 +3890,12 @@ namespace BitMiracle.LibTiff
                 size = m_tilesize;
             
             byte[] tempBuf = new byte [size];
-            memcpy(tempBuf, &buf[offset], size);
+            Array.Copy(buf, offset, tempBuf, 0, size);
 
             if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (ushort)(tile / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
-                memcpy(&buf[offset], tempBuf, size);
+                Array.Copy(tempBuf, 0, buf, offset, size);
                 return size;
             }
 
@@ -3878,7 +3905,7 @@ namespace BitMiracle.LibTiff
         /*
         * Read a tile of data from the file.
         */
-        public int ReadRawTile(uint tile, byte[] buf, int offset, int size)
+        public int ReadRawTile(int tile, byte[] buf, int offset, int size)
         {
             const string module = "ReadRawTile";
     
@@ -3903,7 +3930,7 @@ namespace BitMiracle.LibTiff
                 return -1;
             }
 
-            uint bytecount = m_dir.td_stripbytecount[tile];
+            int bytecount = m_dir.td_stripbytecount[tile];
             if (size != (int)-1 && (uint)size < bytecount)
                 bytecount = size;
             
@@ -3914,7 +3941,7 @@ namespace BitMiracle.LibTiff
         * Write and compress a tile of data.  The
         * tile is selected by the (x,y,z,s) coordinates.
         */
-        public int WriteTile(byte[] buf, uint x, uint y, uint z, ushort s)
+        public int WriteTile(byte[] buf, int x, int y, int z, ushort s)
         {
             if (!CheckTile(x, y, z, s))
                 return -1;
@@ -3931,9 +3958,9 @@ namespace BitMiracle.LibTiff
         /*
         * Compute which strip a (row,sample) value is in.
         */
-        public uint ComputeStrip(uint row, ushort sample)
+        public int ComputeStrip(int row, ushort sample)
         {
-            uint strip = row / m_dir.td_rowsperstrip;
+            int strip = row / m_dir.td_rowsperstrip;
             if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
             {
                 if (sample >= m_dir.td_samplesperpixel)
@@ -3953,7 +3980,7 @@ namespace BitMiracle.LibTiff
         */
         public int NumberOfStrips()
         {
-            uint nstrips = (m_dir.td_rowsperstrip == -1 ? 1: howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
+            int nstrips = (m_dir.td_rowsperstrip == -1 ? 1: howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
             if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
                 nstrips = multiply(nstrips, m_dir.td_samplesperpixel, "NumberOfStrips");
 
@@ -3964,7 +3991,7 @@ namespace BitMiracle.LibTiff
         * Read a strip of data and decompress the specified
         * amount into the user-supplied buffer.
         */
-        public int ReadEncodedStrip(uint strip, byte[] buf, int offset, int size)
+        public int ReadEncodedStrip(int strip, byte[] buf, int offset, int size)
         {
             if (!checkRead(0))
                 return -1;
@@ -3980,15 +4007,15 @@ namespace BitMiracle.LibTiff
              * rows in the strip (check for truncated last strip on any
              * of the separations).
              */
-            uint strips_per_sep;
+            int strips_per_sep;
             if (m_dir.td_rowsperstrip >= m_dir.td_imagelength)
                 strips_per_sep = 1;
             else
                 strips_per_sep = (m_dir.td_imagelength + m_dir.td_rowsperstrip - 1) / m_dir.td_rowsperstrip;
 
-            uint sep_strip = strip % strips_per_sep;
+            int sep_strip = strip % strips_per_sep;
 
-            uint nrows = m_dir.td_imagelength % m_dir.td_rowsperstrip;
+            int nrows = m_dir.td_imagelength % m_dir.td_rowsperstrip;
             if (sep_strip != strips_per_sep - 1 || nrows == 0)
                 nrows = m_dir.td_rowsperstrip;
 
@@ -3999,12 +4026,12 @@ namespace BitMiracle.LibTiff
                 size = stripsize;
             
             byte[] tempBuf = new byte[size];
-            memcpy(tempBuf, &buf[offset], size);
+            Array.Copy(buf, offset, tempBuf, 0, size);
 
             if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (ushort)(strip / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
-                memcpy(&buf[offset], tempBuf, size);
+                Array.Copy(tempBuf, 0, buf, offset, size);
                 return size;
             }
 
@@ -4014,7 +4041,7 @@ namespace BitMiracle.LibTiff
         /*
         * Read a strip of data from the file.
         */
-        public int ReadRawStrip(uint strip, byte[] buf, int offset, int size)
+        public int ReadRawStrip(int strip, byte[] buf, int offset, int size)
         {
             const string module = "ReadRawStrip";
 
@@ -4039,7 +4066,7 @@ namespace BitMiracle.LibTiff
                 return -1;
             }
 
-            uint bytecount = m_dir.td_stripbytecount[strip];
+            int bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
                 ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
@@ -4058,7 +4085,7 @@ namespace BitMiracle.LibTiff
         *
         * NB: Image length must be setup before writing.
         */
-        public int WriteEncodedStrip(uint strip, byte[] data, int cc)
+        public int WriteEncodedStrip(int strip, byte[] data, int cc)
         {
             const string module = "WriteEncodedStrip";
     
@@ -4145,7 +4172,7 @@ namespace BitMiracle.LibTiff
         *
         * NB: Image length must be setup before writing.
         */
-        public int WriteRawStrip(uint strip, byte[] data, int cc)
+        public int WriteRawStrip(int strip, byte[] data, int cc)
         {
             const string module = "WriteRawStrip";
 
@@ -4198,7 +4225,7 @@ namespace BitMiracle.LibTiff
         *     interface does not support automatically growing
         *     the image on each write (as WriteScanline does).
         */
-        public int WriteEncodedTile(uint tile, byte[] data, int cc)
+        public int WriteEncodedTile(int tile, byte[] data, int cc)
         {
             const string module = "WriteEncodedTile";
     
@@ -4287,7 +4314,7 @@ namespace BitMiracle.LibTiff
         *     interface does not support automatically growing
         *     the image on each write (as WriteScanline does).
         */
-        public int WriteRawTile(uint tile, byte[] data, int cc)
+        public int WriteRawTile(int tile, byte[] data, int cc)
         {
             const string module = "WriteRawTile";
 
@@ -4321,26 +4348,27 @@ namespace BitMiracle.LibTiff
         {
             switch (type)
             {
-                case 0: /* nothing */
-                case 1: /* TIFF_BYTE */
-                case 2: /* TIFF_ASCII */
-                case 6: /* TIFF_SBYTE */
-                case 7: /* TIFF_UNDEFINED */
+                case TiffDataType.TIFF_NOTYPE:
+                case TiffDataType.TIFF_BYTE:
+                case TiffDataType.TIFF_ASCII:
+                case TiffDataType.TIFF_SBYTE:
+                case TiffDataType.TIFF_UNDEFINED:
                     return 1;
-                case 3: /* TIFF_SHORT */
-                case 8: /* TIFF_SSHORT */
+                case TiffDataType.TIFF_SHORT:
+                case TiffDataType.TIFF_SSHORT:
                     return 2;
-                case 4: /* TIFF_LONG */
-                case 9: /* TIFF_SLONG */
-                case 11: /* TIFF_FLOAT */
-                case 13: /* TIFF_IFD */
+                case TiffDataType.TIFF_LONG:
+                case TiffDataType.TIFF_SLONG:
+                case TiffDataType.TIFF_FLOAT:
+                case TiffDataType.TIFF_IFD:
                     return 4;
-                case 5: /* TIFF_RATIONAL */
-                case 10: /* TIFF_SRATIONAL */
-                case 12: /* TIFF_DOUBLE */
+                case TiffDataType.TIFF_RATIONAL:
+                case TiffDataType.TIFF_SRATIONAL:
+                case TiffDataType.TIFF_DOUBLE:
                     return 8;
                 default:
-                    return 0; /* will return 0 for unknown types */
+                    /* will return 0 for unknown types */
+                    return 0;
             }
         }
 
@@ -4351,7 +4379,7 @@ namespace BitMiracle.LibTiff
         */
         public static void SwabShort(ref ushort wp)
         {
-            byte cp[2];
+            byte[] cp = new byte[2];
             cp[0] = (byte)wp;
             cp[1] = (byte)(wp >> 8);
 
@@ -4359,13 +4387,13 @@ namespace BitMiracle.LibTiff
             cp[1] = cp[0];
             cp[0] = t;
 
-            wp = cp[0] & 0xFF;
-            wp += (cp[1] & 0xFF) << 8;
+            wp = (ushort)(cp[0] & 0xFF);
+            wp += (ushort)((cp[1] & 0xFF) << 8);
         }
 
         public static void SwabLong(ref int lp)
         {
-            byte cp[4];
+            byte[] cp = new byte[4];
             cp[0] = (byte)lp;
             cp[1] = (byte)(lp >> 8);
             cp[2] = (byte)(lp >> 16);
@@ -4387,19 +4415,27 @@ namespace BitMiracle.LibTiff
 
         public static void SwabDouble(ref double dp)
         {
-            uint[] lp = (uint*)dp;
+            byte[] bytes = BitConverter.GetBytes(dp);
+            int[] lp = new int[2];
+            lp[0] = BitConverter.ToInt32(bytes, 0);
+            lp[0] = BitConverter.ToInt32(bytes, sizeof(int));
+
             SwabArrayOfLong(lp, 2);
 
-            uint t = lp[0];
+            int t = lp[0];
             lp[0] = lp[1];
             lp[1] = t;
+
+            Array.Copy(BitConverter.GetBytes(lp[0]), bytes, 0);
+            Array.Copy(BitConverter.GetBytes(lp[1]), bytes, sizeof(int));
+            dp = BitConverter.ToDouble(bytes, 0);
         }
 
         public static void SwabArrayOfShort(ushort[] wp, int n)
         {
+            byte[] cp = new byte[2];
             for (int i = 0; i < n; i++)
             {
-                byte cp[2];
                 cp[0] = (byte)wp[i];
                 cp[1] = (byte)(wp[i] >> 8);
 
@@ -4407,8 +4443,8 @@ namespace BitMiracle.LibTiff
                 cp[1] = cp[0];
                 cp[0] = t;
 
-                wp[i] = cp[0] & 0xFF;
-                wp[i] += (cp[1] & 0xFF) << 8;
+                wp[i] = (ushort)(cp[0] & 0xFF);
+                wp[i] += (ushort)((cp[1] & 0xFF) << 8);
             }
         }
 
@@ -4453,17 +4489,25 @@ namespace BitMiracle.LibTiff
 
         public static void SwabArrayOfDouble(double[] dp, int n)
         {
-            uint[] lp = (uint*)dp;
+            byte[] bytes = new byte[n * sizeof(double)];
+            for (int i = 0; i < n; i++)
+                Array.Copy(BitConverter.GetBytes(dp[i]), 0, bytes, i * sizeof(double), sizeof(double));
+
+            int[] lp = byteArrayToInt(bytes, 0, n * sizeof(double));
             SwabArrayOfLong(lp, n + n);
 
             int lpPos = 0;
             while (n-- > 0)
             {
-                uint t = lp[lpPos];
+                int t = lp[lpPos];
                 lp[lpPos] = lp[lpPos + 1];
                 lp[lpPos + 1] = t;
                 lpPos += 2;
             }
+
+            intToByteArray(lp, 0, n + n, bytes, 0);
+            for (int i = 0; i < n; i++)
+                dp[i] = BitConverter.ToDouble(bytes, i * sizeof(double));
         }
 
         public static void ReverseBits(byte[] cp, int n)

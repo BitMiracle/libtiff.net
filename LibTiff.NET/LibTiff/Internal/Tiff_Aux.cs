@@ -226,7 +226,7 @@ namespace BitMiracle.LibTiff
             return value;
         }
 
-        internal void fprintf(Stream fd, string format, params object[] list)
+        internal static void fprintf(Stream fd, string format, params object[] list)
         {
             string s = string.Format(format, list);
             byte[] bytes = Encoding.ASCII.GetBytes(s);

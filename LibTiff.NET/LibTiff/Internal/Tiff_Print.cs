@@ -55,32 +55,32 @@ namespace BitMiracle.LibTiff
             for (uint j = 0; j < value_count; j++)
             {
                 if (fip.field_type == TiffDataType.TIFF_BYTE)
-                    fprintf(fd, "%u", ((byte*)raw_data)[j]);
+                    fprintf(fd, "%u", (raw_data as byte[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_UNDEFINED)
-                    fprintf(fd, "0x%x", (uint)((byte*)raw_data)[j]);
+                    fprintf(fd, "0x%x", (raw_data as byte[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SBYTE)
-                    fprintf(fd, "%d", ((sbyte*)raw_data)[j]);
+                    fprintf(fd, "%d", (raw_data as sbyte[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SHORT)
-                    fprintf(fd, "%u", ((ushort*)raw_data)[j]);
+                    fprintf(fd, "%u", (raw_data as ushort[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SSHORT)
-                    fprintf(fd, "%d", ((Int16*)raw_data)[j]);
+                    fprintf(fd, "%d", (raw_data as short[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_LONG)
-                    fprintf(fd, "%lu", (uint)((uint*)raw_data)[j]);
+                    fprintf(fd, "%lu", (raw_data as uint[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SLONG)
-                    fprintf(fd, "%ld", (int)((int*)raw_data)[j]);
+                    fprintf(fd, "%ld", (raw_data as int[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_RATIONAL || fip.field_type == TiffDataType.TIFF_SRATIONAL || fip.field_type == TiffDataType.TIFF_FLOAT)
-                    fprintf(fd, "%f", ((float*)raw_data)[j]);
+                    fprintf(fd, "%f", (raw_data as float[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_IFD)
-                    fprintf(fd, "0x%ulx", ((uint*)raw_data)[j]);
+                    fprintf(fd, "0x%ulx", (raw_data as uint[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_ASCII)
                 {
-                    fprintf(fd, "%s", (char*)raw_data);
+                    fprintf(fd, "%s", raw_data as string);
                     break;
                 }
                 else if (fip.field_type == TiffDataType.TIFF_DOUBLE)
-                    fprintf(fd, "%f", ((double*)raw_data)[j]);
+                    fprintf(fd, "%f", (raw_data as double[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_FLOAT)
-                    fprintf(fd, "%f", ((float*)raw_data)[j]);
+                    fprintf(fd, "%f", (raw_data as float[])[j]);
                 else
                 {
                     fprintf(fd, "<unsupported data type in printField>");
@@ -102,7 +102,7 @@ namespace BitMiracle.LibTiff
                     fprintf(fd, "  Ink Set: ");
                     switch (*((ushort*)raw_data))
                     {
-                        case INKSET_CMYK:
+                        case INKSET.INKSET_CMYK:
                             fprintf(fd, "CMYK\n");
                             break;
                         default:
@@ -166,7 +166,7 @@ namespace BitMiracle.LibTiff
                     continue;
                 }
 
-                const char* tp = "\tt\bb\rr\nn\vv";
+                string tp = "\tt\bb\rr\nn\vv";
                 int tpPos = 0;
                 for (; tp[tpPos] != 0; tpPos++)
                 {
