@@ -359,7 +359,7 @@ namespace BitMiracle.LibTiff
              */
             ushort dircount = (ushort)nfields;
             int diroff = m_nextdiroff;
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
             {
                 /*
                  * The file's byte order is opposite to the
@@ -1185,7 +1185,7 @@ namespace BitMiracle.LibTiff
 
         private bool writeData(ref TiffDirEntry dir, ushort[] cp, int cc)
         {
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabArrayOfShort(cp, cc);
 
             int byteCount = cc * sizeof(ushort);
@@ -1197,7 +1197,7 @@ namespace BitMiracle.LibTiff
 
         private bool writeData(ref TiffDirEntry dir, int[] cp, int cc)
         {
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabArrayOfLong(cp, cc);
 
             int byteCount = cc * sizeof(int);
@@ -1224,7 +1224,7 @@ namespace BitMiracle.LibTiff
 
         private bool writeData(ref TiffDirEntry dir, double[] cp, int cc)
         {
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabArrayOfDouble(cp, cc);
 
             int doubleCount = cc / 8;
@@ -1250,7 +1250,7 @@ namespace BitMiracle.LibTiff
 
             m_diroff = (seekFile(0, SEEK_END) + 1) & ~1;
             int diroff = m_diroff;
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabLong(ref diroff);
 
             /*
@@ -1309,7 +1309,7 @@ namespace BitMiracle.LibTiff
                     return false;
                 }
                 
-                if ((m_flags & TIFF_SWAB) != 0)
+                if ((m_flags & Tiff.TIFF_SWAB) != 0)
                     SwabShort(ref dircount);
                 
                 seekFile(dircount * TiffDirEntry.SizeInBytes, SEEK_CUR);
@@ -1319,7 +1319,7 @@ namespace BitMiracle.LibTiff
                     return false;
                 }
 
-                if ((m_flags & TIFF_SWAB) != 0)
+                if ((m_flags & Tiff.TIFF_SWAB) != 0)
                     SwabLong(ref nextdir);
             }
             while (nextdir != 0);

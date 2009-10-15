@@ -62,14 +62,14 @@ namespace BitMiracle.LibTiff
             /* Initialize to normal values */
             img.row_offset = 0;
             img.col_offset = 0;
-            img.redcmap = NULL;
-            img.greencmap = NULL;
-            img.bluecmap = NULL;
+            img.redcmap = null;
+            img.greencmap = null;
+            img.bluecmap = null;
             img.req_orientation = ORIENTATION_BOTLEFT; /* It is the default */
 
             img.tif = tif;
             img.stoponerr = stop;
-            tif.GetFieldDefaulted(TIFFTAG_BITSPERSAMPLE, &img.bitspersample);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE, &img.bitspersample);
             switch (img.bitspersample)
             {
                 case 1:
@@ -81,15 +81,15 @@ namespace BitMiracle.LibTiff
                 default:
                     sprintf(emsg, "Sorry, can not handle images with %d-bit samples", img.bitspersample);
                     delete img;
-                    return NULL;
+                    return null;
             }
 
             img.alpha = 0;
-            tif.GetFieldDefaulted(TIFFTAG_SAMPLESPERPIXEL, &img.samplesperpixel);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, &img.samplesperpixel);
 
             ushort* sampleinfo;
             ushort extrasamples;
-            tif.GetFieldDefaulted(TIFFTAG_EXTRASAMPLES, &extrasamples, &sampleinfo);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_EXTRASAMPLES, &extrasamples, &sampleinfo);
             if (extrasamples >= 1)
             {
                 switch (sampleinfo[0])
@@ -111,7 +111,7 @@ namespace BitMiracle.LibTiff
 
             if (Tiff.DEFAULT_EXTRASAMPLE_AS_ALPHA)
             {
-                if (!tif.GetField(TIFFTAG_PHOTOMETRIC, &img.photometric))
+                if (!tif.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, &img.photometric))
                     img.photometric = PHOTOMETRIC.PHOTOMETRIC_MINISWHITE;
 
                 if (extrasamples == 0 && img.samplesperpixel == 4 && img.photometric == PHOTOMETRIC.PHOTOMETRIC_RGB)
@@ -124,11 +124,11 @@ namespace BitMiracle.LibTiff
             int colorchannels = img.samplesperpixel - extrasamples;
             
             ushort compress;
-            tif.GetFieldDefaulted(TIFFTAG_COMPRESSION, &compress);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_COMPRESSION, &compress);
             
             ushort planarconfig;
-            tif.GetFieldDefaulted(TIFFTAG_PLANARCONFIG, &planarconfig);
-            if (!tif.GetField(TIFFTAG_PHOTOMETRIC, &img.photometric))
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_PLANARCONFIG, &planarconfig);
+            if (!tif.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, &img.photometric))
             {
                 switch (colorchannels)
                 {
@@ -144,7 +144,7 @@ namespace BitMiracle.LibTiff
                 default:
                     sprintf(emsg, "Missing needed %s tag", photoTag);
                     delete img;
-                    return NULL;
+                    return null;
                 }
             }
             switch (img.photometric)
@@ -154,11 +154,11 @@ namespace BitMiracle.LibTiff
                     ushort* red_orig;
                     ushort* green_orig;
                     ushort* blue_orig;
-                    if (!tif.GetField(TIFFTAG_COLORMAP, &red_orig, &green_orig, &blue_orig))
+                    if (!tif.GetField(TIFFTAG.TIFFTAG_COLORMAP, &red_orig, &green_orig, &blue_orig))
                     {
                         sprintf(emsg, "Missing required \"Colormap\" tag");
                         delete img;
-                        return NULL;
+                        return null;
                     }
 
                     /* copy the colormaps so we can modify them */
@@ -166,38 +166,38 @@ namespace BitMiracle.LibTiff
                     img.redcmap = new ushort [n_color];
                     img.greencmap = new ushort [n_color];
                     img.bluecmap = new ushort [n_color];
-                    if (img.redcmap == NULL || img.greencmap == NULL || img.bluecmap == NULL)
+                    if (img.redcmap == null || img.greencmap == null || img.bluecmap == null)
                     {
                         sprintf(emsg, "Out of memory for colormap copy");
                         delete img;
-                        return NULL;
+                        return null;
                     }
 
                     memcpy(img.redcmap, red_orig, n_color * 2);
                     memcpy(img.greencmap, green_orig, n_color * 2);
                     memcpy(img.bluecmap, blue_orig, n_color * 2);
 
-                    if (planarconfig == PLANARCONFIG_CONTIG && img.samplesperpixel != 1 && img.bitspersample < 8)
+                    if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
                         sprintf(emsg, "Sorry, can not handle contiguous data with %s=%d, ""and %s=%d and Bits/Sample=%d", photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                         delete img;
-                        return NULL;
+                        return null;
                     }
                 }
                 break;
 
             case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
             case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
-                if (planarconfig == PLANARCONFIG_CONTIG && img.samplesperpixel != 1 && img.bitspersample < 8)
+                if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && img.samplesperpixel != 1 && img.bitspersample < 8)
                 {
                     sprintf(emsg, "Sorry, can not handle contiguous data with %s=%d, ""and %s=%d and Bits/Sample=%d", photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                     delete img;
-                    return NULL;
+                    return null;
                 }
                 break;
             case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
                 /* It would probably be nice to have a reality check here. */
-                if (planarconfig == PLANARCONFIG_CONTIG)
+                if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
                 {
                     /* can rely on libjpeg to convert to RGB */
                     /* XXX should restore current state on exit */
@@ -209,7 +209,7 @@ namespace BitMiracle.LibTiff
                             * and YCbCr handling, remove use of TIFFTAG_JPEGCOLORMODE in
                             * favor of native handling
                             */
-                            tif.SetField(TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
+                            tif.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
                             img.photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
                             break;
 
@@ -231,24 +231,24 @@ namespace BitMiracle.LibTiff
                 {
                     sprintf(emsg, "Sorry, can not handle RGB image with %s=%d", "Color channels", colorchannels);
                     delete img;
-                    return NULL;
+                    return null;
                 }
                 break;
             case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
                 {
                     ushort inkset;
-                    tif.GetFieldDefaulted(TIFFTAG_INKSET, &inkset);
+                    tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET, &inkset);
                     if (inkset != INKSET.INKSET_CMYK)
                     {
                         sprintf(emsg, "Sorry, can not handle separated image with %s=%d", "InkSet", inkset);
                         delete img;
-                        return NULL;
+                        return null;
                     }
                     if (img.samplesperpixel < 4)
                     {
                         sprintf(emsg, "Sorry, can not handle separated image with %s=%d", "Samples/pixel", img.samplesperpixel);
                         delete img;
-                        return NULL;
+                        return null;
                     }
                     break;
                 }
@@ -257,9 +257,9 @@ namespace BitMiracle.LibTiff
                 {
                     sprintf(emsg, "Sorry, LogL data must have %s=%d", "Compression", COMPRESSION_SGILOG);
                     delete img;
-                    return NULL;
+                    return null;
                 }
-                tif.SetField(TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_8BIT);
+                tif.SetField(TIFFTAG.TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_8BIT);
                 img.photometric = PHOTOMETRIC.PHOTOMETRIC_MINISBLACK; /* little white lie */
                 img.bitspersample = 8;
                 break;
@@ -268,17 +268,17 @@ namespace BitMiracle.LibTiff
                 {
                     sprintf(emsg, "Sorry, LogLuv data must have %s=%d or %d", "Compression", COMPRESSION_SGILOG, COMPRESSION_SGILOG24);
                     delete img;
-                    return NULL;
+                    return null;
                 }
 
-                if (planarconfig != PLANARCONFIG_CONTIG)
+                if (planarconfig != PLANARCONFIG.PLANARCONFIG_CONTIG)
                 {
                     sprintf(emsg, "Sorry, can not handle LogLuv images with %s=%d", "Planarconfiguration", planarconfig);
                     delete img;
-                    return NULL;
+                    return null;
                 }
                 
-                tif.SetField(TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_8BIT);
+                tif.SetField(TIFFTAG.TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_8BIT);
                 img.photometric = PHOTOMETRIC.PHOTOMETRIC_RGB; /* little white lie */
                 img.bitspersample = 8;
                 break;
@@ -287,25 +287,25 @@ namespace BitMiracle.LibTiff
             default:
                 sprintf(emsg, "Sorry, can not handle image with %s=%d", photoTag, img.photometric);
                 delete img;
-                return NULL;
+                return null;
             }
-            img.Map = NULL;
-            img.BWmap = NULL;
-            img.PALmap = NULL;
-            img.ycbcr = NULL;
-            img.cielab = NULL;
-            tif.GetField(TIFFTAG_IMAGEWIDTH, &img.width);
-            tif.GetField(TIFFTAG_IMAGELENGTH, &img.height);
-            tif.GetFieldDefaulted(TIFFTAG_ORIENTATION, &img.orientation);
+            img.Map = null;
+            img.BWmap = null;
+            img.PALmap = null;
+            img.ycbcr = null;
+            img.cielab = null;
+            tif.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, &img.width);
+            tif.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH, &img.height);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION, &img.orientation);
             
-            img.isContig = !(planarconfig == PLANARCONFIG_SEPARATE && colorchannels > 1);
+            img.isContig = !(planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && colorchannels > 1);
             if (img.isContig)
             {
                 if (!img.pickContigCase())
                 {
                     sprintf(emsg, "Sorry, can not handle image");
                     delete img;
-                    return NULL;
+                    return null;
                 }
             }
             else
@@ -314,7 +314,7 @@ namespace BitMiracle.LibTiff
                 {
                     sprintf(emsg, "Sorry, can not handle image");
                     delete img;
-                    return NULL;
+                    return null;
                 }
             }
 
@@ -323,13 +323,13 @@ namespace BitMiracle.LibTiff
 
         public bool Get(uint[] raster, int offset, int w, int h)
         {
-            if (get == NULL)
+            if (get == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"get\" routine setup");
                 return false;
             }
             
-            //if (put == NULL)
+            //if (put == null)
             //{
             //    Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"put\" routine setup; probably can not handle image format");
             //    return false;
@@ -340,16 +340,16 @@ namespace BitMiracle.LibTiff
 
         protected TiffRGBAImage()
         {
-            tif = NULL;
-            redcmap = NULL;
-            greencmap = NULL;
-            bluecmap = NULL;
+            tif = null;
+            redcmap = null;
+            greencmap = null;
+            bluecmap = null;
 
-            Map = NULL;
-            BWmap = NULL;
-            PALmap = NULL;
-            ycbcr = NULL;
-            cielab = NULL;
+            Map = null;
+            BWmap = null;
+            PALmap = null;
+            ycbcr = null;
+            cielab = null;
         }
 
         private static TiffDisplay display_sRGB;
@@ -424,7 +424,7 @@ namespace BitMiracle.LibTiff
             tileContigRoutine put = img.contig;
 
             byte* buf = new byte [tif.TileSize()];
-            if (buf == NULL)
+            if (buf == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
                 return false;
@@ -433,10 +433,10 @@ namespace BitMiracle.LibTiff
             memset(buf, 0, tif.TileSize());
 
             uint tw;
-            tif.GetField(TIFFTAG_TILEWIDTH, &tw);
+            tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH, &tw);
 
             uint th;
-            tif.GetField(TIFFTAG_TILELENGTH, &th);
+            tif.GetField(TIFFTAG.TIFFTAG_TILELENGTH, &th);
 
             int flip = img.setorientation();
             uint y;
@@ -523,7 +523,7 @@ namespace BitMiracle.LibTiff
 
             int tilesize = tif.TileSize();
             byte* buf = new byte [(img.alpha != 0 ? 4 : 3) * tilesize];
-            if (buf == NULL)
+            if (buf == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
                 return false;
@@ -536,10 +536,10 @@ namespace BitMiracle.LibTiff
             int pa = (img.alpha != 0 ? (p2 + tilesize) : -1);
             
             uint tw;
-            tif.GetField(TIFFTAG_TILEWIDTH, &tw);
+            tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH, &tw);
 
             uint th;
-            tif.GetField(TIFFTAG_TILELENGTH, &th);
+            tif.GetField(TIFFTAG.TIFFTAG_TILELENGTH, &th);
 
             int flip = img.setorientation();
             uint y;
@@ -645,7 +645,7 @@ namespace BitMiracle.LibTiff
             tileContigRoutine put = img.contig;
 
             byte* buf = new byte [tif.StripSize()];
-            if (buf == NULL)
+            if (buf == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for strip buffer");
                 return false;
@@ -668,11 +668,11 @@ namespace BitMiracle.LibTiff
             }
 
             uint rowsperstrip;
-            tif.GetFieldDefaulted(TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
 
             ushort subsamplinghor;
             ushort subsamplingver;
-            tif.GetFieldDefaulted(TIFFTAG_YCBCRSUBSAMPLING, &subsamplinghor, &subsamplingver);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, &subsamplinghor, &subsamplingver);
 
             int scanline = tif.newScanlineSize();
             int fromskew = (w < img.width ? img.width - w : 0);
@@ -761,7 +761,7 @@ namespace BitMiracle.LibTiff
             }
 
             uint rowsperstrip;
-            tif.GetFieldDefaulted(TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
 
             int scanline = tif.ScanlineSize();
             int fromskew = (w < img.width ? img.width - w : 0);
@@ -830,7 +830,7 @@ namespace BitMiracle.LibTiff
         private bool isCCITTCompression()
         {
             ushort compress;
-            tif.GetField(TIFFTAG_COMPRESSION, &compress);
+            tif.GetField(TIFFTAG.TIFFTAG_COMPRESSION, &compress);
 
             return (compress == COMPRESSION_CCITTFAX3 || compress == COMPRESSION_CCITTFAX4 || compress == COMPRESSION_CCITTRLE || compress == COMPRESSION_CCITTRLEW);
         }
@@ -893,7 +893,7 @@ namespace BitMiracle.LibTiff
         private bool pickContigCase()
         {
             get = tif.IsTiled() ? gtTileContig : gtStripContig;
-            contig = NULL;
+            contig = null;
 
             switch (photometric)
             {
@@ -923,7 +923,7 @@ namespace BitMiracle.LibTiff
                     {
                         if (bitspersample == 8)
                         {
-                            if (Map == NULL)
+                            if (Map == null)
                                 contig = putRGBcontig8bitCMYKtile;
                             else
                                 contig = putRGBcontig8bitCMYKMaptile;
@@ -990,7 +990,7 @@ namespace BitMiracle.LibTiff
                             */
                             ushort SubsamplingHor;
                             ushort SubsamplingVer;
-                            tif.GetFieldDefaulted(TIFFTAG_YCBCRSUBSAMPLING, &SubsamplingHor, &SubsamplingVer);
+                            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, &SubsamplingHor, &SubsamplingVer);
 
                             switch ((SubsamplingHor << 4) | SubsamplingVer)
                             {
@@ -1028,7 +1028,7 @@ namespace BitMiracle.LibTiff
                     }
             }
 
-            return ((get != NULL) && (contig != NULL));
+            return ((get != null) && (contig != null));
         }
 
         /*
@@ -1040,7 +1040,7 @@ namespace BitMiracle.LibTiff
         private bool pickSeparateCase()
         {
             get = tif.IsTiled() ? gtTileSeparate : gtStripSeparate;
-            separate = NULL;
+            separate = null;
 
             switch (photometric)
             {
@@ -1072,7 +1072,7 @@ namespace BitMiracle.LibTiff
                         {
                             ushort hs;
                             ushort vs;
-                            tif.GetFieldDefaulted(TIFFTAG_YCBCRSUBSAMPLING, &hs, &vs);
+                            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, &hs, &vs);
                             switch ((hs << 4) | vs)
                             {
                                 case 0x11:
@@ -1085,7 +1085,7 @@ namespace BitMiracle.LibTiff
                     break;
             }
 
-            return ((get != NULL) && (separate != NULL));
+            return ((get != null) && (separate != null));
         }
 
         /*
@@ -1134,7 +1134,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                uint* bw = NULL;
+                uint* bw = null;
                 int bwPos = 0;
 
                 uint _x;
@@ -1177,7 +1177,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                uint* bw = NULL;
+                uint* bw = null;
                 int bwPos = 0;
 
                 uint _x;
@@ -1226,7 +1226,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                uint* bw = NULL;
+                uint* bw = null;
                 int bwPos = 0;
 
                 uint _x;
@@ -1330,7 +1330,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                uint* bw = NULL;
+                uint* bw = null;
                 int bwPos = 0;
 
                 uint _x;
@@ -1380,7 +1380,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                uint* bw = NULL;
+                uint* bw = null;
                 int bwPos = 0;
 
                 uint _x;
@@ -1429,7 +1429,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                uint* bw = NULL;
+                uint* bw = null;
                 int bwPos = 0;
 
                 uint _x;
@@ -1503,7 +1503,7 @@ namespace BitMiracle.LibTiff
 
         /*
         * 8-bit packed samples => RGBA w/ associated alpha
-        * (known to have Map == NULL)
+        * (known to have Map == null)
         */
         private static void putRGBAAcontig8bittile(TiffRGBAImage img, uint[] cp, int cpOffset, uint x, uint y, uint w, uint h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
@@ -1544,7 +1544,7 @@ namespace BitMiracle.LibTiff
 
         /*
         * 8-bit packed samples => RGBA w/ unassociated alpha
-        * (known to have Map == NULL)
+        * (known to have Map == null)
         */
         private static void putRGBUAcontig8bittile(TiffRGBAImage img, uint[] cp, int cpOffset, uint x, uint y, uint w, uint h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
@@ -1601,7 +1601,7 @@ namespace BitMiracle.LibTiff
 
         /*
         * 16-bit packed samples => RGBA w/ associated alpha
-        * (known to have Map == NULL)
+        * (known to have Map == null)
         */
         private static void putRGBAAcontig16bittile(TiffRGBAImage img, uint[] cp, int cpOffset, uint x, uint y, uint w, uint h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
@@ -1631,7 +1631,7 @@ namespace BitMiracle.LibTiff
 
         /*
         * 16-bit packed samples => RGBA w/ unassociated alpha
-        * (known to have Map == NULL)
+        * (known to have Map == null)
         */
         private static void putRGBUAcontig16bittile(TiffRGBAImage img, uint[] cp, int cpOffset, uint x, uint y, uint w, uint h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
@@ -2024,11 +2024,11 @@ namespace BitMiracle.LibTiff
         {
             static char module[] = "initYCbCrConversion";
 
-            if (ycbcr == NULL)
+            if (ycbcr == null)
             {
                 ycbcr = new TiffYCbCrToRGB();
 
-                if (ycbcr == NULL)
+                if (ycbcr == null)
                 {
                     Tiff::ErrorExt(tif, tif.m_clientdata, module, "No space for YCbCr->RGB conversion state");
                     return false;
@@ -2036,10 +2036,10 @@ namespace BitMiracle.LibTiff
             }
 
             float* luma;
-            tif.GetFieldDefaulted(TIFFTAG_YCBCRCOEFFICIENTS, &luma);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS, &luma);
 
             float* refBlackWhite;
-            tif.GetFieldDefaulted(TIFFTAG_REFERENCEBLACKWHITE, &refBlackWhite);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE, &refBlackWhite);
 
             ycbcr.Init(luma, refBlackWhite);
             return true;
@@ -2049,18 +2049,18 @@ namespace BitMiracle.LibTiff
         {
             static char module[] = "initCIELabConversion";    
 
-            if (cielab == NULL)
+            if (cielab == null)
             {
                 cielab = new TiffCIELabToRGB();
-                if (cielab == NULL)
+                if (cielab == null)
                 {
                     Tiff::ErrorExt(tif, tif.m_clientdata, module, "No space for CIE L*a*b*->RGB conversion state.");
-                    return NULL;
+                    return null;
                 }
             }
 
             float* whitePoint;
-            tif.GetFieldDefaulted(TIFFTAG_WHITEPOINT, &whitePoint);
+            tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_WHITEPOINT, &whitePoint);
             
             float refWhite[3];
             refWhite[1] = 100.0F;
@@ -2129,7 +2129,7 @@ namespace BitMiracle.LibTiff
                 range = 255;
 
             Map = new byte [range + 1];
-            if (Map == NULL)
+            if (Map == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for photometric conversion table");
                 return false;
@@ -2157,7 +2157,7 @@ namespace BitMiracle.LibTiff
                 
                 /* no longer need Map, free it */
                 delete Map;
-                Map = NULL;
+                Map = null;
             }
 
             return true;
@@ -2197,7 +2197,7 @@ namespace BitMiracle.LibTiff
             int nsamples = 8 / bitspersample;
 
             PALmap = new uint* [256];
-            if (PALmap == NULL)
+            if (PALmap == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for Palette mapping table");
                 return false;
@@ -2206,7 +2206,7 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < 256; i++)
             {
                 PALmap[i] = new uint [nsamples];
-                if (PALmap[i] == NULL)
+                if (PALmap[i] == null)
                 {
                     for (int j = i - 1; i >= 0; i--)
                         delete PALmap[j];
@@ -2258,7 +2258,7 @@ namespace BitMiracle.LibTiff
                 nsamples = 1;
 
             BWmap = new uint* [256];
-            if (BWmap == NULL)
+            if (BWmap == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for B&W mapping table");
                 return false;
@@ -2267,7 +2267,7 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < 256; i++)
             {
                 BWmap[i] = new uint [nsamples];
-                if (BWmap[i] == NULL)
+                if (BWmap[i] == null)
                 {
                     for (int j = i - 1; i >= 0; i--)
                         delete BWmap[j];

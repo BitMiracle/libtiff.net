@@ -25,7 +25,7 @@ namespace BitMiracle.LibTiff
     public partial class Tiff
     {
         /* is tag value normal or pseudo */
-        private static bool isPseudoTag(TIFFTAG t)
+        internal static bool isPseudoTag(TIFFTAG t)
         {
             return ((int)t > 0xffff);
         }
@@ -128,7 +128,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabShort(ref dircount);
 
             off = seekFile(dircount * TiffDirEntry.SizeInBytes, SEEK_CUR);
@@ -139,7 +139,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabLong(ref nextdir);
             
             return true;
@@ -150,17 +150,17 @@ namespace BitMiracle.LibTiff
             cpp = cp.Clone() as string;
         }
 
-        internal static void setShortArray(out ushort[] wpp, ushort[] wp, uint n)
+        internal static void setShortArray(out ushort[] wpp, ushort[] wp, int n)
         {
             wpp = new ushort[n];
-            for (uint i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
                 wpp[i] = wp[i];
         }
 
-        internal static void setLongArray(out uint[] lpp, uint[] lp, uint n)
+        internal static void setLongArray(out int[] lpp, int[] lp, uint n)
         {
-            lpp = new uint[n];
-            for (uint i = 0; i < n; i++)
+            lpp = new int[n];
+            for (int i = 0; i < n; i++)
                 lpp[i] = lp[i];
         }
 

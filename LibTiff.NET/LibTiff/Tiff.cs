@@ -450,7 +450,7 @@ namespace BitMiracle.LibTiff
                 {
                     case 'b':
                         if ((m & O_CREAT) != 0)
-                            tif.m_flags |= TIFF_SWAB;
+                            tif.m_flags |= Tiff.TIFF_SWAB;
                         break;
                     case 'l':
                         break;
@@ -492,9 +492,9 @@ namespace BitMiracle.LibTiff
                 /*
                  * Setup header and write.
                  */
-                tif.m_header.tiff_magic = (tif.m_flags & TIFF_SWAB) != 0 ? TIFF_BIGENDIAN : TIFF_LITTLEENDIAN;
+                tif.m_header.tiff_magic = (tif.m_flags & Tiff.TIFF_SWAB) != 0 ? TIFF_BIGENDIAN : TIFF_LITTLEENDIAN;
                 tif.m_header.tiff_version = TIFF_VERSION;
-                if ((tif.m_flags & TIFF_SWAB) != 0)
+                if ((tif.m_flags & Tiff.TIFF_SWAB) != 0)
                     SwabShort(ref tif.m_header.tiff_version);
 
                 tif.m_header.tiff_diroff = 0; /* filled in later */
@@ -543,7 +543,7 @@ namespace BitMiracle.LibTiff
             /*
              * Swap header if required.
              */
-            if ((tif.m_flags & TIFF_SWAB) != 0)
+            if ((tif.m_flags & Tiff.TIFF_SWAB) != 0)
             {
                 SwabShort(ref tif.m_header.tiff_version);
                 SwabLong(ref tif.m_header.tiff_diroff);
@@ -1102,7 +1102,7 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < dircount; i++)
             {
                 TiffDirEntry dp = dir[i];
-                if ((m_flags & TIFF_SWAB) != 0)
+                if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 {
                     ushort temp = (ushort)dp.tdir_tag;
                     SwabShort(ref temp);
@@ -1713,7 +1713,7 @@ namespace BitMiracle.LibTiff
             uint fix = 0;
             for (ushort i = 0; i < dircount; i++)
             {
-                if ((m_flags & TIFF_SWAB) != 0)
+                if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 {
                     ushort temp = (ushort)dir[i].tdir_tag;
                     SwabShort(ref temp);
@@ -1885,7 +1885,7 @@ namespace BitMiracle.LibTiff
             */
             ushort dircount = (ushort)nfields;
             pdiroff = m_nextdiroff;
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
             {
                 /*
                 * The file's byte order is opposite to the
@@ -2212,7 +2212,7 @@ namespace BitMiracle.LibTiff
         */
         public bool IsByteSwapped()
         {
-            return ((m_flags & TIFF_SWAB) != 0);
+            return ((m_flags & Tiff.TIFF_SWAB) != 0);
         }
 
         /*
@@ -2618,7 +2618,7 @@ namespace BitMiracle.LibTiff
              * that follows.
              */
             seekFile(off, SEEK_SET);
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabLong(ref nextdir);
             
             if (!writeIntOK(nextdir))
@@ -2730,7 +2730,7 @@ namespace BitMiracle.LibTiff
                         return false;
                     }
                     
-                    if ((m_flags & TIFF_SWAB) != 0)
+                    if ((m_flags & Tiff.TIFF_SWAB) != 0)
                         SwabShort(ref dircount);
 
                     seekFile(dircount * TiffDirEntry.SizeInBytes, SEEK_CUR);
@@ -2741,7 +2741,7 @@ namespace BitMiracle.LibTiff
                         return false;
                     }
 
-                    if ((m_flags & TIFF_SWAB) != 0)
+                    if ((m_flags & Tiff.TIFF_SWAB) != 0)
                         SwabLong(ref nextdir);
                 }
                 while (nextdir != m_diroff && nextdir != 0);
@@ -3018,8 +3018,8 @@ namespace BitMiracle.LibTiff
             if (fieldSet(FIELD.FIELD_ORIENTATION))
             {
                 fprintf(fd, "  Orientation: ");
-                if (m_dir.td_orientation < orientNames.Length)
-                    fprintf(fd, "%s\n", orientNames[m_dir.td_orientation]);
+                if ((int)m_dir.td_orientation < orientNames.Length)
+                    fprintf(fd, "%s\n", orientNames[(int)m_dir.td_orientation]);
                 else
                     fprintf(fd, "%u (0x%x)\n", m_dir.td_orientation, m_dir.td_orientation);
             }

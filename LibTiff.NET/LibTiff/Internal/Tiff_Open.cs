@@ -21,17 +21,17 @@ namespace BitMiracle.LibTiff
         {
             0,           /* TIFF_NOTYPE */
             0x000000ff,  /* TIFF_BYTE */
-            0xffffffff,  /* TIFF_ASCII */
+            -1,  /* TIFF_ASCII */
             0x0000ffff,  /* TIFF_SHORT */
-            0xffffffff,  /* TIFF_LONG */
-            0xffffffff,  /* TIFF_RATIONAL */
+            -1,  /* TIFF_LONG */
+            -1,  /* TIFF_RATIONAL */
             0x000000ff,  /* TIFF_SBYTE */
             0x000000ff,  /* TIFF_UNDEFINED */
             0x0000ffff,  /* TIFF_SSHORT */
-            0xffffffff,  /* TIFF_SLONG */
-            0xffffffff,  /* TIFF_SRATIONAL */
-            0xffffffff,  /* TIFF_FLOAT */
-            0xffffffff,  /* TIFF_DOUBLE */
+            -1,  /* TIFF_SLONG */
+            -1,  /* TIFF_SRATIONAL */
+            -1,  /* TIFF_FLOAT */
+            -1,  /* TIFF_DOUBLE */
         };
 
         private static readonly int[] bigTypeshift = 
@@ -79,7 +79,7 @@ namespace BitMiracle.LibTiff
             if (magic == TIFF_BIGENDIAN)
             {
                 m_typeshift = bigTypeshift;
-                m_flags |= TIFF_SWAB;
+                m_flags |= Tiff.TIFF_SWAB;
             }
             else
             {

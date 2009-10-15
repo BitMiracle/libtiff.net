@@ -21,7 +21,7 @@ namespace BitMiracle.LibTiff
     {
         public virtual void ErrorHandler(Tiff tif, string module, string fmt, params object[] ap)
         {
-            if (module != NULL)
+            if (module != null)
                 fprintf(stderr, "%s: ", module);
 
             vfprintf(stderr, fmt, ap);
@@ -34,7 +34,7 @@ namespace BitMiracle.LibTiff
 
         public virtual void WarningHandler(Tiff tif, string module, string fmt, params object[] ap)
         {
-            if (module != NULL)
+            if (module != null)
                 fprintf(stderr, "%s: ", module);
 
             fprintf(stderr, "Warning, ");

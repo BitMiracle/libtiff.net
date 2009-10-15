@@ -100,41 +100,38 @@ namespace BitMiracle.LibTiff
             {
                 case TIFFTAG.TIFFTAG_INKSET:
                     fprintf(fd, "  Ink Set: ");
-                    switch (*((ushort*)raw_data))
+                    ushort[] udata = raw_data as ushort[];
+                    switch ((INKSET)udata[0])
                     {
                         case INKSET.INKSET_CMYK:
                             fprintf(fd, "CMYK\n");
                             break;
                         default:
-                            fprintf(fd, "%u (0x%x)\n", *((ushort*)raw_data), *((ushort*)raw_data));
+                            fprintf(fd, "%u (0x%x)\n", udata[0], udata[0]);
                             break;
                     }
                     return true;
                 case TIFFTAG.TIFFTAG_DOTRANGE:
-                    fprintf(fd, "  Dot Range: %u-%u\n", ((ushort*)raw_data)[0], ((ushort*)raw_data)[1]);
+                    udata = raw_data as ushort[];
+                    fprintf(fd, "  Dot Range: %u-%u\n", udata[0], udata[1]);
                     return true;
                 case TIFFTAG.TIFFTAG_WHITEPOINT:
-                    fprintf(fd, "  White Point: %g-%g\n", ((float*)raw_data)[0], ((float*)raw_data)[1]);
+                    float[] fdata = raw_data as float[];
+                    fprintf(fd, "  White Point: %g-%g\n", fdata[0], fdata[1]);
                     return true;
                 case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
-                    {
-                        ushort i;
-
-                        fprintf(fd, "  Reference Black/White:\n");
-                        for (i = 0; i < m_dir.td_samplesperpixel; i++)
-                            fprintf(fd, "    %2d: %5g %5g\n", i, ((float*)raw_data)[2 * i + 0], ((float*)raw_data)[2 * i + 1]);
-                        return true;
-                    }
+                    fdata = raw_data as float[];
+                    fprintf(fd, "  Reference Black/White:\n");
+                    for (ushort i = 0; i < m_dir.td_samplesperpixel; i++)
+                        fprintf(fd, "    %2d: %5g %5g\n", i, fdata[2 * i + 0], fdata[2 * i + 1]);
+                    return true;
                 case TIFFTAG.TIFFTAG_XMLPACKET:
-                    {
-                        uint i;
+                    fprintf(fd, "  XMLPacket (XMP Metadata):\n");
+                    string sdata = raw_data as string;
+                    fprintf(fd, sdata.Substring(0, value_count));
+                    fprintf(fd, "\n");
+                    return true;
 
-                        fprintf(fd, "  XMLPacket (XMP Metadata):\n");
-                        for (i = 0; i < value_count; i++)
-                            fputc(((char*)raw_data)[i], fd);
-                        fprintf(fd, "\n");
-                        return true;
-                    }
                 case TIFFTAG.TIFFTAG_RICHTIFFIPTC:
                     /*
                      * XXX: for some weird reason RichTIFFIPTC tag
@@ -149,7 +146,8 @@ namespace BitMiracle.LibTiff
                     fprintf(fd, "  ICC Profile: <present>, %lu bytes\n", value_count);
                     return true;
                 case TIFFTAG.TIFFTAG_STONITS:
-                    fprintf(fd, "  Sample to Nits conversion factor: %.4e\n", *((double*)raw_data));
+                    double[] ddata = raw_data as double[];
+                    fprintf(fd, "  Sample to Nits conversion factor: %.4e\n", ddata[0]);
                     return true;
             }
 
@@ -160,9 +158,9 @@ namespace BitMiracle.LibTiff
         {
             for (int cpPos = 0; cp[cpPos] != '\0'; cpPos++)
             {
-                if (isprint((int)cp[cpPos]))
+                if (!char.IsControl(cp[cpPos]))
                 {
-                    fputc(cp[cpPos], fd);
+                    fprintf(fd, "%c", cp[cpPos]);
                     continue;
                 }
 

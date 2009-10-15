@@ -17,6 +17,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using BitMiracle.LibTiff.Internal;
+
 namespace BitMiracle.LibTiff
 {
     public partial class Tiff
@@ -26,10 +28,10 @@ namespace BitMiracle.LibTiff
          */
         private void setupBuiltInCodecs()
         {
-            m_builtInCodecs = new TiffCodec*[19];
+            m_builtInCodecs = new TiffCodec[19];
 
             int i = 0;
-            m_builtInCodecs[i++] = new TiffCodec(this, -1, "Not configured");
+            m_builtInCodecs[i++] = new TiffCodec(this, (COMPRESSION)(-1), "Not configured");
             m_builtInCodecs[i++] = new DumpModeCodec(this, COMPRESSION.COMPRESSION_NONE, "None");
             m_builtInCodecs[i++] = new LZWCodec(this, COMPRESSION.COMPRESSION_LZW, "LZW");
             m_builtInCodecs[i++] = new PackBitsCodec(this, COMPRESSION.COMPRESSION_PACKBITS, "PackBits");
@@ -52,25 +54,8 @@ namespace BitMiracle.LibTiff
 
         private void freeCodecs()
         {
-            if (m_builtInCodecs != null)
-            {
-                int i = 0;
-                while (m_builtInCodecs[i] != null)
-                {
-                    delete m_builtInCodecs[i];
-                    i++;
-                }
-
-                delete[] m_builtInCodecs;
-            }
-
-            while (m_registeredCodecs != null)
-            {
-                codecList* c = m_registeredCodecs;
-                m_registeredCodecs = m_registeredCodecs.next;
-                delete c.codec;
-                delete c;
-            }
+            m_builtInCodecs = null;
+            m_registeredCodecs = null;
         }
     }
 }

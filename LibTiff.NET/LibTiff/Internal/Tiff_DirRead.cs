@@ -223,7 +223,7 @@ namespace BitMiracle.LibTiff
                 return 0;
             }
             
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabShort(ref dircount);
 
             dir = new TiffDirEntry [dircount];
@@ -244,7 +244,7 @@ namespace BitMiracle.LibTiff
             */
             readIntOK(out nextdiroff);
 
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabLong(ref nextdiroff);
 
             pdir = dir;
@@ -328,7 +328,7 @@ namespace BitMiracle.LibTiff
             if (!readOK(cp, cc))
                 fetchFailed(dir);
 
-            if ((m_flags & TIFF_SWAB) != 0)
+            if ((m_flags & Tiff.TIFF_SWAB) != 0)
             {
                 switch (dir.tdir_type)
                 {
@@ -376,7 +376,7 @@ namespace BitMiracle.LibTiff
             if (dir.tdir_count <= 4)
             {
                 int l = dir.tdir_offset;
-                if ((m_flags & TIFF_SWAB) != 0)
+                if ((m_flags & Tiff.TIFF_SWAB) != 0)
                     SwabLong(ref l);
 
                 bytes = new byte[sizeof(uint)];

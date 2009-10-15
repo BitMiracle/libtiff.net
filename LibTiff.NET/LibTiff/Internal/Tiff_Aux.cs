@@ -26,7 +26,7 @@ namespace BitMiracle.LibTiff
     {
         private static bool defaultTransferFunction(TiffDirectory td)
         {
-            ushort** tf = td.td_transferfunction;
+            ushort[][] tf = td.td_transferfunction;
             tf[0] = null;
             tf[1] = null;
             tf[2] = null;
@@ -37,33 +37,33 @@ namespace BitMiracle.LibTiff
             int n = 1 << td.td_bitspersample;
             int nbytes = n * sizeof(ushort);
             tf[0] = new ushort [n];
-            if (!tf[0])
+            if (tf[0] == null)
                 return false;
 
             tf[0][0] = 0;
             for (int i = 1; i < n; i++)
             {
-                double t = (double)i / ((double)n - 1.);
-                tf[0][i] = (ushort)floor(65535. * pow(t, 2.2) + 0.5);
+                double t = (double)i / ((double)n - 1.0);
+                tf[0][i] = (ushort)Math.Floor(65535.0 * Math.Pow(t, 2.2) + 0.5);
             }
 
             bool failed = false;
             if (td.td_samplesperpixel - td.td_extrasamples > 1)
             {
                 tf[1] = new ushort [n];
-                if (!tf[1])
+                if (tf[1] == null)
                     failed = true;
 
                 if (!failed)
                 {
-                    memcpy(tf[1], tf[0], nbytes);
+                    Array.Copy(tf[0], tf[1], nbytes);
 
                     tf[2] = new ushort [n];
-                    if (!tf[2])
+                    if (tf[2] == null)
                         failed = true;
 
                     if (!failed)
-                        memcpy(tf[2], tf[0], nbytes);
+                        Array.Copy(tf[0], tf[2], nbytes);
                 }
             }
 
@@ -120,10 +120,10 @@ namespace BitMiracle.LibTiff
             int intPos = 0;
             for (int i = byteStartOffset; i < byteStopPos; )
             {
-                uint value = b[i++] & 0xFF;
-                value += (b[i++] & 0xFF) << 8;
-                value += (b[i++] & 0xFF) << 16;
-                value += b[i++] << 24;
+                uint value = (uint)(b[i++] & 0xFF);
+                value += (uint)((b[i++] & 0xFF) << 8);
+                value += (uint)((b[i++] & 0xFF) << 16);
+                value += (uint)(b[i++] << 24);
                 integers[intPos++] = value;
             }
 
@@ -144,17 +144,17 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        internal static Int16[] byteArrayToInt16(byte[] b, int byteStartOffset, int byteCount)
+        internal static short[] byteArrayToInt16(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 2;
-            Int16[] integers = new Int16[intCount];
+            short[] integers = new short[intCount];
 
             int byteStopPos = byteStartOffset + intCount * 2;
             int intPos = 0;
             for (int i = byteStartOffset; i < byteStopPos; )
             {
-                Int16 value = b[i++] & 0xFF;
-                value += (b[i++] & 0xFF) << 8;
+                short value = (short)(b[i++] & 0xFF);
+                value += (short)((b[i++] & 0xFF) << 8);
                 integers[intPos++] = value;
             }
 
@@ -167,7 +167,7 @@ namespace BitMiracle.LibTiff
             int intStopPos = intStartOffset + intCount;
             for (int i = intStartOffset; i < intStopPos; i++)
             {
-                Int16 value = integers[i];
+                short value = integers[i];
                 bytes[bytePos++] = (byte)value;
                 bytes[bytePos++] = (byte)(value >> 8);
             }
@@ -182,8 +182,8 @@ namespace BitMiracle.LibTiff
             int intPos = 0;
             for (int i = byteStartOffset; i < byteStopPos; )
             {
-                ushort value = b[i++] & 0xFF;
-                value += (b[i++] & 0xFF) << 8;
+                ushort value = (ushort)(b[i++] & 0xFF);
+                value += (ushort)((b[i++] & 0xFF) << 8);
                 integers[intPos++] = value;
             }
 
@@ -221,8 +221,8 @@ namespace BitMiracle.LibTiff
 
         internal ushort readUInt16(byte[] b, int byteStartOffset)
         {
-            ushort value = b[byteStartOffset] & 0xFF;
-            value += (b[byteStartOffset + 1] & 0xFF) << 8;
+            ushort value = (ushort)(b[byteStartOffset] & 0xFF);
+            value += (ushort)((b[byteStartOffset + 1] & 0xFF) << 8);
             return value;
         }
 

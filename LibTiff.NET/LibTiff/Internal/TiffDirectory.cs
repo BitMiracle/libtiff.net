@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff.Internal
         public PHOTOMETRIC td_photometric;
         public THRESHHOLD td_threshholding;
         public FILLORDER td_fillorder;
-        public ushort td_orientation;
+        public ORIENTATION td_orientation;
         public ushort td_samplesperpixel;
         public int td_rowsperstrip;
         public ushort td_minsamplevalue;
