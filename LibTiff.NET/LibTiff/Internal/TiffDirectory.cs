@@ -75,8 +75,6 @@ namespace BitMiracle.LibTiff.Internal
 
         public TiffDirectory()
         {
-            memset(td_fieldsset, 0, sizeof(uint) * FIELD.FIELD_SETLONGS);
-
             td_imagewidth = 0;
             td_imagelength = 0;
             td_subfiletype = 0;
@@ -92,10 +90,6 @@ namespace BitMiracle.LibTiff.Internal
             td_xposition = 0;
             td_yposition = 0;
 
-            memset(td_pagenumber, 0, sizeof(ushort) * 2);
-            memset(td_colormap, 0, sizeof(ushort*) * 3);
-            memset(td_halftonehints, 0, sizeof(ushort) * 2);
-
             td_extrasamples = 0;
             td_sampleinfo = null;
             td_stripsperimage = 0;
@@ -105,7 +99,6 @@ namespace BitMiracle.LibTiff.Internal
             td_nsubifd = 0;
             td_subifd = null;
 
-            memset(td_transferfunction, 0, sizeof(ushort*) * 3);
             td_inknameslen = 0;
             td_inknames = null;
 

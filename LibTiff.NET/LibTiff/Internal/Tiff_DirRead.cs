@@ -1187,7 +1187,7 @@ namespace BitMiracle.LibTiff
             if (dir.tdir_type == TiffDataType.TIFF_SHORT)
             {
                 /*
-                 * Handle uint16->uint expansion.
+                 * Handle uint16.uint expansion.
                  */
                 ushort[] dp = new ushort[dir.tdir_count];
                 if (dp == null)

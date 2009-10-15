@@ -2146,7 +2146,7 @@ namespace BitMiracle.LibTiff
         * request is <1 then we choose a strip size according
         * to certain heuristics.
         */
-        public uint DefaultStripSize(uint request)
+        public int DefaultStripSize(int request)
         {
             return m_currentCodec.tif_defstripsize(request);
         }
@@ -2157,7 +2157,7 @@ namespace BitMiracle.LibTiff
         * request is <1 then we choose a size according
         * to certain heuristics.
         */
-        public void DefaultTileSize(ref uint tw, ref uint th)
+        public void DefaultTileSize(ref int tw, ref int th)
         {
             m_currentCodec.tif_deftilesize(ref tw, ref th);
         }

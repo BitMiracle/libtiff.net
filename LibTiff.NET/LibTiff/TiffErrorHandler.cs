@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 using thandle_t = System.Object;
 
@@ -21,11 +22,13 @@ namespace BitMiracle.LibTiff
     {
         public virtual void ErrorHandler(Tiff tif, string module, string fmt, params object[] ap)
         {
+            Stream stderr = Console.OpenStandardError();
+            
             if (module != null)
-                fprintf(stderr, "%s: ", module);
+                Tiff.fprintf(stderr, "%s: ", module);
 
-            vfprintf(stderr, fmt, ap);
-            fprintf(stderr, ".\n");
+            Tiff.fprintf(stderr, fmt, ap);
+            Tiff.fprintf(stderr, ".\n");
         }
 
         public virtual void ErrorHandlerExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
@@ -34,12 +37,14 @@ namespace BitMiracle.LibTiff
 
         public virtual void WarningHandler(Tiff tif, string module, string fmt, params object[] ap)
         {
-            if (module != null)
-                fprintf(stderr, "%s: ", module);
+            Stream stderr = Console.OpenStandardError();
 
-            fprintf(stderr, "Warning, ");
-            vfprintf(stderr, fmt, ap);
-            fprintf(stderr, ".\n");
+            if (module != null)
+                Tiff.fprintf(stderr, "%s: ", module);
+
+            Tiff.fprintf(stderr, "Warning, ");
+            Tiff.fprintf(stderr, fmt, ap);
+            Tiff.fprintf(stderr, ".\n");
         }
 
         public virtual void WarningHandlerExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)

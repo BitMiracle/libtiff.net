@@ -423,7 +423,7 @@ namespace BitMiracle.LibTiff
             Tiff tif = img.tif;
             tileContigRoutine put = img.contig;
 
-            byte* buf = new byte [tif.TileSize()];
+            byte[] buf = new byte [tif.TileSize()];
             if (buf == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
@@ -522,7 +522,7 @@ namespace BitMiracle.LibTiff
             tileSeparateRoutine put = img.separate;
 
             int tilesize = tif.TileSize();
-            byte* buf = new byte [(img.alpha != 0 ? 4 : 3) * tilesize];
+            byte[] buf = new byte [(img.alpha != 0 ? 4 : 3) * tilesize];
             if (buf == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
@@ -644,7 +644,7 @@ namespace BitMiracle.LibTiff
             Tiff tif = img.tif;
             tileContigRoutine put = img.contig;
 
-            byte* buf = new byte [tif.StripSize()];
+            byte[] buf = new byte [tif.StripSize()];
             if (buf == null)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for strip buffer");
@@ -732,7 +732,7 @@ namespace BitMiracle.LibTiff
             tileSeparateRoutine put = img.separate;
 
             int stripsize = tif.StripSize();
-            byte* buf = new byte [(img.alpha != 0 ? 4 : 3) * stripsize];
+            byte[] buf = new byte [(img.alpha != 0 ? 4 : 3) * stripsize];
             if (buf == 0)
             {
                 Tiff::ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
@@ -1724,7 +1724,7 @@ namespace BitMiracle.LibTiff
         private static void putRGBcontig8bitCMYKMaptile(TiffRGBAImage img, uint[] cp, int cpOffset, uint x, uint y, uint w, uint h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
-            byte* Map = img.Map;
+            byte[] Map = img.Map;
             fromskew *= samplesperpixel;
 
             int cpPos = cpOffset;

@@ -33,9 +33,7 @@ namespace BitMiracle.LibTiff
             m_scheme = scheme;
             m_tif = tif;
 
-            m_name = new char[name.Length + 1];
-            strcpy(m_name, name);
-
+            m_name = name.Clone() as string;
             Init();
         }
 
@@ -134,7 +132,7 @@ namespace BitMiracle.LibTiff
          */
         public virtual bool tif_seek(int off)
         {
-            ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression algorithm does not support random access");
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression algorithm does not support random access");
             return false;
         }
 
@@ -144,9 +142,9 @@ namespace BitMiracle.LibTiff
         }
 
         /* calculate/constrain strip size */
-        public virtual uint tif_defstripsize(uint s)
+        public virtual int tif_defstripsize(int s)
         {
-            if ((int)s < 1)
+            if (s < 1)
             {
                 /*
                 * If RowsPerStrip is unspecified, try to break the
@@ -154,7 +152,7 @@ namespace BitMiracle.LibTiff
                 * STRIP_SIZE_DEFAULT bytes long.
                 */
                 int scanline = m_tif.ScanlineSize();
-                s = (uint)STRIP_SIZE_DEFAULT / (scanline == 0 ? 1 : scanline);
+                s = Tiff.STRIP_SIZE_DEFAULT / (scanline == 0 ? 1 : scanline);
                 if (s == 0)
                 {
                     /* very wide images */
@@ -166,29 +164,29 @@ namespace BitMiracle.LibTiff
         }
 
         /* calculate/constrain tile size */
-        public virtual void tif_deftilesize(ref uint tw, ref uint th)
+        public virtual void tif_deftilesize(ref int tw, ref int th)
         {
-            if ((int)tw < 1)
+            if (tw < 1)
                 tw = 256;
             
-            if ((int)th < 1)
+            if (th < 1)
                 th = 256;
             
             /* roundup to a multiple of 16 per the spec */
             if ((tw & 0xf) != 0)
-                tw = roundUp(tw, 16);
+                tw = Tiff.roundUp(tw, 16);
 
             if ((th & 0xf) != 0)
-                th = roundUp(th, 16);
+                th = Tiff.roundUp(th, 16);
         }
 
         private bool noEncode(string method)
         {
             TiffCodec c = m_tif.FindCodec(m_tif.m_dir.td_compression);
             if (c != null)
-                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s encoding is not implemented", c.m_name, method);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s encoding is not implemented", c.m_name, method);
             else
-                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s encoding is not implemented", m_tif.m_dir.td_compression, method);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s encoding is not implemented", m_tif.m_dir.td_compression, method);
 
             return false;
         }
@@ -198,9 +196,9 @@ namespace BitMiracle.LibTiff
             TiffCodec c = m_tif.FindCodec(m_tif.m_dir.td_compression);
 
             if (c != null)
-                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s decoding is not implemented", c.m_name, method);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s decoding is not implemented", c.m_name, method);
             else
-                ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s decoding is not implemented", m_tif.m_dir.td_compression, method);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s decoding is not implemented", m_tif.m_dir.td_compression, method);
 
             return false;
         }
