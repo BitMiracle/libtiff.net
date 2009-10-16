@@ -18,7 +18,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override void init_source()
         {
-            initInternalBuffer((JOCTET*)m_sp->m_jpegtables, m_sp->m_jpegtables_length);
+            initInternalBuffer(m_sp.m_jpegtables, m_sp.m_jpegtables_length);
         }
     }
 }

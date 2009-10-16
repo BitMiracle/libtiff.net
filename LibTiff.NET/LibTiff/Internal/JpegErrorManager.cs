@@ -15,12 +15,12 @@ namespace BitMiracle.LibTiff.Internal
     /// </summary>
     class JpegErrorManager : jpeg_error_mgr
     {
-        private Tiff m_tif;
+        private JpegCodec m_sp;
 
-        public JpegErrorManager(Tiff tif)
+        public JpegErrorManager(JpegCodec sp)
             : base()
         {
-            m_tif = tif;
+            m_sp = sp;
         }
 
         /*
@@ -30,13 +30,11 @@ namespace BitMiracle.LibTiff.Internal
         */
         public override void error_exit()
         {
-            char buffer[JMSG_LENGTH_MAX];
+            string buffer = m_sp.m_err.format_message();
+            Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", buffer); /* display the error message */
+            m_sp.m_common.jpeg_abort(); /* clean up libjpeg state */
 
-            cinfo->m_err->format_message(buffer);
-            Tiff::ErrorExt(m_tif, m_tif->m_clientdata, "JPEGLib", buffer); /* display the error message */
-            cinfo->jpeg_abort(); /* clean up libjpeg state */
-
-            throw Exception(buffer);
+            throw new Exception(buffer);
         }
 
         /*
@@ -46,10 +44,8 @@ namespace BitMiracle.LibTiff.Internal
         */
         public override void output_message()
         {
-            char buffer[JMSG_LENGTH_MAX];
-
-            format_message(buffer);
-            Tiff::WarningExt(m_tif, m_tif->m_clientdata, "JPEGLib", buffer);
+            string buffer = format_message();
+            Tiff.WarningExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", buffer);
         }
     }
 }

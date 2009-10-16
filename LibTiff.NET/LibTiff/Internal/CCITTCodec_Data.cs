@@ -5303,5 +5303,9 @@ namespace BitMiracle.LibTiff.Internal
             4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 7, 8,  /* 0xf0 - 0xff */
         };
 
+        static byte[] fillMasks = 
+        {
+            0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff
+        };
     }
 }

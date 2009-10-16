@@ -38,6 +38,7 @@
   <ItemGroup>
     <Compile Include="AssemblyVersion.cs" />
     <Compile Include="Internal\CCITTCodec.cs" />
+    <Compile Include="Internal\CCITTCodecTagMethods.cs" />
     <Compile Include="Internal\CCITTCodec_Data.cs" />
     <Compile Include="Internal\CodecWithPredictor.cs" />
     <Compile Include="Internal\CodecWithPredictorTagMethods.cs" />

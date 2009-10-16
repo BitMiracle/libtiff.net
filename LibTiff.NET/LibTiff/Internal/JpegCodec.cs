@@ -37,7 +37,7 @@ namespace BitMiracle.LibTiff.Internal
 
         /* pseudo-tag fields */
         internal byte[] m_jpegtables; /* JPEGTables tag value, or null */
-        internal uint m_jpegtables_length; /* number of bytes in same */
+        internal int m_jpegtables_length; /* number of bytes in same */
         internal int m_jpegquality; /* Compression quality level */
         internal JPEGCOLORMODE m_jpegcolormode; /* Auto RGB<=>YCbCr convert? */
         internal JPEGTABLESMODE m_jpegtablesmode; /* What to put in JPEGTables */
@@ -70,7 +70,7 @@ namespace BitMiracle.LibTiff.Internal
         
         private bool m_cinfo_initialized;
 
-        private jpeg_error_mgr m_err; /* libjpeg error manager */
+        internal jpeg_error_mgr m_err; /* libjpeg error manager */
         private PHOTOMETRIC m_photometric; /* copy of PhotometricInterpretation */
         
         private int m_bytesperline; /* decompressed bytes per scanline */
@@ -107,7 +107,7 @@ namespace BitMiracle.LibTiff.Internal
             m_scancount = 0;
             m_samplesperclump = 0;
             m_recvtime = 0;
-            m_err = new JpegErrorManager(m_tif);
+            m_err = new JpegErrorManager(this);
 
             m_parentTagMethods = m_tif.m_tagmethods;
             m_tif.m_tagmethods = m_tagMethods;
@@ -139,7 +139,7 @@ namespace BitMiracle.LibTiff.Internal
              */
             if (m_tif.m_diroff == 0)
             {
-                uint SIZE_OF_JPEGTABLES = 2000;
+                const int SIZE_OF_JPEGTABLES = 2000;
                 m_tif.setFieldBit(FIELD_JPEGTABLES);
                 m_jpegtables_length = SIZE_OF_JPEGTABLES;
                 m_jpegtables = new byte [m_jpegtables_length];
@@ -1352,7 +1352,7 @@ namespace BitMiracle.LibTiff.Internal
             /* initialize JPEG error handling */
             try
             {
-                m_compression = new jpeg_compress_struct(new JpegErrorManager(m_tif));
+                m_compression = new jpeg_compress_struct(new JpegErrorManager(this));
                 m_common = m_compression;
             }
             catch (Exception)
@@ -1368,7 +1368,7 @@ namespace BitMiracle.LibTiff.Internal
             /* initialize JPEG error handling */
             try
             {
-                m_decompression = new jpeg_decompress_struct(new JpegErrorManager(m_tif));
+                m_decompression = new jpeg_decompress_struct(new JpegErrorManager(this));
                 m_common = m_decompression;
             }
             catch (Exception)
