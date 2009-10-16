@@ -49,7 +49,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override bool Init()
         {
-            assert((m_scheme == COMPRESSION_DEFLATE) || (m_scheme == COMPRESSION_ADOBE_DEFLATE));
+            Debug.Assert((m_scheme == COMPRESSION_DEFLATE) || (m_scheme == COMPRESSION_ADOBE_DEFLATE));
 
             /*
             * Merge codec-specific tag information and
@@ -60,9 +60,9 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Allocate state block so tag methods have storage to record values.
              */
-            m_stream.zalloc = NULL;
-            m_stream.zfree = NULL;
-            m_stream.opaque = NULL;
+            m_stream.zalloc = null;
+            m_stream.zfree = null;
+            m_stream.opaque = null;
             m_stream.data_type = Z_BINARY;
 
             /* Default values for codec-specific fields */
@@ -166,10 +166,10 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool ZIPDecode(byte[] op, int occ, UInt16 s)
         {
-            static const char module[] = "ZIPDecode";
+            const string module = "ZIPDecode";
 
             s;
-            assert(m_state == ZSTATE_INIT_DECODE);
+            Debug.Assert(m_state == ZSTATE_INIT_DECODE);
             m_stream.next_out = op;
             m_stream.avail_out = occ;
             do
@@ -180,7 +180,7 @@ namespace BitMiracle.LibTiff.Internal
 
                 if (state == Z_DATA_ERROR)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Decoding error at scanline %d, %s", m_tif.m_name, m_tif.m_row, m_stream.msg);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Decoding error at scanline %d, %s", m_tif.m_name, m_tif.m_row, m_stream.msg);
                     if (inflateSync(&m_stream) != Z_OK)
                         return false;
                     
@@ -189,7 +189,7 @@ namespace BitMiracle.LibTiff.Internal
 
                 if (state != Z_OK)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: zlib error: %s", m_tif.m_name, m_stream.msg);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: zlib error: %s", m_tif.m_name, m_stream.msg);
                     return false;
                 }
             }
@@ -197,7 +197,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (m_stream.avail_out != 0)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Not enough data at scanline %d (short %d bytes)", m_tif.m_name, m_tif.m_row, m_stream.avail_out);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Not enough data at scanline %d (short %d bytes)", m_tif.m_name, m_tif.m_row, m_stream.avail_out);
                 return false;
             }
 
@@ -209,11 +209,11 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool ZIPEncode(byte[] bp, int cc, UInt16 s)
         {
-            static const char module[] = "ZIPEncode";
+            const string module = "ZIPEncode";
 
             s;
 
-            assert(m_state == ZSTATE_INIT_ENCODE);
+            Debug.Assert(m_state == ZSTATE_INIT_ENCODE);
 
             m_stream.next_in = bp;
             m_stream.avail_in = cc;
@@ -221,7 +221,7 @@ namespace BitMiracle.LibTiff.Internal
             {
                 if (deflate(&m_stream, Z_NO_FLUSH) != Z_OK)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Encoder error: %s", m_tif.m_name, m_stream.msg);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Encoder error: %s", m_tif.m_name, m_stream.msg);
                     return false;
                 }
 
@@ -244,7 +244,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool ZIPPostEncode()
         {
-            static const char module[] = "ZIPPostEncode";
+            const string module = "ZIPPostEncode";
             int state;
 
             m_stream.avail_in = 0;
@@ -264,7 +264,7 @@ namespace BitMiracle.LibTiff.Internal
                         }
                         break;
                     default:
-                        Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: zlib error: %s", m_tif.m_name, m_stream.msg);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: zlib error: %s", m_tif.m_name, m_stream.msg);
                         return false;
                 }
             }
@@ -301,7 +301,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool ZIPSetupDecode()
         {
-            static const char module[] = "ZIPSetupDecode";
+            const string module = "ZIPSetupDecode";
 
             /* if we were last encoding, terminate this mode */
             if ((m_state & ZSTATE_INIT_ENCODE) != 0)
@@ -312,7 +312,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (inflateInit(&m_stream) != Z_OK)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
                 return false;
             }
 
@@ -322,7 +322,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool ZIPSetupEncode()
         {
-            static const char module[] = "ZIPSetupEncode";
+            const string module = "ZIPSetupEncode";
 
             if ((m_state & ZSTATE_INIT_DECODE) != 0)
             {
@@ -332,7 +332,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (deflateInit(&m_stream, m_zipquality) != Z_OK)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
                 return false;
             }
 

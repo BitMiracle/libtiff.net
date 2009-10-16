@@ -331,7 +331,7 @@ namespace BitMiracle.LibTiff.Internal
                     n = -n + 1;
                     if (occ < n)
                     {
-                        Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes ""to avoid buffer overrun", n - occ);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes ""to avoid buffer overrun", n - occ);
                         n = occ;
                     }
                     occ -= n;
@@ -349,7 +349,7 @@ namespace BitMiracle.LibTiff.Internal
                     /* copy next (n + 1) bytes literally */
                     if (occ < n + 1)
                     {
-                        Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes ""to avoid buffer overrun", n - occ + 1);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes ""to avoid buffer overrun", n - occ + 1);
                         n = occ - 1;
                     }
                     memcpy(&op[opPos], m_tif.m_rawdata + bp, ++n);
@@ -364,7 +364,7 @@ namespace BitMiracle.LibTiff.Internal
             m_tif.m_rawcc = cc;
             if (occ > 0)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: Not enough data for scanline %ld", m_tif.m_row);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: Not enough data for scanline %ld", m_tif.m_row);
                 return false;
             }
 

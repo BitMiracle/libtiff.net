@@ -3411,7 +3411,7 @@ namespace BitMiracle.LibTiff
                 TiffRGBAImage img = TiffRGBAImage.Create(this, stop, out emsg);
                 if (img != null)
                 {
-                    img.req_orientation = (ushort)orientation;
+                    img.req_orientation = orientation;
                     /* XXX verify rwidth and rheight against width and height */
                     ok = img.Get(raster, (rheight - img.height) * rwidth, rwidth, img.height);
                 }

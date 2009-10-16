@@ -232,7 +232,7 @@ namespace BitMiracle.LibTiff.Internal
             * and then re-decode the image.  Otherwise they'd need to close
             * and open the image to get the state reset.
             */
-            m_bitmap = Tiff::GetBitRevTable(m_tif.m_dir.td_fillorder != FILLORDER_LSB2MSB);
+            m_bitmap = Tiff.GetBitRevTable(m_tif.m_dir.td_fillorder != FILLORDER_LSB2MSB);
             if (m_refruns)
             {
                 /* init reference line to white */
@@ -353,8 +353,8 @@ namespace BitMiracle.LibTiff.Internal
         {
             if ((m_mode & FAXMODE_NORTC) == 0)
             {
-                unsigned int code = EOL_CODE;
-                unsigned int length = 12;
+                uint code = EOL_CODE;
+                uint length = 12;
                 if (is2DEncoding())
                 {
                     code = (code << 1) | (m_encoder == useFax1DEncoder);
@@ -371,11 +371,6 @@ namespace BitMiracle.LibTiff.Internal
         public override void tif_cleanup()
         {
             m_tif.m_tagmethods = m_tagMethods;
-
-            delete m_runs;
-            delete m_refline;
-            delete m_subaddress;
-            delete m_faxdcs;
         }
 
         private bool is2DEncoding()
@@ -569,7 +564,7 @@ namespace BitMiracle.LibTiff.Internal
                 }
             }
 
-            assert(x == lastx);
+            Debug.Assert(x == lastx);
         }
 
         /*
@@ -1016,7 +1011,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (m_tif.m_dir.td_bitspersample != 1)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Bits/sample must be 1 for Group 3/4 encoding/decoding");
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Bits/sample must be 1 for Group 3/4 encoding/decoding");
                 return false;
             }
 
@@ -1044,12 +1039,12 @@ namespace BitMiracle.LibTiff.Internal
              */
             bool needsRefLine = ((m_groupoptions & GROUP3OPT_2DENCODING) || m_tif.m_dir.td_compression == COMPRESSION_CCITTFAX4);
 
-            uint nruns = needsRefLine ? 2 * Tiff::roundUp(rowpixels, 32) : rowpixels;
+            uint nruns = needsRefLine ? 2 * Tiff.roundUp(rowpixels, 32) : rowpixels;
             nruns += 3;
             m_runs = new uint [2 * nruns];
-            if (m_runs == NULL)
+            if (m_runs == null)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_name, "No space for Group 3/4 run arrays");
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_name, "No space for Group 3/4 run arrays");
                 return false;
             }
 
@@ -1077,16 +1072,16 @@ namespace BitMiracle.LibTiff.Internal
                  * be initialized to be ``white'' (done elsewhere).
                  */
                 m_refline = new byte [rowbytes];
-                if (m_refline == NULL)
+                if (m_refline == null)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, "setupState", "%s: No space for Group 3/4 reference line", m_tif.m_name);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, "setupState", "%s: No space for Group 3/4 reference line", m_tif.m_name);
                     return false;
                 }
             }
             else
             {
                 /* 1d encoding */
-                m_refline = NULL;
+                m_refline = null;
             }
 
             return true;
@@ -1099,22 +1094,22 @@ namespace BitMiracle.LibTiff.Internal
         */
         private void Fax3Unexpected(string module)
         {
-            Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Bad code word at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Bad code word at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
         }
 
         private void Fax3Extension(string module)
         {
-            Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Uncompressed data (not supported) at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Uncompressed data (not supported) at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
         }
 
         private void Fax3BadLength(string module)
         {
-            Tiff::WarningExt(m_tif, m_tif.m_clientdata, module, "%s: %s at line %u of %s %u (got %u, expected %u)", m_tif.m_name, m_a0 < (int)m_rowpixels ? "Premature EOL" : "Line length mismatch", m_line, m_tif.IsTiled() ? "tile" : "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0, m_rowpixels);
+            Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "%s: %s at line %u of %s %u (got %u, expected %u)", m_tif.m_name, m_a0 < (int)m_rowpixels ? "Premature EOL" : "Line length mismatch", m_line, m_tif.IsTiled() ? "tile" : "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0, m_rowpixels);
         }
 
         private void Fax3PrematureEOF(string module)
         {
-            Tiff::WarningExt(m_tif, m_tif.m_clientdata, module, "%s: Premature EOF at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
+            Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "%s: Premature EOF at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
         }
 
         /*
@@ -1122,7 +1117,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool Fax3Decode1D(byte[] buf, int occ)
         {
-            static const char module[] = "Fax3Decode1D";
+            const string module = "Fax3Decode1D";
     
             /* current row's run array */
             m_thisrun = m_curruns;
@@ -1164,7 +1159,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool Fax3Decode2D(byte[] buf, int occ)
         {
-            static const char module[] = "Fax3Decode2D";
+            const string module = "Fax3Decode2D";
             uint startOffset = 0;
 
             while (occ > 0)
@@ -1404,19 +1399,19 @@ namespace BitMiracle.LibTiff.Internal
             
             m_groupoptions = 0;
             m_recvparams = 0;
-            m_subaddress = NULL;
-            m_faxdcs = NULL;
+            m_subaddress = null;
+            m_faxdcs = null;
 
             if (m_rw_mode == O_RDONLY)
             {
                 /* FIXME: improve for in place update */
-                m_tif.m_flags |= Tiff::TIFF_NOBITREV;
+                m_tif.m_flags |= Tiff.TIFF_NOBITREV;
                 /* decoder does bit reversal */
             }
 
-            m_runs = NULL;
+            m_runs = null;
             m_tif.SetField(TIFFTAG_FAXFILLFUNC, fax3FillRuns);
-            m_refline = NULL;
+            m_refline = null;
 
             /*
              * Install codec methods.
@@ -1458,7 +1453,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private void putBits(uint bits, uint length)
         {
-            while (length > (unsigned int)m_bit)
+            while (length > (uint)m_bit)
             {
                 m_data |= bits >> (length - m_bit);
                 length -= m_bit;
@@ -1487,7 +1482,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private void putspan(int span, bool useBlack)
         {
-            tableEntry* entries = NULL;
+            tableEntry* entries = null;
             if (useBlack)
                 entries = (tableEntry*)m_faxBlackCodes;
             else
@@ -1503,7 +1498,7 @@ namespace BitMiracle.LibTiff.Internal
             if (span >= 64)
             {
                 te = entries[63 + (span >> 6)];
-                assert(te.runlen == 64 * (span >> 6));
+                Debug.Assert(te.runlen == 64 * (span >> 6));
                 putBits(te.code, te.length);
                 span -= te.runlen;
             }
@@ -1538,8 +1533,8 @@ namespace BitMiracle.LibTiff.Internal
                 }
             }
 
-            unsigned int code = EOL_CODE;
-            unsigned int length = 12;
+            uint code = EOL_CODE;
+            uint length = 12;
             if (is2DEncoding())
             {
                 code = (code << 1) | (m_encoder == useFax1DEncoder);
@@ -2023,7 +2018,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool Fax3DecodeRLE(byte[] buf, int occ)
         {
-            static const char module[] = "Fax3DecodeRLE";
+            const string module = "Fax3DecodeRLE";
 
             int thisrun = m_curruns; /* current row's run array */
             uint startOffset = 0;
@@ -2095,7 +2090,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool Fax4Decode(byte[] buf, int occ)
         {
-            static const char module[] = "Fax4Decode";
+            const string module = "Fax4Decode";
             uint startOffset = 0;
 
             while (occ > 0)

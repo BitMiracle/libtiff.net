@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
 
 namespace BitMiracle.LibTiff.Internal
 {
@@ -48,13 +49,13 @@ namespace BitMiracle.LibTiff.Internal
             new TiffFieldInfo(TIFFTAG.TIFFTAG_PREDICTOR, 1, 1, TiffDataType.TIFF_SHORT, CodecWithPredictor.FIELD_PREDICTOR, false, false, "Predictor"), 
         };
 
-        private int predictor; /* predictor tag value */
+        private PREDICTOR predictor; /* predictor tag value */
         private int stride; /* sample stride over data */
         private int rowsize; /* tile/strip row size */
 
         private TiffTagMethods m_parentTagMethods;
         private TiffTagMethods m_tagMethods;
-        private TiffTagMethods m_childTagMethods; // could be NULL
+        private TiffTagMethods m_childTagMethods; // could be null
 
         private bool m_passThruDecode;
         private bool m_passThruEncode;
@@ -67,20 +68,20 @@ namespace BitMiracle.LibTiff.Internal
             m_tagMethods = new CodecWithPredictorTagMethods();
         }
 
-        // tagMethods can be NULL
+        // tagMethods can be null
         public void TIFFPredictorInit(TiffTagMethods tagMethods)
         {
             /*
             * Merge codec-specific tag information and
             * override parent get/set field methods.
             */
-            m_tif.MergeFieldInfo(predictFieldInfo, sizeof(predictFieldInfo) / sizeof(predictFieldInfo[0]));
+            m_tif.MergeFieldInfo(predictFieldInfo, predictFieldInfo.Length);
             m_childTagMethods = tagMethods;
             m_parentTagMethods = m_tif.m_tagmethods;
             m_tif.m_tagmethods = m_tagMethods;
 
-            predictor = 1; /* default value */
-            m_predictorType = ptNone; /* no predictor routine */
+            predictor = PREDICTOR.PREDICTOR_NONE; /* default value */
+            m_predictorType = PredictorType.ptNone; /* no predictor routine */
         }
 
         public void TIFFPredictorCleanup()
@@ -156,55 +157,55 @@ namespace BitMiracle.LibTiff.Internal
 
         public virtual bool predictor_setupdecode()
         {
-            return TiffCodec::tif_setupdecode();
+            return base.tif_setupdecode();
         }
 
         public virtual bool predictor_decoderow(byte[] pp, int cc, UInt16 s)
         {
-            return TiffCodec::tif_decoderow(pp, cc, s);
+            return base.tif_decoderow(pp, cc, s);
         }
 
         public virtual bool predictor_decodestrip(byte[] pp, int cc, UInt16 s)
         {
-            return TiffCodec::tif_decodestrip(pp, cc, s);
+            return base.tif_decodestrip(pp, cc, s);
         }
 
         public virtual bool predictor_decodetile(byte[] pp, int cc, UInt16 s)
         {
-            return TiffCodec::tif_decodetile(pp, cc, s);
+            return base.tif_decodetile(pp, cc, s);
         }
 
         public virtual bool predictor_setupencode()
         {
-            return TiffCodec::tif_setupencode();
+            return base.tif_setupencode();
         }
 
         public virtual bool predictor_encoderow(byte[] pp, int cc, UInt16 s)
         {
-            return TiffCodec::tif_encoderow(pp, cc, s);
+            return base.tif_encoderow(pp, cc, s);
         }
 
         public virtual bool predictor_encodestrip(byte[] pp, int cc, UInt16 s)
         {
-            return TiffCodec::tif_encodestrip(pp, cc, s);
+            return base.tif_encodestrip(pp, cc, s);
         }
 
         public virtual bool predictor_encodetile(byte[] pp, int cc, UInt16 s)
         {
-            return TiffCodec::tif_encodetile(pp, cc, s);
+            return base.tif_encodetile(pp, cc, s);
         }
 
-        public int GetPredictorValue()
+        public PREDICTOR GetPredictorValue()
         {
             return predictor;
         }
 
-        public void SetPredictorValue(int value)
+        public void SetPredictorValue(PREDICTOR value)
         {
             predictor = value;
         }
 
-        // retrieves child object's tag methods (could be NULL)
+        // retrieves child object's tag methods (could be null)
         public TiffTagMethods GetChildTagMethods()
         {
             return m_childTagMethods;
@@ -214,34 +215,34 @@ namespace BitMiracle.LibTiff.Internal
         {
             switch (m_predictorType)
             {
-                case ptHorAcc8:
+                case PredictorType.ptHorAcc8:
                     horAcc8(cp0, offset, cc);
                     break;
-                case ptHorAcc16:
+                case PredictorType.ptHorAcc16:
                     horAcc16(cp0, offset, cc);
                     break;
-                case ptHorAcc32:
+                case PredictorType.ptHorAcc32:
                     horAcc32(cp0, offset, cc);
                     break;
-                case ptSwabHorAcc16:
+                case PredictorType.ptSwabHorAcc16:
                     swabHorAcc16(cp0, offset, cc);
                     break;
-                case ptSwabHorAcc32:
+                case PredictorType.ptSwabHorAcc32:
                     swabHorAcc32(cp0, offset, cc);
                     break;
-                case ptHorDiff8:
+                case PredictorType.ptHorDiff8:
                     horDiff8(cp0, offset, cc);
                     break;
-                case ptHorDiff16:
+                case PredictorType.ptHorDiff16:
                     horDiff16(cp0, offset, cc);
                     break;
-                case ptHorDiff32:
+                case PredictorType.ptHorDiff32:
                     horDiff32(cp0, offset, cc);
                     break;
-                case ptFpAcc:
+                case PredictorType.ptFpAcc:
                     fpAcc(cp0, offset, cc);
                     break;
-                case ptFpDiff:
+                case PredictorType.ptFpDiff:
                     fpDiff(cp0, offset, cc);
                     break;
             }
@@ -258,9 +259,9 @@ namespace BitMiracle.LibTiff.Internal
                 */
                 if (stride == 3)
                 {
-                    unsigned int cr = cp0[cp];
-                    unsigned int cg = cp0[cp + 1];
-                    unsigned int cb = cp0[cp + 2];
+                    uint cr = cp0[cp];
+                    uint cg = cp0[cp + 1];
+                    uint cb = cp0[cp + 2];
                     do
                     {
                         cc -= 3;
@@ -279,10 +280,10 @@ namespace BitMiracle.LibTiff.Internal
                 }
                 else if (stride == 4)
                 {
-                    unsigned int cr = cp0[cp];
-                    unsigned int cg = cp0[cp + 1];
-                    unsigned int cb = cp0[cp + 2];
-                    unsigned int ca = cp0[cp + 3];
+                    uint cr = cp0[cp];
+                    uint cg = cp0[cp + 1];
+                    uint cb = cp0[cp + 2];
+                    uint ca = cp0[cp + 3];
                     do
                     {
                         cc -= 4;
@@ -310,7 +311,7 @@ namespace BitMiracle.LibTiff.Internal
                         {
                             for (int i = stride - 4; i > 0; i--)
                             {
-                                cp0[cp + stride] = cp0[cp + stride] + cp0[cp];
+                                cp0[cp + stride] = (byte)(cp0[cp + stride] + cp0[cp]);
                                 cp++;
                             }
                         }
@@ -318,7 +319,7 @@ namespace BitMiracle.LibTiff.Internal
                         {
                             for (int i = stride; i > 0; i--)
                             {
-                                cp0[cp + stride] = cp0[cp + stride] + cp0[cp];
+                                cp0[cp + stride] = (byte)(cp0[cp + stride] + cp0[cp]);
                                 cp++;
                             }
                         }
@@ -332,7 +333,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private void horAcc16(byte[] cp0, int offset, int cc)
         {
-            UInt16* wp = Tiff::byteArrayToUInt16(cp0, offset, cc);
+            ushort[] wp = Tiff.byteArrayToUInt16(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 2;
@@ -363,13 +364,12 @@ namespace BitMiracle.LibTiff.Internal
                 while ((int)wc > 0);
             }
 
-            Tiff::uint16ToByteArray(wp, 0, cc / 2, cp0, offset);
-            delete[] wp;
+            Tiff.uint16ToByteArray(wp, 0, cc / 2, cp0, offset);
         }
 
         private void horAcc32(byte[] cp0, int offset, int cc)
         {
-            uint* wp = Tiff::byteArrayToUInt(cp0, offset, cc);
+            uint[] wp = Tiff.byteArrayToUInt(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 4;
@@ -399,19 +399,18 @@ namespace BitMiracle.LibTiff.Internal
                 } while ((int) wc > 0);
             }
 
-            Tiff::uintToByteArray(wp, 0, cc / 4, cp0, offset);
-            delete[] wp;
+            Tiff.uintToByteArray(wp, 0, cc / 4, cp0, offset);
         }
 
         private void swabHorAcc16(byte[] cp0, int offset, int cc)
         {
-            UInt16* wp = Tiff::byteArrayToUInt16(cp0, offset, cc);
+            ushort[] wp = Tiff.byteArrayToUInt16(cp0, offset, cc);
             int wpPos= 0;
             
             int wc = cc / 2;
             if (wc > stride)
             {
-                Tiff::SwabArrayOfShort(wp, wc);
+                Tiff.SwabArrayOfShort(wp, wc);
                 wc -= stride;
                 do
                 {
@@ -437,19 +436,18 @@ namespace BitMiracle.LibTiff.Internal
                 while ((int)wc > 0);
             }
 
-            Tiff::uint16ToByteArray(wp, 0, cc / 2, cp0, offset);
-            delete[] wp;
+            Tiff.uint16ToByteArray(wp, 0, cc / 2, cp0, offset);
         }
         
         private void swabHorAcc32(byte[] cp0, int offset, int cc)
         {
-            uint* wp = Tiff::byteArrayToUInt(cp0, offset, cc);
+            int[] wp = Tiff.byteArrayToInt(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 4;
             if (wc > stride)
             {
-                m_tif.SwabArrayOfLong(wp, wc);
+                Tiff.SwabArrayOfLong(wp, wc);
                 wc -= stride;
                 do
                 {
@@ -471,11 +469,10 @@ namespace BitMiracle.LibTiff.Internal
                     }
 
                     wc -= stride;
-                } while ((int) wc > 0);
+                } while (wc > 0);
             }
 
-            Tiff::uintToByteArray(wp, 0, cc / 4, cp0, offset);
-            delete[] wp;
+            Tiff.intToByteArray(wp, 0, cc / 4, cp0, offset);
         }
 
         private void horDiff8(byte[] cp0, int offset, int cc)
@@ -568,7 +565,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private void horDiff16(byte[] cp0, int offset, int cc)
         {
-            Int16* wp = Tiff::byteArrayToInt16(cp0, offset, cc);
+            short[] wp = Tiff.byteArrayToInt16(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 2;
@@ -600,13 +597,12 @@ namespace BitMiracle.LibTiff.Internal
                 while ((int)wc > 0);
             }
 
-            Tiff::int16ToByteArray(wp, 0, cc / 2, cp0, offset);
-            delete[] wp;
+            Tiff.int16ToByteArray(wp, 0, cc / 2, cp0, offset);
         }
 
         private void horDiff32(byte[] cp0, int offset, int cc)
         {
-            int* wp = Tiff::byteArrayToInt(cp0, offset, cc);
+            int[] wp = Tiff.byteArrayToInt(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 4;
@@ -637,8 +633,7 @@ namespace BitMiracle.LibTiff.Internal
                 } while ((int) wc > 0);
             }
 
-            Tiff::intToByteArray(wp, 0, cc / 4, cp0, offset);
-            delete[] wp;
+            Tiff.intToByteArray(wp, 0, cc / 4, cp0, offset);
         }
         
         /*
@@ -646,10 +641,10 @@ namespace BitMiracle.LibTiff.Internal
         */
         private void fpAcc(byte[] cp0, int offset, int cc)
         {
-            uint bps = m_tif.m_dir.td_bitspersample / 8;
+            int bps = m_tif.m_dir.td_bitspersample / 8;
             int wc = cc / bps;
             byte[] tmp = new byte [cc];
-            if (!tmp)
+            if (tmp != null)
                 return ;
 
             int count = cc;
@@ -677,17 +672,15 @@ namespace BitMiracle.LibTiff.Internal
                 count -= stride;
             }
 
-            memcpy(tmp, cp0 + offset, cc);
+            Array.Copy(cp0, offset, tmp, 0, cc);
             for (count = 0; count < wc; count++)
             {
-                uint byte;
-                for (byte = 0; byte < bps; byte++)
+                uint b;
+                for (b = 0; b < bps; b++)
                 {
-                    cp0[offset + bps * count + byte] = tmp[(bps - byte - 1) * wc + count];
+                    cp0[offset + bps * count + b] = tmp[(bps - b - 1) * wc + count];
                 }
             }
-
-            delete tmp;
         }
 
         /*
@@ -696,23 +689,21 @@ namespace BitMiracle.LibTiff.Internal
         private void fpDiff(byte[] cp0, int offset, int cc)
         {
             byte[] tmp = new byte [cc];
-            if (!tmp)
+            if (tmp == null)
                 return ;
 
-            memcpy(tmp, cp0 + offset, cc);
+            Array.Copy(cp0, offset, tmp, 0, cc);
 
-            uint bps = m_tif.m_dir.td_bitspersample / 8;
+            int bps = m_tif.m_dir.td_bitspersample / 8;
             int wc = cc / bps;
             for (int count = 0; count < wc; count++)
             {
-                uint byte;
-                for (byte = 0; byte < bps; byte++)
+                uint b;
+                for (b = 0; b < bps; b++)
                 {
-                    cp0[offset + (bps - byte - 1) * wc + count] = tmp[bps * count + byte];
+                    cp0[offset + (bps - b - 1) * wc + count] = tmp[bps * count + b];
                 }
             }
-
-            delete tmp;
 
             int cp = offset + cc - stride - 1;
             for (int count = cc; count > stride; count -= stride)
@@ -741,7 +732,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool PredictorDecodeRow(byte[] op0, int occ0, UInt16 s)
         {
-            assert(m_predictorType != ptNone);
+            Debug.Assert(m_predictorType != PredictorType.ptNone);
 
             if (predictor_decoderow(op0, occ0, s))
             {
@@ -763,8 +754,8 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (predictor_decodetile(op0, occ0, s))
             {
-                assert(rowsize > 0);
-                assert(m_predictorType != ptNone);
+                Debug.Assert(rowsize > 0);
+                Debug.Assert(m_predictorType != PredictorType.ptNone);
 
                 int offset = 0;
                 while (occ0 > 0)
@@ -782,35 +773,35 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool PredictorEncodeRow(byte[] op0, int occ0, UInt16 s)
         {
-            assert(m_predictorType != ptNone);
+            Debug.Assert(m_predictorType != PredictorType.ptNone);
 
             /* XXX horizontal differencing alters user's data XXX */
-            predictorFunc(bp, 0, cc);
-            return predictor_encoderow(bp, cc, s);
+            predictorFunc(op0, 0, occ0);
+            return predictor_encoderow(op0, occ0, s);
         }
 
         private bool PredictorEncodeTile(byte[] op0, int occ0, UInt16 s)
         {
-            static const char module[] = "PredictorEncodeTile";
-            assert(m_predictorType != ptNone);
+            const string module = "PredictorEncodeTile";
+            Debug.Assert(m_predictorType != PredictorType.ptNone);
 
             /* 
             * Do predictor manipulation in a working buffer to avoid altering
             * the callers buffer. http://trac.osgeo.org/gdal/ticket/1965
             */
-            byte[] working_copy = new byte [cc0];
-            if (working_copy == NULL)
+            byte[] working_copy = new byte[occ0];
+            if (working_copy == null)
             {
-                Tiff::ErrorExt(m_tif.m_clientdata, module, "Out of memory allocating %d byte temp buffer.", cc0);
+                Tiff.ErrorExt(m_tif.m_clientdata, module, "Out of memory allocating %d byte temp buffer.", occ0);
                 return false;
             }
 
-            memcpy(working_copy, bp0, cc0);
+            Array.Copy(op0, working_copy, occ0);
 
-            assert(rowsize > 0);
-            assert((cc0 % rowsize) == 0);
+            Debug.Assert(rowsize > 0);
+            Debug.Assert((occ0 % rowsize) == 0);
 
-            int cc = cc0;
+            int cc = occ0;
             int offset = 0;
             while (cc > 0)
             {
@@ -819,8 +810,7 @@ namespace BitMiracle.LibTiff.Internal
                 offset += rowsize;
             }
 
-            bool result_code = predictor_encodetile(working_copy, cc0, s);
-            delete working_copy;
+            bool result_code = predictor_encodetile(working_copy, occ0, s);
             return result_code;
         }
 
@@ -829,26 +819,28 @@ namespace BitMiracle.LibTiff.Internal
             if (!predictor_setupdecode() || !PredictorSetup())
                 return false;
 
-            CodecWithPredictor::m_passThruDecode = true;
-            if (predictor == 2)
+            m_passThruDecode = true;
+            if (predictor == PREDICTOR.PREDICTOR_HORIZONTAL)
             {
                 switch (m_tif.m_dir.td_bitspersample)
                 {
-                case 8:
-                    m_predictorType = ptHorAcc8;
-                    break;
-                case 16:
-                    m_predictorType = ptHorAcc16;
-                    break;
-                case 32:
-                    m_predictorType = ptHorAcc32;
-                    break;
+                    case 8:
+                        m_predictorType = PredictorType.ptHorAcc8;
+                        break;
+                    case 16:
+                        m_predictorType = PredictorType.ptHorAcc16;
+                        break;
+                    case 32:
+                        m_predictorType = PredictorType.ptHorAcc32;
+                        break;
                 }
+
                 /*
                 * Override default decoding method with one that does the
                 * predictor stuff.
                 */
-                CodecWithPredictor::m_passThruDecode = false;
+                m_passThruDecode = false;
+                
                 /*
                 * If the data is horizontally differenced 16-bit data that
                 * requires byte-swapping, then it must be byte swapped before
@@ -856,37 +848,37 @@ namespace BitMiracle.LibTiff.Internal
                 * routine and override the normal post decoding logic that
                 * the library setup when the directory was read.
                 */
-                if ((m_tif.m_flags & Tiff::TIFF_SWAB) != 0)
+                if ((m_tif.m_flags & Tiff.TIFF_SWAB) != 0)
                 {
-                    if (m_predictorType == ptHorAcc16)
+                    if (m_predictorType == PredictorType.ptHorAcc16)
                     {
-                        m_predictorType = ptSwabHorAcc16;
-                        m_tif.m_postDecodeMethod = Tiff::pdmNone;
+                        m_predictorType = PredictorType.ptSwabHorAcc16;
+                        m_tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmNone;
                     }
-                    else if (m_predictorType == ptHorAcc32)
+                    else if (m_predictorType == PredictorType.ptHorAcc32)
                     {
-                        m_predictorType = ptSwabHorAcc32;
-                        m_tif.m_postDecodeMethod = Tiff::pdmNone;
+                        m_predictorType = PredictorType.ptSwabHorAcc32;
+                        m_tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmNone;
                     }
                 }
             }
-            else if (predictor == 3)
+            else if (predictor == PREDICTOR.PREDICTOR_FLOATINGPOINT)
             {
-                m_predictorType = ptFpAcc;
+                m_predictorType = PredictorType.ptFpAcc;
                 
                 /*
                 * Override default decoding method with one that does the
                 * predictor stuff.
                 */
-                CodecWithPredictor::m_passThruDecode = false;
+                m_passThruDecode = false;
                 
                 /*
                 * The data should not be swapped outside of the floating
                 * point predictor, the accumulation routine should return
                 * byres in the native order.
                 */
-                if ((m_tif.m_flags & Tiff::TIFF_SWAB) != 0)
-                    m_tif.m_postDecodeMethod = Tiff::pdmNone;
+                if ((m_tif.m_flags & Tiff.TIFF_SWAB) != 0)
+                    m_tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmNone;
 
                 /*
                 * Allocate buffer to keep the decoded bytes before
@@ -902,35 +894,37 @@ namespace BitMiracle.LibTiff.Internal
             if (!predictor_setupencode() || !PredictorSetup())
                 return false;
 
-            CodecWithPredictor::m_passThruEncode = true;
-            if (predictor == 2)
+            m_passThruEncode = true;
+            if (predictor == PREDICTOR.PREDICTOR_HORIZONTAL)
             {
                 switch (m_tif.m_dir.td_bitspersample)
                 {
-                case 8:
-                    m_predictorType = ptHorDiff8;
-                    break;
-                case 16:
-                    m_predictorType = ptHorDiff16;
-                    break;
-                case 32:
-                    m_predictorType = ptHorDiff32;
-                    break;
+                    case 8:
+                        m_predictorType = PredictorType.ptHorDiff8;
+                        break;
+                    case 16:
+                        m_predictorType = PredictorType.ptHorDiff16;
+                        break;
+                    case 32:
+                        m_predictorType = PredictorType.ptHorDiff32;
+                        break;
                 }
+
                 /*
                 * Override default encoding method with one that does the
                 * predictor stuff.
                 */
-                CodecWithPredictor::m_passThruEncode = false;
+                m_passThruEncode = false;
             }
-            else if (predictor == 3)
+            else if (predictor == PREDICTOR.PREDICTOR_FLOATINGPOINT)
             {
-                m_predictorType = ptFpDiff;
+                m_predictorType = PredictorType.ptFpDiff;
+
                 /*
                 * Override default encoding method with one that does the
                 * predictor stuff.
                 */
-                CodecWithPredictor::m_passThruEncode = false;
+                m_passThruEncode = false;
             }
 
             return true;
@@ -938,32 +932,34 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool PredictorSetup()
         {
-            static const char module[] = "PredictorSetup";
-            TiffDirectory* td = m_tif.m_dir;
+            const string module = "PredictorSetup";
+            TiffDirectory td = m_tif.m_dir;
 
             switch (predictor) /* no differencing */
             {
-            case PREDICTOR_NONE:
-                return true;
-            case PREDICTOR_HORIZONTAL:
-                if (td.td_bitspersample != 8 && td.td_bitspersample != 16 && td.td_bitspersample != 32)
-                {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "Horizontal differencing \"Predictor\" not supported with %d-bit samples", td.td_bitspersample);
+                case PREDICTOR.PREDICTOR_NONE:
+                    return true;
+                case PREDICTOR.PREDICTOR_HORIZONTAL:
+                    if (td.td_bitspersample != 8 && td.td_bitspersample != 16 && td.td_bitspersample != 32)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Horizontal differencing \"Predictor\" not supported with %d-bit samples", td.td_bitspersample);
+                        return false;
+                    }
+                    break;
+                case PREDICTOR.PREDICTOR_FLOATINGPOINT:
+                    if (td.td_sampleformat != SAMPLEFORMAT.SAMPLEFORMAT_IEEEFP)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Floating point \"Predictor\" not supported with %d data format", td.td_sampleformat);
+                        return false;
+                    }
+                    break;
+                default:
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "\"Predictor\" value %d not supported", predictor);
                     return false;
-                }
-                break;
-            case PREDICTOR_FLOATINGPOINT:
-                if (td.td_sampleformat != SAMPLEFORMAT_IEEEFP)
-                {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "Floating point \"Predictor\" not supported with %d data format", td.td_sampleformat);
-                    return false;
-                }
-                break;
-            default:
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "\"Predictor\" value %d not supported", predictor);
-                return false;
             }
-            stride = (td.td_planarconfig == PLANARCONFIG_CONTIG ? td.td_samplesperpixel : 1);
+
+            stride = (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG ? td.td_samplesperpixel : 1);
+            
             /*
             * Calculate the scanline/tile-width size in bytes.
             */

@@ -119,11 +119,11 @@ namespace BitMiracle.LibTiff.Internal
 
         public override bool Init()
         {
-            assert(m_scheme == COMPRESSION_LZW);
+            Debug.Assert(m_scheme == COMPRESSION_LZW);
 
-            m_dec_codetab = NULL;
+            m_dec_codetab = null;
             m_oldStyleCodeFound = false;
-            m_enc_hashtab = NULL;
+            m_enc_hashtab = null;
             m_rw_mode = m_tif.m_mode;
 
             /*
@@ -134,7 +134,7 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Setup predictor setup.
              */
-            TIFFPredictorInit(NULL);
+            TIFFPredictorInit(null);
             return true;
         }
 
@@ -221,13 +221,13 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool LZWSetupDecode()
         {
-            static const char module[] = " LZWSetupDecode";
-            if (m_dec_codetab == NULL)
+            const string module = " LZWSetupDecode";
+            if (m_dec_codetab == null)
             {
                 m_dec_codetab = new code_t [CSIZE];
-                if (m_dec_codetab == NULL)
+                if (m_dec_codetab == null)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "No space for LZW code table");
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "No space for LZW code table");
                     return false;
                 }
 
@@ -258,7 +258,7 @@ namespace BitMiracle.LibTiff.Internal
          */
         private bool LZWPreDecode(UInt16 s)
         {
-            if (m_dec_codetab == NULL)
+            if (m_dec_codetab == null)
                 tif_setupdecode();
 
             /*
@@ -268,7 +268,7 @@ namespace BitMiracle.LibTiff.Internal
             {
                 if (!m_oldStyleCodeFound)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Old-style LZW codes, convert file");
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Old-style LZW codes, convert file");
                     m_compatDecode = true;
 
                     /*
@@ -311,7 +311,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool LZWDecode(byte[] op0, int occ0, UInt16 s)
         {
-            assert(m_dec_codetab != NULL);
+            Debug.Assert(m_dec_codetab != null);
 
             int occ = occ0;
             int op = 0;
@@ -393,7 +393,7 @@ namespace BitMiracle.LibTiff.Internal
                     
                     if (code == CODE_CLEAR)
                     {
-                        Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
                         return false;
                     }
 
@@ -411,14 +411,14 @@ namespace BitMiracle.LibTiff.Internal
                  */
                 if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
                     return false;
                 }
 
                 m_dec_codetab[m_dec_free_entp].next = m_dec_oldcodep;
                 if (m_dec_codetab[m_dec_free_entp].next < 0 || m_dec_codetab[m_dec_free_entp].next >= CSIZE)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
                     return false;
                 }
 
@@ -447,7 +447,7 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_dec_codetab[codep].length == 0)
                     {
-                        Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Wrong length of decoded string: ""data probably corrupted at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Wrong length of decoded string: ""data probably corrupted at scanline %d", m_tif.m_row);
                         return false;
                     }
 
@@ -514,7 +514,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (occ > 0)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Not enough data at scanline %d (short %ld bytes)", m_tif.m_row, occ);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Not enough data at scanline %d (short %ld bytes)", m_tif.m_row, occ);
                 return false;
             }
 
@@ -601,7 +601,7 @@ namespace BitMiracle.LibTiff.Internal
 
                     if (code == CODE_CLEAR)
                     {
-                        Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
                         return false;
                     }
 
@@ -619,14 +619,14 @@ namespace BitMiracle.LibTiff.Internal
                  */
                 if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Corrupted LZW table at scanline %d", m_tif.m_row);
                     return false;
                 }
 
                 m_dec_codetab[m_dec_free_entp].next = m_dec_oldcodep;
                 if (m_dec_codetab[m_dec_free_entp].next < 0 || m_dec_codetab[m_dec_free_entp].next >= CSIZE)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Corrupted LZW table at scanline %d", m_tif.m_row);
                     return false;
                 }
 
@@ -655,7 +655,7 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_dec_codetab[codep].length == 0)
                     {
-                        Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Wrong length of decoded ""string: data probably corrupted at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Wrong length of decoded ""string: data probably corrupted at scanline %d", m_tif.m_row);
                         return false;
                     }
 
@@ -708,7 +708,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (occ > 0)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Not enough data at scanline %d (short %ld bytes)", m_tif.m_row, occ);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Not enough data at scanline %d (short %ld bytes)", m_tif.m_row, occ);
                 return false;
             }
 
@@ -717,12 +717,12 @@ namespace BitMiracle.LibTiff.Internal
         
         private bool LZWSetupEncode()
         {
-            static const char module[] = "LZWSetupEncode";
+            const string module = "LZWSetupEncode";
 
             m_enc_hashtab = new hash_t [HSIZE];
-            if (m_enc_hashtab == NULL)
+            if (m_enc_hashtab == null)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, module, "No space for LZW hash table");
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "No space for LZW hash table");
                 return false;
             }
 
@@ -734,7 +734,7 @@ namespace BitMiracle.LibTiff.Internal
          */
         private bool LZWPreEncode(UInt16 s)
         {
-            if (m_enc_hashtab == NULL)
+            if (m_enc_hashtab == null)
                 tif_setupencode();
 
             m_nbits = BITS_MIN;
@@ -804,7 +804,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private bool LZWEncode(byte[] bp, int cc, UInt16 s)
         {
-            assert(m_enc_hashtab != NULL);
+            Debug.Assert(m_enc_hashtab != null);
             int bpPos = 0;
             if (m_enc_oldcode == (hcode_t)-1 && cc > 0)
             {
@@ -911,7 +911,7 @@ namespace BitMiracle.LibTiff.Internal
                         if (m_free_ent > m_maxcode)
                         {
                             m_nbits++;
-                            assert(m_nbits <= BITS_MAX);
+                            Debug.Assert(m_nbits <= BITS_MAX);
                             m_maxcode = (unsigned short)MAXCODE(m_nbits);
                         }
                         else if (m_enc_incount >= m_enc_checkpoint)
@@ -957,11 +957,8 @@ namespace BitMiracle.LibTiff.Internal
 
         private void LZWCleanup()
         {
-            delete m_dec_codetab;
-            m_dec_codetab = NULL;
-
-            delete m_enc_hashtab;
-            m_enc_hashtab = NULL;
+            m_dec_codetab = null;
+            m_enc_hashtab = null;
         }
 
         private static int MAXCODE(int n)
@@ -1019,7 +1016,7 @@ namespace BitMiracle.LibTiff.Internal
             {
                 if (m_dec_bitsleft < m_nbits)
                 {
-                    Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Strip %d not terminated with EOI code", m_tif.m_curstrip);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Strip %d not terminated with EOI code", m_tif.m_curstrip);
                     _code = CODE_EOI;
                 }
                 else
@@ -1058,12 +1055,12 @@ namespace BitMiracle.LibTiff.Internal
 
         private void GetNextCodeCompat(out UInt16 code)
         {
-            m_nextdata |= (unsigned int)m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
+            m_nextdata |= (uint)m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
             m_tif.m_rawcp++;
             m_nextbits += 8;
             if (m_nextbits < m_nbits)
             {
-                m_nextdata |= (unsigned int)m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
+                m_nextdata |= (uint)m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
                 m_tif.m_rawcp++;
                 m_nextbits += 8;
             }
@@ -1074,7 +1071,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private void codeLoop()
         {
-            Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Bogus encoding, loop in the code table; scanline %d", m_tif.m_row);
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Bogus encoding, loop in the code table; scanline %d", m_tif.m_row);
         }
     }
 }

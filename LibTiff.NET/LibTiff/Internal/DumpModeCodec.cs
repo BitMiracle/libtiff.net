@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 namespace BitMiracle.LibTiff.Internal
 {
@@ -83,7 +84,7 @@ namespace BitMiracle.LibTiff.Internal
                 if (m_tif.m_rawcc + n > m_tif.m_rawdatasize)
                     n = m_tif.m_rawdatasize - m_tif.m_rawcc;
 
-                assert(n > 0);
+                Debug.Assert(n > 0);
 
                 memcpy(m_tif.m_rawdata + m_tif.m_rawcp, pp + ppPos, n);
                 m_tif.m_rawcp += n;
@@ -105,7 +106,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (m_tif.m_rawcc < cc)
             {
-                Tiff::ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "DumpModeDecode: Not enough data for scanline %d", m_tif.m_row);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "DumpModeDecode: Not enough data for scanline %d", m_tif.m_row);
                 return false;
             }
 
