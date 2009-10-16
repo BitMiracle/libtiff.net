@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 using hcode_t = System.UInt16; /* codes fit in 16 bits */
 
@@ -39,7 +40,7 @@ namespace BitMiracle.LibTiff.Internal
         * check for end-of-strip w/o seeing this code.  This makes the
         * library more robust, but also slower.
         */
-        private const bool LZW_CHECKEOS = true; /* include checks for strips w/o EOI code */
+        private bool LZW_CHECKEOS = true; /* include checks for strips w/o EOI code */
 
         /*
         * The TIFF spec specifies that encoded bit
@@ -67,10 +68,10 @@ namespace BitMiracle.LibTiff.Internal
         */
         private struct code_t
         {
-            int next;
-            ushort length; /* string len, including this token */
-            byte value; /* data value */
-            byte firstchar; /* first token of string */
+            public int next;
+            public ushort length; /* string len, including this token */
+            public byte value; /* data value */
+            public byte firstchar; /* first token of string */
         };
 
         /*
@@ -78,8 +79,8 @@ namespace BitMiracle.LibTiff.Internal
         */
         private struct hash_t
         {
-            int hash;
-            hcode_t code;
+            public int hash;
+            public hcode_t code;
         };
 
         private bool m_compatDecode;
@@ -119,7 +120,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override bool Init()
         {
-            Debug.Assert(m_scheme == COMPRESSION_LZW);
+            Debug.Assert(m_scheme == COMPRESSION.COMPRESSION_LZW);
 
             m_dec_codetab = null;
             m_oldStyleCodeFound = false;
@@ -165,7 +166,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override void tif_cleanup()
         {
-            return LZWCleanup();
+            LZWCleanup();
         }
 
         // CodecWithPredictor overrides
@@ -242,12 +243,12 @@ namespace BitMiracle.LibTiff.Internal
                     m_dec_codetab[code].length = 1;
                     m_dec_codetab[code].next = -1;
                 }
-                while (code--);
+                while (code-- != 0);
 
                 /*
                 * Zero-out the unused entries
                 */
-                memset(&m_dec_codetab[CODE_CLEAR], 0, (CODE_FIRST - CODE_CLEAR) * sizeof(code_t));
+                Array.Clear(m_dec_codetab, CODE_CLEAR, CODE_FIRST - CODE_CLEAR);
             }
 
             return true;
@@ -303,7 +304,7 @@ namespace BitMiracle.LibTiff.Internal
              * come up with a way to safely bounds-check input codes
              * while decoding then you can remove this operation.
              */
-            memset(&m_dec_codetab[m_dec_free_entp], 0, (CSIZE - CODE_FIRST) * sizeof(code_t));
+            Array.Clear(m_dec_codetab, m_dec_free_entp, CSIZE - CODE_FIRST);
             m_dec_oldcodep = -1;
             m_dec_maxcodep = m_dec_nbitsmask - 1;
             return true;
@@ -347,7 +348,7 @@ namespace BitMiracle.LibTiff.Internal
                             op0[op + tp] = m_dec_codetab[codep].value;
                             codep = m_dec_codetab[codep].next;
                         }
-                        while (--occ && codep != -1);
+                        while (--occ != 0 && codep != -1);
                     }
 
                     return true;
@@ -358,15 +359,15 @@ namespace BitMiracle.LibTiff.Internal
                  */
                 op += residue;
                 occ -= residue;
-                int tp = 0;
+                int ttp = 0;
                 do
                 {
-                    --tp;
+                    --ttp;
                     int t = m_dec_codetab[codep].value;
                     codep = m_dec_codetab[codep].next;
-                    op0[op + tp] = (byte)t;
+                    op0[op + ttp] = (byte)t;
                 }
-                while (--residue && codep != -1);
+                while (--residue != 0 && codep != -1);
 
                 m_dec_restart = 0;
             }
@@ -374,19 +375,19 @@ namespace BitMiracle.LibTiff.Internal
             while (occ > 0)
             {
                 hcode_t code;
-                NextCode(code, false);
+                NextCode(out code, false);
                 if (code == CODE_EOI)
                     break;
 
                 if (code == CODE_CLEAR)
                 {
                     m_dec_free_entp = CODE_FIRST;
-                    memset(&m_dec_codetab[m_dec_free_entp], 0, (CSIZE - CODE_FIRST) * sizeof(code_t));
+                    Array.Clear(m_dec_codetab, m_dec_free_entp, CSIZE - CODE_FIRST);
 
                     m_nbits = BITS_MIN;
                     m_dec_nbitsmask = CODE_MIN;
                     m_dec_maxcodep = m_dec_nbitsmask - 1;
-                    NextCode(code, false);
+                    NextCode(out code, false);
                     
                     if (code == CODE_EOI)
                         break;
@@ -423,7 +424,7 @@ namespace BitMiracle.LibTiff.Internal
                 }
 
                 m_dec_codetab[m_dec_free_entp].firstchar = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].firstchar;
-                m_dec_codetab[m_dec_free_entp].length = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1;
+                m_dec_codetab[m_dec_free_entp].length = (ushort)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
                 m_dec_codetab[m_dec_free_entp].value = (codep < m_dec_free_entp) ? m_dec_codetab[codep].firstchar : m_dec_codetab[m_dec_free_entp].firstchar;
 
                 if (++m_dec_free_entp > m_dec_maxcodep)
@@ -447,7 +448,7 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_dec_codetab[codep].length == 0)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Wrong length of decoded string: ""data probably corrupted at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Wrong length of decoded string: data probably corrupted at scanline %d", m_tif.m_row);
                         return false;
                     }
 
@@ -476,7 +477,7 @@ namespace BitMiracle.LibTiff.Internal
                                 op0[op + tp] = m_dec_codetab[codep].value;
                                 codep = m_dec_codetab[codep].next;
                             }
-                            while (--occ && codep != -1);
+                            while (--occ != 0 && codep != -1);
 
                             if (codep != -1)
                                 codeLoop();
@@ -485,15 +486,15 @@ namespace BitMiracle.LibTiff.Internal
                     }
 
                     int len = m_dec_codetab[codep].length;
-                    int tp = len;
+                    int ttp = len;
                     do
                     {
-                        --tp;
+                        --ttp;
                         int t = m_dec_codetab[codep].value;
                         codep = m_dec_codetab[codep].next;
-                        op0[op + tp] = (char)t;
+                        op0[op + ttp] = (byte)t;
                     }
-                    while (codep != -1 && tp > 0);
+                    while (codep != -1 && ttp > 0);
 
                     if (codep != -1)
                     {
@@ -529,7 +530,7 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Restart interrupted output operation.
              */
-            if (m_dec_restart)
+            if (m_dec_restart != 0)
             {
                 int residue;
 
@@ -557,7 +558,7 @@ namespace BitMiracle.LibTiff.Internal
                         op0[op + tp] = m_dec_codetab[codep].value;
                         codep = m_dec_codetab[codep].next;
                     }
-                    while (--occ);
+                    while (--occ != 0);
 
                     return true;
                 }
@@ -567,14 +568,14 @@ namespace BitMiracle.LibTiff.Internal
                  */
                 op += residue;
                 occ -= residue;
-                int tp = 0;
+                int ttp = 0;
                 do
                 {
-                    --tp;
-                    op0[op + tp] = m_dec_codetab[codep].value;
+                    --ttp;
+                    op0[op + ttp] = m_dec_codetab[codep].value;
                     codep = m_dec_codetab[codep].next;
                 }
-                while (--residue);
+                while (--residue != 0);
 
                 m_dec_restart = 0;
             }
@@ -582,19 +583,19 @@ namespace BitMiracle.LibTiff.Internal
             while (occ > 0)
             {
                 UInt16 code;
-                NextCode(code, true);
+                NextCode(out code, true);
                 if (code == CODE_EOI)
                     break;
                 
                 if (code == CODE_CLEAR)
                 {
                     m_dec_free_entp = CODE_FIRST;
-                    memset(&m_dec_codetab[m_dec_free_entp], 0, (CSIZE - CODE_FIRST) * sizeof(code_t));
+                    Array.Clear(m_dec_codetab, m_dec_free_entp, CSIZE - CODE_FIRST);
 
                     m_nbits = BITS_MIN;
                     m_dec_nbitsmask = CODE_MIN;
                     m_dec_maxcodep = m_dec_nbitsmask;
-                    NextCode(code, true);
+                    NextCode(out code, true);
                     
                     if (code == CODE_EOI)
                         break;
@@ -631,7 +632,7 @@ namespace BitMiracle.LibTiff.Internal
                 }
 
                 m_dec_codetab[m_dec_free_entp].firstchar = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].firstchar;
-                m_dec_codetab[m_dec_free_entp].length = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1;
+                m_dec_codetab[m_dec_free_entp].length = (ushort)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
                 m_dec_codetab[m_dec_free_entp].value = (codep < m_dec_free_entp) ? m_dec_codetab[codep].firstchar : m_dec_codetab[m_dec_free_entp].firstchar;
                 if (++m_dec_free_entp > m_dec_maxcodep)
                 {
@@ -640,7 +641,7 @@ namespace BitMiracle.LibTiff.Internal
                         /* should not happen */
                         m_nbits = BITS_MAX;
                     }
-                    m_dec_nbitsmask = LZWCodec::MAXCODE(m_nbits);
+                    m_dec_nbitsmask = MAXCODE(m_nbits);
                     m_dec_maxcodep = m_dec_nbitsmask;
                 }
 
@@ -655,7 +656,7 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_dec_codetab[codep].length == 0)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Wrong length of decoded ""string: data probably corrupted at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Wrong length of decoded string: data probably corrupted at scanline %d", m_tif.m_row);
                         return false;
                     }
 
@@ -682,25 +683,25 @@ namespace BitMiracle.LibTiff.Internal
                             op0[op + tp] = m_dec_codetab[codep].value;
                             codep = m_dec_codetab[codep].next;
                         }
-                        while (--occ);
+                        while (--occ != 0);
 
                         break;
                     }
 
                     op += m_dec_codetab[codep].length;
                     occ -= m_dec_codetab[codep].length;
-                    int tp = op;
+                    int ttp = op;
                     do
                     {
-                        --tp;
-                        op0[tp] = m_dec_codetab[codep].value;
+                        --ttp;
+                        op0[ttp] = m_dec_codetab[codep].value;
                         codep = m_dec_codetab[codep].next;
                     }
-                    while (codep != -1 && tp > op_orig);
+                    while (codep != -1 && ttp > op_orig);
                 }
                 else
                 {
-                    op0[op] = (char)code;
+                    op0[op] = (byte)code;
                     op++;
                     occ--;
                 }
@@ -753,7 +754,7 @@ namespace BitMiracle.LibTiff.Internal
              */
             m_enc_rawlimit = m_tif.m_rawdatasize - 1 - 4;
             cl_hash(); /* clear hash table */
-            m_enc_oldcode = (hcode_t) - 1; /* generates CODE_CLEAR in LZWEncode */
+            m_enc_oldcode = -1; /* generates CODE_CLEAR in LZWEncode */
             return true;
         }
 
@@ -770,10 +771,10 @@ namespace BitMiracle.LibTiff.Internal
                 m_tif.m_rawcp = 0;
             }
 
-            if (m_enc_oldcode != (hcode_t) - 1)
+            if (m_enc_oldcode != -1)
             {
                 PutNextCode(m_enc_oldcode);
-                m_enc_oldcode = (hcode_t) - 1;
+                m_enc_oldcode = -1;
             }
 
             PutNextCode(CODE_EOI);
@@ -806,7 +807,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             Debug.Assert(m_enc_hashtab != null);
             int bpPos = 0;
-            if (m_enc_oldcode == (hcode_t)-1 && cc > 0)
+            if (m_enc_oldcode == -1 && cc > 0)
             {
                 /*
                  * NB: This is safe because it can only happen
@@ -912,7 +913,7 @@ namespace BitMiracle.LibTiff.Internal
                         {
                             m_nbits++;
                             Debug.Assert(m_nbits <= BITS_MAX);
-                            m_maxcode = (unsigned short)MAXCODE(m_nbits);
+                            m_maxcode = (ushort)MAXCODE(m_nbits);
                         }
                         else if (m_enc_incount >= m_enc_checkpoint)
                         {
@@ -1022,9 +1023,9 @@ namespace BitMiracle.LibTiff.Internal
                 else
                 {
                     if (compat)
-                        GetNextCodeCompat(_code);
+                        GetNextCodeCompat(out _code);
                     else
-                        GetNextCode(_code);
+                        GetNextCode(out _code);
 
                     m_dec_bitsleft -= m_nbits;
                 }
@@ -1032,9 +1033,9 @@ namespace BitMiracle.LibTiff.Internal
             else
             {
                 if (compat)
-                    GetNextCodeCompat(_code);
+                    GetNextCodeCompat(out _code);
                 else
-                    GetNextCode(_code);
+                    GetNextCode(out _code);
             }
         }
 
@@ -1055,12 +1056,12 @@ namespace BitMiracle.LibTiff.Internal
 
         private void GetNextCodeCompat(out UInt16 code)
         {
-            m_nextdata |= (uint)m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
+            m_nextdata |= m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
             m_tif.m_rawcp++;
             m_nextbits += 8;
             if (m_nextbits < m_nbits)
             {
-                m_nextdata |= (uint)m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
+                m_nextdata |= m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
                 m_tif.m_rawcp++;
                 m_nextbits += 8;
             }

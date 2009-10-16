@@ -11,27 +11,29 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
-    /// Huffman coding tables.
+    /// DCT coefficient quantization tables.
     /// </summary>
-    class JHUFF_TBL
+    public class JQUANT_TBL
     {
-        /* These two fields directly represent the contents of a JPEG DHT marker */
-        public byte[] bits = new byte[17];     /* bits[k] = # of symbols with codes of */
-        /* length k bits; bits[0] is unused */
-        public byte[] huffval = new byte[256];     /* The symbols, in order of incr code length */
+        public JQUANT_TBL()
+        {
+            sent_table = false;
+        }
+
+        /* This array gives the coefficient quantizers in natural array order
+         * (not the zigzag order in which they are stored in a JPEG DQT marker).
+         * CAUTION: IJG versions prior to v6a kept this array in zigzag order.
+         */
+        public short[] quantval = new short[JpegConstants.DCTSIZE2];  /* quantization step for each coefficient */
+
         /* This field is used only during compression.  It's initialized false when
          * the table is created, and set true when it's been output to the file.
          * You could suppress output of a table by setting this to true.
          * (See jpeg_suppress_tables for an example.)
          */
         public bool sent_table;        /* true when table has been output */
-
-        public JHUFF_TBL()
-        {
-            sent_table = false;
-        }
     }
 }

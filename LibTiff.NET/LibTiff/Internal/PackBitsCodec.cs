@@ -23,7 +23,7 @@ namespace BitMiracle.LibTiff.Internal
         private int m_rowsize;
 
         public PackBitsCodec(Tiff tif, COMPRESSION scheme, string name)
-            : base(tif, m_scheme, name)
+            : base(tif, scheme, name)
         {
         }
 
@@ -95,7 +95,7 @@ namespace BitMiracle.LibTiff.Internal
         private bool PackBitsEncode(byte[] buf, int offset, int cc, UInt16 s)
         {
             int op = m_tif.m_rawcp;
-            EncodingState state = BASE;
+            EncodingState state = EncodingState.BASE;
             int lastliteral = 0;
             int bp = offset;
             while (cc > 0)
@@ -122,7 +122,7 @@ namespace BitMiracle.LibTiff.Internal
                          * and then copy the remainder to the
                          * front of the buffer.
                          */
-                        if (state == LITERAL || state == LITERAL_RUN)
+                        if (state == EncodingState.LITERAL || state == EncodingState.LITERAL_RUN)
                         {
                             int slop = op - lastliteral;
                             m_tif.m_rawcc += lastliteral - m_tif.m_rawcp;
@@ -149,20 +149,20 @@ namespace BitMiracle.LibTiff.Internal
 
                     switch (state)
                     {
-                        case BASE:
+                        case EncodingState.BASE:
                             /* initial state, set run/literal */
                             if (n > 1)
                             {
-                                state = RUN;
+                                state = EncodingState.RUN;
                                 if (n > 128)
                                 {
-                                    m_tif.m_rawdata[op] = (byte)-127;
+                                    int temp = -127;
+                                    m_tif.m_rawdata[op] = (byte)temp;
                                     op++;
                                     m_tif.m_rawdata[op] = (byte)b;
                                     op++;
                                     n -= 128;
                                     continue;
-                                    break;
                                 }
 
                                 m_tif.m_rawdata[op] = (byte)(-n + 1);
@@ -177,25 +177,25 @@ namespace BitMiracle.LibTiff.Internal
                                 op++;
                                 m_tif.m_rawdata[op] = (byte)b;
                                 op++;
-                                state = LITERAL;
+                                state = EncodingState.LITERAL;
                             }
                             stop = true;
                             break;
 
-                        case LITERAL:
+                        case EncodingState.LITERAL:
                             /* last object was literal string */
                             if (n > 1)
                             {
-                                state = LITERAL_RUN;
+                                state = EncodingState.LITERAL_RUN;
                                 if (n > 128)
                                 {
-                                    m_tif.m_rawdata[op] = (byte)-127;
+                                    int temp = -127;
+                                    m_tif.m_rawdata[op] = (byte)temp;
                                     op++;
                                     m_tif.m_rawdata[op] = (byte)b;
                                     op++;
                                     n -= 128;
                                     continue;
-                                    break;
                                 }
 
                                 m_tif.m_rawdata[op] = (byte)(-n + 1); /* encode run */
@@ -208,7 +208,7 @@ namespace BitMiracle.LibTiff.Internal
                                 /* extend literal */
                                 m_tif.m_rawdata[lastliteral]++;
                                 if (m_tif.m_rawdata[lastliteral] == 127)
-                                    state = BASE;
+                                    state = EncodingState.BASE;
 
                                 m_tif.m_rawdata[op] = (byte)b;
                                 op++;
@@ -216,19 +216,19 @@ namespace BitMiracle.LibTiff.Internal
                             stop = true;
                             break;
 
-                        case RUN:
+                        case EncodingState.RUN:
                             /* last object was run */
                             if (n > 1)
                             {
                                 if (n > 128)
                                 {
-                                    m_tif.m_rawdata[op] = (byte)-127;
+                                    int temp = -127;
+                                    m_tif.m_rawdata[op] = (byte)temp;
                                     op++;
                                     m_tif.m_rawdata[op] = (byte)b;
                                     op++;
                                     n -= 128;
                                     continue;
-                                    break;
                                 }
 
                                 m_tif.m_rawdata[op] = (byte)(-n + 1);
@@ -243,12 +243,12 @@ namespace BitMiracle.LibTiff.Internal
                                 op++;
                                 m_tif.m_rawdata[op] = (byte)b;
                                 op++;
-                                state = LITERAL;
+                                state = EncodingState.LITERAL;
                             }
                             stop = true;
                             break;
 
-                        case LITERAL_RUN:
+                        case EncodingState.LITERAL_RUN:
                             /* literal followed by a run */
                             /*
                              * Check to see if previous run should
@@ -256,16 +256,16 @@ namespace BitMiracle.LibTiff.Internal
                              * case we convert literal-run-literal
                              * to a single literal.
                              */
-                            if (n == 1 && m_tif.m_rawdata[op - 2] == (byte)-1 && m_tif.m_rawdata[lastliteral] < 126)
+                            int atemp = -1;
+                            if (n == 1 && m_tif.m_rawdata[op - 2] == (byte)atemp && m_tif.m_rawdata[lastliteral] < 126)
                             {
                                 m_tif.m_rawdata[lastliteral] += 2;
-                                state = (m_tif.m_rawdata[lastliteral] == 127 ? BASE : LITERAL);
+                                state = (m_tif.m_rawdata[lastliteral] == 127 ? EncodingState.BASE : EncodingState.LITERAL);
                                 m_tif.m_rawdata[op - 2] = m_tif.m_rawdata[op - 1]; /* replicate */
                             }
                             else
-                                state = RUN;
+                                state = EncodingState.RUN;
                             continue;
-                            break;
                     }
                 }
             }
@@ -331,7 +331,7 @@ namespace BitMiracle.LibTiff.Internal
                     n = -n + 1;
                     if (occ < n)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes ""to avoid buffer overrun", n - occ);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes to avoid buffer overrun", n - occ);
                         n = occ;
                     }
                     occ -= n;
@@ -349,10 +349,11 @@ namespace BitMiracle.LibTiff.Internal
                     /* copy next (n + 1) bytes literally */
                     if (occ < n + 1)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes ""to avoid buffer overrun", n - occ + 1);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "PackBitsDecode: discarding %ld bytes to avoid buffer overrun", n - occ + 1);
                         n = occ - 1;
                     }
-                    memcpy(&op[opPos], m_tif.m_rawdata + bp, ++n);
+
+                    Array.Copy(m_tif.m_rawdata, bp, op, opPos, ++n);
                     opPos += n;
                     occ -= n;
                     bp += n;

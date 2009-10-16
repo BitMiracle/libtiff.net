@@ -69,7 +69,7 @@ namespace BitMiracle.LibJpeg.Classic
         
         // Progress monitor, or null if none
         internal jpeg_progress_mgr m_progress;
-        internal bool m_is_decompressor;   /* So common code can tell which is which */
+        public bool m_is_decompressor;   /* So common code can tell which is which */
         
         internal JpegState m_global_state;     /* For checking call sequence validity */
 

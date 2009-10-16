@@ -11,12 +11,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+using BitMiracle.LibJpeg.Classic.Internal;
+
+namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Basic info about one component (color channel).
     /// </summary>
-    struct jpeg_component_info
+    public struct jpeg_component_info
     {
         /* These values are fixed over the whole image. */
         /* For compression, they must be supplied by parameter setup; */
@@ -40,7 +42,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
          * Any dummy blocks added to complete an MCU are not counted; therefore
          * these values do not depend on whether a scan is interleaved or not.
          */
-        internal int width_in_blocks;
+        public int width_in_blocks;
         internal int height_in_blocks;
         /* Size of a DCT block in samples.  Always DCTSIZE for compression.
          * For decompression this is the size of the output from one DCT block,
@@ -56,6 +58,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
          * downsampled_width = ceil(image_width * Hi/Hmax * DCT_scaled_size/DCTSIZE)
          */
         internal int downsampled_width;    /* actual width in samples */
+	
         internal int downsampled_height; /* actual height in samples */
         /* This flag is used only for decompression.  In cases where some of the
          * components will be ignored (eg grayscale output from YCbCr image),
@@ -101,5 +104,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             last_row_height = ci.last_row_height;
             quant_table = ci.quant_table;
         }
+
+        public int Downsampled_width
+	    {
+		    get { return downsampled_width; }
+		    //set { downsampled_width = value; }
+	    }
     }
 }

@@ -49,7 +49,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override bool Init()
         {
-            Debug.Assert((m_scheme == COMPRESSION_DEFLATE) || (m_scheme == COMPRESSION_ADOBE_DEFLATE));
+            Debug.Assert((m_scheme == COMPRESSION.COMPRESSION_DEFLATE) || (m_scheme == COMPRESSION.COMPRESSION_ADOBE_DEFLATE));
 
             /*
             * Merge codec-specific tag information and

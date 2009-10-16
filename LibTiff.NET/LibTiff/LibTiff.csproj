@@ -45,6 +45,12 @@
     <Compile Include="Internal\DumpModeCodec.cs" />
     <Compile Include="Internal\Field.cs" />
     <Compile Include="Internal\JpegCodec.cs" />
+    <Compile Include="Internal\JpegCodecTagMethods.cs" />
+    <Compile Include="Internal\JpegErrorManager.cs" />
+    <Compile Include="Internal\JpegStdDestination.cs" />
+    <Compile Include="Internal\JpegStdSource.cs" />
+    <Compile Include="Internal\JpegTablesDestination.cs" />
+    <Compile Include="Internal\JpegTablesSource.cs" />
     <Compile Include="Internal\LZWCodec.cs" />
     <Compile Include="Internal\PackBitsCodec.cs" />
     <Compile Include="Internal\TiffDirectory.cs" />
@@ -78,6 +84,12 @@
     <Compile Include="TiffStream.cs" />
     <Compile Include="TiffTagMethods.cs" />
     <Compile Include="TiffYCbCrToRGB.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LibJpeg.NET\LibJpeg\LibJpeg.csproj">
+      <Project>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</Project>
+      <Name>LibJpeg</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -186,16 +186,16 @@ namespace BitMiracle.LibTiff.Internal
         {
             switch (m_scheme)
             {
-                case COMPRESSION_CCITTRLE:
+                case COMPRESSION.COMPRESSION_CCITTRLE:
                     return TIFFInitCCITTRLE();
                     break;
-                case COMPRESSION_CCITTRLEW:
+                case COMPRESSION.COMPRESSION_CCITTRLEW:
                     return TIFFInitCCITTRLEW();
                     break;
-                case COMPRESSION_CCITTFAX3:
+                case COMPRESSION.COMPRESSION_CCITTFAX3:
                     return TIFFInitCCITTFax3();
                     break;
-                case COMPRESSION_CCITTFAX4:
+                case COMPRESSION.COMPRESSION_CCITTFAX4:
                     return TIFFInitCCITTFax4();
                     break;
             }
@@ -1037,7 +1037,7 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Allocate any additional space required for decoding/encoding.
              */
-            bool needsRefLine = ((m_groupoptions & GROUP3OPT_2DENCODING) || m_tif.m_dir.td_compression == COMPRESSION_CCITTFAX4);
+            bool needsRefLine = ((m_groupoptions & GROUP3OPT_2DENCODING) || m_tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX4);
 
             uint nruns = needsRefLine ? 2 * Tiff.roundUp(rowpixels, 32) : rowpixels;
             nruns += 3;
@@ -1055,7 +1055,7 @@ namespace BitMiracle.LibTiff.Internal
             else
                 m_refruns = -1;
             
-            if (m_tif.m_dir.td_compression == COMPRESSION_CCITTFAX3 && is2DEncoding())
+            if (m_tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX3 && is2DEncoding())
             {
                 /* NB: default is 1D routine */
                 m_decoder = useFax3_2DDecoder;

@@ -94,8 +94,8 @@ namespace BitMiracle.LibJpeg.Classic
          */
 
         internal int m_data_precision;     /* bits of precision in image data */
-
-        internal jpeg_component_info[] m_comp_info;
+	
+        public jpeg_component_info[] m_comp_info;
         /* comp_info[i] describes component that appears i'th in SOF */
 
         internal bool m_progressive_mode;  /* true if SOFn specifies progressive mode */
@@ -130,7 +130,7 @@ namespace BitMiracle.LibJpeg.Classic
          */
         internal int m_max_h_samp_factor;  /* largest h_samp_factor */
         internal int m_max_v_samp_factor;  /* largest v_samp_factor */
-
+	
         internal int m_min_DCT_scaled_size;    /* smallest DCT_scaled_size of any component */
 
         internal int m_total_iMCU_rows; /* # of iMCU rows in image */
@@ -220,6 +220,7 @@ namespace BitMiracle.LibJpeg.Classic
         public LibJpeg.Classic.J_COLOR_SPACE Jpeg_color_space
         {
             get { return m_jpeg_color_space; }
+            set { m_jpeg_color_space = value; }
         }
 
         /* Aside from the specific data retained from APPn markers known to the
@@ -490,6 +491,18 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get { return m_Y_density; }
         }
+
+        public int Data_precision
+	    {
+		    get { return m_data_precision; }
+		    //set { m_data_precision = value; }
+	    }
+
+        public int Max_v_samp_factor
+	    {
+		    get { return m_max_v_samp_factor; }
+		    //set { m_max_v_samp_factor = value; }
+	    }
 
         // It is either zero or the code of a JPEG marker that has been
         // read from the data source, but has not yet been processed.

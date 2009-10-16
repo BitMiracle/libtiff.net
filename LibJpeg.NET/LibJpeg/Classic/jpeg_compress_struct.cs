@@ -108,15 +108,15 @@ namespace BitMiracle.LibJpeg.Classic
         internal J_COLOR_SPACE m_jpeg_color_space; /* colorspace of JPEG image */
 
         /* comp_info[i] describes component that appears i'th in SOF */
-        internal jpeg_component_info[] m_comp_info;
+        public jpeg_component_info[] m_comp_info;
 
         /* ptrs to coefficient quantization tables, or null if not defined */
         internal JQUANT_TBL[] m_quant_tbl_ptrs = new JQUANT_TBL[JpegConstants.NUM_QUANT_TBLS];
-
+	
         /* ptrs to Huffman coding tables, or null if not defined */
         internal JHUFF_TBL[] m_dc_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
         internal JHUFF_TBL[] m_ac_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
-
+	
         /* The default value of scan_info is null, which causes a single-scan
          * sequential JPEG file to be emitted.  To create a multi-scan file,
          * set num_scans and scan_info to point to an array of scan definitions.
@@ -156,7 +156,7 @@ namespace BitMiracle.LibJpeg.Classic
         internal bool m_progressive_mode;  /* true if scan script uses progressive mode */
         internal int m_max_h_samp_factor;  /* largest h_samp_factor */
         internal int m_max_v_samp_factor;  /* largest v_samp_factor */
-
+        
         internal int m_total_iMCU_rows; /* # of iMCU rows to be input to coef ctlr */
         /* The coefficient controller receives data in units of MCU rows as defined
          * for fully interleaved scans (whether the JPEG file is interleaved or not).
@@ -379,6 +379,32 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_write_Adobe_marker; }
             set { m_write_Adobe_marker = value; }
         }
+
+        public int Max_v_samp_factor
+        {
+            get { return m_max_v_samp_factor; }
+            //set { m_max_v_samp_factor = value; }
+        }
+
+        /* ptrs to coefficient quantization tables, or null if not defined */
+        public JQUANT_TBL[] Quant_tbl_ptrs
+        {
+            get { return m_quant_tbl_ptrs; }
+            //set { m_quant_tbl_ptrs = value; }
+        }
+
+        /* ptrs to Huffman coding tables, or null if not defined */
+	    public JHUFF_TBL[] Dc_huff_tbl_ptrs
+	    {
+		    get { return m_dc_huff_tbl_ptrs; }
+		    //set { m_dc_huff_tbl_ptrs = value; }
+	    }
+
+        public JHUFF_TBL[] Ac_huff_tbl_ptrs
+	    {
+		    get { return m_ac_huff_tbl_ptrs; }
+		    //set { m_ac_huff_tbl_ptrs = value; }
+	    }
 
         /* State variable: index of next scanline to be written to
          * jpeg_write_scanlines().  Application may use this to control its
