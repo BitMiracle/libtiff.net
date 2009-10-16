@@ -2010,7 +2010,7 @@ namespace BitMiracle.LibTiff
                 do
                 {
                     uint dr, dg, db;
-                    img.ycbcr.YCbCrtoRGB(rgba[rPos], rgba[gPos], rgba[bPos], dr, dg, db);
+                    img.ycbcr.YCbCrtoRGB(rgba[rPos], rgba[gPos], rgba[bPos], out dr, out dg, out db);
 
                     cp[cpPos] = PACK(dr, dg, db);
                     cpPos++;
@@ -2323,10 +2323,10 @@ namespace BitMiracle.LibTiff
                 for (x = w; x-- > 0; )
                 {
                     float X, Y, Z;
-                    img.cielab.CIELabToXYZ(pp[ppPos], pp[ppPos + 1], pp[ppPos + 2], X, Y, Z);
+                    img.cielab.CIELabToXYZ(pp[ppPos], pp[ppPos + 1], pp[ppPos + 2], out X, out Y, out Z);
 
                     uint r, g, b;
-                    img.cielab.XYZToRGB(X, Y, Z, r, g, b);
+                    img.cielab.XYZToRGB(X, Y, Z, out r, out g, out b);
 
                     cp[cpPos] = PACK(r, g, b);
                     cpPos++;
@@ -2904,7 +2904,7 @@ namespace BitMiracle.LibTiff
         private void YCbCrtoRGB(out uint dst, uint Y, int Cb, int Cr)
         {
             uint r, g, b;
-            ycbcr.YCbCrtoRGB(Y, Cb, Cr, r, g, b);
+            ycbcr.YCbCrtoRGB(Y, Cb, Cr, out r, out g, out b);
             dst = PACK(r, g, b);
         }
     }

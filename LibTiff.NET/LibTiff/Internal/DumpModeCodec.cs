@@ -86,7 +86,7 @@ namespace BitMiracle.LibTiff.Internal
 
                 Debug.Assert(n > 0);
 
-                memcpy(m_tif.m_rawdata + m_tif.m_rawcp, pp + ppPos, n);
+                Array.Copy(pp, ppPos, m_tif.m_rawdata, m_tif.m_rawcp, n);
                 m_tif.m_rawcp += n;
                 m_tif.m_rawcc += n;
 
@@ -110,7 +110,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
             }
 
-            memcpy(buf, m_tif.m_rawdata + m_tif.m_rawcp, cc);
+            Array.Copy(m_tif.m_rawdata, m_tif.m_rawcp, buf, 0, cc);
             m_tif.m_rawcp += cc;
             m_tif.m_rawcc -= cc;
             return true;
