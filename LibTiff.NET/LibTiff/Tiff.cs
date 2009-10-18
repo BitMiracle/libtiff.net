@@ -4537,5 +4537,12 @@ namespace BitMiracle.LibTiff
         {
             return (reversed ? TIFFBitRevTable : TIFFNoBitRevTable);
         }
+
+        public static void fprintf(Stream fd, string format, params object[] list)
+        {
+            string s = string.Format(format, list);
+            byte[] bytes = Encoding.ASCII.GetBytes(s);
+            fd.Write(bytes, 0, bytes.Length);
+        }
     }
 }
