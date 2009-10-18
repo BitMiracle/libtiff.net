@@ -2527,9 +2527,9 @@ namespace BitMiracle.LibTiff
         * Set the n-th directory as the current directory.
         * NB: Directories are numbered starting at 0.
         */
-        public bool SetDirectory(ushort dirn)
+        public bool SetDirectory(short dirn)
         {
-            ushort n;
+            short n;
             int dummyOff;
             int nextdir = m_header.tiff_diroff;
             for (n = dirn; n > 0 && nextdir != 0; n--)

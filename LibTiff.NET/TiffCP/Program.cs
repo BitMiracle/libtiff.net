@@ -51,6 +51,10 @@ namespace BitMiracle.TiffCP
             public TiffDataType type;
         };
 
+        delegate bool readFunc(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp);
+        delegate bool writeFunc(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp);
+
+
         static int g_outtiled = -1;
         static int g_tilewidth;
         static int g_tilelength;
@@ -58,8 +62,8 @@ namespace BitMiracle.TiffCP
         static COMPRESSION g_compression;
         static short g_predictor;
         static FILLORDER g_fillorder;
-        static UInt16 g_orientation;
-        static uint g_rowsperstrip;
+        static ORIENTATION g_orientation;
+        static int g_rowsperstrip;
         static GROUP3OPT g_g3opts;
         static bool g_ignore = false; /* if true, ignore read errors */
         static GROUP3OPT g_defg3opts = (GROUP3OPT)(-1);
@@ -121,7 +125,7 @@ namespace BitMiracle.TiffCP
             null
         };
 
-        tagToCopy[] g_tags = 
+        static tagToCopy[] g_tags = 
         {
             new tagToCopy(TIFFTAG.TIFFTAG_SUBFILETYPE, 1, TiffDataType.TIFF_LONG), 
             new tagToCopy(TIFFTAG.TIFFTAG_THRESHHOLDING, 1, TiffDataType.TIFF_SHORT), 
@@ -168,7 +172,7 @@ namespace BitMiracle.TiffCP
             int deftilelength = -1;
             int diroff = 0;
             PLANARCONFIG defconfig = (PLANARCONFIG)(-1);
-            uint defrowsperstrip = 0;
+            int defrowsperstrip = 0;
             int deftilewidth = -1;
 
             Stream stderr = Console.OpenStandardError();
@@ -261,7 +265,7 @@ namespace BitMiracle.TiffCP
                         break;
                     case 'r':
                         /* rows/strip */
-                        defrowsperstrip = uint.Parse(optarg, CultureInfo.InvariantCulture);
+                        defrowsperstrip = int.Parse(optarg, CultureInfo.InvariantCulture);
                         break;
                     case 's':
                         /* generate stripped output */
@@ -400,7 +404,7 @@ namespace BitMiracle.TiffCP
         /*
         seek to the next image specified in imageSpec
         returns 1 if success, 0 if no more images to process
-        imageSpec=NULL if subsequent images should be processed in sequence
+        imageSpec=null if subsequent images should be processed in sequence
         */
         static bool nextSrcImage(Tiff tif, ref string imageSpec)
         {
@@ -419,7 +423,7 @@ namespace BitMiracle.TiffCP
             //        {
             //            /* a trailing comma denotes remaining images in sequence */
             //            if (imageSpec[1] == '\0')
-            //                imageSpec = NULL;
+            //                imageSpec = null;
             //        }
             //        else
             //        {
@@ -521,87 +525,158 @@ namespace BitMiracle.TiffCP
             }
         }
 
+        static void CopyTag(Tiff inImage, Tiff outImage, TIFFTAG tag, short count, TiffDataType type)
+        {
+            object[] result = null;
+            switch (type)
+            {
+                case TiffDataType.TIFF_SHORT:
+                    result = inImage.GetField(tag);
+                    if (result != null)
+                    {
+                        if (count == 1)
+                            outImage.SetField(tag, result[0]);
+                        else if (count == 2)
+                            outImage.SetField(tag, result[0], result[1]);
+                        else if (count == 4)
+                            outImage.SetField(tag, result[0], result[1], result[2], result[3]);
+                        else if (count == -1)
+                            outImage.SetField(tag, result[0], result[1]);
+                    }
+                    break;
+                case TiffDataType.TIFF_LONG:
+                    result = inImage.GetField(tag);
+                    if (result != null)
+                        outImage.SetField(tag, result[0]);
+                    break;
+                case TiffDataType.TIFF_RATIONAL:
+                    result = inImage.GetField(tag);
+                    if (result != null)
+                        outImage.SetField(tag, result[0]);
+                    break;
+                case TiffDataType.TIFF_ASCII:
+                    result = inImage.GetField(tag);
+                    if (result != null)
+                        outImage.SetField(tag, result[0]);
+                    break;
+                case TiffDataType.TIFF_DOUBLE:
+                    result = inImage.GetField(tag);
+                    if (result != null)
+                        outImage.SetField(tag, result[0]);
+                    break;
+                default:
+                    Tiff.Error(inImage.FileName(), "Data type %d is not supported, tag %d skipped.", tag, type);
+                    break;
+            }
+        }
+
         static bool tiffcp(Tiff inImage, Tiff outImage)
         {
-            uint width;
-            if (inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, &width))
+            int width = 0;
+            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+            if (result != null)
+            {
+                width = (int)result[0];
                 outImage.SetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, width);
+            }
 
-            uint length;
-            if (inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH, &length))
+            int length = 0;
+            result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+            if (result != null)
+            {
+                length = (int)result[0];
                 outImage.SetField(TIFFTAG.TIFFTAG_IMAGELENGTH, length);
+            }
 
-            UInt16 bitspersample;
-            if (inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, &bitspersample))
+            ushort bitspersample = 1;
+            result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            if (result != null)
+            {
+                bitspersample = (ushort)result[0];
                 outImage.SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, bitspersample);
+            }
 
-            UInt16 samplesperpixel;
-            if (inImage.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel))
+            ushort samplesperpixel = 1;
+            result = inImage.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+            if (result != null)
+            {
+                samplesperpixel = (ushort)result[0];
                 outImage.SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, samplesperpixel);
+            }
             
-            if (g_compression != (UInt16)-1)
+            if (g_compression != (COMPRESSION)(-1))
                 outImage.SetField(TIFFTAG.TIFFTAG_COMPRESSION, g_compression);
             else
             {
-                if (inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION, &g_compression))
+                result = inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+                if (result != null)
+                {
+                    g_compression = (COMPRESSION)result[0];
                     outImage.SetField(TIFFTAG.TIFFTAG_COMPRESSION, g_compression);
+                }
             }
 
-            if (g_compression == COMPRESSION_JPEG)
+            if (g_compression == COMPRESSION.COMPRESSION_JPEG)
             {
-                UInt16 input_compression;
-                if (inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION, &input_compression) && input_compression == COMPRESSION_JPEG)
-                    inImage.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
-                
-                UInt16 input_photometric;
-                if (inImage.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, &input_photometric))
+                result = inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+                if (result != null)
                 {
-                    if (input_photometric == PHOTOMETRIC_RGB)
+                    COMPRESSION input_compression = (COMPRESSION)result[0];
+                    if (input_compression == COMPRESSION.COMPRESSION_JPEG)
+                        inImage.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RGB);
+                }
+
+                result = inImage.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+                if (result != null)
+                {
+                    PHOTOMETRIC input_photometric = (PHOTOMETRIC)result[0];
+                    if (input_photometric == PHOTOMETRIC.PHOTOMETRIC_RGB)
                     {
-                        if (g_jpegcolormode == JPEGCOLORMODE_RGB)
-                            outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_YCBCR);
+                        if (g_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
+                            outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_YCBCR);
                         else
-                            outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+                            outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_RGB);
                     }
                     else
                         outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, input_photometric);
                 }
             }
-            else if (g_compression == COMPRESSION_SGILOG || g_compression == COMPRESSION_SGILOG24)
-                outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, samplesperpixel == 1 ? PHOTOMETRIC_LOGL: PHOTOMETRIC_LOGLUV);
+            else if (g_compression == COMPRESSION.COMPRESSION_SGILOG || g_compression == COMPRESSION.COMPRESSION_SGILOG24)
+                outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, samplesperpixel == 1 ? PHOTOMETRIC.PHOTOMETRIC_LOGL: PHOTOMETRIC.PHOTOMETRIC_LOGLUV);
             else
-                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_PHOTOMETRIC, 1, TIFF_SHORT);
+                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_PHOTOMETRIC, 1, TiffDataType.TIFF_SHORT);
 
             if (g_fillorder != 0)
                 outImage.SetField(TIFFTAG.TIFFTAG_FILLORDER, g_fillorder);
             else
-                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FILLORDER, 1, TIFF_SHORT);
+                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FILLORDER, 1, TiffDataType.TIFF_SHORT);
 
             /*
              * Will copy `Orientation' tag from input image
              */
-            inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION, &g_orientation);
+            result = inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION);
+            g_orientation = (ORIENTATION)result[0];
             switch (g_orientation)
             {
-                case ORIENTATION_BOTRIGHT:
-                case ORIENTATION_RIGHTBOT:
+                case ORIENTATION.ORIENTATION_BOTRIGHT:
+                case ORIENTATION.ORIENTATION_RIGHTBOT:
                     Tiff.Warning(inImage.FileName(), "using bottom-left orientation");
-                    g_orientation = ORIENTATION_BOTLEFT;
+                    g_orientation = ORIENTATION.ORIENTATION_BOTLEFT;
                     break;
 
-                case ORIENTATION_LEFTBOT:
-                case ORIENTATION_BOTLEFT:
+                case ORIENTATION.ORIENTATION_LEFTBOT:
+                case ORIENTATION.ORIENTATION_BOTLEFT:
                     break;
 
-                case ORIENTATION_TOPRIGHT:
-                case ORIENTATION_RIGHTTOP:
+                case ORIENTATION.ORIENTATION_TOPRIGHT:
+                case ORIENTATION.ORIENTATION_RIGHTTOP:
                 default:
                     Tiff.Warning(inImage.FileName(), "using top-left orientation");
-                    g_orientation = ORIENTATION_TOPLEFT;
+                    g_orientation = ORIENTATION.ORIENTATION_TOPLEFT;
                     break;
 
-                case ORIENTATION_LEFTTOP:
-                case ORIENTATION_TOPLEFT:
+                case ORIENTATION.ORIENTATION_LEFTTOP:
+                case ORIENTATION.ORIENTATION_TOPLEFT:
                     break;
             }
 
@@ -613,7 +688,12 @@ namespace BitMiracle.TiffCP
              * structure of the input image.
              */
             if (g_outtiled == -1)
-                g_outtiled = inImage.IsTiled();
+            {
+                if (inImage.IsTiled())
+                    g_outtiled = 1;
+                else
+                    g_outtiled = 0;
+            }
 
             if (g_outtiled != 0)
             {
@@ -623,13 +703,19 @@ namespace BitMiracle.TiffCP
                  * input image or, if nothing is defined, use the
                  * library default.
                  */
-                if (g_tilewidth == (uint)-1)
-                    inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH, &g_tilewidth);
+                if (g_tilewidth == -1)
+                {
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                    g_tilewidth = (int)result[0];
+                }
 
-                if (g_tilelength == (uint)-1)
-                    inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH, &g_tilelength);
+                if (g_tilelength == -1)
+                {
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                    g_tilelength = (int)result[0];
+                }
                 
-                outImage.DefaultTileSize(g_tilewidth, g_tilelength);
+                outImage.DefaultTileSize(ref g_tilewidth, ref g_tilelength);
                 outImage.SetField(TIFFTAG.TIFFTAG_TILEWIDTH, g_tilewidth);
                 outImage.SetField(TIFFTAG.TIFFTAG_TILELENGTH, g_tilelength);
             }
@@ -642,110 +728,125 @@ namespace BitMiracle.TiffCP
                  */
                 if (g_rowsperstrip == 0)
                 {
-                    if (!inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, &g_rowsperstrip))
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+                    if (result == null)
                         g_rowsperstrip = outImage.DefaultStripSize(g_rowsperstrip);
+                    else
+                        g_rowsperstrip = (int)result[0];
 
-                    if (g_rowsperstrip > length && g_rowsperstrip != (uint)-1)
+                    if (g_rowsperstrip > length && g_rowsperstrip != -1)
                         g_rowsperstrip = length;
                 }
-                else if (g_rowsperstrip == (uint)-1)
+                else if (g_rowsperstrip == -1)
                     g_rowsperstrip = length;
 
                 outImage.SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, g_rowsperstrip);
             }
 
-            if (g_config != (UInt16)-1)
+            if (g_config != (PLANARCONFIG)(-1))
                 outImage.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, g_config);
             else
             {
-                if (inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG, &g_config))
+                result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+                if (result != null)
+                {
+                    g_config = (PLANARCONFIG)result[0];
                     outImage.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, g_config);
+                }
             }
 
             if (samplesperpixel <= 4)
-                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_TRANSFERFUNCTION, 4, TIFF_SHORT);
+                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_TRANSFERFUNCTION, 4, TiffDataType.TIFF_SHORT);
 
-            CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_COLORMAP, 4, TIFF_SHORT);
+            CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_COLORMAP, 4, TiffDataType.TIFF_SHORT);
             
             /* SMinSampleValue & SMaxSampleValue */
             switch (g_compression)
             {
-                case COMPRESSION_JPEG:
+                case COMPRESSION.COMPRESSION_JPEG:
                     outImage.SetField(TIFFTAG.TIFFTAG_JPEGQUALITY, g_quality);
                     outImage.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, g_jpegcolormode);
                     break;
-                case COMPRESSION_LZW:
-                case COMPRESSION_ADOBE_DEFLATE:
-                case COMPRESSION_DEFLATE:
-                    if (g_predictor != (UInt16)-1)
+                case COMPRESSION.COMPRESSION_LZW:
+                case COMPRESSION.COMPRESSION_ADOBE_DEFLATE:
+                case COMPRESSION.COMPRESSION_DEFLATE:
+                    if (g_predictor != -1)
                         outImage.SetField(TIFFTAG.TIFFTAG_PREDICTOR, g_predictor);
                     else
                     {
-                        if (inImage.GetField(TIFFTAG.TIFFTAG_PREDICTOR, &g_predictor))
+                        result = inImage.GetField(TIFFTAG.TIFFTAG_PREDICTOR);
+                        if (result != null)
+                        {
+                            g_predictor = (short)result[0];
                             outImage.SetField(TIFFTAG.TIFFTAG_PREDICTOR, g_predictor);
+                        }
                     }
                     break;
-                case COMPRESSION_CCITTFAX3:
-                case COMPRESSION_CCITTFAX4:
-                    if (g_compression == COMPRESSION_CCITTFAX3)
+                case COMPRESSION.COMPRESSION_CCITTFAX3:
+                case COMPRESSION.COMPRESSION_CCITTFAX4:
+                    if (g_compression == COMPRESSION.COMPRESSION_CCITTFAX3)
                     {
-                        if (g_g3opts != (uint)-1)
+                        if (g_g3opts != (GROUP3OPT)(-1))
                             outImage.SetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS, g_g3opts);
                         else
                         {
-                            if (inImage.GetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS, &g_g3opts))
+                            result = inImage.GetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS);
+                            if (result != null)
+                            {
+                                g_g3opts = (GROUP3OPT)result[0];
                                 outImage.SetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS, g_g3opts);
+                            }
                         }
                     }
                     else
-                        CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_GROUP4OPTIONS, 1, TIFF_LONG);
+                        CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_GROUP4OPTIONS, 1, TiffDataType.TIFF_LONG);
 
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_BADFAXLINES, 1, TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_CLEANFAXDATA, 1, TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES, 1, TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXRECVPARAMS, 1, TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXRECVTIME, 1, TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXSUBADDRESS, 1, TIFF_ASCII);
+                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_BADFAXLINES, 1, TiffDataType.TIFF_LONG);
+                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_CLEANFAXDATA, 1, TiffDataType.TIFF_LONG);
+                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES, 1, TiffDataType.TIFF_LONG);
+                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXRECVPARAMS, 1, TiffDataType.TIFF_LONG);
+                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXRECVTIME, 1, TiffDataType.TIFF_LONG);
+                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXSUBADDRESS, 1, TiffDataType.TIFF_ASCII);
                     break;
             }
 
-            uint len32;
-            void** data;
-            if (inImage.GetField(TIFFTAG.TIFFTAG_ICCPROFILE, &len32, &data))
-                outImage.SetField(TIFFTAG.TIFFTAG_ICCPROFILE, len32, data);
+            result = inImage.GetField(TIFFTAG.TIFFTAG_ICCPROFILE);
+            if (result != null)
+                outImage.SetField(TIFFTAG.TIFFTAG_ICCPROFILE, result[0], result[1]);
 
-            UInt16 ninks;
-            if (inImage.GetField(TIFFTAG.TIFFTAG_NUMBEROFINKS, &ninks))
+            result = inImage.GetField(TIFFTAG.TIFFTAG_NUMBEROFINKS);
+            if (result != null)
             {
+                ushort ninks = (ushort)result[0];
                 outImage.SetField(TIFFTAG.TIFFTAG_NUMBEROFINKS, ninks);
 
-                string inknames;
-                if (inImage.GetField(TIFFTAG.TIFFTAG_INKNAMES, &inknames))
+                result = inImage.GetField(TIFFTAG.TIFFTAG_INKNAMES);
+                if (result != null)
                 {
-                    int inknameslen = strlen(inknames) + 1;
-                    const char* cp = inknames;
-                    while (ninks > 1)
-                    {
-                        cp = strchr(cp, '\0');
-                        if (cp != NULL)
-                        {
-                            cp++;
-                            inknameslen += (strlen(cp) + 1);
-                        }
-                        ninks--;
-                    }
-                    outImage.SetField(TIFFTAG.TIFFTAG_INKNAMES, inknameslen, inknames);
+                    //string inknames = result[0] as string;
+                    //int inknameslen = strlen(inknames) + 1;
+                    //const char* cp = inknames;
+                    //while (ninks > 1)
+                    //{
+                    //    cp = strchr(cp, '\0');
+                    //    if (cp != null)
+                    //    {
+                    //        cp++;
+                    //        inknameslen += (strlen(cp) + 1);
+                    //    }
+                    //    ninks--;
+                    //}
+                    //outImage.SetField(TIFFTAG.TIFFTAG_INKNAMES, inknameslen, inknames);
                 }
             }
 
-            ushort pg0;
-            ushort pg1;
-            if (inImage.GetField(TIFFTAG.TIFFTAG_PAGENUMBER, &pg0, &pg1))
+            result = inImage.GetField(TIFFTAG.TIFFTAG_PAGENUMBER);
+            if (result != null)
             {
                 if (g_pageNum < 0)
                 {
                     /* only one input file */
-                    outImage.SetField(TIFFTAG.TIFFTAG_PAGENUMBER, pg0, pg1);
+                    outImage.SetField(TIFFTAG.TIFFTAG_PAGENUMBER, result[0], result[1]);
                 }
                 else
                     outImage.SetField(TIFFTAG.TIFFTAG_PAGENUMBER, g_pageNum++, 0);
@@ -761,5 +862,692 @@ namespace BitMiracle.TiffCP
             return pickFuncAndCopy(inImage, outImage, bitspersample, samplesperpixel, length, width);
         }
 
+        /*
+         * Select the appropriate copy function to use.
+         */
+        static bool pickFuncAndCopy(Tiff inImage, Tiff outImage, ushort bitspersample, ushort samplesperpixel, int length, int width)
+        {
+            Stream stderr = Console.OpenStandardError();
+
+            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+            PLANARCONFIG shortv = (PLANARCONFIG)result[0];
+
+            if (shortv != g_config && bitspersample != 8 && samplesperpixel > 1)
+            {
+                Tiff.fprintf(stderr, "%s: Cannot handle different planar configuration w/ bits/sample != 8\n", inImage.FileName());
+                return false;
+            }
+
+            result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+            uint w = (uint)result[0];
+
+            result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+            uint l = (uint)result[0];
+
+            bool bychunk;
+            if (!(outImage.IsTiled() || inImage.IsTiled()))
+            {
+                result = inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+                int irps = (int)result[0];
+
+                /* if biased, force decoded copying to allow image subtraction */
+                bychunk = (g_bias == null) && (g_rowsperstrip == irps);
+            }
+            else
+            {
+                /* either inImage or outImage is tiled */
+                if (g_bias != null)
+                {
+                    Tiff.fprintf(stderr, "%s: Cannot handle tiled configuration w/bias image\n", inImage.FileName());
+                    return false;
+                }
+
+                if (outImage.IsTiled())
+                {
+                    uint tw;
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                    if (result == null)
+                        tw = w;
+                    else
+                        tw = (uint)result[0];
+
+                    uint tl;
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                    if (result == null)
+                        tl = l;
+                    else
+                        tl = (uint)result[0];
+
+                    bychunk = (tw == g_tilewidth && tl == g_tilelength);
+                }
+                else
+                {
+                    /* outImage's not, so inImage must be tiled */
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                    uint tw = (uint)result[0];
+
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                    uint tl = (uint)result[0];
+
+                    bychunk = (tw == w && tl == g_rowsperstrip);
+                }
+            }
+
+            if (inImage.IsTiled())
+            {
+                if (outImage.IsTiled())
+                {
+                    /* Tiles -> Tiles */
+                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        return cpContigTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpContigTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        return cpSeparateTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpSeparateTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                }
+                else
+                {
+                    /* Tiles -> Strips */
+                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        return cpContigTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpContigTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        return cpSeparateTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpSeparateTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
+                }
+            }
+            else
+            {
+                if (outImage.IsTiled())
+                {
+                    /* Strips -> Tiles */
+                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        return cpContigStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);    
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpContigStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        return cpSeparateStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpSeparateStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                }
+                else
+                {
+                    /* Strips -> Strips */
+                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG && !bychunk)
+                    {
+                        if (g_bias != null)
+                            return cpBiasedContig2Contig(inImage, outImage, length, width, samplesperpixel);
+
+                        return cpContig2ContigByRow(inImage, outImage, length, width, samplesperpixel);
+                    }
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG && bychunk)
+                        return cpDecodedStrips(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpContig2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        return cpSeparate2ContigByRow(inImage, outImage, length, width, samplesperpixel);
+                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        return cpSeparate2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
+                }
+            }
+
+            Tiff.fprintf(stderr, "tiffcp: %s: Don't know how to copy/convert image.\n", inImage.FileName());
+            return false;
+        }
+
+        /*
+         * Contig -> contig by scanline for rows/strip change.
+         */
+        static bool cpContig2ContigByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] buf = new byte [inImage.ScanlineSize()];
+            for (int row = 0; row < imagelength; row++)
+            {
+                if (!inImage.ReadScanline(buf, row, 0) && !g_ignore)
+                {
+                    Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                    return false;
+                }
+                
+                if (!outImage.WriteScanline(buf, row, 0))
+                {
+                    Tiff.Error(outImage.FileName(), "Error, can't write scanline %lu", row);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /*
+         * Contig -> contig by scanline while subtracting a bias image.
+         */
+        static bool cpBiasedContig2Contig(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            if (spp == 1)
+            {
+                int biasSize = g_bias.ScanlineSize();
+                int bufSize = inImage.ScanlineSize();
+
+                object[] result = g_bias.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+                uint biasWidth = (uint)result[0];
+
+                result = g_bias.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+                uint biasLength = (uint)result[0];
+
+                if (biasSize == bufSize && imagelength == biasLength && imagewidth == biasWidth)
+                {
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+                    ushort sampleBits = (ushort)result[0];
+
+                    if (sampleBits == 8 || sampleBits == 16 || sampleBits == 32)
+                    {
+                        byte[] buf = new byte [bufSize];
+                        byte[] biasBuf = new byte [bufSize];
+                        
+                        for (int row = 0; row < imagelength; row++)
+                        {
+                            if (!inImage.ReadScanline(buf, row, 0) && !g_ignore)
+                            {
+                                Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                                return false;
+                            }
+
+                            if (!g_bias.ReadScanline(biasBuf, row, 0) && !g_ignore)
+                            {
+                                Tiff.Error(inImage.FileName(), "Error, can't read biased scanline %lu", row);
+                                return false;
+                            }
+                           
+                            if (sampleBits == 8)
+                                subtract8(buf, biasBuf, imagewidth);
+                            else if (sampleBits == 16)
+                                subtract16(buf, biasBuf, imagewidth);
+                            else if (sampleBits == 32)
+                                subtract32(buf, biasBuf, imagewidth);
+
+                            if (!outImage.WriteScanline(buf, row, 0))
+                            {
+                                Tiff.Error(outImage.FileName(), "Error, can't write scanline %lu", row);
+                                return false;
+                            }
+                        }
+
+                        g_bias.SetDirectory(g_bias.CurrentDirectory()); /* rewind */
+                        return true;
+                    }
+                    else
+                    {
+                        Tiff.Error(inImage.FileName(), "No support for biasing %d bit pixels\n", sampleBits);
+                        return false;
+                    }
+                }
+
+                Tiff.Error(inImage.FileName(), "Bias image %s,%d\nis not the same size as %s,%d\n", g_bias.FileName(), g_bias.CurrentDirectory(), inImage.FileName(), inImage.CurrentDirectory());
+                return false;
+            }
+            else
+            {
+                Tiff.Error(inImage.FileName(), "Can't bias %s,%d as it has >1 Sample/Pixel\n", inImage.FileName(), inImage.CurrentDirectory());
+                return false;
+            }
+        }
+
+        /*
+         * Strip -> strip for change in encoding.
+         */
+        static bool cpDecodedStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            int stripsize = inImage.StripSize();
+            byte[] buf = new byte [stripsize];
+            if (buf != null)
+            {
+                int ns = inImage.NumberOfStrips();
+                int row = 0;
+                for (int s = 0; s < ns; s++)
+                {
+                    int cc = (row + g_rowsperstrip > imagelength) ? inImage.VStripSize(imagelength - row) : stripsize;
+                    if (inImage.ReadEncodedStrip(s, buf, 0, cc) < 0 && !g_ignore)
+                    {
+                        Tiff.Error(inImage.FileName(), "Error, can't read strip %lu", s);
+                        return false;
+                    }
+
+                    if (outImage.WriteEncodedStrip(s, buf, cc) < 0)
+                    {
+                        Tiff.Error(outImage.FileName(), "Error, can't write strip %lu", s);
+                        return false;
+                    }
+
+                    row += g_rowsperstrip;
+                }
+
+                return true;
+            }
+            else
+            {
+                Tiff.Error(inImage.FileName(), "Error, can't allocate memory buffer of size %lu to read strips", stripsize);
+                return false;
+            }
+        }
+
+        /*
+         * Separate -> separate by row for rows/strip change.
+         */
+        static bool cpSeparate2SeparateByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] buf = new byte[inImage.ScanlineSize()];
+            
+            for (UInt16 s = 0; s < spp; s++)
+            {
+                for (int row = 0; row < imagelength; row++)
+                {
+                    if (!inImage.ReadScanline(buf, row, s) && !g_ignore)
+                    {
+                        Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                        return false;
+                    }
+
+                    if (!outImage.WriteScanline(buf, row, s))
+                    {
+                        Tiff.Error(outImage.FileName(), "Error, can't write scanline %lu", row);
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /*
+         * Contig -> separate by row.
+         */
+        static bool cpContig2SeparateByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] inbuf = new byte [inImage.ScanlineSize()];
+            byte[] outbuf = new byte [outImage.ScanlineSize()];
+
+            /* unpack channels */
+            for (UInt16 s = 0; s < spp; s++)
+            {
+                for (int row = 0; row < imagelength; row++)
+                {
+                    if (!inImage.ReadScanline(inbuf, row, 0) && !g_ignore)
+                    {
+                        Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                        return false;
+                    }
+
+                    int inp = s;
+                    int outp = 0;
+
+                    for (int n = imagewidth; n-- > 0;)
+                    {
+                        outbuf[outp] = inbuf[inp];
+                        outp++;
+                        inp += spp;
+                    }
+                    
+                    if (!outImage.WriteScanline(outbuf, row, s))
+                    {
+                        Tiff.Error(outImage.FileName(), "Error, can't write scanline %lu", row);
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /*
+         * Separate -> contig by row.
+         */
+        static bool cpSeparate2ContigByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] inbuf = new byte [inImage.ScanlineSize()];
+            byte[] outbuf = new byte [outImage.ScanlineSize()];
+
+            for (int row = 0; row < imagelength; row++)
+            {
+                /* merge channels */
+                for (ushort s = 0; s < spp; s++)
+                {
+                    if (!inImage.ReadScanline(inbuf, row, s) && !g_ignore)
+                    {
+                        Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                        return false;
+                    }
+
+                    int inp = 0;
+                    int outp = s;
+
+                    for (int n = imagewidth; n-- > 0; )
+                    {
+                        outbuf[outp] = inbuf[inp];
+                        inp++;
+                        outp += spp;
+                    }
+                }
+
+                if (!outImage.WriteScanline(outbuf, row, 0))
+                {
+                    Tiff.Error(outImage.FileName(), "Error, can't write scanline %lu", row);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        static void cpStripToTile(byte[] outImage, int outOffset, byte[] inImage, int inOffset, uint rows, uint cols, int outskew, int inskew)
+        {
+            int outPos = outOffset;
+            int inPos = inOffset;
+
+            while (rows-- > 0)
+            {
+                uint j = cols;
+                while (j-- > 0)
+                {
+                    outImage[outPos] = inImage[inPos];
+                    outPos++;
+                    inPos++;
+                }
+
+                outPos += outskew;
+                inPos += inskew;
+            }
+        }
+
+        static void cpContigBufToSeparateBuf(byte[] outImage, byte[] inImage, int inOffset, uint rows, uint cols, int outskew, int inskew, UInt16 spp, int bytes_per_sample)
+        {
+            int outPos = 0;
+            int inPos = inOffset;
+
+            while (rows-- > 0)
+            {
+                uint j = cols;
+                while (j-- > 0)
+                {
+                    int n = bytes_per_sample;
+                    while (n-- != 0)
+                    {
+                        outImage[outPos] = inImage[inPos];
+                        outPos++;
+                        inPos++;
+                    }
+
+                    inPos += (spp - 1) * bytes_per_sample;
+                }
+
+                outPos += outskew;
+                inPos += inskew;
+            }
+        }
+
+        static void cpSeparateBufToContigBuf(byte[] outImage, int outOffset, byte[] inImage, uint rows, uint cols, int outskew, int inskew, UInt16 spp, int bytes_per_sample)
+        {
+            int inPos = 0;
+            int outPos = outOffset;
+
+            while (rows-- > 0)
+            {
+                uint j = cols;
+                while (j-- > 0)
+                {
+                    int n = bytes_per_sample;
+                    while (n-- != 0)
+                    {
+                        outImage[outPos] = inImage[inPos];
+                        outPos++;
+                        inPos++;
+                    }
+
+                    outPos += (spp - 1) * bytes_per_sample;
+                }
+
+                outPos += outskew;
+                inPos += inskew;
+            }
+        }
+
+        static bool cpImage(Tiff inImage, Tiff outImage, readFunc fin, writeFunc fout, int imagelength, int imagewidth, UInt16 spp)
+        {
+            bool status = false;
+            
+            int scanlinesize = inImage.RasterScanlineSize();
+            int bytes = scanlinesize * imagelength;
+            
+            /*
+             * XXX: Check for integer overflow.
+             */
+            if (scanlinesize != 0 && imagelength != 0 && (bytes / imagelength == (uint)scanlinesize))
+            {
+                byte[] buf = new byte [bytes];
+                if (buf != null)
+                {
+                    if (fin(inImage, buf, imagelength, imagewidth, spp))
+                        status = fout(outImage, buf, imagelength, imagewidth, spp);
+                }
+                else
+                {
+                    Tiff.Error(inImage.FileName(), "Error, can't allocate space for image buffer");
+                }
+            }
+            else
+            {
+                Tiff.Error(inImage.FileName(), "Error, no space for image buffer");
+            }
+
+            return status;
+        }
+
+        /*
+         * Contig strips -> contig tiles.
+         */
+        static bool cpContigStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readContigStripsIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Contig strips -> separate tiles.
+         */
+        static bool cpContigStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readContigStripsIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Separate strips -> contig tiles.
+         */
+        static bool cpSeparateStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readSeparateStripsIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Separate strips -> separate tiles.
+         */
+        static bool cpSeparateStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readSeparateStripsIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Contig strips -> contig tiles.
+         */
+        static bool cpContigTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Contig tiles -> separate tiles.
+         */
+        static bool cpContigTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Separate tiles -> contig tiles.
+         */
+        static bool cpSeparateTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Separate tiles -> separate tiles (tile dimension change).
+         */
+        static bool cpSeparateTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Contig tiles -> contig tiles (tile dimension change).
+         */
+        static bool cpContigTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToContigStrips, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Contig tiles -> separate strips.
+         */
+        static bool cpContigTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToSeparateStrips, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Separate tiles -> contig strips.
+         */
+        static bool cpSeparateTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToContigStrips, imagelength, imagewidth, spp);
+        }
+
+        /*
+         * Separate tiles -> separate strips.
+         */
+        static bool cpSeparateTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
+        {
+            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToSeparateStrips, imagelength, imagewidth, spp);
+        }
+
+        static void subtract8(byte[] image, byte[] bias, int pixels)
+        {
+            int imagePos = 0;
+            int biasPos = 0;
+            while (pixels-- != 0)
+            {
+                image[imagePos] = image[imagePos] > bias[biasPos] ? (byte)(image[imagePos] - bias[biasPos]) : (byte)0;
+                imagePos++;
+                biasPos++;
+            }
+        }
+
+        static void subtract16(byte[] i, byte[] b, int pixels)
+        {
+            ushort[] image = byteArrayToUInt16(i, 0, pixels * sizeof(UInt16));
+            ushort[] bias = byteArrayToUInt16(b, 0, pixels * sizeof(UInt16));
+            int imagePos = 0;
+            int biasPos = 0;
+
+            while (pixels-- != 0)
+            {
+                image[imagePos] = image[imagePos] > bias[biasPos] ? (ushort)(image[imagePos] - bias[biasPos]) : (ushort)0;
+                imagePos++;
+                biasPos++;
+            }
+
+            uint16ToByteArray(image, 0, pixels, i, 0);
+        }
+
+        static void subtract32(byte[] i, byte[] b, int pixels)
+        {
+            uint[] image = byteArrayToUInt(i, 0, pixels * sizeof(uint));
+            uint[] bias = byteArrayToUInt(b, 0, pixels * sizeof(uint));
+            int imagePos = 0;
+            int biasPos = 0;
+
+            while (pixels-- != 0)
+            {
+                image[imagePos] = image[imagePos] > bias[biasPos] ? image[imagePos] - bias[biasPos] : 0;
+                imagePos++;
+                biasPos++;
+            }
+
+            uintToByteArray(image, 0, pixels, i, 0);
+        }
+
+        static ushort[] byteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount)
+        {
+            int intCount = byteCount / 2;
+            ushort[] integers = new UInt16[intCount];
+
+            int byteStopPos = byteStartOffset + intCount * 2;
+            int intPos = 0;
+            for (int i = byteStartOffset; i < byteStopPos; )
+            {
+                ushort value = (ushort)(b[i++] & 0xFF);
+                value += (ushort)((b[i++] & 0xFF) << 8);
+                integers[intPos++] = value;
+            }
+
+            return integers;
+        }
+
+        static void uint16ToByteArray(ushort[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        {
+            int bytePos = byteStartOffset;
+            int intStopPos = intStartOffset + intCount;
+            for (int i = intStartOffset; i < intStopPos; i++)
+            {
+                UInt16 value = integers[i];
+                bytes[bytePos++] = (byte)value;
+                bytes[bytePos++] = (byte)(value >> 8);
+            }
+        }
+
+        static uint[] byteArrayToUInt(byte[] b, int byteStartOffset, int byteCount)
+        {
+            int intCount = byteCount / 4;
+            uint[] integers = new uint[intCount];
+
+            int byteStopPos = byteStartOffset + intCount * 4;
+            int intPos = 0;
+            for (int i = byteStartOffset; i < byteStopPos; )
+            {
+                uint value = (uint)(b[i++] & 0xFF);
+                value += (uint)((b[i++] & 0xFF) << 8);
+                value += (uint)((b[i++] & 0xFF) << 16);
+                value += (uint)(b[i++] << 24);
+                integers[intPos++] = value;
+            }
+
+            return integers;
+        }
+
+        static void uintToByteArray(uint[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        {
+            int bytePos = byteStartOffset;
+            int intStopPos = intStartOffset + intCount;
+            for (int i = intStartOffset; i < intStopPos; i++)
+            {
+                uint value = integers[i];
+                bytes[bytePos++] = (byte)value;
+                bytes[bytePos++] = (byte)(value >> 8);
+                bytes[bytePos++] = (byte)(value >> 16);
+                bytes[bytePos++] = (byte)(value >> 24);
+            }
+        }
     }
 }
