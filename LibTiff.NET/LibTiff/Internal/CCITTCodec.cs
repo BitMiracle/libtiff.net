@@ -49,7 +49,7 @@ namespace BitMiracle.LibTiff.Internal
 
         internal FAXMODE m_mode; /* operating mode */
         internal GROUP3OPT m_groupoptions; /* Group 3/4 options tag */
-        internal UInt16 m_cleanfaxdata; /* CleanFaxData tag */
+        internal CLEANFAXDATA m_cleanfaxdata; /* CleanFaxData tag */
         internal uint m_badfaxlines; /* BadFaxLines tag */
         internal uint m_badfaxrun; /* BadFaxRun tag */
         internal uint m_recvparams; /* encoded Class 2 session params */
@@ -105,6 +105,13 @@ namespace BitMiracle.LibTiff.Internal
 
         private struct faxTableEntry
         {
+            public faxTableEntry(byte _State, byte _Width, int _Param)
+            {
+                State = _State;
+                Width = _Width;
+                Param = _Param;
+            }
+
             /* state table entry */
             public byte State; /* see above */
             public byte Width; /* width of code in bits */

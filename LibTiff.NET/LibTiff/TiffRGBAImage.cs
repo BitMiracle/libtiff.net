@@ -371,7 +371,17 @@ namespace BitMiracle.LibTiff
             cielab = null;
         }
 
-        private static TiffDisplay display_sRGB;
+        private static TiffDisplay display_sRGB = new TiffDisplay(
+            /* XYZ -> luminance matrix */
+            new float[] { 3.2410F, -1.5374F, -0.4986F },
+            new float[] { -0.9692F, 1.8760F, 0.0416F }, 
+            new float[] { 0.0556F, -0.2040F, 1.0570F },
+            100.0F, 100.0F, 100.0F,  /* Light o/p for reference white */
+            255, 255, 255,  /* Pixel values for ref. white */
+            1.0F, 1.0F, 1.0F,  /* Residual light o/p for black pixel */
+            2.4F, 2.4F, 2.4F  /* Gamma values for the three guns */
+        );
+
         private const uint A1 = (((uint)0xffL)<<24);
         
         /* 

@@ -138,7 +138,7 @@ namespace BitMiracle.LibTiff
         //private static TiffExtendProc m_extender;
 
         private TiffStream m_stream; // stream used for read|write|etc.
-        private bool m_userStream; // if true, then stream in use is provided by user.
+        //private bool m_userStream; // if true, then stream in use is provided by user.
 
         private const string m_version = TIFFLIB_VERSION_STR;
 
@@ -182,7 +182,7 @@ namespace BitMiracle.LibTiff
             m_rawcc = 0;
 
             m_stream = null;
-            m_userStream = false;
+            //m_userStream = false;
 
             m_clientdata = 0;
 

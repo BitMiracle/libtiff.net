@@ -9,12 +9,45 @@ namespace BitMiracle.LibTiff
     /// </summary>
     class TiffDisplay
     {
-        /* XYZ -> luminance matrix */
-        public float[][] d_mat = new float[][] 
-        { 
-            new float[3], new float[3], new float[3] 
-        };
+        public TiffDisplay()
+        {
+            d_mat = null;
+            d_YCR = 0;
+            d_YCG = 0;
+            d_YCB = 0;
+            d_Vrwr = 0;
+            d_Vrwg = 0;
+            d_Vrwb = 0;
+            d_Y0R = 0;
+            d_Y0G = 0;
+            d_Y0B = 0;
+            d_gammaR = 0;
+            d_gammaG = 0;
+            d_gammaB = 0;
+        }
 
+        public TiffDisplay(float[] mat0, float[] mat1, float[] mat2,
+            float YCR, float YCG, float YCB, uint Vrwr, uint Vrwg,
+            uint Vrwb, float Y0R, float Y0G, float Y0B,
+            float gammaR, float gammaG, float gammaB)
+        {
+            d_mat = new float[3][] { mat0, mat1, mat2 };
+            d_YCR = YCR;
+            d_YCG = YCG;
+            d_YCB = YCB;
+            d_Vrwr = Vrwr;
+            d_Vrwg = Vrwg;
+            d_Vrwb = Vrwb;
+            d_Y0R = Y0R;
+            d_Y0G = Y0G;
+            d_Y0B = Y0B;
+            d_gammaR = gammaR;
+            d_gammaG = gammaG;
+            d_gammaB = gammaB;
+        }
+
+        /* XYZ -> luminance matrix */
+        public float[][] d_mat;
         public float d_YCR; /* Light o/p for reference white */
         public float d_YCG;
         public float d_YCB;

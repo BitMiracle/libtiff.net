@@ -92,6 +92,10 @@
       <Project>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</Project>
       <Name>LibJpeg</Name>
     </ProjectReference>
+    <ProjectReference Include="..\zLib\zLib.csproj">
+      <Project>{366A602D-AF6F-4FE1-8A95-392ED17845DC}</Project>
+      <Name>zLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

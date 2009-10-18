@@ -24,6 +24,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 
+using ComponentAce.Compression.Libs.zlib;
+
 namespace BitMiracle.LibTiff.Internal
 {
     class DeflateCodec : CodecWithPredictor
@@ -31,7 +33,7 @@ namespace BitMiracle.LibTiff.Internal
         public const int ZSTATE_INIT_DECODE = 0x01;
         public const int ZSTATE_INIT_ENCODE = 0x02;
 
-        //public z_stream m_stream;
+        public ZStream m_stream = new ZStream();
         public int m_zipquality; /* compression level */
         public int m_state; /* state flags */
 
@@ -61,13 +63,13 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Allocate state block so tag methods have storage to record values.
              */
-            m_stream.zalloc = null;
-            m_stream.zfree = null;
-            m_stream.opaque = null;
-            m_stream.data_type = Z_BINARY;
+            //m_stream.zalloc = null;
+            //m_stream.zfree = null;
+            //m_stream.opaque = null;
+            //m_stream.data_type = Z_BINARY;
 
             /* Default values for codec-specific fields */
-            m_zipquality = Z_DEFAULT_COMPRESSION; /* default comp. level */
+            m_zipquality = zlibConst.Z_DEFAULT_COMPRESSION; /* default comp. level */
             m_state = 0;
 
             /*
@@ -155,12 +157,12 @@ namespace BitMiracle.LibTiff.Internal
 
             if ((m_state & ZSTATE_INIT_ENCODE) != 0)
             {
-                deflateEnd(&m_stream);
+                m_stream.deflateEnd();
                 m_state = 0;
             }
             else if ((m_state & ZSTATE_INIT_DECODE) != 0)
             {
-                inflateEnd(&m_stream);
+                m_stream.inflateEnd();
                 m_state = 0;
             }
         }
@@ -174,20 +176,20 @@ namespace BitMiracle.LibTiff.Internal
             m_stream.avail_out = occ;
             do
             {
-                int state = inflate(&m_stream, Z_PARTIAL_FLUSH);
-                if (state == Z_STREAM_END)
+                int state = m_stream.inflate(zlibConst.Z_PARTIAL_FLUSH);
+                if (state == zlibConst.Z_STREAM_END)
                     break;
 
-                if (state == Z_DATA_ERROR)
+                if (state == zlibConst.Z_DATA_ERROR)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Decoding error at scanline %d, %s", m_tif.m_name, m_tif.m_row, m_stream.msg);
-                    if (inflateSync(&m_stream) != Z_OK)
+                    if (m_stream.inflateSync() != zlibConst.Z_OK)
                         return false;
                     
                     continue;
                 }
 
-                if (state != Z_OK)
+                if (state != zlibConst.Z_OK)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: zlib error: %s", m_tif.m_name, m_stream.msg);
                     return false;
@@ -217,7 +219,7 @@ namespace BitMiracle.LibTiff.Internal
             m_stream.avail_in = cc;
             do
             {
-                if (deflate(&m_stream, Z_NO_FLUSH) != Z_OK)
+                if (m_stream.deflate(zlibConst.Z_NO_FLUSH) != zlibConst.Z_OK)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Encoder error: %s", m_tif.m_name, m_stream.msg);
                     return false;
@@ -248,12 +250,12 @@ namespace BitMiracle.LibTiff.Internal
             m_stream.avail_in = 0;
             do
             {
-                state = deflate(&m_stream, Z_FINISH);
+                state = m_stream.deflate(zlibConst.Z_FINISH);
                 switch (state)
                 {
-                    case Z_STREAM_END:
-                    case Z_OK:
-                        if ((int)m_stream.avail_out != (int)m_tif.m_rawdatasize)
+                    case zlibConst.Z_STREAM_END:
+                    case zlibConst.Z_OK:
+                        if (m_stream.avail_out != m_tif.m_rawdatasize)
                         {
                             m_tif.m_rawcc = m_tif.m_rawdatasize - m_stream.avail_out;
                             m_tif.flushData1();
@@ -266,7 +268,7 @@ namespace BitMiracle.LibTiff.Internal
                         return false;
                 }
             }
-            while (state != Z_STREAM_END);
+            while (state != zlibConst.Z_STREAM_END);
 
             return true;
         }
@@ -281,7 +283,8 @@ namespace BitMiracle.LibTiff.Internal
 
             m_stream.next_in = m_tif.m_rawdata;
             m_stream.avail_in = m_tif.m_rawcc;
-            return (inflateReset(&m_stream) == Z_OK);
+            //return (m_stream.inflateReset() == zlibConst.Z_OK);
+            return false;
         }
 
         /*
@@ -294,7 +297,8 @@ namespace BitMiracle.LibTiff.Internal
 
             m_stream.next_out = m_tif.m_rawdata;
             m_stream.avail_out = m_tif.m_rawdatasize;
-            return (deflateReset(&m_stream) == Z_OK);
+            //return (m_stream.deflateReset() == zlibConst.Z_OK);
+            return false;
         }
 
         private bool ZIPSetupDecode()
@@ -304,11 +308,11 @@ namespace BitMiracle.LibTiff.Internal
             /* if we were last encoding, terminate this mode */
             if ((m_state & ZSTATE_INIT_ENCODE) != 0)
             {
-                deflateEnd(&m_stream);
+                m_stream.deflateEnd();
                 m_state = 0;
             }
 
-            if (inflateInit(&m_stream) != Z_OK)
+            if (m_stream.inflateInit() != zlibConst.Z_OK)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
                 return false;
@@ -324,11 +328,11 @@ namespace BitMiracle.LibTiff.Internal
 
             if ((m_state & ZSTATE_INIT_DECODE) != 0)
             {
-                inflateEnd(&m_stream);
+                m_stream.inflateEnd();
                 m_state = 0;
             }
 
-            if (deflateInit(&m_stream, m_zipquality) != Z_OK)
+            if (m_stream.deflateInit(m_zipquality) != zlibConst.Z_OK)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
                 return false;

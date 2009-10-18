@@ -138,11 +138,6 @@ namespace BitMiracle.LibTiff
         GROUP3OPT_FILLBITS = 0x4,  /* fill to byte boundary */
     };
 
-    enum GROUP4OPT
-    {
-        GROUP4OPT_UNCOMPRESSED = 0x2,  /* data not compressed */
-    };
-
     enum RESUNIT
     {
         RESUNIT_NONE = 1,  /* no meaningful units */

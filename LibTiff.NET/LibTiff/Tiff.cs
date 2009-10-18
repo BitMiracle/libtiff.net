@@ -348,8 +348,8 @@ namespace BitMiracle.LibTiff
         public static Tiff FdOpen(int ifd, string name, string mode)
         {
             Tiff tif = ClientOpen(name, mode, (thandle_t)ifd, new TiffStream());
-            if (tif != null)
-                tif.m_userStream = false; // clear flag, so stream will be deleted
+            //if (tif != null)
+            //    tif.m_userStream = false; // clear flag, so stream will be deleted
 
             return tif;
         }
@@ -385,7 +385,7 @@ namespace BitMiracle.LibTiff
             }
 
             tif.m_stream = stream;
-            tif.m_userStream = true;
+            //tif.m_userStream = true;
 
             /* setup default state */
             tif.m_currentCodec = tif.m_builtInCodecs[0];
