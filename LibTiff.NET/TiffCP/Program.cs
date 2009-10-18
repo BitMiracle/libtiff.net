@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Globalization;
+using System.Diagnostics;
 
 using BitMiracle.LibTiff;
 
@@ -1243,14 +1244,14 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        static void cpStripToTile(byte[] outImage, int outOffset, byte[] inImage, int inOffset, uint rows, uint cols, int outskew, int inskew)
+        static void cpStripToTile(byte[] outImage, int outOffset, byte[] inImage, int inOffset, int rows, int cols, int outskew, int inskew)
         {
             int outPos = outOffset;
             int inPos = inOffset;
 
             while (rows-- > 0)
             {
-                uint j = cols;
+                int j = cols;
                 while (j-- > 0)
                 {
                     outImage[outPos] = inImage[inPos];
@@ -1263,14 +1264,14 @@ namespace BitMiracle.TiffCP
             }
         }
 
-        static void cpContigBufToSeparateBuf(byte[] outImage, byte[] inImage, int inOffset, uint rows, uint cols, int outskew, int inskew, UInt16 spp, int bytes_per_sample)
+        static void cpContigBufToSeparateBuf(byte[] outImage, byte[] inImage, int inOffset, int rows, int cols, int outskew, int inskew, UInt16 spp, int bytes_per_sample)
         {
             int outPos = 0;
             int inPos = inOffset;
 
             while (rows-- > 0)
             {
-                uint j = cols;
+                int j = cols;
                 while (j-- > 0)
                 {
                     int n = bytes_per_sample;
@@ -1289,14 +1290,14 @@ namespace BitMiracle.TiffCP
             }
         }
 
-        static void cpSeparateBufToContigBuf(byte[] outImage, int outOffset, byte[] inImage, uint rows, uint cols, int outskew, int inskew, UInt16 spp, int bytes_per_sample)
+        static void cpSeparateBufToContigBuf(byte[] outImage, int outOffset, byte[] inImage, int rows, int cols, int outskew, int inskew, UInt16 spp, int bytes_per_sample)
         {
             int inPos = 0;
             int outPos = outOffset;
 
             while (rows-- > 0)
             {
-                uint j = cols;
+                int j = cols;
                 while (j-- > 0)
                 {
                     int n = bytes_per_sample;
@@ -1351,7 +1352,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpContigStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readContigStripsIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readContigStripsIntoBuffer), 
+                new writeFunc(writeBufferToContigTiles), 
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1359,7 +1364,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpContigStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readContigStripsIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readContigStripsIntoBuffer), 
+                new writeFunc(writeBufferToSeparateTiles),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1367,7 +1376,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpSeparateStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readSeparateStripsIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readSeparateStripsIntoBuffer), 
+                new writeFunc(writeBufferToContigTiles),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1375,7 +1388,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpSeparateStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readSeparateStripsIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readSeparateStripsIntoBuffer), 
+                new writeFunc(writeBufferToSeparateTiles),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1383,7 +1400,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpContigTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readContigTilesIntoBuffer), 
+                new writeFunc(writeBufferToContigTiles),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1391,7 +1412,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpContigTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readContigTilesIntoBuffer),
+                new writeFunc(writeBufferToSeparateTiles),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1399,7 +1424,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpSeparateTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToContigTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readSeparateTilesIntoBuffer),
+                new writeFunc(writeBufferToContigTiles),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1407,7 +1436,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpSeparateTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToSeparateTiles, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readSeparateTilesIntoBuffer),
+                new writeFunc(writeBufferToSeparateTiles),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1415,7 +1448,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpContigTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToContigStrips, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readContigTilesIntoBuffer),
+                new writeFunc(writeBufferToContigStrips),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1423,7 +1460,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpContigTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readContigTilesIntoBuffer, writeBufferToSeparateStrips, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readContigTilesIntoBuffer), 
+                new writeFunc(writeBufferToSeparateStrips),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1431,7 +1472,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpSeparateTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToContigStrips, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readSeparateTilesIntoBuffer),
+                new writeFunc(writeBufferToContigStrips),
+                imagelength, imagewidth, spp);
         }
 
         /*
@@ -1439,7 +1484,11 @@ namespace BitMiracle.TiffCP
          */
         static bool cpSeparateTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, UInt16 spp)
         {
-            return cpImage(inImage, outImage, readSeparateTilesIntoBuffer, writeBufferToSeparateStrips, imagelength, imagewidth, spp);
+            return cpImage(
+                inImage, outImage, 
+                new readFunc(readSeparateTilesIntoBuffer),
+                new writeFunc(writeBufferToSeparateStrips),
+                imagelength, imagewidth, spp);
         }
 
         static void subtract8(byte[] image, byte[] bias, int pixels)
@@ -1548,6 +1597,355 @@ namespace BitMiracle.TiffCP
                 bytes[bytePos++] = (byte)(value >> 16);
                 bytes[bytePos++] = (byte)(value >> 24);
             }
+        }
+
+        static bool readContigStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            int scanlinesize = inImage.ScanlineSize();
+            byte[] scanline = new byte [scanlinesize];
+
+            int bufp = 0;
+
+            for (int row = 0; row < imagelength; row++)
+            {
+                if (!inImage.ReadScanline(scanline, row, 0) && !g_ignore)
+                {
+                    Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                    return false;
+                }
+
+                Array.Copy(scanline, 0, buf, bufp, scanlinesize);
+                bufp += scanlinesize;
+            }
+
+            return true;
+        }
+
+        static bool readSeparateStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            int scanlinesize = inImage.ScanlineSize();
+            if (scanlinesize == 0)
+                return false;
+
+            byte[] scanline = new byte [scanlinesize];
+            if (scanline != null)
+            {
+                int bufp = 0;
+                for (int row = 0; row < imagelength; row++)
+                {
+                    /* merge channels */
+                    for (UInt16 s = 0; s < spp; s++)
+                    {
+                        if (!inImage.ReadScanline(scanline, row, s) && !g_ignore)
+                        {
+                            Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                            return false;
+                        }
+
+                        int n = scanlinesize;
+                        int bp = s;
+                        int sbuf = 0;
+                        while (n-- > 0)
+                        {
+                            buf[bufp + bp] = scanline[sbuf];
+                            sbuf++;
+                            bp += spp;
+                        }
+                    }
+
+                    bufp += scanlinesize * spp;
+                }
+            }
+
+            return true;
+        }
+
+        static bool readContigTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] tilebuf = new byte [inImage.TileSize()];
+            if (tilebuf == null)
+                return false;
+
+            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = (int)result[0];
+
+            result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            int tl = (int)result[0];
+
+            int imagew = inImage.ScanlineSize();
+            int tilew = inImage.TileRowSize();
+            int iskew = imagew - tilew;
+
+            int bufp = 0;
+
+            for (int row = 0; row < imagelength; row += tl)
+            {
+                int nrow = (row + tl > imagelength) ? imagelength - row : tl;
+                int colb = 0;
+
+                for (int col = 0; col < imagewidth; col += tw)
+                {
+                    if (inImage.ReadTile(tilebuf, 0, col, row, 0, 0) < 0 && !g_ignore)
+                    {
+                        Tiff.Error(inImage.FileName(), "Error, can't read tile at %lu %lu", col, row);
+                        return false;
+                    }
+
+                    if (colb + tilew > imagew)
+                    {
+                        int width = imagew - colb;
+                        int oskew = tilew - width;
+                        cpStripToTile(buf, bufp + colb, tilebuf, 0, nrow, width, oskew + iskew, oskew);
+                    }
+                    else
+                        cpStripToTile(buf, bufp + colb, tilebuf, 0, nrow, tilew, iskew, 0);
+                    
+                    colb += tilew;
+                }
+
+                bufp += imagew * nrow;
+            }
+
+            return true;
+        }
+
+        static bool readSeparateTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] tilebuf = new byte [inImage.TileSize()];
+            if (tilebuf == null)
+                return false;
+
+            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = (int)result[0];
+
+            result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            int tl = (int)result[0];
+
+            result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            ushort bps = (ushort)result[0];
+
+            Debug.Assert(bps % 8 == 0);
+
+            ushort bytes_per_sample = (ushort)(bps / 8);
+            
+            int imagew = inImage.RasterScanlineSize();
+            int tilew = inImage.TileRowSize();
+            int iskew = imagew - tilew * spp;
+
+            int bufp = 0;
+
+            for (int row = 0; row < imagelength; row += tl)
+            {
+                int nrow = (row + tl > imagelength) ? imagelength - row : tl;
+                int colb = 0;
+
+                for (int col = 0; col < imagewidth; col += tw)
+                {
+                    for (UInt16 s = 0; s < spp; s++)
+                    {
+                        if (inImage.ReadTile(tilebuf, 0, col, row, 0, s) < 0 && !g_ignore)
+                        {
+                            Tiff.Error(inImage.FileName(), "Error, can't read tile at %lu %lu, sample %lu", col, row, s);
+                            return false;
+                        }
+
+                        /*
+                         * Tile is clipped horizontally.  Calculate
+                         * visible portion and skewing factors.
+                         */
+                        if (colb + tilew * spp > imagew)
+                        {
+                            int width = imagew - colb;
+                            int oskew = tilew * spp - width;
+                            cpSeparateBufToContigBuf(buf, bufp + colb + s * bytes_per_sample, tilebuf, nrow, width / (spp * bytes_per_sample), oskew + iskew, oskew / spp, spp, bytes_per_sample);
+                        }
+                        else
+                            cpSeparateBufToContigBuf(buf, bufp + colb + s * bytes_per_sample, tilebuf, nrow, tw, iskew, 0, spp, bytes_per_sample);
+                    }
+
+                    colb += tilew * spp;
+                }
+
+                bufp += imagew * nrow;
+            }
+
+            return true;
+        }
+
+        static bool writeBufferToContigStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            object[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = (int)result[0];
+
+            int strip = 0;
+            int bufPos = 0;
+            for (int row = 0; row < imagelength; row += rowsperstrip)
+            {
+                int nrows = (row + rowsperstrip > imagelength) ? imagelength - row : rowsperstrip;
+                int stripsize = outImage.VStripSize(nrows);
+                
+                byte[] stripBuf = new byte [stripsize];
+                Array.Copy(buf, bufPos, stripBuf, 0, stripsize);
+                
+                if (outImage.WriteEncodedStrip(strip++, stripBuf, stripsize) < 0)
+                {
+                    Tiff.Error(outImage.FileName(), "Error, can't write strip %u", strip - 1);
+                    return false;
+                }
+
+                bufPos += stripsize;
+            }
+
+            return true;
+        }
+
+        static bool writeBufferToSeparateStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] obuf = new byte [outImage.StripSize()];
+            if (obuf == null)
+                return false;
+
+            object[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = (int)result[0];
+
+            int rowsize = imagewidth * spp;
+            int strip = 0;
+
+            for (UInt16 s = 0; s < spp; s++)
+            {
+                for (int row = 0; row < imagelength; row += rowsperstrip)
+                {
+                    int nrows = (row + rowsperstrip > imagelength) ? imagelength - row: rowsperstrip;
+                    int stripsize = outImage.VStripSize(nrows);
+
+                    cpContigBufToSeparateBuf(obuf, buf, row * rowsize + s, nrows, imagewidth, 0, 0, spp, 1);
+                    if (outImage.WriteEncodedStrip(strip++, obuf, stripsize) < 0)
+                    {
+                        Tiff.Error(outImage.FileName(), "Error, can't write strip %u", strip - 1);
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+
+        static bool writeBufferToContigTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] obuf = new byte [outImage.TileSize()];
+            if (obuf == null)
+                return false;
+
+            object[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            int tl = (int)result[0];
+
+            result = outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = (int)result[0];
+
+            int imagew = outImage.ScanlineSize();
+            int tilew = outImage.TileRowSize();
+            int iskew = imagew - tilew;
+
+            int bufp = 0;
+
+            for (int row = 0; row < imagelength; row += g_tilelength)
+            {
+                int nrow = (row + tl > imagelength) ? imagelength - row : tl;
+                int colb = 0;
+
+                for (int col = 0; col < imagewidth; col += tw)
+                {
+                    /*
+                     * Tile is clipped horizontally.  Calculate
+                     * visible portion and skewing factors.
+                     */
+                    if (colb + tilew > imagew)
+                    {
+                        int width = imagew - colb;
+                        int oskew = tilew - width;
+                        cpStripToTile(obuf, 0, buf, bufp + colb, nrow, width, oskew, oskew + iskew);
+                    }
+                    else
+                        cpStripToTile(obuf, 0, buf, bufp + colb, nrow, tilew, 0, iskew);
+
+                    if (outImage.WriteTile(obuf, col, row, 0, 0) < 0)
+                    {
+                        Tiff.Error(outImage.FileName(), "Error, can't write tile at %lu %lu", col, row);
+                        return false;
+                    }
+
+                    colb += tilew;
+                }
+
+                bufp += nrow * imagew;
+            }
+
+            return true;
+        }
+
+        static bool writeBufferToSeparateTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
+        {
+            byte[] obuf = new byte [outImage.TileSize()];
+            if (obuf == null)
+                return false;
+
+            object[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            int tl = (int)result[0];
+
+            outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = (int)result[0];
+
+            outImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            ushort bps = (ushort)result[0];
+
+            Debug.Assert(bps % 8 == 0);
+
+            ushort bytes_per_sample = (ushort)(bps / 8);
+            
+            int imagew = outImage.ScanlineSize();
+            int tilew = outImage.TileRowSize();
+            int iimagew = outImage.RasterScanlineSize();
+            int iskew = iimagew - tilew * spp;
+
+            int bufp = 0;
+
+            for (int row = 0; row < imagelength; row += tl)
+            {
+                int nrow = (row + tl > imagelength) ? imagelength - row: tl;
+                int colb = 0;
+
+                for (int col = 0; col < imagewidth; col += tw)
+                {
+                    for (UInt16 s = 0; s < spp; s++)
+                    {
+                        /*
+                         * Tile is clipped horizontally.  Calculate
+                         * visible portion and skewing factors.
+                         */
+                        if (colb + tilew > imagew)
+                        {
+                            int width = imagew - colb;
+                            int oskew = tilew - width;
+
+                            cpContigBufToSeparateBuf(obuf, buf, bufp + (colb * spp) + s, nrow, width / bytes_per_sample, oskew, (oskew * spp) + iskew, spp, bytes_per_sample);
+                        }
+                        else
+                            cpContigBufToSeparateBuf(obuf, buf, bufp + (colb * spp) + s, nrow, g_tilewidth, 0, iskew, spp, bytes_per_sample);
+
+                        if (outImage.WriteTile(obuf, col, row, 0, s) < 0)
+                        {
+                            Tiff.Error(outImage.FileName(), "Error, can't write tile at %lu %lu sample %lu", col, row, s);
+                            return false;
+                        }
+                    }
+
+                    colb += tilew;
+                }
+
+                bufp += nrow * iimagew;
+            }
+
+            return true;
         }
     }
 }
