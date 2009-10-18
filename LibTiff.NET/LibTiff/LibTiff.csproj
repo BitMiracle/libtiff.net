@@ -43,6 +43,7 @@
     <Compile Include="Internal\CodecWithPredictor.cs" />
     <Compile Include="Internal\CodecWithPredictorTagMethods.cs" />
     <Compile Include="Internal\DeflateCodec.cs" />
+    <Compile Include="Internal\DeflateCodecTagMethods.cs" />
     <Compile Include="Internal\DumpModeCodec.cs" />
     <Compile Include="Internal\Field.cs" />
     <Compile Include="Internal\JpegCodec.cs" />

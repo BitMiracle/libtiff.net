@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 namespace BitMiracle.LibTiff.Internal
 {
@@ -36,7 +37,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private static TiffFieldInfo[] zipFieldInfo = 
         {
-            TiffFieldInfo(TIFFTAG_ZIPQUALITY, 0, 0, TIFF_ANY, FIELD_PSEUDO, true, false, ""), 
+            new TiffFieldInfo(TIFFTAG.TIFFTAG_ZIPQUALITY, 0, 0, TiffDataType.TIFF_ANY, FIELD.FIELD_PSEUDO, true, false, ""), 
         };
 
         private TiffTagMethods m_tagMethods;
@@ -55,7 +56,7 @@ namespace BitMiracle.LibTiff.Internal
             * Merge codec-specific tag information and
             * override parent get/set field methods.
             */
-            m_tif.MergeFieldInfo(zipFieldInfo, sizeof(zipFieldInfo) / sizeof(zipFieldInfo[0]));
+            m_tif.MergeFieldInfo(zipFieldInfo, zipFieldInfo.Length);
 
             /*
              * Allocate state block so tag methods have storage to record values.
@@ -103,7 +104,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override void tif_cleanup()
         {
-            return ZIPCleanup();
+            ZIPCleanup();
         }
 
         // CodecWithPredictor overrides
@@ -150,7 +151,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private void ZIPCleanup()
         {
-            CodecWithPredictor::TIFFPredictorCleanup();
+            base.TIFFPredictorCleanup();
 
             if ((m_state & ZSTATE_INIT_ENCODE) != 0)
             {
@@ -168,7 +169,6 @@ namespace BitMiracle.LibTiff.Internal
         {
             const string module = "ZIPDecode";
 
-            s;
             Debug.Assert(m_state == ZSTATE_INIT_DECODE);
             m_stream.next_out = op;
             m_stream.avail_out = occ;
@@ -210,8 +210,6 @@ namespace BitMiracle.LibTiff.Internal
         private bool ZIPEncode(byte[] bp, int cc, UInt16 s)
         {
             const string module = "ZIPEncode";
-
-            s;
 
             Debug.Assert(m_state == ZSTATE_INIT_ENCODE);
 

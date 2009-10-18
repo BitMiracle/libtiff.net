@@ -21,17 +21,17 @@ namespace BitMiracle.LibTiff.Internal
         public override void init_destination()
         {
             /* while building, jpegtables_length is allocated buffer size */
-            initInternalBuffer((byte*)m_sp.m_jpegtables, m_sp.m_jpegtables_length);
+            initInternalBuffer(m_sp.m_jpegtables);
         }
 
         public override bool empty_output_buffer()
         {
             /* the entire buffer has been filled; enlarge it by 1000 bytes */
-            byte* newbuf = Tiff::Realloc(m_sp.m_jpegtables, m_sp.m_jpegtables_length, (int)(m_sp.m_jpegtables_length + 1000));
+            byte[] newbuf = Tiff.Realloc(m_sp.m_jpegtables, m_sp.m_jpegtables_length, (int)(m_sp.m_jpegtables_length + 1000));
             if (newbuf == null)
-                m_sp.m_compression.ERREXIT1(JERR_OUT_OF_MEMORY, 100);
+                m_sp.m_compression.ERREXIT(J_MESSAGE_CODE.JERR_OUT_OF_MEMORY, 100);
 
-            initInternalBuffer((byte*)newbuf + m_sp.m_jpegtables_length, 1000);
+            //initInternalBuffer(newbuf + m_sp.m_jpegtables_length, 1000);
             m_sp.m_jpegtables = newbuf;
             m_sp.m_jpegtables_length += 1000;
             return true;
@@ -40,7 +40,7 @@ namespace BitMiracle.LibTiff.Internal
         public override void term_destination()
         {
             /* set tables length to number of bytes actually emitted */
-            m_sp.m_jpegtables_length -= freeInBuffer();
+            m_sp.m_jpegtables_length -= freeInBuffer;
         }
     }
 }

@@ -91,6 +91,13 @@ namespace BitMiracle.LibTiff.Internal
         */
         private struct tableEntry
         {
+            public tableEntry(ushort _length, ushort _code, short _runlen)
+            {
+                length = _length;
+                code = _code;
+                runlen = _runlen;
+            }
+
             public ushort length; /* bit length of g3 code */
             public ushort code; /* g3 code */
             public short runlen; /* run length in bits */
