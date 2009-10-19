@@ -13,9 +13,9 @@ namespace BitMiracle.Tiff2Pdf
     /* This struct defines a logical page of a TIFF. */
     struct T2P_PAGE
     {
-        public UInt16 page_directory;
+        public short page_directory;
         public uint page_number;
-        public uint page_tilecount;
+        public int page_tilecount;
         public uint page_extra;
     };
 
