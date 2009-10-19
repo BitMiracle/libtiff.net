@@ -4544,5 +4544,129 @@ namespace BitMiracle.LibTiff
             byte[] bytes = Encoding.ASCII.GetBytes(s);
             fd.Write(bytes, 0, bytes.Length);
         }
+
+        public static int[] byteArrayToInt(byte[] b, int byteStartOffset, int byteCount)
+        {
+            int intCount = byteCount / 4;
+            int[] integers = new int[intCount];
+
+            int byteStopPos = byteStartOffset + intCount * 4;
+            int intPos = 0;
+            for (int i = byteStartOffset; i < byteStopPos; )
+            {
+                int value = b[i++] & 0xFF;
+                value += (b[i++] & 0xFF) << 8;
+                value += (b[i++] & 0xFF) << 16;
+                value += b[i++] << 24;
+                integers[intPos++] = value;
+            }
+
+            return integers;
+        }
+
+        public static void intToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        {
+            int bytePos = byteStartOffset;
+            int intStopPos = intStartOffset + intCount;
+            for (int i = intStartOffset; i < intStopPos; i++)
+            {
+                int value = integers[i];
+                bytes[bytePos++] = (byte)value;
+                bytes[bytePos++] = (byte)(value >> 8);
+                bytes[bytePos++] = (byte)(value >> 16);
+                bytes[bytePos++] = (byte)(value >> 24);
+            }
+        }
+
+        public static uint[] byteArrayToUInt(byte[] b, int byteStartOffset, int byteCount)
+        {
+            int intCount = byteCount / 4;
+            uint[] integers = new uint[intCount];
+
+            int byteStopPos = byteStartOffset + intCount * 4;
+            int intPos = 0;
+            for (int i = byteStartOffset; i < byteStopPos; )
+            {
+                uint value = (uint)(b[i++] & 0xFF);
+                value += (uint)((b[i++] & 0xFF) << 8);
+                value += (uint)((b[i++] & 0xFF) << 16);
+                value += (uint)(b[i++] << 24);
+                integers[intPos++] = value;
+            }
+
+            return integers;
+        }
+
+        public static void uintToByteArray(uint[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        {
+            int bytePos = byteStartOffset;
+            int intStopPos = intStartOffset + intCount;
+            for (int i = intStartOffset; i < intStopPos; i++)
+            {
+                uint value = integers[i];
+                bytes[bytePos++] = (byte)value;
+                bytes[bytePos++] = (byte)(value >> 8);
+                bytes[bytePos++] = (byte)(value >> 16);
+                bytes[bytePos++] = (byte)(value >> 24);
+            }
+        }
+
+        public static short[] byteArrayToInt16(byte[] b, int byteStartOffset, int byteCount)
+        {
+            int intCount = byteCount / 2;
+            short[] integers = new short[intCount];
+
+            int byteStopPos = byteStartOffset + intCount * 2;
+            int intPos = 0;
+            for (int i = byteStartOffset; i < byteStopPos; )
+            {
+                short value = (short)(b[i++] & 0xFF);
+                value += (short)((b[i++] & 0xFF) << 8);
+                integers[intPos++] = value;
+            }
+
+            return integers;
+        }
+
+        public static void int16ToByteArray(Int16[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        {
+            int bytePos = byteStartOffset;
+            int intStopPos = intStartOffset + intCount;
+            for (int i = intStartOffset; i < intStopPos; i++)
+            {
+                short value = integers[i];
+                bytes[bytePos++] = (byte)value;
+                bytes[bytePos++] = (byte)(value >> 8);
+            }
+        }
+
+        public static ushort[] byteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount)
+        {
+            int intCount = byteCount / 2;
+            ushort[] integers = new ushort[intCount];
+
+            int byteStopPos = byteStartOffset + intCount * 2;
+            int intPos = 0;
+            for (int i = byteStartOffset; i < byteStopPos; )
+            {
+                ushort value = (ushort)(b[i++] & 0xFF);
+                value += (ushort)((b[i++] & 0xFF) << 8);
+                integers[intPos++] = value;
+            }
+
+            return integers;
+        }
+
+        public static void uint16ToByteArray(ushort[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        {
+            int bytePos = byteStartOffset;
+            int intStopPos = intStartOffset + intCount;
+            for (int i = intStartOffset; i < intStopPos; i++)
+            {
+                ushort value = integers[i];
+                bytes[bytePos++] = (byte)value;
+                bytes[bytePos++] = (byte)(value >> 8);
+            }
+        }
     }
 }

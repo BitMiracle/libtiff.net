@@ -1505,8 +1505,8 @@ namespace BitMiracle.TiffCP
 
         static void subtract16(byte[] i, byte[] b, int pixels)
         {
-            ushort[] image = byteArrayToUInt16(i, 0, pixels * sizeof(UInt16));
-            ushort[] bias = byteArrayToUInt16(b, 0, pixels * sizeof(UInt16));
+            ushort[] image = Tiff.byteArrayToUInt16(i, 0, pixels * sizeof(UInt16));
+            ushort[] bias = Tiff.byteArrayToUInt16(b, 0, pixels * sizeof(UInt16));
             int imagePos = 0;
             int biasPos = 0;
 
@@ -1517,13 +1517,13 @@ namespace BitMiracle.TiffCP
                 biasPos++;
             }
 
-            uint16ToByteArray(image, 0, pixels, i, 0);
+            Tiff.uint16ToByteArray(image, 0, pixels, i, 0);
         }
 
         static void subtract32(byte[] i, byte[] b, int pixels)
         {
-            uint[] image = byteArrayToUInt(i, 0, pixels * sizeof(uint));
-            uint[] bias = byteArrayToUInt(b, 0, pixels * sizeof(uint));
+            uint[] image = Tiff.byteArrayToUInt(i, 0, pixels * sizeof(uint));
+            uint[] bias = Tiff.byteArrayToUInt(b, 0, pixels * sizeof(uint));
             int imagePos = 0;
             int biasPos = 0;
 
@@ -1534,69 +1534,7 @@ namespace BitMiracle.TiffCP
                 biasPos++;
             }
 
-            uintToByteArray(image, 0, pixels, i, 0);
-        }
-
-        static ushort[] byteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount)
-        {
-            int intCount = byteCount / 2;
-            ushort[] integers = new UInt16[intCount];
-
-            int byteStopPos = byteStartOffset + intCount * 2;
-            int intPos = 0;
-            for (int i = byteStartOffset; i < byteStopPos; )
-            {
-                ushort value = (ushort)(b[i++] & 0xFF);
-                value += (ushort)((b[i++] & 0xFF) << 8);
-                integers[intPos++] = value;
-            }
-
-            return integers;
-        }
-
-        static void uint16ToByteArray(ushort[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
-        {
-            int bytePos = byteStartOffset;
-            int intStopPos = intStartOffset + intCount;
-            for (int i = intStartOffset; i < intStopPos; i++)
-            {
-                UInt16 value = integers[i];
-                bytes[bytePos++] = (byte)value;
-                bytes[bytePos++] = (byte)(value >> 8);
-            }
-        }
-
-        static uint[] byteArrayToUInt(byte[] b, int byteStartOffset, int byteCount)
-        {
-            int intCount = byteCount / 4;
-            uint[] integers = new uint[intCount];
-
-            int byteStopPos = byteStartOffset + intCount * 4;
-            int intPos = 0;
-            for (int i = byteStartOffset; i < byteStopPos; )
-            {
-                uint value = (uint)(b[i++] & 0xFF);
-                value += (uint)((b[i++] & 0xFF) << 8);
-                value += (uint)((b[i++] & 0xFF) << 16);
-                value += (uint)(b[i++] << 24);
-                integers[intPos++] = value;
-            }
-
-            return integers;
-        }
-
-        static void uintToByteArray(uint[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
-        {
-            int bytePos = byteStartOffset;
-            int intStopPos = intStartOffset + intCount;
-            for (int i = intStartOffset; i < intStopPos; i++)
-            {
-                uint value = integers[i];
-                bytes[bytePos++] = (byte)value;
-                bytes[bytePos++] = (byte)(value >> 8);
-                bytes[bytePos++] = (byte)(value >> 16);
-                bytes[bytePos++] = (byte)(value >> 24);
-            }
+            Tiff.uintToByteArray(image, 0, pixels, i, 0);
         }
 
         static bool readContigStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
