@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
+using BitMiracle.LibTiff;
+
 namespace BitMiracle.Tiff2Pdf
 {
-    class Tiff2PdfErrorHandler
+    class Tiff2PdfErrorHandler : TiffErrorHandler
     {
     }
 }

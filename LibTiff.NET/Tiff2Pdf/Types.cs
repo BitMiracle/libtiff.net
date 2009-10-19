@@ -13,10 +13,10 @@ namespace BitMiracle.Tiff2Pdf
     /* This struct defines a logical page of a TIFF. */
     struct T2P_PAGE
     {
-        UInt16 page_directory;
-        uint page_number;
-        uint page_tilecount;
-        uint page_extra;
+        public UInt16 page_directory;
+        public uint page_number;
+        public uint page_tilecount;
+        public uint page_extra;
     };
 
     /* This struct defines a PDF rectangle's coordinates. */
@@ -32,20 +32,20 @@ namespace BitMiracle.Tiff2Pdf
     /* This struct defines a tile of a PDF.  */
     struct T2P_TILE
     {
-        T2P_BOX tile_box;
+        public T2P_BOX tile_box;
     };
 
     /* This struct defines information about the tiles on a PDF page. */
     struct T2P_TILES
     {
-        uint tiles_tilecount;
-        uint tiles_tilewidth;
-        uint tiles_tilelength;
-        uint tiles_tilecountx;
-        uint tiles_tilecounty;
-        uint tiles_edgetilewidth;
-        uint tiles_edgetilelength;
-        T2P_TILE tiles_tiles;
+        public uint tiles_tilecount;
+        public uint tiles_tilewidth;
+        public uint tiles_tilelength;
+        public uint tiles_tilecountx;
+        public uint tiles_tilecounty;
+        public uint tiles_edgetilewidth;
+        public uint tiles_edgetilelength;
+        public T2P_TILE tiles_tiles;
     };
 
     /* This type is of PDF color spaces. */

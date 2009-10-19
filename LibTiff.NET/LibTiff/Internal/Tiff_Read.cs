@@ -28,7 +28,7 @@ namespace BitMiracle.LibTiff
         private const int NOTILE = -1;          /* undefined state */
 
         // remove this
-        internal const int SEEK_SET = 0;
+        public const int SEEK_SET = 0;
         internal const int SEEK_CUR = 1;
         internal const int SEEK_END = 2;
 
