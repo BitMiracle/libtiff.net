@@ -50,19 +50,19 @@ namespace BitMiracle.Tiff2Pdf
         private T2P_PAGE[] m_tiff_pages;
         private T2P_TILES[] m_tiff_tiles;
         private ushort m_tiff_pagecount;
-        private ushort m_tiff_compression;
-        private ushort m_tiff_photometric;
-        private ushort m_tiff_fillorder;
+        private COMPRESSION m_tiff_compression;
+        private PHOTOMETRIC m_tiff_photometric;
+        private FILLORDER m_tiff_fillorder;
         private ushort m_tiff_bitspersample;
         private ushort m_tiff_samplesperpixel;
-        private ushort m_tiff_planar;
+        private PLANARCONFIG m_tiff_planar;
         private uint m_tiff_width;
         private uint m_tiff_length;
         private float m_tiff_xres;
         private float m_tiff_yres;
-        private ushort m_tiff_orientation;
+        private ORIENTATION m_tiff_orientation;
         private int m_tiff_datasize;
-        private ushort m_tiff_resunit;
+        private RESUNIT m_tiff_resunit;
         
         private float m_pdf_xres;
         private float m_pdf_yres;
@@ -75,10 +75,10 @@ namespace BitMiracle.Tiff2Pdf
         private T2P_BOX m_pdf_imagebox;
         private ushort m_pdf_majorversion;
         private ushort m_pdf_minorversion;
-        private uint m_pdf_catalog;
-        private uint m_pdf_pages;
-        private uint m_pdf_info;
-        private uint m_pdf_palettecs;
+        private int m_pdf_catalog;
+        private int m_pdf_pages;
+        private int m_pdf_info;
+        private int m_pdf_palettecs;
         
         private int m_pdf_startxref;
         private byte[] m_pdf_fileid;
@@ -86,7 +86,7 @@ namespace BitMiracle.Tiff2Pdf
         private t2p_cs_t m_pdf_colorspace;
         
         private bool m_pdf_switchdecode;
-        private ushort m_pdf_palettesize;
+        private int m_pdf_palettesize;
         private byte[] m_pdf_palette;
         private int[] m_pdf_labrange = new int[4];
         
@@ -96,14 +96,14 @@ namespace BitMiracle.Tiff2Pdf
         private t2p_transcode_t m_pdf_transcode;
         private t2p_sample_t m_pdf_sample;
         private int[] m_pdf_xrefoffsets;
-        private uint m_pdf_xrefcount;
+        private int m_pdf_xrefcount;
         private ushort m_pdf_page;
         private float[] m_tiff_whitechromaticities = new float[2];
         private float[] m_tiff_primarychromaticities = new float[6];
         private float[][] m_tiff_transferfunction = new float[3][];
         
         private ushort m_tiff_transferfunctioncount;
-        private uint m_pdf_icccs;
+        private int m_pdf_icccs;
         private uint m_tiff_iccprofilelength;
         private byte[] m_tiff_iccprofile;
 
@@ -441,24 +441,33 @@ namespace BitMiracle.Tiff2Pdf
                 m_pdf_xrefcount += 5;
                 input.SetDirectory(m_tiff_pages[i].page_directory);
 
-                ushort xuint16 = 0;
-                if ((input.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, &xuint16) && (xuint16 == PHOTOMETRIC.PHOTOMETRIC_PALETTE)) || input.GetField(TIFFTAG.TIFFTAG_INDEXED, &xuint16))
+                result = input.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+                if ((result != null && ((PHOTOMETRIC)result[0] == PHOTOMETRIC.PHOTOMETRIC_PALETTE)) || input.GetField(TIFFTAG.TIFFTAG_INDEXED) != null)
                 {
                     m_tiff_pages[i].page_extra++;
                     m_pdf_xrefcount++;
                 }
 
-                if (input.GetField(TIFFTAG.TIFFTAG_COMPRESSION, &xuint16))
+                result = input.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+                if (result != null)
                 {
-                    if ((xuint16 == COMPRESSION.COMPRESSION_DEFLATE || xuint16 == COMPRESSION.COMPRESSION_ADOBE_DEFLATE) && ((m_tiff_pages[i].page_tilecount != 0) || input.NumberOfStrips() == 1) && !m_pdf_nopassthrough)
+                    COMPRESSION xuint16 = (COMPRESSION)result[0];
+                    if ((xuint16 == COMPRESSION.COMPRESSION_DEFLATE || xuint16 == COMPRESSION.COMPRESSION_ADOBE_DEFLATE) 
+                        && ((m_tiff_pages[i].page_tilecount != 0) || input.NumberOfStrips() == 1) 
+                        && !m_pdf_nopassthrough)
                     {
                         if (m_pdf_minorversion < 2)
                             m_pdf_minorversion = 2;
                     }
                 }
 
-                if (input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION, &m_tiff_transferfunction[0], &m_tiff_transferfunction[1], &m_tiff_transferfunction[2]))
+                result = input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION);
+                if (result != null)
                 {
+                    m_tiff_transferfunction[0] = result[0] as float[];
+                    m_tiff_transferfunction[1] = result[1] as float[];
+                    m_tiff_transferfunction[2] = result[2] as float[];
+
                     if (m_tiff_transferfunction[1] != m_tiff_transferfunction[0])
                     {
                         m_tiff_transferfunctioncount = 3;
@@ -480,8 +489,12 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_transferfunctioncount = 0;
                 }
 
-                if (input.GetField(TIFFTAG.TIFFTAG_ICCPROFILE, &m_tiff_iccprofilelength, &m_tiff_iccprofile))
+                result = input.GetField(TIFFTAG.TIFFTAG_ICCPROFILE);
+                if (result != null)
                 {
+                    m_tiff_iccprofilelength = (uint)result[0];
+                    m_tiff_iccprofile = result[1] as byte[];
+
                     m_tiff_pages[i].page_extra++;
                     m_pdf_xrefcount++;
                     if (m_pdf_minorversion < 3)
@@ -490,24 +503,24 @@ namespace BitMiracle.Tiff2Pdf
 
                 m_tiff_tiles[i].tiles_tilecount = m_tiff_pages[i].page_tilecount;
 
-                if ((input.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG, &xuint16) != 0) && (xuint16 == PLANARCONFIG.PLANARCONFIG_SEPARATE))
+                result = input.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+                if (result != null && ((PLANARCONFIG)result[0] == PLANARCONFIG.PLANARCONFIG_SEPARATE))
                 {
-                    input.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, &xuint16);
+                    result = input.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+                    int xuint16 = (int)result[0];
                     m_tiff_tiles[i].tiles_tilecount /= xuint16;
                 }
                 
                 if (m_tiff_tiles[i].tiles_tilecount > 0)
                 {
                     m_pdf_xrefcount += (m_tiff_tiles[i].tiles_tilecount - 1) * 2;
-                    input.GetField(TIFFTAG.TIFFTAG_TILEWIDTH, &m_tiff_tiles[i].tiles_tilewidth);
-                    input.GetField(TIFFTAG.TIFFTAG_TILELENGTH, &m_tiff_tiles[i].tiles_tilelength);
+                    result = input.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                    m_tiff_tiles[i].tiles_tilewidth = (int)result[0];
+
+                    input.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                    m_tiff_tiles[i].tiles_tilelength = (int)result[0];
+
                     m_tiff_tiles[i].tiles_tiles = new T2P_TILE [m_tiff_tiles[i].tiles_tilecount];
-                    if (m_tiff_tiles[i].tiles_tiles == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for read_tiff_init, %s", m_tiff_tiles[i].tiles_tilecount * sizeof(T2P_TILE), input.FileName());
-                        m_error = true;
-                        return ;
-                    }
                 }
             }
         }
@@ -531,7 +544,8 @@ namespace BitMiracle.Tiff2Pdf
 
             input.SetDirectory(m_tiff_pages[m_pdf_page].page_directory);
 
-            input.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, &m_tiff_width);
+            object[] result = input.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+            m_tiff_width = (uint)result[0];
             if (m_tiff_width == 0)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with zero width", input.FileName());
@@ -539,7 +553,8 @@ namespace BitMiracle.Tiff2Pdf
                 return ;
             }
 
-            input.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH, &m_tiff_length);
+            result = input.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+            m_tiff_length = (uint)result[0];
             if (m_tiff_length == 0)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with zero length", input.FileName());
@@ -547,14 +562,17 @@ namespace BitMiracle.Tiff2Pdf
                 return ;
             }
 
-            if (input.GetField(TIFFTAG.TIFFTAG_COMPRESSION, &m_tiff_compression) == 0)
+            result = input.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+            if (result == null)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with no compression tag", input.FileName());
                 m_error = true;
-                return ;
-
+                return;
             }
-            if (input.IsCodecConfigured(m_tiff_compression) == 0)
+            else
+                m_tiff_compression = (COMPRESSION)result[0];
+
+            if (!input.IsCodecConfigured(m_tiff_compression))
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with compression type %u:  not configured", input.FileName(), m_tiff_compression);
                 m_error = true;
@@ -562,26 +580,28 @@ namespace BitMiracle.Tiff2Pdf
 
             }
 
-            input.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE, &m_tiff_bitspersample);
-            
+            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            m_tiff_bitspersample = (ushort)result[0];
+
             switch (m_tiff_bitspersample)
             {
-            case 1:
-            case 2:
-            case 4:
-            case 8:
-                break;
-            case 0:
-                Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Image %s has 0 bits per sample, assuming 1", input.FileName());
-                m_tiff_bitspersample = 1;
-                break;
-            default:
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with %u bits per sample", input.FileName(), m_tiff_bitspersample);
-                m_error = true;
-                return ;
+                case 1:
+                case 2:
+                case 4:
+                case 8:
+                    break;
+                case 0:
+                    Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Image %s has 0 bits per sample, assuming 1", input.FileName());
+                    m_tiff_bitspersample = 1;
+                    break;
+                default:
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with %u bits per sample", input.FileName(), m_tiff_bitspersample);
+                    m_error = true;
+                    return ;
             }
 
-            input.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, &m_tiff_samplesperpixel);
+            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+            m_tiff_samplesperpixel = (ushort)result[0];
             if (m_tiff_samplesperpixel > 4)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with %u samples per pixel", input.FileName(), m_tiff_samplesperpixel);
@@ -595,105 +615,118 @@ namespace BitMiracle.Tiff2Pdf
                 m_tiff_samplesperpixel = 1;
             }
 
-            ushort xuint16;
-            if (input.GetField(TIFFTAG.TIFFTAG_SAMPLEFORMAT, &xuint16) != 0)
+            result = input.GetField(TIFFTAG.TIFFTAG_SAMPLEFORMAT);
+            if (result != null)
             {
-                switch (xuint16)
+                SAMPLEFORMAT f = (SAMPLEFORMAT)result[0];
+                switch (f)
                 {
-                case 0:
-                case 1:
-                case 4:
-                    break;
-                default:
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with sample format %u", input.FileName(), xuint16);
-                    m_error = true;
-                    return ;
-                    break;
+                    case 0:
+                    case SAMPLEFORMAT.SAMPLEFORMAT_UINT:
+                    case SAMPLEFORMAT.SAMPLEFORMAT_VOID:
+                        break;
+
+                    default:
+                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with sample format %u", input.FileName(), f);
+                        m_error = true;
+                        return;
                 }
             }
 
-            input.GetFieldDefaulted(TIFFTAG.TIFFTAG_FILLORDER, &m_tiff_fillorder);
+            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_FILLORDER);
+            m_tiff_fillorder = (FILLORDER)result[0];
 
-            if (input.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, &m_tiff_photometric) == 0)
+            result = input.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+            if (result == null)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with no photometric interpretation tag", input.FileName());
                 m_error = true;
-                return ;
-
+                return;
             }
+            else
+                m_tiff_photometric = (PHOTOMETRIC)result[0];
 
-            ushort* r;
-            ushort* g;
-            ushort* b;
-            ushort* a;
+            ushort[] r;
+            ushort[] g;
+            ushort[] b;
+            ushort[] a;
             bool photometric_palette;
             bool photometric_palette_cmyk;
 
             switch (m_tiff_photometric)
             {
-            case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
-            case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
-                if (m_tiff_bitspersample == 1)
-                {
-                    m_pdf_colorspace = t2p_cs_t.T2P_CS_BILEVEL;
-                    if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
-                        m_pdf_switchdecode ^= 1;
-                }
-                else
-                {
-                    m_pdf_colorspace = t2p_cs_t.T2P_CS_GRAY;
-                    if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
-                        m_pdf_switchdecode ^= 1;
-                }
-                break;
-           
-            case PHOTOMETRIC.PHOTOMETRIC_RGB:
-            case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
-                photometric_palette = (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_PALETTE);
-                if (!photometric_palette)
-                {
-                    m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
-                    if (m_tiff_samplesperpixel == 3)
-                        break;
-
-                    if (input.GetField(TIFFTAG.TIFFTAG_INDEXED, &xuint16))
+                case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
+                case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
+                    if (m_tiff_bitspersample == 1)
                     {
-                        if (xuint16 == 1)
-                            photometric_palette = true;
+                        m_pdf_colorspace = t2p_cs_t.T2P_CS_BILEVEL;
+                        if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
+                            m_pdf_switchdecode ^= true;
                     }
-                }
-
-                if (!photometric_palette)
-                {
-                    if (m_tiff_samplesperpixel > 3)
+                    else
                     {
-                        if (m_tiff_samplesperpixel == 4)
+                        m_pdf_colorspace = t2p_cs_t.T2P_CS_GRAY;
+                        if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
+                            m_pdf_switchdecode ^= true;
+                    }
+                    break;
+               
+                case PHOTOMETRIC.PHOTOMETRIC_RGB:
+                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
+                    photometric_palette = (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_PALETTE);
+                    if (!photometric_palette)
+                    {
+                        m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
+                        if (m_tiff_samplesperpixel == 3)
+                            break;
+
+                        result = input.GetField(TIFFTAG.TIFFTAG_INDEXED);
+                        if (result != null)
                         {
-                            m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
+                            if ((int)result[0] == 1)
+                                photometric_palette = true;
+                        }
+                    }
 
-                            ushort* xuint16p;
-                            if (input.GetField(TIFFTAG.TIFFTAG_EXTRASAMPLES, &xuint16, &xuint16p) && xuint16 == 1)
+                    if (!photometric_palette)
+                    {
+                        if (m_tiff_samplesperpixel > 3)
+                        {
+                            if (m_tiff_samplesperpixel == 4)
                             {
-                                if (xuint16p[0] == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA)
+                                m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
+
+                                result = input.GetField(TIFFTAG.TIFFTAG_EXTRASAMPLES);
+                                if (result != null && (int)result[0] == 1)
                                 {
-                                    m_pdf_sample = t2p_sample_t.T2P_SAMPLE_RGBAA_TO_RGB;
+                                    EXTRASAMPLE[] xuint16p = result[1] as EXTRASAMPLE[];
+                                    if (xuint16p[0] == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA)
+                                    {
+                                        m_pdf_sample = t2p_sample_t.T2P_SAMPLE_RGBAA_TO_RGB;
+                                        break;
+                                    }
+
+                                    if (xuint16p[0] == EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
+                                    {
+                                        m_pdf_sample = t2p_sample_t.T2P_SAMPLE_RGBA_TO_RGB;
+                                        break;
+                                    }
+                                    
+                                    Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "RGB image %s has 4 samples per pixel, assuming RGBA", input.FileName());
                                     break;
                                 }
 
-                                if (xuint16p[0] == EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
-                                {
-                                    m_pdf_sample = t2p_sample_t.T2P_SAMPLE_RGBA_TO_RGB;
-                                    break;
-                                }
-                                
-                                Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "RGB image %s has 4 samples per pixel, assuming RGBA", input.FileName());
+                                m_pdf_colorspace = t2p_cs_t.T2P_CS_CMYK;
+                                m_pdf_switchdecode ^= true;
+                                Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "RGB image %s has 4 samples per pixel, assuming inverse CMYK", input.FileName());
                                 break;
                             }
-
-                            m_pdf_colorspace = t2p_cs_t.T2P_CS_CMYK;
-                            m_pdf_switchdecode ^= 1;
-                            Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "RGB image %s has 4 samples per pixel, assuming inverse CMYK", input.FileName());
-                            break;
+                            else
+                            {
+                                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for RGB image %s with %u samples per pixel", input.FileName(), m_tiff_samplesperpixel);
+                                m_error = true;
+                                break;
+                            }
                         }
                         else
                         {
@@ -702,220 +735,240 @@ namespace BitMiracle.Tiff2Pdf
                             break;
                         }
                     }
-                    else
+
+                    if (photometric_palette)
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for RGB image %s with %u samples per pixel", input.FileName(), m_tiff_samplesperpixel);
-                        m_error = true;
-                        break;
-                    }
-                }
-
-                if (photometric_palette)
-                {
-                    if (m_tiff_samplesperpixel != 1)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for palettized image %s with not one sample per pixel", input.FileName());
-                        m_error = true;
-                        return ;
-                    }
-
-                    m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_RGB | t2p_cs_t.T2P_CS_PALETTE);
-                    m_pdf_palettesize = 0x0001 << m_tiff_bitspersample;
-
-                    if (!input.GetField(TIFFTAG.TIFFTAG_COLORMAP, &r, &g, &b))
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Palletized image %s has no color map", input.FileName());
-                        m_error = true;
-                        return ;
-                    }
-
-                    delete m_pdf_palette;
-                    m_pdf_palette = new byte [m_pdf_palettesize * 3];
-
-                    if (m_pdf_palette == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for t2p_read_tiff_image, %s", m_pdf_palettesize, input.FileName());
-                        m_error = true;
-                        return ;
-                    }
-
-                    for (int i = 0; i < m_pdf_palettesize; i++)
-                    {
-                        m_pdf_palette[i * 3] = (byte)(r[i] >> 8);
-                        m_pdf_palette[i * 3 + 1] = (byte)(g[i] >> 8);
-                        m_pdf_palette[i * 3 + 2] = (byte)(b[i] >> 8);
-                    }
-
-                    m_pdf_palettesize *= 3;
-                }
-                break;
-
-            case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
-                photometric_palette_cmyk = false;
-                if (input.GetField(TIFFTAG.TIFFTAG_INDEXED, &xuint16))
-                {
-                    if (xuint16 == 1)
-                        photometric_palette_cmyk = true;
-                }
-
-                if (!photometric_palette_cmyk)
-                {
-                    if (input.GetField(TIFFTAG.TIFFTAG_INKSET, &xuint16))
-                    {
-                        if (xuint16 != INKSET.INKSET_CMYK)
+                        if (m_tiff_samplesperpixel != 1)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s because its inkset is not CMYK", input.FileName());
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for palettized image %s with not one sample per pixel", input.FileName());
+                            m_error = true;
+                            return ;
+                        }
+
+                        m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_RGB | t2p_cs_t.T2P_CS_PALETTE);
+                        m_pdf_palettesize = 0x0001 << m_tiff_bitspersample;
+
+                        result = input.GetField(TIFFTAG.TIFFTAG_COLORMAP);
+                        if (result == null)
+                        {
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Palletized image %s has no color map", input.FileName());
+                            m_error = true;
+                            return;
+                        }
+                        else
+                        {
+                            r = result[0] as ushort[];
+                            g = result[1] as ushort[];
+                            b = result[2] as ushort[];
+                        }
+
+                        m_pdf_palette = new byte [m_pdf_palettesize * 3];
+
+                        if (m_pdf_palette == null)
+                        {
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for t2p_read_tiff_image, %s", m_pdf_palettesize, input.FileName());
+                            m_error = true;
+                            return ;
+                        }
+
+                        for (int i = 0; i < m_pdf_palettesize; i++)
+                        {
+                            m_pdf_palette[i * 3] = (byte)(r[i] >> 8);
+                            m_pdf_palette[i * 3 + 1] = (byte)(g[i] >> 8);
+                            m_pdf_palette[i * 3 + 2] = (byte)(b[i] >> 8);
+                        }
+
+                        m_pdf_palettesize *= 3;
+                    }
+                    break;
+
+                case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
+                    photometric_palette_cmyk = false;
+                    result = input.GetField(TIFFTAG.TIFFTAG_INDEXED);
+                    if (result != null)
+                    {
+                        if ((int)result[0] == 1)
+                            photometric_palette_cmyk = true;
+                    }
+
+                    if (!photometric_palette_cmyk)
+                    {
+                        result = input.GetField(TIFFTAG.TIFFTAG_INKSET);
+                        if (result != null)
+                        {
+                            if ((INKSET)result[0] != INKSET.INKSET_CMYK)
+                            {
+                                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s because its inkset is not CMYK", input.FileName());
+                                m_error = true;
+                                return ;
+                            }
+                        }
+                        
+                        if (m_tiff_samplesperpixel == 4)
+                        {
+                            m_pdf_colorspace = t2p_cs_t.T2P_CS_CMYK;
+                        }
+                        else
+                        {
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s because it has %u samples per pixel", input.FileName(), m_tiff_samplesperpixel);
                             m_error = true;
                             return ;
                         }
                     }
-                    
-                    if (m_tiff_samplesperpixel == 4)
-                    {
-                        m_pdf_colorspace = t2p_cs_t.T2P_CS_CMYK;
-                    }
                     else
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s because it has %u samples per pixel", input.FileName(), m_tiff_samplesperpixel);
-                        m_error = true;
-                        return ;
-                    }
-                }
-                else
-                {
-                    if (m_tiff_samplesperpixel != 1)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for palletized CMYK image %s with not one sample per pixel", input.FileName());
-                        m_error = true;
-                        return ;
-                    }
-                    
-                    m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_CMYK | t2p_cs_t.T2P_CS_PALETTE);
-                    m_pdf_palettesize = 0x0001 << m_tiff_bitspersample;
-                    
-                    if (!input.GetField(TIFFTAG.TIFFTAG_COLORMAP, &r, &g, &b, &a))
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Palletized image %s has no color map", input.FileName());
-                        m_error = true;
-                        return ;
-                    }
-                    
-                    delete m_pdf_palette;
-                    m_pdf_palette = new byte [m_pdf_palettesize * 4];
-                    
-                    if (m_pdf_palette == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for t2p_read_tiff_image, %s", m_pdf_palettesize, input.FileName());
-                        m_error = true;
-                        return ;
-                    }
-                    
-                    for (int i = 0; i < m_pdf_palettesize; i++)
-                    {
-                        m_pdf_palette[i * 4] = (byte)(r[i] >> 8);
-                        m_pdf_palette[i * 4 + 1] = (byte)(g[i] >> 8);
-                        m_pdf_palette[i * 4 + 2] = (byte)(b[i] >> 8);
-                        m_pdf_palette[i * 4 + 3] = (byte)(a[i] >> 8);
-                    }
+                        if (m_tiff_samplesperpixel != 1)
+                        {
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for palletized CMYK image %s with not one sample per pixel", input.FileName());
+                            m_error = true;
+                            return ;
+                        }
+                        
+                        m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_CMYK | t2p_cs_t.T2P_CS_PALETTE);
+                        m_pdf_palettesize = 0x0001 << m_tiff_bitspersample;
+                        
+                        result = input.GetField(TIFFTAG.TIFFTAG_COLORMAP);
+                        if (result == null)
+                        {
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Palletized image %s has no color map", input.FileName());
+                            m_error = true;
+                            return;
+                        }
+                        else
+                        {
+                            r = result[0] as ushort[];
+                            g = result[1] as ushort[];
+                            b = result[2] as ushort[];
+                            a = result[3] as ushort[];
+                        }
+                        
+                        m_pdf_palette = new byte [m_pdf_palettesize * 4];
+                        
+                        if (m_pdf_palette == null)
+                        {
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for t2p_read_tiff_image, %s", m_pdf_palettesize, input.FileName());
+                            m_error = true;
+                            return ;
+                        }
+                        
+                        for (int i = 0; i < m_pdf_palettesize; i++)
+                        {
+                            m_pdf_palette[i * 4] = (byte)(r[i] >> 8);
+                            m_pdf_palette[i * 4 + 1] = (byte)(g[i] >> 8);
+                            m_pdf_palette[i * 4 + 2] = (byte)(b[i] >> 8);
+                            m_pdf_palette[i * 4 + 3] = (byte)(a[i] >> 8);
+                        }
 
-                    m_pdf_palettesize *= 4;
-                }
-                break;
-            
-            case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
-                m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
-                if (m_tiff_samplesperpixel == 1)
-                {
-                    m_pdf_colorspace = t2p_cs_t.T2P_CS_GRAY;
-                    m_tiff_photometric = PHOTOMETRIC.PHOTOMETRIC_MINISBLACK;
-                    break;
-                }
-
-                m_pdf_sample = t2p_sample_t.T2P_SAMPLE_YCBCR_TO_RGB;
-                if (m_pdf_defaultcompression == t2p_compress_t.T2P_COMPRESS_JPEG)
-                    m_pdf_sample = t2p_sample_t.T2P_SAMPLE_NOTHING;
-
-                break;
-
-            case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
-                m_pdf_labrange[0] = -127;
-                m_pdf_labrange[1] = 127;
-                m_pdf_labrange[2] = -127;
-                m_pdf_labrange[3] = 127;
-                m_pdf_sample = t2p_sample_t.T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED;
-                m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
-                break;
-
-            case PHOTOMETRIC.PHOTOMETRIC_ICCLAB:
-                m_pdf_labrange[0] = 0;
-                m_pdf_labrange[1] = 255;
-                m_pdf_labrange[2] = 0;
-                m_pdf_labrange[3] = 255;
-                m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
-                break;
-
-            case PHOTOMETRIC.PHOTOMETRIC_ITULAB:
-                m_pdf_labrange[0] = -85;
-                m_pdf_labrange[1] = 85;
-                m_pdf_labrange[2] = -75;
-                m_pdf_labrange[3] = 124;
-                m_pdf_sample = t2p_sample_t.T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED;
-                m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
-                break;
-
-            case PHOTOMETRIC.PHOTOMETRIC_LOGL:
-            case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with photometric interpretation LogL/LogLuv", input.FileName());
-                m_error = true;
-                return ;
-            default:
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with photometric interpretation %u", input.FileName(), m_tiff_photometric);
-                m_error = true;
-                return ;
-            }
-
-            if (input.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG, &m_tiff_planar))
-            {
-                switch (m_tiff_planar)
-                {
-                case 0:
-                    Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Image %s has planar configuration 0, assuming 1", input.FileName());
-                    m_tiff_planar = PLANARCONFIG.PLANARCONFIG_CONTIG;
-
-                case PLANARCONFIG.PLANARCONFIG_CONTIG:
-                    break;
-                
-                case PLANARCONFIG.PLANARCONFIG_SEPARATE:
-                    m_pdf_sample = t2p_sample_t.T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG;
-                    if (m_tiff_bitspersample != 8)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with separated planar configuration and %u bits per sample", input.FileName(), m_tiff_bitspersample);
-                        m_error = true;
-                        return ;
+                        m_pdf_palettesize *= 4;
                     }
                     break;
                 
-                default:
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with planar configuration %u", input.FileName(), m_tiff_planar);
+                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                    m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
+                    if (m_tiff_samplesperpixel == 1)
+                    {
+                        m_pdf_colorspace = t2p_cs_t.T2P_CS_GRAY;
+                        m_tiff_photometric = PHOTOMETRIC.PHOTOMETRIC_MINISBLACK;
+                        break;
+                    }
+
+                    m_pdf_sample = t2p_sample_t.T2P_SAMPLE_YCBCR_TO_RGB;
+                    if (m_pdf_defaultcompression == t2p_compress_t.T2P_COMPRESS_JPEG)
+                        m_pdf_sample = t2p_sample_t.T2P_SAMPLE_NOTHING;
+
+                    break;
+
+                case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
+                    m_pdf_labrange[0] = -127;
+                    m_pdf_labrange[1] = 127;
+                    m_pdf_labrange[2] = -127;
+                    m_pdf_labrange[3] = 127;
+                    m_pdf_sample = t2p_sample_t.T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED;
+                    m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
+                    break;
+
+                case PHOTOMETRIC.PHOTOMETRIC_ICCLAB:
+                    m_pdf_labrange[0] = 0;
+                    m_pdf_labrange[1] = 255;
+                    m_pdf_labrange[2] = 0;
+                    m_pdf_labrange[3] = 255;
+                    m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
+                    break;
+
+                case PHOTOMETRIC.PHOTOMETRIC_ITULAB:
+                    m_pdf_labrange[0] = -85;
+                    m_pdf_labrange[1] = 85;
+                    m_pdf_labrange[2] = -75;
+                    m_pdf_labrange[3] = 124;
+                    m_pdf_sample = t2p_sample_t.T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED;
+                    m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
+                    break;
+
+                case PHOTOMETRIC.PHOTOMETRIC_LOGL:
+                case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with photometric interpretation LogL/LogLuv", input.FileName());
                     m_error = true;
                     return ;
+                default:
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with photometric interpretation %u", input.FileName(), m_tiff_photometric);
+                    m_error = true;
+                    return ;
+            }
+
+            result = input.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+            if (result != null)
+            {
+                m_tiff_planar = (PLANARCONFIG)result[0];
+                switch (m_tiff_planar)
+                {
+                    case 0:
+                        Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Image %s has planar configuration 0, assuming 1", input.FileName());
+                        m_tiff_planar = PLANARCONFIG.PLANARCONFIG_CONTIG;
+                        break;
+
+                    case PLANARCONFIG.PLANARCONFIG_CONTIG:
+                        break;
+                    
+                    case PLANARCONFIG.PLANARCONFIG_SEPARATE:
+                        m_pdf_sample = t2p_sample_t.T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG;
+                        if (m_tiff_bitspersample != 8)
+                        {
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with separated planar configuration and %u bits per sample", input.FileName(), m_tiff_bitspersample);
+                            m_error = true;
+                            return ;
+                        }
+                        break;
+                    
+                    default:
+                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for %s with planar configuration %u", input.FileName(), m_tiff_planar);
+                        m_error = true;
+                        return;
                 }
             }
 
-            input.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION, &(m_tiff_orientation));
+            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION);
+            m_tiff_orientation = (ORIENTATION)result[0];
+
             if (m_tiff_orientation > ORIENTATION.ORIENTATION_LEFTBOT)
             {
                 Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Image %s has orientation %u, assuming 0", input.FileName(), m_tiff_orientation);
                 m_tiff_orientation = 0;
             }
 
-            if (input.GetField(TIFFTAG.TIFFTAG_XRESOLUTION, &m_tiff_xres) == 0)
-                m_tiff_xres = 0.0;
+            result = input.GetField(TIFFTAG.TIFFTAG_XRESOLUTION);
+            if (result == null)
+                m_tiff_xres = 0.0f;
+            else
+                m_tiff_xres = (float)result[0];
 
-            if (input.GetField(TIFFTAG.TIFFTAG_YRESOLUTION, &m_tiff_yres) == 0)
-                m_tiff_yres = 0.0;
+            result = input.GetField(TIFFTAG.TIFFTAG_YRESOLUTION);
+            if (result == null)
+                m_tiff_yres = 0.0f;
+            else
+                m_tiff_yres = (float)result[0];
 
-            input.GetFieldDefaulted(TIFFTAG.TIFFTAG_RESOLUTIONUNIT, &m_tiff_resunit);
+            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_RESOLUTIONUNIT);
+            m_tiff_resunit = (RESUNIT)result[0];
             if (m_tiff_resunit == RESUNIT.RESUNIT_CENTIMETER)
             {
                 m_tiff_xres *= 2.54F;
@@ -962,7 +1015,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_pdf_defaultcompression == t2p_compress_t.T2P_COMPRESS_JPEG)
             {
-                if (m_pdf_colorspace & t2p_cs_t.T2P_CS_PALETTE)
+                if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_PALETTE) != 0)
                 {
                     m_pdf_sample = (t2p_sample_t)(m_pdf_sample | t2p_sample_t.T2P_SAMPLE_REALIZE_PALETTE);
                     m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace ^ t2p_cs_t.T2P_CS_PALETTE);
@@ -994,8 +1047,13 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            if (input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION, &m_tiff_transferfunction[0], &m_tiff_transferfunction[1], &m_tiff_transferfunction[2]))
+            result = input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION);
+            if (result != null)
             {
+                m_tiff_transferfunction[0] = result[0] as float[];
+                m_tiff_transferfunction[1] = result[1] as float[];
+                m_tiff_transferfunction[2] = result[2] as float[];
+
                 if (m_tiff_transferfunction[1] != m_tiff_transferfunction[0])
                     m_tiff_transferfunctioncount = 3;
                 else
@@ -1006,9 +1064,10 @@ namespace BitMiracle.Tiff2Pdf
                 m_tiff_transferfunctioncount = 0;
             }
 
-            float* xfloatp;
-            if (input.GetField(TIFFTAG.TIFFTAG_WHITEPOINT, &xfloatp))
+            result = input.GetField(TIFFTAG.TIFFTAG_WHITEPOINT);
+            if (result != null)
             {
+                float[] xfloatp = result[0] as float[];
                 m_tiff_whitechromaticities[0] = xfloatp[0];
                 m_tiff_whitechromaticities[1] = xfloatp[1];
                 
@@ -1019,22 +1078,27 @@ namespace BitMiracle.Tiff2Pdf
                     m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace | t2p_cs_t.T2P_CS_CALRGB);
             }
             
-            if (input.GetField(TIFFTAG.TIFFTAG_PRIMARYCHROMATICITIES, &xfloatp) != 0)
+            result = input.GetField(TIFFTAG.TIFFTAG_PRIMARYCHROMATICITIES);
+            if (result != null)
             {
+                float[] xfloatp = result[0] as float[];
                 m_tiff_primarychromaticities[0] = xfloatp[0];
                 m_tiff_primarychromaticities[1] = xfloatp[1];
                 m_tiff_primarychromaticities[2] = xfloatp[2];
                 m_tiff_primarychromaticities[3] = xfloatp[3];
                 m_tiff_primarychromaticities[4] = xfloatp[4];
                 m_tiff_primarychromaticities[5] = xfloatp[5];
+
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_RGB) != 0)
                     m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace | t2p_cs_t.T2P_CS_CALRGB);
             }
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_LAB) != 0)
             {
-                if (input.GetField(TIFFTAG.TIFFTAG_WHITEPOINT, &xfloatp) != 0)
+                result = input.GetField(TIFFTAG.TIFFTAG_WHITEPOINT);
+                if (result != null)
                 {
+                    float[] xfloatp = result[0] as float[];
                     m_tiff_whitechromaticities[0] = xfloatp[0];
                     m_tiff_whitechromaticities[1] = xfloatp[1];
                 }
@@ -1045,8 +1109,11 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            if (input.GetField(TIFFTAG.TIFFTAG_ICCPROFILE, &m_tiff_iccprofilelength, &m_tiff_iccprofile))
+            result = input.GetField(TIFFTAG.TIFFTAG_ICCPROFILE);
+            if (result != null)
             {
+                m_tiff_iccprofilelength = (uint)result[0];
+                m_tiff_iccprofile = result[1] as byte[];
                 m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace | t2p_cs_t.T2P_CS_ICCBASED);
             }
             else
@@ -3360,7 +3427,7 @@ namespace BitMiracle.Tiff2Pdf
         /*
         This function writes a stream dictionary for a PDF stream to output.
         */
-        private int write_pdf_stream_dict(int len, uint number)
+        private int write_pdf_stream_dict(int len, int number)
         {
             int written = writeToFile("/Length ");
             if (len != 0)
@@ -3409,7 +3476,7 @@ namespace BitMiracle.Tiff2Pdf
         /*
         This function writes the beginning of a PDF object to output.
         */
-        private int write_pdf_obj_start(uint number)
+        private int write_pdf_obj_start(int number)
         {
             char buffer[16];
             sprintf(buffer, "%lu", number);
@@ -3429,7 +3496,7 @@ namespace BitMiracle.Tiff2Pdf
         /*
         This function writes a PDF Page structure to output.
         */
-        private int write_pdf_page(uint obj)
+        private int write_pdf_page(int obj)
         {
             int written = writeToFile("<<\n/Type /Page \n/Parent ");
     

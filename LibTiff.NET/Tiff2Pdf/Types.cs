@@ -38,14 +38,14 @@ namespace BitMiracle.Tiff2Pdf
     /* This struct defines information about the tiles on a PDF page. */
     struct T2P_TILES
     {
-        public uint tiles_tilecount;
-        public uint tiles_tilewidth;
-        public uint tiles_tilelength;
+        public int tiles_tilecount;
+        public int tiles_tilewidth;
+        public int tiles_tilelength;
         public uint tiles_tilecountx;
         public uint tiles_tilecounty;
         public uint tiles_edgetilewidth;
         public uint tiles_edgetilelength;
-        public T2P_TILE tiles_tiles;
+        public T2P_TILE[] tiles_tiles;
     };
 
     /* This type is of PDF color spaces. */
