@@ -70,7 +70,7 @@ namespace BitMiracle.LibTiff
             return false;
         }
 
-        public virtual uint Size(thandle_t fd)
+        public virtual int Size(thandle_t fd)
         {
             //return GetFileSize(fd, null);
             return 0;

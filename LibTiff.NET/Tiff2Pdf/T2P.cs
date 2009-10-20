@@ -71,8 +71,8 @@ namespace BitMiracle.Tiff2Pdf
         private float m_pdf_pagelength;
         private float m_pdf_imagewidth;
         private float m_pdf_imagelength;
-        private T2P_BOX m_pdf_mediabox;
-        private T2P_BOX m_pdf_imagebox;
+        private T2P_BOX m_pdf_mediabox = new T2P_BOX();
+        private T2P_BOX m_pdf_imagebox = new T2P_BOX();
         private ushort m_pdf_majorversion;
         private ushort m_pdf_minorversion;
         private int m_pdf_catalog;
@@ -91,7 +91,6 @@ namespace BitMiracle.Tiff2Pdf
         private int[] m_pdf_labrange = new int[4];
         
         private t2p_compress_t m_pdf_compression;
-        private ushort m_pdf_compressionquality;
         
         private t2p_transcode_t m_pdf_transcode;
         private t2p_sample_t m_pdf_sample;
@@ -2949,11 +2948,11 @@ namespace BitMiracle.Tiff2Pdf
 
                 case t2p_compress_t.T2P_COMPRESS_ZIP:
                     written += writeToFile("/FlateDecode ");
-                    if ((m_pdf_compressionquality % 100) != 0)
+                    if ((m_pdf_defaultcompressionquality % 100) != 0)
                     {
                         written += writeToFile("/DecodeParms ");
                         written += writeToFile("<< /Predictor ");
-                        buffer = string.Format("{0}", m_pdf_compressionquality % 100);
+                        buffer = string.Format("{0}", m_pdf_defaultcompressionquality % 100);
                         written += writeToFile(buffer);
                         written += writeToFile(" /Columns ");
                         buffer = string.Format("{0}", m_tiff_width);

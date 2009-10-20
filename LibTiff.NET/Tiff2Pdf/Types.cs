@@ -30,9 +30,9 @@ namespace BitMiracle.Tiff2Pdf
     };
 
     /* This struct defines a tile of a PDF.  */
-    struct T2P_TILE
+    class T2P_TILE
     {
-        public T2P_BOX tile_box;
+        public T2P_BOX tile_box = new T2P_BOX();
     };
 
     /* This struct defines information about the tiles on a PDF page. */

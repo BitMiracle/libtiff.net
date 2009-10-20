@@ -449,6 +449,8 @@ namespace BitMiracle.Tiff2Pdf
                                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "An error occurred creating output PDF file");
                                 failed = true;
                             }
+
+                            t2p.m_outputfile.Dispose();
                         }
                     }
                 }
