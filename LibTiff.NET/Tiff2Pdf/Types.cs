@@ -11,12 +11,12 @@ namespace BitMiracle.Tiff2Pdf
     }
 
     /* This struct defines a logical page of a TIFF. */
-    struct T2P_PAGE
+    class T2P_PAGE
     {
         public short page_directory;
-        public uint page_number;
+        public int page_number;
         public int page_tilecount;
-        public uint page_extra;
+        public int page_extra;
     };
 
     /* This struct defines a PDF rectangle's coordinates. */
@@ -41,10 +41,10 @@ namespace BitMiracle.Tiff2Pdf
         public int tiles_tilecount;
         public int tiles_tilewidth;
         public int tiles_tilelength;
-        public uint tiles_tilecountx;
-        public uint tiles_tilecounty;
-        public uint tiles_edgetilewidth;
-        public uint tiles_edgetilelength;
+        public int tiles_tilecountx;
+        public int tiles_tilecounty;
+        public int tiles_edgetilewidth;
+        public int tiles_edgetilelength;
         public T2P_TILE[] tiles_tiles;
     };
 
