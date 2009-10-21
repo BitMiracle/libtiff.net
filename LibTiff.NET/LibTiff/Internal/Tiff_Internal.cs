@@ -12,10 +12,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 using BitMiracle.LibTiff.Internal;
-
-using thandle_t = System.Object;
 
 namespace BitMiracle.LibTiff
 {
@@ -74,7 +73,7 @@ namespace BitMiracle.LibTiff
         internal int m_rawcp; /* current spot in raw buffer */
         internal int m_rawcc; /* bytes unread from raw buffer */
 
-        internal thandle_t m_clientdata; /* callback parameter */ // should become object reference
+        internal object m_clientdata; /* callback parameter */
 
         /* post-decoding support */
         internal PostDecodeMethodType m_postDecodeMethod;  /* post decoding method type */
@@ -132,6 +131,9 @@ namespace BitMiracle.LibTiff
         private static TiffErrorHandler m_errorHandler;
         private TiffErrorHandler m_defaultErrorHandler;
 
+        private bool m_disposed = false;
+        private Stream m_fileStream = null;
+ 
         /*
         * Client Tag extension support (from Niles Ritter).
         */
@@ -207,6 +209,33 @@ namespace BitMiracle.LibTiff
                 // install default
                 m_defaultErrorHandler = new TiffErrorHandler();
                 m_errorHandler = m_defaultErrorHandler;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!this.m_disposed)
+            {
+                // If disposing equals true, dispose all managed
+                // and unmanaged resources.
+                if (disposing)
+                {
+                    // Dispose managed resources.
+                    if (m_fileStream != null)
+                        m_fileStream.Dispose();
+                }
+
+                // Call the appropriate methods to clean up
+                // unmanaged resources here.
+
+                // Note disposing has been done.
+                m_disposed = true;
             }
         }
 

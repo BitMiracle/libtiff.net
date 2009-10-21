@@ -1,4 +1,15 @@
-﻿/*
+﻿/* Copyright (C) 2008-2009, Bit Miracle
+ * http://www.bitmiracle.com
+ * 
+ * This software is based in part on the work of the Sam Leffler, Silicon 
+ * Graphics, Inc. and contributors.
+ *
+ * Copyright (c) 1988-1997 Sam Leffler
+ * Copyright (c) 1991-1997 Silicon Graphics, Inc.
+ * For conditions of distribution and use, see the accompanying README file.
+ */
+
+/*
 * CIE L*a*b* to CIE XYZ and CIE XYZ to RGB conversion routines are taken
 * from the VIPS library (http://www.vips.ecs.soton.ac.uk) with
 * the permission of John Cupitt, the VIPS author.

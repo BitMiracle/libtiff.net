@@ -14,8 +14,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-using thandle_t = System.Object;
-
 namespace BitMiracle.LibTiff
 {
     public class TiffErrorHandler
@@ -32,7 +30,7 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public virtual void ErrorHandlerExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
+        public virtual void ErrorHandlerExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
         {
         }
 
@@ -49,7 +47,7 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public virtual void WarningHandlerExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
+        public virtual void WarningHandlerExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
         {
         }
     }

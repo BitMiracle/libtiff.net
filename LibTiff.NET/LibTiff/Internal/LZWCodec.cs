@@ -1,5 +1,15 @@
-﻿/*
- * TIFF Library.
+﻿/* Copyright (C) 2008-2009, Bit Miracle
+ * http://www.bitmiracle.com
+ * 
+ * This software is based in part on the work of the Sam Leffler, Silicon 
+ * Graphics, Inc. and contributors.
+ *
+ * Copyright (c) 1988-1997 Sam Leffler
+ * Copyright (c) 1991-1997 Silicon Graphics, Inc.
+ * For conditions of distribution and use, see the accompanying README file.
+ */
+
+/*
  * Rev 5.0 Lempel-Ziv & Welch Compression Support
  *
  * This code is derived from the compress program whose code is
@@ -28,8 +38,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 
-using hcode_t = System.UInt16; /* codes fit in 16 bits */
-
 namespace BitMiracle.LibTiff.Internal
 {
     class LZWCodec : CodecWithPredictor
@@ -50,11 +58,11 @@ namespace BitMiracle.LibTiff.Internal
         private const ushort BITS_MAX = 12;      /* max of 12 bit strings */
 
         /* predefined codes */
-        private const hcode_t CODE_CLEAR = 256;     /* code to clear string table */
-        private const hcode_t CODE_EOI = 257;     /* end-of-information code */
-        private const hcode_t CODE_FIRST = 258;     /* first free code entry */
-        private const hcode_t CODE_MAX = ((1 << BITS_MAX) - 1);
-        private const hcode_t CODE_MIN = ((1 << BITS_MIN) - 1);
+        private const ushort CODE_CLEAR = 256;     /* code to clear string table */
+        private const ushort CODE_EOI = 257;     /* end-of-information code */
+        private const ushort CODE_FIRST = 258;     /* first free code entry */
+        private const ushort CODE_MAX = ((1 << BITS_MAX) - 1);
+        private const ushort CODE_MIN = ((1 << BITS_MIN) - 1);
 
         private const int HSIZE = 9001;       /* 91% occupancy */
         private const int HSHIFT = (13 - 8);
@@ -80,7 +88,7 @@ namespace BitMiracle.LibTiff.Internal
         private struct hash_t
         {
             public int hash;
-            public hcode_t code;
+            public ushort code;
         };
 
         private bool m_compatDecode;
@@ -374,7 +382,7 @@ namespace BitMiracle.LibTiff.Internal
 
             while (occ > 0)
             {
-                hcode_t code;
+                ushort code;
                 NextCode(out code, false);
                 if (code == CODE_EOI)
                     break;
@@ -887,8 +895,8 @@ namespace BitMiracle.LibTiff.Internal
                     }
 
                     PutNextCode(m_enc_oldcode);
-                    m_enc_oldcode = (hcode_t)c;
-                    m_enc_hashtab[h].code = (hcode_t)m_free_ent;
+                    m_enc_oldcode = (ushort)c;
+                    m_enc_hashtab[h].code = (ushort)m_free_ent;
                     m_free_ent++;
                     m_enc_hashtab[h].hash = fcode;
                     if (m_free_ent == CODE_MAX - 1)
@@ -1050,7 +1058,7 @@ namespace BitMiracle.LibTiff.Internal
                 m_tif.m_rawcp++;
                 m_nextbits += 8;
             }
-            code = (hcode_t)((m_nextdata >> (m_nextbits - m_nbits)) & m_dec_nbitsmask);
+            code = (ushort)((m_nextdata >> (m_nextbits - m_nbits)) & m_dec_nbitsmask);
             m_nextbits -= m_nbits;
         }
 
@@ -1065,7 +1073,7 @@ namespace BitMiracle.LibTiff.Internal
                 m_tif.m_rawcp++;
                 m_nextbits += 8;
             }
-            code = (hcode_t)(m_nextdata & m_dec_nbitsmask);
+            code = (ushort)(m_nextdata & m_dec_nbitsmask);
             m_nextdata >>= m_nbits;
             m_nextbits -= m_nbits;
         }

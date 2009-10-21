@@ -14,11 +14,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using System.Collections;
 
 using BitMiracle.LibTiff.Internal;
-
-using thandle_t = System.Object;
-using System.Collections;
 
 namespace BitMiracle.LibTiff
 {
@@ -38,7 +36,7 @@ namespace BitMiracle.LibTiff
     /// For Big TIFF design notes see the following link
     /// http://gdal.maptools.org/twiki/bin/view/libtiff/BigTIFFDesign
     /// </summary>
-    public partial class Tiff
+    public partial class Tiff : IDisposable
     {
         /// <summary>
         /// Support strip chopping (whether or not to convert single-strip 
@@ -87,8 +85,6 @@ namespace BitMiracle.LibTiff
         internal const short TIFF_VARIABLE = -1; /* marker for variable length tags */
         internal const short TIFF_SPP = -2; /* marker for SamplesPerPixel tags */
         internal const short TIFF_VARIABLE2 = -3; /* marker for uint var-length tags */
-
-        //public ~Tiff();
 
         public static string GetVersion()
         {
@@ -331,14 +327,12 @@ namespace BitMiracle.LibTiff
             if (tif == null)
                 fd.Dispose();
             else
-            {
-                //    tif.m_userStream = false; // clear flag, so stream will be deleted
-            }
+                tif.m_fileStream = fd;
 
             return tif;
         }
 
-        public static Tiff ClientOpen(string name, string mode, thandle_t clientdata, TiffStream stream)
+        public static Tiff ClientOpen(string name, string mode, object clientdata, TiffStream stream)
         {
             const string module = "ClientOpen";
 
@@ -375,7 +369,6 @@ namespace BitMiracle.LibTiff
             }
 
             tif.m_stream = stream;
-            //tif.m_userStream = true;
 
             /* setup default state */
             tif.m_currentCodec = tif.m_builtInCodecs[0];
@@ -664,15 +657,18 @@ namespace BitMiracle.LibTiff
             if (m_fieldinfo == null)
                 return null;
 
-            /* NB: use sorted search (e.g. binary search) */
-            //TiffFieldInfo key = new TiffFieldInfo(0, 0, 0, TiffDataType.TIFF_NOTYPE, 0, false, false, null);
-            //key.field_name = (char*)field_name;
-            //key.field_type = dt;
-            //TiffFieldInfo* pkey = &key;
+            m_foundfield = null;
 
-            //TiffFieldInfo** ret = (TiffFieldInfo**)_lfind(&pkey, m_fieldinfo, &m_nfields, sizeof(TiffFieldInfo*), tagNameCompare);
-            //return m_foundfield = (ret ? *ret : null);
-            return null;
+            foreach (TiffFieldInfo info in m_fieldinfo)
+            {
+                if (info != null && info.field_name == field_name && (dt == TiffDataType.TIFF_ANY || dt == info.field_type))
+                {
+                    m_foundfield = info;
+                    break;
+                }
+            }
+
+            return m_foundfield;
         }
 
         public TiffFieldInfo FieldWithTag(TIFFTAG tag)
@@ -2152,7 +2148,7 @@ namespace BitMiracle.LibTiff
         /*
         * Return open file's clientdata.
         */
-        public thandle_t Clientdata()
+        public object Clientdata()
         {
             return m_clientdata;
         }
@@ -2160,9 +2156,9 @@ namespace BitMiracle.LibTiff
         /*
         * Set open file's clientdata, and return previous value.
         */
-        public thandle_t SetClientdata(thandle_t newvalue)
+        public object SetClientdata(object newvalue)
         {
-            thandle_t m = m_clientdata;
+            object m = m_clientdata;
             m_clientdata = newvalue;
             return m;
         }
@@ -3711,10 +3707,10 @@ namespace BitMiracle.LibTiff
         public static void Error(Tiff tif, string module, string fmt, params object[] ap)
         {
             m_errorHandler.ErrorHandler(tif, module, fmt, ap);
-            m_errorHandler.ErrorHandlerExt(tif, 0, module, fmt, ap);
+            m_errorHandler.ErrorHandlerExt(tif, null, module, fmt, ap);
         }
 
-        public static void ErrorExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
+        public static void ErrorExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
         {
             m_errorHandler.ErrorHandler(tif, module, fmt, ap);
             m_errorHandler.ErrorHandlerExt(tif, fd, module, fmt, ap);
@@ -3723,10 +3719,10 @@ namespace BitMiracle.LibTiff
         public static void Warning(Tiff tif, string module, string fmt, params object[] ap)
         {
             m_errorHandler.WarningHandler(tif, module, fmt, ap);
-            m_errorHandler.WarningHandlerExt(tif, 0, module, fmt, ap);
+            m_errorHandler.WarningHandlerExt(tif, null, module, fmt, ap);
         }
 
-        public static void WarningExt(Tiff tif, thandle_t fd, string module, string fmt, params object[] ap)
+        public static void WarningExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
         {
             m_errorHandler.WarningHandler(tif, module, fmt, ap);
             m_errorHandler.WarningHandlerExt(tif, fd, module, fmt, ap);
@@ -3737,7 +3733,7 @@ namespace BitMiracle.LibTiff
             Error(null, module, fmt, ap);
         }
 
-        public static void ErrorExt(thandle_t fd, string module, string fmt, params object[] ap)
+        public static void ErrorExt(object fd, string module, string fmt, params object[] ap)
         {
             ErrorExt(null, fd, module, fmt, ap);
         }
@@ -3747,7 +3743,7 @@ namespace BitMiracle.LibTiff
             Warning(null, module, fmt, ap);
         }
 
-        public static void WarningExt(thandle_t fd, string module, string fmt, params object[] ap)
+        public static void WarningExt(object fd, string module, string fmt, params object[] ap)
         {
             WarningExt(null, fd, module, fmt, ap);
         }

@@ -14,20 +14,18 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-using thandle_t = System.Object;
-
 namespace BitMiracle.LibTiff
 {
     public class TiffStream
     {
-        public virtual int Read(thandle_t fd, byte[] buf, int offset, int size)
+        public virtual int Read(object fd, byte[] buf, int offset, int size)
         {
             Stream s = fd as Stream;
             int read = s.Read(buf, offset, size);
             return read;
         }
 
-        public virtual int Write(thandle_t fd, byte[] buf, int size)
+        public virtual int Write(object fd, byte[] buf, int size)
         {
             //DWORD dwSizeWritten;
             //if (!WriteFile(fd, buf, size, &dwSizeWritten, null))
@@ -37,7 +35,7 @@ namespace BitMiracle.LibTiff
             return 0;
         }
 
-        public virtual long Seek(thandle_t fd, long off, SeekOrigin whence)
+        public virtual long Seek(object fd, long off, SeekOrigin whence)
         {
             /* we use this as a special code, so avoid accepting it */
             if (off == -1)
@@ -47,13 +45,13 @@ namespace BitMiracle.LibTiff
             return s.Seek(off, whence);
         }
 
-        public virtual bool Close(thandle_t fd)
+        public virtual bool Close(object fd)
         {
             //return (CloseHandle(fd) ? true : false);
             return false;
         }
 
-        public virtual int Size(thandle_t fd)
+        public virtual int Size(object fd)
         {
             //return GetFileSize(fd, null);
             return 0;

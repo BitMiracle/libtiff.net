@@ -31,7 +31,7 @@ namespace BitMiracle.LibTiff
         /* tag set routine */
         public virtual bool vsetfield(Tiff tif, TIFFTAG tag, params object[] ap)
         {
-            const string module = "_TIFFVSetField";
+            const string module = "vsetfield";
 
             TiffDirectory td = tif.m_dir;
             bool status = true;
