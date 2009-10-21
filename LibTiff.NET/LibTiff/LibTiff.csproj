@@ -55,6 +55,7 @@
     <Compile Include="Internal\JpegTablesSource.cs" />
     <Compile Include="Internal\LZWCodec.cs" />
     <Compile Include="Internal\PackBitsCodec.cs" />
+    <Compile Include="Internal\TagCompare.cs" />
     <Compile Include="Internal\TiffDirectory.cs" />
     <Compile Include="Internal\TiffDirEntry.cs" />
     <Compile Include="Internal\TiffHeader.cs" />

@@ -135,7 +135,7 @@ namespace BitMiracle.LibTiff
         /*
         * Client Tag extension support (from Niles Ritter).
         */
-        //private static TiffExtendProc m_extender;
+        private static TiffExtendProc m_extender;
 
         private TiffStream m_stream; // stream used for read|write|etc.
         //private bool m_userStream; // if true, then stream in use is provided by user.

@@ -297,7 +297,14 @@ namespace BitMiracle.LibTiff
             MergeFieldInfo(info, n);
         }
 
-        //private static int tagCompare(const void* a, const void* b);
+        //private static bool tagCompare(TiffFieldInfo info)
+        //{
+        //    if (info != null && info.field_tag == tag && (dt == TiffDataType.TIFF_ANY || dt == info.field_type))
+        //        return true;
+
+        //    return false;
+        //}
+
         //private static int tagNameCompare(const void* a, const void* b);
 
         private void printFieldInfo(Stream fd)

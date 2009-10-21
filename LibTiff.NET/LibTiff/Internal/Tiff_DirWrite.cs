@@ -16,9 +16,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
+using System.IO;
 
 using BitMiracle.LibTiff.Internal;
-using System.Diagnostics;
 
 namespace BitMiracle.LibTiff
 {
@@ -152,7 +153,7 @@ namespace BitMiracle.LibTiff
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
-            seekFile(m_dataoff, SEEK_SET);
+            seekFile(m_dataoff, SeekOrigin.Begin);
             m_curdir++;
             int dir = 0;
 
@@ -389,8 +390,8 @@ namespace BitMiracle.LibTiff
                 SwabShort(ref dircount);
                 SwabLong(ref diroff);
             }
-            
-            seekFile(m_diroff, SEEK_SET);
+
+            seekFile(m_diroff, SeekOrigin.Begin);
             if (!writeUInt16OK(dircount))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
@@ -1248,7 +1249,7 @@ namespace BitMiracle.LibTiff
         {
             const string module = "linkDirectory";
 
-            m_diroff = (seekFile(0, SEEK_END) + 1) & ~1;
+            m_diroff = (seekFile(0, SeekOrigin.End) + 1) & ~1;
             int diroff = m_diroff;
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabLong(ref diroff);
@@ -1258,7 +1259,7 @@ namespace BitMiracle.LibTiff
              */
             if ((m_flags & TIFF_INSUBIFD) != 0)
             {
-                seekFile(m_subifdoff, SEEK_SET);
+                seekFile(m_subifdoff, SeekOrigin.Begin);
                 if (!writeIntOK(diroff))
                 {
                     ErrorExt(this, m_clientdata, module, "%s: Error writing SubIFD directory link", m_name);
@@ -1286,7 +1287,7 @@ namespace BitMiracle.LibTiff
                  * First directory, overwrite offset in header.
                  */
                 m_header.tiff_diroff = m_diroff;
-                seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SEEK_SET);
+                seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SeekOrigin.Begin);
                 if (!writeIntOK(diroff))
                 {
                     ErrorExt(this, m_clientdata, m_name, "Error writing TIFF header");
@@ -1311,8 +1312,8 @@ namespace BitMiracle.LibTiff
                 
                 if ((m_flags & Tiff.TIFF_SWAB) != 0)
                     SwabShort(ref dircount);
-                
-                seekFile(dircount * TiffDirEntry.SizeInBytes, SEEK_CUR);
+
+                seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
                 if (!readIntOK(out nextdir))
                 {
                     ErrorExt(this, m_clientdata, module, "Error fetching directory link");
@@ -1324,8 +1325,8 @@ namespace BitMiracle.LibTiff
             }
             while (nextdir != 0);
 
-            int off = seekFile(0, SEEK_CUR); /* get current offset */
-            seekFile(off - sizeof(uint), SEEK_SET);
+            int off = seekFile(0, SeekOrigin.Current); /* get current offset */
+            seekFile(off - sizeof(uint), SeekOrigin.Begin);
             if (!writeIntOK(diroff))
             {
                 ErrorExt(this, m_clientdata, module, "Error writing directory link");

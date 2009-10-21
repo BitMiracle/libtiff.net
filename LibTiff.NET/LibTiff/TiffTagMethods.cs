@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff
             TiffDirectory td = tif.m_dir;
             bool status = true;
             uint v32 = 0;
-            uint v = 0;
+            int v = 0;
 
             bool end = false;
             bool badvalue = false;
@@ -80,7 +80,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
                 case TIFFTAG.TIFFTAG_COMPRESSION:
-                    v = (uint)ap[0] & 0xffff;
+                    v = (int)ap[0] & 0xffff;
                     COMPRESSION comp = (COMPRESSION)v;
                     /*
                     * If we're changing the compression scheme, the notify the
@@ -112,7 +112,7 @@ namespace BitMiracle.LibTiff
                     td.td_threshholding = (THRESHHOLD)ap[0];
                     break;
                 case TIFFTAG.TIFFTAG_FILLORDER:
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     FILLORDER fo = (FILLORDER)v;
                     if (fo != FILLORDER.FILLORDER_LSB2MSB && fo != FILLORDER.FILLORDER_MSB2LSB)
                     {
@@ -123,7 +123,7 @@ namespace BitMiracle.LibTiff
                     td.td_fillorder = fo;
                     break;
                 case TIFFTAG.TIFFTAG_ORIENTATION:
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     ORIENTATION or = (ORIENTATION)v;
                     if (or < ORIENTATION.ORIENTATION_TOPLEFT || ORIENTATION.ORIENTATION_LEFTBOT < or)
                     {
@@ -135,7 +135,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFFTAG.TIFFTAG_SAMPLESPERPIXEL:
                     /* XXX should cross check -- e.g. if pallette, then 1 */
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     if (v == 0)
                     {
                         badvalue = true;
@@ -178,7 +178,7 @@ namespace BitMiracle.LibTiff
                     td.td_yresolution = (float)ap[0];
                     break;
                 case TIFFTAG.TIFFTAG_PLANARCONFIG:
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     PLANARCONFIG pc = (PLANARCONFIG)v;
                     if (pc != PLANARCONFIG.PLANARCONFIG_CONTIG && pc != PLANARCONFIG.PLANARCONFIG_SEPARATE)
                     {
@@ -194,7 +194,7 @@ namespace BitMiracle.LibTiff
                     td.td_yposition = (float)ap[0];
                     break;
                 case TIFFTAG.TIFFTAG_RESOLUTIONUNIT:
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     RESUNIT ru = (RESUNIT)v;
                     if (ru < RESUNIT.RESUNIT_NONE || RESUNIT.RESUNIT_CENTIMETER < ru)
                     {
@@ -279,7 +279,7 @@ namespace BitMiracle.LibTiff
                     td.td_tiledepth = (int)v32;
                     break;
                 case TIFFTAG.TIFFTAG_DATATYPE:
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     SAMPLEFORMAT sf = SAMPLEFORMAT.SAMPLEFORMAT_VOID;
                     switch (v)
                     {
@@ -305,7 +305,7 @@ namespace BitMiracle.LibTiff
 
                     break;
                 case TIFFTAG.TIFFTAG_SAMPLEFORMAT:
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     sf = (SAMPLEFORMAT)v;
                     if (sf < SAMPLEFORMAT.SAMPLEFORMAT_UINT || SAMPLEFORMAT.SAMPLEFORMAT_COMPLEXIEEEFP < sf)
                     {
@@ -351,16 +351,16 @@ namespace BitMiracle.LibTiff
                     td.td_ycbcrsubsampling[1] = (ushort)ap[1];
                     break;
                 case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
-                    v = (uint)((td.td_samplesperpixel - td.td_extrasamples) > 1 ? 3 : 1);
+                    v = ((td.td_samplesperpixel - td.td_extrasamples) > 1 ? 3 : 1);
                     for (uint i = 0; i < v; i++)
                     {
                         Tiff.setShortArray(out td.td_transferfunction[i], ap[0] as ushort[], 1 << td.td_bitspersample);
                     }
                     break;
                 case TIFFTAG.TIFFTAG_INKNAMES:
-                    v = (uint)ap[0];
+                    v = (int)ap[0];
                     string s = ap[1] as string;
-                    v = (uint)checkInkNamesString(tif, (int)v, s);
+                    v = checkInkNamesString(tif, (int)v, s);
                     status = v > 0;
                     if (v > 0)
                     {
@@ -869,12 +869,12 @@ namespace BitMiracle.LibTiff
         /*
         * Install extra samples information.
         */
-        private static bool setExtraSamples(TiffDirectory td, ref uint v, params object[] ap)
+        private static bool setExtraSamples(TiffDirectory td, ref int v, params object[] ap)
         {
             /* XXX: Unassociated alpha data == 999 is a known Corel Draw bug, see below */
             const ushort EXTRASAMPLE_COREL_UNASSALPHA = 999;
 
-            v = (uint)ap[0];
+            v = (int)ap[0];
             if (v > td.td_samplesperpixel)
                 return false;
 

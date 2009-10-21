@@ -18,6 +18,7 @@ using System.Diagnostics;
 using BitMiracle.LibTiff.Internal;
 
 using thandle_t = System.Object;
+using System.Collections;
 
 namespace BitMiracle.LibTiff
 {
@@ -68,6 +69,8 @@ namespace BitMiracle.LibTiff
          * version checking should be done based on the
          * string returned by TIFFGetVersion.
          */
+
+        public delegate void TiffExtendProc(Tiff tif);
 
         public const int TIFF_VERSION = 42;
         public const int TIFF_BIGTIFF_VERSION = 43;
@@ -300,7 +303,7 @@ namespace BitMiracle.LibTiff
         /*
         * Open a TIFF file for read/writing.
         */
-        public static Tiff Open(string name, string mode)
+        public static Tiff Open(string fileName, string mode)
         {
             const string module = "Open";
 
@@ -311,34 +314,26 @@ namespace BitMiracle.LibTiff
             FileStream fd = null;
             try
             {
-                fd = File.Open(name, m, a);
+                fd = File.Open(fileName, m, a);
             }
             catch (System.Exception)
             {
                 fd = null;
             }
-            
+
             if (fd == null)
             {
-                ErrorExt(null, 0, module, "{0}: Cannot open", name);
+                ErrorExt(null, 0, module, "{0}: Cannot open", fileName);
                 return null;
             }
 
-            Tiff tif = FdOpen(fd, name, mode);
+            Tiff tif = ClientOpen(fileName, mode, fd, new TiffStream());
             if (tif == null)
                 fd.Dispose();
-
-            return tif;
-        }
-
-        /*
-        * Open a TIFF file descriptor for read/writing.
-        */
-        public static Tiff FdOpen(object ifd, string name, string mode)
-        {
-            Tiff tif = ClientOpen(name, mode, ifd, new TiffStream());
-            //if (tif != null)
-            //    tif.m_userStream = false; // clear flag, so stream will be deleted
+            else
+            {
+                //    tif.m_userStream = false; // clear flag, so stream will be deleted
+            }
 
             return tif;
         }
@@ -347,9 +342,15 @@ namespace BitMiracle.LibTiff
         {
             const string module = "ClientOpen";
 
-            FileMode m;
-            FileAccess a;
-            getMode(mode, module, out m, out a);
+            if (mode == null || mode.Length == 0)
+            {
+                ErrorExt(null, clientdata, module, "{0}: mode string should contain at least one char", name);
+                return null;
+            }
+
+            FileMode fm;
+            FileAccess fa;
+            int m = getMode(mode, module, out fm, out fa);
 
             Tiff tif = new Tiff();
             if (tif == null)
@@ -360,7 +361,7 @@ namespace BitMiracle.LibTiff
 
             tif.m_name = name.Clone() as string;
 
-            //tif.m_mode = m & ~(O_CREAT | O_TRUNC);
+            tif.m_mode = m & ~(O_CREAT | O_TRUNC);
             tif.m_curdir = -1; /* non-existent directory */
             tif.m_curoff = 0;
             tif.m_curstrip = -1; /* invalid strip */
@@ -386,8 +387,8 @@ namespace BitMiracle.LibTiff
              */
             tif.m_flags = (uint)FILLORDER.FILLORDER_MSB2LSB;
 
-            //if (m == O_RDONLY || m == O_RDWR)
-            //    tif.m_flags |= STRIPCHOP_DEFAULT;
+            if (m == O_RDONLY || m == O_RDWR)
+                tif.m_flags |= STRIPCHOP_DEFAULT;
 
             /*
              * Process library-specific flags in the open mode string.
@@ -438,8 +439,8 @@ namespace BitMiracle.LibTiff
                 switch (mode[i])
                 {
                     case 'b':
-                        //if ((m & O_CREAT) != 0)
-                        //    tif.m_flags |= Tiff.TIFF_SWAB;
+                        if ((m & O_CREAT) != 0)
+                            tif.m_flags |= Tiff.TIFF_SWAB;
                         break;
                     case 'l':
                         break;
@@ -488,14 +489,7 @@ namespace BitMiracle.LibTiff
 
                 tif.m_header.tiff_diroff = 0; /* filled in later */
 
-                /*
-                 * The doc for "fopen" for some STD_C_LIBs says that if you 
-                 * open a file for modify ("+"), then you must fseek (or 
-                 * fflush?) between any freads and fwrites.  This is not
-                 * necessary on most systems, but has been shown to be needed
-                 * on Solaris. 
-                 */
-                tif.seekFile(0, SEEK_SET);
+                tif.seekFile(0, SeekOrigin.Begin);
 
                 if (!tif.writeHeaderOK(tif.m_header))
                 {
@@ -634,7 +628,8 @@ namespace BitMiracle.LibTiff
             }
 
             /* Sort the field info by tag number */
-            //qsort(m_fieldinfo, m_nfields, sizeof(TiffFieldInfo*), tagCompare);
+            IComparer myComparer = new TagCompare();
+            Array.Sort(m_fieldinfo, myComparer);
         }
 
         public TiffFieldInfo FindFieldInfo(TIFFTAG tag, TiffDataType dt)
@@ -646,15 +641,18 @@ namespace BitMiracle.LibTiff
             if (m_fieldinfo == null)
                 return null;
 
-            /* NB: use sorted search (e.g. binary search) */
-            TiffFieldInfo key = new TiffFieldInfo(0, 0, 0, TiffDataType.TIFF_NOTYPE, 0, false, false, null);
-            //key.field_tag = tag;
-            //key.field_type = dt;
-            //TiffFieldInfo* pkey = &key;
+            m_foundfield = null;
 
-            //TiffFieldInfo** ret = (TiffFieldInfo **) bsearch(&pkey, m_fieldinfo, m_nfields, sizeof(TiffFieldInfo*), tagCompare);
-            //return m_foundfield = (ret ? *ret : null);
-            return null;
+            foreach (TiffFieldInfo info in m_fieldinfo)
+            {
+                if (info != null && info.field_tag == tag && (dt == TiffDataType.TIFF_ANY || dt == info.field_type))
+                {
+                    m_foundfield = info;
+                    break;
+                }
+            }
+
+            return m_foundfield;
         }
 
         public TiffFieldInfo FindFieldInfoByName(string field_name, TiffDataType dt)
@@ -1829,12 +1827,12 @@ namespace BitMiracle.LibTiff
             /*
             * Put the directory  at the end of the file.
             */
-            m_diroff = (seekFile(0, SEEK_END) + 1) & ~1;
+            m_diroff = (seekFile(0, SeekOrigin.End) + 1) & ~1;
             m_dataoff = m_diroff + sizeof(ushort) + dirsize + sizeof(uint);
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
-            seekFile(m_dataoff, SEEK_SET);
+            seekFile(m_dataoff, SeekOrigin.Begin);
             TiffDirEntry[] dir = data;
             
             /*
@@ -1907,7 +1905,7 @@ namespace BitMiracle.LibTiff
                 SwabLong(ref pdiroff);
             }
 
-            seekFile(m_diroff, SEEK_SET);
+            seekFile(m_diroff, SeekOrigin.Begin);
             if (!writeUInt16OK(dircount))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
@@ -2606,7 +2604,7 @@ namespace BitMiracle.LibTiff
              * directory to point to the offset of the directory
              * that follows.
              */
-            seekFile(off, SEEK_SET);
+            seekFile(off, SeekOrigin.Begin);
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabLong(ref nextdir);
             
@@ -2671,7 +2669,7 @@ namespace BitMiracle.LibTiff
                 SetupStrips();
 
             bool rc = writeDirectory(false);
-            SetWriteOffset(seekFile(0, SEEK_END));
+            SetWriteOffset(seekFile(0, SeekOrigin.End));
             return rc;
         }
 
@@ -2700,7 +2698,7 @@ namespace BitMiracle.LibTiff
                 m_header.tiff_diroff = 0;
                 m_diroff = 0;
 
-                seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SEEK_SET);
+                seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SeekOrigin.Begin);
                 if (!writeIntOK(m_header.tiff_diroff))
                 {
                     ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
@@ -2722,7 +2720,7 @@ namespace BitMiracle.LibTiff
                     if ((m_flags & Tiff.TIFF_SWAB) != 0)
                         SwabShort(ref dircount);
 
-                    seekFile(dircount * TiffDirEntry.SizeInBytes, SEEK_CUR);
+                    seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
                     
                     if (!readIntOK(out nextdir))
                     {
@@ -2735,8 +2733,8 @@ namespace BitMiracle.LibTiff
                 }
                 while (nextdir != m_diroff && nextdir != 0);
 
-                int off = seekFile(0, SEEK_CUR); /* get current offset */
-                seekFile(off - sizeof(int), SEEK_SET);
+                int off = seekFile(0, SeekOrigin.Current); /* get current offset */
+                seekFile(off - sizeof(int), SeekOrigin.Begin);
                 m_diroff = 0;
                 
                 if (!writeIntOK(m_diroff))
@@ -3761,7 +3759,12 @@ namespace BitMiracle.LibTiff
             return prev;
         }
 
-        //public static TiffExtendProc SetTagExtender(TiffExtendProc);
+        public static TiffExtendProc SetTagExtender(TiffExtendProc proc)
+        {
+            TiffExtendProc prev = m_extender;
+            m_extender = proc;
+            return prev;
+        }
 
         /*
         * Compute which tile an (x,y,z,s) value is in.

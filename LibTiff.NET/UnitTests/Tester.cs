@@ -39,7 +39,7 @@ namespace UnitTests
                     completeArgs.Add(args[i]);
 
                 completeArgs.Add(targetFile);
-                completeArgs.Add(Path.Combine(dataFolder, sourceFile));
+                completeArgs.Add(sourceFile);
 
                 File.Delete(targetFile);
 

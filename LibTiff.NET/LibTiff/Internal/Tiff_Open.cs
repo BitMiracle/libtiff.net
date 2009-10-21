@@ -88,34 +88,46 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        private static void getMode(string mode, string module, out FileMode m, out FileAccess a)
+        private static int getMode(string mode, string module, out FileMode m, out FileAccess a)
         {
             m = 0;
             a = 0;
+            int tiffMode = -1;
+
+            if (mode.Length == 0)
+                return tiffMode;
 
             switch (mode[0])
             {
                 case 'r':
                     m = FileMode.Open;
                     a = FileAccess.Read;
+                    tiffMode = O_RDONLY;
                     if (mode.Length > 1 && mode[1] == '+')
+                    {
                         a = FileAccess.ReadWrite;
+                        tiffMode = O_RDWR;
+                    }
                     break;
 
                 case 'w':
                     m = FileMode.Create;
                     a = FileAccess.ReadWrite;
+                    tiffMode = O_RDWR | O_CREAT | O_TRUNC;
                     break;
 
                 case 'a':
                     m = FileMode.Append;
                     a = FileAccess.ReadWrite;
+                    tiffMode = O_RDWR | O_CREAT;
                     break;
 
                 default:
                     ErrorExt(null, 0, module, "\"%s\": Bad mode", mode);
                     break;
             }
+
+            return tiffMode;
         }
 
         private Tiff safeOpenFailed()

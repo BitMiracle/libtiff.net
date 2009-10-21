@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 using BitMiracle.LibTiff.Internal;
 
@@ -93,8 +94,8 @@ namespace BitMiracle.LibTiff
              *  Give client code a chance to install their own
              *  tag extensions & methods, prior to compression overloads.
              */
-            //if (m_extender != null)
-            //    (*m_extender)(this);
+            if (m_extender != null)
+                m_extender(this);
             
             SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_NONE);
             
@@ -131,7 +132,7 @@ namespace BitMiracle.LibTiff
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabShort(ref dircount);
 
-            off = seekFile(dircount * TiffDirEntry.SizeInBytes, SEEK_CUR);
+            off = seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
 
             if (!readIntOK(out nextdir))
             {

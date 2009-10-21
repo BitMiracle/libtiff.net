@@ -28,14 +28,14 @@ using System.Text;
 
 namespace BitMiracle.LibTiff
 {
-    public enum FILETYPE
+    public enum FILETYPE : byte
     {
         FILETYPE_REDUCEDIMAGE = 0x1,  /* reduced resolution version */
         FILETYPE_PAGE = 0x2,  /* one page of many */
         FILETYPE_MASK = 0x4 /* transparency mask */
     };
 
-    public enum OFILETYPE
+    public enum OFILETYPE : byte
     {
         OFILETYPE_IMAGE = 1,  /* full resolution image data */
         OFILETYPE_REDUCEDIMAGE = 2,  /* reduced size image data */
@@ -75,7 +75,7 @@ namespace BitMiracle.LibTiff
         COMPRESSION_JP2000 = 34712,  /* Leadtools JPEG2000 */
     };
 
-    public enum PHOTOMETRIC
+    public enum PHOTOMETRIC : int
     {
         PHOTOMETRIC_MINISWHITE = 0,  /* min value is white */
         PHOTOMETRIC_MINISBLACK = 1,  /* min value is black */
@@ -91,20 +91,20 @@ namespace BitMiracle.LibTiff
         PHOTOMETRIC_LOGLUV = 32845,  /* CIE Log2(L) (u',v') */
     };
 
-    public enum THRESHHOLD
+    public enum THRESHHOLD : byte
     {
         THRESHHOLD_BILEVEL = 1,  /* b&w art scan */
         THRESHHOLD_HALFTONE = 2,  /* or dithered scan */
         THRESHHOLD_ERRORDIFFUSE = 3,  /* usually floyd-steinberg */
     };
 
-    public enum FILLORDER : short
+    public enum FILLORDER : byte
     {
         FILLORDER_MSB2LSB = 1,  /* most significant -> least */
         FILLORDER_LSB2MSB = 2,  /* least significant -> most */
     };
 
-    public enum ORIENTATION
+    public enum ORIENTATION : byte
     {
         ORIENTATION_TOPLEFT = 1,  /* row 0 top, col 0 lhs */
         ORIENTATION_TOPRIGHT = 2,  /* row 0 top, col 0 rhs */
@@ -116,13 +116,13 @@ namespace BitMiracle.LibTiff
         ORIENTATION_LEFTBOT = 8,  /* row 0 lhs, col 0 bottom */
     };
 
-    public enum PLANARCONFIG
+    public enum PLANARCONFIG : short
     {
         PLANARCONFIG_CONTIG = 1,  /* single image plane */
         PLANARCONFIG_SEPARATE = 2 /* separate planes of data */
     };
 
-    public enum GRAYRESPONSEUNIT
+    public enum GRAYRESPONSEUNIT : byte
     {
         GRAYRESPONSEUNIT_10S = 1,  /* tenths of a unit */
         GRAYRESPONSEUNIT_100S = 2,  /* hundredths of a unit */
@@ -131,21 +131,21 @@ namespace BitMiracle.LibTiff
         GRAYRESPONSEUNIT_100000S = 5,  /* hundred-thousandths */
     };
 
-    public enum GROUP3OPT
+    public enum GROUP3OPT : short
     {
         GROUP3OPT_2DENCODING = 0x1,  /* 2-dimensional coding */
         GROUP3OPT_UNCOMPRESSED = 0x2,  /* data not compressed */
         GROUP3OPT_FILLBITS = 0x4,  /* fill to byte boundary */
     };
 
-    public enum RESUNIT
+    public enum RESUNIT : byte
     {
         RESUNIT_NONE = 1,  /* no meaningful units */
         RESUNIT_INCH = 2,  /* english */
         RESUNIT_CENTIMETER = 3,  /* metric */
     };
 
-    public enum COLORRESPONSEUNIT
+    public enum COLORRESPONSEUNIT : byte
     {
         COLORRESPONSEUNIT_10S = 1,  /* tenths of a unit */
         COLORRESPONSEUNIT_100S = 2,  /* hundredths of a unit */
@@ -154,34 +154,34 @@ namespace BitMiracle.LibTiff
         COLORRESPONSEUNIT_100000S = 5,  /* hundred-thousandths */
     };
 
-    public enum PREDICTOR
+    public enum PREDICTOR : byte
     {
         PREDICTOR_NONE = 1,  /* no prediction scheme used */
         PREDICTOR_HORIZONTAL = 2,  /* horizontal differencing */
         PREDICTOR_FLOATINGPOINT = 3,  /* floating point predictor */
     };
 
-    public enum CLEANFAXDATA
+    public enum CLEANFAXDATA : byte
     {
         CLEANFAXDATA_CLEAN = 0,  /* no errors detected */
         CLEANFAXDATA_REGENERATED = 1,  /* receiver regenerated lines */
         CLEANFAXDATA_UNCLEAN = 2,  /* uncorrected errors exist */
     };
 
-    public enum INKSET
+    public enum INKSET : byte
     {
         INKSET_CMYK = 1,  /* !cyan-magenta-yellow-black color */
         INKSET_MULTIINK = 2,  /* !multi-ink or hi-fi color */
     };
 
-    public enum EXTRASAMPLE
+    public enum EXTRASAMPLE : byte
     {
         EXTRASAMPLE_UNSPECIFIED = 0,  /* !unspecified data */
         EXTRASAMPLE_ASSOCALPHA = 1,  /* !associated alpha data */
         EXTRASAMPLE_UNASSALPHA = 2,  /* !unassociated alpha data */
     };
 
-    public enum SAMPLEFORMAT
+    public enum SAMPLEFORMAT : byte
     {
         SAMPLEFORMAT_UINT = 1,  /* !unsigned integer data */
         SAMPLEFORMAT_INT = 2,  /* !signed integer data */
@@ -191,19 +191,19 @@ namespace BitMiracle.LibTiff
         SAMPLEFORMAT_COMPLEXIEEEFP = 6,  /* !complex ieee floating */
     };
 
-    public enum JPEGPROC
+    public enum JPEGPROC : byte
     {
         JPEGPROC_BASELINE = 1,  /* !baseline sequential */
         JPEGPROC_LOSSLESS = 14,  /* !Huffman coded lossless */
     };
 
-    public enum YCBCRPOSITION
+    public enum YCBCRPOSITION : byte
     {
         YCBCRPOSITION_CENTERED = 1,  /* !as in PostScript Level 2 */
         YCBCRPOSITION_COSITED = 2,  /* !as in CCIR 601-1 */
     };
 
-    public enum FAXMODE
+    public enum FAXMODE : short
     {
         FAXMODE_CLASSIC = 0x0000,  /* default, include RTC */
         FAXMODE_NORTC = 0x0001,  /* no RTC at end of data */
@@ -213,19 +213,19 @@ namespace BitMiracle.LibTiff
         FAXMODE_CLASSF = FAXMODE_NORTC,  /* TIFF Class F */
     };
 
-    public enum JPEGCOLORMODE
+    public enum JPEGCOLORMODE : short
     {
         JPEGCOLORMODE_RAW = 0x0000,  /* no conversion (default) */
         JPEGCOLORMODE_RGB = 0x0001,  /* do auto conversion */
     };
 
-    public enum JPEGTABLESMODE
+    public enum JPEGTABLESMODE : short
     {
         JPEGTABLESMODE_QUANT = 0x0001,  /* include quantization tbls */
         JPEGTABLESMODE_HUFF = 0x0002,  /* include Huffman tbls */
     };
 
-    public enum PIXARLOGDATAFMT
+    public enum PIXARLOGDATAFMT : byte
     {
         PIXARLOGDATAFMT_8BIT = 0,  /* regular u_char samples */
         PIXARLOGDATAFMT_8BITABGR = 1,  /* ABGR-order u_chars */
@@ -235,14 +235,14 @@ namespace BitMiracle.LibTiff
         PIXARLOGDATAFMT_FLOAT = 5,  /* IEEE float samples */
     };
 
-    public enum DCSIMAGERMODEL
+    public enum DCSIMAGERMODEL : byte
     {
         DCSIMAGERMODEL_M3 = 0,  /* M3 chip (1280 x 1024) */
         DCSIMAGERMODEL_M5 = 1,  /* M5 chip (1536 x 1024) */
         DCSIMAGERMODEL_M6 = 2,  /* M6 chip (3072 x 2048) */
     };
 
-    public enum DCSIMAGERFILTER
+    public enum DCSIMAGERFILTER : byte
     {
         DCSIMAGERFILTER_IR = 0,  /* infrared filter */
         DCSIMAGERFILTER_MONO = 1,  /* monochrome filter */
@@ -250,13 +250,13 @@ namespace BitMiracle.LibTiff
         DCSIMAGERFILTER_OTHER = 3,  /* other filter */
     };
 
-    public enum DCSINTERPMODE
+    public enum DCSINTERPMODE : byte
     {
         DCSINTERPMODE_NORMAL = 0x0,  /* whole image, default */
         DCSINTERPMODE_PREVIEW = 0x1,  /* preview of image (384x256) */
     };
 
-    public enum SGILOGDATAFMT
+    public enum SGILOGDATAFMT : byte
     {
         SGILOGDATAFMT_FLOAT = 0,  /* IEEE float samples */
         SGILOGDATAFMT_16BIT = 1,  /* 16-bit samples */
@@ -264,7 +264,7 @@ namespace BitMiracle.LibTiff
         SGILOGDATAFMT_8BIT = 3,  /* 8-bit RGB monitor values */
     };
 
-    public enum SGILOGENCODE
+    public enum SGILOGENCODE : byte
     {
         SGILOGENCODE_NODITHER = 0,  /* do not dither encoded values*/
         SGILOGENCODE_RANDITHER = 1,  /* randomly dither encd values */

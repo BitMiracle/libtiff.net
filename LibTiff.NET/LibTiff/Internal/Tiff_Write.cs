@@ -16,9 +16,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
+using System.IO;
 
 using BitMiracle.LibTiff.Internal;
-using System.Diagnostics;
 
 namespace BitMiracle.LibTiff
 {
@@ -164,7 +165,7 @@ namespace BitMiracle.LibTiff
                     * Seek to end of file, and set that as our location to 
                     * write this strip.
                     */
-                    m_dir.td_stripoffset[strip] = seekFile(0, SEEK_END);
+                    m_dir.td_stripoffset[strip] = seekFile(0, SeekOrigin.End);
                 }
 
                 m_curoff = m_dir.td_stripoffset[strip];

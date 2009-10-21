@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 using thandle_t = System.Object;
 
@@ -21,12 +22,9 @@ namespace BitMiracle.LibTiff
     {
         public virtual int Read(thandle_t fd, byte[] buf, int offset, int size)
         {
-            //DWORD dwSizeRead;
-            //if (!ReadFile(fd, &buf[offset], size, &dwSizeRead, null))
-            //    return 0;
-
-            //return dwSizeRead;
-            return 0;
+            Stream s = fd as Stream;
+            int read = s.Read(buf, offset, size);
+            return read;
         }
 
         public virtual int Write(thandle_t fd, byte[] buf, int size)
@@ -39,29 +37,14 @@ namespace BitMiracle.LibTiff
             return 0;
         }
 
-        public virtual int Seek(thandle_t fd, int off, int whence)
+        public virtual long Seek(thandle_t fd, long off, SeekOrigin whence)
         {
-            ///* we use this as a special code, so avoid accepting it */
-            //if (off == 0xFFFFFFFF)
-            //    return 0xFFFFFFFF;
+            /* we use this as a special code, so avoid accepting it */
+            if (off == -1)
+                return -1; // was 0xFFFFFFFF
 
-            //DWORD dwMoveMethod = FILE_BEGIN;
-            //switch (whence)
-            //{
-            //    case Tiff.SEEK_SET:
-            //        dwMoveMethod = FILE_BEGIN;
-            //        break;
-            //    case Tiff.SEEK_CUR:
-            //        dwMoveMethod = FILE_CURRENT;
-            //        break;
-            //    case Tiff.SEEK_END:
-            //        dwMoveMethod = FILE_END;
-            //        break;
-            //}
-
-            //DWORD dwMoveHigh = 0;
-            //return SetFilePointer(fd, (LONG)off, (PLONG) & dwMoveHigh, dwMoveMethod);
-            return 0;
+            Stream s = fd as Stream;
+            return s.Seek(off, whence);
         }
 
         public virtual bool Close(thandle_t fd)

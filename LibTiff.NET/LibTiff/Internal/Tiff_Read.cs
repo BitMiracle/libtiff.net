@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 using BitMiracle.LibTiff.Internal;
 
@@ -27,17 +28,11 @@ namespace BitMiracle.LibTiff
         private const int NOSTRIP = -1;         /* undefined state */
         private const int NOTILE = -1;          /* undefined state */
 
-        // remove this
-        public const int SEEK_SET = 0;
-        internal const int SEEK_CUR = 1;
-        internal const int SEEK_END = 2;
-
         internal const int O_RDONLY = 0;
         internal const int O_WRONLY = 0x0001;
         internal const int O_CREAT = 0x0100;
         internal const int O_TRUNC = 0x0200;
         internal const int O_RDWR = 0x0002;
-        // end remove
 
         /*
         * Default Read/Seek/Write definitions.
@@ -47,9 +42,9 @@ namespace BitMiracle.LibTiff
             return m_stream.Read(m_clientdata, buf, offset, size);
         }
 
-        private int seekFile(int off, int whence)
+        private int seekFile(int off, SeekOrigin whence)
         {
-            return m_stream.Seek(m_clientdata, off, whence);
+            return (int)m_stream.Seek(m_clientdata, off, whence);
         }
 
         private bool closeFile()
@@ -114,7 +109,7 @@ namespace BitMiracle.LibTiff
             int pos = (int)offset;
             for (int i = 0; i < dircount; i++)
             {
-                TiffDirEntry entry = dir[i];
+                TiffDirEntry entry = new TiffDirEntry();
                 entry.tdir_tag = (TIFFTAG)readUInt16(bytes, pos);
                 pos += sizeof(ushort);
                 entry.tdir_type = (TiffDataType)readUInt16(bytes, pos);
@@ -123,6 +118,7 @@ namespace BitMiracle.LibTiff
                 pos += sizeof(uint);
                 entry.tdir_offset = readInt(bytes, pos);
                 pos += sizeof(uint);
+                dir[i] = entry;
             }
         }
 
@@ -141,7 +137,7 @@ namespace BitMiracle.LibTiff
 
         private bool seekOK(int off)
         {
-            return (seekFile(off, SEEK_SET) == off);
+            return (seekFile(off, SeekOrigin.Begin) == off);
         }
 
         /*

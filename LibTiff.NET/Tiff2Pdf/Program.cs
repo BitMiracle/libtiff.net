@@ -392,7 +392,7 @@ namespace BitMiracle.Tiff2Pdf
                             object client = output.Clientdata();
                             TiffStream stream = output.GetStream();
                             if (stream != null)
-                                stream.Seek(client, 0, Tiff.SEEK_SET);
+                                stream.Seek(client, 0, SeekOrigin.Begin);
 
                             /*
                             * Write

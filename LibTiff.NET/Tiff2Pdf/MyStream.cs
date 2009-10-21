@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 using BitMiracle.LibTiff;
 
@@ -25,7 +26,7 @@ namespace BitMiracle.Tiff2Pdf
             return size;
         }
 
-        public override int Seek(object fd, int off, int whence)
+        public override long Seek(object fd, long off, SeekOrigin whence)
         {
             T2P t2p = fd as T2P;
             //if (!t2p.m_outputdisable && t2p.m_outputfile != null)
