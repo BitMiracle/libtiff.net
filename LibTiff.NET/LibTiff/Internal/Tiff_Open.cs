@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace BitMiracle.LibTiff
 {
@@ -87,29 +88,34 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        private static int getMode(string mode, string module)
+        private static void getMode(string mode, string module, out FileMode m, out FileAccess a)
         {
-            int m = -1;
+            m = 0;
+            a = 0;
 
             switch (mode[0])
             {
                 case 'r':
-                    m = O_RDONLY;
-                    if (mode[1] == '+')
-                        m = O_RDWR;
+                    m = FileMode.Open;
+                    a = FileAccess.Read;
+                    if (mode.Length > 1 && mode[1] == '+')
+                        a = FileAccess.ReadWrite;
                     break;
+
                 case 'w':
-                case 'a':
-                    m = O_RDWR | O_CREAT;
-                    if (mode[0] == 'w')
-                        m |= O_TRUNC;
+                    m = FileMode.Create;
+                    a = FileAccess.ReadWrite;
                     break;
+
+                case 'a':
+                    m = FileMode.Append;
+                    a = FileAccess.ReadWrite;
+                    break;
+
                 default:
                     ErrorExt(null, 0, module, "\"%s\": Bad mode", mode);
                     break;
             }
-
-            return m;
         }
 
         private Tiff safeOpenFailed()

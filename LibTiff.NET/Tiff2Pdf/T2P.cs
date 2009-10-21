@@ -44,8 +44,8 @@ namespace BitMiracle.Tiff2Pdf
         public bool m_outputdisable;
         public int m_outputwritten;
 
-        public Tiff2PdfErrorHandler m_errorHandler;
-        public Tiff2PdfStream m_stream;
+        public MyErrorHandler m_errorHandler;
+        public MyStream m_stream;
 
         private T2P_PAGE[] m_tiff_pages;
         private T2P_TILES[] m_tiff_tiles;
@@ -110,10 +110,10 @@ namespace BitMiracle.Tiff2Pdf
 
         public T2P()
         {
-            m_errorHandler = new Tiff2PdfErrorHandler();
+            m_errorHandler = new MyErrorHandler();
             Tiff.SetErrorHandler(m_errorHandler);
 
-            m_stream = new Tiff2PdfStream();
+            m_stream = new MyStream();
             m_pdf_majorversion = 1;
             m_pdf_minorversion = 1;
             m_pdf_defaultxres = 300.0f;

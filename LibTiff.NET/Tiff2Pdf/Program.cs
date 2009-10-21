@@ -26,7 +26,7 @@ using BitMiracle.LibTiff;
 
 namespace BitMiracle.Tiff2Pdf
 {
-    class Program
+    public class Program
     {
         static string[] sizes = 
         {
@@ -175,12 +175,9 @@ namespace BitMiracle.Tiff2Pdf
             putting the image pages on a letter sized page, compressing the output 
             with JPEG.
         */
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             T2P t2p = new T2P();
-            if (t2p == null)
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize context");
-
             string outfilename = null;
             bool failed = false;
 
@@ -256,8 +253,7 @@ namespace BitMiracle.Tiff2Pdf
                         if (tiff2pdf_match_paper_size(out t2p.m_pdf_defaultpagewidth, out t2p.m_pdf_defaultpagelength, optarg))
                             t2p.m_pdf_overridepagesize = true;
                         else
-                            Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Unknown paper size %s, ignoring option", optarg);
-
+                            Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Unknown paper size {0}, ignoring option", optarg);
                         break;
 
                     case 'i':
@@ -270,13 +266,6 @@ namespace BitMiracle.Tiff2Pdf
 
                     case 'e':
                         t2p.m_pdf_datetime = new byte [17];
-                        if (t2p.m_pdf_datetime == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for main", 17); 
-                            failed = true;
-                            break;
-                        }
-
                         if (optarg.Length == 0)
                         {
                             t2p.m_pdf_datetime[0] = 0;
@@ -293,65 +282,30 @@ namespace BitMiracle.Tiff2Pdf
 
                     case 'c': 
                         t2p.m_pdf_creator = new byte [optarg.Length + 1];
-                        if (t2p.m_pdf_creator == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for main", optarg.Length + 1); 
-                            failed = true;
-                            break;
-                        }
-
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_creator, bytes.Length);
                         break;
                     
                     case 'a': 
                         t2p.m_pdf_author = new byte [optarg.Length + 1];
-                        if (t2p.m_pdf_author == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for main", optarg.Length + 1); 
-                            failed = true;
-                            break;
-                        }
-
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_author, bytes.Length);
                         break;
 
                     case 't': 
                         t2p.m_pdf_title = new byte [optarg.Length + 1];
-                        if (t2p.m_pdf_title == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for main", optarg.Length + 1); 
-                            failed = true;
-                            break;
-                        }
-
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_title, bytes.Length);
                         break;
                     
                     case 's': 
                         t2p.m_pdf_subject = new byte [optarg.Length + 1];
-                        if (t2p.m_pdf_subject == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for main", optarg.Length + 1);
-                            failed = true;
-                            break;
-                        }
-
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_subject, bytes.Length);
                         break;
 
                     case 'k': 
                         t2p.m_pdf_keywords = new byte [optarg.Length + 1];
-                        if (t2p.m_pdf_keywords == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for main", optarg.Length + 1); 
-                            failed = true;
-                            break;
-                        }
-
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_keywords, bytes.Length);
                         break;
@@ -377,10 +331,10 @@ namespace BitMiracle.Tiff2Pdf
                 */
                 if (args.Length > argn)
                 {
-                    input = Tiff.Open(args[argn++], "r");
+                    input = Tiff.Open(args[++argn], "r");
                     if (input == null)
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open input file %s for reading", args[argn - 1]);
+                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open input file {0} for reading", args[argn - 1]);
                         failed = true;
                     }
                 }
@@ -409,7 +363,7 @@ namespace BitMiracle.Tiff2Pdf
                         t2p.m_outputfile = File.Open(outfilename, FileMode.Create, FileAccess.Write);
                         if (t2p.m_outputfile == null)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open output file %s for writing", outfilename);
+                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open output file {0} for writing", outfilename);
                             failed = true;
                         }
                     } 
@@ -488,11 +442,13 @@ namespace BitMiracle.Tiff2Pdf
                 null
             };
 
-            Stream stderr = Console.OpenStandardError();
-            Tiff.fprintf(stderr, "%s\n\n", Tiff.GetVersion());
+            using (TextWriter stderr = Console.Error)
+            {
+                stderr.Write("{0}\n\n", Tiff.GetVersion());
 
-            for (int i = 0; lines[i] != null; i++)
-                Tiff.fprintf(stderr, "%s\n", lines[i]);
+                for (int i = 0; lines[i] != null; i++)
+                    stderr.Write("{0}\n", lines[i]);
+            }
         }
 
         static bool tiff2pdf_match_paper_size(out float width, out float length, string papersize)

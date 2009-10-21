@@ -6,7 +6,7 @@ using BitMiracle.LibTiff;
 
 namespace BitMiracle.Tiff2Pdf
 {
-    class Tiff2PdfStream : TiffStream
+    class MyStream : TiffStream
     {
         public override int Read(object fd, byte[] buf, int offset, int size)
         {

@@ -39,8 +39,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="T2P.cs" />
-    <Compile Include="Tiff2PdfErrorHandler.cs" />
-    <Compile Include="Tiff2PdfStream.cs" />
+    <Compile Include="MyErrorHandler.cs" />
+    <Compile Include="MyStream.cs" />
     <Compile Include="Types.cs" />
   </ItemGroup>
   <ItemGroup>

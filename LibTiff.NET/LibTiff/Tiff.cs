@@ -302,52 +302,41 @@ namespace BitMiracle.LibTiff
         */
         public static Tiff Open(string name, string mode)
         {
-            //const string module = "Open";
+            const string module = "Open";
 
-            return null;
-            //DWORD dwMode;
-            //int m = getMode(mode, module);
-            //switch (m)
-            //{
-            //    case O_RDONLY:
-            //        dwMode = OPEN_EXISTING;
-            //        break;
-            //    case O_RDWR:
-            //        dwMode = OPEN_ALWAYS;
-            //        break;
-            //    case O_RDWR | O_CREAT: 
-            //        dwMode = OPEN_ALWAYS;
-            //        break;
-            //    case O_RDWR | O_TRUNC: 
-            //        dwMode = CREATE_ALWAYS;
-            //        break;
-            //    case O_RDWR | O_CREAT | O_TRUNC: 
-            //        dwMode = CREATE_ALWAYS;
-            //        break;
-            //    default:
-            //        return null;
-            //}
+            FileMode m;
+            FileAccess a;
+            getMode(mode, module, out m, out a);
 
-            //thandle_t fd = (thandle_t)CreateFileA(name, (m == O_RDONLY) ? GENERIC_READ: (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ | FILE_SHARE_WRITE, null, dwMode, (m == O_RDONLY) ? FILE_ATTRIBUTE_READONLY: FILE_ATTRIBUTE_NORMAL, null);
-            //if (fd == INVALID_HANDLE_VALUE)
-            //{
-            //    ErrorExt(null, 0, module, "%s: Cannot open", name);
-            //    return null;
-            //}
+            FileStream fd = null;
+            try
+            {
+                fd = File.Open(name, m, a);
+            }
+            catch (System.Exception)
+            {
+                fd = null;
+            }
+            
+            if (fd == null)
+            {
+                ErrorExt(null, 0, module, "{0}: Cannot open", name);
+                return null;
+            }
 
-            //Tiff tif = FdOpen((int)fd, name, mode);
-            //if (tif == null)
-            //    CloseHandle(fd);
+            Tiff tif = FdOpen(fd, name, mode);
+            if (tif == null)
+                fd.Dispose();
 
-            //return tif;
+            return tif;
         }
 
         /*
         * Open a TIFF file descriptor for read/writing.
         */
-        public static Tiff FdOpen(int ifd, string name, string mode)
+        public static Tiff FdOpen(object ifd, string name, string mode)
         {
-            Tiff tif = ClientOpen(name, mode, (thandle_t)ifd, new TiffStream());
+            Tiff tif = ClientOpen(name, mode, ifd, new TiffStream());
             //if (tif != null)
             //    tif.m_userStream = false; // clear flag, so stream will be deleted
 
@@ -357,21 +346,21 @@ namespace BitMiracle.LibTiff
         public static Tiff ClientOpen(string name, string mode, thandle_t clientdata, TiffStream stream)
         {
             const string module = "ClientOpen";
-    
-            int m = getMode(mode, module);
-            if (m == -1)
-                return null;
+
+            FileMode m;
+            FileAccess a;
+            getMode(mode, module, out m, out a);
 
             Tiff tif = new Tiff();
             if (tif == null)
             {
-                ErrorExt(tif, clientdata, module, "%s: Out of memory (TIFF structure)", name);
+                ErrorExt(tif, clientdata, module, "{0}: Out of memory (TIFF structure)", name);
                 return null;
             }
 
             tif.m_name = name.Clone() as string;
 
-            tif.m_mode = m & ~(O_CREAT | O_TRUNC);
+            //tif.m_mode = m & ~(O_CREAT | O_TRUNC);
             tif.m_curdir = -1; /* non-existent directory */
             tif.m_curoff = 0;
             tif.m_curstrip = -1; /* invalid strip */
@@ -397,8 +386,8 @@ namespace BitMiracle.LibTiff
              */
             tif.m_flags = (uint)FILLORDER.FILLORDER_MSB2LSB;
 
-            if (m == O_RDONLY || m == O_RDWR)
-                tif.m_flags |= STRIPCHOP_DEFAULT;
+            //if (m == O_RDONLY || m == O_RDWR)
+            //    tif.m_flags |= STRIPCHOP_DEFAULT;
 
             /*
              * Process library-specific flags in the open mode string.
@@ -449,8 +438,8 @@ namespace BitMiracle.LibTiff
                 switch (mode[i])
                 {
                     case 'b':
-                        if ((m & O_CREAT) != 0)
-                            tif.m_flags |= Tiff.TIFF_SWAB;
+                        //if ((m & O_CREAT) != 0)
+                        //    tif.m_flags |= Tiff.TIFF_SWAB;
                         break;
                     case 'l':
                         break;
@@ -706,7 +695,7 @@ namespace BitMiracle.LibTiff
             TiffFieldInfo fip = FindFieldInfoByName(field_name, TiffDataType.TIFF_ANY);
             if (fip == null)
             {
-                ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag %s", field_name);
+                ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag {0}", field_name);
                 Debug.Assert(false);
                 /*NOTREACHED*/
             }
@@ -1055,7 +1044,7 @@ namespace BitMiracle.LibTiff
             ushort dircount = fetchDirectory(m_nextdiroff, out dir, out m_nextdiroff);
             if (dircount == 0)
             {
-                ErrorExt(this, m_clientdata, module, "%s: Failed to read directory at offset %u", m_name, m_nextdiroff);
+                ErrorExt(this, m_clientdata, module, "{0}: Failed to read directory at offset {1}", m_name, m_nextdiroff);
                 return false;
             }
 
@@ -1144,7 +1133,7 @@ namespace BitMiracle.LibTiff
                 {
                     if (!diroutoforderwarning)
                     {
-                        WarningExt(this, m_clientdata, module, "%s: invalid TIFF directory; tags are not sorted in ascending order", m_name);
+                        WarningExt(this, m_clientdata, module, "{0}: invalid TIFF directory; tags are not sorted in ascending order", m_name);
                         diroutoforderwarning = true;
                     }
 
@@ -1191,7 +1180,7 @@ namespace BitMiracle.LibTiff
                     fip = m_fieldinfo[++fix];
                     if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
                     {
-                        WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
                         dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
                         continue;
                     }
@@ -1317,7 +1306,7 @@ namespace BitMiracle.LibTiff
 
             if (m_dir.td_nstrips == 0)
             {
-                ErrorExt(this, m_clientdata, module, "%s: cannot handle zero number of %s", m_name, IsTiled() ? "tiles" : "strips");
+                ErrorExt(this, m_clientdata, module, "{0}: cannot handle zero number of {1}", m_name, IsTiled() ? "tiles" : "strips");
                 return readDirectoryFailed(dir);
             }
 
@@ -1581,7 +1570,7 @@ namespace BitMiracle.LibTiff
                         return readDirectoryFailed(dir);
                     }
 
-                    WarningExt(this, m_clientdata, module, "%s: TIFF directory is missing required \"%s\" field, calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return readDirectoryFailed(dir);
                 }
@@ -1593,7 +1582,7 @@ namespace BitMiracle.LibTiff
                      * and handle the simple case of estimating the size of a one
                      * strip image.
                      */
-                    WarningExt(this, m_clientdata, module, "%s: Bogus \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return readDirectoryFailed(dir);
                 }
@@ -1604,7 +1593,7 @@ namespace BitMiracle.LibTiff
                      * wrong values (it can be equal to StripOffset array, for
                      * example). Catch this case here.
                      */
-                    WarningExt(this, m_clientdata, module, "%s: Wrong \"%s\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return readDirectoryFailed(dir);
                 }
@@ -1663,7 +1652,7 @@ namespace BitMiracle.LibTiff
             m_scanlinesize = ScanlineSize();
             if (m_scanlinesize == 0)
             {
-                ErrorExt(this, m_clientdata, module, "%s: cannot handle zero scanline size", m_name);
+                ErrorExt(this, m_clientdata, module, "{0}: cannot handle zero scanline size", m_name);
                 return false;
             }
 
@@ -1672,7 +1661,7 @@ namespace BitMiracle.LibTiff
                 m_tilesize = TileSize();
                 if (m_tilesize == 0)
                 {
-                    ErrorExt(this, m_clientdata, module, "%s: cannot handle zero tile size", m_name);
+                    ErrorExt(this, m_clientdata, module, "{0}: cannot handle zero tile size", m_name);
                     return false;
                 }
             }
@@ -1680,7 +1669,7 @@ namespace BitMiracle.LibTiff
             {
                 if (StripSize() == 0)
                 {
-                    ErrorExt(this, m_clientdata, module, "%s: cannot handle zero strip size", m_name);
+                    ErrorExt(this, m_clientdata, module, "{0}: cannot handle zero strip size", m_name);
                     return false;
                 }
             }
@@ -1703,7 +1692,7 @@ namespace BitMiracle.LibTiff
             ushort dircount = fetchDirectory(diroff, out dir, out dummyNextDirOff);
             if (dircount == 0)
             {
-                ErrorExt(this, m_clientdata, module, "%s: Failed to read custom directory at offset %u", m_name, diroff);
+                ErrorExt(this, m_clientdata, module, "{0}: Failed to read custom directory at offset {1}", m_name, diroff);
                 return false;
             }
 
@@ -1770,7 +1759,7 @@ namespace BitMiracle.LibTiff
                     fip = m_fieldinfo[++fix];
                     if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
                     {
-                        WarningExt(this, m_clientdata, module, "%s: wrong data type %d for \"%s\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
                         dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
                         continue;
                     }
@@ -2330,7 +2319,7 @@ namespace BitMiracle.LibTiff
             
             if (m_rawdata == null)
             {
-                ErrorExt(this, m_clientdata, module, "%s: No space for data buffer at scanline %ld", m_name, m_row);
+                ErrorExt(this, m_clientdata, module, "{0}: No space for data buffer at scanline {1}", m_name, m_row);
                 m_rawdatasize = 0;
                 return false;
             }
@@ -2371,7 +2360,7 @@ namespace BitMiracle.LibTiff
                 bp = new byte [size];
                 if (bp == null)
                 {
-                    ErrorExt(this, m_clientdata, module, "%s: No space for output buffer", m_name);
+                    ErrorExt(this, m_clientdata, module, "{0}: No space for output buffer", m_name);
                     return false;
                 }
 
@@ -2420,7 +2409,7 @@ namespace BitMiracle.LibTiff
         {
             if (m_mode == O_RDONLY)
             {
-                ErrorExt(this, m_clientdata, module, "%s: File not open for writing", m_name);
+                ErrorExt(this, m_clientdata, module, "{0}: File not open for writing", m_name);
                 return false;
             }
 
@@ -2446,7 +2435,7 @@ namespace BitMiracle.LibTiff
              */
             if (!fieldSet(FIELD.FIELD_IMAGEDIMENSIONS))
             {
-                ErrorExt(this, m_clientdata, module, "%s: Must set \"ImageWidth\" before writing data", m_name);
+                ErrorExt(this, m_clientdata, module, "{0}: Must set \"ImageWidth\" before writing data", m_name);
                 return false;
             }
 
@@ -2465,7 +2454,7 @@ namespace BitMiracle.LibTiff
             {
                 if (!fieldSet(FIELD.FIELD_PLANARCONFIG))
                 {
-                    ErrorExt(this, m_clientdata, module, "%s: Must set \"PlanarConfiguration\" before writing data", m_name);
+                    ErrorExt(this, m_clientdata, module, "{0}: Must set \"PlanarConfiguration\" before writing data", m_name);
                     return false;
                 }
             }
@@ -2473,7 +2462,7 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_stripoffset == null && !SetupStrips())
             {
                 m_dir.td_nstrips = 0;
-                ErrorExt(this, m_clientdata, module, "%s: No space for %s arrays", m_name, IsTiled() ? "tile" : "strip");
+                ErrorExt(this, m_clientdata, module, "{0}: No space for {1} arrays", m_name, IsTiled() ? "tile" : "strip");
                 return false;
             }
 
@@ -2782,18 +2771,18 @@ namespace BitMiracle.LibTiff
                 string sep = " ";
                 if ((m_dir.td_subfiletype & FILETYPE.FILETYPE_REDUCEDIMAGE) != 0)
                 {
-                    fprintf(fd, "%sreduced-resolution image", sep);
+                    fprintf(fd, "{0}reduced-resolution image", sep);
                     sep = "/";
                 }
 
                 if ((m_dir.td_subfiletype & FILETYPE.FILETYPE_PAGE) != 0)
                 {
-                    fprintf(fd, "%smulti-page document", sep);
+                    fprintf(fd, "{0}multi-page document", sep);
                     sep = "/";
                 }
                 
                 if ((m_dir.td_subfiletype & FILETYPE.FILETYPE_MASK) != 0)
-                    fprintf(fd, "%stransparency mask", sep);
+                    fprintf(fd, "{0}transparency mask", sep);
                 
                 fprintf(fd, " (%lu = 0x%lx)\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
             }
@@ -2878,7 +2867,7 @@ namespace BitMiracle.LibTiff
                 TiffCodec c = FindCodec(m_dir.td_compression);
                 fprintf(fd, "  Compression Scheme: ");
                 if (c != null)
-                    fprintf(fd, "%s\n", c.m_name);
+                    fprintf(fd, "{0}\n", c.m_name);
                 else
                     fprintf(fd, "%u (0x%x)\n", m_dir.td_compression, m_dir.td_compression);
             }
@@ -2887,7 +2876,7 @@ namespace BitMiracle.LibTiff
             {
                 fprintf(fd, "  Photometric Interpretation: ");
                 if ((int)m_dir.td_photometric < photoNames.Length)
-                    fprintf(fd, "%s\n", photoNames[(int)m_dir.td_photometric]);
+                    fprintf(fd, "{0}\n", photoNames[(int)m_dir.td_photometric]);
                 else
                 {
                     switch (m_dir.td_photometric)
@@ -2914,13 +2903,13 @@ namespace BitMiracle.LibTiff
                     switch (m_dir.td_sampleinfo[i])
                     {
                         case EXTRASAMPLE.EXTRASAMPLE_UNSPECIFIED:
-                            fprintf(fd, "%sunspecified", sep);
+                            fprintf(fd, "{0}unspecified", sep);
                             break;
                         case EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA:
-                            fprintf(fd, "%sassoc-alpha", sep);
+                            fprintf(fd, "{0}assoc-alpha", sep);
                             break;
                         case EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA:
-                            fprintf(fd, "%sunassoc-alpha", sep);
+                            fprintf(fd, "{0}unassoc-alpha", sep);
                             break;
                         default:
                             fprintf(fd, "%s%u (0x%x)", sep, m_dir.td_sampleinfo[i], m_dir.td_sampleinfo[i]);
@@ -3019,7 +3008,7 @@ namespace BitMiracle.LibTiff
             {
                 fprintf(fd, "  Orientation: ");
                 if ((int)m_dir.td_orientation < orientNames.Length)
-                    fprintf(fd, "%s\n", orientNames[(int)m_dir.td_orientation]);
+                    fprintf(fd, "{0}\n", orientNames[(int)m_dir.td_orientation]);
                 else
                     fprintf(fd, "%u (0x%x)\n", m_dir.td_orientation, m_dir.td_orientation);
             }
@@ -3196,7 +3185,7 @@ namespace BitMiracle.LibTiff
 
             if ((flags & TiffPrintDirectoryFlags.TIFFPRINT_STRIPS) != 0 && fieldSet(FIELD.FIELD_STRIPOFFSETS))
             {
-                fprintf(fd, "  %lu %s:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
+                fprintf(fd, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
                 for (uint s = 0; s < m_dir.td_nstrips; s++)
                     fprintf(fd, "    %3lu: [%8lu, %8lu]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
             }
@@ -3606,7 +3595,7 @@ namespace BitMiracle.LibTiff
                         photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
                         break;
                     default:
-                        emsg = string.Format("Missing needed %s tag", TiffRGBAImage.photoTag);
+                        emsg = string.Format("Missing needed {0} tag", TiffRGBAImage.photoTag);
                         return false;
                 }
             }
@@ -3618,7 +3607,11 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
                     if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
                     {
-                        emsg = string.Format("Sorry, can not handle contiguous data with %s=%d, and %s=%d and Bits/Sample=%d", TiffRGBAImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel, m_dir.td_bitspersample);
+                        emsg = string.Format(
+                            "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}", 
+                            TiffRGBAImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel, 
+                            m_dir.td_bitspersample);
+
                         return false;
                     }
                     /*
@@ -3638,7 +3631,10 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_RGB:
                     if (colorchannels < 3)
                     {
-                        emsg = string.Format("Sorry, can not handle RGB image with %s=%d", "Color channels", colorchannels);
+                        emsg = string.Format(
+                            "Sorry, can not handle RGB image with {0}={1}", 
+                            "Color channels", colorchannels);
+
                         return false;
                     }
                     break;
@@ -3648,12 +3644,14 @@ namespace BitMiracle.LibTiff
                         INKSET inkset = (INKSET)result[0];
                         if (inkset != INKSET.INKSET_CMYK)
                         {
-                            emsg = string.Format("Sorry, can not handle separated image with %s=%d", "InkSet", inkset);
+                            emsg = string.Format(
+                                "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                             return false;
                         }
                         if (m_dir.td_samplesperpixel < 4)
                         {
-                            emsg = string.Format("Sorry, can not handle separated image with %s=%d", "Samples/pixel", m_dir.td_samplesperpixel);
+                            emsg = string.Format("Sorry, can not handle separated image with {0}={1}",
+                                "Samples/pixel", m_dir.td_samplesperpixel);
                             return false;
                         }
                         break;
@@ -3661,26 +3659,32 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_LOGL:
                     if (m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG)
                     {
-                        emsg = string.Format("Sorry, LogL data must have %s=%d", "Compression", COMPRESSION.COMPRESSION_SGILOG);
+                        emsg = string.Format("Sorry, LogL data must have {0}={1}",
+                            "Compression", COMPRESSION.COMPRESSION_SGILOG);
                         return false;
                     }
                     break;
                 case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
-                    if (m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG && m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG24)
+                    if (m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG &&
+                        m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG24)
                     {
-                        emsg = string.Format("Sorry, LogLuv data must have %s=%d or %d", "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
+                        emsg = string.Format("Sorry, LogLuv data must have {0}={1} or {2}",
+                            "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
                         return false;
                     }
+
                     if (m_dir.td_planarconfig != PLANARCONFIG.PLANARCONFIG_CONTIG)
                     {
-                        emsg = string.Format("Sorry, can not handle LogLuv images with %s=%d", "Planarconfiguration", m_dir.td_planarconfig);
+                        emsg = string.Format("Sorry, can not handle LogLuv images with {0}={1}",
+                            "Planarconfiguration", m_dir.td_planarconfig);
                         return false;
                     }
                     break;
                 case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
                     break;
                 default:
-                    emsg = string.Format("Sorry, can not handle image with %s=%d", TiffRGBAImage.photoTag, photometric);
+                    emsg = string.Format("Sorry, can not handle image with {0}={1}",
+                        TiffRGBAImage.photoTag, photometric);
                     return false;
             }
 
@@ -4234,7 +4238,7 @@ namespace BitMiracle.LibTiff
 
             if (tile >= m_dir.td_nstrips)
             {
-                ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, module, "{0}: Tile {1} out of range, max {2}", m_name, tile, m_dir.td_nstrips);
                 return -1;
             }
 
@@ -4323,7 +4327,7 @@ namespace BitMiracle.LibTiff
 
             if (tile >= m_dir.td_nstrips)
             {
-                ErrorExt(this, m_clientdata, module, "%s: Tile %lu out of range, max %lu", m_name, tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, module, "{0}: Tile {1} out of range, max {2}", m_name, tile, m_dir.td_nstrips);
                 return -1;
             }
 
@@ -4536,13 +4540,6 @@ namespace BitMiracle.LibTiff
         public static byte[] GetBitRevTable(bool reversed)
         {
             return (reversed ? TIFFBitRevTable : TIFFNoBitRevTable);
-        }
-
-        public static void fprintf(Stream fd, string format, params object[] list)
-        {
-            string s = string.Format(format, list);
-            byte[] bytes = Encoding.ASCII.GetBytes(s);
-            fd.Write(bytes, 0, bytes.Length);
         }
 
         public static int[] byteArrayToInt(byte[] b, int byteStartOffset, int byteCount)

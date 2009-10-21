@@ -354,10 +354,12 @@ namespace BitMiracle.TiffCP
 
         static void usage()
         {
-            Stream stderr = Console.OpenStandardError();
-            Tiff.fprintf(stderr, "%s\n\n", Tiff.GetVersion());
-            for (int i = 0; g_stuff[i] != null; i++)
-                Tiff.fprintf(stderr, "%s\n", g_stuff[i]);
+            using (TextWriter stderr = Console.Error)
+            {
+                stderr.Write("{0}\n\n", Tiff.GetVersion());
+                for (int i = 0; g_stuff[i] != null; i++)
+                    stderr.Write("{0}\n", g_stuff[i]);
+            }
 
             throw new Exception();
         }
@@ -868,135 +870,137 @@ namespace BitMiracle.TiffCP
          */
         static bool pickFuncAndCopy(Tiff inImage, Tiff outImage, ushort bitspersample, ushort samplesperpixel, int length, int width)
         {
-            Stream stderr = Console.OpenStandardError();
-
-            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
-            PLANARCONFIG shortv = (PLANARCONFIG)result[0];
-
-            if (shortv != g_config && bitspersample != 8 && samplesperpixel > 1)
+            using (TextWriter stderr = Console.Error)
             {
-                Tiff.fprintf(stderr, "%s: Cannot handle different planar configuration w/ bits/sample != 8\n", inImage.FileName());
-                return false;
-            }
+                object[] result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+                PLANARCONFIG shortv = (PLANARCONFIG)result[0];
 
-            result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
-            uint w = (uint)result[0];
-
-            result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
-            uint l = (uint)result[0];
-
-            bool bychunk;
-            if (!(outImage.IsTiled() || inImage.IsTiled()))
-            {
-                result = inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
-                int irps = (int)result[0];
-
-                /* if biased, force decoded copying to allow image subtraction */
-                bychunk = (g_bias == null) && (g_rowsperstrip == irps);
-            }
-            else
-            {
-                /* either inImage or outImage is tiled */
-                if (g_bias != null)
+                if (shortv != g_config && bitspersample != 8 && samplesperpixel > 1)
                 {
-                    Tiff.fprintf(stderr, "%s: Cannot handle tiled configuration w/bias image\n", inImage.FileName());
+                    stderr.Write("{0}: Cannot handle different planar configuration w/ bits/sample != 8\n", inImage.FileName());
                     return false;
                 }
 
-                if (outImage.IsTiled())
+                result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+                uint w = (uint)result[0];
+
+                result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+                uint l = (uint)result[0];
+
+                bool bychunk;
+                if (!(outImage.IsTiled() || inImage.IsTiled()))
                 {
-                    uint tw;
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-                    if (result == null)
-                        tw = w;
-                    else
-                        tw = (uint)result[0];
+                    result = inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+                    int irps = (int)result[0];
 
-                    uint tl;
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-                    if (result == null)
-                        tl = l;
-                    else
-                        tl = (uint)result[0];
-
-                    bychunk = (tw == g_tilewidth && tl == g_tilelength);
+                    /* if biased, force decoded copying to allow image subtraction */
+                    bychunk = (g_bias == null) && (g_rowsperstrip == irps);
                 }
                 else
                 {
-                    /* outImage's not, so inImage must be tiled */
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-                    uint tw = (uint)result[0];
-
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-                    uint tl = (uint)result[0];
-
-                    bychunk = (tw == w && tl == g_rowsperstrip);
-                }
-            }
-
-            if (inImage.IsTiled())
-            {
-                if (outImage.IsTiled())
-                {
-                    /* Tiles -> Tiles */
-                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
-                        return cpContigTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpContigTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
-                        return cpSeparateTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpSeparateTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
-                }
-                else
-                {
-                    /* Tiles -> Strips */
-                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
-                        return cpContigTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpContigTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
-                        return cpSeparateTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpSeparateTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
-                }
-            }
-            else
-            {
-                if (outImage.IsTiled())
-                {
-                    /* Strips -> Tiles */
-                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
-                        return cpContigStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);    
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpContigStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
-                        return cpSeparateStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpSeparateStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
-                }
-                else
-                {
-                    /* Strips -> Strips */
-                    if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG && !bychunk)
+                    /* either inImage or outImage is tiled */
+                    if (g_bias != null)
                     {
-                        if (g_bias != null)
-                            return cpBiasedContig2Contig(inImage, outImage, length, width, samplesperpixel);
-
-                        return cpContig2ContigByRow(inImage, outImage, length, width, samplesperpixel);
+                        stderr.Write("{0}: Cannot handle tiled configuration w/bias image\n", inImage.FileName());
+                        return false;
                     }
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG && bychunk)
-                        return cpDecodedStrips(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpContig2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
-                        return cpSeparate2ContigByRow(inImage, outImage, length, width, samplesperpixel);
-                    else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
-                        return cpSeparate2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
+
+                    if (outImage.IsTiled())
+                    {
+                        uint tw;
+                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                        if (result == null)
+                            tw = w;
+                        else
+                            tw = (uint)result[0];
+
+                        uint tl;
+                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                        if (result == null)
+                            tl = l;
+                        else
+                            tl = (uint)result[0];
+
+                        bychunk = (tw == g_tilewidth && tl == g_tilelength);
+                    }
+                    else
+                    {
+                        /* outImage's not, so inImage must be tiled */
+                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                        uint tw = (uint)result[0];
+
+                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                        uint tl = (uint)result[0];
+
+                        bychunk = (tw == w && tl == g_rowsperstrip);
+                    }
                 }
+
+                if (inImage.IsTiled())
+                {
+                    if (outImage.IsTiled())
+                    {
+                        /* Tiles -> Tiles */
+                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                            return cpContigTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpContigTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                            return cpSeparateTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpSeparateTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                    }
+                    else
+                    {
+                        /* Tiles -> Strips */
+                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                            return cpContigTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpContigTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                            return cpSeparateTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpSeparateTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
+                    }
+                }
+                else
+                {
+                    if (outImage.IsTiled())
+                    {
+                        /* Strips -> Tiles */
+                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                            return cpContigStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpContigStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                            return cpSeparateStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpSeparateStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
+                    }
+                    else
+                    {
+                        /* Strips -> Strips */
+                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG && !bychunk)
+                        {
+                            if (g_bias != null)
+                                return cpBiasedContig2Contig(inImage, outImage, length, width, samplesperpixel);
+
+                            return cpContig2ContigByRow(inImage, outImage, length, width, samplesperpixel);
+                        }
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG && bychunk)
+                            return cpDecodedStrips(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpContig2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                            return cpSeparate2ContigByRow(inImage, outImage, length, width, samplesperpixel);
+                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && g_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                            return cpSeparate2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
+                    }
+                }
+
+                stderr.Write("tiffcp: {0}: Don't know how to copy/convert image.\n", inImage.FileName());
             }
 
-            Tiff.fprintf(stderr, "tiffcp: %s: Don't know how to copy/convert image.\n", inImage.FileName());
             return false;
         }
 

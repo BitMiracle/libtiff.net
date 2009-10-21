@@ -100,6 +100,13 @@ namespace BitMiracle.LibTiff
             ushort value = (ushort)(b[byteStartOffset] & 0xFF);
             value += (ushort)((b[byteStartOffset + 1] & 0xFF) << 8);
             return value;
-        }        
+        }
+
+        internal static void fprintf(Stream fd, string format, params object[] list)
+        {
+            string s = string.Format(format, list);
+            byte[] bytes = Encoding.ASCII.GetBytes(s);
+            fd.Write(bytes, 0, bytes.Length);
+        }
     }
 }
