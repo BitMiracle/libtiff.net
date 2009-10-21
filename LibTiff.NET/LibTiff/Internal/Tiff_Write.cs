@@ -86,7 +86,7 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private bool writeUInt16OK(UInt16 value)
+        private bool writeUInt16OK(ushort value)
         {
             byte[] cp = new byte[2];
             cp[0] = (byte)value;

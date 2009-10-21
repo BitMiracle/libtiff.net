@@ -411,7 +411,7 @@ namespace BitMiracle.LibTiff
             return ((uint)r | ((uint)g << 8) | ((uint)b << 16) | ((uint)a << 24));
         }
 
-        private static uint W2B(UInt16 v)
+        private static uint W2B(ushort v)
         {
             return (uint)((v >> 8) & 0xff);
         }

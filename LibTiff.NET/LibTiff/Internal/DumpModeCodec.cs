@@ -42,32 +42,32 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decoderow(byte[] pp, int cc, ushort s)
         {
             return DumpModeDecode(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decodestrip(byte[] pp, int cc, ushort s)
         {
             return DumpModeDecode(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decodetile(byte[] pp, int cc, ushort s)
         {
             return DumpModeDecode(pp, cc, s);
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encoderow(byte[] pp, int cc, ushort s)
         {
             return DumpModeEncode(pp, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encodestrip(byte[] pp, int cc, ushort s)
         {
             return DumpModeEncode(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encodetile(byte[] pp, int cc, ushort s)
         {
             return DumpModeEncode(pp, cc, s);
         }
@@ -82,7 +82,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Encode a hunk of pixels.
         */
-        private bool DumpModeEncode(byte[] pp, int cc, UInt16 s)
+        private bool DumpModeEncode(byte[] pp, int cc, ushort s)
         {
             int ppPos = 0;
             while (cc > 0)
@@ -111,7 +111,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Decode a hunk of pixels.
         */
-        private bool DumpModeDecode(byte[] buf, int cc, UInt16 s)
+        private bool DumpModeDecode(byte[] buf, int cc, ushort s)
         {
             if (m_tif.m_rawcc < cc)
             {

@@ -98,12 +98,12 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_predecode(UInt16 s)
+        public override bool tif_predecode(ushort s)
         {
             return ZIPPreDecode(s);
         }
 
-        public override bool tif_preencode(UInt16 s)
+        public override bool tif_preencode(ushort s)
         {
             return ZIPPreEncode(s);
         }
@@ -125,17 +125,17 @@ namespace BitMiracle.LibTiff.Internal
             return ZIPSetupDecode();
         }
 
-        public override bool predictor_decoderow(byte[] pp, int cc, UInt16 s)
+        public override bool predictor_decoderow(byte[] pp, int cc, ushort s)
         {
             return ZIPDecode(pp, cc, s);
         }
 
-        public override bool predictor_decodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool predictor_decodestrip(byte[] pp, int cc, ushort s)
         {
             return ZIPDecode(pp, cc, s);
         }
 
-        public override bool predictor_decodetile(byte[] pp, int cc, UInt16 s)
+        public override bool predictor_decodetile(byte[] pp, int cc, ushort s)
         {
             return ZIPDecode(pp, cc, s);
         }
@@ -145,17 +145,17 @@ namespace BitMiracle.LibTiff.Internal
             return ZIPSetupEncode();
         }
 
-        public override bool predictor_encoderow(byte[] pp, int cc, UInt16 s)
+        public override bool predictor_encoderow(byte[] pp, int cc, ushort s)
         {
             return ZIPEncode(pp, cc, s);
         }
 
-        public override bool predictor_encodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool predictor_encodestrip(byte[] pp, int cc, ushort s)
         {
             return ZIPEncode(pp, cc, s);
         }
 
-        public override bool predictor_encodetile(byte[] pp, int cc, UInt16 s)
+        public override bool predictor_encodetile(byte[] pp, int cc, ushort s)
         {
             return ZIPEncode(pp, cc, s);
         }
@@ -176,7 +176,7 @@ namespace BitMiracle.LibTiff.Internal
             }
         }
 
-        private bool ZIPDecode(byte[] op, int occ, UInt16 s)
+        private bool ZIPDecode(byte[] op, int occ, ushort s)
         {
             const string module = "ZIPDecode";
 
@@ -218,7 +218,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Encode a chunk of pixels.
         */
-        private bool ZIPEncode(byte[] bp, int cc, UInt16 s)
+        private bool ZIPEncode(byte[] bp, int cc, ushort s)
         {
             const string module = "ZIPEncode";
 
@@ -285,7 +285,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Setup state for decoding a strip.
         */
-        private bool ZIPPreDecode(UInt16 s)
+        private bool ZIPPreDecode(ushort s)
         {
             if ((m_state & ZSTATE_INIT_DECODE) == 0)
                 tif_setupdecode();
@@ -299,7 +299,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Reset encoding state at the start of a strip.
         */
-        private bool ZIPPreEncode(UInt16 s)
+        private bool ZIPPreEncode(ushort s)
         {
             if (m_state != ZSTATE_INIT_ENCODE)
                 tif_setupencode();

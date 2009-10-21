@@ -41,8 +41,8 @@ namespace BitMiracle.LibTiff.Internal
         internal jpeg_decompress_struct m_decompression;
         internal jpeg_common_struct m_common;
 
-        internal UInt16 m_h_sampling; /* luminance sampling factors */
-        internal UInt16 m_v_sampling;
+        internal ushort m_h_sampling; /* luminance sampling factors */
+        internal ushort m_v_sampling;
 
         /* pseudo-tag fields */
         internal byte[] m_jpegtables; /* JPEGTables tag value, or null */
@@ -177,12 +177,12 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGSetupDecode();
         }
 
-        public override bool tif_predecode(UInt16 s)
+        public override bool tif_predecode(ushort s)
         {
             return JPEGPreDecode(s);
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decoderow(byte[] pp, int cc, ushort s)
         {
             if (m_rawDecode)
                 return JPEGDecodeRaw(pp, cc, s);
@@ -190,7 +190,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGDecode(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decodestrip(byte[] pp, int cc, ushort s)
         {
             if (m_rawDecode)
                 return JPEGDecodeRaw(pp, cc, s);
@@ -198,7 +198,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGDecode(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decodetile(byte[] pp, int cc, ushort s)
         {
             if (m_rawDecode)
                 return JPEGDecodeRaw(pp, cc, s);
@@ -211,7 +211,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGSetupEncode();
         }
 
-        public override bool tif_preencode(UInt16 s)
+        public override bool tif_preencode(ushort s)
         {
             return JPEGPreEncode(s);
         }
@@ -221,7 +221,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGPostEncode();
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encoderow(byte[] pp, int cc, ushort s)
         {
             if (m_rawEncode)
                 return JPEGEncodeRaw(pp, cc, s);
@@ -229,7 +229,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGEncode(pp, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encodestrip(byte[] pp, int cc, ushort s)
         {
             if (m_rawEncode)
                 return JPEGEncodeRaw(pp, cc, s);
@@ -237,7 +237,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGEncode(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encodetile(byte[] pp, int cc, ushort s)
         {
             if (m_rawEncode)
                 return JPEGEncodeRaw(pp, cc, s);
@@ -378,7 +378,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
          * Set encoding state at the start of a strip or tile.
          */
-        private bool JPEGPreEncode(UInt16 s)
+        private bool JPEGPreEncode(ushort s)
         {
             const string module = "JPEGPreEncode";
             int segment_width;
@@ -684,7 +684,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Set up for decoding a strip or tile.
         */
-        private bool JPEGPreDecode(UInt16 s)
+        private bool JPEGPreDecode(ushort s)
         {
             TiffDirectory td = m_tif.m_dir;
             const string module = "JPEGPreDecode";
@@ -793,8 +793,8 @@ namespace BitMiracle.LibTiff.Internal
                     {
                         Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Decompressor will try reading with sampling %d,%d.", m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor);
 
-                        m_h_sampling = (UInt16)m_decompression.m_comp_info[0].h_samp_factor;
-                        m_v_sampling = (UInt16)m_decompression.m_comp_info[0].v_samp_factor;
+                        m_h_sampling = (ushort)m_decompression.m_comp_info[0].h_samp_factor;
+                        m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
                     }
                 }
                 /* Rest should have sampling factors 1,1 */
@@ -943,7 +943,7 @@ namespace BitMiracle.LibTiff.Internal
         * Decode a chunk of pixels.
         * "Standard" case: returned data is not downsampled.
         */
-        private bool JPEGDecode(byte[] buf, int cc, UInt16 s)
+        private bool JPEGDecode(byte[] buf, int cc, ushort s)
         {
             TiffDirectory td = m_tif.m_dir;
             const string module = "JPEGPreDecode";
@@ -1052,8 +1052,8 @@ namespace BitMiracle.LibTiff.Internal
                     {
                         Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Decompressor will try reading with sampling %d,%d.", m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor);
 
-                        m_h_sampling = (UInt16)m_decompression.m_comp_info[0].h_samp_factor;
-                        m_v_sampling = (UInt16)m_decompression.m_comp_info[0].v_samp_factor;
+                        m_h_sampling = (ushort)m_decompression.m_comp_info[0].h_samp_factor;
+                        m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
                     }
                 }
                 /* Rest should have sampling factors 1,1 */
@@ -1124,7 +1124,7 @@ namespace BitMiracle.LibTiff.Internal
         * Decode a chunk of pixels.
         * Returned data is downsampled per sampling factors.
         */
-        private bool JPEGDecodeRaw(byte[] buf, int cc, UInt16 s)
+        private bool JPEGDecodeRaw(byte[] buf, int cc, ushort s)
         {
             /* data is expected to be read in multiples of a scanline */
             int nrows = m_decompression.Image_height;
@@ -1212,7 +1212,7 @@ namespace BitMiracle.LibTiff.Internal
         * Encode a chunk of pixels.
         * "Standard" case: incoming data is not downsampled.
         */
-        private bool JPEGEncode(byte[] buf, int cc, UInt16 s)
+        private bool JPEGEncode(byte[] buf, int cc, ushort s)
         {
             /* data is expected to be supplied in multiples of a scanline */
             int nrows = cc / m_bytesperline;
@@ -1245,7 +1245,7 @@ namespace BitMiracle.LibTiff.Internal
         * Encode a chunk of pixels.
         * Incoming data is expected to be downsampled per sampling factors.
         */
-        private bool JPEGEncodeRaw(byte[] buf, int cc, UInt16 s)
+        private bool JPEGEncodeRaw(byte[] buf, int cc, ushort s)
         {
             /* data is expected to be supplied in multiples of a clumpline */
             /* a clumpline is equivalent to v_sampling desubsampled scanlines */

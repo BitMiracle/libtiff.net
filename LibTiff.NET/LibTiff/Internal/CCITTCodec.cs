@@ -239,7 +239,7 @@ namespace BitMiracle.LibTiff.Internal
             return setupState();
         }
 
-        public override bool tif_predecode(UInt16 s)
+        public override bool tif_predecode(ushort s)
         {
             m_bit = 0; /* force initial read */
             m_data = 0;
@@ -264,7 +264,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decoderow(byte[] pp, int cc, ushort s)
         {
             switch (m_decoder)
             {
@@ -281,12 +281,12 @@ namespace BitMiracle.LibTiff.Internal
             return false;
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decodestrip(byte[] pp, int cc, ushort s)
         {
             return tif_decoderow(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, UInt16 s)
+        public override bool tif_decodetile(byte[] pp, int cc, ushort s)
         {
             return tif_decoderow(pp, cc, s);
         }
@@ -297,7 +297,7 @@ namespace BitMiracle.LibTiff.Internal
             return setupState();
         }
 
-        public override bool tif_preencode(UInt16 s)
+        public override bool tif_preencode(ushort s)
         {
             m_bit = 8;
             m_data = 0;
@@ -351,7 +351,7 @@ namespace BitMiracle.LibTiff.Internal
             return Fax3PostEncode();
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encoderow(byte[] pp, int cc, ushort s)
         {
             if (m_encodingFax4)
                 return Fax4Encode(pp, cc);
@@ -359,12 +359,12 @@ namespace BitMiracle.LibTiff.Internal
             return Fax3Encode(pp, cc);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encodestrip(byte[] pp, int cc, ushort s)
         {
             return tif_encoderow(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, UInt16 s)
+        public override bool tif_encodetile(byte[] pp, int cc, ushort s)
         {
             return tif_encoderow(pp, cc, s);
         }
@@ -433,7 +433,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private static bool isUint16Aligned(int offset)
         {
-            return (offset % sizeof(UInt16) == 0);
+            return (offset % sizeof(ushort) == 0);
         }
 
         /*
