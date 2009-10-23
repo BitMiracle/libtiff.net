@@ -19,7 +19,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class CodecWithPredictorTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TIFFTAG tag, params object[] ap)
+        public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
@@ -27,7 +27,7 @@ namespace BitMiracle.LibTiff.Internal
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_PREDICTOR:
-                    sp.SetPredictorValue((PREDICTOR)ap[0]);
+                    sp.SetPredictorValue((PREDICTOR)ap[0].ToByte());
                     tif.setFieldBit(CodecWithPredictor.FIELD_PREDICTOR);
                     tif.m_flags |= Tiff.TIFF_DIRTYDIRECT;
                     return true;
@@ -40,7 +40,7 @@ namespace BitMiracle.LibTiff.Internal
             return base.vsetfield(tif, tag, ap);
         }
 
-        public override object[] vgetfield(Tiff tif, TIFFTAG tag)
+        public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
@@ -48,8 +48,8 @@ namespace BitMiracle.LibTiff.Internal
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_PREDICTOR:
-                    object[] result = new object[1];
-                    result[0] = sp.GetPredictorValue();
+                    FieldValue[] result = new FieldValue[1];
+                    result[0].Set(sp.GetPredictorValue());
                     return result;
             }
 

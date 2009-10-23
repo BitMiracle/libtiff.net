@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyVersion.cs" />
+    <Compile Include="FieldValue.cs" />
     <Compile Include="Internal\CCITTCodec.cs" />
     <Compile Include="Internal\CCITTCodecTagMethods.cs" />
     <Compile Include="Internal\CCITTCodec_Data.cs" />

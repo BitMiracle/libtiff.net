@@ -19,7 +19,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class CCITTCodecTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TIFFTAG tag, params object[] ap)
+        public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
         {
             CCITTCodec sp = (CCITTCodec)tif.m_currentCodec;
             Debug.Assert(sp != null);
@@ -27,41 +27,41 @@ namespace BitMiracle.LibTiff.Internal
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_FAXMODE:
-                    sp.m_mode = (FAXMODE)ap[0];
+                    sp.m_mode = (FAXMODE)ap[0].ToShort();
                     return true; /* NB: pseudo tag */
                 case TIFFTAG.TIFFTAG_FAXFILLFUNC:
-                    sp.fill = ap[0] as CCITTCodec.FaxFillFunc;
+                    sp.fill = ap[0].Value as CCITTCodec.FaxFillFunc;
                     return true; /* NB: pseudo tag */
                 case TIFFTAG.TIFFTAG_GROUP3OPTIONS:
                     /* XXX: avoid reading options if compression mismatches. */
                     if (tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX3)
-                        sp.m_groupoptions = (GROUP3OPT)ap[0];
+                        sp.m_groupoptions = (GROUP3OPT)ap[0].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_GROUP4OPTIONS:
                     /* XXX: avoid reading options if compression mismatches. */
                     if (tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX4)
-                        sp.m_groupoptions = (GROUP3OPT)ap[0];
+                        sp.m_groupoptions = (GROUP3OPT)ap[0].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_BADFAXLINES:
-                    sp.m_badfaxlines = (uint)ap[0];
+                    sp.m_badfaxlines = ap[0].ToUInt();
                     break;
                 case TIFFTAG.TIFFTAG_CLEANFAXDATA:
-                    sp.m_cleanfaxdata = (CLEANFAXDATA)ap[0];
+                    sp.m_cleanfaxdata = (CLEANFAXDATA)ap[0].ToByte();
                     break;
                 case TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES:
-                    sp.m_badfaxrun = (uint)ap[0];
+                    sp.m_badfaxrun = ap[0].ToUInt();
                     break;
                 case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
-                    sp.m_recvparams = (uint)ap[0];
+                    sp.m_recvparams = ap[0].ToUInt();
                     break;
                 case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
-                    Tiff.setString(out sp.m_subaddress, ap[0] as string);
+                    Tiff.setString(out sp.m_subaddress, ap[0].ToString());
                     break;
                 case TIFFTAG.TIFFTAG_FAXRECVTIME:
-                    sp.m_recvtime = (uint)ap[0];
+                    sp.m_recvtime = ap[0].ToUInt();
                     break;
                 case TIFFTAG.TIFFTAG_FAXDCS:
-                    Tiff.setString(out sp.m_faxdcs, ap[0] as string);
+                    Tiff.setString(out sp.m_faxdcs, ap[0].ToString());
                     break;
                 default:
                     return base.vsetfield(tif, tag, ap);
@@ -77,45 +77,45 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override object[] vgetfield(Tiff tif, TIFFTAG tag)
+        public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
         {
             CCITTCodec sp = (CCITTCodec)tif.m_currentCodec;
             Debug.Assert(sp != null);
 
-            object[] result = new object[1];
+            FieldValue[] result = new FieldValue[1];
 
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_FAXMODE:
-                    result[0] = sp.m_mode;
+                    result[0].Set(sp.m_mode);
                     break;
                 case TIFFTAG.TIFFTAG_FAXFILLFUNC:
-                    result[0] = sp.fill;
+                    result[0].Set(sp.fill);
                     break;
                 case TIFFTAG.TIFFTAG_GROUP3OPTIONS:
                 case TIFFTAG.TIFFTAG_GROUP4OPTIONS:
-                    result[0] = sp.m_groupoptions;
+                    result[0].Set(sp.m_groupoptions);
                     break;
                 case TIFFTAG.TIFFTAG_BADFAXLINES:
-                    result[0] = sp.m_badfaxlines;
+                    result[0].Set(sp.m_badfaxlines);
                     break;
                 case TIFFTAG.TIFFTAG_CLEANFAXDATA:
-                    result[0] = sp.m_cleanfaxdata;
+                    result[0].Set(sp.m_cleanfaxdata);
                     break;
                 case TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES:
-                    result[0] = sp.m_badfaxrun;
+                    result[0].Set(sp.m_badfaxrun);
                     break;
                 case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
-                    result[0] = sp.m_recvparams;
+                    result[0].Set(sp.m_recvparams);
                     break;
                 case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
-                    result[0] = sp.m_subaddress;
+                    result[0].Set(sp.m_subaddress);
                     break;
                 case TIFFTAG.TIFFTAG_FAXRECVTIME:
-                    result[0] = sp.m_recvtime;
+                    result[0].Set(sp.m_recvtime);
                     break;
                 case TIFFTAG.TIFFTAG_FAXDCS:
-                    result[0] = sp.m_faxdcs;
+                    result[0].Set(sp.m_faxdcs);
                     break;
                 default:
                     return base.vgetfield(tif, tag);

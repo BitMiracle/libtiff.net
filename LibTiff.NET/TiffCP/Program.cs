@@ -215,8 +215,8 @@ namespace BitMiracle.TiffCP
                             return;
                         }
 
-                        object[] result = g_bias.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
-                        short samples = (short)result[0];
+                        FieldValue[] result = g_bias.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+                        short samples = result[0].ToShort();
                         if (samples != 1)
                         {
                             fputs("Bias image must be monochrome\n", stderr);
@@ -576,10 +576,10 @@ namespace BitMiracle.TiffCP
         static bool tiffcp(Tiff inImage, Tiff outImage)
         {
             int width = 0;
-            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+            FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
             if (result != null)
             {
-                width = (int)result[0];
+                width = result[0].ToInt();
                 outImage.SetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, width);
             }
 
@@ -587,7 +587,7 @@ namespace BitMiracle.TiffCP
             result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
             if (result != null)
             {
-                length = (int)result[0];
+                length = result[0].ToInt();
                 outImage.SetField(TIFFTAG.TIFFTAG_IMAGELENGTH, length);
             }
 
@@ -595,7 +595,7 @@ namespace BitMiracle.TiffCP
             result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
             if (result != null)
             {
-                bitspersample = (ushort)result[0];
+                bitspersample = result[0].ToUShort();
                 outImage.SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, bitspersample);
             }
 
@@ -603,7 +603,7 @@ namespace BitMiracle.TiffCP
             result = inImage.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
             if (result != null)
             {
-                samplesperpixel = (ushort)result[0];
+                samplesperpixel = result[0].ToUShort();
                 outImage.SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, samplesperpixel);
             }
             
@@ -614,7 +614,7 @@ namespace BitMiracle.TiffCP
                 result = inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
                 if (result != null)
                 {
-                    g_compression = (COMPRESSION)result[0];
+                    g_compression = (COMPRESSION)result[0].ToInt();
                     outImage.SetField(TIFFTAG.TIFFTAG_COMPRESSION, g_compression);
                 }
             }
@@ -624,7 +624,7 @@ namespace BitMiracle.TiffCP
                 result = inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
                 if (result != null)
                 {
-                    COMPRESSION input_compression = (COMPRESSION)result[0];
+                    COMPRESSION input_compression = (COMPRESSION)result[0].ToInt();
                     if (input_compression == COMPRESSION.COMPRESSION_JPEG)
                         inImage.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RGB);
                 }
@@ -632,7 +632,7 @@ namespace BitMiracle.TiffCP
                 result = inImage.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
                 if (result != null)
                 {
-                    PHOTOMETRIC input_photometric = (PHOTOMETRIC)result[0];
+                    PHOTOMETRIC input_photometric = (PHOTOMETRIC)result[0].ToInt();
                     if (input_photometric == PHOTOMETRIC.PHOTOMETRIC_RGB)
                     {
                         if (g_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
@@ -658,7 +658,7 @@ namespace BitMiracle.TiffCP
              * Will copy `Orientation' tag from input image
              */
             result = inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION);
-            g_orientation = (ORIENTATION)result[0];
+            g_orientation = (ORIENTATION)result[0].ToByte();
             switch (g_orientation)
             {
                 case ORIENTATION.ORIENTATION_BOTRIGHT:
@@ -709,13 +709,13 @@ namespace BitMiracle.TiffCP
                 if (g_tilewidth == -1)
                 {
                     result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-                    g_tilewidth = (int)result[0];
+                    g_tilewidth = result[0].ToInt();
                 }
 
                 if (g_tilelength == -1)
                 {
                     result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-                    g_tilelength = (int)result[0];
+                    g_tilelength = result[0].ToInt();
                 }
                 
                 outImage.DefaultTileSize(ref g_tilewidth, ref g_tilelength);
@@ -735,7 +735,7 @@ namespace BitMiracle.TiffCP
                     if (result == null)
                         g_rowsperstrip = outImage.DefaultStripSize(g_rowsperstrip);
                     else
-                        g_rowsperstrip = (int)result[0];
+                        g_rowsperstrip = result[0].ToInt();
 
                     if (g_rowsperstrip > length && g_rowsperstrip != -1)
                         g_rowsperstrip = length;
@@ -753,7 +753,7 @@ namespace BitMiracle.TiffCP
                 result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
                 if (result != null)
                 {
-                    g_config = (PLANARCONFIG)result[0];
+                    g_config = (PLANARCONFIG)result[0].ToShort();
                     outImage.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, g_config);
                 }
             }
@@ -780,7 +780,7 @@ namespace BitMiracle.TiffCP
                         result = inImage.GetField(TIFFTAG.TIFFTAG_PREDICTOR);
                         if (result != null)
                         {
-                            g_predictor = (short)result[0];
+                            g_predictor = result[0].ToShort();
                             outImage.SetField(TIFFTAG.TIFFTAG_PREDICTOR, g_predictor);
                         }
                     }
@@ -796,7 +796,7 @@ namespace BitMiracle.TiffCP
                             result = inImage.GetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS);
                             if (result != null)
                             {
-                                g_g3opts = (GROUP3OPT)result[0];
+                                g_g3opts = (GROUP3OPT)result[0].ToShort();
                                 outImage.SetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS, g_g3opts);
                             }
                         }
@@ -820,13 +820,13 @@ namespace BitMiracle.TiffCP
             result = inImage.GetField(TIFFTAG.TIFFTAG_NUMBEROFINKS);
             if (result != null)
             {
-                ushort ninks = (ushort)result[0];
+                ushort ninks = result[0].ToUShort();
                 outImage.SetField(TIFFTAG.TIFFTAG_NUMBEROFINKS, ninks);
 
                 result = inImage.GetField(TIFFTAG.TIFFTAG_INKNAMES);
                 if (result != null)
                 {
-                    //string inknames = result[0] as string;
+                    //string inknames = result[0].ToString();
                     //int inknameslen = strlen(inknames) + 1;
                     //const char* cp = inknames;
                     //while (ninks > 1)
@@ -872,8 +872,8 @@ namespace BitMiracle.TiffCP
         {
             using (TextWriter stderr = Console.Error)
             {
-                object[] result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
-                PLANARCONFIG shortv = (PLANARCONFIG)result[0];
+                FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+                PLANARCONFIG shortv = (PLANARCONFIG)result[0].ToShort();
 
                 if (shortv != g_config && bitspersample != 8 && samplesperpixel > 1)
                 {
@@ -882,16 +882,16 @@ namespace BitMiracle.TiffCP
                 }
 
                 result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
-                uint w = (uint)result[0];
+                uint w = result[0].ToUInt();
 
                 result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
-                uint l = (uint)result[0];
+                uint l = result[0].ToUInt();
 
                 bool bychunk;
                 if (!(outImage.IsTiled() || inImage.IsTiled()))
                 {
                     result = inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
-                    int irps = (int)result[0];
+                    int irps = result[0].ToInt();
 
                     /* if biased, force decoded copying to allow image subtraction */
                     bychunk = (g_bias == null) && (g_rowsperstrip == irps);
@@ -912,14 +912,14 @@ namespace BitMiracle.TiffCP
                         if (result == null)
                             tw = w;
                         else
-                            tw = (uint)result[0];
+                            tw = result[0].ToUInt();
 
                         uint tl;
                         result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
                         if (result == null)
                             tl = l;
                         else
-                            tl = (uint)result[0];
+                            tl = result[0].ToUInt();
 
                         bychunk = (tw == g_tilewidth && tl == g_tilelength);
                     }
@@ -927,10 +927,10 @@ namespace BitMiracle.TiffCP
                     {
                         /* outImage's not, so inImage must be tiled */
                         result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-                        uint tw = (uint)result[0];
+                        uint tw = result[0].ToUInt();
 
                         result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-                        uint tl = (uint)result[0];
+                        uint tl = result[0].ToUInt();
 
                         bychunk = (tw == w && tl == g_rowsperstrip);
                     }
@@ -1038,16 +1038,16 @@ namespace BitMiracle.TiffCP
                 int biasSize = g_bias.ScanlineSize();
                 int bufSize = inImage.ScanlineSize();
 
-                object[] result = g_bias.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
-                uint biasWidth = (uint)result[0];
+                FieldValue[] result = g_bias.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+                uint biasWidth = result[0].ToUInt();
 
                 result = g_bias.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
-                uint biasLength = (uint)result[0];
+                uint biasLength = result[0].ToUInt();
 
                 if (biasSize == bufSize && imagelength == biasLength && imagewidth == biasWidth)
                 {
                     result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-                    ushort sampleBits = (ushort)result[0];
+                    ushort sampleBits = result[0].ToUShort();
 
                     if (sampleBits == 8 || sampleBits == 16 || sampleBits == 32)
                     {
@@ -1608,11 +1608,11 @@ namespace BitMiracle.TiffCP
             if (tilebuf == null)
                 return false;
 
-            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-            int tw = (int)result[0];
+            FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = result[0].ToInt();
 
             result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-            int tl = (int)result[0];
+            int tl = result[0].ToInt();
 
             int imagew = inImage.ScanlineSize();
             int tilew = inImage.TileRowSize();
@@ -1657,14 +1657,14 @@ namespace BitMiracle.TiffCP
             if (tilebuf == null)
                 return false;
 
-            object[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-            int tw = (int)result[0];
+            FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = result[0].ToInt();
 
             result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-            int tl = (int)result[0];
+            int tl = result[0].ToInt();
 
             result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-            ushort bps = (ushort)result[0];
+            ushort bps = result[0].ToUShort();
 
             Debug.Assert(bps % 8 == 0);
 
@@ -1716,8 +1716,8 @@ namespace BitMiracle.TiffCP
 
         static bool writeBufferToContigStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
         {
-            object[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
-            int rowsperstrip = (int)result[0];
+            FieldValue[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = result[0].ToInt();
 
             int strip = 0;
             int bufPos = 0;
@@ -1747,8 +1747,8 @@ namespace BitMiracle.TiffCP
             if (obuf == null)
                 return false;
 
-            object[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
-            int rowsperstrip = (int)result[0];
+            FieldValue[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = result[0].ToInt();
 
             int rowsize = imagewidth * spp;
             int strip = 0;
@@ -1778,11 +1778,11 @@ namespace BitMiracle.TiffCP
             if (obuf == null)
                 return false;
 
-            object[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-            int tl = (int)result[0];
+            FieldValue[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            int tl = result[0].ToInt();
 
             result = outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-            int tw = (int)result[0];
+            int tw = result[0].ToInt();
 
             int imagew = outImage.ScanlineSize();
             int tilew = outImage.TileRowSize();
@@ -1831,14 +1831,14 @@ namespace BitMiracle.TiffCP
             if (obuf == null)
                 return false;
 
-            object[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-            int tl = (int)result[0];
+            FieldValue[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            int tl = result[0].ToInt();
 
             outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-            int tw = (int)result[0];
+            int tw = result[0].ToInt();
 
             outImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-            ushort bps = (ushort)result[0];
+            ushort bps = result[0].ToUShort();
 
             Debug.Assert(bps % 8 == 0);
 

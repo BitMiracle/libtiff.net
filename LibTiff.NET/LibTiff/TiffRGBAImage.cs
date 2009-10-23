@@ -83,8 +83,8 @@ namespace BitMiracle.LibTiff
             img.tif = tif;
             img.stoponerr = stop;
 
-            object[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-            img.bitspersample = (ushort)result[0];
+            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            img.bitspersample = result[0].ToUShort();
             switch (img.bitspersample)
             {
                 case 1:
@@ -101,15 +101,15 @@ namespace BitMiracle.LibTiff
 
             img.alpha = 0;
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
-            img.samplesperpixel = (ushort)result[0];
+            img.samplesperpixel = result[0].ToUShort();
 
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_EXTRASAMPLES);
-            ushort extrasamples = (ushort)result[0];
-            EXTRASAMPLE[] sampleinfo = result[1] as EXTRASAMPLE[];
+            ushort extrasamples = result[0].ToUShort();
+            byte[] sampleinfo = result[1].ToByteArray();
 
             if (extrasamples >= 1)
             {
-                switch (sampleinfo[0])
+                switch ((EXTRASAMPLE)sampleinfo[0])
                 {
                     case EXTRASAMPLE.EXTRASAMPLE_UNSPECIFIED:
                         /* Workaround for some images without */
@@ -123,7 +123,7 @@ namespace BitMiracle.LibTiff
                         /* data is pre-multiplied */
                     case EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA:
                         /* data is not pre-multiplied */
-                        img.alpha = sampleinfo[0];
+                        img.alpha = (EXTRASAMPLE)sampleinfo[0];
                         break;
                 }
             }
@@ -144,10 +144,10 @@ namespace BitMiracle.LibTiff
             int colorchannels = img.samplesperpixel - extrasamples;
             
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_COMPRESSION);
-            COMPRESSION compress = (COMPRESSION)result[0];
+            COMPRESSION compress = (COMPRESSION)result[0].ToInt();
 
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_PLANARCONFIG);
-            PLANARCONFIG planarconfig = (PLANARCONFIG)result[0];
+            PLANARCONFIG planarconfig = (PLANARCONFIG)result[0].ToShort();
 
             result = tif.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
             if (result == null)
@@ -171,7 +171,7 @@ namespace BitMiracle.LibTiff
                 }
             }
             else
-                img.photometric = (PHOTOMETRIC)result[0];
+                img.photometric = (PHOTOMETRIC)result[0].ToInt();
 
             switch (img.photometric)
             {
@@ -183,9 +183,9 @@ namespace BitMiracle.LibTiff
                         return null;
                     }
 
-                    ushort[] red_orig = result[0] as ushort[];
-                    ushort[] green_orig = result[1] as ushort[];
-                    ushort[] blue_orig = result[2] as ushort[];
+                    ushort[] red_orig = result[0].ToUShortArray();
+                    ushort[] green_orig = result[1].ToUShortArray();
+                    ushort[] blue_orig = result[2].ToUShortArray();
 
                     /* copy the colormaps so we can modify them */
                     int n_color = (1 << img.bitspersample);
@@ -262,7 +262,7 @@ namespace BitMiracle.LibTiff
 
                 case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
                     result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET);
-                    INKSET inkset = (INKSET)result[0];
+                    INKSET inkset = (INKSET)result[0].ToByte();
 
                     if (inkset != INKSET.INKSET_CMYK)
                     {
@@ -322,13 +322,13 @@ namespace BitMiracle.LibTiff
             img.cielab = null;
 
             result = tif.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
-            img.width = (int)result[0];
+            img.width = result[0].ToInt();
 
             result = tif.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
-            img.height = (int)result[0];
+            img.height = result[0].ToInt();
 
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION);
-            img.orientation = (ORIENTATION)result[0];
+            img.orientation = (ORIENTATION)result[0].ToByte();
             
             img.isContig = !(planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && colorchannels > 1);
             if (img.isContig)
@@ -470,11 +470,11 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            object[] result = tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-            int tw = (int)result[0];
+            FieldValue[] result = tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = result[0].ToInt();
 
             result = tif.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-            int th = (int)result[0];
+            int th = result[0].ToInt();
 
             int flip = img.setorientation();
             int y;
@@ -570,11 +570,11 @@ namespace BitMiracle.LibTiff
             int p2 = p1 + tilesize;
             int pa = (img.alpha != 0 ? (p2 + tilesize) : -1);
             
-            object[] result = tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-            int tw = (int)result[0];
+            FieldValue[] result = tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tw = result[0].ToInt();
 
             result = tif.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-            int th = (int)result[0];
+            int th = result[0].ToInt();
 
             int flip = img.setorientation();
             int y;
@@ -699,12 +699,12 @@ namespace BitMiracle.LibTiff
                 toskew = -(int)(w - w);
             }
 
-            object[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
-            int rowsperstrip = (int)result[0];
+            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = result[0].ToInt();
 
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-            ushort subsamplinghor = (ushort)result[0];
-            ushort subsamplingver = (ushort)result[1];
+            ushort subsamplinghor = result[0].ToUShort();
+            ushort subsamplingver = result[1].ToUShort();
 
             int scanline = tif.newScanlineSize();
             int fromskew = (w < img.width ? img.width - w : 0);
@@ -790,8 +790,8 @@ namespace BitMiracle.LibTiff
                 toskew = -(int)(w - w);
             }
 
-            object[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
-            int rowsperstrip = (int)result[0];
+            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = result[0].ToInt();
 
             int scanline = tif.ScanlineSize();
             int fromskew = (w < img.width ? img.width - w : 0);
@@ -858,8 +858,8 @@ namespace BitMiracle.LibTiff
 
         private bool isCCITTCompression()
         {
-            object[] result = tif.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
-            COMPRESSION compress = (COMPRESSION)result[0];
+            FieldValue[] result = tif.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+            COMPRESSION compress = (COMPRESSION)result[0].ToInt();
 
             return (compress == COMPRESSION.COMPRESSION_CCITTFAX3 || 
                 compress == COMPRESSION.COMPRESSION_CCITTFAX4 || 
@@ -1025,9 +1025,9 @@ namespace BitMiracle.LibTiff
                             * Joris: added support for the [1,2] case, nonetheless, to accommodate
                             * some OJPEG files
                             */
-                            object[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                            ushort SubsamplingHor = (ushort)result[0];
-                            ushort SubsamplingVer = (ushort)result[1];
+                            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                            ushort SubsamplingHor = result[0].ToUShort();
+                            ushort SubsamplingVer = result[1].ToUShort();
 
                             switch ((SubsamplingHor << 4) | SubsamplingVer)
                             {
@@ -1110,9 +1110,9 @@ namespace BitMiracle.LibTiff
                     {
                         if (initYCbCrConversion())
                         {
-                            object[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                            ushort hs = (ushort)result[0];
-                            ushort vs = (ushort)result[0];
+                            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                            ushort hs = result[0].ToUShort();
+                            ushort vs = result[0].ToUShort();
 
                             switch ((hs << 4) | vs)
                             {
@@ -2062,11 +2062,11 @@ namespace BitMiracle.LibTiff
                 }
             }
 
-            object[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS);
-            float[] luma = result[0] as float[];
+            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS);
+            float[] luma = result[0].ToFloatArray();
 
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE);
-            float[] refBlackWhite = result[0] as float[];
+            float[] refBlackWhite = result[0].ToFloatArray();
 
             ycbcr.Init(luma, refBlackWhite);
             return true;
@@ -2086,8 +2086,8 @@ namespace BitMiracle.LibTiff
                 }
             }
 
-            object[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_WHITEPOINT);
-            float[] whitePoint = result[0] as float[];
+            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_WHITEPOINT);
+            float[] whitePoint = result[0].ToFloatArray();
 
             float[] refWhite = new float[3];
             refWhite[1] = 100.0F;

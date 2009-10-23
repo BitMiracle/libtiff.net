@@ -19,7 +19,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class JpegCodecTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TIFFTAG tag, params object[] ap)
+        public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
         {
             JpegCodec sp = tif.m_currentCodec as JpegCodec;
             Debug.Assert(sp != null);
@@ -27,7 +27,7 @@ namespace BitMiracle.LibTiff.Internal
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_JPEGTABLES:
-                    int v32 = (int)ap[0];
+                    int v32 = ap[0].ToInt();
                     if (v32 == 0)
                     {
                         /* XXX */
@@ -35,17 +35,17 @@ namespace BitMiracle.LibTiff.Internal
                     }
 
                     sp.m_jpegtables = new byte [v32];
-                    Array.Copy(ap[1] as byte[], sp.m_jpegtables, v32);
+                    Array.Copy(ap[1].ToByteArray(), sp.m_jpegtables, v32);
                     sp.m_jpegtables_length = v32;
                     tif.setFieldBit(JpegCodec.FIELD_JPEGTABLES);
                     break;
 
                 case TIFFTAG.TIFFTAG_JPEGQUALITY:
-                    sp.m_jpegquality = (int)ap[0];
+                    sp.m_jpegquality = ap[0].ToInt();
                     return true; /* pseudo tag */
 
                 case TIFFTAG.TIFFTAG_JPEGCOLORMODE:
-                    sp.m_jpegcolormode = (JPEGCOLORMODE)ap[0];
+                    sp.m_jpegcolormode = (JPEGCOLORMODE)ap[0].ToShort();
                     sp.JPEGResetUpsampled();
                     return true; /* pseudo tag */
 
@@ -55,7 +55,7 @@ namespace BitMiracle.LibTiff.Internal
                     return ret_value;
 
                 case TIFFTAG.TIFFTAG_JPEGTABLESMODE:
-                    sp.m_jpegtablesmode = (JPEGTABLESMODE)ap[0];
+                    sp.m_jpegtablesmode = (JPEGTABLESMODE)ap[0].ToShort();
                     return true; /* pseudo tag */
                 
                 case TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING:
@@ -65,19 +65,19 @@ namespace BitMiracle.LibTiff.Internal
                     return base.vsetfield(tif, tag, ap);
                 
                 case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
-                    sp.m_recvparams = (uint)ap[0];
+                    sp.m_recvparams = ap[0].ToUInt();
                     break;
                 
                 case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
-                    Tiff.setString(out sp.m_subaddress, ap[0] as string);
+                    Tiff.setString(out sp.m_subaddress, ap[0].ToString());
                     break;
                 
                 case TIFFTAG.TIFFTAG_FAXRECVTIME:
-                    sp.m_recvtime = (uint)ap[0];
+                    sp.m_recvtime = ap[0].ToUInt();
                     break;
                 
                 case TIFFTAG.TIFFTAG_FAXDCS:
-                    Tiff.setString(out sp.m_faxdcs, ap[0] as string);
+                    Tiff.setString(out sp.m_faxdcs, ap[0].ToString());
                     break;
                 
                 default:
@@ -94,34 +94,34 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override object[] vgetfield(Tiff tif, TIFFTAG tag)
+        public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
         {
             JpegCodec sp = tif.m_currentCodec as JpegCodec;
             Debug.Assert(sp != null);
 
-            object[] result = null;
+            FieldValue[] result = null;
 
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_JPEGTABLES:
-                    result = new object[2];
-                    result[0] = sp.m_jpegtables_length;
-                    result[1] = sp.m_jpegtables;
+                    result = new FieldValue[2];
+                    result[0].Set(sp.m_jpegtables_length);
+                    result[1].Set(sp.m_jpegtables);
                     break;
 
                 case TIFFTAG.TIFFTAG_JPEGQUALITY:
-                    result = new object[1];
-                    result[0] = sp.m_jpegquality;
+                    result = new FieldValue[1];
+                    result[0].Set(sp.m_jpegquality);
                     break;
 
                 case TIFFTAG.TIFFTAG_JPEGCOLORMODE:
-                    result = new object[1];
-                    result[0] = sp.m_jpegcolormode;
+                    result = new FieldValue[1];
+                    result[0].Set(sp.m_jpegcolormode);
                     break;
 
                 case TIFFTAG.TIFFTAG_JPEGTABLESMODE:
-                    result = new object[1];
-                    result[0] = sp.m_jpegtablesmode;
+                    result = new FieldValue[1];
+                    result[0].Set(sp.m_jpegtablesmode);
                     break;
 
                 case TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING:
@@ -129,23 +129,23 @@ namespace BitMiracle.LibTiff.Internal
                     return base.vgetfield(tif, tag);
 
                 case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
-                    result = new object[1];
-                    result[0] = sp.m_recvparams;
+                    result = new FieldValue[1];
+                    result[0].Set(sp.m_recvparams);
                     break;
 
                 case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
-                    result = new object[1];
-                    result[0] = sp.m_subaddress;
+                    result = new FieldValue[1];
+                    result[0].Set(sp.m_subaddress);
                     break;
 
                 case TIFFTAG.TIFFTAG_FAXRECVTIME:
-                    result = new object[1];
-                    result[0] = sp.m_recvtime;
+                    result = new FieldValue[1];
+                    result[0].Set(sp.m_recvtime);
                     break;
 
                 case TIFFTAG.TIFFTAG_FAXDCS:
-                    result = new object[1];
-                    result[0] = sp.m_faxdcs;
+                    result = new FieldValue[1];
+                    result[0].Set(sp.m_faxdcs);
                     break;
 
                 default:

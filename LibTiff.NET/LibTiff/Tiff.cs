@@ -799,7 +799,7 @@ namespace BitMiracle.LibTiff
         * Return the value of a field in the
         * internal directory structure.
         */
-        public object[] GetField(TIFFTAG tag)
+        public FieldValue[] GetField(TIFFTAG tag)
         {
             TiffFieldInfo fip = FindFieldInfo(tag, TiffDataType.TIFF_ANY);
             if (fip != null && (isPseudoTag(tag) || fieldSet(fip.field_bit)))
@@ -816,105 +816,105 @@ namespace BitMiracle.LibTiff
         *  explicit values so that defaults exist only one
         *  place in the library -- in setupDefaultDirectory.
         */
-        public object[] GetFieldDefaulted(TIFFTAG tag)
+        public FieldValue[] GetFieldDefaulted(TIFFTAG tag)
         {
             TiffDirectory td = m_dir;
 
-            object[] result = GetField(tag);
+            FieldValue[] result = GetField(tag);
             if (result != null)
                 return result;
 
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_SUBFILETYPE:
-                    result = new object[1];
-                    result[0] = td.td_subfiletype;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_subfiletype);
                     break;
                 case TIFFTAG.TIFFTAG_BITSPERSAMPLE:
-                    result = new object[1];
-                    result[0] = td.td_bitspersample;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_bitspersample);
                     break;
                 case TIFFTAG.TIFFTAG_THRESHHOLDING:
-                    result = new object[1];
-                    result[0] = td.td_threshholding;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_threshholding);
                     break;
                 case TIFFTAG.TIFFTAG_FILLORDER:
-                    result = new object[1];
-                    result[0] = td.td_fillorder;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_fillorder);
                     break;
                 case TIFFTAG.TIFFTAG_ORIENTATION:
-                    result = new object[1];
-                    result[0] = td.td_orientation;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_orientation);
                     break;
                 case TIFFTAG.TIFFTAG_SAMPLESPERPIXEL:
-                    result = new object[1];
-                    result[0] = td.td_samplesperpixel;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_samplesperpixel);
                     break;
                 case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
-                    result = new object[1];
-                    result[0] = td.td_rowsperstrip;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_rowsperstrip);
                     break;
                 case TIFFTAG.TIFFTAG_MINSAMPLEVALUE:
-                    result = new object[1];
-                    result[0] = td.td_minsamplevalue;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_minsamplevalue);
                     break;
                 case TIFFTAG.TIFFTAG_MAXSAMPLEVALUE:
-                    result = new object[1];
-                    result[0] = td.td_maxsamplevalue;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_maxsamplevalue);
                     break;
                 case TIFFTAG.TIFFTAG_PLANARCONFIG:
-                    result = new object[1];
-                    result[0] = td.td_planarconfig;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_planarconfig);
                     break;
                 case TIFFTAG.TIFFTAG_RESOLUTIONUNIT:
-                    result = new object[1];
-                    result[0] = td.td_resolutionunit;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_resolutionunit);
                     break;
                 case TIFFTAG.TIFFTAG_PREDICTOR:
                     CodecWithPredictor sp = m_currentCodec as CodecWithPredictor;
                     if (sp != null)
                     {
-                        result = new object[1];
-                        result[0] = sp.GetPredictorValue();
+                        result = new FieldValue[1];
+                        result[0].Set(sp.GetPredictorValue());
                     }
                     break;
                 case TIFFTAG.TIFFTAG_DOTRANGE:
-                    result = new object[2];
-                    result[0] = 0;
-                    result[1] = (1 << td.td_bitspersample) - 1;
+                    result = new FieldValue[2];
+                    result[0].Set(0);
+                    result[1].Set((1 << td.td_bitspersample) - 1);
                     break;
                 case TIFFTAG.TIFFTAG_INKSET:
-                    result = new object[1];
-                    result[0] = INKSET.INKSET_CMYK;
+                    result = new FieldValue[1];
+                    result[0].Set(INKSET.INKSET_CMYK);
                     break;
                 case TIFFTAG.TIFFTAG_NUMBEROFINKS:
-                    result = new object[1];
-                    result[0] = 4;
+                    result = new FieldValue[1];
+                    result[0].Set(4);
                     break;
                 case TIFFTAG.TIFFTAG_EXTRASAMPLES:
-                    result = new object[2];
-                    result[0] = td.td_extrasamples;
-                    result[1] = td.td_sampleinfo;
+                    result = new FieldValue[2];
+                    result[0].Set(td.td_extrasamples);
+                    result[1].Set(td.td_sampleinfo);
                     break;
                 case TIFFTAG.TIFFTAG_MATTEING:
-                    result = new object[1];
-                    result[0] = (td.td_extrasamples == 1 && td.td_sampleinfo[0] == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA);
+                    result = new FieldValue[1];
+                    result[0].Set((td.td_extrasamples == 1 && td.td_sampleinfo[0] == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA));
                     break;
                 case TIFFTAG.TIFFTAG_TILEDEPTH:
-                    result = new object[1];
-                    result[0] = td.td_tiledepth;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_tiledepth);
                     break;
                 case TIFFTAG.TIFFTAG_DATATYPE:
-                    result = new object[1];
-                    result[0] = td.td_sampleformat - 1;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_sampleformat - 1);
                     break;
                 case TIFFTAG.TIFFTAG_SAMPLEFORMAT:
-                    result = new object[1];
-                    result[0] = td.td_sampleformat;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_sampleformat);
                     break;
                 case TIFFTAG.TIFFTAG_IMAGEDEPTH:
-                    result = new object[1];
-                    result[0] = td.td_imagedepth;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_imagedepth);
                     break;
                 case TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS:
                     {
@@ -924,18 +924,18 @@ namespace BitMiracle.LibTiff
                         ycbcrcoeffs[1] = 0.587f;
                         ycbcrcoeffs[2] = 0.114f;
 
-                        result = new object[1];
-                        result[0] = ycbcrcoeffs;
+                        result = new FieldValue[1];
+                        result[0].Set(ycbcrcoeffs);
                         break;
                     }
                 case TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING:
-                    result = new object[2];
-                    result[0] = td.td_ycbcrsubsampling[0];
-                    result[1] = td.td_ycbcrsubsampling[1];
+                    result = new FieldValue[2];
+                    result[0].Set(td.td_ycbcrsubsampling[0]);
+                    result[1].Set(td.td_ycbcrsubsampling[1]);
                     break;
                 case TIFFTAG.TIFFTAG_YCBCRPOSITIONING:
-                    result = new object[1];
-                    result[0] = td.td_ycbcrpositioning;
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_ycbcrpositioning);
                     break;
                 case TIFFTAG.TIFFTAG_WHITEPOINT:
                     {
@@ -946,8 +946,8 @@ namespace BitMiracle.LibTiff
                         whitepoint[0] = D50_X0 / (D50_X0 + D50_Y0 + D50_Z0);
                         whitepoint[1] = D50_Y0 / (D50_X0 + D50_Y0 + D50_Z0);
 
-                        result = new object[1];
-                        result[0] = whitepoint;
+                        result = new FieldValue[1];
+                        result[0].Set(whitepoint);
                         break;
                     }
                 case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
@@ -957,12 +957,12 @@ namespace BitMiracle.LibTiff
                         return null;
                     }
 
-                    result = new object[3];
-                    result[0] = td.td_transferfunction[0];
+                    result = new FieldValue[3];
+                    result[0].Set(td.td_transferfunction[0]);
                     if (td.td_samplesperpixel - td.td_extrasamples > 1)
                     {
-                        result[1] = td.td_transferfunction[1];
-                        result[2] = td.td_transferfunction[2];
+                        result[1].Set(td.td_transferfunction[1]);
+                        result[2].Set(td.td_transferfunction[2]);
                     }
                     break;
                 case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
@@ -982,7 +982,7 @@ namespace BitMiracle.LibTiff
                             rgb_refblackwhite[2 * i + 1] = (float)((1L << td.td_bitspersample) - 1L);
                         }
 
-                        result = new object[1];
+                        result = new FieldValue[1];
                         if (td.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
                         {
                             /*
@@ -990,14 +990,14 @@ namespace BitMiracle.LibTiff
                              * ReferenceBlackWhite tag set. Fix the
                              * broken images, which lacks that tag.
                              */
-                            result[0] = ycbcr_refblackwhite;
+                            result[0].Set(ycbcr_refblackwhite);
                         }
                         else
                         {
                             /*
                              * Assume RGB (Class R)
                              */
-                            result[0] = rgb_refblackwhite;
+                            result[0].Set(rgb_refblackwhite);
                         }
 
                         break;
@@ -1947,8 +1947,8 @@ namespace BitMiracle.LibTiff
             {
                 if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
                 {
-                    object[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                    ushort ycbcrsubsampling0 = (ushort)result[0];
+                    FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                    ushort ycbcrsubsampling0 = result[0].ToUShort();
 
                     if (ycbcrsubsampling0 == 0)
                     {
@@ -2039,9 +2039,9 @@ namespace BitMiracle.LibTiff
                  * horizontal/vertical subsampling area include
                  * YCbCr data for the extended image.
                  */
-                object[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                ushort ycbcrsubsampling0 = (ushort)result[0];
-                ushort ycbcrsubsampling1 = (ushort)result[1];
+                FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                ushort ycbcrsubsampling0 = result[0].ToUShort();
+                ushort ycbcrsubsampling1 = result[1].ToUShort();
 
                 int samplingarea = ycbcrsubsampling0 * ycbcrsubsampling1;
                 if (samplingarea == 0)
@@ -2644,7 +2644,7 @@ namespace BitMiracle.LibTiff
         */
         public bool SetField(TIFFTAG tag, params object[] ap)
         {
-            return okToChangeTag(tag) ? m_tagmethods.vsetfield(this, tag, ap) : false;
+            return okToChangeTag(tag) ? m_tagmethods.vsetfield(this, tag, FieldValue.FromParams(ap)) : false;
         }
 
         public bool WriteDirectory()
@@ -2972,9 +2972,9 @@ namespace BitMiracle.LibTiff
                  * we need to fetch this rather than trust what is in our
                  * structures.
                  */
-                object[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                ushort subsampling0 = (ushort)result[0];
-                ushort subsampling1 = (ushort)result[1];
+                FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                ushort subsampling0 = result[0].ToUShort();
+                ushort subsampling1 = result[1].ToUShort();
                 fprintf(fd, "  YCbCr Subsampling: %u, %u\n", subsampling0, subsampling1);
             }
 
@@ -3107,12 +3107,12 @@ namespace BitMiracle.LibTiff
                 int value_count;
                 if (fip.field_passcount)
                 {
-                    object[] result = GetField(tag);
+                    FieldValue[] result = GetField(tag);
                     if (result == null)
                         continue;
 
-                    value_count = (int)result[0];
-                    raw_data = result[1] as byte[];
+                    value_count = result[0].ToInt();
+                    raw_data = result[1].ToByteArray();
                 }
                 else
                 {
@@ -3125,21 +3125,21 @@ namespace BitMiracle.LibTiff
 
                     if ((fip.field_type == TiffDataType.TIFF_ASCII || fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2 || fip.field_readcount == TIFF_SPP || value_count > 1) && fip.field_tag != TIFFTAG.TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG.TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
                     {
-                        object[] result = GetField(tag);
+                        FieldValue[] result = GetField(tag);
                         if (result == null)
                             continue;
 
-                        raw_data = result[0] as byte[];
+                        raw_data = result[0].ToByteArray();
                     }
                     else if (fip.field_tag != TIFFTAG.TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG.TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
                     {
                         raw_data = new byte [dataSize(fip.field_type) * value_count];
 
-                        object[] result = GetField(tag);
+                        FieldValue[] result = GetField(tag);
                         if (result == null)
                             continue;
 
-                        raw_data = result[0] as byte[];
+                        raw_data = result[0].ToByteArray();
                     }
                     else
                     {
@@ -3151,12 +3151,12 @@ namespace BitMiracle.LibTiff
                          * TIFFTAG_DOTRANGE tags in tif_dir.c. */
                         raw_data = new byte [dataSize(fip.field_type) * value_count];
 
-                        object[] result = GetField(tag);
+                        FieldValue[] result = GetField(tag);
                         if (result == null)
                             continue;
 
-                        byte[] first = result[0] as byte[];
-                        byte[] second = result[1] as byte[];
+                        byte[] first = result[0].ToByteArray();
+                        byte[] second = result[1].ToByteArray();
 
                         Array.Copy(first, raw_data, first.Length);
                         Array.Copy(second, 0, raw_data, dataSize(fip.field_type), second.Length);
@@ -3422,8 +3422,8 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            object[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
-            int rowsperstrip = (int)result[0];
+            FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            int rowsperstrip = result[0].ToInt();
             if ((row % rowsperstrip) != 0)
             {
                 ErrorExt(this, m_clientdata, FileName(), "Row passed to ReadRGBAStrip() must be first in a strip.");
@@ -3472,10 +3472,10 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            object[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_TILEWIDTH);
-            int tile_xsize = (int)result[0];
+            FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_TILEWIDTH);
+            int tile_xsize = result[0].ToInt();
             result = GetFieldDefaulted(TIFFTAG.TIFFTAG_TILELENGTH);
-            int tile_ysize = (int)result[0];
+            int tile_ysize = result[0].ToInt();
 
             if ((col % tile_xsize) != 0 || (row % tile_ysize) != 0)
             {
@@ -3577,7 +3577,7 @@ namespace BitMiracle.LibTiff
             
             int colorchannels = m_dir.td_samplesperpixel - m_dir.td_extrasamples;
             PHOTOMETRIC photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
-            object[] result = GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+            FieldValue[] result = GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
             if (result == null)
             {
                 switch (colorchannels)
@@ -3635,7 +3635,7 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
                     {
                         result = GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET);
-                        INKSET inkset = (INKSET)result[0];
+                        INKSET inkset = (INKSET)result[0].ToByte();
                         if (inkset != INKSET.INKSET_CMYK)
                         {
                             emsg = string.Format(
