@@ -407,14 +407,6 @@ namespace BitMiracle.LibTiff
                         {
                             td.td_customValueCount++;
                             TiffTagValue[] new_customValues = Tiff.Realloc(td.td_customValues, td.td_customValueCount - 1, td.td_customValueCount);
-                            if (new_customValues == null)
-                            {
-                                Tiff.ErrorExt(tif, tif.m_clientdata, module, "%s: Failed to allocate space for list of custom values", tif.m_name);
-                                status = false;
-                                end = true;
-                                break;
-                            }
-
                             td.td_customValues = new_customValues;
 
                             tvIndex = td.td_customValueCount - 1;
@@ -458,14 +450,6 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             td.td_customValues[tvIndex].value = new byte[tv_size * td.td_customValues[tvIndex].count];
-                            if (td.td_customValues[tvIndex].value == null)
-                            {
-                                Tiff.ErrorExt(tif, tif.m_clientdata, tif.m_name, "No space Tag Value");
-                                status = false;
-                                end = true;
-                                break;
-                            }
-
                             if ((fip.field_passcount || fip.field_writecount == Tiff.TIFF_VARIABLE ||
                                 fip.field_writecount == Tiff.TIFF_VARIABLE2 ||
                                 fip.field_writecount == Tiff.TIFF_SPP || td.td_customValues[tvIndex].count > 1) &&

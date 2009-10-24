@@ -1068,12 +1068,6 @@ namespace BitMiracle.LibTiff.Internal
             int nruns = needsRefLine ? 2 * Tiff.roundUp(rowpixels, 32) : rowpixels;
             nruns += 3;
             m_runs = new int [2 * nruns];
-            if (m_runs == null)
-            {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_name, "No space for Group 3/4 run arrays");
-                return false;
-            }
-
             m_curruns = 0;
 
             if (needsRefLine)
@@ -1098,11 +1092,6 @@ namespace BitMiracle.LibTiff.Internal
                  * be initialized to be ``white'' (done elsewhere).
                  */
                 m_refline = new byte [rowbytes];
-                if (m_refline == null)
-                {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, "setupState", "%s: No space for Group 3/4 reference line", m_tif.m_name);
-                    return false;
-                }
             }
             else
             {

@@ -133,11 +133,6 @@ namespace BitMiracle.LibTiff
             nfields += m_dir.td_customValueCount;
             int dirsize = nfields * TiffDirEntry.SizeInBytes;
             TiffDirEntry[] data = new TiffDirEntry [nfields];
-            if (data == null)
-            {
-                ErrorExt(this, m_clientdata, m_name, "Cannot write directory, out of space");
-                return false;
-            }
 
             /*
              * Directory hasn't been placed yet, put
@@ -796,11 +791,6 @@ namespace BitMiracle.LibTiff
         private bool writePerSampleShorts(TIFFTAG tag, ref TiffDirEntry dir)
         {
             ushort[] w = new ushort [m_dir.td_samplesperpixel];
-            if (w == null)
-            {
-                ErrorExt(this, m_clientdata, m_name, "No space to write per-sample shorts");
-                return false;
-            }
 
             FieldValue[] result = GetField(tag);
             ushort v = result[0].ToUShort();
@@ -823,11 +813,6 @@ namespace BitMiracle.LibTiff
         private bool writePerSampleAnys(TiffDataType type, TIFFTAG tag, ref TiffDirEntry dir)
         {
             double[] w = new double [m_dir.td_samplesperpixel];
-            if (w == null)
-            {
-                ErrorExt(this, m_clientdata, m_name, "No space to write per-sample values");
-                return false;
-            }
 
             FieldValue[] result = GetField(tag);
             double v = result[0].ToDouble();
@@ -966,12 +951,6 @@ namespace BitMiracle.LibTiff
         private bool writeRationalArray(ref TiffDirEntry dir, float[] v)
         {
             int[] t = new int [2 * dir.tdir_count];
-            if (t == null)
-            {
-                ErrorExt(this, m_clientdata, m_name, "No space to write RATIONAL array");
-                return false;
-            }
-
             for (uint i = 0; i < dir.tdir_count; i++)
             {
                 int sign = 1;
@@ -1046,12 +1025,6 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_SBYTE:
                     {
                         byte[] bp = new byte [n];
-                        if (bp == null)
-                        {
-                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
-                            return false;
-                        }
-
                         for (int i = 0; i < n; i++)
                             bp[i] = (byte)v[i];
 
@@ -1063,12 +1036,6 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_SSHORT:
                     {
                         ushort[] bp = new ushort [n];
-                        if (bp == null)
-                        {
-                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
-                            return false;
-                        }
-                        
                         for (int i = 0; i < n; i++)
                             bp[i] = (ushort)v[i];
                         
@@ -1080,12 +1047,6 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_SLONG:
                     {
                         int[] bp = new int [n];
-                        if (bp == null)
-                        {
-                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
-                            return false;
-                        }
-                        
                         for (int i = 0; i < n; i++)
                             bp[i] = (int)v[i];
                         
@@ -1096,12 +1057,6 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_FLOAT:
                     {
                         float[] bp = new float [n];
-                        if (bp == null)
-                        {
-                            ErrorExt(this, m_clientdata, m_name, "No space to write array");
-                            return false;
-                        }
-                        
                         for (int i = 0; i < n; i++)
                             bp[i] = (float)v[i];
                         

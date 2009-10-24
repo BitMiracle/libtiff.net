@@ -144,17 +144,9 @@ namespace BitMiracle.LibTiff
                 return false;
 
             codecList cd = new codecList();
-            if (cd != null)
-            {
-                cd.codec = codec;
-                cd.next = m_registeredCodecs;
-                m_registeredCodecs = cd;
-            }
-            else
-            {
-                ErrorExt(this, 0, "RegisterCodec", "No space to register compression scheme %s", codec.m_name);
-                return false;
-            }
+            cd.codec = codec;
+            cd.next = m_registeredCodecs;
+            m_registeredCodecs = cd;
 
             return true;
         }
@@ -225,8 +217,6 @@ namespace BitMiracle.LibTiff
                 totalCodecs++;
 
             TiffCodec[] codecs = new TiffCodec [totalCodecs + 1];
-            if (codecs == null)
-                return null;
 
             int codecPos = 0;
             for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
@@ -259,11 +249,8 @@ namespace BitMiracle.LibTiff
             if (oldBuffer == null)
                 return newBuffer;
 
-            if (newBuffer != null)
-            {
-                int copyLength = Math.Min(elementCount, newElementCount);
-                Array.Copy(oldBuffer, newBuffer, copyLength);
-            }
+            int copyLength = Math.Min(elementCount, newElementCount);
+            Array.Copy(oldBuffer, newBuffer, copyLength);
 
             return newBuffer;
         }
@@ -276,11 +263,8 @@ namespace BitMiracle.LibTiff
             if (oldBuffer == null)
                 return newBuffer;
 
-            if (newBuffer != null)
-            {
-                int copyLength = Math.Min(elementCount, newElementCount);
-                Array.Copy(oldBuffer, newBuffer, copyLength);
-            }
+            int copyLength = Math.Min(elementCount, newElementCount);
+            Array.Copy(oldBuffer, newBuffer, copyLength);
 
             return newBuffer;
         }
@@ -347,12 +331,6 @@ namespace BitMiracle.LibTiff
             int m = getMode(mode, module, out fm, out fa);
 
             Tiff tif = new Tiff();
-            if (tif == null)
-            {
-                ErrorExt(tif, clientdata, module, "{0}: Out of memory (TIFF structure)", name);
-                return null;
-            }
-
             tif.m_name = name.Clone() as string;
 
             tif.m_mode = m & ~(O_CREAT | O_TRUNC);
@@ -748,10 +726,8 @@ namespace BitMiracle.LibTiff
              */
 
             link = new clientInfoLink();
-            Debug.Assert(link != null);
             link.next = m_clientinfo;
             link.name = name.Clone() as string;
-            Debug.Assert(link.name != null);
             link.data = data;
 
             m_clientinfo = link;
@@ -1413,32 +1389,26 @@ namespace BitMiracle.LibTiff
                             }
 
                             byte[] cp = new byte [dir[i].tdir_count * sizeof(ushort)];
-                            if (cp == null)
-                                ErrorExt(this, m_clientdata, m_name, "No space to read \"TransferFunction\" tag");
-
-                            if (cp != null)
+                            if (fetchData(dir[i], cp) != 0)
                             {
-                                if (fetchData(dir[i], cp) != 0)
+                                int c = 1 << m_dir.td_bitspersample;
+                                if (dir[i].tdir_count == c)
                                 {
-                                    int c = 1 << m_dir.td_bitspersample;
-                                    if (dir[i].tdir_count == c)
-                                    {
-                                        /*
-                                        * This deals with there being
-                                        * only one array to apply to
-                                        * all samples.
-                                        */
-                                        ushort[] u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(ushort));
-                                        SetField(dir[i].tdir_tag, u, u, u);
-                                    }
-                                    else
-                                    {
-                                        v *= sizeof(ushort);
-                                        ushort[] u0 = byteArrayToUInt16(cp, 0, v);
-                                        ushort[] u1 = byteArrayToUInt16(cp, v, v);
-                                        ushort[] u2 = byteArrayToUInt16(cp, 2 * v, v);
-                                        SetField(dir[i].tdir_tag, u0, u1, u2);
-                                    }
+                                    /*
+                                    * This deals with there being
+                                    * only one array to apply to
+                                    * all samples.
+                                    */
+                                    ushort[] u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(ushort));
+                                    SetField(dir[i].tdir_tag, u, u, u);
+                                }
+                                else
+                                {
+                                    v *= sizeof(ushort);
+                                    ushort[] u0 = byteArrayToUInt16(cp, 0, v);
+                                    ushort[] u1 = byteArrayToUInt16(cp, v, v);
+                                    ushort[] u2 = byteArrayToUInt16(cp, 2 * v, v);
+                                    SetField(dir[i].tdir_tag, u0, u1, u2);
                                 }
                             }
                             break;
@@ -1814,11 +1784,6 @@ namespace BitMiracle.LibTiff
             nfields += m_dir.td_customValueCount;
             int dirsize = nfields * TiffDirEntry.SizeInBytes;
             TiffDirEntry[] data = new TiffDirEntry[nfields];
-            if (data == null) 
-            {
-                ErrorExt(this, m_clientdata, m_name, "Cannot write directory, out of space");
-                return false;
-            }
 
             /*
             * Put the directory  at the end of the file.
@@ -2290,12 +2255,9 @@ namespace BitMiracle.LibTiff
         * large enough to hold any individual strip of
         * raw data.
         */
-        public bool ReadBufferSetup(byte[] bp, int size)
+        public void ReadBufferSetup(byte[] bp, int size)
         {
-            const string module = "ReadBufferSetup";
-            
             Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
-
             m_rawdata = null;
             
             if (bp != null)
@@ -2310,24 +2272,13 @@ namespace BitMiracle.LibTiff
                 m_rawdata = new byte [m_rawdatasize];
                 m_flags |= TIFF_MYBUFFER;
             }
-            
-            if (m_rawdata == null)
-            {
-                ErrorExt(this, m_clientdata, module, "{0}: No space for data buffer at scanline {1}", m_name, m_row);
-                m_rawdatasize = 0;
-                return false;
-            }
-
-            return true;
         }
 
         /*
         * Setup the raw data buffer used for encoding.
         */
-        public bool WriteBufferSetup(byte[] bp, int size)
+        public void WriteBufferSetup(byte[] bp, int size)
         {
-            const string module = "WriteBufferSetup";
-
             if (m_rawdata != null)
             {
                 if ((m_flags & TIFF_MYBUFFER) != 0)
@@ -2336,7 +2287,7 @@ namespace BitMiracle.LibTiff
                 m_rawdata = null;
             }
             
-            if (size == (int)-1)
+            if (size == -1)
             {
                 size = (IsTiled() ? m_tilesize : StripSize());
 
@@ -2352,12 +2303,6 @@ namespace BitMiracle.LibTiff
             if (bp == null)
             {
                 bp = new byte [size];
-                if (bp == null)
-                {
-                    ErrorExt(this, m_clientdata, module, "{0}: No space for output buffer", m_name);
-                    return false;
-                }
-
                 m_flags |= TIFF_MYBUFFER;
             }
             else
@@ -2368,7 +2313,6 @@ namespace BitMiracle.LibTiff
             m_rawcc = 0;
             m_rawcp = 0;
             m_flags |= TIFF_BUFFERSETUP;
-            return true;
         }
 
         public bool SetupStrips()
@@ -2385,8 +2329,6 @@ namespace BitMiracle.LibTiff
 
             m_dir.td_stripoffset = new int[m_dir.td_nstrips];
             m_dir.td_stripbytecount = new int[m_dir.td_nstrips];
-            if (m_dir.td_stripoffset == null || m_dir.td_stripbytecount == null)
-                return false;
 
             setFieldBit(FIELD.FIELD_STRIPOFFSETS);
             setFieldBit(FIELD.FIELD_STRIPBYTECOUNTS);
@@ -3230,8 +3172,7 @@ namespace BitMiracle.LibTiff
              * permits it to be sized more intelligently (using
              * directory information).
              */
-            if (!bufferCheck())
-                return false;
+            bufferCheck();
             
             /*
              * Extend image length if needed
@@ -3571,7 +3512,7 @@ namespace BitMiracle.LibTiff
                 case 16:
                     break;
                 default:
-                    emsg = string.Format("Sorry, can not handle images with %d-bit samples", m_dir.td_bitspersample);
+                    emsg = string.Format("Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
                     return false;
             }
             
@@ -4123,8 +4064,7 @@ namespace BitMiracle.LibTiff
              * permits it to be sized according to the directory
              * info.
              */
-            if (!bufferCheck())
-                return -1;
+            bufferCheck();
 
             m_curstrip = strip;
             m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
@@ -4246,8 +4186,7 @@ namespace BitMiracle.LibTiff
              * permits it to be sized more intelligently (using
              * directory information).
              */
-            if (!bufferCheck())
-                return -1;
+            bufferCheck();
 
             m_curtile = tile;
 

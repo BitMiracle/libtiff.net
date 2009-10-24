@@ -2,11 +2,27 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Collections;
 
 using BitMiracle.LibTiff;
 
 namespace BitMiracle.Tiff2Pdf
 {
+    /*
+     * This is used to sort a T2P_PAGE array of page structures
+     * by page number.
+     */
+    public class cmp_t2p_page : IComparer
+    {
+        int IComparer.Compare(object x, object y)
+        {
+            T2P_PAGE e1 = x as T2P_PAGE;
+            T2P_PAGE e2 = y as T2P_PAGE;
+
+            return e1.page_number - e2.page_number;
+        }
+    }
+
     /// <summary>
     /// This is the context of a function to generate PDF from a TIFF.
     /// </summary>
@@ -200,12 +216,6 @@ namespace BitMiracle.Tiff2Pdf
                 return 0;
 
             m_pdf_xrefoffsets = new int [m_pdf_xrefcount];
-            if (m_pdf_xrefoffsets == null)
-            {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for write_pdf", m_pdf_xrefcount * sizeof(uint));
-                return 0;
-            }
-
             m_output = output;
             m_pdf_xrefcount = 0;
             m_pdf_catalog = 1;
@@ -436,7 +446,8 @@ namespace BitMiracle.Tiff2Pdf
                 m_tiff_pagecount++;
             }
 
-            //qsort((void*)m_tiff_pages, m_tiff_pagecount, sizeof(T2P_PAGE), cmp_t2p_page);
+            IComparer myComparer = new cmp_t2p_page();
+            Array.Sort(m_tiff_pages, myComparer);
 
             for (ushort i = 0; i < m_tiff_pagecount; i++)
             {
@@ -765,14 +776,6 @@ namespace BitMiracle.Tiff2Pdf
                         }
 
                         m_pdf_palette = new byte [m_pdf_palettesize * 3];
-
-                        if (m_pdf_palette == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for t2p_read_tiff_image, %s", m_pdf_palettesize, input.FileName());
-                            m_error = true;
-                            return ;
-                        }
-
                         for (int i = 0; i < m_pdf_palettesize; i++)
                         {
                             m_pdf_palette[i * 3] = (byte)(r[i] >> 8);
@@ -845,14 +848,6 @@ namespace BitMiracle.Tiff2Pdf
                         }
                         
                         m_pdf_palette = new byte [m_pdf_palettesize * 4];
-                        
-                        if (m_pdf_palette == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for t2p_read_tiff_image, %s", m_pdf_palettesize, input.FileName());
-                            m_error = true;
-                            return ;
-                        }
-                        
                         for (int i = 0; i < m_pdf_palettesize; i++)
                         {
                             m_pdf_palette[i * 4] = (byte)(r[i] >> 8);
@@ -1259,13 +1254,6 @@ namespace BitMiracle.Tiff2Pdf
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     input.ReadRawStrip(0, buffer, 0, m_tiff_datasize);
                     if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
                     {
@@ -1283,13 +1271,6 @@ namespace BitMiracle.Tiff2Pdf
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_ZIP)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     input.ReadRawStrip(0, buffer, 0, m_tiff_datasize);
                     if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
@@ -1301,13 +1282,6 @@ namespace BitMiracle.Tiff2Pdf
                 if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     result = input.GetField(TIFFTAG.TIFFTAG_JPEGTABLES);
                     if (result != null)
                     {
@@ -1330,13 +1304,6 @@ namespace BitMiracle.Tiff2Pdf
                     }
                     
                     byte[] stripbuffer = new byte [max_striplength];
-                    if (stripbuffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for readwrite_pdf_image, %s", max_striplength, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     for (int i = 0; i < stripcount; i++)
                     {
                         int striplength = input.ReadRawStrip(i, stripbuffer, 0, -1);
@@ -1359,13 +1326,6 @@ namespace BitMiracle.Tiff2Pdf
             if (m_pdf_sample == t2p_sample_t.T2P_SAMPLE_NOTHING)
             {
                 buffer = new byte [m_tiff_datasize];
-                if (buffer == null)
-                {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                    m_error = true;
-                    return 0;
-                }
-
                 stripsize = input.StripSize();
                 stripcount = input.NumberOfStrips();
                 for (int i = 0; i < stripcount; i++)
@@ -1395,21 +1355,7 @@ namespace BitMiracle.Tiff2Pdf
                     stripcount = sepstripcount / m_tiff_samplesperpixel;
 
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     samplebuffer = new byte [stripsize];
-                    if (samplebuffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-                    
                     for (int i = 0; i < stripcount; i++)
                     {
                         int samplebufferoffset = 0;
@@ -1435,13 +1381,6 @@ namespace BitMiracle.Tiff2Pdf
                 if (!dataready)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     stripsize = input.StripSize();
                     stripcount = input.NumberOfStrips();
                     for (int i = 0; i < stripcount; i++)
@@ -1460,17 +1399,8 @@ namespace BitMiracle.Tiff2Pdf
                     if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_REALIZE_PALETTE) != 0)
                     {
                         samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_datasize * m_tiff_samplesperpixel);
-                        if (samplebuffer == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                            m_error = true;
-                        }
-                        else
-                        {
-                            buffer = samplebuffer;
-                            m_tiff_datasize *= m_tiff_samplesperpixel;
-                        }
-                        
+                        buffer = samplebuffer;
+                        m_tiff_datasize *= m_tiff_samplesperpixel;
                         sample_realize_palette(buffer);
                     }
 
@@ -1483,16 +1413,7 @@ namespace BitMiracle.Tiff2Pdf
                     if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_YCBCR_TO_RGB) != 0)
                     {
                         samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_width * m_tiff_length * 4);
-                        if (samplebuffer == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image, %s", m_tiff_datasize, input.FileName());
-                            m_error = true;
-                            return 0;
-                        }
-                        else
-                        {
-                            buffer = samplebuffer;
-                        }
+                        buffer = samplebuffer;
 
                         uint[] buffer32 = Tiff.byteArrayToUInt(buffer, 0, m_tiff_width * m_tiff_length * 4);
                         if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, ORIENTATION.ORIENTATION_TOPLEFT, false))
@@ -1630,13 +1551,6 @@ namespace BitMiracle.Tiff2Pdf
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image_tile, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     input.ReadRawTile(tile, buffer, 0, m_tiff_datasize);
                     if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
@@ -1648,13 +1562,6 @@ namespace BitMiracle.Tiff2Pdf
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_ZIP)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image_tile, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     input.ReadRawTile(tile, buffer, 0, m_tiff_datasize);
                     if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
@@ -1667,13 +1574,6 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     byte[] table_end = new byte[2];
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image_tile, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     result = input.GetField(TIFFTAG.TIFFTAG_JPEGTABLES);
                     if (result != null)
                     {
@@ -1708,13 +1608,6 @@ namespace BitMiracle.Tiff2Pdf
             if (m_pdf_sample == t2p_sample_t.T2P_SAMPLE_NOTHING)
             {
                 buffer = new byte [m_tiff_datasize];
-                if (buffer == null)
-                {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image_tile, %s", m_tiff_datasize, input.FileName());
-                    m_error = true;
-                    return 0;
-                }
-
                 int read = input.ReadEncodedTile(tile, buffer, bufferoffset, m_tiff_datasize);
                 if (read == -1)
                 {
@@ -1731,21 +1624,7 @@ namespace BitMiracle.Tiff2Pdf
                     int septilecount = input.NumberOfTiles();
                     int tilecount = septilecount / m_tiff_samplesperpixel;
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image_tile, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     byte[] samplebuffer = new byte [m_tiff_datasize];
-                    if (samplebuffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image_tile, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return 0;
-                    }
-
                     int samplebufferoffset = 0;
                     for (ushort i = 0; i < m_tiff_samplesperpixel; i++)
                     {
@@ -1767,13 +1646,6 @@ namespace BitMiracle.Tiff2Pdf
                 if (buffer == null)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    if (buffer == null)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %lu bytes of memory for readwrite_pdf_image_tile, %s", m_tiff_datasize, input.FileName());
-                        m_error = true;
-                        return (0);
-                    }
-                    
                     int read = input.ReadEncodedTile(tile, buffer, bufferoffset, m_tiff_datasize);
                     if (read == -1)
                     {
@@ -2212,11 +2084,15 @@ namespace BitMiracle.Tiff2Pdf
         private void pdf_currenttime()
         {
             int timenow = 1247603070; // 15-07-2009 XXXX
-            DateTime dt = new DateTime(1970, 1, 1).AddSeconds(timenow);
+            DateTime dt = new DateTime(1970, 1, 1).AddSeconds(timenow).ToLocalTime();
 
             //timenow=time(0);
-            //struct tm* currenttime = localtime(&timenow);
-            //sprintf((char*)m_pdf_datetime, "D:%.4d%.2d%.2d%.2d%.2d%.2d", (currenttime.tm_year + 1900) % 65536, (currenttime.tm_mon + 1) % 256, (currenttime.tm_mday) % 256, (currenttime.tm_hour) % 256, (currenttime.tm_min) % 256, (currenttime.tm_sec) % 256);
+
+            string s = string.Format("D:{0:0000}{1:00}{2:00}{3:00}{4:00}{5:00}", 
+                dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256, 
+                dt.Minute % 256, dt.Second % 256);
+
+            m_pdf_datetime = Encoding.ASCII.GetBytes(s);
         }
         
         /*
@@ -2226,13 +2102,6 @@ namespace BitMiracle.Tiff2Pdf
         private void pdf_tifftime(Tiff input)
         {
             m_pdf_datetime = new byte [19];
-            if (m_pdf_datetime == null)
-            {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for t2p_pdf_tiff_time", 17);
-                m_error = true;
-                return ;
-            } 
-            
             m_pdf_datetime[16] = 0;
 
             FieldValue[] result = input.GetField(TIFFTAG.TIFFTAG_DATETIME);
@@ -2549,7 +2418,7 @@ namespace BitMiracle.Tiff2Pdf
                 buffer = string.Format("[%.4f %.4f %.4f] \n", X_W, Y_W, Z_W);
                 written += writeToFile(buffer);
                 written += writeToFile("/Range ");
-                buffer = string.Format("[%d %d %d %d] \n", m_pdf_labrange[0], m_pdf_labrange[1], m_pdf_labrange[2], m_pdf_labrange[3]);
+                buffer = string.Format("[{0} {1} {2} {3}] \n", m_pdf_labrange[0], m_pdf_labrange[1], m_pdf_labrange[2], m_pdf_labrange[3]);
                 written += writeToFile(buffer);
                 written += writeToFile(">>] \n");
             }
@@ -2780,13 +2649,6 @@ namespace BitMiracle.Tiff2Pdf
             string fileidbuf = "2900000023480000FF180000FF670000";
 
             m_pdf_fileid = new byte [33];
-            if (m_pdf_fileid == null)
-            {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't allocate %u bytes of memory for write_pdf_trailer", 33);
-                m_error = true;
-                return 0;
-            }
-
             for (int i = 0; i < 16; i++)
             {
                 m_pdf_fileid[2 * i] = (byte)(fileidbuf[2 * i]);
@@ -3017,15 +2879,6 @@ namespace BitMiracle.Tiff2Pdf
         private int write_pdf_xobject_palettecs_stream()
         {
             return write_pdf_stream(m_pdf_palette, m_pdf_palettesize);
-        }
-
-        /*
-        * This function is used by qsort to sort a T2P_PAGE array of page structures
-        * by page number.
-        */
-        private static int cmp_t2p_page(object e1, object e2)
-        {
-            return ((e1 as T2P_PAGE).page_number - (e2 as T2P_PAGE).page_number);
         }
 
         /*

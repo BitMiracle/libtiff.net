@@ -230,15 +230,9 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool LZWSetupDecode()
         {
-            const string module = " LZWSetupDecode";
             if (m_dec_codetab == null)
             {
                 m_dec_codetab = new code_t [CSIZE];
-                if (m_dec_codetab == null)
-                {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "No space for LZW code table");
-                    return false;
-                }
 
                 /*
                  * Pre-load the table.
@@ -726,15 +720,7 @@ namespace BitMiracle.LibTiff.Internal
         
         private bool LZWSetupEncode()
         {
-            const string module = "LZWSetupEncode";
-
             m_enc_hashtab = new hash_t [HSIZE];
-            if (m_enc_hashtab == null)
-            {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "No space for LZW hash table");
-                return false;
-            }
-
             return true;
         }
 

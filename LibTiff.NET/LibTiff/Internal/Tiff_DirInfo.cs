@@ -358,13 +358,10 @@ namespace BitMiracle.LibTiff
         {
             TiffFieldInfo fld = new TiffFieldInfo(tag, TIFF_VARIABLE2, TIFF_VARIABLE2, field_type, FIELD.FIELD_CUSTOM, true, true, null);
 
-            if (fld == null)
-                return null;
-
             /* note that this name is a special sign to Close() and
              * setupFieldInfo() to free the field
              */
-            fld.field_name = string.Format("Tag %d", tag);
+            fld.field_name = string.Format("Tag {0}", tag);
             return fld;
         }
         

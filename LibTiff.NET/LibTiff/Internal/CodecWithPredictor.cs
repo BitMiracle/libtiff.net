@@ -652,10 +652,6 @@ namespace BitMiracle.LibTiff.Internal
         {
             int bps = m_tif.m_dir.td_bitspersample / 8;
             int wc = cc / bps;
-            byte[] tmp = new byte [cc];
-            if (tmp != null)
-                return ;
-
             int count = cc;
             int cp = offset;
 
@@ -681,6 +677,7 @@ namespace BitMiracle.LibTiff.Internal
                 count -= stride;
             }
 
+            byte[] tmp = new byte[cc];
             Array.Copy(cp0, offset, tmp, 0, cc);
             for (count = 0; count < wc; count++)
             {
@@ -698,9 +695,6 @@ namespace BitMiracle.LibTiff.Internal
         private void fpDiff(byte[] cp0, int offset, int cc)
         {
             byte[] tmp = new byte [cc];
-            if (tmp == null)
-                return ;
-
             Array.Copy(cp0, offset, tmp, 0, cc);
 
             int bps = m_tif.m_dir.td_bitspersample / 8;
@@ -791,7 +785,6 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool PredictorEncodeTile(byte[] op0, int occ0, ushort s)
         {
-            const string module = "PredictorEncodeTile";
             Debug.Assert(m_predictorType != PredictorType.ptNone);
 
             /* 
@@ -799,12 +792,6 @@ namespace BitMiracle.LibTiff.Internal
             * the callers buffer. http://trac.osgeo.org/gdal/ticket/1965
             */
             byte[] working_copy = new byte[occ0];
-            if (working_copy == null)
-            {
-                Tiff.ErrorExt(m_tif.m_clientdata, module, "Out of memory allocating %d byte temp buffer.", occ0);
-                return false;
-            }
-
             Array.Copy(op0, working_copy, occ0);
 
             Debug.Assert(rowsize > 0);

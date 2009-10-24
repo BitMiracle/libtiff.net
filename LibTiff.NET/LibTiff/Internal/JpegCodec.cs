@@ -1642,9 +1642,6 @@ namespace BitMiracle.LibTiff.Internal
                 jpeg_component_info compptr = comp_info[ci];
                 samples_per_clump += compptr.h_samp_factor * compptr.v_samp_factor;
                 byte[][] buf = TIFFjpeg_alloc_sarray(compptr.width_in_blocks * JpegConstants.DCTSIZE, (int)(compptr.v_samp_factor * JpegConstants.DCTSIZE));
-                if (buf == null)
-                    return false;
-
                 m_ds_buffer[ci] = buf;
             }
 
@@ -1684,13 +1681,6 @@ namespace BitMiracle.LibTiff.Internal
              */
             m_jpegtables_length = 1000;
             m_jpegtables = new byte [m_jpegtables_length];
-            if (m_jpegtables == null)
-            {
-                m_jpegtables_length = 0;
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, "TIFFjpeg_tables_dest", "No space for JPEGTables");
-                return false;
-            }
-
             m_compression.Dest = new JpegTablesDestination(this);
             return true;
         }

@@ -39,8 +39,6 @@ namespace BitMiracle.LibTiff.Internal
         {
             /* the entire buffer has been filled; enlarge it by 1000 bytes */
             byte[] newbuf = Tiff.Realloc(m_sp.m_jpegtables, m_sp.m_jpegtables_length, (int)(m_sp.m_jpegtables_length + 1000));
-            if (newbuf == null)
-                m_sp.m_compression.ERREXIT(J_MESSAGE_CODE.JERR_OUT_OF_MEMORY, 100);
 
             //initInternalBuffer(newbuf + m_sp.m_jpegtables_length, 1000);
             m_sp.m_jpegtables = newbuf;

@@ -398,9 +398,8 @@ namespace BitMiracle.LibTiff
                         ErrorExt(this, m_clientdata, module, "%s: Data buffer too small to hold strip %lu", m_name, strip);
                         return false;
                     }
-                    
-                    if (!ReadBufferSetup(null, roundUp(bytecount, 1024)))
-                        return false;
+
+                    ReadBufferSetup(null, roundUp(bytecount, 1024));
                 }
                 
                 if ((uint)readRawStrip1(strip, m_rawdata, 0, bytecount, module) != bytecount)
@@ -453,8 +452,7 @@ namespace BitMiracle.LibTiff
                         return false;
                     }
 
-                    if (!ReadBufferSetup(null, roundUp(bytecount, 1024)))
-                        return false;
+                    ReadBufferSetup(null, roundUp(bytecount, 1024));
                 }
 
                 if ((uint)readRawTile1(tile, m_rawdata, 0, bytecount, module) != bytecount)

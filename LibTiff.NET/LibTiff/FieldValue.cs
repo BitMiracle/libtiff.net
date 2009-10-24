@@ -11,6 +11,11 @@ namespace BitMiracle.LibTiff
 {
     /// <summary>
     /// Holds a value of Tiff tag.
+    /// Simply put, it is a wrapper around System.Object, that helps to deal with
+    /// unboxing and conversion of types a bit easier.
+    /// 
+    /// Please take a look at:
+    /// http://blogs.msdn.com/ericlippert/archive/2009/03/19/representation-and-identity.aspx
     /// </summary>
     public struct FieldValue
     {

@@ -95,7 +95,7 @@ namespace BitMiracle.LibTiff
                     break;
                 
                 default:
-                    emsg = string.Format("Sorry, can not handle images with %d-bit samples", img.bitspersample);
+                    emsg = string.Format("Sorry, can not handle images with {0}-bit samples", img.bitspersample);
                     return null;
             }
 
@@ -166,7 +166,7 @@ namespace BitMiracle.LibTiff
                         break;
 
                     default:
-                        emsg = string.Format("Missing needed %s tag", photoTag);
+                        emsg = string.Format("Missing needed {0} tag", photoTag);
                         return null;
                 }
             }
@@ -192,11 +192,6 @@ namespace BitMiracle.LibTiff
                     img.redcmap = new ushort [n_color];
                     img.greencmap = new ushort [n_color];
                     img.bluecmap = new ushort [n_color];
-                    if (img.redcmap == null || img.greencmap == null || img.bluecmap == null)
-                    {
-                        emsg = string.Format("Out of memory for colormap copy");
-                        return null;
-                    }
 
                     Array.Copy(red_orig, img.redcmap, n_color);
                     Array.Copy(green_orig, img.greencmap, n_color);
@@ -205,7 +200,9 @@ namespace BitMiracle.LibTiff
                     if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && 
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
-                        emsg = string.Format("Sorry, can not handle contiguous data with %s=%d, and %s=%d and Bits/Sample=%d", photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
+                        emsg = string.Format(
+                            "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
+                            photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                         return null;
                     }
                     break;
@@ -215,7 +212,9 @@ namespace BitMiracle.LibTiff
                     if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && 
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
-                        emsg = string.Format("Sorry, can not handle contiguous data with %s=%d, and %s=%d and Bits/Sample=%d", photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
+                        emsg = string.Format(
+                            "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
+                            photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                         return null;
                     }
                     break;
@@ -255,7 +254,7 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_RGB:
                     if (colorchannels < 3)
                     {
-                        emsg = string.Format("Sorry, can not handle RGB image with %s=%d", "Color channels", colorchannels);
+                        emsg = string.Format("Sorry, can not handle RGB image with {0}={1}", "Color channels", colorchannels);
                         return null;
                     }
                     break;
@@ -266,13 +265,13 @@ namespace BitMiracle.LibTiff
 
                     if (inkset != INKSET.INKSET_CMYK)
                     {
-                        emsg = string.Format("Sorry, can not handle separated image with %s=%d", "InkSet", inkset);
+                        emsg = string.Format("Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                         return null;
                     }
 
                     if (img.samplesperpixel < 4)
                     {
-                        emsg = string.Format("Sorry, can not handle separated image with %s=%d", "Samples/pixel", img.samplesperpixel);
+                        emsg = string.Format("Sorry, can not handle separated image with {0}={1}", "Samples/pixel", img.samplesperpixel);
                         return null;
                     }
                     break;
@@ -280,7 +279,7 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_LOGL:
                     if (compress != COMPRESSION.COMPRESSION_SGILOG)
                     {
-                        emsg = string.Format("Sorry, LogL data must have %s=%d", "Compression", COMPRESSION.COMPRESSION_SGILOG);
+                        emsg = string.Format("Sorry, LogL data must have {0}={1}", "Compression", COMPRESSION.COMPRESSION_SGILOG);
                         return null;
                     }
 
@@ -292,13 +291,13 @@ namespace BitMiracle.LibTiff
                 case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
                     if (compress != COMPRESSION.COMPRESSION_SGILOG && compress != COMPRESSION.COMPRESSION_SGILOG24)
                     {
-                        emsg = string.Format("Sorry, LogLuv data must have %s=%d or %d", "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
+                        emsg = string.Format("Sorry, LogLuv data must have {0}={1} or {2}", "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
                         return null;
                     }
 
                     if (planarconfig != PLANARCONFIG.PLANARCONFIG_CONTIG)
                     {
-                        emsg = string.Format("Sorry, can not handle LogLuv images with %s=%d", "Planarconfiguration", planarconfig);
+                        emsg = string.Format("Sorry, can not handle LogLuv images with {0}={1}", "Planarconfiguration", planarconfig);
                         return null;
                     }
 
@@ -311,7 +310,7 @@ namespace BitMiracle.LibTiff
                     break;
                 
                 default:
-                    emsg = string.Format("Sorry, can not handle image with %s=%d", photoTag, img.photometric);
+                    emsg = string.Format("Sorry, can not handle image with {0}={1}", photoTag, img.photometric);
                     return null;
             }
 
@@ -464,11 +463,6 @@ namespace BitMiracle.LibTiff
             tileContigRoutine put = img.contig;
 
             byte[] buf = new byte [tif.TileSize()];
-            if (buf == null)
-            {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
-                return false;
-            }
 
             FieldValue[] result = tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
             int tw = result[0].ToInt();
@@ -559,11 +553,6 @@ namespace BitMiracle.LibTiff
 
             int tilesize = tif.TileSize();
             byte[] buf = new byte [(img.alpha != 0 ? 4 : 3) * tilesize];
-            if (buf == null)
-            {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
-                return false;
-            }
 
             int p0 = 0;
             int p1 = p0 + tilesize;
@@ -679,11 +668,6 @@ namespace BitMiracle.LibTiff
             tileContigRoutine put = img.contig;
 
             byte[] buf = new byte [tif.StripSize()];
-            if (buf == null)
-            {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for strip buffer");
-                return false;
-            }
 
             int flip = img.setorientation();
             int y;
@@ -764,11 +748,6 @@ namespace BitMiracle.LibTiff
 
             int stripsize = tif.StripSize();
             byte[] buf = new byte [(img.alpha != 0 ? 4 : 3) * stripsize];
-            if (buf == null)
-            {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for tile buffer");
-                return false;
-            }
 
             int p0 = 0;
             int p1 = p0 + stripsize;
@@ -1066,7 +1045,7 @@ namespace BitMiracle.LibTiff
                     break;
             }
 
-            return ((get != null) && (contig != null));
+            return (contig != null);
         }
 
         /*
@@ -1126,7 +1105,7 @@ namespace BitMiracle.LibTiff
                     break;
             }
 
-            return ((get != null) && (separate != null));
+            return (separate != null);
         }
 
         /*
@@ -2049,18 +2028,8 @@ namespace BitMiracle.LibTiff
 
         private bool initYCbCrConversion()
         {
-            const string module = "initYCbCrConversion";
-
             if (ycbcr == null)
-            {
                 ycbcr = new TiffYCbCrToRGB();
-
-                if (ycbcr == null)
-                {
-                    Tiff.ErrorExt(tif, tif.m_clientdata, module, "No space for YCbCr->RGB conversion state");
-                    return false;
-                }
-            }
 
             FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS);
             float[] luma = result[0].ToFloatArray();
@@ -2074,17 +2043,8 @@ namespace BitMiracle.LibTiff
 
         private tileContigRoutine initCIELabConversion()
         {
-            const string module = "initCIELabConversion";    
-
             if (cielab == null)
-            {
                 cielab = new TiffCIELabToRGB();
-                if (cielab == null)
-                {
-                    Tiff.ErrorExt(tif, tif.m_clientdata, module, "No space for CIE L*a*b*->RGB conversion state.");
-                    return null;
-                }
-            }
 
             FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_WHITEPOINT);
             float[] whitePoint = result[0].ToFloatArray();
@@ -2156,11 +2116,6 @@ namespace BitMiracle.LibTiff
                 range = 255;
 
             Map = new byte [range + 1];
-            if (Map == null)
-            {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for photometric conversion table");
-                return false;
-            }
 
             if (photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
             {
@@ -2223,21 +2178,8 @@ namespace BitMiracle.LibTiff
             int nsamples = 8 / bitspersample;
 
             PALmap = new uint[256][];
-            if (PALmap == null)
-            {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for Palette mapping table");
-                return false;
-            }
-
             for (int i = 0; i < 256; i++)
-            {
                 PALmap[i] = new uint [nsamples];
-                if (PALmap[i] == null)
-                {
-                    Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for Palette mapping table");
-                    return false;
-                }
-            }
 
             for (int i = 0; i < 256; i++)
             {
@@ -2280,21 +2222,8 @@ namespace BitMiracle.LibTiff
                 nsamples = 1;
 
             BWmap = new uint[256][];
-            if (BWmap == null)
-            {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for B&W mapping table");
-                return false;
-            }
-
             for (int i = 0; i < 256; i++)
-            {
                 BWmap[i] = new uint [nsamples];
-                if (BWmap[i] == null)
-                {
-                    Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No space for B&W mapping table");
-                    return false;
-                }
-            }
 
             for (int i = 0; i < 256; i++)
             {

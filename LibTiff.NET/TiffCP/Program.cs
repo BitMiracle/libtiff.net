@@ -1109,35 +1109,27 @@ namespace BitMiracle.TiffCP
         {
             int stripsize = inImage.StripSize();
             byte[] buf = new byte [stripsize];
-            if (buf != null)
+            int ns = inImage.NumberOfStrips();
+            int row = 0;
+            for (int s = 0; s < ns; s++)
             {
-                int ns = inImage.NumberOfStrips();
-                int row = 0;
-                for (int s = 0; s < ns; s++)
+                int cc = (row + g_rowsperstrip > imagelength) ? inImage.VStripSize(imagelength - row) : stripsize;
+                if (inImage.ReadEncodedStrip(s, buf, 0, cc) < 0 && !g_ignore)
                 {
-                    int cc = (row + g_rowsperstrip > imagelength) ? inImage.VStripSize(imagelength - row) : stripsize;
-                    if (inImage.ReadEncodedStrip(s, buf, 0, cc) < 0 && !g_ignore)
-                    {
-                        Tiff.Error(inImage.FileName(), "Error, can't read strip %lu", s);
-                        return false;
-                    }
-
-                    if (outImage.WriteEncodedStrip(s, buf, cc) < 0)
-                    {
-                        Tiff.Error(outImage.FileName(), "Error, can't write strip %lu", s);
-                        return false;
-                    }
-
-                    row += g_rowsperstrip;
+                    Tiff.Error(inImage.FileName(), "Error, can't read strip %lu", s);
+                    return false;
                 }
 
-                return true;
+                if (outImage.WriteEncodedStrip(s, buf, cc) < 0)
+                {
+                    Tiff.Error(outImage.FileName(), "Error, can't write strip %lu", s);
+                    return false;
+                }
+
+                row += g_rowsperstrip;
             }
-            else
-            {
-                Tiff.Error(inImage.FileName(), "Error, can't allocate memory buffer of size %lu to read strips", stripsize);
-                return false;
-            }
+
+            return true;
         }
 
         /*
@@ -1330,18 +1322,11 @@ namespace BitMiracle.TiffCP
             /*
              * XXX: Check for integer overflow.
              */
-            if (scanlinesize != 0 && imagelength != 0 && (bytes / imagelength == (uint)scanlinesize))
+            if (scanlinesize != 0 && imagelength != 0 && (bytes / imagelength == scanlinesize))
             {
                 byte[] buf = new byte [bytes];
-                if (buf != null)
-                {
-                    if (fin(inImage, buf, imagelength, imagewidth, spp))
-                        status = fout(outImage, buf, imagelength, imagewidth, spp);
-                }
-                else
-                {
-                    Tiff.Error(inImage.FileName(), "Error, can't allocate space for image buffer");
-                }
+                if (fin(inImage, buf, imagelength, imagewidth, spp))
+                    status = fout(outImage, buf, imagelength, imagewidth, spp);
             }
             else
             {
@@ -1570,33 +1555,30 @@ namespace BitMiracle.TiffCP
                 return false;
 
             byte[] scanline = new byte [scanlinesize];
-            if (scanline != null)
+            int bufp = 0;
+            for (int row = 0; row < imagelength; row++)
             {
-                int bufp = 0;
-                for (int row = 0; row < imagelength; row++)
+                /* merge channels */
+                for (UInt16 s = 0; s < spp; s++)
                 {
-                    /* merge channels */
-                    for (UInt16 s = 0; s < spp; s++)
+                    if (!inImage.ReadScanline(scanline, row, s) && !g_ignore)
                     {
-                        if (!inImage.ReadScanline(scanline, row, s) && !g_ignore)
-                        {
-                            Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
-                            return false;
-                        }
-
-                        int n = scanlinesize;
-                        int bp = s;
-                        int sbuf = 0;
-                        while (n-- > 0)
-                        {
-                            buf[bufp + bp] = scanline[sbuf];
-                            sbuf++;
-                            bp += spp;
-                        }
+                        Tiff.Error(inImage.FileName(), "Error, can't read scanline %lu", row);
+                        return false;
                     }
 
-                    bufp += scanlinesize * spp;
+                    int n = scanlinesize;
+                    int bp = s;
+                    int sbuf = 0;
+                    while (n-- > 0)
+                    {
+                        buf[bufp + bp] = scanline[sbuf];
+                        sbuf++;
+                        bp += spp;
+                    }
                 }
+
+                bufp += scanlinesize * spp;
             }
 
             return true;
@@ -1605,8 +1587,6 @@ namespace BitMiracle.TiffCP
         static bool readContigTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
         {
             byte[] tilebuf = new byte [inImage.TileSize()];
-            if (tilebuf == null)
-                return false;
 
             FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
             int tw = result[0].ToInt();
@@ -1654,8 +1634,6 @@ namespace BitMiracle.TiffCP
         static bool readSeparateTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
         {
             byte[] tilebuf = new byte [inImage.TileSize()];
-            if (tilebuf == null)
-                return false;
 
             FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
             int tw = result[0].ToInt();
@@ -1744,8 +1722,6 @@ namespace BitMiracle.TiffCP
         static bool writeBufferToSeparateStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
         {
             byte[] obuf = new byte [outImage.StripSize()];
-            if (obuf == null)
-                return false;
 
             FieldValue[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
@@ -1775,8 +1751,6 @@ namespace BitMiracle.TiffCP
         static bool writeBufferToContigTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
         {
             byte[] obuf = new byte [outImage.TileSize()];
-            if (obuf == null)
-                return false;
 
             FieldValue[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
             int tl = result[0].ToInt();
@@ -1828,8 +1802,6 @@ namespace BitMiracle.TiffCP
         static bool writeBufferToSeparateTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, UInt16 spp)
         {
             byte[] obuf = new byte [outImage.TileSize()];
-            if (obuf == null)
-                return false;
 
             FieldValue[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
             int tl = result[0].ToInt();

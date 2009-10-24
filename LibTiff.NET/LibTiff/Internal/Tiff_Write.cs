@@ -35,9 +35,10 @@ namespace BitMiracle.LibTiff
             return ((m_flags & TIFF_BEENWRITING) != 0 || WriteCheck(1, module));
         }
 
-        private bool bufferCheck()
+        private void bufferCheck()
         {
-            return (((m_flags & TIFF_BUFFERSETUP) != 0 && m_rawdata != null) || WriteBufferSetup(null, (int)-1));
+            if (!((m_flags & TIFF_BUFFERSETUP) != 0 && m_rawdata != null))
+                WriteBufferSetup(null, -1);
         }
 
         private void writeFile(byte[] buf, int size)
@@ -129,13 +130,6 @@ namespace BitMiracle.LibTiff
             Debug.Assert(m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG);
             int[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             int[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
-            if (new_stripoffset == null || new_stripbytecount == null)
-            {
-                m_dir.td_nstrips = 0;
-                ErrorExt(this, m_clientdata, module, "%s: No space to expand strip arrays", m_name);
-                return false;
-            }
-
             m_dir.td_stripoffset = new_stripoffset;
             m_dir.td_stripbytecount = new_stripbytecount;
             Array.Clear(m_dir.td_stripoffset, m_dir.td_nstrips, delta);
