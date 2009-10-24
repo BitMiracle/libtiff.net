@@ -123,7 +123,7 @@ namespace BitMiracle.LibTiff
                     break;
 
                 default:
-                    ErrorExt(null, 0, module, "\"%s\": Bad mode", mode);
+                    ErrorExt(null, 0, module, "\"{0}\": Bad mode", mode);
                     break;
             }
 

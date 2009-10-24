@@ -191,7 +191,10 @@ namespace BitMiracle.LibTiff.Internal
 
                 if (state == zlibConst.Z_DATA_ERROR)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Decoding error at scanline %d, %s", m_tif.m_name, m_tif.m_row, m_stream.msg);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                        "{0}: Decoding error at scanline {1}, {2}",
+                        m_tif.m_name, m_tif.m_row, m_stream.msg);
+
                     if (m_stream.inflateSync() != zlibConst.Z_OK)
                         return false;
                     
@@ -200,7 +203,8 @@ namespace BitMiracle.LibTiff.Internal
 
                 if (state != zlibConst.Z_OK)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: zlib error: %s", m_tif.m_name, m_stream.msg);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                        "{0}: zlib error: {1}", m_tif.m_name, m_stream.msg);
                     return false;
                 }
             }
@@ -208,7 +212,9 @@ namespace BitMiracle.LibTiff.Internal
 
             if (m_stream.avail_out != 0)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Not enough data at scanline %d (short %d bytes)", m_tif.m_name, m_tif.m_row, m_stream.avail_out);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                    "{0}: Not enough data at scanline {1} (short {2} bytes)",
+                    m_tif.m_name, m_tif.m_row, m_stream.avail_out);
                 return false;
             }
 
@@ -230,7 +236,8 @@ namespace BitMiracle.LibTiff.Internal
             {
                 if (m_stream.deflate(zlibConst.Z_NO_FLUSH) != zlibConst.Z_OK)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Encoder error: %s", m_tif.m_name, m_stream.msg);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                        "{0}: Encoder error: {1}", m_tif.m_name, m_stream.msg);
                     return false;
                 }
 
@@ -273,7 +280,8 @@ namespace BitMiracle.LibTiff.Internal
                         }
                         break;
                     default:
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: zlib error: %s", m_tif.m_name, m_stream.msg);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                            "{0}: zlib error: {1}", m_tif.m_name, m_stream.msg);
                         return false;
                 }
             }
@@ -323,7 +331,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (m_stream.inflateInit() != zlibConst.Z_OK)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "{0}: {1}", m_tif.m_name, m_stream.msg);
                 return false;
             }
 
@@ -343,7 +351,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (m_stream.deflateInit(m_zipquality) != zlibConst.Z_OK)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: %s", m_tif.m_name, m_stream.msg);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "{0}: {1}", m_tif.m_name, m_stream.msg);
                 return false;
             }
 

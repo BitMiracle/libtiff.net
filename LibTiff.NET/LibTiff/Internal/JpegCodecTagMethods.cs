@@ -161,19 +161,19 @@ namespace BitMiracle.LibTiff.Internal
             Debug.Assert(sp != null);
             
             if (tif.fieldSet(JpegCodec.FIELD_JPEGTABLES))
-                Tiff.fprintf(fd, "  JPEG Tables: (%lu bytes)\n", sp.m_jpegtables_length);
+                Tiff.fprintf(fd, "  JPEG Tables: ({0} bytes)\n", sp.m_jpegtables_length);
             
             if (tif.fieldSet(JpegCodec.FIELD_RECVPARAMS))
-                Tiff.fprintf(fd, "  Fax Receive Parameters: %08lx\n", sp.m_recvparams);
+                Tiff.fprintf(fd, "  Fax Receive Parameters: {0,8:x}\n", sp.m_recvparams);
             
             if (tif.fieldSet(JpegCodec.FIELD_SUBADDRESS))
-                Tiff.fprintf(fd, "  Fax SubAddress: %s\n", sp.m_subaddress);
+                Tiff.fprintf(fd, "  Fax SubAddress: {0}\n", sp.m_subaddress);
             
             if (tif.fieldSet(JpegCodec.FIELD_RECVTIME))
-                Tiff.fprintf(fd, "  Fax Receive Time: %lu secs\n", sp.m_recvtime);
+                Tiff.fprintf(fd, "  Fax Receive Time: {0} secs\n", sp.m_recvtime);
             
             if (tif.fieldSet(JpegCodec.FIELD_FAXDCS))
-                Tiff.fprintf(fd, "  Fax DCS: %s\n", sp.m_faxdcs);
+                Tiff.fprintf(fd, "  Fax DCS: {0}\n", sp.m_faxdcs);
         }
 
         /*

@@ -248,7 +248,8 @@ namespace BitMiracle.LibTiff
                             break;
                         }
 
-                        Tiff.WarningExt(tif, tif.m_clientdata, tif.m_name, "Nonstandard tile width %d, convert file", v32);
+                        Tiff.WarningExt(tif, tif.m_clientdata, tif.m_name,
+                            "Nonstandard tile width {0}, convert file", v32);
                     }
                     td.td_tilewidth = (int)v32;
                     tif.m_flags |= Tiff.TIFF_ISTILED;
@@ -263,7 +264,8 @@ namespace BitMiracle.LibTiff
                             break;
                         }
 
-                        Tiff.WarningExt(tif, tif.m_clientdata, tif.m_name, "Nonstandard tile length %d, convert file", v32);
+                        Tiff.WarningExt(tif, tif.m_clientdata, tif.m_name,
+                            "Nonstandard tile length {0}, convert file", v32);
                     }
                     td.td_tilelength = (int)v32;
                     tif.m_flags |= Tiff.TIFF_ISTILED;
@@ -339,7 +341,8 @@ namespace BitMiracle.LibTiff
                     }
                     else
                     {
-                        Tiff.ErrorExt(tif, tif.m_clientdata, module, "%s: Sorry, cannot nest SubIFDs", tif.m_name);
+                        Tiff.ErrorExt(tif, tif.m_clientdata, module,
+                            "{0}: Sorry, cannot nest SubIFDs", tif.m_name);
                         status = false;
                     }
                     break;
@@ -382,7 +385,10 @@ namespace BitMiracle.LibTiff
                         TiffFieldInfo fip = tif.FindFieldInfo(tag, TiffDataType.TIFF_ANY);
                         if (fip == null || fip.field_bit != FIELD.FIELD_CUSTOM)
                         {
-                            Tiff.ErrorExt(tif, tif.m_clientdata, module, "%s: Invalid %stag \"%s\" (not supported by codec)", tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "", fip != null ? fip.field_name : "Unknown");
+                            Tiff.ErrorExt(tif, tif.m_clientdata, module,
+                                "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
+                                tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
+                                fip != null ? fip.field_name : "Unknown");
                             status = false;
                             break;
                         }
@@ -422,7 +428,9 @@ namespace BitMiracle.LibTiff
                         if (tv_size == 0)
                         {
                             status = false;
-                            Tiff.ErrorExt(tif, tif.m_clientdata, module, "%s: Bad field type %d for \"%s\"", tif.m_name, fip.field_type, fip.field_name);
+                            Tiff.ErrorExt(tif, tif.m_clientdata, module,
+                                "{0}: Bad field type {1} for \"{2}\"",
+                                tif.m_name, fip.field_type, fip.field_name);
                             end = true;
                             break;
                         }
@@ -530,13 +538,17 @@ namespace BitMiracle.LibTiff
 
             if (badvalue)
             {
-                Tiff.ErrorExt(tif, tif.m_clientdata, module, "%s: Bad value %d for \"%s\" tag", tif.m_name, v, tif.FieldWithTag(tag).field_name);
+                Tiff.ErrorExt(tif, tif.m_clientdata, module,
+                    "{0}: Bad value {1} for \"{2}\" tag",
+                    tif.m_name, v, tif.FieldWithTag(tag).field_name);
                 return false;
             }
 
             if (badvalue32)
             {
-                Tiff.ErrorExt(tif, tif.m_clientdata, module, "%s: Bad value %ld for \"%s\" tag", tif.m_name, v32, tif.FieldWithTag(tag).field_name);
+                Tiff.ErrorExt(tif, tif.m_clientdata, module,
+                    "{0}: Bad value {1} for \"{2}\" tag",
+                    tif.m_name, v32, tif.FieldWithTag(tag).field_name);
                 return false;
             }
 
@@ -750,7 +762,10 @@ namespace BitMiracle.LibTiff
                     TiffFieldInfo fip = tif.FindFieldInfo(tag, TiffDataType.TIFF_ANY);
                     if (fip == null || fip.field_bit != FIELD.FIELD_CUSTOM)
                     {
-                        Tiff.ErrorExt(tif, tif.m_clientdata, "_TIFFVGetField", "%s: Invalid %stag \"%s\" (not supported by codec)", tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-": "", fip != null ? fip.field_name : "Unknown");
+                        Tiff.ErrorExt(tif, tif.m_clientdata, "_TIFFVGetField",
+                            "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
+                            tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
+                            fip != null ? fip.field_name : "Unknown");
                         result = null;
                         break;
                     }
@@ -923,7 +938,9 @@ namespace BitMiracle.LibTiff
                     return pos;
             }
 
-            Tiff.ErrorExt(tif, tif.m_clientdata, "TIFFSetField", "%s: Invalid InkNames value; expecting %d names, found %d", tif.m_name, tif.m_dir.td_samplesperpixel, tif.m_dir.td_samplesperpixel - i);
+            Tiff.ErrorExt(tif, tif.m_clientdata, "TIFFSetField",
+                "{0}: Invalid InkNames value; expecting {1} names, found {2}",
+                tif.m_name, tif.m_dir.td_samplesperpixel, tif.m_dir.td_samplesperpixel - i);
             return 0;
         }
 

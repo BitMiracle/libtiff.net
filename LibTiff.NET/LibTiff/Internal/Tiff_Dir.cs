@@ -56,7 +56,8 @@ namespace BitMiracle.LibTiff
             if (fip == null)
             {
                 /* unknown tag */
-                ErrorExt(this, m_clientdata, "SetField", "%s: Unknown %stag %u", m_name, isPseudoTag(tag) ? "pseudo-" : "", tag);
+                ErrorExt(this, m_clientdata, "SetField", "{0}: Unknown {1}tag {2}",
+                    m_name, isPseudoTag(tag) ? "pseudo-" : "", tag);
                 return false;
             }
 
@@ -68,7 +69,8 @@ namespace BitMiracle.LibTiff
                  * to those tags that don't/shouldn't affect the
                  * compression and/or format of the data.
                  */
-                ErrorExt(this, m_clientdata, "SetField", "%s: Cannot modify tag \"%s\" while writing", m_name, fip.field_name);
+                ErrorExt(this, m_clientdata, "SetField", "{0}: Cannot modify tag \"{1}\" while writing",
+                    m_name, fip.field_name);
                 return false;
             }
 
@@ -125,7 +127,7 @@ namespace BitMiracle.LibTiff
             
             if (!seekOK(nextdir) || !readUInt16OK(out dircount))
             {
-                ErrorExt(this, m_clientdata, module, "%s: Error fetching directory count", m_name);
+                ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory count", m_name);
                 return false;
             }
 
@@ -136,7 +138,7 @@ namespace BitMiracle.LibTiff
 
             if (!readIntOK(out nextdir))
             {
-                ErrorExt(this, m_clientdata, module, "%s: Error fetching directory link", m_name);
+                ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
                 return false;
             }
 

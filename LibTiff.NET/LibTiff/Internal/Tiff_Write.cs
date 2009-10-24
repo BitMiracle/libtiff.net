@@ -159,7 +159,7 @@ namespace BitMiracle.LibTiff
                     */
                     if (!seekOK(m_dir.td_stripoffset[strip]))
                     {
-                        ErrorExt(this, m_clientdata, module, "Seek error at scanline %lu", m_row);
+                        ErrorExt(this, m_clientdata, module, "Seek error at scanline {0}", m_row);
                         return false;
                     }
                 }
@@ -182,7 +182,7 @@ namespace BitMiracle.LibTiff
 
             if (!writeOK(data, cc))
             {
-                ErrorExt(this, m_clientdata, module, "Write error at scanline %lu", m_row);
+                ErrorExt(this, m_clientdata, module, "Write error at scanline {0}", m_row);
                 return false;
             }
 

@@ -396,7 +396,8 @@ namespace BitMiracle.LibTiff.Internal
                     
                     if (code == CODE_CLEAR)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                            "LZWDecode: Corrupted LZW table at scanline {0}", m_tif.m_row);
                         return false;
                     }
 
@@ -414,14 +415,16 @@ namespace BitMiracle.LibTiff.Internal
                  */
                 if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        "LZWDecode: Corrupted LZW table at scanline {0}", m_tif.m_row);
                     return false;
                 }
 
                 m_dec_codetab[m_dec_free_entp].next = m_dec_oldcodep;
                 if (m_dec_codetab[m_dec_free_entp].next < 0 || m_dec_codetab[m_dec_free_entp].next >= CSIZE)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        "LZWDecode: Corrupted LZW table at scanline {0}", m_tif.m_row);
                     return false;
                 }
 
@@ -450,7 +453,9 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_dec_codetab[codep].length == 0)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Wrong length of decoded string: data probably corrupted at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                            "LZWDecode: Wrong length of decoded string: data probably corrupted at scanline {0}",
+                            m_tif.m_row);
                         return false;
                     }
 
@@ -517,7 +522,9 @@ namespace BitMiracle.LibTiff.Internal
 
             if (occ > 0)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Not enough data at scanline %d (short %ld bytes)", m_tif.m_row, occ);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "LZWDecode: Not enough data at scanline {0} (short {1} bytes)",
+                    m_tif.m_row, occ);
                 return false;
             }
 
@@ -604,7 +611,8 @@ namespace BitMiracle.LibTiff.Internal
 
                     if (code == CODE_CLEAR)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Corrupted LZW table at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                            "LZWDecode: Corrupted LZW table at scanline {0}", m_tif.m_row);
                         return false;
                     }
 
@@ -622,14 +630,16 @@ namespace BitMiracle.LibTiff.Internal
                  */
                 if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        "LZWDecodeCompat: Corrupted LZW table at scanline {0}", m_tif.m_row);
                     return false;
                 }
 
                 m_dec_codetab[m_dec_free_entp].next = m_dec_oldcodep;
                 if (m_dec_codetab[m_dec_free_entp].next < 0 || m_dec_codetab[m_dec_free_entp].next >= CSIZE)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Corrupted LZW table at scanline %d", m_tif.m_row);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        "LZWDecodeCompat: Corrupted LZW table at scanline {0}", m_tif.m_row);
                     return false;
                 }
 
@@ -658,7 +668,9 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_dec_codetab[codep].length == 0)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Wrong length of decoded string: data probably corrupted at scanline %d", m_tif.m_row);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                            "LZWDecodeCompat: Wrong length of decoded string: data probably corrupted at scanline {0}",
+                            m_tif.m_row);
                         return false;
                     }
 
@@ -711,7 +723,9 @@ namespace BitMiracle.LibTiff.Internal
 
             if (occ > 0)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecodeCompat: Not enough data at scanline %d (short %ld bytes)", m_tif.m_row, occ);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "LZWDecodeCompat: Not enough data at scanline {0} (short {1} bytes)",
+                    m_tif.m_row, occ);
                 return false;
             }
 
@@ -1011,7 +1025,8 @@ namespace BitMiracle.LibTiff.Internal
             {
                 if (m_dec_bitsleft < m_nbits)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Strip %d not terminated with EOI code", m_tif.m_curstrip);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        "LZWDecode: Strip {0} not terminated with EOI code", m_tif.m_curstrip);
                     _code = CODE_EOI;
                 }
                 else
@@ -1066,7 +1081,8 @@ namespace BitMiracle.LibTiff.Internal
 
         private void codeLoop()
         {
-            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "LZWDecode: Bogus encoding, loop in the code table; scanline %d", m_tif.m_row);
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                "LZWDecode: Bogus encoding, loop in the code table; scanline {0}", m_tif.m_row);
         }
     }
 }

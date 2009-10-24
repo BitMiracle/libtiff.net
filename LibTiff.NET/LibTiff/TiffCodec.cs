@@ -184,9 +184,16 @@ namespace BitMiracle.LibTiff
         {
             TiffCodec c = m_tif.FindCodec(m_tif.m_dir.td_compression);
             if (c != null)
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s encoding is not implemented", c.m_name, method);
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "{0} {1} encoding is not implemented", c.m_name, method);
+            }
             else
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s encoding is not implemented", m_tif.m_dir.td_compression, method);
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "Compression scheme {0} {1} encoding is not implemented",
+                    m_tif.m_dir.td_compression, method);
+            }
 
             return false;
         }
@@ -196,9 +203,16 @@ namespace BitMiracle.LibTiff
             TiffCodec c = m_tif.FindCodec(m_tif.m_dir.td_compression);
 
             if (c != null)
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "%s %s decoding is not implemented", c.m_name, method);
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "{0} {1} decoding is not implemented", c.m_name, method);
+            }
             else
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression scheme %u %s decoding is not implemented", m_tif.m_dir.td_compression, method);
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "Compression scheme {0} {1} decoding is not implemented",
+                    m_tif.m_dir.td_compression, method);
+            }
 
             return false;
         }

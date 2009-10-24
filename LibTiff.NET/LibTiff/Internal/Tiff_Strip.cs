@@ -31,7 +31,7 @@ namespace BitMiracle.LibTiff
 
             if (bytes - summand1 != summand2)
             {
-                ErrorExt(this, m_clientdata, m_name, "Integer overflow in %s", where);
+                ErrorExt(this, m_clientdata, m_name, "Integer overflow in {0}", where);
                 bytes = 0;
             }
 
@@ -44,7 +44,7 @@ namespace BitMiracle.LibTiff
 
             if (elem_size != 0 && bytes / elem_size != nmemb)
             {
-                ErrorExt(this, m_clientdata, m_name, "Integer overflow in %s", where);
+                ErrorExt(this, m_clientdata, m_name, "Integer overflow in {0}", where);
                 bytes = 0;
             }
 

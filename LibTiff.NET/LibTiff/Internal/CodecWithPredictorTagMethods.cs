@@ -81,7 +81,7 @@ namespace BitMiracle.LibTiff.Internal
                         break;
                 }
 
-                Tiff.fprintf(fd, "%u (0x%x)\n", predictor, predictor);
+                Tiff.fprintf(fd, "{0} (0x{1:x})\n", predictor, predictor);
             }
 
             TiffTagMethods childMethods = sp.GetChildTagMethods();

@@ -938,19 +938,24 @@ namespace BitMiracle.LibTiff.Internal
                 case PREDICTOR.PREDICTOR_HORIZONTAL:
                     if (td.td_bitspersample != 8 && td.td_bitspersample != 16 && td.td_bitspersample != 32)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Horizontal differencing \"Predictor\" not supported with %d-bit samples", td.td_bitspersample);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                            "Horizontal differencing \"Predictor\" not supported with {0}-bit samples",
+                            td.td_bitspersample);
                         return false;
                     }
                     break;
                 case PREDICTOR.PREDICTOR_FLOATINGPOINT:
                     if (td.td_sampleformat != SAMPLEFORMAT.SAMPLEFORMAT_IEEEFP)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Floating point \"Predictor\" not supported with %d data format", td.td_sampleformat);
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                            "Floating point \"Predictor\" not supported with {0} data format",
+                            td.td_sampleformat);
                         return false;
                     }
                     break;
                 default:
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "\"Predictor\" value %d not supported", predictor);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, 
+                        "\"Predictor\" value {0} not supported", predictor);
                     return false;
             }
 

@@ -959,7 +959,9 @@ namespace BitMiracle.LibTiff
                 {
                     if (dir.tdir_type == TiffDataType.TIFF_RATIONAL)
                     {
-                        WarningExt(this, m_clientdata, m_name, "\"%s\": Information lost writing value (%g) as (unsigned) RATIONAL", FieldWithTag(dir.tdir_tag).field_name, fv);
+                        WarningExt(this, m_clientdata, m_name,
+                            "\"{0}\": Information lost writing value ({1:G}) as (unsigned) RATIONAL",
+                            FieldWithTag(dir.tdir_tag).field_name, fv);
                         fv = 0;
                     }
                     else
@@ -1135,7 +1137,9 @@ namespace BitMiracle.LibTiff
                 return true;
             }
 
-            ErrorExt(this, m_clientdata, m_name, "Error writing data for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+            ErrorExt(this, m_clientdata, m_name,
+                "Error writing data for field \"{0}\"",
+                FieldWithTag(dir.tdir_tag).field_name);
             return false;
         }
 
@@ -1217,7 +1221,8 @@ namespace BitMiracle.LibTiff
                 seekFile(m_subifdoff, SeekOrigin.Begin);
                 if (!writeIntOK(diroff))
                 {
-                    ErrorExt(this, m_clientdata, module, "%s: Error writing SubIFD directory link", m_name);
+                    ErrorExt(this, m_clientdata, module,
+                        "{0}: Error writing SubIFD directory link", m_name);
                     return false;
                 }
 

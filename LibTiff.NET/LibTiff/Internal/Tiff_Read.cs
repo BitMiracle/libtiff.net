@@ -148,7 +148,8 @@ namespace BitMiracle.LibTiff
             if (row >= m_dir.td_imagelength)
             {
                 /* out of range */
-                ErrorExt(this, m_clientdata, m_name, "%lu: Row out of range, max %lu", row, m_dir.td_imagelength);
+                ErrorExt(this, m_clientdata, m_name,
+                    "{0}: Row out of range, max {1}", row, m_dir.td_imagelength);
                 return false;
             }
 
@@ -157,7 +158,8 @@ namespace BitMiracle.LibTiff
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
-                    ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", sample, m_dir.td_samplesperpixel);
+                    ErrorExt(this, m_clientdata, m_name,
+                        "{0}: Sample out of range, max {1}", sample, m_dir.td_samplesperpixel);
                     return false;
                 }
 
@@ -206,14 +208,17 @@ namespace BitMiracle.LibTiff
 
             if (!seekOK(m_dir.td_stripoffset[strip]))
             {
-                ErrorExt(this, m_clientdata, module, "%s: Seek error at scanline %lu, strip %lu", m_name, m_row, strip);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Seek error at scanline {1}, strip {2}", m_name, m_row, strip);
                 return -1;
             }
 
             int cc = readFile(buf, offset, size);
             if (cc != size)
             {
-                ErrorExt(this, m_clientdata, module, "%s: Read error at scanline %lu; got %lu bytes, expected %lu", m_name, m_row, cc, size);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Read error at scanline {1}; got {2} bytes, expected {3}",
+                    m_name, m_row, cc, size);
                 return -1;
             }
 
@@ -226,14 +231,17 @@ namespace BitMiracle.LibTiff
 
             if (!seekOK(m_dir.td_stripoffset[tile]))
             {
-                ErrorExt(this, m_clientdata, module, "%s: Seek error at row %ld, col %ld, tile %ld", m_name, m_row, m_col, tile);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Seek error at row {1}, col {2}, tile {3}", m_name, m_row, m_col, tile);
                 return -1;
             }
 
             int cc = readFile(buf, offset, size);
             if (cc != size)
             {
-                ErrorExt(this, m_clientdata, module, "%s: Read error at row %ld, col %ld; got %lu bytes, expected %lu", m_name, m_row, m_col, cc, size);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Read error at row {1}, col {2}; got {3} bytes, expected {4}",
+                    m_name, m_row, m_col, cc, size);
                 return -1;
             }
 
@@ -380,7 +388,8 @@ namespace BitMiracle.LibTiff
                 int bytecount = m_dir.td_stripbytecount[strip];
                 if (bytecount <= 0)
                 {
-                    ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
+                    ErrorExt(this, m_clientdata, m_name,
+                        "{0}: Invalid strip byte count, strip {1}", bytecount, strip);
                     return false;
                 }
 
@@ -395,7 +404,8 @@ namespace BitMiracle.LibTiff
                     m_curstrip = NOSTRIP;
                     if ((m_flags & TIFF_MYBUFFER) == 0)
                     {
-                        ErrorExt(this, m_clientdata, module, "%s: Data buffer too small to hold strip %lu", m_name, strip);
+                        ErrorExt(this, m_clientdata, module,
+                            "{0}: Data buffer too small to hold strip {1}", m_name, strip);
                         return false;
                     }
 
@@ -433,7 +443,8 @@ namespace BitMiracle.LibTiff
                 int bytecount = m_dir.td_stripbytecount[tile];
                 if (bytecount <= 0)
                 {
-                    ErrorExt(this, m_clientdata, m_name, "%lu: Invalid tile byte count, tile %lu", bytecount, tile);
+                    ErrorExt(this, m_clientdata, m_name,
+                        "{0}: Invalid tile byte count, tile {1}", bytecount, tile);
                     return false;
                 }
 
@@ -448,7 +459,8 @@ namespace BitMiracle.LibTiff
                     m_curtile = NOTILE;
                     if ((m_flags & TIFF_MYBUFFER) == 0)
                     {
-                        ErrorExt(this, m_clientdata, module, "%s: Data buffer too small to hold tile %ld", m_name, tile);
+                        ErrorExt(this, m_clientdata, module,
+                            "{0}: Data buffer too small to hold tile {1}", m_name, tile);
                         return false;
                     }
 

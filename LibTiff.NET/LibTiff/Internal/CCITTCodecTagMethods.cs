@@ -136,28 +136,28 @@ namespace BitMiracle.LibTiff.Internal
                 {
                     Tiff.fprintf(fd, "  Group 4 Options:");
                     if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_UNCOMPRESSED) != 0)
-                        Tiff.fprintf(fd, "%suncompressed data", sep);
+                        Tiff.fprintf(fd, "{0}uncompressed data", sep);
                 }
                 else
                 {
                     Tiff.fprintf(fd, "  Group 3 Options:");
                     if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_2DENCODING) != 0)
                     {
-                        Tiff.fprintf(fd, "%s2-d encoding", sep);
+                        Tiff.fprintf(fd, "{0}2-d encoding", sep);
                         sep = "+";
                     }
 
                     if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_FILLBITS) != 0)
                     {
-                        Tiff.fprintf(fd, "%sEOL padding", sep);
+                        Tiff.fprintf(fd, "{0}EOL padding", sep);
                         sep = "+";
                     }
 
                     if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_UNCOMPRESSED) != 0)
-                        Tiff.fprintf(fd, "%suncompressed data", sep);
+                        Tiff.fprintf(fd, "{0}uncompressed data", sep);
                 }
 
-                Tiff.fprintf(fd, " (%lu = 0x%lx)\n", sp.m_groupoptions, sp.m_groupoptions);
+                Tiff.fprintf(fd, " ({0} = 0x{1:x})\n", sp.m_groupoptions, sp.m_groupoptions);
             }
 
             if (tif.fieldSet(CCITTCodec.FIELD_CLEANFAXDATA))
@@ -177,26 +177,26 @@ namespace BitMiracle.LibTiff.Internal
                         break;
                 }
 
-                Tiff.fprintf(fd, " (%u = 0x%x)\n", sp.m_cleanfaxdata, sp.m_cleanfaxdata);
+                Tiff.fprintf(fd, " ({0} = 0x{1:x})\n", sp.m_cleanfaxdata, sp.m_cleanfaxdata);
             }
 
             if (tif.fieldSet(CCITTCodec.FIELD_BADFAXLINES))
-                Tiff.fprintf(fd, "  Bad Fax Lines: %lu\n", sp.m_badfaxlines);
+                Tiff.fprintf(fd, "  Bad Fax Lines: {0}\n", sp.m_badfaxlines);
             
             if (tif.fieldSet(CCITTCodec.FIELD_BADFAXRUN))
-                Tiff.fprintf(fd, "  Consecutive Bad Fax Lines: %lu\n", sp.m_badfaxrun);
+                Tiff.fprintf(fd, "  Consecutive Bad Fax Lines: {0}\n", sp.m_badfaxrun);
             
             if (tif.fieldSet(CCITTCodec.FIELD_RECVPARAMS))
-                Tiff.fprintf(fd, "  Fax Receive Parameters: %08lx\n", sp.m_recvparams);
+                Tiff.fprintf(fd, "  Fax Receive Parameters: {0,8:x}\n", sp.m_recvparams);
             
             if (tif.fieldSet(CCITTCodec.FIELD_SUBADDRESS))
-                Tiff.fprintf(fd, "  Fax SubAddress: %s\n", sp.m_subaddress);
+                Tiff.fprintf(fd, "  Fax SubAddress: {0}\n", sp.m_subaddress);
             
             if (tif.fieldSet(CCITTCodec.FIELD_RECVTIME))
-                Tiff.fprintf(fd, "  Fax Receive Time: %lu secs\n", sp.m_recvtime);
+                Tiff.fprintf(fd, "  Fax Receive Time: {0} secs\n", sp.m_recvtime);
             
             if (tif.fieldSet(CCITTCodec.FIELD_FAXDCS))
-                Tiff.fprintf(fd, "  Fax DCS: %s\n", sp.m_faxdcs);
+                Tiff.fprintf(fd, "  Fax DCS: {0}\n", sp.m_faxdcs);
         }
     }
 }

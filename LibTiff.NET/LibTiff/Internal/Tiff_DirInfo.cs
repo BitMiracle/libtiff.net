@@ -311,11 +311,14 @@ namespace BitMiracle.LibTiff
         {
             uint i;
 
-            fprintf(fd, "%s: \n", m_name);
+            fprintf(fd, "{0}: \n", m_name);
             for (i = 0; i < m_nfields; i++)
             {
                 TiffFieldInfo fip = m_fieldinfo[i];
-                fprintf(fd, "field[%2d] %5lu, %2d, %2d, %d, %2d, %5s, %5s, %s\n", i, fip.field_tag, fip.field_readcount, fip.field_writecount, fip.field_type, fip.field_bit, fip.field_oktochange ? "TRUE" : "FALSE", fip.field_passcount ? "TRUE" : "FALSE", fip.field_name);
+                fprintf(fd, "field[{0,2:D}] {1,5:D}, {2,2:D}, {3,2:D}, {4}, {5,2:D}, {6,5}, {7,5}, {8}\n",
+                    i, fip.field_tag, fip.field_readcount, fip.field_writecount,
+                    fip.field_type, fip.field_bit, fip.field_oktochange ? "TRUE" : "FALSE",
+                    fip.field_passcount ? "TRUE" : "FALSE", fip.field_name);
             }
         }
 

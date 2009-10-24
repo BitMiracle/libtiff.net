@@ -78,7 +78,9 @@ namespace BitMiracle.LibTiff
                     int cc = DataWidth((TiffDataType)dir[n].tdir_type);
                     if (cc == 0)
                     {
-                        ErrorExt(this, m_clientdata, module, "%s: Cannot determine size of unknown tag type %d", m_name, dir[n].tdir_type);
+                        ErrorExt(this, m_clientdata, module,
+                            "{0}: Cannot determine size of unknown tag type {1}",
+                            m_name, dir[n].tdir_type);
                         return false;
                     }
 
@@ -131,12 +133,15 @@ namespace BitMiracle.LibTiff
         private void missingRequired(string tagname)
         {
             const string module = "missingRequired";
-            ErrorExt(this, m_clientdata, module, "%s: TIFF directory is missing required \"%s\" field", m_name, tagname);
+            ErrorExt(this, m_clientdata, module,
+                "{0}: TIFF directory is missing required \"{1}\" field",
+                m_name, tagname);
         }
 
         private int fetchFailed(TiffDirEntry dir)
         {
-            ErrorExt(this, m_clientdata, m_name, "Error fetching data for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+            ErrorExt(this, m_clientdata, m_name,
+                "Error fetching data for field \"{0}\"", FieldWithTag(dir.tdir_tag).field_name);
             return 0;
         }
 
@@ -205,13 +210,15 @@ namespace BitMiracle.LibTiff
 
             if (!seekOK(m_diroff)) 
             {
-                ErrorExt(this, m_clientdata, module, "%s: Seek error accessing TIFF directory", m_name);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Seek error accessing TIFF directory", m_name);
                 return 0;
             }
             
             if (!readUInt16OK(out dircount)) 
             {
-                ErrorExt(this, m_clientdata, module, "%s: Can not read TIFF directory count", m_name);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Can not read TIFF directory count", m_name);
                 return 0;
             }
             
@@ -221,7 +228,7 @@ namespace BitMiracle.LibTiff
             dir = new TiffDirEntry [dircount];
             if (!readDirEntryOk(dir, dircount))
             {
-                ErrorExt(this, m_clientdata, module, "%.100s: Can not read TIFF directory", m_name);
+                ErrorExt(this, m_clientdata, module, "{0}: Can not read TIFF directory", m_name);
                 return 0;
             }
 
@@ -277,12 +284,16 @@ namespace BitMiracle.LibTiff
         {
             if (count > dir.tdir_count)
             {
-                WarningExt(this, m_clientdata, m_name, "incorrect count for field \"%s\" (%u, expecting %u); tag ignored", FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
+                WarningExt(this, m_clientdata, m_name,
+                    "incorrect count for field \"{0}\" ({1}, expecting {2}); tag ignored",
+                    FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
                 return false;
             }
             else if (count < dir.tdir_count)
             {
-                WarningExt(this, m_clientdata, m_name, "incorrect count for field \"%s\" (%u, expecting %u); tag trimmed", FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
+                WarningExt(this, m_clientdata, m_name,
+                    "incorrect count for field \"{0}\" ({1}, expecting {2}); tag trimmed",
+                    FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
                 return true;
             }
 
@@ -384,7 +395,9 @@ namespace BitMiracle.LibTiff
         {
             if (denom == 0)
             {
-                ErrorExt(this, m_clientdata, m_name, "%s: Rational with zero denominator (num = %u)", FieldWithTag(dir.tdir_tag).field_name, num);
+                ErrorExt(this, m_clientdata, m_name,
+                    "{0}: Rational with zero denominator (num = {1})",
+                    FieldWithTag(dir.tdir_tag).field_name, num);
                 rv = float.NaN;
                 return false;
             }
@@ -531,7 +544,9 @@ namespace BitMiracle.LibTiff
             */
             if (dir.tdir_count > 2) 
             {
-                WarningExt(this, m_clientdata, m_name, "unexpected count for field \"%s\", %u, expected 2; ignored", FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count);
+                WarningExt(this, m_clientdata, m_name,
+                    "unexpected count for field \"{0}\", {1}, expected 2; ignored",
+                    FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count);
                 return false;
             }
 
@@ -751,7 +766,9 @@ namespace BitMiracle.LibTiff
                     /* TIFF_NOTYPE */
                     /* TIFF_ASCII */
                     /* TIFF_UNDEFINED */
-                    ErrorExt(this, m_clientdata, m_name, "cannot read TIFF_ANY type %d for field \"%s\"", dir.tdir_type, FieldWithTag(dir.tdir_tag).field_name);
+                    ErrorExt(this, m_clientdata, m_name,
+                        "cannot read TIFF_ANY type {0} for field \"{1}\"",
+                        dir.tdir_type, FieldWithTag(dir.tdir_tag).field_name);
                     return false;
             }
 
@@ -1012,7 +1029,9 @@ namespace BitMiracle.LibTiff
                     {
                         if (v[i] != v[0])
                         {
-                            ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+                            ErrorExt(this, m_clientdata, m_name,
+                                "Cannot handle different per-sample values for field \"{0}\"",
+                                FieldWithTag(dir.tdir_tag).field_name);
                             failed = true;
                             break;
                         }
@@ -1054,7 +1073,9 @@ namespace BitMiracle.LibTiff
                     {
                         if (v[i] != v[0])
                         {
-                            ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+                            ErrorExt(this, m_clientdata, m_name,
+                                "Cannot handle different per-sample values for field \"{0}\"",
+                                FieldWithTag(dir.tdir_tag).field_name);
                             failed = true;
                             break;
                         }
@@ -1095,7 +1116,9 @@ namespace BitMiracle.LibTiff
                     {
                         if (v[i] != v[0])
                         {
-                            ErrorExt(this, m_clientdata, m_name, "Cannot handle different per-sample values for field \"%s\"", FieldWithTag(dir.tdir_tag).field_name);
+                            ErrorExt(this, m_clientdata, m_name,
+                                "Cannot handle different per-sample values for field \"{0}\"",
+                                FieldWithTag(dir.tdir_tag).field_name);
                             failed = true;
                             break;
                         }

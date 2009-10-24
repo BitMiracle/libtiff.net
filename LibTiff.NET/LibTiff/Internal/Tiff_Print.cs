@@ -50,37 +50,37 @@ namespace BitMiracle.LibTiff
 
         private static void printField(Stream fd, TiffFieldInfo fip, int value_count, object raw_data)
         {
-            fprintf(fd, "  %s: ", fip.field_name);
+            fprintf(fd, "  {0}: ", fip.field_name);
 
             for (uint j = 0; j < value_count; j++)
             {
                 if (fip.field_type == TiffDataType.TIFF_BYTE)
-                    fprintf(fd, "%u", (raw_data as byte[])[j]);
+                    fprintf(fd, "{0}", (raw_data as byte[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_UNDEFINED)
-                    fprintf(fd, "0x%x", (raw_data as byte[])[j]);
+                    fprintf(fd, "0x{0:x}", (raw_data as byte[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SBYTE)
-                    fprintf(fd, "%d", (raw_data as sbyte[])[j]);
+                    fprintf(fd, "{0}", (raw_data as sbyte[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SHORT)
-                    fprintf(fd, "%u", (raw_data as ushort[])[j]);
+                    fprintf(fd, "{0}", (raw_data as ushort[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SSHORT)
-                    fprintf(fd, "%d", (raw_data as short[])[j]);
+                    fprintf(fd, "{0}", (raw_data as short[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_LONG)
-                    fprintf(fd, "%lu", (raw_data as uint[])[j]);
+                    fprintf(fd, "{0}", (raw_data as uint[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SLONG)
-                    fprintf(fd, "%ld", (raw_data as int[])[j]);
+                    fprintf(fd, "{0}", (raw_data as int[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_RATIONAL || fip.field_type == TiffDataType.TIFF_SRATIONAL || fip.field_type == TiffDataType.TIFF_FLOAT)
-                    fprintf(fd, "%f", (raw_data as float[])[j]);
+                    fprintf(fd, "{0}", (raw_data as float[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_IFD)
-                    fprintf(fd, "0x%ulx", (raw_data as uint[])[j]);
+                    fprintf(fd, "0x{0:x}", (raw_data as uint[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_ASCII)
                 {
-                    fprintf(fd, "%s", raw_data as string);
+                    fprintf(fd, "{0}", raw_data as string);
                     break;
                 }
                 else if (fip.field_type == TiffDataType.TIFF_DOUBLE)
-                    fprintf(fd, "%f", (raw_data as double[])[j]);
+                    fprintf(fd, "{0}", (raw_data as double[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_FLOAT)
-                    fprintf(fd, "%f", (raw_data as float[])[j]);
+                    fprintf(fd, "{0}", (raw_data as float[])[j]);
                 else
                 {
                     fprintf(fd, "<unsupported data type in printField>");
@@ -107,23 +107,23 @@ namespace BitMiracle.LibTiff
                             fprintf(fd, "CMYK\n");
                             break;
                         default:
-                            fprintf(fd, "%u (0x%x)\n", udata[0], udata[0]);
+                            fprintf(fd, "{0} (0x{1:x})\n", udata[0], udata[0]);
                             break;
                     }
                     return true;
                 case TIFFTAG.TIFFTAG_DOTRANGE:
                     udata = raw_data as ushort[];
-                    fprintf(fd, "  Dot Range: %u-%u\n", udata[0], udata[1]);
+                    fprintf(fd, "  Dot Range: {0}-{1}\n", udata[0], udata[1]);
                     return true;
                 case TIFFTAG.TIFFTAG_WHITEPOINT:
                     float[] fdata = raw_data as float[];
-                    fprintf(fd, "  White Point: %g-%g\n", fdata[0], fdata[1]);
+                    fprintf(fd, "  White Point: {0:G}-{1:G}\n", fdata[0], fdata[1]);
                     return true;
                 case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
                     fdata = raw_data as float[];
                     fprintf(fd, "  Reference Black/White:\n");
                     for (ushort i = 0; i < m_dir.td_samplesperpixel; i++)
-                        fprintf(fd, "    %2d: %5g %5g\n", i, fdata[2 * i + 0], fdata[2 * i + 1]);
+                        fprintf(fd, "    {0,2:D}: {1,5:G} {2,5:G}\n", i, fdata[2 * i + 0], fdata[2 * i + 1]);
                     return true;
                 case TIFFTAG.TIFFTAG_XMLPACKET:
                     fprintf(fd, "  XMLPacket (XMP Metadata):\n");
@@ -137,17 +137,17 @@ namespace BitMiracle.LibTiff
                      * XXX: for some weird reason RichTIFFIPTC tag
                      * defined as array of LONG values.
                      */
-                    fprintf(fd, "  RichTIFFIPTC Data: <present>, %lu bytes\n", value_count * 4);
+                    fprintf(fd, "  RichTIFFIPTC Data: <present>, {0} bytes\n", value_count * 4);
                     return true;
                 case TIFFTAG.TIFFTAG_PHOTOSHOP:
-                    fprintf(fd, "  Photoshop Data: <present>, %lu bytes\n", value_count);
+                    fprintf(fd, "  Photoshop Data: <present>, {0} bytes\n", value_count);
                     return true;
                 case TIFFTAG.TIFFTAG_ICCPROFILE:
-                    fprintf(fd, "  ICC Profile: <present>, %lu bytes\n", value_count);
+                    fprintf(fd, "  ICC Profile: <present>, {0} bytes\n", value_count);
                     return true;
                 case TIFFTAG.TIFFTAG_STONITS:
                     double[] ddata = raw_data as double[];
-                    fprintf(fd, "  Sample to Nits conversion factor: %.4e\n", ddata[0]);
+                    fprintf(fd, "  Sample to Nits conversion factor: {0:e4}\n", ddata[0]);
                     return true;
             }
 
@@ -160,7 +160,7 @@ namespace BitMiracle.LibTiff
             {
                 if (!char.IsControl(cp[cpPos]))
                 {
-                    fprintf(fd, "%c", cp[cpPos]);
+                    fprintf(fd, "{0}", cp[cpPos]);
                     continue;
                 }
 
@@ -173,15 +173,15 @@ namespace BitMiracle.LibTiff
                 }
 
                 if (tp[tpPos] != 0)
-                    fprintf(fd, "\\%c", tp[tpPos]);
+                    fprintf(fd, "\\{0}", tp[tpPos]);
                 else
-                    fprintf(fd, "\\%03o", cp[cpPos] & 0xff);
+                    fprintf(fd, "\\{0}", encodeOctalString((byte)(cp[cpPos] & 0xff)));
             }
         }
 
         private static void printAsciiTag(Stream fd, string name, string value)
         {
-            fprintf(fd, "  %s: \"", name);
+            fprintf(fd, "  {0}: \"", name);
             printAscii(fd, value);
             fprintf(fd, "\"\n");
         }

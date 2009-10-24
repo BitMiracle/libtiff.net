@@ -19,6 +19,7 @@ using System.Text;
 using System.IO;
 
 using BitMiracle.LibTiff.Internal;
+using System.Globalization;
 
 namespace BitMiracle.LibTiff
 {
@@ -82,9 +83,18 @@ namespace BitMiracle.LibTiff
 
         internal static void fprintf(Stream fd, string format, params object[] list)
         {
-            string s = string.Format(format, list);
+            string s = string.Format(CultureInfo.InvariantCulture, format, list);
             byte[] bytes = Encoding.ASCII.GetBytes(s);
             fd.Write(bytes, 0, bytes.Length);
+        }
+
+        private static string encodeOctalString(byte value)
+        {
+            //convert to int, for cleaner syntax below. 
+            int x = (int)value;
+
+            //return octal encoding \ddd of the character value. 
+            return string.Format(@"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);
         }
     }
 }

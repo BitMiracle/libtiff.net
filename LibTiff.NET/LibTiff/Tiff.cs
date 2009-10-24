@@ -177,7 +177,8 @@ namespace BitMiracle.LibTiff
                 }
             }
 
-            ErrorExt(this, 0, "UnRegisterCodec", "Cannot remove compression scheme %s; not registered", c.m_name);
+            ErrorExt(this, 0, "UnRegisterCodec",
+                "Cannot remove compression scheme {0}; not registered", c.m_name);
         }
 
         /**
@@ -488,7 +489,9 @@ namespace BitMiracle.LibTiff
              */
             if (tif.m_header.tiff_magic != TIFF_BIGENDIAN && tif.m_header.tiff_magic != TIFF_LITTLEENDIAN && tif.m_header.tiff_magic != MDI_LITTLEENDIAN)
             {
-                ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF or MDI file, bad magic number %d (0x%x)", tif.m_header.tiff_magic, tif.m_header.tiff_magic);
+                ErrorExt(tif, tif.m_clientdata, name,
+                    "Not a TIFF or MDI file, bad magic number {0} (0x{1:x})",
+                    tif.m_header.tiff_magic, tif.m_header.tiff_magic);
                 return tif.safeOpenFailed();
             }
 
@@ -515,7 +518,9 @@ namespace BitMiracle.LibTiff
 
             if (tif.m_header.tiff_version != TIFF_VERSION)
             {
-                ErrorExt(tif, tif.m_clientdata, name, "Not a TIFF file, bad version number %d (0x%x)", tif.m_header.tiff_version, tif.m_header.tiff_version);
+                ErrorExt(tif, tif.m_clientdata, name,
+                    "Not a TIFF file, bad version number {0} (0x{1:x})",
+                    tif.m_header.tiff_version, tif.m_header.tiff_version);
                 return tif.safeOpenFailed();
             }
 
@@ -654,7 +659,8 @@ namespace BitMiracle.LibTiff
             TiffFieldInfo fip = FindFieldInfo(tag, TiffDataType.TIFF_ANY);
             if (fip == null)
             {
-                ErrorExt(this, m_clientdata, "FieldWithTag", "Internal error, unknown tag 0x%x", tag);
+                ErrorExt(this, m_clientdata, "FieldWithTag",
+                    "Internal error, unknown tag 0x{0:x}", tag);
                 Debug.Assert(false);
                 /*NOTREACHED*/
             }
@@ -1115,7 +1121,9 @@ namespace BitMiracle.LibTiff
 
                 if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
                 {
-                    WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+                    WarningExt(this, m_clientdata, module,
+                        "{0}: unknown field with tag {1} (0x{2:x}) encountered",
+                        m_name, dir[i].tdir_tag, dir[i].tdir_tag);
 
                     TiffFieldInfo[] arr = new TiffFieldInfo[1];
                     arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
@@ -1688,7 +1696,9 @@ namespace BitMiracle.LibTiff
 
                 if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
                 {
-                    WarningExt(this, m_clientdata, module, "%s: unknown field with tag %d (0x%x) encountered", m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+                    WarningExt(this, m_clientdata, module,
+                        "{0}: unknown field with tag {1} (0x{2:x}) encountered",
+                        m_name, dir[i].tdir_tag, dir[i].tdir_tag);
 
                     TiffFieldInfo[] arr = new TiffFieldInfo[1];
                     arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
@@ -1979,7 +1989,8 @@ namespace BitMiracle.LibTiff
             int bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
+                ErrorExt(this, m_clientdata, m_name,
+                    "{0}: Invalid strip byte count, strip {1}", bytecount, strip);
                 bytecount = (int)-1;
             }
 
@@ -2521,7 +2532,8 @@ namespace BitMiracle.LibTiff
             {
                 if (nextdir == 0)
                 {
-                    ErrorExt(this, m_clientdata, module, "Directory %d does not exist", dirn);
+                    ErrorExt(this, m_clientdata, module,
+                        "Directory {0} does not exist", dirn);
                     return false;
                 }
 
@@ -2699,7 +2711,7 @@ namespace BitMiracle.LibTiff
 
         public void PrintDirectory(Stream fd, TiffPrintDirectoryFlags flags)
         {
-            fprintf(fd, "TIFF Directory at offset 0x%lx (%lu)\n", m_diroff, m_diroff);
+            fprintf(fd, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
     
             if (fieldSet(FIELD.FIELD_SUBFILETYPE))
             {
@@ -2719,29 +2731,29 @@ namespace BitMiracle.LibTiff
                 
                 if ((m_dir.td_subfiletype & FILETYPE.FILETYPE_MASK) != 0)
                     fprintf(fd, "{0}transparency mask", sep);
-                
-                fprintf(fd, " (%lu = 0x%lx)\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
+
+                fprintf(fd, " ({0} = 0x{1:x})\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
             }
 
             if (fieldSet(FIELD.FIELD_IMAGEDIMENSIONS))
             {
-                fprintf(fd, "  Image Width: %lu Image Length: %lu", m_dir.td_imagewidth, m_dir.td_imagelength);
+                fprintf(fd, "  Image Width: {0} Image Length: {1}", m_dir.td_imagewidth, m_dir.td_imagelength);
                 if (fieldSet(FIELD.FIELD_IMAGEDEPTH))
-                    fprintf(fd, " Image Depth: %lu", m_dir.td_imagedepth);
+                    fprintf(fd, " Image Depth: {0}", m_dir.td_imagedepth);
                 fprintf(fd, "\n");
             }
 
             if (fieldSet(FIELD.FIELD_TILEDIMENSIONS))
             {
-                fprintf(fd, "  Tile Width: %lu Tile Length: %lu", m_dir.td_tilewidth, m_dir.td_tilelength);
+                fprintf(fd, "  Tile Width: {0} Tile Length: {1}", m_dir.td_tilewidth, m_dir.td_tilelength);
                 if (fieldSet(FIELD.FIELD_TILEDEPTH))
-                    fprintf(fd, " Tile Depth: %lu", m_dir.td_tiledepth);
+                    fprintf(fd, " Tile Depth: {0}", m_dir.td_tiledepth);
                 fprintf(fd, "\n");
             }
 
             if (fieldSet(FIELD.FIELD_RESOLUTION))
             {
-                fprintf(fd, "  Resolution: %g, %g", m_dir.td_xresolution, m_dir.td_yresolution);
+                fprintf(fd, "  Resolution: {0:G}, {1:G}", m_dir.td_xresolution, m_dir.td_yresolution);
                 if (fieldSet(FIELD.FIELD_RESOLUTIONUNIT))
                 {
                     switch (m_dir.td_resolutionunit)
@@ -2756,7 +2768,7 @@ namespace BitMiracle.LibTiff
                             fprintf(fd, " pixels/cm");
                             break;
                         default:
-                            fprintf(fd, " (unit %u = 0x%x)", m_dir.td_resolutionunit, m_dir.td_resolutionunit);
+                            fprintf(fd, " (unit {0} = 0x{1:x})", m_dir.td_resolutionunit, m_dir.td_resolutionunit);
                             break;
                     }
                 }
@@ -2764,10 +2776,10 @@ namespace BitMiracle.LibTiff
             }
 
             if (fieldSet(FIELD.FIELD_POSITION))
-                fprintf(fd, "  Position: %g, %g\n", m_dir.td_xposition, m_dir.td_yposition);
+                fprintf(fd, "  Position: {0:G}, {1:G}\n", m_dir.td_xposition, m_dir.td_yposition);
             
             if (fieldSet(FIELD.FIELD_BITSPERSAMPLE))
-                fprintf(fd, "  Bits/Sample: %u\n", m_dir.td_bitspersample);
+                fprintf(fd, "  Bits/Sample: {0}\n", m_dir.td_bitspersample);
             
             if (fieldSet(FIELD.FIELD_SAMPLEFORMAT))
             {
@@ -2793,7 +2805,7 @@ namespace BitMiracle.LibTiff
                         fprintf(fd, "complex IEEE floating point\n");
                         break;
                     default:
-                        fprintf(fd, "%u (0x%x)\n", m_dir.td_sampleformat, m_dir.td_sampleformat);
+                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_sampleformat, m_dir.td_sampleformat);
                         break;
                 }
             }
@@ -2805,7 +2817,7 @@ namespace BitMiracle.LibTiff
                 if (c != null)
                     fprintf(fd, "{0}\n", c.m_name);
                 else
-                    fprintf(fd, "%u (0x%x)\n", m_dir.td_compression, m_dir.td_compression);
+                    fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_compression, m_dir.td_compression);
             }
 
             if (fieldSet(FIELD.FIELD_PHOTOMETRIC))
@@ -2824,7 +2836,7 @@ namespace BitMiracle.LibTiff
                             fprintf(fd, "CIE Log2(L) (u',v')\n");
                             break;
                         default:
-                            fprintf(fd, "%u (0x%x)\n", m_dir.td_photometric, m_dir.td_photometric);
+                            fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_photometric, m_dir.td_photometric);
                             break;
                     }
                 }
@@ -2832,7 +2844,7 @@ namespace BitMiracle.LibTiff
 
             if (fieldSet(FIELD.FIELD_EXTRASAMPLES) && m_dir.td_extrasamples != 0)
             {
-                fprintf(fd, "  Extra Samples: %u<", m_dir.td_extrasamples);
+                fprintf(fd, "  Extra Samples: {0}<", m_dir.td_extrasamples);
                 string sep = "";
                 for (ushort i = 0; i < m_dir.td_extrasamples; i++)
                 {
@@ -2848,7 +2860,7 @@ namespace BitMiracle.LibTiff
                             fprintf(fd, "{0}unassoc-alpha", sep);
                             break;
                         default:
-                            fprintf(fd, "%s%u (0x%x)", sep, m_dir.td_sampleinfo[i], m_dir.td_sampleinfo[i]);
+                            fprintf(fd, "{0}{1} (0x{2:x})", sep, m_dir.td_sampleinfo[i], m_dir.td_sampleinfo[i]);
                             break;
                     }
                     sep = ", ";
@@ -2885,7 +2897,7 @@ namespace BitMiracle.LibTiff
                         fprintf(fd, "error diffused\n");
                         break;
                     default:
-                        fprintf(fd, "%u (0x%x)\n", m_dir.td_threshholding, m_dir.td_threshholding);
+                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_threshholding, m_dir.td_threshholding);
                         break;
                 }
             }
@@ -2902,7 +2914,7 @@ namespace BitMiracle.LibTiff
                         fprintf(fd, "lsb-to-msb\n");
                         break;
                     default:
-                        fprintf(fd, "%u (0x%x)\n", m_dir.td_fillorder, m_dir.td_fillorder);
+                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_fillorder, m_dir.td_fillorder);
                         break;
                 }
             }
@@ -2917,7 +2929,7 @@ namespace BitMiracle.LibTiff
                 FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
                 ushort subsampling0 = result[0].ToUShort();
                 ushort subsampling1 = result[1].ToUShort();
-                fprintf(fd, "  YCbCr Subsampling: %u, %u\n", subsampling0, subsampling1);
+                fprintf(fd, "  YCbCr Subsampling: {0}, {1}\n", subsampling0, subsampling1);
             }
 
             if (fieldSet(FIELD.FIELD_YCBCRPOSITIONING))
@@ -2932,13 +2944,13 @@ namespace BitMiracle.LibTiff
                         fprintf(fd, "cosited\n");
                         break;
                     default:
-                        fprintf(fd, "%u (0x%x)\n", m_dir.td_ycbcrpositioning, m_dir.td_ycbcrpositioning);
+                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_ycbcrpositioning, m_dir.td_ycbcrpositioning);
                         break;
                 }
             }
 
             if (fieldSet(FIELD.FIELD_HALFTONEHINTS))
-                fprintf(fd, "  Halftone Hints: light %u dark %u\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
+                fprintf(fd, "  Halftone Hints: light {0} dark {1}\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
             
             if (fieldSet(FIELD.FIELD_ORIENTATION))
             {
@@ -2946,11 +2958,11 @@ namespace BitMiracle.LibTiff
                 if ((int)m_dir.td_orientation < orientNames.Length)
                     fprintf(fd, "{0}\n", orientNames[(int)m_dir.td_orientation]);
                 else
-                    fprintf(fd, "%u (0x%x)\n", m_dir.td_orientation, m_dir.td_orientation);
+                    fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_orientation, m_dir.td_orientation);
             }
 
             if (fieldSet(FIELD.FIELD_SAMPLESPERPIXEL))
-                fprintf(fd, "  Samples/Pixel: %u\n", m_dir.td_samplesperpixel);
+                fprintf(fd, "  Samples/Pixel: {0}\n", m_dir.td_samplesperpixel);
             
             if (fieldSet(FIELD.FIELD_ROWSPERSTRIP))
             {
@@ -2958,20 +2970,20 @@ namespace BitMiracle.LibTiff
                 if (m_dir.td_rowsperstrip == -1)
                     fprintf(fd, "(infinite)\n");
                 else
-                    fprintf(fd, "%lu\n", m_dir.td_rowsperstrip);
+                    fprintf(fd, "{0}\n", m_dir.td_rowsperstrip);
             }
 
             if (fieldSet(FIELD.FIELD_MINSAMPLEVALUE))
-                fprintf(fd, "  Min Sample Value: %u\n", m_dir.td_minsamplevalue);
+                fprintf(fd, "  Min Sample Value: {0}\n", m_dir.td_minsamplevalue);
             
             if (fieldSet(FIELD.FIELD_MAXSAMPLEVALUE))
-                fprintf(fd, "  Max Sample Value: %u\n", m_dir.td_maxsamplevalue);
+                fprintf(fd, "  Max Sample Value: {0}\n", m_dir.td_maxsamplevalue);
             
             if (fieldSet(FIELD.FIELD_SMINSAMPLEVALUE))
-                fprintf(fd, "  SMin Sample Value: %g\n", m_dir.td_sminsamplevalue);
+                fprintf(fd, "  SMin Sample Value: {0:G}\n", m_dir.td_sminsamplevalue);
             
             if (fieldSet(FIELD.FIELD_SMAXSAMPLEVALUE))
-                fprintf(fd, "  SMax Sample Value: %g\n", m_dir.td_smaxsamplevalue);
+                fprintf(fd, "  SMax Sample Value: {0:G}\n", m_dir.td_smaxsamplevalue);
             
             if (fieldSet(FIELD.FIELD_PLANARCONFIG))
             {
@@ -2985,13 +2997,13 @@ namespace BitMiracle.LibTiff
                         fprintf(fd, "separate image planes\n");
                         break;
                     default:
-                        fprintf(fd, "%u (0x%x)\n", m_dir.td_planarconfig, m_dir.td_planarconfig);
+                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_planarconfig, m_dir.td_planarconfig);
                         break;
                 }
             }
 
             if (fieldSet(FIELD.FIELD_PAGENUMBER))
-                fprintf(fd, "  Page Number: %u-%u\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
+                fprintf(fd, "  Page Number: {0}-{1}\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
             
             if (fieldSet(FIELD.FIELD_COLORMAP))
             {
@@ -3001,7 +3013,7 @@ namespace BitMiracle.LibTiff
                     fprintf(fd, "\n");
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
-                        fprintf(fd, "   %5lu: %5u %5u %5u\n", l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
+                        fprintf(fd, "   {0,5}: {1,5} {2,5} {3,5}\n", l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
                 }
                 else
                     fprintf(fd, "(present)\n");
@@ -3016,9 +3028,9 @@ namespace BitMiracle.LibTiff
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
                     {
-                        fprintf(fd, "    %2lu: %5u", l, m_dir.td_transferfunction[0][l]);
+                        fprintf(fd, "    {0,2}: {0,5}", l, m_dir.td_transferfunction[0][l]);
                         for (ushort i = 1; i < m_dir.td_samplesperpixel; i++)
-                            fprintf(fd, " %5u", m_dir.td_transferfunction[i][l]);
+                            fprintf(fd, " {0,5}", m_dir.td_transferfunction[i][l]);
                         fprintf(fd, "\n");
                     }
                 }
@@ -3030,7 +3042,7 @@ namespace BitMiracle.LibTiff
             {
                 fprintf(fd, "  SubIFD Offsets:");
                 for (ushort i = 0; i < m_dir.td_nsubifd; i++)
-                    fprintf(fd, " %5lu", m_dir.td_subifd[i]);
+                    fprintf(fd, " {0,5}", m_dir.td_subifd[i]);
                 fprintf(fd, "\n");
             }
 
@@ -3123,7 +3135,7 @@ namespace BitMiracle.LibTiff
             {
                 fprintf(fd, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
                 for (uint s = 0; s < m_dir.td_nstrips; s++)
-                    fprintf(fd, "    %3lu: [%8lu, %8lu]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
+                    fprintf(fd, "    {0,3}: [{0,8}, {0,8}]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
             }
         }
 
@@ -3199,7 +3211,8 @@ namespace BitMiracle.LibTiff
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
-                    ErrorExt(this, m_clientdata, m_name, "%d: Sample out of range, max %d", sample, m_dir.td_samplesperpixel);
+                    ErrorExt(this, m_clientdata, m_name,
+                        "{0}: Sample out of range, max {1}", sample, m_dir.td_samplesperpixel);
                     return false;
                 }
 
@@ -3747,25 +3760,25 @@ namespace BitMiracle.LibTiff
         {
             if (x >= m_dir.td_imagewidth)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Col out of range, max %lu", x, m_dir.td_imagewidth - 1);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Col out of range, max {1}", x, m_dir.td_imagewidth - 1);
                 return false;
             }
 
             if (y >= m_dir.td_imagelength)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Row out of range, max %lu", y, m_dir.td_imagelength - 1);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Row out of range, max {1}", y, m_dir.td_imagelength - 1);
                 return false;
             }
 
             if (z >= m_dir.td_imagedepth)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Depth out of range, max %lu", z, m_dir.td_imagedepth - 1);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Depth out of range, max {1}", z, m_dir.td_imagedepth - 1);
                 return false;
             }
 
             if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && s >= m_dir.td_samplesperpixel)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", s, m_dir.td_samplesperpixel - 1);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Sample out of range, max {1}", s, m_dir.td_samplesperpixel - 1);
                 return false;
             }
 
@@ -3824,7 +3837,7 @@ namespace BitMiracle.LibTiff
 
             if (tile >= m_dir.td_nstrips)
             {
-                ErrorExt(this, m_clientdata, m_name, "%ld: Tile out of range, max %ld", tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Tile out of range, max {1}", tile, m_dir.td_nstrips);
                 return -1;
             }
             
@@ -3864,7 +3877,7 @@ namespace BitMiracle.LibTiff
             
             if (tile >= m_dir.td_nstrips)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Tile out of range, max %lu", tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Tile out of range, max {1}", tile, m_dir.td_nstrips);
                 return -1;
             }
             
@@ -3909,7 +3922,7 @@ namespace BitMiracle.LibTiff
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
-                    ErrorExt(this, m_clientdata, m_name, "%lu: Sample out of range, max %lu", sample, m_dir.td_samplesperpixel);
+                    ErrorExt(this, m_clientdata, m_name, "{0}: Sample out of range, max {1}", sample, m_dir.td_samplesperpixel);
                     return 0;
                 }
 
@@ -3942,7 +3955,7 @@ namespace BitMiracle.LibTiff
 
             if (strip >= m_dir.td_nstrips)
             {
-                ErrorExt(this, m_clientdata, m_name, "%ld: Strip out of range, max %ld", strip, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Strip out of range, max {1}", strip, m_dir.td_nstrips);
                 return -1;
             }
 
@@ -4000,7 +4013,7 @@ namespace BitMiracle.LibTiff
             
             if (strip >= m_dir.td_nstrips)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Strip out of range, max %lu", strip, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Strip out of range, max {1}", strip, m_dir.td_nstrips);
                 return -1;
             }
 
@@ -4013,7 +4026,7 @@ namespace BitMiracle.LibTiff
             int bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
-                ErrorExt(this, m_clientdata, m_name, "%lu: Invalid strip byte count, strip %lu", bytecount, strip);
+                ErrorExt(this, m_clientdata, m_name, "{0}: Invalid strip byte count, strip {1}", bytecount, strip);
                 return -1;
             }
 

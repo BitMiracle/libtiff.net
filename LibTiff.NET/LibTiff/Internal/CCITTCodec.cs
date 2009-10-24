@@ -1109,22 +1109,35 @@ namespace BitMiracle.LibTiff.Internal
         */
         private void Fax3Unexpected(string module)
         {
-            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Bad code word at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                "{0}: Bad code word at line {1} of {2} {3} (x {4})", 
+                m_tif.m_name, m_line, m_tif.IsTiled() ? "tile" : "strip", 
+                (m_tif.IsTiled() ? m_tif.m_curtile : m_tif.m_curstrip), m_a0);
         }
 
         private void Fax3Extension(string module)
         {
-            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "%s: Uncompressed data (not supported) at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                "{0}: Uncompressed data (not supported) at line {1} of {2} {3} (x {4})",
+                m_tif.m_name, m_line, m_tif.IsTiled() ? "tile" : "strip", 
+                (m_tif.IsTiled() ? m_tif.m_curtile : m_tif.m_curstrip), m_a0);
         }
 
         private void Fax3BadLength(string module)
         {
-            Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "%s: %s at line %u of %s %u (got %u, expected %u)", m_tif.m_name, m_a0 < (int)m_rowpixels ? "Premature EOL" : "Line length mismatch", m_line, m_tif.IsTiled() ? "tile" : "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0, m_rowpixels);
+            Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                "{0}: {1} at line {2} of {3} {4} (got {5}, expected {6})",
+                m_tif.m_name, m_a0 < (int)m_rowpixels ? "Premature EOL" : "Line length mismatch",
+                m_line, m_tif.IsTiled() ? "tile" : "strip", 
+                (m_tif.IsTiled() ? m_tif.m_curtile : m_tif.m_curstrip), m_a0, m_rowpixels);
         }
 
         private void Fax3PrematureEOF(string module)
         {
-            Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "%s: Premature EOF at line %u of %s %u (x %u)", m_tif.m_name, m_line, m_tif.IsTiled() ? "tile": "strip", (m_tif.IsTiled() ? m_tif.m_curtile: m_tif.m_curstrip), m_a0);
+            Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                "{0}: Premature EOF at line {1} of {2} {3} (x {4})",
+                m_tif.m_name, m_line, m_tif.IsTiled() ? "tile" : "strip", 
+                (m_tif.IsTiled() ? m_tif.m_curtile : m_tif.m_curstrip), m_a0);
         }
 
         /*

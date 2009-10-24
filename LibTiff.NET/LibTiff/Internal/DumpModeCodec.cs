@@ -115,7 +115,8 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (m_tif.m_rawcc < cc)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "DumpModeDecode: Not enough data for scanline %d", m_tif.m_row);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "DumpModeDecode: Not enough data for scanline {0}", m_tif.m_row);
                 return false;
             }
 

@@ -567,7 +567,8 @@ namespace BitMiracle.LibTiff.Internal
                 case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
                     /* disallowed by Tech Note */
                 case PHOTOMETRIC.PHOTOMETRIC_MASK:
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "PhotometricInterpretation %d not allowed for JPEG", m_photometric);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                        "PhotometricInterpretation {0} not allowed for JPEG", m_photometric);
                     return false;
                 default:
                     /* TIFF 6.0 forbids subsampling of all other color spaces */
@@ -585,7 +586,8 @@ namespace BitMiracle.LibTiff.Internal
              */
             if (m_tif.m_dir.td_bitspersample != JpegConstants.BITS_IN_JSAMPLE)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "BitsPerSample %d not allowed for JPEG", m_tif.m_dir.td_bitspersample);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                    "BitsPerSample {0} not allowed for JPEG", m_tif.m_dir.td_bitspersample);
                 return false;
             }
             
@@ -594,13 +596,15 @@ namespace BitMiracle.LibTiff.Internal
             {
                 if ((m_tif.m_dir.td_tilelength % (m_v_sampling * JpegConstants.DCTSIZE)) != 0)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG tile height must be multiple of %d", m_v_sampling * JpegConstants.DCTSIZE);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                        "JPEG tile height must be multiple of {0}", m_v_sampling * JpegConstants.DCTSIZE);
                     return false;
                 }
 
                 if ((m_tif.m_dir.td_tilewidth % (m_h_sampling * JpegConstants.DCTSIZE)) != 0)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG tile width must be multiple of %d", m_h_sampling * JpegConstants.DCTSIZE);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                        "JPEG tile width must be multiple of {0}", m_h_sampling * JpegConstants.DCTSIZE);
                     return false;
                 }
             }
@@ -608,7 +612,8 @@ namespace BitMiracle.LibTiff.Internal
             {
                 if (m_tif.m_dir.td_rowsperstrip < m_tif.m_dir.td_imagelength && (m_tif.m_dir.td_rowsperstrip % (m_v_sampling * JpegConstants.DCTSIZE)) != 0)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "RowsPerStrip must be multiple of %d for JPEG", m_v_sampling * JpegConstants.DCTSIZE);
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                        "RowsPerStrip must be multiple of {0} for JPEG", m_v_sampling * JpegConstants.DCTSIZE);
                     return false;
                 }
             }
@@ -735,7 +740,9 @@ namespace BitMiracle.LibTiff.Internal
             
             if (m_decompression.Image_width < segment_width || m_decompression.Image_height < segment_height)
             {
-                Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG strip/tile size, expected %dx%d, got %dx%d", segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
+                Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                    "Improper JPEG strip/tile size, expected {0}x{1}, got {2}x{3}",
+                    segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
             }
 
             if (m_decompression.Image_width > segment_width || m_decompression.Image_height > segment_height)
@@ -746,7 +753,9 @@ namespace BitMiracle.LibTiff.Internal
                 * return, some potential security issues arise. Catch this
                 * case and error out.
                 */
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG strip/tile size exceeds expected dimensions, expected %dx%d, got %dx%d", segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                    "JPEG strip/tile size exceeds expected dimensions, expected {0}x{1}, got {2}x{3}",
+                    segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
                 return false;
             }
 
@@ -767,7 +776,10 @@ namespace BitMiracle.LibTiff.Internal
                 /* Component 0 should have expected sampling factors */
                 if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling || m_decompression.m_comp_info[0].v_samp_factor != m_v_sampling)
                 {
-                    Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG sampling factors %d,%d\nApparently should be %d,%d.", m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor, m_h_sampling, m_v_sampling);
+                    Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                        "Improper JPEG sampling factors {0},{1}\nApparently should be {2},{3}.",
+                        m_decompression.m_comp_info[0].h_samp_factor, 
+                        m_decompression.m_comp_info[0].v_samp_factor, m_h_sampling, m_v_sampling);
 
                     /*
                     * There are potential security issues here
@@ -791,7 +803,9 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_tif.FindFieldInfo((TIFFTAG)33918, TiffDataType.TIFF_ANY) == null)
                     {
-                        Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Decompressor will try reading with sampling %d,%d.", m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor);
+                        Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                            "Decompressor will try reading with sampling {0},{1}.",
+                            m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor);
 
                         m_h_sampling = (ushort)m_decompression.m_comp_info[0].h_samp_factor;
                         m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
@@ -994,7 +1008,9 @@ namespace BitMiracle.LibTiff.Internal
             
             if (m_decompression.Image_width < segment_width || m_decompression.Image_height < segment_height)
             {
-                Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG strip/tile size, expected %dx%d, got %dx%d", segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
+                Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                    "Improper JPEG strip/tile size, expected {0}x{1}, got {2}x{3}",
+                    segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
             }
 
             if (m_decompression.Image_width > segment_width || m_decompression.Image_height > segment_height)
@@ -1005,7 +1021,9 @@ namespace BitMiracle.LibTiff.Internal
                 * return, some potential security issues arise. Catch this
                 * case and error out.
                 */
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG strip/tile size exceeds expected dimensions, expected %dx%d, got %dx%d", segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                    "JPEG strip/tile size exceeds expected dimensions, expected {0}x{1}, got {2}x{3}",
+                    segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
                 return false;
             }
 
@@ -1026,7 +1044,10 @@ namespace BitMiracle.LibTiff.Internal
                 /* Component 0 should have expected sampling factors */
                 if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling || m_decompression.m_comp_info[0].v_samp_factor != m_v_sampling)
                 {
-                    Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG sampling factors %d,%d\nApparently should be %d,%d.", m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor, m_h_sampling, m_v_sampling);
+                    Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                        "Improper JPEG sampling factors {0},{1}\nApparently should be {2},{3}.",
+                        m_decompression.m_comp_info[0].h_samp_factor, 
+                        m_decompression.m_comp_info[0].v_samp_factor, m_h_sampling, m_v_sampling);
 
                     /*
                     * There are potential security issues here
@@ -1050,7 +1071,10 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_tif.FindFieldInfo((TIFFTAG)33918, TiffDataType.TIFF_ANY) == null)
                     {
-                        Tiff.WarningExt(m_tif, m_tif.m_clientdata, module, "Decompressor will try reading with sampling %d,%d.", m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor);
+                        Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
+                            "Decompressor will try reading with sampling {0},{1}.",
+                            m_decompression.m_comp_info[0].h_samp_factor,
+                            m_decompression.m_comp_info[0].v_samp_factor);
 
                         m_h_sampling = (ushort)m_decompression.m_comp_info[0].h_samp_factor;
                         m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
