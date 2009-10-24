@@ -530,7 +530,7 @@ namespace BitMiracle.TiffCP
 
         static void CopyTag(Tiff inImage, Tiff outImage, TIFFTAG tag, short count, TiffDataType type)
         {
-            object[] result = null;
+            FieldValue[] result = null;
             switch (type)
             {
                 case TiffDataType.TIFF_SHORT:

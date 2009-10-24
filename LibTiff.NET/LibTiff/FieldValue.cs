@@ -12,15 +12,11 @@ namespace BitMiracle.LibTiff
     /// <summary>
     /// Holds a value of Tiff tag.
     /// </summary>
-    public class FieldValue
+    public struct FieldValue
     {
         private object m_value;
         
-        protected FieldValue()
-        {
-        }
-
-        public FieldValue(object o)
+        internal FieldValue(object o)
         {
             m_value = o;
         }

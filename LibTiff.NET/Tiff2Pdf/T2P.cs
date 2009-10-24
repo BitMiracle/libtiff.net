@@ -378,6 +378,9 @@ namespace BitMiracle.Tiff2Pdf
         {
             ushort directorycount = input.NumberOfDirectories();
             m_tiff_pages = new T2P_PAGE [directorycount];
+            for (int p = 0; p < directorycount; p++)
+                m_tiff_pages[p] = new T2P_PAGE();
+
             m_tiff_tiles = new T2P_TILES [directorycount];
             FieldValue[] result = null;
 
@@ -2232,7 +2235,7 @@ namespace BitMiracle.Tiff2Pdf
             
             m_pdf_datetime[16] = 0;
 
-            object[] result = input.GetField(TIFFTAG.TIFFTAG_DATETIME);
+            FieldValue[] result = input.GetField(TIFFTAG.TIFFTAG_DATETIME);
             if (result != null && (result[0].ToString()).Length >= 19)
             {
                 string datetime = result[0].ToString();
@@ -3625,7 +3628,8 @@ namespace BitMiracle.Tiff2Pdf
             if (stream != null)
             {
                 object client = m_output.Clientdata();
-                return stream.Write(client, data, size);
+                stream.Write(client, data, size);
+                return size;
             }
 
             return -1;

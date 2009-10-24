@@ -304,10 +304,10 @@ namespace BitMiracle.LibTiff.Internal
              * the state in decompressor mode if we have tile data, even if we
              * are not in read-only file access mode. 
              */
-            object[] result = m_tif.GetField(TIFFTAG.TIFFTAG_TILEBYTECOUNTS);
+            FieldValue[] result = m_tif.GetField(TIFFTAG.TIFFTAG_TILEBYTECOUNTS);
             if (m_tif.IsTiled() && result != null)
             {
-                byte_counts = result[0] as uint[];
+                byte_counts = result[0].ToUIntArray();
                 if (byte_counts != null)
                     data_is_empty = byte_counts[0] == 0;
             }
@@ -315,7 +315,7 @@ namespace BitMiracle.LibTiff.Internal
             result = m_tif.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
             if (!m_tif.IsTiled() && result != null)
             {
-                byte_counts = result[0] as uint[];
+                byte_counts = result[0].ToUIntArray();
                 if (byte_counts != null)
                     data_is_empty = byte_counts[0] == 0;
             }
@@ -550,7 +550,7 @@ namespace BitMiracle.LibTiff.Internal
                      * default value is inappropriate for YCbCr.  Fill in the
                      * proper value if application didn't set it.
                      */
-                    object[] result = m_tif.GetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE);
+                    FieldValue[] result = m_tif.GetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE);
                     if (result == null)
                     {
                         float[] refbw = new float [6];

@@ -452,7 +452,7 @@ namespace BitMiracle.LibTiff
                         if (fip.field_type == TiffDataType.TIFF_ASCII)
                         {
                             string ascii;
-                            Tiff.setString(out ascii, ap[1].ToString());
+                            Tiff.setString(out ascii, ap[0].ToString());
                             td.td_customValues[tvIndex].value = Encoding.ASCII.GetBytes(ascii);
                         }
                         else

@@ -14,23 +14,21 @@ namespace BitMiracle.Tiff2Pdf
             return -1;
         }
 
-        public override int Write(object fd, byte[] buf, int size)
+        public override void Write(object fd, byte[] buf, int size)
         {
             T2P t2p = fd as T2P;
-            //if (!t2p.m_outputdisable && t2p.m_outputfile != null)
-            //{
-            //    int written = fwrite(buf, 1, size, t2p.m_outputfile);
-            //    t2p.m_outputwritten += written;
-            //    return written;
-            //}
-            return size;
+            if (!t2p.m_outputdisable && t2p.m_outputfile != null)
+            {
+                t2p.m_outputfile.Write(buf, 0, size);
+                t2p.m_outputwritten += size;
+            }
         }
 
         public override long Seek(object fd, long off, SeekOrigin whence)
         {
             T2P t2p = fd as T2P;
-            //if (!t2p.m_outputdisable && t2p.m_outputfile != null)
-            //    return fseekt2p.m_outputfile, off, whence);
+            if (!t2p.m_outputdisable && t2p.m_outputfile != null)
+                return t2p.m_outputfile.Seek(off, whence);
 
             return off;
         }
@@ -40,7 +38,7 @@ namespace BitMiracle.Tiff2Pdf
             return true;
         }
 
-        public override int Size(object fd)
+        public override long Size(object fd)
         {
             return -1;
         }

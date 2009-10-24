@@ -25,14 +25,13 @@ namespace BitMiracle.LibTiff
             return read;
         }
 
-        public virtual int Write(object fd, byte[] buf, int size)
+        public virtual void Write(object fd, byte[] buf, int size)
         {
             //DWORD dwSizeWritten;
             //if (!WriteFile(fd, buf, size, &dwSizeWritten, null))
             //    return 0;
 
             //return dwSizeWritten;
-            return 0;
         }
 
         public virtual long Seek(object fd, long off, SeekOrigin whence)
@@ -51,10 +50,10 @@ namespace BitMiracle.LibTiff
             return false;
         }
 
-        public virtual int Size(object fd)
+        public virtual long Size(object fd)
         {
-            //return GetFileSize(fd, null);
-            return 0;
+            Stream s = fd as Stream;
+            return s.Length;
         }
     }
 }

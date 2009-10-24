@@ -40,14 +40,24 @@ namespace BitMiracle.LibTiff
             return (((m_flags & TIFF_BUFFERSETUP) != 0 && m_rawdata != null) || WriteBufferSetup(null, (int)-1));
         }
 
-        private int writeFile(byte[] buf, int size)
+        private void writeFile(byte[] buf, int size)
         {
-            return m_stream.Write(m_clientdata, buf, size);
+            m_stream.Write(m_clientdata, buf, size);
         }
 
         private bool writeOK(byte[] buf, int size)
         {
-            return (writeFile(buf, size) == size);
+            try
+            {
+                writeFile(buf, size);
+            }
+            catch (Exception)
+            {
+                Tiff.Warning(this, "writeOK", "Failed to write {0} bytes", size);
+                return false;
+            }
+
+            return true;
         }
 
         private bool writeHeaderOK(TiffHeader header)

@@ -345,7 +345,7 @@ namespace BitMiracle.Tiff2Pdf
                     failed = true;
                 }
 
-                if (!failed && args.Length > argn)
+                if (!failed && (args.Length - 1) > argn)
                 {
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for multiple input files"); 
                     tiff2pdf_usage();
