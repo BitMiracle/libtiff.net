@@ -167,6 +167,44 @@ namespace BitMiracle.LibTiff
             Type t = m_value.GetType();
             if (t.IsArray)
             {
+                if (m_value is ushort[])
+                    return m_value as ushort[];
+                else if (m_value is byte[])
+                {
+                    byte[] temp = m_value as byte[];
+                    ushort[] result = new ushort[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (ushort)temp[i];
+
+                    return result;
+                }
+                else if (m_value is short[])
+                {
+                    short[] temp = m_value as short[];
+                    ushort[] result = new ushort[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (ushort)temp[i];
+
+                    return result;
+                }
+                else if (m_value is int[])
+                {
+                    int[] temp = m_value as int[];
+                    ushort[] result = new ushort[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (ushort)temp[i];
+
+                    return result;
+                }
+                else if (m_value is uint[])
+                {
+                    uint[] temp = m_value as uint[];
+                    ushort[] result = new ushort[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (ushort)temp[i];
+
+                    return result;
+                }
             }
 
             return null;

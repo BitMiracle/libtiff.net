@@ -41,8 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Tester.cs" />
-    <Compile Include="Tiff2Pdf_chaotic.cs" />
-    <Compile Include="Tiff2Pdf_sample.cs" />
+    <Compile Include="Tiff2Pdf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

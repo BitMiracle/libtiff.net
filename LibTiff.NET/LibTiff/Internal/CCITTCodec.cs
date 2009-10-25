@@ -1092,10 +1092,10 @@ namespace BitMiracle.LibTiff.Internal
                 /* 2d encoding */
                 /*
                  * 2d encoding requires a scanline
-                 * buffer for the ``reference line''; the
+                 * buffer for the "reference line"; the
                  * scanline against which delta encoding
                  * is referenced.  The reference line must
-                 * be initialized to be ``white'' (done elsewhere).
+                 * be initialized to be "white" (done elsewhere).
                  */
                 m_refline = new byte [rowbytes + 1];
             }

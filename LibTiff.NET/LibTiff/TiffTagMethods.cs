@@ -488,31 +488,31 @@ namespace BitMiracle.LibTiff
                                     {
                                         case TiffDataType.TIFF_BYTE:
                                         case TiffDataType.TIFF_UNDEFINED:
-                                            val[valPos] = ap[i + 1].ToByte();
+                                            val[valPos] = ap[i].ToByte();
                                             break;
                                         case TiffDataType.TIFF_SBYTE:
-                                            val[valPos] = ap[i + 1].ToByte();
+                                            val[valPos] = ap[i].ToByte();
                                             break;
                                         case TiffDataType.TIFF_SHORT:
-                                            Array.Copy(BitConverter.GetBytes(ap[i + 1].ToUShort()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[i].ToUShort()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_SSHORT:
-                                            Array.Copy(BitConverter.GetBytes(ap[i + 1].ToShort()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[i].ToShort()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_LONG:
                                         case TiffDataType.TIFF_IFD:
-                                            Array.Copy(BitConverter.GetBytes(ap[i + 1].ToUInt()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[i].ToUInt()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_SLONG:
-                                            Array.Copy(BitConverter.GetBytes(ap[i + 1].ToInt()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[i].ToInt()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_RATIONAL:
                                         case TiffDataType.TIFF_SRATIONAL:
                                         case TiffDataType.TIFF_FLOAT:
-                                            Array.Copy(BitConverter.GetBytes(ap[i + 1].ToFloat()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[i].ToFloat()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_DOUBLE:
-                                            Array.Copy(BitConverter.GetBytes(ap[i + 1].ToDouble()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[i].ToDouble()), 0, val, valPos, tv_size);
                                             break;
                                         default:
                                             Array.Clear(val, valPos, tv_size);
@@ -825,31 +825,31 @@ namespace BitMiracle.LibTiff
                                     {
                                         case TiffDataType.TIFF_BYTE:
                                         case TiffDataType.TIFF_UNDEFINED:
-                                            result[j + 1].Set(val[valPos]);
+                                            result[j].Set(val[valPos]);
                                             break;
                                         case TiffDataType.TIFF_SBYTE:
-                                            result[j + 1].Set(val[valPos]);
+                                            result[j].Set(val[valPos]);
                                             break;
                                         case TiffDataType.TIFF_SHORT:
-                                            result[j + 1].Set(BitConverter.ToUInt16(val, valPos));
+                                            result[j].Set(BitConverter.ToUInt16(val, valPos));
                                             break;
                                         case TiffDataType.TIFF_SSHORT:
-                                            result[j + 1].Set(BitConverter.ToInt16(val, valPos));
+                                            result[j].Set(BitConverter.ToInt16(val, valPos));
                                             break;
                                         case TiffDataType.TIFF_LONG:
                                         case TiffDataType.TIFF_IFD:
-                                            result[j + 1].Set(BitConverter.ToUInt32(val, valPos));
+                                            result[j].Set(BitConverter.ToUInt32(val, valPos));
                                             break;
                                         case TiffDataType.TIFF_SLONG:
-                                            result[j + 1].Set(BitConverter.ToInt32(val, valPos));
+                                            result[j].Set(BitConverter.ToInt32(val, valPos));
                                             break;
                                         case TiffDataType.TIFF_RATIONAL:
                                         case TiffDataType.TIFF_SRATIONAL:
                                         case TiffDataType.TIFF_FLOAT:
-                                            result[j + 1].Set(BitConverter.ToSingle(val, valPos));
+                                            result[j].Set(BitConverter.ToSingle(val, valPos));
                                             break;
                                         case TiffDataType.TIFF_DOUBLE:
-                                            result[j + 1].Set(BitConverter.ToDouble(val, valPos));
+                                            result[j].Set(BitConverter.ToDouble(val, valPos));
                                             break;
                                         default:
                                             result = null;
