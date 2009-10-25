@@ -107,6 +107,12 @@ namespace BitMiracle.LibTiff.Internal
                 runlen = _runlen;
             }
 
+            public static tableEntry FromArray(short[] array, int entryNumber)
+            {
+                int offset = entryNumber * 3; // we have 3 elements in entry
+                return new tableEntry((ushort)array[offset], (ushort)array[offset + 1], array[offset + 2]);
+            }
+
             public ushort length; /* bit length of g3 code */
             public ushort code; /* g3 code */
             public short runlen; /* run length in bits */
@@ -1515,13 +1521,13 @@ namespace BitMiracle.LibTiff.Internal
         */
         private void putspan(int span, bool useBlack)
         {
-            tableEntry[] entries = null;
+            short[] entries = null;
             if (useBlack)
                 entries = m_faxBlackCodes;
             else
                 entries = m_faxWhiteCodes;
 
-            tableEntry te = entries[63 + (2560 >> 6)];
+            tableEntry te = tableEntry.FromArray(entries, 63 + (2560 >> 6));
             while (span >= 2624)
             {
                 putBits(te.code, te.length);
@@ -1530,13 +1536,14 @@ namespace BitMiracle.LibTiff.Internal
 
             if (span >= 64)
             {
-                te = entries[63 + (span >> 6)];
+                te = tableEntry.FromArray(entries, 63 + (span >> 6));
                 Debug.Assert(te.runlen == 64 * (span >> 6));
                 putBits(te.code, te.length);
                 span -= te.runlen;
             }
 
-            putBits(entries[span].code, entries[span].length);
+            te = tableEntry.FromArray(entries, span);
+            putBits(te.code, te.length);
         }
 
         /*

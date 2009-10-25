@@ -133,6 +133,8 @@ namespace BitMiracle.LibTiff
             nfields += m_dir.td_customValueCount;
             int dirsize = nfields * TiffDirEntry.SizeInBytes;
             TiffDirEntry[] data = new TiffDirEntry [nfields];
+            for (int i = 0; i < nfields; i++)
+                data[i] = new TiffDirEntry();
 
             /*
              * Directory hasn't been placed yet, put

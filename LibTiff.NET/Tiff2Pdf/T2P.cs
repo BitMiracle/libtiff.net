@@ -1889,7 +1889,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private int write_pdf_header()
         {
-            string buffer = string.Format("%%PDF-{0}.{1} ", m_pdf_majorversion & 0xff, m_pdf_minorversion & 0xff);
+            string buffer = string.Format("%PDF-{0}.{1} ", m_pdf_majorversion & 0xff, m_pdf_minorversion & 0xff);
             
             int written = writeToFile(buffer);
             written += writeToFile("\n%");
