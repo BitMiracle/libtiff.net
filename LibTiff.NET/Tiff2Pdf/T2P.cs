@@ -538,6 +538,8 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_tiles[i].tiles_tilelength = result[0].ToInt();
 
                     m_tiff_tiles[i].tiles_tiles = new T2P_TILE [m_tiff_tiles[i].tiles_tilecount];
+                    for (int idx = 0; idx < m_tiff_tiles[i].tiles_tilecount; idx++)
+                        m_tiff_tiles[i].tiles_tiles[idx] = new T2P_TILE();
                 }
             }
         }

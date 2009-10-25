@@ -662,6 +662,7 @@ namespace BitMiracle.LibTiff
                         else
                             cp = result[0].ToString();
 
+                        // add zero ('\0') at the end of the byte array
                         byte[] stringBytes = Encoding.ASCII.GetBytes(cp);
                         byte[] totalBytes = new byte[stringBytes.Length + 1];
                         Array.Copy(stringBytes, totalBytes, stringBytes.Length);

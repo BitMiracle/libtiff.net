@@ -38,5 +38,10 @@ namespace BitMiracle.LibTiff
             field_passcount = fieldPassCount;
             field_name = fieldName;
         }
+
+        public override string ToString()
+        {
+            return field_tag.ToString();
+        }
     }
 }

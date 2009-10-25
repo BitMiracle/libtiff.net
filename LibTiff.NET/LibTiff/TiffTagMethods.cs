@@ -804,7 +804,15 @@ namespace BitMiracle.LibTiff
                                 fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
                             {
                                 result = new FieldValue[1];
-                                result[0].Set(tv.value);
+                                byte[] value = tv.value;
+                                if (fip.field_type == TiffDataType.TIFF_ASCII)
+                                {
+                                    // cut unwanted zero at the end
+                                    value = new byte[Math.Max(tv.value.Length - 1, 0)];
+                                    Array.Copy(tv.value, value, value.Length);
+                                }
+
+                                result[0].Set(value);
                             }
                             else
                             {

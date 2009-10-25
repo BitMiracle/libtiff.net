@@ -295,7 +295,10 @@ namespace BitMiracle.LibTiff
             FileStream fd = null;
             try
             {
-                fd = File.Open(fileName, m, a);
+                if (a == FileAccess.Read)
+                    fd = File.Open(fileName, m, a, FileShare.Read);
+                else
+                    fd = File.Open(fileName, m, a);
             }
             catch (System.Exception)
             {

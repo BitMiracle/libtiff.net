@@ -585,7 +585,7 @@ namespace BitMiracle.LibTiff
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                uint[] u = byteArrayToUInt(b, 0, read);
+                int[] u = byteArrayToInt(b, 0, read);
                 Array.Copy(u, v, u.Length);
             }
 

@@ -315,7 +315,7 @@ namespace BitMiracle.LibTiff.Internal
             * up being copied into the refline.
             */
             if (m_refline != null)
-                Array.Clear(m_refline, 0, m_rowbytes);
+                Array.Clear(m_refline, 0, m_refline.Length);
 
             if (is2DEncoding())
             {
@@ -1097,7 +1097,7 @@ namespace BitMiracle.LibTiff.Internal
                  * is referenced.  The reference line must
                  * be initialized to be ``white'' (done elsewhere).
                  */
-                m_refline = new byte [rowbytes];
+                m_refline = new byte [rowbytes + 1];
             }
             else
             {
@@ -1348,6 +1348,8 @@ namespace BitMiracle.LibTiff.Internal
                 int color = Fax3Encode2DRow_Pixel(m_bp, m_bpPos, a0);
                 if (color == 0)
                     color = 1;
+                else
+                    color = 0;
 
                 b1 = finddiff(m_refline, 0, a0, m_rowpixels, color);
                 b1 = finddiff(m_refline, 0, b1, m_rowpixels, Fax3Encode2DRow_Pixel(m_bp, m_bpPos, a0));

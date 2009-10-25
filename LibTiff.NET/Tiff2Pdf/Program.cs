@@ -281,31 +281,31 @@ namespace BitMiracle.Tiff2Pdf
                         break;
 
                     case 'c': 
-                        t2p.m_pdf_creator = new byte [optarg.Length + 1];
+                        t2p.m_pdf_creator = new byte [optarg.Length];
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_creator, bytes.Length);
                         break;
                     
                     case 'a': 
-                        t2p.m_pdf_author = new byte [optarg.Length + 1];
+                        t2p.m_pdf_author = new byte [optarg.Length];
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_author, bytes.Length);
                         break;
 
                     case 't': 
-                        t2p.m_pdf_title = new byte [optarg.Length + 1];
+                        t2p.m_pdf_title = new byte [optarg.Length];
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_title, bytes.Length);
                         break;
                     
                     case 's': 
-                        t2p.m_pdf_subject = new byte [optarg.Length + 1];
+                        t2p.m_pdf_subject = new byte [optarg.Length];
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_subject, bytes.Length);
                         break;
 
                     case 'k': 
-                        t2p.m_pdf_keywords = new byte [optarg.Length + 1];
+                        t2p.m_pdf_keywords = new byte [optarg.Length];
                         bytes = Encoding.ASCII.GetBytes(optarg);
                         Array.Copy(bytes, t2p.m_pdf_keywords, bytes.Length);
                         break;
