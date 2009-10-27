@@ -5,7 +5,7 @@ using System.IO;
 
 using NUnit.Framework;
 
-namespace UnitTests
+namespace UnitTests.Tiff2Pdf
 {
     class Tester
     {

@@ -40,8 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Tester.cs" />
-    <Compile Include="Tiff2Pdf.cs" />
+    <Compile Include="Tiff2Pdf\Chaotic.cs" />
+    <Compile Include="Tiff2Pdf\Tester.cs" />
+    <Compile Include="Tiff2Pdf\Sample.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
