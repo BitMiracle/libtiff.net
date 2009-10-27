@@ -69,7 +69,7 @@ namespace BitMiracle.LibTiff
             int start = clamptabOffset + 256;
             int stop = start + 2 * 256;
 
-            for (int i = start; i <= stop; i++)
+            for (int i = start; i < stop; i++)
                 clamptab[i] = 255; /* v > 255 => 255 */
 
             float LumaRed = luma[0];

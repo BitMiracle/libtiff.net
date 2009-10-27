@@ -182,6 +182,7 @@ namespace BitMiracle.LibTiff.Internal
 
             Debug.Assert(m_state == ZSTATE_INIT_DECODE);
             m_stream.next_out = op;
+            m_stream.next_out_index = 0;
             m_stream.avail_out = occ;
             do
             {
@@ -299,8 +300,9 @@ namespace BitMiracle.LibTiff.Internal
                 tif_setupdecode();
 
             m_stream.next_in = m_tif.m_rawdata;
+            m_stream.next_in_index = 0;
             m_stream.avail_in = m_tif.m_rawcc;
-            return (m_stream.inflateReset() == zlibConst.Z_OK);
+            return (m_stream.inflateInit() == zlibConst.Z_OK);
         }
 
         /*

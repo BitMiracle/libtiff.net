@@ -391,6 +391,17 @@ namespace BitMiracle.LibTiff
             Type t = m_value.GetType();
             if (t.IsArray)
             {
+                if (m_value is float[])
+                    return m_value as float[];
+                else if (m_value is double[])
+                {
+                    double[] temp = m_value as double[];
+                    float[] result = new float[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (float)temp[i];
+
+                    return result;
+                }
             }
 
             return null;
