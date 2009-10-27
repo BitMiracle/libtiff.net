@@ -435,12 +435,13 @@ namespace BitMiracle.LibTiff
                             break;
                         }
 
+                        int paramIndex = 0;
                         if (fip.field_passcount)
                         {
                             if (fip.field_writecount == Tiff.TIFF_VARIABLE2)
-                                td.td_customValues[tvIndex].count = ap[0].ToInt();
+                                td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
                             else
-                                td.td_customValues[tvIndex].count = ap[0].ToInt();
+                                td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
                         }
                         else if (fip.field_writecount == Tiff.TIFF_VARIABLE || fip.field_writecount == Tiff.TIFF_VARIABLE2)
                             td.td_customValues[tvIndex].count = 1;
@@ -452,7 +453,7 @@ namespace BitMiracle.LibTiff
                         if (fip.field_type == TiffDataType.TIFF_ASCII)
                         {
                             string ascii;
-                            Tiff.setString(out ascii, ap[0].ToString());
+                            Tiff.setString(out ascii, ap[paramIndex++].ToString());
                             td.td_customValues[tvIndex].value = Encoding.ASCII.GetBytes(ascii);
                         }
                         else
@@ -466,7 +467,7 @@ namespace BitMiracle.LibTiff
                                 fip.field_tag != TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING &&
                                 fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
                             {
-                                byte[] apBytes = ap[1].ToByteArray();
+                                byte[] apBytes = ap[paramIndex++].GetBytes();
                                 Array.Copy(apBytes, td.td_customValues[tvIndex].value, apBytes.Length);
                             }
                             else
@@ -488,31 +489,31 @@ namespace BitMiracle.LibTiff
                                     {
                                         case TiffDataType.TIFF_BYTE:
                                         case TiffDataType.TIFF_UNDEFINED:
-                                            val[valPos] = ap[i].ToByte();
+                                            val[valPos] = ap[paramIndex + i].ToByte();
                                             break;
                                         case TiffDataType.TIFF_SBYTE:
-                                            val[valPos] = ap[i].ToByte();
+                                            val[valPos] = ap[paramIndex + i].ToByte();
                                             break;
                                         case TiffDataType.TIFF_SHORT:
-                                            Array.Copy(BitConverter.GetBytes(ap[i].ToUShort()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUShort()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_SSHORT:
-                                            Array.Copy(BitConverter.GetBytes(ap[i].ToShort()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_LONG:
                                         case TiffDataType.TIFF_IFD:
-                                            Array.Copy(BitConverter.GetBytes(ap[i].ToUInt()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUInt()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_SLONG:
-                                            Array.Copy(BitConverter.GetBytes(ap[i].ToInt()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_RATIONAL:
                                         case TiffDataType.TIFF_SRATIONAL:
                                         case TiffDataType.TIFF_FLOAT:
-                                            Array.Copy(BitConverter.GetBytes(ap[i].ToFloat()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToFloat()), 0, val, valPos, tv_size);
                                             break;
                                         case TiffDataType.TIFF_DOUBLE:
-                                            Array.Copy(BitConverter.GetBytes(ap[i].ToDouble()), 0, val, valPos, tv_size);
+                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToDouble()), 0, val, valPos, tv_size);
                                             break;
                                         default:
                                             Array.Clear(val, valPos, tv_size);
@@ -805,7 +806,7 @@ namespace BitMiracle.LibTiff
                             {
                                 result = new FieldValue[1];
                                 byte[] value = tv.value;
-                                if (fip.field_type == TiffDataType.TIFF_ASCII)
+                                if (fip.field_type == TiffDataType.TIFF_ASCII && tv.value.Length > 0 && tv.value[tv.value.Length - 1] == 0)
                                 {
                                     // cut unwanted zero at the end
                                     value = new byte[Math.Max(tv.value.Length - 1, 0)];

@@ -93,6 +93,15 @@ namespace ComponentAce.Compression.Libs.zlib
 		{
 			return inflateInit(DEF_WBITS);
 		}
+
+        public int inflateReset()
+        {
+            if (istate == null)
+				return Z_STREAM_ERROR;
+
+            return istate.inflateReset(this);
+        }
+
 		public int inflateInit(int w)
 		{
 			istate = new Inflate();

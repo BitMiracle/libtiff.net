@@ -90,11 +90,114 @@ namespace BitMiracle.LibTiff
 
         public new string ToString()
         {
+            if (m_value is byte[])
+                return Encoding.ASCII.GetString(m_value as byte[]);
+
             return Convert.ToString(m_value);
+        }
+
+        public byte[] GetBytes()
+        {
+            if (m_value == null)
+                return null;
+
+            Type t = m_value.GetType();
+            if (t.IsArray)
+            {
+                if (m_value is byte[])
+                    return m_value as byte[];
+                else if (m_value is short[])
+                {
+                    short[] temp = m_value as short[];
+                    byte[] result = new byte[temp.Length * sizeof(short)];
+                    int resultOffset = 0;
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        byte[] bytes = BitConverter.GetBytes(temp[i]);
+                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
+                        resultOffset += bytes.Length;
+                    }
+                    return result;
+                }
+                else if (m_value is ushort[])
+                {
+                    ushort[] temp = m_value as ushort[];
+                    byte[] result = new byte[temp.Length * sizeof(ushort)];
+                    int resultOffset = 0;
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        byte[] bytes = BitConverter.GetBytes(temp[i]);
+                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
+                        resultOffset += bytes.Length;
+                    }
+                    return result;
+                }
+                else if (m_value is int[])
+                {
+                    int[] temp = m_value as int[];
+                    byte[] result = new byte[temp.Length * sizeof(int)];
+                    int resultOffset = 0;
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        byte[] bytes = BitConverter.GetBytes(temp[i]);
+                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
+                        resultOffset += bytes.Length;
+                    }
+                    return result;
+                }
+                else if (m_value is uint[])
+                {
+                    uint[] temp = m_value as uint[];
+                    byte[] result = new byte[temp.Length * sizeof(uint)];
+                    int resultOffset = 0;
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        byte[] bytes = BitConverter.GetBytes(temp[i]);
+                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
+                        resultOffset += bytes.Length;
+                    }
+                    return result;
+                }
+                else if (m_value is float[])
+                {
+                    float[] temp = m_value as float[];
+                    byte[] result = new byte[temp.Length * sizeof(float)];
+                    int resultOffset = 0;
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        byte[] bytes = BitConverter.GetBytes(temp[i]);
+                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
+                        resultOffset += bytes.Length;
+                    }
+                    return result;
+                }
+                else if (m_value is double[])
+                {
+                    double[] temp = m_value as double[];
+                    byte[] result = new byte[temp.Length * sizeof(double)];
+                    int resultOffset = 0;
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        byte[] bytes = BitConverter.GetBytes(temp[i]);
+                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
+                        resultOffset += bytes.Length;
+                    }
+                    return result;
+                }
+            }
+            else
+            {
+                return null;
+            }
+
+            return null;
         }
 
         public byte[] ToByteArray()
         {
+            if (m_value == null)
+                return null;
+
             Type t = m_value.GetType();
             if (t.IsArray)
             {
@@ -143,6 +246,9 @@ namespace BitMiracle.LibTiff
 
         public short[] ToShortArray()
         {
+            if (m_value == null)
+                return null;
+
             Type t = m_value.GetType();
             if (t.IsArray)
             {
@@ -164,6 +270,9 @@ namespace BitMiracle.LibTiff
 
         public ushort[] ToUShortArray()
         {
+            if (m_value == null)
+                return null;
+
             Type t = m_value.GetType();
             if (t.IsArray)
             {
@@ -212,9 +321,50 @@ namespace BitMiracle.LibTiff
 
         public int[] ToIntArray()
         {
+            if (m_value == null)
+                return null;
+
             Type t = m_value.GetType();
             if (t.IsArray)
             {
+                if (m_value is int[])
+                    return m_value as int[];
+                else if (m_value is byte[])
+                {
+                    byte[] temp = m_value as byte[];
+                    int[] result = new int[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (int)temp[i];
+
+                    return result;
+                }
+                else if (m_value is short[])
+                {
+                    short[] temp = m_value as short[];
+                    int[] result = new int[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (int)temp[i];
+
+                    return result;
+                }
+                else if (m_value is ushort[])
+                {
+                    ushort[] temp = m_value as ushort[];
+                    int[] result = new int[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (int)temp[i];
+
+                    return result;
+                }
+                else if (m_value is uint[])
+                {
+                    uint[] temp = m_value as uint[];
+                    int[] result = new int[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (int)temp[i];
+
+                    return result;
+                }
             }
 
             return null;
@@ -222,6 +372,9 @@ namespace BitMiracle.LibTiff
 
         public uint[] ToUIntArray()
         {
+            if (m_value == null)
+                return null;
+
             Type t = m_value.GetType();
             if (t.IsArray)
             {
@@ -232,6 +385,9 @@ namespace BitMiracle.LibTiff
 
         public float[] ToFloatArray()
         {
+            if (m_value == null)
+                return null;
+
             Type t = m_value.GetType();
             if (t.IsArray)
             {
@@ -242,6 +398,9 @@ namespace BitMiracle.LibTiff
 
         public double[] ToDoubleArray()
         {
+            if (m_value == null)
+                return null;
+
             Type t = m_value.GetType();
             if (t.IsArray)
             {

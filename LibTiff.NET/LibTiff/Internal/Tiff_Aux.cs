@@ -36,7 +36,6 @@ namespace BitMiracle.LibTiff
                 return false;
 
             int n = 1 << td.td_bitspersample;
-            int nbytes = n * sizeof(ushort);
             tf[0] = new ushort [n];
             tf[0][0] = 0;
             for (int i = 1; i < n; i++)
@@ -48,10 +47,10 @@ namespace BitMiracle.LibTiff
             if (td.td_samplesperpixel - td.td_extrasamples > 1)
             {
                 tf[1] = new ushort [n];
-                Array.Copy(tf[0], tf[1], nbytes);
+                Array.Copy(tf[0], tf[1], tf[0].Length);
 
                 tf[2] = new ushort [n];
-                Array.Copy(tf[0], tf[2], nbytes);
+                Array.Copy(tf[0], tf[2], tf[0].Length);
             }
 
             return true;

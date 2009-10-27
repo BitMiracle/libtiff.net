@@ -116,7 +116,7 @@ namespace BitMiracle.Tiff2Pdf
         private ushort m_pdf_page;
         private float[] m_tiff_whitechromaticities = new float[2];
         private float[] m_tiff_primarychromaticities = new float[6];
-        private float[][] m_tiff_transferfunction = new float[3][];
+        private byte[][] m_tiff_transferfunction = new byte[3][];
         
         private ushort m_tiff_transferfunctioncount;
         private int m_pdf_icccs;
@@ -481,9 +481,9 @@ namespace BitMiracle.Tiff2Pdf
                 result = input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION);
                 if (result != null)
                 {
-                    m_tiff_transferfunction[0] = result[0].ToFloatArray();
-                    m_tiff_transferfunction[1] = result[1].ToFloatArray();
-                    m_tiff_transferfunction[2] = result[2].ToFloatArray();
+                    m_tiff_transferfunction[0] = result[0].GetBytes();
+                    m_tiff_transferfunction[1] = result[1].GetBytes();
+                    m_tiff_transferfunction[2] = result[2].GetBytes();
 
                     if (m_tiff_transferfunction[1] != m_tiff_transferfunction[0])
                     {
@@ -1091,9 +1091,9 @@ namespace BitMiracle.Tiff2Pdf
             result = input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION);
             if (result != null)
             {
-                m_tiff_transferfunction[0] = result[0].ToFloatArray();
-                m_tiff_transferfunction[1] = result[1].ToFloatArray();
-                m_tiff_transferfunction[2] = result[2].ToFloatArray();
+                m_tiff_transferfunction[0] = result[0].GetBytes();
+                m_tiff_transferfunction[1] = result[1].GetBytes();
+                m_tiff_transferfunction[2] = result[2].GetBytes();
 
                 if (m_tiff_transferfunction[1] != m_tiff_transferfunction[0])
                     m_tiff_transferfunctioncount = 3;
@@ -2163,13 +2163,12 @@ namespace BitMiracle.Tiff2Pdf
         */
         private void pdf_tifftime(Tiff input)
         {
-            m_pdf_datetime = new byte [19];
-            m_pdf_datetime[16] = 0;
-
             FieldValue[] result = input.GetField(TIFFTAG.TIFFTAG_DATETIME);
             if (result != null && (result[0].ToString()).Length >= 19)
             {
                 string datetime = result[0].ToString();
+
+                m_pdf_datetime = new byte[16];
                 m_pdf_datetime[0] = (byte)'D';
                 m_pdf_datetime[1] = (byte)':';
                 m_pdf_datetime[2] = (byte)datetime[0];
@@ -2534,17 +2533,7 @@ namespace BitMiracle.Tiff2Pdf
 
         private int write_pdf_transfer_stream(ushort i)
         {
-            int floatLength = m_tiff_transferfunction[i].Length;
-            byte[] bytes = new byte[floatLength * sizeof(float)];
-            int bytesPos = 0;
-            for (int pos = 0; pos < floatLength; pos++)
-            {
-                byte[] temp = BitConverter.GetBytes(m_tiff_transferfunction[i][pos]);
-                Array.Copy(temp, 0, bytes, bytesPos, temp.Length);
-                bytesPos += temp.Length;
-            }
-
-            return write_pdf_stream(bytes, (1 << (m_tiff_bitspersample + 1)));
+            return write_pdf_stream(m_tiff_transferfunction[i], (1 << (m_tiff_bitspersample + 1)));
         }
         
         /*

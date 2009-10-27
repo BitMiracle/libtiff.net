@@ -300,8 +300,7 @@ namespace BitMiracle.LibTiff.Internal
 
             m_stream.next_in = m_tif.m_rawdata;
             m_stream.avail_in = m_tif.m_rawcc;
-            //return (m_stream.inflateReset() == zlibConst.Z_OK);
-            return false;
+            return (m_stream.inflateReset() == zlibConst.Z_OK);
         }
 
         /*
