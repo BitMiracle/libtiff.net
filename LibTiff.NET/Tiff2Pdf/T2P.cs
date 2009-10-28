@@ -2467,7 +2467,7 @@ namespace BitMiracle.Tiff2Pdf
                 X_W /= Y_W;
                 Z_W /= Y_W;
                 Y_W = 1.0F;
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {1:N4}] \n", X_W, Y_W, Z_W);
+                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
                 written += writeToFile(buffer);
                 
                 X_W = 0.3457F; /* 0.3127F; */ /* D50, commented D65 */

@@ -45,14 +45,6 @@ namespace BitMiracle.LibTiff
             get { return m_value; }
         }
 
-        // sbyte
-        // long
-        // ulong
-        // decimal
-        // char
-        // bool
-        // object
-
         public byte ToByte()
         {
             return Convert.ToByte(m_value);
@@ -185,10 +177,8 @@ namespace BitMiracle.LibTiff
                     return result;
                 }
             }
-            else
-            {
-                return null;
-            }
+            else if (m_value is string)
+                return Encoding.GetEncoding("Latin1").GetBytes(m_value as string);
 
             return null;
         }
@@ -240,6 +230,8 @@ namespace BitMiracle.LibTiff
                     return result;
                 }
             }
+            else if (m_value is string)
+                return Encoding.GetEncoding("Latin1").GetBytes(m_value as string);
 
             return null;
         }
@@ -257,6 +249,33 @@ namespace BitMiracle.LibTiff
                 else if (m_value is byte[])
                 {
                     byte[] temp = m_value as byte[];
+                    short[] result = new short[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (short)temp[i];
+
+                    return result;
+                }
+                else if (m_value is ushort[])
+                {
+                    ushort[] temp = m_value as ushort[];
+                    short[] result = new short[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (short)temp[i];
+
+                    return result;
+                }
+                else if (m_value is int[])
+                {
+                    int[] temp = m_value as int[];
+                    short[] result = new short[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (short)temp[i];
+
+                    return result;
+                }
+                else if (m_value is uint[])
+                {
+                    uint[] temp = m_value as uint[];
                     short[] result = new short[temp.Length];
                     for (int i = 0; i < temp.Length; i++)
                         result[i] = (short)temp[i];
@@ -378,6 +397,44 @@ namespace BitMiracle.LibTiff
             Type t = m_value.GetType();
             if (t.IsArray)
             {
+                if (m_value is uint[])
+                    return m_value as uint[];
+                else if (m_value is byte[])
+                {
+                    byte[] temp = m_value as byte[];
+                    uint[] result = new uint[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (uint)temp[i];
+
+                    return result;
+                }
+                else if (m_value is short[])
+                {
+                    short[] temp = m_value as short[];
+                    uint[] result = new uint[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (uint)temp[i];
+
+                    return result;
+                }
+                else if (m_value is ushort[])
+                {
+                    ushort[] temp = m_value as ushort[];
+                    uint[] result = new uint[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (uint)temp[i];
+
+                    return result;
+                }
+                else if (m_value is int[])
+                {
+                    int[] temp = m_value as int[];
+                    uint[] result = new uint[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (uint)temp[i];
+
+                    return result;
+                }
             }
 
             return null;
@@ -402,6 +459,23 @@ namespace BitMiracle.LibTiff
 
                     return result;
                 }
+                else if (m_value is byte[])
+                {
+                    byte[] temp = m_value as byte[];
+                    int tempPos = 0; 
+                    
+                    int floatCount = temp.Length / sizeof(float);
+                    float[] result = new float[floatCount];
+                    
+                    for (int i = 0; i < floatCount; i++)
+                    {
+                        float f = BitConverter.ToSingle(temp, tempPos);
+                        result[i] = f;
+                        tempPos += sizeof(float);
+                    }
+
+                    return result;
+                }
             }
 
             return null;
@@ -415,6 +489,34 @@ namespace BitMiracle.LibTiff
             Type t = m_value.GetType();
             if (t.IsArray)
             {
+                if (m_value is double[])
+                    return m_value as double[];
+                else if (m_value is float[])
+                {
+                    float[] temp = m_value as float[];
+                    double[] result = new double[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (double)temp[i];
+
+                    return result;
+                }
+                else if (m_value is byte[])
+                {
+                    byte[] temp = m_value as byte[];
+                    int tempPos = 0;
+
+                    int floatCount = temp.Length / sizeof(double);
+                    double[] result = new double[floatCount];
+
+                    for (int i = 0; i < floatCount; i++)
+                    {
+                        double d = BitConverter.ToDouble(temp, tempPos);
+                        result[i] = d;
+                        tempPos += sizeof(double);
+                    }
+
+                    return result;
+                }
             }
 
             return null;
