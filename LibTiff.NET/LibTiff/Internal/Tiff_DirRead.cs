@@ -378,13 +378,13 @@ namespace BitMiracle.LibTiff
 
                 bytes = new byte[sizeof(uint)];
                 writeInt(l, bytes, 0);
-                cp = Encoding.ASCII.GetString(bytes, 0, dir.tdir_count);
+                cp = Encoding.GetEncoding("Latin1").GetString(bytes, 0, dir.tdir_count);
                 return 1;
             }
 
             bytes = new byte[dir.tdir_count];
             int res = fetchData(dir, bytes);
-            cp = Encoding.ASCII.GetString(bytes, 0, dir.tdir_count);
+            cp = Encoding.GetEncoding("Latin1").GetString(bytes, 0, dir.tdir_count);
             return res;
         }
 

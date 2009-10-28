@@ -91,7 +91,7 @@ namespace BitMiracle.LibTiff
         public new string ToString()
         {
             if (m_value is byte[])
-                return Encoding.ASCII.GetString(m_value as byte[]);
+                return Encoding.GetEncoding("Latin1").GetString(m_value as byte[]);
 
             return Convert.ToString(m_value);
         }

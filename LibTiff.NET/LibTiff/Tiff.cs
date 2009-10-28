@@ -1925,7 +1925,7 @@ namespace BitMiracle.LibTiff
             {
                 if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
                 {
-                    FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                    FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
                     ushort ycbcrsubsampling0 = result[0].ToUShort();
 
                     if (ycbcrsubsampling0 == 0)
@@ -2018,7 +2018,7 @@ namespace BitMiracle.LibTiff
                  * horizontal/vertical subsampling area include
                  * YCbCr data for the extended image.
                  */
-                FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
                 ushort ycbcrsubsampling0 = result[0].ToUShort();
                 ushort ycbcrsubsampling1 = result[1].ToUShort();
 

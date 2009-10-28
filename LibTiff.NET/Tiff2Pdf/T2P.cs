@@ -1945,7 +1945,7 @@ namespace BitMiracle.Tiff2Pdf
 
             //written += writeToFile("\n/Producer ");
             //string buffer = string.Format("libtiff / tiff2pdf - {0}", Tiff.TIFF_VERSION);
-            //written += write_pdf_string(Encoding.ASCII.GetBytes(buffer));
+            //written += write_pdf_string(Encoding.GetEncoding("Latin1").GetBytes(buffer));
 
             written += writeToFile("\n");
 
@@ -2154,7 +2154,7 @@ namespace BitMiracle.Tiff2Pdf
                 dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256, 
                 dt.Minute % 256, dt.Second % 256);
 
-            m_pdf_datetime = Encoding.ASCII.GetBytes(s);
+            m_pdf_datetime = Encoding.GetEncoding("Latin1").GetBytes(s);
         }
         
         /*
@@ -2911,7 +2911,7 @@ namespace BitMiracle.Tiff2Pdf
                         m_tiff_transferfunctioncount != 0 ? "/GS1 gs " : "", box.mat[0], box.mat[1], 
                         box.mat[3], box.mat[4], box.mat[6], box.mat[7], m_pdf_page + 1, i + 1);
 
-                    byte[] bytes = Encoding.ASCII.GetBytes(buffer);
+                    byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(buffer);
                     written += write_pdf_stream(bytes, bytes.Length);
                 }
             }
@@ -2923,7 +2923,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_transferfunctioncount != 0 ? "/GS1 gs " : "", box.mat[0], box.mat[1],
                     box.mat[3], box.mat[4], box.mat[6], box.mat[7], m_pdf_page + 1);
 
-                byte[] bytes = Encoding.ASCII.GetBytes(buffer);
+                byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(buffer);
                 written += write_pdf_stream(bytes, bytes.Length);
             }
 
@@ -3168,7 +3168,7 @@ namespace BitMiracle.Tiff2Pdf
             {
                 if ((pdfstr[i] & 0x80) != 0 || (pdfstr[i] == 127) || (pdfstr[i] < 32))
                 {
-                    string buffer = string.Format("\\{0}", encodeOctalString(pdfstr[i]));
+                    string buffer = string.Format("{0}", encodeOctalString(pdfstr[i]));
                     written += writeToFile(buffer);
                 }
                 else
@@ -3556,7 +3556,7 @@ namespace BitMiracle.Tiff2Pdf
 
         private int writeToFile(string data)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(data);
+            byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(data);
             return writeToFile(bytes, bytes.Length);
         }
     }

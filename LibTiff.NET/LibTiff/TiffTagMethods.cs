@@ -145,7 +145,7 @@ namespace BitMiracle.LibTiff
                     td.td_samplesperpixel = (ushort)v;
                     break;
                 case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
-                    v32 = ap[0].ToUInt();
+                    v32 = (uint)ap[0].ToInt();
                     if (v32 == 0)
                     {
                         badvalue32 = true;
@@ -454,7 +454,7 @@ namespace BitMiracle.LibTiff
                         {
                             string ascii;
                             Tiff.setString(out ascii, ap[paramIndex++].ToString());
-                            td.td_customValues[tvIndex].value = Encoding.ASCII.GetBytes(ascii);
+                            td.td_customValues[tvIndex].value = Encoding.GetEncoding("Latin1").GetBytes(ascii);
                         }
                         else
                         {

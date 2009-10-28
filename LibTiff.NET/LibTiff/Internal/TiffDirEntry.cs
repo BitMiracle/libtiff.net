@@ -30,6 +30,11 @@ namespace BitMiracle.LibTiff.Internal
     {
         public const int SizeInBytes = 12;
 
+        public new string ToString()
+        {
+            return tdir_tag.ToString() + ", " + tdir_type.ToString() + " " + tdir_offset.ToString();
+        }
+
         public TIFFTAG tdir_tag; /* see below */
         public TiffDataType tdir_type; /* data type; see below */
         public int tdir_count; /* number of items; length in spec */

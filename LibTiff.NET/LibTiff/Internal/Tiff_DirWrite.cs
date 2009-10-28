@@ -663,7 +663,7 @@ namespace BitMiracle.LibTiff
                             cp = result[0].ToString();
 
                         // add zero ('\0') at the end of the byte array
-                        byte[] stringBytes = Encoding.ASCII.GetBytes(cp);
+                        byte[] stringBytes = Encoding.GetEncoding("Latin1").GetBytes(cp);
                         byte[] totalBytes = new byte[stringBytes.Length + 1];
                         Array.Copy(stringBytes, totalBytes, stringBytes.Length);
 
@@ -1122,7 +1122,7 @@ namespace BitMiracle.LibTiff
         {
             dir.tdir_tag = TIFFTAG.TIFFTAG_INKNAMES;
             dir.tdir_type = TiffDataType.TIFF_ASCII;
-            byte[] bytes = Encoding.ASCII.GetBytes(m_dir.td_inknames);
+            byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(m_dir.td_inknames);
             dir.tdir_count = bytes.Length;
             return writeByteArray(ref dir, bytes);
         }

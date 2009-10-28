@@ -127,6 +127,12 @@ namespace BitMiracle.LibTiff.Internal
                 Param = _Param;
             }
 
+            public static faxTableEntry FromArray(int[] array, int entryNumber)
+            {
+                int offset = entryNumber * 3; // we have 3 elements in entry
+                return new faxTableEntry((byte)array[offset], (byte)array[offset + 1], array[offset + 2]);
+            }
+
             /* state table entry */
             public byte State; /* see above */
             public byte Width; /* width of code in bits */
@@ -259,7 +265,7 @@ namespace BitMiracle.LibTiff.Internal
             * and open the image to get the state reset.
             */
             m_bitmap = Tiff.GetBitRevTable(m_tif.m_dir.td_fillorder != FILLORDER.FILLORDER_LSB2MSB);
-            if (m_refruns != 0)
+            if (m_refruns >= 0)
             {
                 /* init reference line to white */
                 m_runs[m_refruns] = m_rowpixels;
@@ -962,7 +968,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
             }
 
-            TabEnt = m_faxMainTable[GetBits(wid)];
+            TabEnt = faxTableEntry.FromArray(m_faxMainTable, GetBits(wid));
             ClrBits(TabEnt.Width);
 
             return true;
@@ -977,9 +983,9 @@ namespace BitMiracle.LibTiff.Internal
             }
 
             if (useBlack)
-                TabEnt = m_faxBlackTable[GetBits(wid)];
+                TabEnt = faxTableEntry.FromArray(m_faxBlackTable, GetBits(wid));
             else
-                TabEnt = m_faxWhiteTable[GetBits(wid)];
+                TabEnt = faxTableEntry.FromArray(m_faxWhiteTable, GetBits(wid));
 
             ClrBits(TabEnt.Width);
 
