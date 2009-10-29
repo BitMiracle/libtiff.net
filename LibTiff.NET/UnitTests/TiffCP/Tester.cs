@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-
 using NUnit.Framework;
 
-namespace UnitTests.Tiff2Pdf
+namespace UnitTests.TiffCP
 {
     class Tester
     {
         private const string m_testcase = @"..\..\..\..\TestCase\";
-	
+
         private static object locked = new object();
 
         private string m_dataFolder;
@@ -20,10 +19,10 @@ namespace UnitTests.Tiff2Pdf
             m_dataFolder = dataFolder;
         }
 
-        public string TestCaseFolder
-	    {
-		    get { return m_testcase; }
-	    }
+        public static string TestCaseFolder
+        {
+            get { return m_testcase; }
+        }
 
         public void Run(string[] args, string sourceFile, string targetFile)
         {
@@ -38,14 +37,14 @@ namespace UnitTests.Tiff2Pdf
                 for (int i = 0; i < args.Length; ++i)
                     completeArgs.Add(args[i]);
 
-                completeArgs.Add(targetFile);
                 completeArgs.Add(sourceFile);
+                completeArgs.Add(targetFile);
 
                 File.Delete(targetFile);
 
-                BitMiracle.Tiff2Pdf.Program.Main(completeArgs.ToArray());
+                BitMiracle.TiffCP.Program.Main(completeArgs.ToArray());
 
-                string sampleFile = targetFile.Replace(@"\pdf\", @"\sample_pdf\");
+                string sampleFile = targetFile.Replace(@"\_converted\", @"\_sample\");
                 Assert.IsTrue(File.Exists(targetFile));
                 Assert.IsTrue(Utils.FilesAreEqual(sampleFile, targetFile));
             }

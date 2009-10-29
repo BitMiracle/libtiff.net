@@ -27,11 +27,8 @@ namespace BitMiracle.LibTiff
 
         public virtual void Write(object fd, byte[] buf, int size)
         {
-            //DWORD dwSizeWritten;
-            //if (!WriteFile(fd, buf, size, &dwSizeWritten, null))
-            //    return 0;
-
-            //return dwSizeWritten;
+            Stream s = fd as Stream;
+            s.Write(buf, 0, size);
         }
 
         public virtual long Seek(object fd, long off, SeekOrigin whence)

@@ -36,7 +36,7 @@ using BitMiracle.LibTiff;
 
 namespace BitMiracle.TiffCP
 {
-    class Program
+    public class Program
     {
         struct tagToCopy
         {
@@ -163,7 +163,7 @@ namespace BitMiracle.TiffCP
             new tagToCopy(TIFFTAG.TIFFTAG_STONITS, 1, TiffDataType.TIFF_DOUBLE), 
         };
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             char[] mode = new char[10];
             mode[0] = 'w';
@@ -176,126 +176,130 @@ namespace BitMiracle.TiffCP
             int defrowsperstrip = 0;
             int deftilewidth = -1;
 
-            Stream stderr = Console.OpenStandardError();
             int argn = 0;
-            for ( ; argn < args.Length; argn++)
+            using (TextWriter stderr = Console.Error)
             {
-                string arg = args[argn];
-                if (arg[0] != '-')
-                    break;
-
-                string optarg = null;
-                if (argn < (args.Length - 1))
-                    optarg = args[argn + 1];
-
-                arg = arg.Substring(1);
-                switch (arg[0])
+                for (; argn < args.Length; argn++)
                 {
-                    case ',':
-                        if (arg[1] != '=')
-                            usage();
+                    string arg = args[argn];
+                    if (arg[0] != '-')
+                        break;
 
-                        g_comma = arg[2];
-                        break;
-                    case 'b':
-                        /* this file is bias image subtracted from others */
-                        if (g_bias != null)
-                        {
-                            fputs("Only 1 bias image may be specified\n", stderr);
-                            return;
-                        }
-                        
-                        g_bias = openSrcImage(ref args[argn + 1]);
-                        if (g_bias == null)
-                            return;
+                    string optarg = null;
+                    if (argn < (args.Length - 1))
+                        optarg = args[argn + 1];
 
-                        if (g_bias.IsTiled())
-                        {
-                            fputs("Bias image must be organized in strips\n", stderr);
-                            return;
-                        }
+                    arg = arg.Substring(1);
+                    switch (arg[0])
+                    {
+                        case ',':
+                            if (arg[1] != '=')
+                                usage();
 
-                        FieldValue[] result = g_bias.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
-                        short samples = result[0].ToShort();
-                        if (samples != 1)
-                        {
-                            fputs("Bias image must be monochrome\n", stderr);
-                            return;
-                        }
+                            g_comma = arg[2];
+                            break;
+                        case 'b':
+                            /* this file is bias image subtracted from others */
+                            if (g_bias != null)
+                            {
+                                stderr.Write("Only 1 bias image may be specified\n");
+                                return;
+                            }
 
-                        break;
-                    case 'a':
-                        /* append to output */
-                        mode[0] = 'a';
-                        break;
-                    case 'c':
-                        /* compression scheme */
-                        if (!processCompressOptions(optarg))
+                            g_bias = openSrcImage(ref args[argn + 1]);
+                            if (g_bias == null)
+                                return;
+
+                            if (g_bias.IsTiled())
+                            {
+                                stderr.Write("Bias image must be organized in strips\n");
+                                return;
+                            }
+
+                            FieldValue[] result = g_bias.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+                            short samples = result[0].ToShort();
+                            if (samples != 1)
+                            {
+                                stderr.Write("Bias image must be monochrome\n");
+                                return;
+                            }
+
+                            break;
+                        case 'a':
+                            /* append to output */
+                            mode[0] = 'a';
+                            break;
+                        case 'c':
+                            /* compression scheme */
+                            if (!processCompressOptions(optarg))
+                                usage();
+
+                            argn++;
+                            break;
+                        case 'f':
+                            /* fill order */
+                            if (optarg == "lsb2msb")
+                                deffillorder = FILLORDER.FILLORDER_LSB2MSB;
+                            else if (optarg == "msb2lsb")
+                                deffillorder = FILLORDER.FILLORDER_MSB2LSB;
+                            else
+                                usage();
+                            break;
+                        case 'i':
+                            /* ignore errors */
+                            g_ignore = true;
+                            break;
+                        case 'l':
+                            /* tile length */
+                            g_outtiled = 1;
+                            deftilelength = int.Parse(optarg, CultureInfo.InvariantCulture);
+                            break;
+                        case 'o':
+                            /* initial directory offset */
+                            diroff = int.Parse(optarg, CultureInfo.InvariantCulture);
+                            break;
+                        case 'p':
+                            /* planar configuration */
+                            if (optarg == "separate")
+                                defconfig = PLANARCONFIG.PLANARCONFIG_SEPARATE;
+                            else if (optarg == "contig")
+                                defconfig = PLANARCONFIG.PLANARCONFIG_CONTIG;
+                            else
+                                usage();
+                            break;
+                        case 'r':
+                            /* rows/strip */
+                            defrowsperstrip = int.Parse(optarg, CultureInfo.InvariantCulture);
+                            break;
+                        case 's':
+                            /* generate stripped output */
+                            g_outtiled = 0;
+                            break;
+                        case 't':
+                            /* generate tiled output */
+                            g_outtiled = 1;
+                            break;
+                        case 'w':
+                            /* tile width */
+                            g_outtiled = 1;
+                            deftilewidth = int.Parse(optarg, CultureInfo.InvariantCulture);
+                            break;
+                        case 'B':
+                            mode[mp++] = 'b';
+                            break;
+                        case 'L':
+                            mode[mp++] = 'l';
+                            break;
+                        case 'M':
+                            mode[mp++] = 'm';
+                            break;
+                        case 'C':
+                            mode[mp++] = 'c';
+                            break;
+                        case '?':
                             usage();
-                        break;
-                    case 'f':
-                        /* fill order */
-                        if (optarg == "lsb2msb")
-                            deffillorder = FILLORDER.FILLORDER_LSB2MSB;
-                        else if (optarg == "msb2lsb")
-                            deffillorder = FILLORDER.FILLORDER_MSB2LSB;
-                        else
-                            usage();
-                        break;
-                    case 'i':
-                        /* ignore errors */
-                        g_ignore = true;
-                        break;
-                    case 'l':
-                        /* tile length */
-                        g_outtiled = 1;
-                        deftilelength = int.Parse(optarg, CultureInfo.InvariantCulture);
-                        break;
-                    case 'o':
-                        /* initial directory offset */
-                        diroff = int.Parse(optarg, CultureInfo.InvariantCulture);
-                        break;
-                    case 'p':
-                        /* planar configuration */
-                        if (optarg == "separate")
-                            defconfig = PLANARCONFIG.PLANARCONFIG_SEPARATE;
-                        else if (optarg == "contig")
-                            defconfig = PLANARCONFIG.PLANARCONFIG_CONTIG;
-                        else
-                            usage();
-                        break;
-                    case 'r':
-                        /* rows/strip */
-                        defrowsperstrip = int.Parse(optarg, CultureInfo.InvariantCulture);
-                        break;
-                    case 's':
-                        /* generate stripped output */
-                        g_outtiled = 0;
-                        break;
-                    case 't':
-                        /* generate tiled output */
-                        g_outtiled = 1;
-                        break;
-                    case 'w':
-                        /* tile width */
-                        g_outtiled = 1;
-                        deftilewidth = int.Parse(optarg, CultureInfo.InvariantCulture);
-                        break;
-                    case 'B':
-                        mode[mp++] = 'b';
-                        break;
-                    case 'L':
-                        mode[mp++] = 'l';
-                        break;
-                    case 'M':
-                        mode[mp++] = 'm';
-                        break;
-                    case 'C':
-                        mode[mp++] = 'c';
-                        break;
-                    case '?':
-                        usage();
-                        break;
+                            break;
+                    }
                 }
             }
 
@@ -442,12 +446,6 @@ namespace BitMiracle.TiffCP
             //}
 
             return false;
-        }
-
-        static void fputs(string s, Stream stream)
-        {
-            byte[] bytes = Encoding.Default.GetBytes(s);
-            stream.Write(bytes, 0, bytes.Length);
         }
 
         static bool processCompressOptions(string opt)
