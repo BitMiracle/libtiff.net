@@ -116,8 +116,9 @@ namespace BitMiracle.LibTiff
         ORIENTATION_LEFTBOT = 8,  /* row 0 lhs, col 0 bottom */
     };
 
-    public enum PLANARCONFIG : short
+    public enum PLANARCONFIG : byte
     {
+        PLANARCONFIG_UNKNOWN = 0,  // unknown (uninitialized)
         PLANARCONFIG_CONTIG = 1,  /* single image plane */
         PLANARCONFIG_SEPARATE = 2 /* separate planes of data */
     };
@@ -131,8 +132,9 @@ namespace BitMiracle.LibTiff
         GRAYRESPONSEUNIT_100000S = 5,  /* hundred-thousandths */
     };
 
-    public enum GROUP3OPT : short
+    public enum GROUP3OPT : byte
     {
+        GROUP3OPT_UNKNOWN = 0, // unknown (uninitialized)
         GROUP3OPT_2DENCODING = 0x1,  /* 2-dimensional coding */
         GROUP3OPT_UNCOMPRESSED = 0x2,  /* data not compressed */
         GROUP3OPT_FILLBITS = 0x4,  /* fill to byte boundary */
@@ -203,7 +205,7 @@ namespace BitMiracle.LibTiff
         YCBCRPOSITION_COSITED = 2,  /* !as in CCIR 601-1 */
     };
 
-    public enum FAXMODE : short
+    public enum FAXMODE : byte
     {
         FAXMODE_CLASSIC = 0x0000,  /* default, include RTC */
         FAXMODE_NORTC = 0x0001,  /* no RTC at end of data */
@@ -213,13 +215,13 @@ namespace BitMiracle.LibTiff
         FAXMODE_CLASSF = FAXMODE_NORTC,  /* TIFF Class F */
     };
 
-    public enum JPEGCOLORMODE : short
+    public enum JPEGCOLORMODE : byte
     {
         JPEGCOLORMODE_RAW = 0x0000,  /* no conversion (default) */
         JPEGCOLORMODE_RGB = 0x0001,  /* do auto conversion */
     };
 
-    public enum JPEGTABLESMODE : short
+    public enum JPEGTABLESMODE : byte
     {
         JPEGTABLESMODE_QUANT = 0x0001,  /* include quantization tbls */
         JPEGTABLESMODE_HUFF = 0x0002,  /* include Huffman tbls */

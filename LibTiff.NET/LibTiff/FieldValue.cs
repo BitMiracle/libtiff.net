@@ -30,7 +30,12 @@ namespace BitMiracle.LibTiff
         {
             FieldValue[] values = new FieldValue[list.Length];
             for (int i = 0; i < list.Length; i++)
-                values[i] = new FieldValue(list[i]);
+            {
+                if (list[i] is FieldValue)
+                    values[i] = new FieldValue(((FieldValue)(list[i])).Value);
+                else
+                    values[i] = new FieldValue(list[i]);
+            }
 
             return values;
         }

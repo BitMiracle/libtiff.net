@@ -67,7 +67,7 @@ namespace BitMiracle.TiffCP
         static int g_rowsperstrip;
         static GROUP3OPT g_g3opts;
         static bool g_ignore = false; /* if true, ignore read errors */
-        static GROUP3OPT g_defg3opts = (GROUP3OPT)(-1);
+        static GROUP3OPT g_defg3opts = GROUP3OPT.GROUP3OPT_UNKNOWN;
         static int g_quality = 75; /* JPEG quality */
         static JPEGCOLORMODE g_jpegcolormode = JPEGCOLORMODE.JPEGCOLORMODE_RGB;
         static COMPRESSION g_defcompression = (COMPRESSION)(-1);
@@ -172,7 +172,7 @@ namespace BitMiracle.TiffCP
             FILLORDER deffillorder = 0;
             int deftilelength = -1;
             int diroff = 0;
-            PLANARCONFIG defconfig = (PLANARCONFIG)(-1);
+            PLANARCONFIG defconfig = PLANARCONFIG.PLANARCONFIG_UNKNOWN;
             int defrowsperstrip = 0;
             int deftilewidth = -1;
 
@@ -206,7 +206,9 @@ namespace BitMiracle.TiffCP
                                 return;
                             }
 
-                            g_bias = openSrcImage(ref args[argn + 1]);
+                            string[] fileAndPageNums = args[argn + 1].Split(new char[] { g_comma });
+                            int pageNumberIndex = 1;
+                            openSrcImage(ref g_bias, fileAndPageNums, ref pageNumberIndex);
                             if (g_bias == null)
                                 return;
 
@@ -316,8 +318,10 @@ namespace BitMiracle.TiffCP
 
             for ( ; argn < args.Length - 1; argn++)
             {
-                string imageCursor = args[argn];
-                Tiff inImage = openSrcImage(ref imageCursor);
+                string[] fileAndPageNums = args[argn].Split(new char[] { g_comma });
+                int pageNumberIndex = 1;
+                Tiff inImage = null;
+                openSrcImage(ref inImage, fileAndPageNums, ref pageNumberIndex);
                 if (inImage == null)
                     return;
 
@@ -341,19 +345,15 @@ namespace BitMiracle.TiffCP
                     if (!tiffcp(inImage, outImage) || !outImage.WriteDirectory())
                         return;
                     
-                    if (imageCursor != null)
-                    {
-                         /* seek next image directory */
-                        if (!nextSrcImage(inImage, ref imageCursor))
-                            break;
-                    }
-                    else
-                    {
-                        if (!inImage.ReadDirectory())
-                            break;
-                    }
+                    /* seek next image directory */
+                    if (!openSrcImage(ref inImage, fileAndPageNums, ref pageNumberIndex))
+                        break;
                 }
+
+                inImage.Dispose();
             }
+
+            outImage.Dispose();
         }
 
         static void usage()
@@ -368,84 +368,49 @@ namespace BitMiracle.TiffCP
             throw new Exception();
         }
 
-        /*
-        imageSpec points to a pointer to a filename followed by optional ,image#'s
-        Open the TIFF file and assign *imageSpec to either null if there are
-        no images specified, or a pointer to the next image number text
-        */
-        static Tiff openSrcImage(ref string imageSpec)
+        static bool openSrcImage(ref Tiff tif, string[] fileAndPageNums, ref int pageNumberIndex)
         {
-            string fn = imageSpec;
-            int n = fn.IndexOf(g_comma);
-            if (n != -1)
-                imageSpec = fn.Substring(0, n);
-            else
-                imageSpec = null;
+            if (fileAndPageNums.Length == 0)
+                return false;
 
-            Tiff tif = null;
-            if (imageSpec != null)
+            if (pageNumberIndex >= fileAndPageNums.Length && fileAndPageNums.Length > 1)
             {
-                /* there is at least one image number specifier */
-                tif = Tiff.Open(imageSpec, "r");
-                
-                /* but, ignore any single trailing comma */
-                if (n == fn.Length - 1)
-                {
-                    imageSpec = null;
-                    return tif;
-                }
+                // we processed all images already
+                return false;
+            }
 
-                if (tif != null)
+            if (tif == null)
+                tif = Tiff.Open(fileAndPageNums[0], "r");
+
+            if (tif == null)
+                return false;
+
+            if (fileAndPageNums.Length > 1)
+            {
+                // we have at least one page number specifier
+
+                string pageNumStr = fileAndPageNums[pageNumberIndex];
+                if (pageNumStr.Length == 0)
                 {
-                    imageSpec = fn.Substring(n);
-                    if (!nextSrcImage(tif, ref imageSpec))
-                        tif = null;
+                    // position "after trailing comma". we should process all
+                    // remaining directories, so read next directory
+                    return tif.ReadDirectory();
+                }
+                else
+                {
+                    // parse page number and set appropriate image directory
+                    short pageNum = short.Parse(pageNumStr);
+                    if (!tif.SetDirectory(pageNum))
+                    {
+                        Console.Error.Write("{0}{1}{2} not found!\n", tif.FileName(), g_comma, pageNum);
+                        return false;
+                    }
+
+                    pageNumberIndex++;
                 }
             }
-            else
-                tif = Tiff.Open(fn, "r");
 
-            return tif;
-        }
-
-        /*
-        seek to the next image specified in imageSpec
-        returns 1 if success, 0 if no more images to process
-        imageSpec=null if subsequent images should be processed in sequence
-        */
-        static bool nextSrcImage(Tiff tif, ref string imageSpec)
-        {
-            //if (imageSpec[0] == g_comma)
-            //{
-            //     /* if not @comma, we've done all images */
-            //    string start = imageSpec.Substring(1);
-            //    UInt16 nextImage = (UInt16)strtol(start, &imageSpec, 0);
-                
-            //    if (start == imageSpec)
-            //        nextImage = tif.CurrentDirectory();
-
-            //    if (imageSpec[0] != 0)
-            //    {
-            //        if (imageSpec[0] == g_comma)
-            //        {
-            //            /* a trailing comma denotes remaining images in sequence */
-            //            if (imageSpec[1] == '\0')
-            //                imageSpec = null;
-            //        }
-            //        else
-            //        {
-            //            fprintf(stderr, "Expected a {0} separated image # list after {1}\n", g_comma, tif.FileName());
-            //            exit(-4); /* syntax error */
-            //        }
-            //    }
-
-            //    if (tif.SetDirectory(nextImage))
-            //        return true;
-
-            //    fprintf(stderr, "{0}{1}{2} not found!\n", tif.FileName(), g_comma, nextImage);
-            //}
-
-            return false;
+            return true;
         }
 
         static bool processCompressOptions(string opt)
@@ -509,9 +474,6 @@ namespace BitMiracle.TiffCP
             string[] options = cp.Split(new char[] { ':' });
             if (options.Length > 1)
             {
-                if (g_defg3opts == (GROUP3OPT)(-1))
-                    g_defg3opts = 0;
-
                 for (int i = 1; i < options.Length; i++)
                 {
                     if (options[i].StartsWith("1d"))
@@ -540,7 +502,7 @@ namespace BitMiracle.TiffCP
                         else if (count == 2)
                             outImage.SetField(tag, result[0], result[1]);
                         else if (count == 4)
-                            outImage.SetField(tag, result[0], result[1], result[2], result[3]);
+                            outImage.SetField(tag, result[0], result[1], result[2]);
                         else if (count == -1)
                             outImage.SetField(tag, result[0], result[1]);
                     }
@@ -745,7 +707,7 @@ namespace BitMiracle.TiffCP
                 outImage.SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, g_rowsperstrip);
             }
 
-            if (g_config != (PLANARCONFIG)(-1))
+            if (g_config != PLANARCONFIG.PLANARCONFIG_UNKNOWN)
                 outImage.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, g_config);
             else
             {
@@ -788,7 +750,7 @@ namespace BitMiracle.TiffCP
                 case COMPRESSION.COMPRESSION_CCITTFAX4:
                     if (g_compression == COMPRESSION.COMPRESSION_CCITTFAX3)
                     {
-                        if (g_g3opts != (GROUP3OPT)(-1))
+                        if (g_g3opts != GROUP3OPT.GROUP3OPT_UNKNOWN)
                             outImage.SetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS, g_g3opts);
                         else
                         {
