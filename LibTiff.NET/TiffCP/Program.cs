@@ -226,6 +226,7 @@ namespace BitMiracle.TiffCP
                                 return;
                             }
 
+                            argn++;
                             break;
                         case 'a':
                             /* append to output */
@@ -246,6 +247,7 @@ namespace BitMiracle.TiffCP
                                 deffillorder = FILLORDER.FILLORDER_MSB2LSB;
                             else
                                 usage();
+                            argn++;
                             break;
                         case 'i':
                             /* ignore errors */
@@ -255,6 +257,7 @@ namespace BitMiracle.TiffCP
                             /* tile length */
                             g_outtiled = 1;
                             deftilelength = int.Parse(optarg, CultureInfo.InvariantCulture);
+                            argn++;
                             break;
                         case 'o':
                             /* initial directory offset */
@@ -268,10 +271,13 @@ namespace BitMiracle.TiffCP
                                 defconfig = PLANARCONFIG.PLANARCONFIG_CONTIG;
                             else
                                 usage();
+
+                            argn++;
                             break;
                         case 'r':
                             /* rows/strip */
                             defrowsperstrip = int.Parse(optarg, CultureInfo.InvariantCulture);
+                            argn++;
                             break;
                         case 's':
                             /* generate stripped output */
@@ -285,6 +291,7 @@ namespace BitMiracle.TiffCP
                             /* tile width */
                             g_outtiled = 1;
                             deftilewidth = int.Parse(optarg, CultureInfo.InvariantCulture);
+                            argn++;
                             break;
                         case 'B':
                             mode[mp++] = 'b';
@@ -373,7 +380,7 @@ namespace BitMiracle.TiffCP
             if (fileAndPageNums.Length == 0)
                 return false;
 
-            if (pageNumberIndex >= fileAndPageNums.Length && fileAndPageNums.Length > 1)
+            if (pageNumberIndex >= fileAndPageNums.Length && tif != null)
             {
                 // we processed all images already
                 return false;
@@ -450,16 +457,16 @@ namespace BitMiracle.TiffCP
             else if (opt.StartsWith("lzw"))
             {
                 int n = opt.IndexOf(':');
-                if (n != -1)
-                    g_defpredictor = short.Parse(opt.Substring(n), CultureInfo.InvariantCulture);
+                if (n != -1 && n < (opt.Length - 1))
+                    g_defpredictor = short.Parse(opt.Substring(n + 1));
 
                 g_defcompression = COMPRESSION.COMPRESSION_LZW;
             }
             else if (opt.StartsWith("zip"))
             {
                 int n = opt.IndexOf(':');
-                if (n != -1)
-                    g_defpredictor = short.Parse(opt.Substring(n), CultureInfo.InvariantCulture);
+                if (n != -1 && n < (opt.Length - 1))
+                    g_defpredictor = short.Parse(opt.Substring(n + 1));
 
                 g_defcompression = COMPRESSION.COMPRESSION_ADOBE_DEFLATE;
             }
@@ -981,7 +988,7 @@ namespace BitMiracle.TiffCP
                 
                 if (!outImage.WriteScanline(buf, row, 0))
                 {
-                    Tiff.Error(outImage.FileName(), "Error, can't write scanline {1}", row);
+                    Tiff.Error(outImage.FileName(), "Error, can't write scanline {0}", row);
                     return false;
                 }
             }

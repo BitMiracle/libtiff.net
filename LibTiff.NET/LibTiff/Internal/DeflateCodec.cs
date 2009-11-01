@@ -232,6 +232,7 @@ namespace BitMiracle.LibTiff.Internal
             Debug.Assert(m_state == ZSTATE_INIT_ENCODE);
 
             m_stream.next_in = bp;
+            m_stream.next_in_index = 0;
             m_stream.avail_in = cc;
             do
             {
@@ -247,6 +248,7 @@ namespace BitMiracle.LibTiff.Internal
                     m_tif.m_rawcc = m_tif.m_rawdatasize;
                     m_tif.flushData1();
                     m_stream.next_out = m_tif.m_rawdata;
+                    m_stream.next_out_index = 0;
                     m_stream.avail_out = m_tif.m_rawdatasize;
                 }
             }
@@ -277,6 +279,7 @@ namespace BitMiracle.LibTiff.Internal
                             m_tif.m_rawcc = m_tif.m_rawdatasize - m_stream.avail_out;
                             m_tif.flushData1();
                             m_stream.next_out = m_tif.m_rawdata;
+                            m_stream.next_out_index = 0;
                             m_stream.avail_out = m_tif.m_rawdatasize;
                         }
                         break;
@@ -314,9 +317,9 @@ namespace BitMiracle.LibTiff.Internal
                 tif_setupencode();
 
             m_stream.next_out = m_tif.m_rawdata;
+            m_stream.next_out_index = 0;
             m_stream.avail_out = m_tif.m_rawdatasize;
-            //return (m_stream.deflateReset() == zlibConst.Z_OK);
-            return false;
+            return (m_stream.deflateInit(m_zipquality) == zlibConst.Z_OK);
         }
 
         private bool ZIPSetupDecode()

@@ -1252,7 +1252,7 @@ namespace BitMiracle.LibTiff.Internal
             int bufOffset = 0;
             while (nrows-- > 0)
             {
-                Array.Copy(buf, bufOffset, bufptr, 0, m_bytesperline);
+                Array.Copy(buf, bufOffset, bufptr[0], 0, m_bytesperline);
                 if (TIFFjpeg_write_scanlines(bufptr, 1) != 1)
                     return false;
 
