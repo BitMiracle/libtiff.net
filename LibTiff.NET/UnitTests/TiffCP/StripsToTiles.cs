@@ -12,7 +12,10 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "2Tiles";
 
-        public void performTest(string[] args, string file, string suffix)
+        private static string[] m_args = new string[] { "-c", "none", "-t" };
+        private const string m_suffix = "_converted_tiles_none";
+
+        public void performTest(string file, string[] args, string suffix)
         {
             Tester tester = new Tester(m_dataFolder);
             string fullPath = Path.Combine(Tester.TestCaseFolder, m_dataFolder);
@@ -22,14 +25,21 @@ namespace UnitTests.TiffCP
         }
 
         [Test]
-        public void test_StripsToTiles()
+        public void test_tiger_rgb_strip_contig_03()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "none", "-t" }, file, "_converted_tiles_none");
-            }
+            performTest("tiger-rgb-strip-contig-03.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_rgb_strip_contig_04()
+        {
+            performTest("tiger-rgb-strip-contig-04.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_separated_strip_contig_16()
+        {
+            performTest("tiger-separated-strip-contig-16.tif", m_args, m_suffix);
         }
     }
 }

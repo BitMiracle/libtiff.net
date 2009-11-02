@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace UnitTests.Tiff2Pdf
 {
     [TestFixture]
-    public class Tiff2Pdf
+    public class Sample
     {
         private const string m_dataFolder = @"tiff2pdf_data\";
         

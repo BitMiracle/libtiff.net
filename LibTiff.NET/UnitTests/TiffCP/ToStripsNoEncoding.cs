@@ -12,7 +12,10 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "None";
 
-        public void performTest(string[] args, string file, string suffix)
+        private static string[] m_args = new string[] { "-c", "none", "-s" };
+        private const string m_suffix = "_converted_strips";
+
+        public void performTest(string file, string[] args, string suffix)
         {
             Tester tester = new Tester(m_dataFolder);
             string fullPath = Path.Combine(Tester.TestCaseFolder, m_dataFolder);
@@ -22,14 +25,39 @@ namespace UnitTests.TiffCP
         }
 
         [Test]
-        public void test_ToStripsNoEncoding()
+        public void test_tiger_minisblack_strip_05()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "none", "-s" }, file, "_converted_strips");
-            }
+            performTest("tiger-minisblack-strip-05.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_palette_strip_07()
+        {
+            performTest("tiger-palette-strip-07.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_rgb_strip_contig_03()
+        {
+            performTest("tiger-rgb-strip-contig-03.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_rgb_strip_planar_03()
+        {
+            performTest("tiger-rgb-strip-planar-03.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_rgb_tile_contig_03()
+        {
+            performTest("tiger-rgb-tile-contig-03.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_rgb_tile_planar_24()
+        {
+            performTest("tiger-rgb-tile-planar-24.tif", m_args, m_suffix);
         }
     }
 }

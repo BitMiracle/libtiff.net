@@ -12,7 +12,22 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "CCITT";
 
-        public void performTest(string[] args, string file, string suffix)
+        private static string[] m_g3_1d_args = new string[] { "-c", "g3:1d" };
+        private const string m_g3_1d_suffix = "_converted_g3_1d";
+
+        private static string[] m_g3_1d_fill_args = new string[] { "-c", "g3:1d:fill" };
+        private const string m_g3_1d_fill_suffix = "_converted_g3_1d_fill";
+
+        private static string[] m_g3_2d_args = new string[] { "-c", "g3:2d" };
+        private const string m_g3_2d_suffix = "_converted_g3_2d";
+
+        private static string[] m_g3_2d_fill_args = new string[] { "-c", "g3:2d:fill" };
+        private const string m_g3_2d_fill_suffix = "_converted_g3_2d_fill";
+
+        private static string[] m_g4_args = new string[] { "-c", "g4" };
+        private const string m_g4_suffix = "_converted_g4";
+
+        public void performTest(string file, string[] args, string suffix)
         {
             Tester tester = new Tester(m_dataFolder);
             string fullPath = Path.Combine(Tester.TestCaseFolder, m_dataFolder);
@@ -22,58 +37,213 @@ namespace UnitTests.TiffCP
         }
 
         [Test]
-        public void test_g3_1d()
+        public void test_g3_1d_tiger_minisblack_strip_01()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "g3:1d" }, file, "_converted_g3_1d");
-            }
+            performTest("tiger-minisblack-strip-01.tif", m_g3_1d_args, m_g3_1d_suffix);
         }
 
         [Test]
-        public void test_g3_1d_fill()
+        public void test_g3_1d_tiger_minisblack_tile_01()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "g3:1d:fill" }, file, "_converted_g3_1d_fill");
-            }
+            performTest("tiger-minisblack-tile-01.tif", m_g3_1d_args, m_g3_1d_suffix);
         }
 
         [Test]
-        public void test_g3_2d()
+        public void test_g3_1d_tiger_palette_strip_01()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "g3:2d" }, file, "_converted_g3_2d");
-            }
+            performTest("tiger-palette-strip-01.tif", m_g3_1d_args, m_g3_1d_suffix);
         }
 
         [Test]
-        public void test_g3_2d_fill()
+        public void test_g3_1d_tiger_palette_tile_01()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "g3:2d:fill" }, file, "_converted_g3_2d_fill");
-            }
+            performTest("tiger-palette-tile-01.tif", m_g3_1d_args, m_g3_1d_suffix);
         }
 
         [Test]
-        public void test_g4()
+        public void test_g3_1d_tiger_rgb_strip_contig_01()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "g4" }, file, "_converted_g4");
-            }
+            performTest("tiger-rgb-strip-contig-01.tif", m_g3_1d_args, m_g3_1d_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_tiger_rgb_strip_planar_01()
+        {
+            performTest("tiger-rgb-strip-planar-01.tif", m_g3_1d_args, m_g3_1d_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_tiger_rgb_tile_contig_01()
+        {
+            performTest("tiger-rgb-tile-contig-01.tif", m_g3_1d_args, m_g3_1d_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_fill_tiger_minisblack_strip_01()
+        {
+            performTest("tiger-minisblack-strip-01.tif", m_g3_1d_fill_args, m_g3_1d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_fill_tiger_minisblack_tile_01()
+        {
+            performTest("tiger-minisblack-tile-01.tif", m_g3_1d_fill_args, m_g3_1d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_fill_tiger_palette_strip_01()
+        {
+            performTest("tiger-palette-strip-01.tif", m_g3_1d_fill_args, m_g3_1d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_fill_tiger_palette_tile_01()
+        {
+            performTest("tiger-palette-tile-01.tif", m_g3_1d_fill_args, m_g3_1d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_fill_tiger_rgb_strip_contig_01()
+        {
+            performTest("tiger-rgb-strip-contig-01.tif", m_g3_1d_fill_args, m_g3_1d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_fill_tiger_rgb_strip_planar_01()
+        {
+            performTest("tiger-rgb-strip-planar-01.tif", m_g3_1d_fill_args, m_g3_1d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_1d_fill_tiger_rgb_tile_contig_01()
+        {
+            performTest("tiger-rgb-tile-contig-01.tif", m_g3_1d_fill_args, m_g3_1d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_tiger_minisblack_strip_01()
+        {
+            performTest("tiger-minisblack-strip-01.tif", m_g3_2d_args, m_g3_2d_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_tiger_minisblack_tile_01()
+        {
+            performTest("tiger-minisblack-tile-01.tif", m_g3_2d_args, m_g3_2d_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_tiger_palette_strip_01()
+        {
+            performTest("tiger-palette-strip-01.tif", m_g3_2d_args, m_g3_2d_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_tiger_palette_tile_01()
+        {
+            performTest("tiger-palette-tile-01.tif", m_g3_2d_args, m_g3_2d_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_tiger_rgb_strip_contig_01()
+        {
+            performTest("tiger-rgb-strip-contig-01.tif", m_g3_2d_args, m_g3_2d_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_tiger_rgb_strip_planar_01()
+        {
+            performTest("tiger-rgb-strip-planar-01.tif", m_g3_2d_args, m_g3_2d_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_tiger_rgb_tile_contig_01()
+        {
+            performTest("tiger-rgb-tile-contig-01.tif", m_g3_2d_args, m_g3_2d_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_fill_tiger_minisblack_strip_01()
+        {
+            performTest("tiger-minisblack-strip-01.tif", m_g3_2d_fill_args, m_g3_2d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_fill_tiger_minisblack_tile_01()
+        {
+            performTest("tiger-minisblack-tile-01.tif", m_g3_2d_fill_args, m_g3_2d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_fill_tiger_palette_strip_01()
+        {
+            performTest("tiger-palette-strip-01.tif", m_g3_2d_fill_args, m_g3_2d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_fill_tiger_palette_tile_01()
+        {
+            performTest("tiger-palette-tile-01.tif", m_g3_2d_fill_args, m_g3_2d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_fill_tiger_rgb_strip_contig_01()
+        {
+            performTest("tiger-rgb-strip-contig-01.tif", m_g3_2d_fill_args, m_g3_2d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_fill_tiger_rgb_strip_planar_01()
+        {
+            performTest("tiger-rgb-strip-planar-01.tif", m_g3_2d_fill_args, m_g3_2d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g3_2d_fill_tiger_rgb_tile_contig_01()
+        {
+            performTest("tiger-rgb-tile-contig-01.tif", m_g3_2d_fill_args, m_g3_2d_fill_suffix);
+        }
+
+        [Test]
+        public void test_g4_tiger_minisblack_strip_01()
+        {
+            performTest("tiger-minisblack-strip-01.tif", m_g4_args, m_g4_suffix);
+        }
+
+        [Test]
+        public void test_g4_tiger_minisblack_tile_01()
+        {
+            performTest("tiger-minisblack-tile-01.tif", m_g4_args, m_g4_suffix);
+        }
+
+        [Test]
+        public void test_g4_tiger_palette_strip_01()
+        {
+            performTest("tiger-palette-strip-01.tif", m_g4_args, m_g4_suffix);
+        }
+
+        [Test]
+        public void test_g4_tiger_palette_tile_01()
+        {
+            performTest("tiger-palette-tile-01.tif", m_g4_args, m_g4_suffix);
+        }
+
+        [Test]
+        public void test_g4_tiger_rgb_strip_contig_01()
+        {
+            performTest("tiger-rgb-strip-contig-01.tif", m_g4_args, m_g4_suffix);
+        }
+
+        [Test]
+        public void test_g4_tiger_rgb_strip_planar_01()
+        {
+            performTest("tiger-rgb-strip-planar-01.tif", m_g4_args, m_g4_suffix);
+        }
+
+        [Test]
+        public void test_g4_tiger_rgb_tile_contig_01()
+        {
+            performTest("tiger-rgb-tile-contig-01.tif", m_g4_args, m_g4_suffix);
         }
     }
 }

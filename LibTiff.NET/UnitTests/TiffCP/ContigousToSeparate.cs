@@ -12,7 +12,10 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "2Separate";
 
-        public void performTest(string[] args, string file, string suffix)
+        private static string[] m_args = new string[] { "-p", "separate", "-c", "lzw" };
+        private const string m_suffix = "_converted_separate_lzw";
+
+        public void performTest(string file, string[] args, string suffix)
         {
             Tester tester = new Tester(m_dataFolder);
             string fullPath = Path.Combine(Tester.TestCaseFolder, m_dataFolder);
@@ -22,14 +25,21 @@ namespace UnitTests.TiffCP
         }
 
         [Test]
-        public void test_ContigousToSeparate()
+        public void test_tiger_minisblack_strip_08()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-p", "separate", "-c", "lzw" }, file, "_converted_separate_lzw");
-            }
+            performTest("tiger-minisblack-strip-08.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_minisblack_tile_08()
+        {
+            performTest("tiger-minisblack-tile-08.tif", m_args, m_suffix);
+        }
+
+        [Test]
+        public void test_tiger_rgb_tile_contig_08()
+        {
+            performTest("tiger-rgb-tile-contig-08.tif", m_args, m_suffix);
         }
     }
 }

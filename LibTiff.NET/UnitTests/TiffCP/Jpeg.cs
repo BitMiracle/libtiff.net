@@ -12,7 +12,16 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "Jpeg";
 
-        public void performTest(string[] args, string file, string suffix)
+        private static string[] m_jpeg_args = new string[] { "-c", "jpeg" };
+        private const string m_jpeg_suffix = "_converted_jpeg";
+
+        private static string[] m_jpeg_rgb_args = new string[] { "-c", "jpeg:r" };
+        private const string m_jpeg_rgb_suffix = "_converted_jpeg_rgb";
+
+        private static string[] m_jpeg_rgb_50_args = new string[] { "-c", "jpeg:r:50" };
+        private const string m_jpeg_rgb_50_suffix = "_converted_jpeg_rgb_50";
+
+        public void performTest(string file, string[] args, string suffix)
         {
             Tester tester = new Tester(m_dataFolder);
             string fullPath = Path.Combine(Tester.TestCaseFolder, m_dataFolder);
@@ -22,36 +31,75 @@ namespace UnitTests.TiffCP
         }
 
         [Test]
-        public void test_jpeg()
+        public void test_jpeg_tiger_minisblack_strip_08()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "jpeg" }, file, "_converted_jpeg");
-            }
+            performTest("tiger-minisblack-strip-08.tif", m_jpeg_args, m_jpeg_suffix);
         }
 
         [Test]
-        public void test_jpeg_rgb()
+        public void test_jpeg_tiger_minisblack_tile_08()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "jpeg:r" }, file, "_converted_jpeg_rgb");
-            }
+            performTest("tiger-minisblack-tile-08.tif", m_jpeg_args, m_jpeg_suffix);
         }
 
         [Test]
-        public void test_jpeg_rgb_50()
+        public void test_jpeg_tiger_rgb_tile_contig_08()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string[] files = Directory.GetFiles(fullPath);
-            foreach (string file in files)
-            {
-                performTest(new string[] { "-c", "jpeg:r:50" }, file, "_converted_jpeg_rgb_50");
-            }
+            performTest("tiger-rgb-tile-contig-08.tif", m_jpeg_args, m_jpeg_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_tiger_separated_strip_planar_08()
+        {
+            performTest("tiger-separated-strip-planar-08.tif", m_jpeg_args, m_jpeg_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_tiger_minisblack_strip_08()
+        {
+            performTest("tiger-minisblack-strip-08.tif", m_jpeg_rgb_args, m_jpeg_rgb_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_tiger_minisblack_tile_08()
+        {
+            performTest("tiger-minisblack-tile-08.tif", m_jpeg_rgb_args, m_jpeg_rgb_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_tiger_rgb_tile_contig_08()
+        {
+            performTest("tiger-rgb-tile-contig-08.tif", m_jpeg_rgb_args, m_jpeg_rgb_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_tiger_separated_strip_planar_08()
+        {
+            performTest("tiger-separated-strip-planar-08.tif", m_jpeg_rgb_args, m_jpeg_rgb_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_50_tiger_minisblack_strip_08()
+        {
+            performTest("tiger-minisblack-strip-08.tif", m_jpeg_rgb_50_args, m_jpeg_rgb_50_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_50_tiger_minisblack_tile_08()
+        {
+            performTest("tiger-minisblack-tile-08.tif", m_jpeg_rgb_50_args, m_jpeg_rgb_50_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_50_tiger_rgb_tile_contig_08()
+        {
+            performTest("tiger-rgb-tile-contig-08.tif", m_jpeg_rgb_50_args, m_jpeg_rgb_50_suffix);
+        }
+
+        [Test]
+        public void test_jpeg_rgb_50_tiger_separated_strip_planar_08()
+        {
+            performTest("tiger-separated-strip-planar-08.tif", m_jpeg_rgb_50_args, m_jpeg_rgb_50_suffix);
         }
     }
 }

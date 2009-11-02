@@ -11,6 +11,7 @@ namespace UnitTests.TiffCP
     {
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "Multipage";
+        private string m_fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
 
         public void performTest(string[] args, string file, string pageSpecifier, string suffix)
         {
@@ -25,40 +26,35 @@ namespace UnitTests.TiffCP
         [Test]
         public void test_page0()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string file = Path.Combine(fullPath, "1.tif");
+            string file = Path.Combine(m_fullPath, "1.tif");
             performTest(new string[] { }, file, ",0", "_page0_converted");
         }
 
         [Test]
         public void test_page1()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string file = Path.Combine(fullPath, "1.tif");
+            string file = Path.Combine(m_fullPath, "1.tif");
             performTest(new string[] { }, file, ",1", "_page1_converted");
         }
 
         [Test]
         public void test_page2()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string file = Path.Combine(fullPath, "1.tif");
+            string file = Path.Combine(m_fullPath, "1.tif");
             performTest(new string[] { }, file, ",2", "_page2_converted");
         }
 
         [Test]
         public void test_page0and2()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string file = Path.Combine(fullPath, "1.tif");
+            string file = Path.Combine(m_fullPath, "1.tif");
             performTest(new string[] { }, file, ",0,2", "_page0and2_converted");
         }
 
         [Test]
         public void test_afterPage1()
         {
-            string fullPath = Path.Combine(Path.Combine(Tester.TestCaseFolder, m_dataFolder), m_dataSubFolder);
-            string file = Path.Combine(fullPath, "1.tif");
+            string file = Path.Combine(m_fullPath, "1.tif");
             performTest(new string[] { }, file, ",1,", "_afterPage1_converted");
         }
     }
