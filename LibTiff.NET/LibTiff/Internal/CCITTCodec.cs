@@ -1018,7 +1018,7 @@ namespace BitMiracle.LibTiff.Internal
                 }
             }
 
-            for (; ; )
+            for ( ; ; )
             {
                 if (!NeedBits8(8))
                     return false;
