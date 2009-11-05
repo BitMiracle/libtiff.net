@@ -42,7 +42,7 @@ namespace BitMiracle.LibTiff.Internal
         public override void error_exit()
         {
             string buffer = m_sp.m_err.format_message();
-            Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", buffer); /* display the error message */
+            Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", "{0}", buffer); /* display the error message */
             m_sp.m_common.jpeg_abort(); /* clean up libjpeg state */
 
             throw new Exception(buffer);
@@ -56,7 +56,7 @@ namespace BitMiracle.LibTiff.Internal
         public override void output_message()
         {
             string buffer = format_message();
-            Tiff.WarningExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", buffer);
+            Tiff.WarningExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", "{0}", buffer);
         }
     }
 }

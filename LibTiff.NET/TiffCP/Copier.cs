@@ -92,7 +92,7 @@ namespace BitMiracle.TiffCP
         public int m_pageNum = 0;
 
         ORIENTATION m_orientation;
-        int g_quality = 75; /* JPEG quality */
+        int m_quality = 75; /* JPEG quality */
         JPEGCOLORMODE m_jpegcolormode = JPEGCOLORMODE.JPEGCOLORMODE_RGB;
 
         public bool ProcessCompressOptions(string opt)
@@ -113,7 +113,7 @@ namespace BitMiracle.TiffCP
                 for (int i = 1; i < options.Length; i++)
                 {
                     if (char.IsDigit(options[i][0]))
-                        g_quality = int.Parse(options[i], CultureInfo.InvariantCulture);
+                        m_quality = int.Parse(options[i], CultureInfo.InvariantCulture);
                     else if (options[i] == "r")
                         m_jpegcolormode = JPEGCOLORMODE.JPEGCOLORMODE_RAW;
                     else
@@ -368,7 +368,7 @@ namespace BitMiracle.TiffCP
             switch (m_compression)
             {
                 case COMPRESSION.COMPRESSION_JPEG:
-                    outImage.SetField(TIFFTAG.TIFFTAG_JPEGQUALITY, g_quality);
+                    outImage.SetField(TIFFTAG.TIFFTAG_JPEGQUALITY, m_quality);
                     outImage.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, m_jpegcolormode);
                     break;
                 case COMPRESSION.COMPRESSION_LZW:

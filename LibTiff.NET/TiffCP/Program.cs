@@ -38,7 +38,7 @@ namespace BitMiracle.TiffCP
 {
     public class Program
     {
-        static string[] g_stuff = 
+        static string[] m_stuff = 
         {
             "usage: tiffcp [options] input... output", 
             "where options are:",
@@ -352,8 +352,8 @@ namespace BitMiracle.TiffCP
             using (TextWriter stderr = Console.Error)
             {
                 stderr.Write("{0}\n\n", Tiff.GetVersion());
-                for (int i = 0; g_stuff[i] != null; i++)
-                    stderr.Write("{0}\n", g_stuff[i]);
+                for (int i = 0; m_stuff[i] != null; i++)
+                    stderr.Write("{0}\n", m_stuff[i]);
             }
 
             throw new Exception();

@@ -3358,7 +3358,7 @@ namespace BitMiracle.LibTiff
             }
             else
             {
-                ErrorExt(this, m_clientdata, FileName(), emsg);
+                ErrorExt(this, m_clientdata, FileName(), "{0}", emsg);
                 ok = false;
             }
 
@@ -3407,7 +3407,7 @@ namespace BitMiracle.LibTiff
                 return true;
             }
 
-            ErrorExt(this, m_clientdata, FileName(), emsg);
+            ErrorExt(this, m_clientdata, FileName(), "{0}", emsg);
             return false;
         }
 
@@ -3447,7 +3447,7 @@ namespace BitMiracle.LibTiff
             TiffRGBAImage img = TiffRGBAImage.Create(this, false, out emsg);
             if (!RGBAImageOK(out emsg) || img == null)
             {
-                ErrorExt(this, m_clientdata, FileName(), emsg);
+                ErrorExt(this, m_clientdata, FileName(), "{0}", emsg);
                 return false;
             }
 
