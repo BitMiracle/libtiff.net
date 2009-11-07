@@ -1172,17 +1172,14 @@ namespace BitMiracle.LibTiff
 
         private bool writeData(ref TiffDirEntry dir, float[] cp, int cc)
         {
-            int floatCount = cc / 4;
-            int byteOffset = 0;
-            byte[] bytes = new byte[cc];
-            for (int i = 0; i < floatCount; i++)
+            int[] ints = new int[cc];
+            for (int i = 0; i < cc; i++)
             {
                 byte[] result = BitConverter.GetBytes(cp[i]);
-                Array.Copy(result, bytes, result.Length);
-                byteOffset += 4;
+                ints[i] = BitConverter.ToInt32(result, 0);
             }
 
-            return writeData(ref dir, bytes, cc);
+            return writeData(ref dir, ints, cc);
         }
 
         private bool writeData(ref TiffDirEntry dir, double[] cp, int cc)
@@ -1190,17 +1187,16 @@ namespace BitMiracle.LibTiff
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabArrayOfDouble(cp, cc);
 
-            int doubleCount = cc / 8;
             int byteOffset = 0;
-            byte[] bytes = new byte[cc];
-            for (int i = 0; i < doubleCount; i++)
+            byte[] bytes = new byte[cc * sizeof(double)];
+            for (int i = 0; i < cc; i++)
             {
                 byte[] result = BitConverter.GetBytes(cp[i]);
                 Array.Copy(result, bytes, result.Length);
-                byteOffset += 8;
+                byteOffset += result.Length;
             }
 
-            return writeData(ref dir, bytes, cc);
+            return writeData(ref dir, bytes, cc * sizeof(double));
         }
 
         /*
