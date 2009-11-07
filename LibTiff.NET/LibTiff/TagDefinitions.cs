@@ -132,9 +132,9 @@ namespace BitMiracle.LibTiff
         GRAYRESPONSEUNIT_100000S = 5,  /* hundred-thousandths */
     };
 
-    public enum GROUP3OPT : byte
+    public enum GROUP3OPT : short
     {
-        GROUP3OPT_UNKNOWN = 0, // unknown (uninitialized)
+        GROUP3OPT_UNKNOWN = -1, // unknown (uninitialized)
         GROUP3OPT_2DENCODING = 0x1,  /* 2-dimensional coding */
         GROUP3OPT_UNCOMPRESSED = 0x2,  /* data not compressed */
         GROUP3OPT_FILLBITS = 0x4,  /* fill to byte boundary */

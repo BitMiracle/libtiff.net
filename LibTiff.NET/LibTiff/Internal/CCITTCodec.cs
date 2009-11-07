@@ -1585,10 +1585,9 @@ namespace BitMiracle.LibTiff.Internal
             int length = 12;
             if (is2DEncoding())
             {
-                int temp = 0;
-                if (((code << 1) != 0) | (m_encoder == Fax3Encoder.useFax1DEncoder))
-                    temp = 1;
-                code = temp;
+                code = (code << 1);
+                if (m_encoder == Fax3Encoder.useFax1DEncoder)
+                    code++;
 
                 length++;
             }

@@ -2601,7 +2601,10 @@ namespace BitMiracle.LibTiff
         */
         public bool SetField(TIFFTAG tag, params object[] ap)
         {
-            return okToChangeTag(tag) ? m_tagmethods.vsetfield(this, tag, FieldValue.FromParams(ap)) : false;
+            if (okToChangeTag(tag))
+                return m_tagmethods.vsetfield(this, tag, FieldValue.FromParams(ap));
+            
+            return false;
         }
 
         public bool WriteDirectory()

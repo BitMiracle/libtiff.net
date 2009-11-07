@@ -158,6 +158,9 @@ namespace BitMiracle.TiffCP
             string[] options = cp.Split(new char[] { ':' });
             if (options.Length > 1)
             {
+                if (m_defg3opts == GROUP3OPT.GROUP3OPT_UNKNOWN)
+                    m_defg3opts = 0;
+
                 for (int i = 1; i < options.Length; i++)
                 {
                     if (options[i].StartsWith("1d"))
