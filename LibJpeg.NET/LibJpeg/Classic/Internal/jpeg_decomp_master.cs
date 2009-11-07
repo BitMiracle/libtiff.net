@@ -330,7 +330,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 table[tableOffset + i] = JpegConstants.MAXJSAMPLE;
 
             /* Second half of post-IDCT table */
-            Array.Clear(table, tableOffset + (2 * (JpegConstants.MAXJSAMPLE + 1)), 2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE);
+            Array.Clear(table, tableOffset + 2 * (JpegConstants.MAXJSAMPLE + 1), 2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE);
             Array.Copy(m_cinfo.m_sample_range_limit, 0, table, tableOffset + 4 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE, JpegConstants.CENTERJSAMPLE);
         }
     }

@@ -33,35 +33,21 @@ namespace BitMiracle.LibJpeg.Classic
         internal enum JpegState
         {
             DESTROYED = 0,
-            CSTATE_START = 100,
-            /* after create_compress */
-            CSTATE_SCANNING = 101,
-            /* start_compress done, write_scanlines OK */
-            CSTATE_RAW_OK = 102,
-            /* start_compress done, write_raw_data OK */
-            CSTATE_WRCOEFS = 103,
-            /* jpeg_write_coefficients done */
-            DSTATE_START = 200,
-            /* after create_decompress */
-            DSTATE_INHEADER = 201,
-            /* reading header markers, no SOS yet */
-            DSTATE_READY = 202,
-            /* found SOS, ready for start_decompress */
-            DSTATE_PRELOAD = 203,
-            /* reading multiscan file in start_decompress*/
-            DSTATE_PRESCAN = 204,
-            /* performing dummy pass for 2-pass quant */
-            DSTATE_SCANNING = 205,
-            /* start_decompress done, read_scanlines OK */
-            DSTATE_RAW_OK = 206,
-            /* start_decompress done, read_raw_data OK */
-            DSTATE_BUFIMAGE = 207,
-            /* expecting jpeg_start_output */
-            DSTATE_BUFPOST = 208,
-            /* looking for SOS/EOI in jpeg_finish_output */
-            DSTATE_RDCOEFS = 209,
-            /* reading file in jpeg_read_coefficients */
-            DSTATE_STOPPING = 210 /* looking for EOI in jpeg_finish_decompress */
+            CSTATE_START = 100,     /* after create_compress */
+            CSTATE_SCANNING = 101,  /* start_compress done, write_scanlines OK */
+            CSTATE_RAW_OK = 102,    /* start_compress done, write_raw_data OK */
+            CSTATE_WRCOEFS = 103,   /* jpeg_write_coefficients done */
+            DSTATE_START = 200,     /* after create_decompress */
+            DSTATE_INHEADER = 201,  /* reading header markers, no SOS yet */
+            DSTATE_READY = 202,     /* found SOS, ready for start_decompress */
+            DSTATE_PRELOAD = 203,   /* reading multiscan file in start_decompress*/
+            DSTATE_PRESCAN = 204,   /* performing dummy pass for 2-pass quant */
+            DSTATE_SCANNING = 205,  /* start_decompress done, read_scanlines OK */
+            DSTATE_RAW_OK = 206,    /* start_decompress done, read_raw_data OK */
+            DSTATE_BUFIMAGE = 207,  /* expecting jpeg_start_output */
+            DSTATE_BUFPOST = 208,   /* looking for SOS/EOI in jpeg_finish_output */
+            DSTATE_RDCOEFS = 209,   /* reading file in jpeg_read_coefficients */
+            DSTATE_STOPPING = 210   /* looking for EOI in jpeg_finish_decompress */
         }
 
         // Error handler module
@@ -186,7 +172,7 @@ namespace BitMiracle.LibJpeg.Classic
                 /* Try to keep application from accessing now-deleted marker list.
                  * A bit kludgy to do it here, but this is the most central place.
                  */
-                ((jpeg_decompress_struct)this).m_marker_list = null;
+                (this as jpeg_decompress_struct).m_marker_list = null;
             }
             else
             {

@@ -77,14 +77,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 {
                     /* Two-pass color quantization: need full-image storage. */
                     /* We round up the number of rows to a multiple of the strip height. */
-                    m_whole_image = jpeg_common_struct.CreateSamplesArray(cinfo.m_output_width * cinfo.m_out_color_components,
+                    m_whole_image = jpeg_common_struct.CreateSamplesArray(
+                        cinfo.m_output_width * cinfo.m_out_color_components,
                         JpegUtils.jround_up(cinfo.m_output_height, m_strip_height));
                     m_whole_image.ErrorProcessor = cinfo;
                 }
                 else
                 {
                     /* One-pass color quantization: just make a strip buffer. */
-                    m_buffer = jpeg_common_struct.AllocJpegSamples(cinfo.m_output_width * cinfo.m_out_color_components, m_strip_height);
+                    m_buffer = jpeg_common_struct.AllocJpegSamples(
+                        cinfo.m_output_width * cinfo.m_out_color_components, m_strip_height);
                 }
             }
         }

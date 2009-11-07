@@ -174,35 +174,33 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 /* Compute divisors for this quant table */
                 /* We may do this more than once for same table, but it's not a big deal */
+                int i = 0;
                 switch (m_cinfo.m_dct_method)
                 {
-                case J_DCT_METHOD.JDCT_ISLOW:
-                    /* For LL&M IDCT method, divisors are equal to raw quantization
-                     * coefficients multiplied by 8 (to counteract scaling).
-                     */
-                    if (m_divisors[qtblno] == null)
-                        m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
-
-                    for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
-                        m_divisors[qtblno][i] = ((int)qtbl.quantval[i]) << 3;
-
-                    break;
-                case J_DCT_METHOD.JDCT_IFAST:
-                    {
+                    case J_DCT_METHOD.JDCT_ISLOW:
+                        /* For LL&M IDCT method, divisors are equal to raw quantization
+                         * coefficients multiplied by 8 (to counteract scaling).
+                         */
                         if (m_divisors[qtblno] == null)
                             m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
 
-                        for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
+                        for (i = 0; i < JpegConstants.DCTSIZE2; i++)
+                            m_divisors[qtblno][i] = ((int)qtbl.quantval[i]) << 3;
+
+                        break;
+                    case J_DCT_METHOD.JDCT_IFAST:
+                        if (m_divisors[qtblno] == null)
+                            m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
+
+                        for (i = 0; i < JpegConstants.DCTSIZE2; i++)
                             m_divisors[qtblno][i] = JpegUtils.DESCALE((int)qtbl.quantval[i] * (int)aanscales[i], CONST_BITS - 3);
-                    }
-                    break;
-                case J_DCT_METHOD.JDCT_FLOAT:
-                    {
+                        break;
+                    case J_DCT_METHOD.JDCT_FLOAT:
                         if (m_float_divisors[qtblno] == null)
                             m_float_divisors[qtblno] = new float [JpegConstants.DCTSIZE2];
 
                         float[] fdtbl = m_float_divisors[qtblno];
-                        int i = 0;
+                        i = 0;
                         for (int row = 0; row < JpegConstants.DCTSIZE; row++)
                         {
                             for (int col = 0; col < JpegConstants.DCTSIZE; col++)
@@ -211,11 +209,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                                 i++;
                             }
                         }
-                    }
-                    break;
-                default:
-                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
-                    break;
+                        break;
+                    default:
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                        break;
                 }
             }
         }

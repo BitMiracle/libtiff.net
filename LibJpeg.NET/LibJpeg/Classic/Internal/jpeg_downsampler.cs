@@ -448,9 +448,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private void fullsize_smooth_downsample(int componentIndex, byte[][] input_data, int startInputRow, byte[][] output_data, int startOutRow)
         {
             /* Expand input data enough to let all the output samples be generated
-     * by the standard loop.  Special-casing padded output would be more
-     * efficient.
-     */
+             * by the standard loop.  Special-casing padded output would be more
+             * efficient.
+             */
             int output_cols = m_cinfo.m_comp_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow - 1, m_cinfo.m_max_v_samp_factor + 2, m_cinfo.m_image_width, output_cols);
 

@@ -125,7 +125,7 @@ namespace BitMiracle.LibJpeg.Classic
 
             /* Outer loop handles repeated decision after scanning forward. */
             int action = 1;
-            for (; ; )
+            for ( ; ; )
             {
                 if (cinfo.m_unread_marker < (int)JPEG_MARKER.SOF0)
                 {

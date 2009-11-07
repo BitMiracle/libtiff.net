@@ -541,7 +541,7 @@ namespace BitMiracle.LibJpeg.Classic
                 m_src = new my_source_mgr(this);
             }
 
-            ((my_source_mgr)m_src).Attach(infile);
+            (m_src as my_source_mgr).Attach(infile);
         }
 
         /// <summary>
@@ -639,7 +639,7 @@ namespace BitMiracle.LibJpeg.Classic
                 /* If file has multiple scans, absorb them all into the coef buffer */
                 if (m_inputctl.HasMultipleScans())
                 {
-                    for (; ; )
+                    for ( ; ; )
                     {
                         ReadResult retcode;
                         /* Call progress monitor hook if present */
@@ -1017,21 +1017,21 @@ namespace BitMiracle.LibJpeg.Classic
             /* Probably this should be in the color conversion module... */
             switch (m_out_color_space)
             {
-            case J_COLOR_SPACE.JCS_GRAYSCALE:
-                m_out_color_components = 1;
-                break;
-            case J_COLOR_SPACE.JCS_RGB:
-            case J_COLOR_SPACE.JCS_YCbCr:
-                m_out_color_components = 3;
-                break;
-            case J_COLOR_SPACE.JCS_CMYK:
-            case J_COLOR_SPACE.JCS_YCCK:
-                m_out_color_components = 4;
-                break;
-            default:
-                /* else must be same colorspace as in file */
-                m_out_color_components = m_num_components;
-                break;
+                case J_COLOR_SPACE.JCS_GRAYSCALE:
+                    m_out_color_components = 1;
+                    break;
+                case J_COLOR_SPACE.JCS_RGB:
+                case J_COLOR_SPACE.JCS_YCbCr:
+                    m_out_color_components = 3;
+                    break;
+                case J_COLOR_SPACE.JCS_CMYK:
+                case J_COLOR_SPACE.JCS_YCCK:
+                    m_out_color_components = 4;
+                    break;
+                default:
+                    /* else must be same colorspace as in file */
+                    m_out_color_components = m_num_components;
+                    break;
             }
 
             m_output_components = (m_quantize_colors ? 1 : m_out_color_components);
@@ -1078,7 +1078,7 @@ namespace BitMiracle.LibJpeg.Classic
             if (m_global_state == JpegState.DSTATE_RDCOEFS)
             {
                 /* Absorb whole file into the coef buffer */
-                for (; ; )
+                for ( ; ; )
                 {
                     ReadResult retcode;
                     /* Call progress monitor hook if present */

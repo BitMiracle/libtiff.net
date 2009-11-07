@@ -5,7 +5,7 @@ using System.Text;
 namespace BitMiracle.LibJpeg
 {
     /// <summary>
-    /// Represents a "sample" (you can understand it as "pixel") of image.
+    /// Represents a "sample" (you can understand it as a "pixel") of image.
     /// </summary>
 #if EXPOSE_LIBJPEG
     public

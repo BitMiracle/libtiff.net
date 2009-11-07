@@ -262,25 +262,25 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 if (!componentInfo.component_needed || m_cur_method[ci] == method)
                     continue;
 
-                if (componentInfo.quant_table == null)       /* happens if no data yet for component */
+                if (componentInfo.quant_table == null)
+                {
+                    /* happens if no data yet for component */
                     continue;
+                }
                 
                 m_cur_method[ci] = method;
-                switch (method)
+                switch ((J_DCT_METHOD)method)
                 {
-                case (int)J_DCT_METHOD.JDCT_ISLOW:
-                    {
+                    case J_DCT_METHOD.JDCT_ISLOW:
                         /* For LL&M IDCT method, multipliers are equal to raw quantization
                          * coefficients, but are stored as ints to ensure access efficiency.
                          */
                         int[] ismtbl = m_dctTables[ci].int_array;
                         for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                             ismtbl[i] = componentInfo.quant_table.quantval[i];
+                        break;
 
-                    }
-                    break;
-                case (int)J_DCT_METHOD.JDCT_IFAST:
-                    {
+                    case J_DCT_METHOD.JDCT_IFAST:
                         /* For AA&N IDCT method, multipliers are equal to quantization
                          * coefficients scaled by scalefactor[row]*scalefactor[col], where
                          *   scalefactor[0] = 1
@@ -294,30 +294,29 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         {
                             ifmtbl[i] = JpegUtils.DESCALE((int)componentInfo.quant_table.quantval[i] * (int)aanscales[i], CONST_BITS - IFAST_SCALE_BITS);
                         }
-                    }
-                    break;
-                case (int)J_DCT_METHOD.JDCT_FLOAT:
-                    {
+                        break;
+
+                    case J_DCT_METHOD.JDCT_FLOAT:
                         /* For float AA&N IDCT method, multipliers are equal to quantization
                          * coefficients scaled by scalefactor[row]*scalefactor[col], where
                          *   scalefactor[0] = 1
                          *   scalefactor[k] = cos(k*PI/16) * sqrt(2)    for k=1..7
                          */
                         float[] fmtbl = m_dctTables[ci].float_array;
-                        int i = 0;
+                        int ii = 0;
                         for (int row = 0; row < JpegConstants.DCTSIZE; row++)
                         {
                             for (int col = 0; col < JpegConstants.DCTSIZE; col++)
                             {
-                                fmtbl[i] = (float) ((double) componentInfo.quant_table.quantval[i] * aanscalefactor[row] * aanscalefactor[col]);
-                                i++;
+                                fmtbl[ii] = (float) ((double) componentInfo.quant_table.quantval[ii] * aanscalefactor[row] * aanscalefactor[col]);
+                                ii++;
                             }
                         }
-                    }
-                    break;
-                default:
-                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
-                    break;
+                        break;
+
+                    default:
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                        break;
                 }
             }
         }

@@ -108,7 +108,6 @@ namespace BitMiracle.LibJpeg.Classic
         public int Downsampled_width
 	    {
 		    get { return downsampled_width; }
-		    //set { downsampled_width = value; }
 	    }
     }
 }

@@ -225,7 +225,6 @@ namespace BitMiracle.LibJpeg
             return bitmap;
         }
 
-
         private MemoryStream compressedData
         {
             get
@@ -404,7 +403,6 @@ namespace BitMiracle.LibJpeg
             m_bitsPerComponent = 8;
             m_componentsPerSample = 3;
             m_colorspace = Colorspace.RGB;
-
             
             if (pixelSizeByte == 16)
                 m_bitsPerComponent = 6;

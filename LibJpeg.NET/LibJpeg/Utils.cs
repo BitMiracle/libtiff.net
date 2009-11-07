@@ -18,7 +18,7 @@ namespace BitMiracle.LibJpeg
             MemoryStream result = new MemoryStream((int)stream.Length);
 
             byte[] block = new byte[2048];
-            for (; ; )
+            for ( ; ; )
             {
                 int bytesRead = stream.Read(block, 0, 2048);
                 result.Write(block, 0, bytesRead);
@@ -32,7 +32,6 @@ namespace BitMiracle.LibJpeg
 
         public static void CMYK2RGB(byte c, byte m, byte y, byte k, out byte red, out byte green, out byte blue)
         {
-            
             float C, M, Y, K;
             C = c / 255.0f;
             M = m / 255.0f;

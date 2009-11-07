@@ -420,7 +420,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 nb = JpegConstants.HUFF_LOOKAHEAD + 1;
             }
 
-            if ((result = jpeg_huff_decode(ref state, get_buffer, bits_left, htbl, nb)) < 0)
+            result = jpeg_huff_decode(ref state, get_buffer, bits_left, htbl, nb);
+            if (result < 0)
                 return false;
 
             get_buffer = state.get_buffer;

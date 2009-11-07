@@ -264,7 +264,7 @@ namespace BitMiracle.LibJpeg.Classic
         }
 
         // colorspace of JPEG image
-        public LibJpeg.Classic.J_COLOR_SPACE Jpeg_color_space
+        public J_COLOR_SPACE Jpeg_color_space
         {
             get { return m_jpeg_color_space; }
             set { m_jpeg_color_space = value; }
@@ -299,7 +299,7 @@ namespace BitMiracle.LibJpeg.Classic
         }
         
         // DCT algorithm selector
-        public LibJpeg.Classic.J_DCT_METHOD Dct_method
+        public J_DCT_METHOD Dct_method
         {
             get { return m_dct_method; }
             set { m_dct_method = value; }
@@ -383,27 +383,23 @@ namespace BitMiracle.LibJpeg.Classic
         public int Max_v_samp_factor
         {
             get { return m_max_v_samp_factor; }
-            //set { m_max_v_samp_factor = value; }
         }
 
         /* ptrs to coefficient quantization tables, or null if not defined */
         public JQUANT_TBL[] Quant_tbl_ptrs
         {
             get { return m_quant_tbl_ptrs; }
-            //set { m_quant_tbl_ptrs = value; }
         }
 
         /* ptrs to Huffman coding tables, or null if not defined */
 	    public JHUFF_TBL[] Dc_huff_tbl_ptrs
 	    {
 		    get { return m_dc_huff_tbl_ptrs; }
-		    //set { m_dc_huff_tbl_ptrs = value; }
 	    }
 
         public JHUFF_TBL[] Ac_huff_tbl_ptrs
 	    {
 		    get { return m_ac_huff_tbl_ptrs; }
-		    //set { m_ac_huff_tbl_ptrs = value; }
 	    }
 
         /* State variable: index of next scanline to be written to
@@ -813,7 +809,6 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         public void jpeg_set_linear_quality(int scale_factor, bool force_baseline)
         {
-            
             /* Set up two quantization tables using the specified scaling */
             jpeg_add_quant_table(0, std_luminance_quant_tbl, scale_factor, force_baseline);
             jpeg_add_quant_table(1, std_chrominance_quant_tbl, scale_factor, force_baseline);

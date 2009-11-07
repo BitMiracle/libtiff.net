@@ -101,7 +101,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public ReadResult read_markers()
         {
             /* Outer loop repeats once for each marker. */
-            for (; ; )
+            for ( ; ; )
             {
                 /* Collect the marker proper, unless we already did. */
                 /* NB: first_marker() enforces the requirement that SOI appear first. */
@@ -131,7 +131,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         break;
 
                     case JPEG_MARKER.SOF0:
-                    /* Baseline */
+                        /* Baseline */
                     case JPEG_MARKER.SOF1:
                         /* Extended sequential, Huffman */
                         if (!get_sof(false))
@@ -146,25 +146,25 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     /* Currently unsupported SOFn types */
                     case JPEG_MARKER.SOF3:
-                    /* Lossless, Huffman */
+                        /* Lossless, Huffman */
                     case JPEG_MARKER.SOF5:
-                    /* Differential sequential, Huffman */
+                        /* Differential sequential, Huffman */
                     case JPEG_MARKER.SOF6:
-                    /* Differential progressive, Huffman */
+                        /* Differential progressive, Huffman */
                     case JPEG_MARKER.SOF7:
-                    /* Differential lossless, Huffman */
+                        /* Differential lossless, Huffman */
                     case JPEG_MARKER.SOF9:
-                    /* Extended sequential, arithmetic */
+                        /* Extended sequential, arithmetic */
                     case JPEG_MARKER.SOF10:
-                    /* Progressive, arithmetic */
+                        /* Progressive, arithmetic */
                     case JPEG_MARKER.JPG:
-                    /* Reserved for JPEG extensions */
+                        /* Reserved for JPEG extensions */
                     case JPEG_MARKER.SOF11:
-                    /* Lossless, arithmetic */
+                        /* Lossless, arithmetic */
                     case JPEG_MARKER.SOF13:
-                    /* Differential sequential, arithmetic */
+                        /* Differential sequential, arithmetic */
                     case JPEG_MARKER.SOF14:
-                    /* Differential progressive, arithmetic */
+                        /* Differential progressive, arithmetic */
                     case JPEG_MARKER.SOF15:
                         /* Differential lossless, arithmetic */
                         m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED, m_cinfo.m_unread_marker);
@@ -226,8 +226,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
-                    case JPEG_MARKER.RST0:
                     /* these are all parameterless */
+                    case JPEG_MARKER.RST0:
                     case JPEG_MARKER.RST1:
                     case JPEG_MARKER.RST2:
                     case JPEG_MARKER.RST3:
@@ -315,7 +315,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public bool next_marker()
         {
             int c;
-            for (; ; )
+            for ( ; ; )
             {
                 if (!m_cinfo.m_src.GetByte(out c))
                     return false;
@@ -618,16 +618,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* process it */
             switch ((JPEG_MARKER)cinfo.m_unread_marker)
             {
-            case JPEG_MARKER.APP0:
-                examine_app0(cinfo, b, numtoread, length);
-                break;
-            case JPEG_MARKER.APP14:
-                examine_app14(cinfo, b, numtoread, length);
-                break;
-            default:
-                /* can't get here unless jpeg_save_markers chooses wrong processor */
-                cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, cinfo.m_unread_marker);
-                break;
+                case JPEG_MARKER.APP0:
+                    examine_app0(cinfo, b, numtoread, length);
+                    break;
+                case JPEG_MARKER.APP14:
+                    examine_app14(cinfo, b, numtoread, length);
+                    break;
+                default:
+                    /* can't get here unless jpeg_save_markers chooses wrong processor */
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, cinfo.m_unread_marker);
+                    break;
             }
 
             /* skip any remaining data -- could be lots */
