@@ -23,7 +23,10 @@ using BitMiracle.LibTiff.Internal;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         private const int NOSTRIP = -1;         /* undefined state */
         private const int NOTILE = -1;          /* undefined state */

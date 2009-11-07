@@ -16,7 +16,10 @@ using System.IO;
 
 namespace BitMiracle.LibTiff
 {
-    public class TiffErrorHandler
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    class TiffErrorHandler
     {
         public virtual void ErrorHandler(Tiff tif, string module, string fmt, params object[] ap)
         {

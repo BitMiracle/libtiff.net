@@ -21,7 +21,10 @@ using BitMiracle.LibTiff.Internal;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         /*
          * Compression schemes statically built into the library.

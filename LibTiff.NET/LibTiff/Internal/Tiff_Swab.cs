@@ -21,7 +21,10 @@ using System.Text;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         /*
         * Bit reversal tables.  TIFFBitRevTable[<byte>] gives

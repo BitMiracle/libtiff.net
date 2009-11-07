@@ -23,7 +23,10 @@ using BitMiracle.LibTiff.Internal;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         private bool writeCheckStrips(string module)
         {

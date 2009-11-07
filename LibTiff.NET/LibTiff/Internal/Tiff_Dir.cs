@@ -23,7 +23,10 @@ using BitMiracle.LibTiff.Internal;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         /* is tag value normal or pseudo */
         internal static bool isPseudoTag(TIFFTAG t)

@@ -36,7 +36,10 @@ namespace BitMiracle.LibTiff
     /// For Big TIFF design notes see the following link
     /// http://gdal.maptools.org/twiki/bin/view/libtiff/BigTIFFDesign
     /// </summary>
-    public partial class Tiff : IDisposable
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff : IDisposable
     {
         /// <summary>
         /// Support strip chopping (whether or not to convert single-strip 

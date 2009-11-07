@@ -19,7 +19,10 @@ using System.Text;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         private int summarize(int summand1, int summand2, string where)
         {

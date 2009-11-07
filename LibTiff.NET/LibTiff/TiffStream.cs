@@ -16,7 +16,10 @@ using System.IO;
 
 namespace BitMiracle.LibTiff
 {
-    public class TiffStream
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    class TiffStream
     {
         public virtual int Read(object fd, byte[] buf, int offset, int size)
         {

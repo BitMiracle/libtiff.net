@@ -15,7 +15,10 @@ using System.Text;
 
 namespace BitMiracle.LibTiff
 {
-    public class TiffFieldInfo
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    class TiffFieldInfo
     {
         public TIFFTAG field_tag; /* field's tag */
         public short field_readcount; /* read count/TIFF_VARIABLE/TIFF_SPP */

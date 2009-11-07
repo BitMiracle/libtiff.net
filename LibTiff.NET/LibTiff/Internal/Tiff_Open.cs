@@ -16,7 +16,10 @@ using System.IO;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         private static readonly int[] typemask = 
         {

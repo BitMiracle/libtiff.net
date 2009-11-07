@@ -22,7 +22,10 @@ namespace BitMiracle.LibTiff
     /// More codecs may be registered through calls to the library
     /// and/or the builtin implementations may be overridden.
     /// </summary>
-    public class TiffCodec
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    class TiffCodec
     {
         protected Tiff m_tif;
         public COMPRESSION m_scheme;

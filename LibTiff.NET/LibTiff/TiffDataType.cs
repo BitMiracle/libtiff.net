@@ -19,7 +19,10 @@ namespace BitMiracle.LibTiff
     /// Tag data type information.
     /// Note: RATIONALs are the ratio of two 32-bit integer values.
     /// </summary>
-    public enum TiffDataType : short
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    enum TiffDataType : short
     {
         TIFF_NOTYPE = 0, /* placeholder */
         TIFF_ANY = TIFF_NOTYPE, /* for field descriptor searching */

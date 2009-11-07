@@ -17,7 +17,10 @@ namespace BitMiracle.LibTiff
     /// Please take a look at:
     /// http://blogs.msdn.com/ericlippert/archive/2009/03/19/representation-and-identity.aspx
     /// </summary>
-    public struct FieldValue
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    struct FieldValue
     {
         private object m_value;
         

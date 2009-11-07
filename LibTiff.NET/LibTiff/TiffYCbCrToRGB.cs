@@ -20,6 +20,9 @@ namespace BitMiracle.LibTiff
     /// The colorspace conversion algorithm comes from the IJG v5a code;
     /// see below for more information on how it works.
     /// </summary>
+#if EXPOSE_LIBTIFF
+    public
+#endif
     class TiffYCbCrToRGB
     {
         public const int clamptabOffset = 256;

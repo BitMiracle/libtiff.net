@@ -22,7 +22,10 @@ namespace BitMiracle.LibTiff
     /// multiple items.
     /// </summary>
     [Flags]
-    public enum TiffPrintDirectoryFlags
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    enum TiffPrintDirectoryFlags
     {
         TIFFPRINT_NONE = 0x0,  /* no extra info */
         TIFFPRINT_STRIPS = 0x1,  /* strips/tiles info */

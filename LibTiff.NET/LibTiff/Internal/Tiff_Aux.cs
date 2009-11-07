@@ -23,7 +23,10 @@ using System.Globalization;
 
 namespace BitMiracle.LibTiff
 {
-    public partial class Tiff
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    partial class Tiff
     {
         private static bool defaultTransferFunction(TiffDirectory td)
         {

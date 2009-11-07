@@ -18,6 +18,9 @@ namespace BitMiracle.LibTiff
     /// <summary>
     /// Structure for holding information about a display device.
     /// </summary>
+#if EXPOSE_LIBTIFF
+    public
+#endif
     class TiffDisplay
     {
         public TiffDisplay()

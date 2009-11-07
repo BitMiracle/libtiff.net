@@ -18,7 +18,10 @@ using BitMiracle.LibTiff.Internal;
 
 namespace BitMiracle.LibTiff
 {
-    public class TiffTagMethods
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    class TiffTagMethods
     {
         /*
          * These are used in the backwards compatibility code...

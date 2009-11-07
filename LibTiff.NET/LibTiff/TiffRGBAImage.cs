@@ -18,6 +18,9 @@ namespace BitMiracle.LibTiff
     /// <summary>
     /// RGBA-style image support.
     /// </summary>
+#if EXPOSE_LIBTIFF
+    public
+#endif
     class TiffRGBAImage
     {
         /*
