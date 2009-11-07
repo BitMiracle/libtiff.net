@@ -309,14 +309,16 @@ namespace BitMiracle.TiffCP
                  */
                 if (m_tilewidth == -1)
                 {
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-                    m_tilewidth = result[0].ToInt();
+                    result = inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_TILEWIDTH);
+                    if (result != null)
+                        m_tilewidth = result[0].ToInt();
                 }
 
                 if (m_tilelength == -1)
                 {
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-                    m_tilelength = result[0].ToInt();
+                    result = inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_TILELENGTH);
+                    if (result != null)
+                        m_tilelength = result[0].ToInt();
                 }
 
                 outImage.DefaultTileSize(ref m_tilewidth, ref m_tilelength);
@@ -1363,10 +1365,10 @@ namespace BitMiracle.TiffCP
             FieldValue[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
             int tl = result[0].ToInt();
 
-            outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            result = outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
             int tw = result[0].ToInt();
 
-            outImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            result = outImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
             ushort bps = result[0].ToUShort();
 
             Debug.Assert(bps % 8 == 0);
