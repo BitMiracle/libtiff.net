@@ -667,7 +667,7 @@ namespace BitMiracle.LibTiff
                         byte[] totalBytes = new byte[stringBytes.Length + 1];
                         Array.Copy(stringBytes, totalBytes, stringBytes.Length);
 
-                        dir.tdir_count = cp.Length + 1;
+                        dir.tdir_count = totalBytes.Length;
                         if (!writeByteArray(ref dir, totalBytes))
                             return false;
                     }
@@ -1192,7 +1192,7 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < cc; i++)
             {
                 byte[] result = BitConverter.GetBytes(cp[i]);
-                Array.Copy(result, bytes, result.Length);
+                Array.Copy(result, 0, bytes, byteOffset, result.Length);
                 byteOffset += result.Length;
             }
 
