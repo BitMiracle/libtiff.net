@@ -1322,7 +1322,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                ushort[] wp = Tiff.byteArrayToUInt16(pp, ppPos, pp.Length);
+                ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
                 int wpPos = 0;
 
                 for (x = w; x-- > 0;)
@@ -1601,7 +1601,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             fromskew *= samplesperpixel;
 
-            ushort[] wp = Tiff.byteArrayToUInt16(pp, ppPos, pp.Length);
+            ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
             int wpPos = 0;
 
             while (h-- > 0)
@@ -1628,7 +1628,7 @@ namespace BitMiracle.LibTiff
             int cpPos = cpOffset;
             int ppPos = ppOffset;
 
-            ushort[] wp = Tiff.byteArrayToUInt16(pp, ppPos, pp.Length);
+            ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
             int wpPos = 0;
 
             fromskew *= samplesperpixel;
@@ -1658,7 +1658,7 @@ namespace BitMiracle.LibTiff
             int cpPos = cpOffset;
             int ppPos = ppOffset;
 
-            ushort[] wp = Tiff.byteArrayToUInt16(pp, ppPos, pp.Length);
+            ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
             int wpPos = 0;
             
             while (h-- > 0)
@@ -1900,7 +1900,7 @@ namespace BitMiracle.LibTiff
         */
         private static void putRGBseparate16bittile(TiffRGBAImage img, uint[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            ushort[] wrgba = Tiff.byteArrayToUInt16(rgba, 0, rgba.Length);
+            ushort[] wrgba = Tiff.ByteArrayToUInt16(rgba, 0, rgba.Length);
     
             int wrPos = rOffset / sizeof(UInt16);
             int wgPos = gOffset / sizeof(ushort);
@@ -1930,7 +1930,7 @@ namespace BitMiracle.LibTiff
         */
         private static void putRGBAAseparate16bittile(TiffRGBAImage img, uint[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            ushort[] wrgba = Tiff.byteArrayToUInt16(rgba, 0, rgba.Length);
+            ushort[] wrgba = Tiff.ByteArrayToUInt16(rgba, 0, rgba.Length);
     
             int wrPos = rOffset / sizeof(ushort);
             int wgPos = gOffset / sizeof(ushort);
@@ -1964,7 +1964,7 @@ namespace BitMiracle.LibTiff
         */
         private static void putRGBUAseparate16bittile(TiffRGBAImage img, uint[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            ushort[] wrgba = Tiff.byteArrayToUInt16(rgba, 0, rgba.Length);
+            ushort[] wrgba = Tiff.ByteArrayToUInt16(rgba, 0, rgba.Length);
 
             int wrPos = rOffset / sizeof(ushort);
             int wgPos = gOffset / sizeof(ushort);

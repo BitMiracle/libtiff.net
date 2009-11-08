@@ -335,26 +335,26 @@ namespace BitMiracle.LibTiff
                     case TiffDataType.TIFF_SHORT:
                     case TiffDataType.TIFF_SSHORT:
                         {
-                            ushort[] u = byteArrayToUInt16(cp, 0, cc);
+                            ushort[] u = ByteArrayToUInt16(cp, 0, cc);
                             SwabArrayOfShort(u, dir.tdir_count);
-                            uint16ToByteArray(u, 0, dir.tdir_count, cp, 0);
+                            UInt16ToByteArray(u, 0, dir.tdir_count, cp, 0);
                         }
                         break;
                     case TiffDataType.TIFF_LONG:
                     case TiffDataType.TIFF_SLONG:
                     case TiffDataType.TIFF_FLOAT:
                         {
-                            int[] u = byteArrayToInt(cp, 0, cc);
+                            int[] u = ByteArrayToInt(cp, 0, cc);
                             SwabArrayOfLong(u, dir.tdir_count);
-                            intToByteArray(u, 0, dir.tdir_count, cp, 0);
+                            IntToByteArray(u, 0, dir.tdir_count, cp, 0);
                         }
                         break;
                     case TiffDataType.TIFF_RATIONAL:
                     case TiffDataType.TIFF_SRATIONAL:
                         {
-                            int[] u = byteArrayToInt(cp, 0, cc);
+                            int[] u = ByteArrayToInt(cp, 0, cc);
                             SwabArrayOfLong(u, 2 * dir.tdir_count);
-                            intToByteArray(u, 0, 2 * dir.tdir_count, cp, 0);
+                            IntToByteArray(u, 0, 2 * dir.tdir_count, cp, 0);
                         }
                         break;
                     case TiffDataType.TIFF_DOUBLE:
@@ -528,7 +528,7 @@ namespace BitMiracle.LibTiff
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                ushort[] u = byteArrayToUInt16(b, 0, read);
+                ushort[] u = ByteArrayToUInt16(b, 0, read);
                 Array.Copy(u, v, u.Length);
             }
 
@@ -588,7 +588,7 @@ namespace BitMiracle.LibTiff
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                int[] u = byteArrayToInt(b, 0, read);
+                int[] u = ByteArrayToInt(b, 0, read);
                 Array.Copy(u, v, u.Length);
             }
 

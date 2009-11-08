@@ -1478,8 +1478,8 @@ namespace BitMiracle.TiffCP
 
         static void subtract16(byte[] i, byte[] b, int pixels)
         {
-            ushort[] image = Tiff.byteArrayToUInt16(i, 0, pixels * sizeof(UInt16));
-            ushort[] bias = Tiff.byteArrayToUInt16(b, 0, pixels * sizeof(UInt16));
+            ushort[] image = Tiff.ByteArrayToUInt16(i, 0, pixels * sizeof(UInt16));
+            ushort[] bias = Tiff.ByteArrayToUInt16(b, 0, pixels * sizeof(UInt16));
             int imagePos = 0;
             int biasPos = 0;
 
@@ -1490,13 +1490,13 @@ namespace BitMiracle.TiffCP
                 biasPos++;
             }
 
-            Tiff.uint16ToByteArray(image, 0, pixels, i, 0);
+            Tiff.UInt16ToByteArray(image, 0, pixels, i, 0);
         }
 
         static void subtract32(byte[] i, byte[] b, int pixels)
         {
-            uint[] image = Tiff.byteArrayToUInt(i, 0, pixels * sizeof(uint));
-            uint[] bias = Tiff.byteArrayToUInt(b, 0, pixels * sizeof(uint));
+            uint[] image = Tiff.ByteArrayToUInt(i, 0, pixels * sizeof(uint));
+            uint[] bias = Tiff.ByteArrayToUInt(b, 0, pixels * sizeof(uint));
             int imagePos = 0;
             int biasPos = 0;
 
@@ -1507,7 +1507,7 @@ namespace BitMiracle.TiffCP
                 biasPos++;
             }
 
-            Tiff.uintToByteArray(image, 0, pixels, i, 0);
+            Tiff.UIntToByteArray(image, 0, pixels, i, 0);
         }
     }
 }

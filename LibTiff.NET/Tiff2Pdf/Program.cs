@@ -28,6 +28,17 @@ namespace BitMiracle.Tiff2Pdf
 {
     public class Program
     {
+        // setting this to true will make program to always output identical 
+        // PDF files for each given image.
+        //
+        // by default this is set false, so program will use different PDF 
+        // trailers and timestamps each time it runs. this behavior is 
+        // more correct if you don't use program as test utility.
+        //
+        // and yes, image data in produced PDFs is the same whether you 
+        // use test friendly or not behavior.
+        static public bool g_testFriendly = false;
+
         static string[] sizes = 
         {
             "LETTER", "A4", "LEGAL", "EXECUTIVE", "LETTER", "LEGAL", "LEDGER", 
@@ -178,6 +189,8 @@ namespace BitMiracle.Tiff2Pdf
         public static void Main(string[] args)
         {
             T2P t2p = new T2P();
+            t2p.m_testFriendly = g_testFriendly;
+
             string outfilename = null;
             
             int argn = 0;

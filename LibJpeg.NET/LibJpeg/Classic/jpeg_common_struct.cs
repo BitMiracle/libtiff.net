@@ -105,8 +105,8 @@ namespace BitMiracle.LibJpeg.Classic
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
                 string versionString = version.Major.ToString() + "." + version.Minor.ToString();
 
-                versionString += "." + version.MajorRevision.ToString();
-                versionString += "." + version.MinorRevision.ToString();
+                versionString += "." + version.Build.ToString();
+                versionString += "." + version.Revision.ToString();
 
                 return versionString;
             }

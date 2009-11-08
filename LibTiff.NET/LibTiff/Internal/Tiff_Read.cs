@@ -327,9 +327,9 @@ namespace BitMiracle.LibTiff
         private static void swab16BitData(byte[] buf, int cc)
         {
             Debug.Assert((cc & 1) == 0);
-            ushort[] swabee = byteArrayToUInt16(buf, 0, cc);
+            ushort[] swabee = ByteArrayToUInt16(buf, 0, cc);
             SwabArrayOfShort(swabee, cc / 2);
-            uint16ToByteArray(swabee, 0, cc / 2, buf, 0);
+            UInt16ToByteArray(swabee, 0, cc / 2, buf, 0);
         }
 
         private static void swab24BitData(byte[] buf, int cc)
@@ -341,9 +341,9 @@ namespace BitMiracle.LibTiff
         private static void swab32BitData(byte[] buf, int cc)
         {
             Debug.Assert((cc & 3) == 0);
-            int[] swabee = byteArrayToInt(buf, 0, cc);
+            int[] swabee = ByteArrayToInt(buf, 0, cc);
             SwabArrayOfLong(swabee, cc / 4);
-            intToByteArray(swabee, 0, cc / 4, buf, 0);
+            IntToByteArray(swabee, 0, cc / 4, buf, 0);
         }
 
         private static void swab64BitData(byte[] buf, int cc)

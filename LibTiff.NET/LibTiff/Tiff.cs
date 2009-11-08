@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Collections;
 
 using BitMiracle.LibTiff.Internal;
+using System.Reflection;
 
 namespace BitMiracle.LibTiff
 {
@@ -92,6 +93,20 @@ namespace BitMiracle.LibTiff
         public static string GetVersion()
         {
             return m_version;
+        }
+
+        public static string AssemblyVersion
+        {
+            get
+            {
+                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+                string versionString = version.Major.ToString() + "." + version.Minor.ToString();
+
+                versionString += "." + version.Build.ToString();
+                versionString += "." + version.Revision.ToString();
+
+                return versionString;
+            }
         }
 
         /*
@@ -1413,15 +1428,15 @@ namespace BitMiracle.LibTiff
                                     * only one array to apply to
                                     * all samples.
                                     */
-                                    ushort[] u = byteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(ushort));
+                                    ushort[] u = ByteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(ushort));
                                     SetField(dir[i].tdir_tag, u, u, u);
                                 }
                                 else
                                 {
                                     v *= sizeof(ushort);
-                                    ushort[] u0 = byteArrayToUInt16(cp, 0, v);
-                                    ushort[] u1 = byteArrayToUInt16(cp, v, v);
-                                    ushort[] u2 = byteArrayToUInt16(cp, 2 * v, v);
+                                    ushort[] u0 = ByteArrayToUInt16(cp, 0, v);
+                                    ushort[] u1 = ByteArrayToUInt16(cp, v, v);
+                                    ushort[] u2 = ByteArrayToUInt16(cp, 2 * v, v);
                                     SetField(dir[i].tdir_tag, u0, u1, u2);
                                 }
                             }
@@ -4457,7 +4472,7 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < n; i++)
                 Array.Copy(BitConverter.GetBytes(dp[i]), 0, bytes, i * sizeof(double), sizeof(double));
 
-            int[] lp = byteArrayToInt(bytes, 0, n * sizeof(double));
+            int[] lp = ByteArrayToInt(bytes, 0, n * sizeof(double));
             SwabArrayOfLong(lp, n + n);
 
             int lpPos = 0;
@@ -4469,7 +4484,7 @@ namespace BitMiracle.LibTiff
                 lpPos += 2;
             }
 
-            intToByteArray(lp, 0, n + n, bytes, 0);
+            IntToByteArray(lp, 0, n + n, bytes, 0);
             for (int i = 0; i < n; i++)
                 dp[i] = BitConverter.ToDouble(bytes, i * sizeof(double));
         }
@@ -4502,7 +4517,7 @@ namespace BitMiracle.LibTiff
             return (reversed ? TIFFBitRevTable : TIFFNoBitRevTable);
         }
 
-        public static int[] byteArrayToInt(byte[] b, int byteStartOffset, int byteCount)
+        public static int[] ByteArrayToInt(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 4;
             int[] integers = new int[intCount];
@@ -4521,7 +4536,7 @@ namespace BitMiracle.LibTiff
             return integers;
         }
 
-        public static void intToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        public static void IntToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
             int intStopPos = intStartOffset + intCount;
@@ -4535,7 +4550,7 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public static uint[] byteArrayToUInt(byte[] b, int byteStartOffset, int byteCount)
+        public static uint[] ByteArrayToUInt(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 4;
             uint[] integers = new uint[intCount];
@@ -4554,7 +4569,7 @@ namespace BitMiracle.LibTiff
             return integers;
         }
 
-        public static void uintToByteArray(uint[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        public static void UIntToByteArray(uint[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
             int intStopPos = intStartOffset + intCount;
@@ -4568,7 +4583,7 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public static short[] byteArrayToInt16(byte[] b, int byteStartOffset, int byteCount)
+        public static short[] ByteArrayToInt16(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 2;
             short[] integers = new short[intCount];
@@ -4585,7 +4600,7 @@ namespace BitMiracle.LibTiff
             return integers;
         }
 
-        public static void int16ToByteArray(Int16[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        public static void Int16ToByteArray(Int16[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
             int intStopPos = intStartOffset + intCount;
@@ -4597,7 +4612,7 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public static ushort[] byteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount)
+        public static ushort[] ByteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 2;
             ushort[] integers = new ushort[intCount];
@@ -4614,7 +4629,7 @@ namespace BitMiracle.LibTiff
             return integers;
         }
 
-        public static void uint16ToByteArray(ushort[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        public static void UInt16ToByteArray(ushort[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
             int intStopPos = intStartOffset + intCount;

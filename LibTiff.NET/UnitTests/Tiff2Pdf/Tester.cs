@@ -43,6 +43,7 @@ namespace UnitTests.Tiff2Pdf
 
                 File.Delete(targetFile);
 
+                BitMiracle.Tiff2Pdf.Program.g_testFriendly = true;
                 BitMiracle.Tiff2Pdf.Program.Main(completeArgs.ToArray());
 
                 string sampleFile = targetFile.Replace(@"\pdf\", @"\sample_pdf\");

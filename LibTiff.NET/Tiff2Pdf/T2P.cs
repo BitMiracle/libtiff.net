@@ -40,6 +40,7 @@ namespace BitMiracle.Tiff2Pdf
     /// </summary>
     class T2P
     {
+        public bool m_testFriendly = false;
         public bool m_error;
 
         public t2p_compress_t m_pdf_defaultcompression;
@@ -1477,7 +1478,7 @@ namespace BitMiracle.Tiff2Pdf
                         samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_width * m_tiff_length * 4);
                         buffer = samplebuffer;
 
-                        uint[] buffer32 = Tiff.byteArrayToUInt(buffer, 0, m_tiff_width * m_tiff_length * 4);
+                        uint[] buffer32 = Tiff.ByteArrayToUInt(buffer, 0, m_tiff_width * m_tiff_length * 4);
                         if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, ORIENTATION.ORIENTATION_TOPLEFT, false))
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
@@ -1487,7 +1488,7 @@ namespace BitMiracle.Tiff2Pdf
                             return 0;
                         }
 
-                        Tiff.uintToByteArray(buffer32, 0, m_tiff_width * m_tiff_length, buffer, 0);
+                        Tiff.UIntToByteArray(buffer32, 0, m_tiff_width * m_tiff_length, buffer, 0);
 
                         m_tiff_datasize = sample_abgr_to_rgb(buffer, m_tiff_width * m_tiff_length);
                     }
@@ -1954,9 +1955,12 @@ namespace BitMiracle.Tiff2Pdf
                 written += write_pdf_string(m_pdf_datetime);
             }
 
-            //written += writeToFile("\n/Producer ");
-            //string buffer = string.Format("libtiff / tiff2pdf - {0}", Tiff.TIFF_VERSION);
-            //written += write_pdf_string(Encoding.GetEncoding("Latin1").GetBytes(buffer));
+            if (!m_testFriendly)
+            {
+                written += writeToFile("\n/Producer ");
+                string buffer = string.Format("libtiff / tiff2pdf - {0}", Tiff.AssemblyVersion);
+                written += write_pdf_string(Encoding.GetEncoding("Latin1").GetBytes(buffer));
+            }
 
             written += writeToFile("\n");
 
@@ -2157,9 +2161,15 @@ namespace BitMiracle.Tiff2Pdf
         */
         private void pdf_currenttime()
         {
-            int timenow = 1247603070; // 15-07-2009 XXXX
-            DateTime dt = new DateTime(1970, 1, 1).AddSeconds(timenow).ToLocalTime();
-            //DateTime dt = DateTime.Now.ToLocalTime();
+            DateTime dt;
+
+            if (m_testFriendly)
+            {
+                int timenow = 1247603070; // 15-07-2009 XXXX
+                dt = new DateTime(1970, 1, 1).AddSeconds(timenow).ToLocalTime();
+            }
+            else
+                dt = DateTime.Now.ToLocalTime();
 
             string s = string.Format("D:{0:0000}{1:00}{2:00}{3:00}{4:00}{5:00}", 
                 dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256, 
@@ -2717,13 +2727,29 @@ namespace BitMiracle.Tiff2Pdf
         */
         private int write_pdf_trailer()
         {
-            string fileidbuf = "2900000023480000FF180000FF670000";
-
             m_pdf_fileid = new byte [33];
-            for (int i = 0; i < 16; i++)
+
+            if (m_testFriendly)
             {
-                m_pdf_fileid[2 * i] = (byte)(fileidbuf[2 * i]);
-                m_pdf_fileid[2 * i + 1] = (byte)(fileidbuf[2 * i + 1]);
+                string fileidbuf = "2900000023480000FF180000FF670000";
+                for (int i = 0; i < 16; i++)
+                {
+                    m_pdf_fileid[2 * i] = (byte)(fileidbuf[2 * i]);
+                    m_pdf_fileid[2 * i + 1] = (byte)(fileidbuf[2 * i + 1]);
+                }
+            }
+            else
+            {
+                Random rnd = new Random(DateTime.Now.Millisecond);
+                byte[] temp = new byte[16];
+                rnd.NextBytes(temp);
+
+                for (int i = 0; i < 16; i++)
+                {
+                    string s = string.Format("{0:X2}", temp[i]);
+                    m_pdf_fileid[i * 2] = (byte)s[0];
+                    m_pdf_fileid[i * 2 + 1] = (byte)s[1];
+                }
             }
 
             int written = writeToFile("trailer\n<<\n/Size ");
@@ -3071,7 +3097,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private static int sample_rgba_to_rgb(byte[] data, int samplecount)
         {
-            uint[] data32 = Tiff.byteArrayToUInt(data, 0, samplecount * sizeof(uint));
+            uint[] data32 = Tiff.ByteArrayToUInt(data, 0, samplecount * sizeof(uint));
 
             int i = 0;
             for ( ; i < samplecount; i++)
@@ -3105,7 +3131,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private static int sample_abgr_to_rgb(byte[] data, int samplecount)
         {
-            uint[] data32 = Tiff.byteArrayToUInt(data, 0, samplecount * sizeof(uint));
+            uint[] data32 = Tiff.ByteArrayToUInt(data, 0, samplecount * sizeof(uint));
 
             int i = 0;
             for ( ; i < samplecount; i++)

@@ -1156,7 +1156,7 @@ namespace BitMiracle.LibTiff
 
             int byteCount = cc * sizeof(ushort);
             byte[] bytes = new byte [byteCount];
-            uint16ToByteArray(cp, 0, cc, bytes, 0);
+            UInt16ToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(ref dir, bytes, byteCount);
             return res;
         }
@@ -1168,7 +1168,7 @@ namespace BitMiracle.LibTiff
 
             int byteCount = cc * sizeof(int);
             byte[] bytes = new byte [byteCount];
-            intToByteArray(cp, 0, cc, bytes, 0);
+            IntToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(ref dir, bytes, byteCount);
             return res;
         }
