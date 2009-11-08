@@ -456,7 +456,7 @@ namespace BitMiracle.LibTiff
                     {
                         string ascii;
                         Tiff.setString(out ascii, ap[paramIndex++].ToString());
-                        td.td_customValues[tvIndex].value = Encoding.GetEncoding("Latin1").GetBytes(ascii);
+                        td.td_customValues[tvIndex].value = Tiff.Latin1Encoding.GetBytes(ascii);
                     }
                     else
                     {

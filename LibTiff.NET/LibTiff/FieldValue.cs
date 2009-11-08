@@ -117,7 +117,7 @@ namespace BitMiracle.LibTiff
         public new string ToString()
         {
             if (m_value is byte[])
-                return Encoding.GetEncoding("Latin1").GetString(m_value as byte[]);
+                return Tiff.Latin1Encoding.GetString(m_value as byte[]);
 
             return Convert.ToString(m_value);
         }
@@ -222,7 +222,7 @@ namespace BitMiracle.LibTiff
                 }
             }
             else if (m_value is string)
-                return Encoding.GetEncoding("Latin1").GetBytes(m_value as string);
+                return Tiff.Latin1Encoding.GetBytes(m_value as string);
 
             return null;
         }
@@ -285,7 +285,7 @@ namespace BitMiracle.LibTiff
                 }
             }
             else if (m_value is string)
-                return Encoding.GetEncoding("Latin1").GetBytes(m_value as string);
+                return Tiff.Latin1Encoding.GetBytes(m_value as string);
 
             return null;
         }

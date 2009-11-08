@@ -86,7 +86,7 @@ namespace BitMiracle.LibTiff
         internal static void fprintf(Stream fd, string format, params object[] list)
         {
             string s = string.Format(CultureInfo.InvariantCulture, format, list);
-            byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(s);
+            byte[] bytes = Latin1Encoding.GetBytes(s);
             fd.Write(bytes, 0, bytes.Length);
         }
 

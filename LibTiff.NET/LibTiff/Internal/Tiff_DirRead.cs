@@ -373,13 +373,13 @@ namespace BitMiracle.LibTiff
 
                 bytes = new byte[sizeof(uint)];
                 writeInt(l, bytes, 0);
-                cp = Encoding.GetEncoding("Latin1").GetString(bytes, 0, dir.tdir_count);
+                cp = Latin1Encoding.GetString(bytes, 0, dir.tdir_count);
                 return 1;
             }
 
             bytes = new byte[dir.tdir_count];
             int res = fetchData(dir, bytes);
-            cp = Encoding.GetEncoding("Latin1").GetString(bytes, 0, dir.tdir_count);
+            cp = Latin1Encoding.GetString(bytes, 0, dir.tdir_count);
             return res;
         }
 
@@ -1215,19 +1215,19 @@ namespace BitMiracle.LibTiff
                 stripbytes = rowbytes * rowsperstrip;
             }
             else
-                return ;
+                return;
 
             /* 
              * never increase the number of strips in an image
              */
             if (rowsperstrip >= m_dir.td_rowsperstrip)
-                return ;
+                return;
             
             int nstrips = howMany(bytecount, stripbytes);
             if (nstrips == 0)
             {
                 /* something is wonky, do nothing. */
-                return ;
+                return;
             }
 
             int[] newcounts = new int [nstrips];

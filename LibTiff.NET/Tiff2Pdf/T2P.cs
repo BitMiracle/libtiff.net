@@ -137,6 +137,8 @@ namespace BitMiracle.Tiff2Pdf
 
         private Tiff m_output;
 
+        internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
+
         public T2P()
         {
             m_errorHandler = new MyErrorHandler();
@@ -417,7 +419,7 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
                         "Can't set directory {0} of input file {1}", i, input.FileName());
-                    return ;
+                    return;
                 }
 
                 result = input.GetField(TIFFTAG.TIFFTAG_PAGENUMBER);
@@ -581,7 +583,7 @@ namespace BitMiracle.Tiff2Pdf
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for {0} with zero width", input.FileName());
                 m_error = true;
-                return ;
+                return;
             }
 
             result = input.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
@@ -591,7 +593,7 @@ namespace BitMiracle.Tiff2Pdf
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "No support for {0} with zero length", input.FileName());
                 m_error = true;
-                return ;
+                return;
             }
 
             result = input.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
@@ -611,7 +613,7 @@ namespace BitMiracle.Tiff2Pdf
                     "No support for {0} with compression type {1}:  not configured", 
                     input.FileName(), m_tiff_compression);
                 m_error = true;
-                return ;
+                return;
 
             }
 
@@ -635,7 +637,7 @@ namespace BitMiracle.Tiff2Pdf
                         "No support for {0} with {1} bits per sample",
                         input.FileName(), m_tiff_bitspersample);
                     m_error = true;
-                    return ;
+                    return;
             }
 
             result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
@@ -645,7 +647,7 @@ namespace BitMiracle.Tiff2Pdf
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "No support for {0} with {1} samples per pixel", input.FileName(), m_tiff_samplesperpixel);
                 m_error = true;
-                return ;
+                return;
             }
 
             if (m_tiff_samplesperpixel == 0)
@@ -792,7 +794,7 @@ namespace BitMiracle.Tiff2Pdf
                                 "No support for palletized image {0} with not one sample per pixel",
                                 input.FileName());
                             m_error = true;
-                            return ;
+                            return;
                         }
 
                         m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_RGB | t2p_cs_t.T2P_CS_PALETTE);
@@ -844,7 +846,7 @@ namespace BitMiracle.Tiff2Pdf
                                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                     "No support for {0} because its inkset is not CMYK", input.FileName());
                                 m_error = true;
-                                return ;
+                                return;
                             }
                         }
                         
@@ -858,7 +860,7 @@ namespace BitMiracle.Tiff2Pdf
                                 "No support for {0} because it has {1} samples per pixel",
                                 input.FileName(), m_tiff_samplesperpixel);
                             m_error = true;
-                            return ;
+                            return;
                         }
                     }
                     else
@@ -869,7 +871,7 @@ namespace BitMiracle.Tiff2Pdf
                                 "No support for palletized CMYK image {0} with not one sample per pixel",
                                 input.FileName());
                             m_error = true;
-                            return ;
+                            return;
                         }
                         
                         m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_CMYK | t2p_cs_t.T2P_CS_PALETTE);
@@ -950,13 +952,13 @@ namespace BitMiracle.Tiff2Pdf
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for {0} with photometric interpretation LogL/LogLuv", input.FileName());
                     m_error = true;
-                    return ;
+                    return;
                 default:
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for {0} with photometric interpretation {1}",
                         input.FileName(), m_tiff_photometric);
                     m_error = true;
-                    return ;
+                    return;
             }
 
             result = input.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
@@ -982,7 +984,7 @@ namespace BitMiracle.Tiff2Pdf
                                 "No support for {0} with separated planar configuration and {1} bits per sample",
                                 input.FileName(), m_tiff_bitspersample);
                             m_error = true;
-                            return ;
+                            return;
                         }
                         break;
                     
@@ -1082,7 +1084,7 @@ namespace BitMiracle.Tiff2Pdf
                         "No support for {0} with JPEG compression and separated planar configuration",
                         input.FileName());
                     m_error = true;
-                    return ;
+                    return;
                 }
             }
 
@@ -1193,7 +1195,7 @@ namespace BitMiracle.Tiff2Pdf
                     result = input.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
                     int[] sbc = result[0].ToIntArray();
                     m_tiff_datasize = sbc[0];
-                    return ;
+                    return;
                 }
 
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_ZIP)
@@ -1201,7 +1203,7 @@ namespace BitMiracle.Tiff2Pdf
                     result = input.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
                     int[] sbc = result[0].ToIntArray();
                     m_tiff_datasize = sbc[0];
-                    return ;
+                    return;
                 }
                 
                 if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
@@ -1864,7 +1866,7 @@ namespace BitMiracle.Tiff2Pdf
                     "Error writing virtual directory to output PDF {0}",
                     m_output.FileName());
                 m_error = true;
-                return ;
+                return;
             }
 
             enable(m_output);
@@ -1959,7 +1961,7 @@ namespace BitMiracle.Tiff2Pdf
             {
                 written += writeToFile("\n/Producer ");
                 string buffer = string.Format("libtiff / tiff2pdf - {0}", Tiff.AssemblyVersion);
-                written += write_pdf_string(Encoding.GetEncoding("Latin1").GetBytes(buffer));
+                written += write_pdf_string(Latin1Encoding.GetBytes(buffer));
             }
 
             written += writeToFile("\n");
@@ -2175,7 +2177,7 @@ namespace BitMiracle.Tiff2Pdf
                 dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256, 
                 dt.Minute % 256, dt.Second % 256);
 
-            m_pdf_datetime = Encoding.GetEncoding("Latin1").GetBytes(s);
+            m_pdf_datetime = Latin1Encoding.GetBytes(s);
         }
         
         /*
@@ -2322,7 +2324,7 @@ namespace BitMiracle.Tiff2Pdf
             if (istiled == 0)
             {
                 compose_pdf_page_orient(m_pdf_imagebox, m_tiff_orientation);
-                return ;
+                return;
             }
             else
             {
@@ -2378,7 +2380,7 @@ namespace BitMiracle.Tiff2Pdf
                 for (uint i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
                     compose_pdf_page_orient(tiles[i].tile_box, 0);
 
-                return ;
+                return;
             }
 
             for (uint i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
@@ -2953,7 +2955,7 @@ namespace BitMiracle.Tiff2Pdf
                         m_tiff_transferfunctioncount != 0 ? "/GS1 gs " : "", box.mat[0], box.mat[1], 
                         box.mat[3], box.mat[4], box.mat[6], box.mat[7], m_pdf_page + 1, i + 1);
 
-                    byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(buffer);
+                    byte[] bytes = Latin1Encoding.GetBytes(buffer);
                     written += write_pdf_stream(bytes, bytes.Length);
                 }
             }
@@ -2965,7 +2967,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_transferfunctioncount != 0 ? "/GS1 gs " : "", box.mat[0], box.mat[1],
                     box.mat[3], box.mat[4], box.mat[6], box.mat[7], m_pdf_page + 1);
 
-                byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(buffer);
+                byte[] bytes = Latin1Encoding.GetBytes(buffer);
                 written += write_pdf_stream(bytes, bytes.Length);
             }
 
@@ -3598,7 +3600,7 @@ namespace BitMiracle.Tiff2Pdf
 
         private int writeToFile(string data)
         {
-            byte[] bytes = Encoding.GetEncoding("Latin1").GetBytes(data);
+            byte[] bytes = Latin1Encoding.GetBytes(data);
             return writeToFile(bytes, bytes.Length);
         }
     }

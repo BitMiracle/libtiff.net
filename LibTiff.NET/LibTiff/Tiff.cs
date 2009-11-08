@@ -90,6 +90,8 @@ namespace BitMiracle.LibTiff
         internal const short TIFF_SPP = -2; /* marker for SamplesPerPixel tags */
         internal const short TIFF_VARIABLE2 = -3; /* marker for uint var-length tags */
 
+        internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
+
         public static string GetVersion()
         {
             return string.Format(TIFFLIB_VERSION_STR, AssemblyVersion);

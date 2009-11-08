@@ -287,29 +287,29 @@ namespace BitMiracle.Tiff2Pdf
                             t2p.m_pdf_datetime[0] = (byte)'D';
                             t2p.m_pdf_datetime[1] = (byte)':';
 
-                            bytes = Encoding.GetEncoding("Latin1").GetBytes(optarg);
+                            bytes = T2P.Latin1Encoding.GetBytes(optarg);
                             Array.Copy(bytes, 0, t2p.m_pdf_datetime, 2, Math.Min(bytes.Length, 14));
                         }
                         break;
 
-                    case 'c': 
-                        t2p.m_pdf_creator = Encoding.GetEncoding("Latin1").GetBytes(optarg);
+                    case 'c':
+                        t2p.m_pdf_creator = T2P.Latin1Encoding.GetBytes(optarg);
                         break;
                     
-                    case 'a': 
-                        t2p.m_pdf_author = Encoding.GetEncoding("Latin1").GetBytes(optarg);
+                    case 'a':
+                        t2p.m_pdf_author = T2P.Latin1Encoding.GetBytes(optarg);
                         break;
 
-                    case 't': 
-                        t2p.m_pdf_title = Encoding.GetEncoding("Latin1").GetBytes(optarg);
+                    case 't':
+                        t2p.m_pdf_title = T2P.Latin1Encoding.GetBytes(optarg);
                         break;
                     
-                    case 's': 
-                        t2p.m_pdf_subject = Encoding.GetEncoding("Latin1").GetBytes(optarg);
+                    case 's':
+                        t2p.m_pdf_subject = T2P.Latin1Encoding.GetBytes(optarg);
                         break;
 
-                    case 'k': 
-                        t2p.m_pdf_keywords = Encoding.GetEncoding("Latin1").GetBytes(optarg);
+                    case 'k':
+                        t2p.m_pdf_keywords = T2P.Latin1Encoding.GetBytes(optarg);
                         break;
 
                     case 'b':
