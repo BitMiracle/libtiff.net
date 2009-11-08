@@ -44,10 +44,10 @@ namespace BitMiracle.LibTiff
             return s.Seek(off, whence);
         }
 
-        public virtual bool Close(object fd)
+        public virtual void Close(object fd)
         {
-            //return (CloseHandle(fd) ? true : false);
-            return false;
+            Stream s = fd as Stream;
+            s.Close();
         }
 
         public virtual long Size(object fd)

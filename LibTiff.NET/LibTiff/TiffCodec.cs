@@ -37,7 +37,6 @@ namespace BitMiracle.LibTiff
             m_tif = tif;
 
             m_name = name.Clone() as string;
-            //Init();
         }
 
         public virtual bool CanEncode()
@@ -204,7 +203,6 @@ namespace BitMiracle.LibTiff
         private bool noDecode(string method)
         {
             TiffCodec c = m_tif.FindCodec(m_tif.m_dir.td_compression);
-
             if (c != null)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,

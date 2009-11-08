@@ -44,9 +44,8 @@ namespace BitMiracle.Tiff2Pdf
             return off;
         }
 
-        public override bool Close(object fd)
+        public override void Close(object fd)
         {
-            return true;
         }
 
         public override long Size(object fd)

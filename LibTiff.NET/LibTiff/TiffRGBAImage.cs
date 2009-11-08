@@ -57,8 +57,6 @@ namespace BitMiracle.LibTiff
         public delegate bool getRoutine(TiffRGBAImage img, uint[] raster, int offset, int w, int h);
         public getRoutine get;
 
-        // put image data routine
-        //public void(*put)(TiffRGBAImage);
         public tileContigRoutine contig;
         public tileSeparateRoutine separate;
 
@@ -70,6 +68,25 @@ namespace BitMiracle.LibTiff
 
         public int row_offset;
         public int col_offset;
+
+        private static TiffDisplay display_sRGB = new TiffDisplay(
+            /* XYZ -> luminance matrix */
+            new float[] { 3.2410F, -1.5374F, -0.4986F },
+            new float[] { -0.9692F, 1.8760F, 0.0416F },
+            new float[] { 0.0556F, -0.2040F, 1.0570F },
+            100.0F, 100.0F, 100.0F,  /* Light o/p for reference white */
+            255, 255, 255,  /* Pixel values for ref. white */
+            1.0F, 1.0F, 1.0F,  /* Residual light o/p for black pixel */
+            2.4F, 2.4F, 2.4F  /* Gamma values for the three guns */
+        );
+
+        private const uint A1 = (((uint)0xffL) << 24);
+
+        /* 
+        * Helper constants used in Orientation tag handling
+        */
+        private const int FLIP_VERTICALLY = 0x01;
+        private const int FLIP_HORIZONTALLY = 0x02;
 
         public static TiffRGBAImage Create(Tiff tif, bool stop, out string emsg)
         {
@@ -122,6 +139,7 @@ namespace BitMiracle.LibTiff
                             img.alpha = EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA;
                         }
                         break;
+
                     case EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA:
                         /* data is pre-multiplied */
                     case EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA:
@@ -241,7 +259,7 @@ namespace BitMiracle.LibTiff
                                 break;
 
                             default:
-                                /* do nothing */;
+                                /* do nothing */
                                 break;
                         }
                     }
@@ -361,12 +379,6 @@ namespace BitMiracle.LibTiff
                 return false;
             }
             
-            //if (put == null)
-            //{
-            //    Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"put\" routine setup; probably can not handle image format");
-            //    return false;
-            //}
-
             return get(this, raster, offset, w, h);
         }
 
@@ -383,25 +395,6 @@ namespace BitMiracle.LibTiff
             ycbcr = null;
             cielab = null;
         }
-
-        private static TiffDisplay display_sRGB = new TiffDisplay(
-            /* XYZ -> luminance matrix */
-            new float[] { 3.2410F, -1.5374F, -0.4986F },
-            new float[] { -0.9692F, 1.8760F, 0.0416F }, 
-            new float[] { 0.0556F, -0.2040F, 1.0570F },
-            100.0F, 100.0F, 100.0F,  /* Light o/p for reference white */
-            255, 255, 255,  /* Pixel values for ref. white */
-            1.0F, 1.0F, 1.0F,  /* Residual light o/p for black pixel */
-            2.4F, 2.4F, 2.4F  /* Gamma values for the three guns */
-        );
-
-        private const uint A1 = (((uint)0xffL)<<24);
-        
-        /* 
-        * Helper constants used in Orientation tag handling
-        */
-        private const int FLIP_VERTICALLY = 0x01;
-        private const int FLIP_HORIZONTALLY = 0x02;
 
         private static uint PACK(uint r, uint g, uint b)
         {
@@ -634,7 +627,7 @@ namespace BitMiracle.LibTiff
                     }
                 }
 
-                y += ((flip & FLIP_VERTICALLY) != 0 ? -(int)nrow : (int)nrow);
+                y += ((flip & FLIP_VERTICALLY) != 0 ? -nrow : nrow);
                 row += nrow;
             }
 
@@ -2069,37 +2062,37 @@ namespace BitMiracle.LibTiff
         {
             switch (photometric)
             {
-            case PHOTOMETRIC.PHOTOMETRIC_RGB:
-            case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
-            case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
-                if (bitspersample == 8)
+                case PHOTOMETRIC.PHOTOMETRIC_RGB:
+                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
+                    if (bitspersample == 8)
+                        break;
+                    if (!setupMap())
+                        return false;
                     break;
-                if (!setupMap())
-                    return false;
-                break;
 
-            case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
-            case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
-                if (!setupMap())
-                    return false;
-                break;
+                case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
+                case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
+                    if (!setupMap())
+                        return false;
+                    break;
 
-            case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
-                /*
-                * Convert 16-bit colormap to 8-bit (unless it looks
-                * like an old-style 8-bit colormap).
-                */
-                if (checkcmap() == 16)
-                    cvtcmap();
-                else
-                    Tiff.WarningExt(tif, tif.m_clientdata, tif.FileName(), "Assuming 8-bit colormap");
-                /*
-                * Use mapping table and colormap to construct
-                * unpacking tables for samples < 8 bits.
-                */
-                if (bitspersample <= 8 && !makecmap())
-                    return false;
-                break;
+                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
+                    /*
+                    * Convert 16-bit colormap to 8-bit (unless it looks
+                    * like an old-style 8-bit colormap).
+                    */
+                    if (checkcmap() == 16)
+                        cvtcmap();
+                    else
+                        Tiff.WarningExt(tif, tif.m_clientdata, tif.FileName(), "Assuming 8-bit colormap");
+                    /*
+                    * Use mapping table and colormap to construct
+                    * unpacking tables for samples < 8 bits.
+                    */
+                    if (bitspersample <= 8 && !makecmap())
+                        return false;
+                    break;
             }
 
             return true;
@@ -2189,29 +2182,29 @@ namespace BitMiracle.LibTiff
                 int j = 0;
                 switch (bitspersample)
                 {
-                case 1:
-                    CMAP(i >> 7, i, ref j);
-                    CMAP((i >> 6) & 1, i, ref j);
-                    CMAP((i >> 5) & 1, i, ref j);
-                    CMAP((i >> 4) & 1, i, ref j);
-                    CMAP((i >> 3) & 1, i, ref j);
-                    CMAP((i >> 2) & 1, i, ref j);
-                    CMAP((i >> 1) & 1, i, ref j);
-                    CMAP(i & 1, i, ref j);
-                    break;
-                case 2:
-                    CMAP(i >> 6, i, ref j);
-                    CMAP((i >> 4) & 3, i, ref j);
-                    CMAP((i >> 2) & 3, i, ref j);
-                    CMAP(i & 3, i, ref j);
-                    break;
-                case 4:
-                    CMAP(i >> 4, i, ref j);
-                    CMAP(i & 0xf, i, ref j);
-                    break;
-                case 8:
-                    CMAP(i, i, ref j);
-                    break;
+                    case 1:
+                        CMAP(i >> 7, i, ref j);
+                        CMAP((i >> 6) & 1, i, ref j);
+                        CMAP((i >> 5) & 1, i, ref j);
+                        CMAP((i >> 4) & 1, i, ref j);
+                        CMAP((i >> 3) & 1, i, ref j);
+                        CMAP((i >> 2) & 1, i, ref j);
+                        CMAP((i >> 1) & 1, i, ref j);
+                        CMAP(i & 1, i, ref j);
+                        break;
+                    case 2:
+                        CMAP(i >> 6, i, ref j);
+                        CMAP((i >> 4) & 3, i, ref j);
+                        CMAP((i >> 2) & 3, i, ref j);
+                        CMAP(i & 3, i, ref j);
+                        break;
+                    case 4:
+                        CMAP(i >> 4, i, ref j);
+                        CMAP(i & 0xf, i, ref j);
+                        break;
+                    case 8:
+                        CMAP(i, i, ref j);
+                        break;
                 }
             }
             
@@ -2233,30 +2226,30 @@ namespace BitMiracle.LibTiff
                 int j = 0;
                 switch (bitspersample)
                 {
-                case 1:
-                    GREY(i >> 7, i, ref j);
-                    GREY((i >> 6) & 1, i, ref j);
-                    GREY((i >> 5) & 1, i, ref j);
-                    GREY((i >> 4) & 1, i, ref j);
-                    GREY((i >> 3) & 1, i, ref j);
-                    GREY((i >> 2) & 1, i, ref j);
-                    GREY((i >> 1) & 1, i, ref j);
-                    GREY(i & 1, i, ref j);
-                    break;
-                case 2:
-                    GREY(i >> 6, i, ref j);
-                    GREY((i >> 4) & 3, i, ref j);
-                    GREY((i >> 2) & 3, i, ref j);
-                    GREY(i & 3, i, ref j);
-                    break;
-                case 4:
-                    GREY(i >> 4, i, ref j);
-                    GREY(i & 0xf, i, ref j);
-                    break;
-                case 8:
-                case 16:
-                    GREY(i, i, ref j);
-                    break;
+                    case 1:
+                        GREY(i >> 7, i, ref j);
+                        GREY((i >> 6) & 1, i, ref j);
+                        GREY((i >> 5) & 1, i, ref j);
+                        GREY((i >> 4) & 1, i, ref j);
+                        GREY((i >> 3) & 1, i, ref j);
+                        GREY((i >> 2) & 1, i, ref j);
+                        GREY((i >> 1) & 1, i, ref j);
+                        GREY(i & 1, i, ref j);
+                        break;
+                    case 2:
+                        GREY(i >> 6, i, ref j);
+                        GREY((i >> 4) & 3, i, ref j);
+                        GREY((i >> 2) & 3, i, ref j);
+                        GREY(i & 3, i, ref j);
+                        break;
+                    case 4:
+                        GREY(i >> 4, i, ref j);
+                        GREY(i & 0xf, i, ref j);
+                        break;
+                    case 8:
+                    case 16:
+                        GREY(i, i, ref j);
+                        break;
                 }
             }
 
@@ -2308,7 +2301,7 @@ namespace BitMiracle.LibTiff
             fromskew = (fromskew * 18) / 4;
             if ((h & 3) == 0 && (w & 3) == 0)
             {
-                for (; h >= 4; h -= 4)
+                for ( ; h >= 4; h -= 4)
                 {
                     x = w >> 2;
                     do
@@ -2516,7 +2509,7 @@ namespace BitMiracle.LibTiff
             fromskew = (fromskew * 10) / 4;
             if ((h & 3) == 0 && (w & 1) == 0)
             {
-                for (; h >= 2; h -= 2)
+                for ( ; h >= 2; h -= 2)
                 {
                     x = w >> 2;
                     do

@@ -375,160 +375,157 @@ namespace BitMiracle.LibTiff
                     }
                     break;
                 default:
+                    /*
+                    * This can happen if multiple images are open with different
+                    * codecs which have private tags.  The global tag information
+                    * table may then have tags that are valid for one file but not
+                    * the other. If the client tries to set a tag that is not valid
+                    * for the image's codec then we'll arrive here.  This
+                    * happens, for example, when tiffcp is used to convert between
+                    * compression schemes and codec-specific tags are blindly copied.
+                    */
+                    TiffFieldInfo fip = tif.FindFieldInfo(tag, TiffDataType.TIFF_ANY);
+                    if (fip == null || fip.field_bit != FIELD.FIELD_CUSTOM)
                     {
-                        /*
-                        * This can happen if multiple images are open with different
-                        * codecs which have private tags.  The global tag information
-                        * table may then have tags that are valid for one file but not
-                        * the other. If the client tries to set a tag that is not valid
-                        * for the image's codec then we'll arrive here.  This
-                        * happens, for example, when tiffcp is used to convert between
-                        * compression schemes and codec-specific tags are blindly copied.
-                        */
-                        TiffFieldInfo fip = tif.FindFieldInfo(tag, TiffDataType.TIFF_ANY);
-                        if (fip == null || fip.field_bit != FIELD.FIELD_CUSTOM)
+                        Tiff.ErrorExt(tif, tif.m_clientdata, module,
+                            "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
+                            tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
+                            fip != null ? fip.field_name : "Unknown");
+                        status = false;
+                        break;
+                    }
+
+                    /*
+                    * Find the existing entry for this custom value.
+                    */
+                    int tvIndex = -1;
+                    for (int iCustom = 0; iCustom < td.td_customValueCount; iCustom++)
+                    {
+                        if (td.td_customValues[iCustom].info.field_tag == tag)
                         {
-                            Tiff.ErrorExt(tif, tif.m_clientdata, module,
-                                "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
-                                tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
-                                fip != null ? fip.field_name : "Unknown");
-                            status = false;
+                            td.td_customValues[iCustom].value = null;
                             break;
                         }
+                    }
 
-                        /*
-                        * Find the existing entry for this custom value.
-                        */
-                        int tvIndex = -1;
-                        for (int iCustom = 0; iCustom < td.td_customValueCount; iCustom++)
-                        {
-                            if (td.td_customValues[iCustom].info.field_tag == tag)
-                            {
-                                td.td_customValues[iCustom].value = null;
-                                break;
-                            }
-                        }
+                    /*
+                    * Grow the custom list if the entry was not found.
+                    */
+                    if (tvIndex == -1)
+                    {
+                        td.td_customValueCount++;
+                        TiffTagValue[] new_customValues = Tiff.Realloc(td.td_customValues, td.td_customValueCount - 1, td.td_customValueCount);
+                        td.td_customValues = new_customValues;
 
-                        /*
-                        * Grow the custom list if the entry was not found.
-                        */
-                        if (tvIndex == -1)
-                        {
-                            td.td_customValueCount++;
-                            TiffTagValue[] new_customValues = Tiff.Realloc(td.td_customValues, td.td_customValueCount - 1, td.td_customValueCount);
-                            td.td_customValues = new_customValues;
+                        tvIndex = td.td_customValueCount - 1;
+                        td.td_customValues[tvIndex].info = fip;
+                        td.td_customValues[tvIndex].value = null;
+                        td.td_customValues[tvIndex].count = 0;
+                    }
 
-                            tvIndex = td.td_customValueCount - 1;
-                            td.td_customValues[tvIndex].info = fip;
-                            td.td_customValues[tvIndex].value = null;
-                            td.td_customValues[tvIndex].count = 0;
-                        }
+                    /*
+                    * Set custom value ... save a copy of the custom tag value.
+                    */
+                    int tv_size = Tiff.dataSize(fip.field_type);
+                    if (tv_size == 0)
+                    {
+                        status = false;
+                        Tiff.ErrorExt(tif, tif.m_clientdata, module,
+                            "{0}: Bad field type {1} for \"{2}\"",
+                            tif.m_name, fip.field_type, fip.field_name);
+                        end = true;
+                        break;
+                    }
 
-                        /*
-                        * Set custom value ... save a copy of the custom tag value.
-                        */
-                        int tv_size = Tiff.dataSize(fip.field_type);
-                        if (tv_size == 0)
-                        {
-                            status = false;
-                            Tiff.ErrorExt(tif, tif.m_clientdata, module,
-                                "{0}: Bad field type {1} for \"{2}\"",
-                                tif.m_name, fip.field_type, fip.field_name);
-                            end = true;
-                            break;
-                        }
-
-                        int paramIndex = 0;
-                        if (fip.field_passcount)
-                        {
-                            if (fip.field_writecount == Tiff.TIFF_VARIABLE2)
-                                td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
-                            else
-                                td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
-                        }
-                        else if (fip.field_writecount == Tiff.TIFF_VARIABLE || fip.field_writecount == Tiff.TIFF_VARIABLE2)
-                            td.td_customValues[tvIndex].count = 1;
-                        else if (fip.field_writecount == Tiff.TIFF_SPP)
-                            td.td_customValues[tvIndex].count = td.td_samplesperpixel;
+                    int paramIndex = 0;
+                    if (fip.field_passcount)
+                    {
+                        if (fip.field_writecount == Tiff.TIFF_VARIABLE2)
+                            td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
                         else
-                            td.td_customValues[tvIndex].count = fip.field_writecount;
+                            td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
+                    }
+                    else if (fip.field_writecount == Tiff.TIFF_VARIABLE || fip.field_writecount == Tiff.TIFF_VARIABLE2)
+                        td.td_customValues[tvIndex].count = 1;
+                    else if (fip.field_writecount == Tiff.TIFF_SPP)
+                        td.td_customValues[tvIndex].count = td.td_samplesperpixel;
+                    else
+                        td.td_customValues[tvIndex].count = fip.field_writecount;
 
-                        if (fip.field_type == TiffDataType.TIFF_ASCII)
+                    if (fip.field_type == TiffDataType.TIFF_ASCII)
+                    {
+                        string ascii;
+                        Tiff.setString(out ascii, ap[paramIndex++].ToString());
+                        td.td_customValues[tvIndex].value = Encoding.GetEncoding("Latin1").GetBytes(ascii);
+                    }
+                    else
+                    {
+                        td.td_customValues[tvIndex].value = new byte[tv_size * td.td_customValues[tvIndex].count];
+                        if ((fip.field_passcount || fip.field_writecount == Tiff.TIFF_VARIABLE ||
+                            fip.field_writecount == Tiff.TIFF_VARIABLE2 ||
+                            fip.field_writecount == Tiff.TIFF_SPP || td.td_customValues[tvIndex].count > 1) &&
+                            fip.field_tag != TIFFTAG.TIFFTAG_PAGENUMBER &&
+                            fip.field_tag != TIFFTAG.TIFFTAG_HALFTONEHINTS &&
+                            fip.field_tag != TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING &&
+                            fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
                         {
-                            string ascii;
-                            Tiff.setString(out ascii, ap[paramIndex++].ToString());
-                            td.td_customValues[tvIndex].value = Encoding.GetEncoding("Latin1").GetBytes(ascii);
+                            byte[] apBytes = ap[paramIndex++].GetBytes();
+                            Array.Copy(apBytes, td.td_customValues[tvIndex].value, apBytes.Length);
                         }
                         else
                         {
-                            td.td_customValues[tvIndex].value = new byte[tv_size * td.td_customValues[tvIndex].count];
-                            if ((fip.field_passcount || fip.field_writecount == Tiff.TIFF_VARIABLE ||
-                                fip.field_writecount == Tiff.TIFF_VARIABLE2 ||
-                                fip.field_writecount == Tiff.TIFF_SPP || td.td_customValues[tvIndex].count > 1) &&
-                                fip.field_tag != TIFFTAG.TIFFTAG_PAGENUMBER &&
-                                fip.field_tag != TIFFTAG.TIFFTAG_HALFTONEHINTS &&
-                                fip.field_tag != TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING &&
-                                fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
+                            /*
+                            * XXX: The following loop required to handle
+                            * TIFFTAG_PAGENUMBER, TIFFTAG_HALFTONEHINTS,
+                            * TIFFTAG_YCBCRSUBSAMPLING and TIFFTAG_DOTRANGE tags.
+                            * These tags are actually arrays and should be passed as
+                            * array pointers to TIFFSetField() function, but actually
+                            * passed as a list of separate values. This behavior
+                            * must be changed in the future!
+                            */
+                            byte[] val = td.td_customValues[tvIndex].value;
+                            int valPos = 0;
+                            for (int i = 0; i < td.td_customValues[tvIndex].count; i++, valPos += tv_size)
                             {
-                                byte[] apBytes = ap[paramIndex++].GetBytes();
-                                Array.Copy(apBytes, td.td_customValues[tvIndex].value, apBytes.Length);
-                            }
-                            else
-                            {
-                                /*
-                                * XXX: The following loop required to handle
-                                * TIFFTAG_PAGENUMBER, TIFFTAG_HALFTONEHINTS,
-                                * TIFFTAG_YCBCRSUBSAMPLING and TIFFTAG_DOTRANGE tags.
-                                * These tags are actually arrays and should be passed as
-                                * array pointers to TIFFSetField() function, but actually
-                                * passed as a list of separate values. This behavior
-                                * must be changed in the future!
-                                */
-                                byte[] val = td.td_customValues[tvIndex].value;
-                                int valPos = 0;
-                                for (int i = 0; i < td.td_customValues[tvIndex].count; i++, valPos += tv_size)
+                                switch (fip.field_type)
                                 {
-                                    switch (fip.field_type)
-                                    {
-                                        case TiffDataType.TIFF_BYTE:
-                                        case TiffDataType.TIFF_UNDEFINED:
-                                            val[valPos] = ap[paramIndex + i].ToByte();
-                                            break;
-                                        case TiffDataType.TIFF_SBYTE:
-                                            val[valPos] = ap[paramIndex + i].ToByte();
-                                            break;
-                                        case TiffDataType.TIFF_SHORT:
-                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUShort()), 0, val, valPos, tv_size);
-                                            break;
-                                        case TiffDataType.TIFF_SSHORT:
-                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
-                                            break;
-                                        case TiffDataType.TIFF_LONG:
-                                        case TiffDataType.TIFF_IFD:
-                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUInt()), 0, val, valPos, tv_size);
-                                            break;
-                                        case TiffDataType.TIFF_SLONG:
-                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
-                                            break;
-                                        case TiffDataType.TIFF_RATIONAL:
-                                        case TiffDataType.TIFF_SRATIONAL:
-                                        case TiffDataType.TIFF_FLOAT:
-                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToFloat()), 0, val, valPos, tv_size);
-                                            break;
-                                        case TiffDataType.TIFF_DOUBLE:
-                                            Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToDouble()), 0, val, valPos, tv_size);
-                                            break;
-                                        default:
-                                            Array.Clear(val, valPos, tv_size);
-                                            status = false;
-                                            break;
-                                    }
+                                    case TiffDataType.TIFF_BYTE:
+                                    case TiffDataType.TIFF_UNDEFINED:
+                                        val[valPos] = ap[paramIndex + i].ToByte();
+                                        break;
+                                    case TiffDataType.TIFF_SBYTE:
+                                        val[valPos] = ap[paramIndex + i].ToByte();
+                                        break;
+                                    case TiffDataType.TIFF_SHORT:
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUShort()), 0, val, valPos, tv_size);
+                                        break;
+                                    case TiffDataType.TIFF_SSHORT:
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
+                                        break;
+                                    case TiffDataType.TIFF_LONG:
+                                    case TiffDataType.TIFF_IFD:
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUInt()), 0, val, valPos, tv_size);
+                                        break;
+                                    case TiffDataType.TIFF_SLONG:
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
+                                        break;
+                                    case TiffDataType.TIFF_RATIONAL:
+                                    case TiffDataType.TIFF_SRATIONAL:
+                                    case TiffDataType.TIFF_FLOAT:
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToFloat()), 0, val, valPos, tv_size);
+                                        break;
+                                    case TiffDataType.TIFF_DOUBLE:
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToDouble()), 0, val, valPos, tv_size);
+                                        break;
+                                    default:
+                                        Array.Clear(val, valPos, tv_size);
+                                        status = false;
+                                        break;
                                 }
                             }
                         }
-
-                        break;
                     }
+                    break;
             }
 
             if (!end && !badvalue && !badvalue32)

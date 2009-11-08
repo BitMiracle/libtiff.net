@@ -50,9 +50,9 @@ namespace BitMiracle.LibTiff
             return (int)m_stream.Seek(m_clientdata, off, whence);
         }
 
-        private bool closeFile()
+        private void closeFile()
         {
-            return m_stream.Close(m_clientdata);
+            m_stream.Close(m_clientdata);
         }
 
         private int getFileSize()
