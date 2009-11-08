@@ -935,8 +935,11 @@ namespace BitMiracle.LibTiff.Internal
             {
                 case PREDICTOR.PREDICTOR_NONE:
                     return true;
+
                 case PREDICTOR.PREDICTOR_HORIZONTAL:
-                    if (td.td_bitspersample != 8 && td.td_bitspersample != 16 && td.td_bitspersample != 32)
+                    if (td.td_bitspersample != 8 &&
+                        td.td_bitspersample != 16 &&
+                        td.td_bitspersample != 32)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
                             "Horizontal differencing \"Predictor\" not supported with {0}-bit samples",
@@ -944,6 +947,7 @@ namespace BitMiracle.LibTiff.Internal
                         return false;
                     }
                     break;
+
                 case PREDICTOR.PREDICTOR_FLOATINGPOINT:
                     if (td.td_sampleformat != SAMPLEFORMAT.SAMPLEFORMAT_IEEEFP)
                     {
@@ -953,6 +957,7 @@ namespace BitMiracle.LibTiff.Internal
                         return false;
                     }
                     break;
+
                 default:
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, 
                         "\"Predictor\" value {0} not supported", predictor);

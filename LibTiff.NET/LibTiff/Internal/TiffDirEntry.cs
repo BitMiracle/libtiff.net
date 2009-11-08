@@ -29,15 +29,14 @@ namespace BitMiracle.LibTiff.Internal
     class TiffDirEntry
     {
         public const int SizeInBytes = 12;
+        public TIFFTAG tdir_tag; /* see below */
+        public TiffDataType tdir_type; /* data type; see below */
+        public int tdir_count; /* number of items; length in spec */
+        public int tdir_offset; /* byte offset to field data */
 
         public new string ToString()
         {
             return tdir_tag.ToString() + ", " + tdir_type.ToString() + " " + tdir_offset.ToString();
         }
-
-        public TIFFTAG tdir_tag; /* see below */
-        public TiffDataType tdir_type; /* data type; see below */
-        public int tdir_count; /* number of items; length in spec */
-        public int tdir_offset; /* byte offset to field data */
     }
 }

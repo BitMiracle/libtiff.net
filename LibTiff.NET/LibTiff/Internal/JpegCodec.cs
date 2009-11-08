@@ -126,7 +126,7 @@ namespace BitMiracle.LibTiff.Internal
             m_jpegtables_length = 0;
             m_jpegquality = 75; /* Default IJG quality */
             m_jpegcolormode = JPEGCOLORMODE.JPEGCOLORMODE_RAW;
-            m_jpegtablesmode = JPEGTABLESMODE.JPEGTABLESMODE_QUANT |JPEGTABLESMODE.JPEGTABLESMODE_HUFF;
+            m_jpegtablesmode = JPEGTABLESMODE.JPEGTABLESMODE_QUANT | JPEGTABLESMODE.JPEGTABLESMODE_HUFF;
 
             m_recvparams = 0;
             m_subaddress = null;
@@ -487,7 +487,7 @@ namespace BitMiracle.LibTiff.Internal
                 unsuppress_quant_table(1);
             }
 
-            if ((m_jpegtablesmode &JPEGTABLESMODE.JPEGTABLESMODE_HUFF) != 0)
+            if ((m_jpegtablesmode & JPEGTABLESMODE.JPEGTABLESMODE_HUFF) != 0)
                 m_compression.Optimize_coding = false;
             else
                 m_compression.Optimize_coding = true;
@@ -564,12 +564,14 @@ namespace BitMiracle.LibTiff.Internal
                         m_tif.SetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE, refbw);
                     }
                     break;
+
+                /* disallowed by Tech Note */
                 case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
-                    /* disallowed by Tech Note */
                 case PHOTOMETRIC.PHOTOMETRIC_MASK:
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
                         "PhotometricInterpretation {0} not allowed for JPEG", m_photometric);
                     return false;
+
                 default:
                     /* TIFF 6.0 forbids subsampling of all other color spaces */
                     m_h_sampling = 1;
@@ -610,7 +612,8 @@ namespace BitMiracle.LibTiff.Internal
             }
             else
             {
-                if (m_tif.m_dir.td_rowsperstrip < m_tif.m_dir.td_imagelength && (m_tif.m_dir.td_rowsperstrip % (m_v_sampling * JpegConstants.DCTSIZE)) != 0)
+                if (m_tif.m_dir.td_rowsperstrip < m_tif.m_dir.td_imagelength &&
+                    (m_tif.m_dir.td_rowsperstrip % (m_v_sampling * JpegConstants.DCTSIZE)) != 0)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
                         "RowsPerStrip must be multiple of {0} for JPEG", m_v_sampling * JpegConstants.DCTSIZE);
@@ -699,17 +702,20 @@ namespace BitMiracle.LibTiff.Internal
             int ci;
 
             Debug.Assert(m_common.m_is_decompressor);
+
             /*
              * Reset decoder state from any previous strip/tile,
              * in case application didn't read the whole strip.
              */
             if (!TIFFjpeg_abort())
                 return false;
+
             /*
              * Read the header for this strip/tile.
              */
             if (TIFFjpeg_read_header(true) != ReadResult.JPEG_HEADER_OK)
                 return false;
+
             /*
              * Check image parameters and set decompression parameters.
              */
@@ -774,7 +780,8 @@ namespace BitMiracle.LibTiff.Internal
             if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
             {
                 /* Component 0 should have expected sampling factors */
-                if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling || m_decompression.m_comp_info[0].v_samp_factor != m_v_sampling)
+                if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling ||
+                    m_decompression.m_comp_info[0].v_samp_factor != m_v_sampling)
                 {
                     Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                         "Improper JPEG sampling factors {0},{1}\nApparently should be {2},{3}.",
@@ -788,9 +795,11 @@ namespace BitMiracle.LibTiff.Internal
                     * factors. Lets check the sampling factors
                     * dont exceed what we were expecting.
                     */
-                    if (m_decompression.m_comp_info[0].h_samp_factor > m_h_sampling || m_decompression.m_comp_info[0].v_samp_factor > m_v_sampling)
+                    if (m_decompression.m_comp_info[0].h_samp_factor > m_h_sampling ||
+                        m_decompression.m_comp_info[0].v_samp_factor > m_v_sampling)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Cannot honour JPEG sampling factors that exceed those specified.");
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                            "Cannot honour JPEG sampling factors that exceed those specified.");
                         return false;
                     }
 
@@ -805,16 +814,19 @@ namespace BitMiracle.LibTiff.Internal
                     {
                         Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                             "Decompressor will try reading with sampling {0},{1}.",
-                            m_decompression.m_comp_info[0].h_samp_factor, m_decompression.m_comp_info[0].v_samp_factor);
+                            m_decompression.m_comp_info[0].h_samp_factor,
+                            m_decompression.m_comp_info[0].v_samp_factor);
 
                         m_h_sampling = (ushort)m_decompression.m_comp_info[0].h_samp_factor;
                         m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
                     }
                 }
+
                 /* Rest should have sampling factors 1,1 */
                 for (ci = 1; ci < m_decompression.Num_components; ci++)
                 {
-                    if (m_decompression.m_comp_info[ci].h_samp_factor != 1 || m_decompression.m_comp_info[ci].v_samp_factor != 1)
+                    if (m_decompression.m_comp_info[ci].h_samp_factor != 1 ||
+                        m_decompression.m_comp_info[ci].v_samp_factor != 1)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG sampling factors");
                         return false;
@@ -824,14 +836,18 @@ namespace BitMiracle.LibTiff.Internal
             else
             {
                 /* PC 2's single component should have sampling factors 1,1 */
-                if (m_decompression.m_comp_info[0].h_samp_factor != 1 || m_decompression.m_comp_info[0].v_samp_factor != 1)
+                if (m_decompression.m_comp_info[0].h_samp_factor != 1 ||
+                    m_decompression.m_comp_info[0].v_samp_factor != 1)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG sampling factors");
                     return false;
                 }
             }
+
             downsampled_output = false;
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
+            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
+                m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR &&
+                m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
             {
                 /* Convert YCbCr to RGB */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
@@ -842,10 +858,14 @@ namespace BitMiracle.LibTiff.Internal
                 /* Suppress colorspace handling */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
                 m_decompression.Out_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
-                if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && (m_h_sampling != 1 || m_v_sampling != 1))
+                if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
+                    (m_h_sampling != 1 || m_v_sampling != 1))
+                {
                     downsampled_output = true;
+                }
                 /* XXX what about up-sampling? */
             }
+
             if (downsampled_output)
             {
                 /* Need to use raw-data interface to libjpeg */
@@ -1006,14 +1026,17 @@ namespace BitMiracle.LibTiff.Internal
                 segment_height = Tiff.howMany(segment_height, m_v_sampling);
             }
             
-            if (m_decompression.Image_width < segment_width || m_decompression.Image_height < segment_height)
+            if (m_decompression.Image_width < segment_width ||
+                m_decompression.Image_height < segment_height)
             {
                 Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                     "Improper JPEG strip/tile size, expected {0}x{1}, got {2}x{3}",
-                    segment_width, segment_height, m_decompression.Image_width, m_decompression.Image_height);
+                    segment_width, segment_height, m_decompression.Image_width,
+                    m_decompression.Image_height);
             }
 
-            if (m_decompression.Image_width > segment_width || m_decompression.Image_height > segment_height)
+            if (m_decompression.Image_width > segment_width ||
+                m_decompression.Image_height > segment_height)
             {
                 /*
                 * This case could be dangerous, if the strip or tile size has
@@ -1042,12 +1065,14 @@ namespace BitMiracle.LibTiff.Internal
             if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
             {
                 /* Component 0 should have expected sampling factors */
-                if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling || m_decompression.m_comp_info[0].v_samp_factor != m_v_sampling)
+                if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling ||
+                    m_decompression.m_comp_info[0].v_samp_factor != m_v_sampling)
                 {
                     Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                         "Improper JPEG sampling factors {0},{1}\nApparently should be {2},{3}.",
                         m_decompression.m_comp_info[0].h_samp_factor, 
-                        m_decompression.m_comp_info[0].v_samp_factor, m_h_sampling, m_v_sampling);
+                        m_decompression.m_comp_info[0].v_samp_factor,
+                        m_h_sampling, m_v_sampling);
 
                     /*
                     * There are potential security issues here
@@ -1056,9 +1081,11 @@ namespace BitMiracle.LibTiff.Internal
                     * factors. Lets check the sampling factors
                     * dont exceed what we were expecting.
                     */
-                    if (m_decompression.m_comp_info[0].h_samp_factor > m_h_sampling || m_decompression.m_comp_info[0].v_samp_factor > m_v_sampling)
+                    if (m_decompression.m_comp_info[0].h_samp_factor > m_h_sampling ||
+                        m_decompression.m_comp_info[0].v_samp_factor > m_v_sampling)
                     {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Cannot honour JPEG sampling factors that exceed those specified.");
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
+                            "Cannot honour JPEG sampling factors that exceed those specified.");
                         return false;
                     }
 
@@ -1080,10 +1107,12 @@ namespace BitMiracle.LibTiff.Internal
                         m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
                     }
                 }
+
                 /* Rest should have sampling factors 1,1 */
                 for (ci = 1; ci < m_decompression.Num_components; ci++)
                 {
-                    if (m_decompression.m_comp_info[ci].h_samp_factor != 1 || m_decompression.m_comp_info[ci].v_samp_factor != 1)
+                    if (m_decompression.m_comp_info[ci].h_samp_factor != 1 ||
+                        m_decompression.m_comp_info[ci].v_samp_factor != 1)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG sampling factors");
                         return false;
@@ -1093,14 +1122,18 @@ namespace BitMiracle.LibTiff.Internal
             else
             {
                 /* PC 2's single component should have sampling factors 1,1 */
-                if (m_decompression.m_comp_info[0].h_samp_factor != 1 || m_decompression.m_comp_info[0].v_samp_factor != 1)
+                if (m_decompression.m_comp_info[0].h_samp_factor != 1 ||
+                    m_decompression.m_comp_info[0].v_samp_factor != 1)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG sampling factors");
                     return false;
                 }
             }
+
             downsampled_output = false;
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
+            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
+                m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR &&
+                m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
             {
                 /* Convert YCbCr to RGB */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
@@ -1111,10 +1144,14 @@ namespace BitMiracle.LibTiff.Internal
                 /* Suppress colorspace handling */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
                 m_decompression.Out_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
-                if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && (m_h_sampling != 1 || m_v_sampling != 1))
+                if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
+                    (m_h_sampling != 1 || m_v_sampling != 1))
+                {
                     downsampled_output = true;
+                }
                 /* XXX what about up-sampling? */
             }
+
             if (downsampled_output)
             {
                 /* Need to use raw-data interface to libjpeg */
@@ -1219,8 +1256,10 @@ namespace BitMiracle.LibTiff.Internal
                     ++m_scancount;
                     m_tif.m_row += m_v_sampling;
 
-                    /* increment/decrement of buf and cc is still incorrect, but should not matter
-                    * TODO: resolve this */
+                    /* increment/decrement of buf and cc is still incorrect,
+                     * but should not matter
+                     * TODO: resolve this
+                     */
                     bufOffset += m_bytesperline;
                     cc -= m_bytesperline;
                     nrows -= m_v_sampling;
@@ -1275,7 +1314,9 @@ namespace BitMiracle.LibTiff.Internal
             /* a clumpline is equivalent to v_sampling desubsampled scanlines */
             /* TODO: the following calculation of bytesperclumpline, should substitute 
              * calculation of bytesperline, except that it is per v_sampling lines */
-            int bytesperclumpline = (((m_compression.Image_width + m_h_sampling - 1) / m_h_sampling) * (m_h_sampling * m_v_sampling + 2) * m_compression.Data_precision + 7) / 8;
+            int bytesperclumpline = (((m_compression.Image_width + m_h_sampling - 1) / m_h_sampling) *
+                (m_h_sampling * m_v_sampling + 2) * m_compression.Data_precision + 7) / 8;
+
             int nrows = (cc / bytesperclumpline) * m_v_sampling;
             if ((cc % bytesperclumpline) != 0)
                 Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "fractional scanline discarded");
@@ -1569,21 +1610,6 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        //private int TIFFjpeg_read_scanlines(byte[][] scanlines, int max_lines)
-        //{
-        //    int n = 0;
-        //    try
-        //    {
-        //        n = m_decompression.jpeg_read_scanlines(scanlines, (int)max_lines);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return -1;
-        //    }
-
-        //    return n;
-        //}
-
         private int TIFFjpeg_read_raw_data(byte[][][] data, int max_lines)
         {
             int n = 0;
@@ -1665,7 +1691,10 @@ namespace BitMiracle.LibTiff.Internal
             {
                 jpeg_component_info compptr = comp_info[ci];
                 samples_per_clump += compptr.h_samp_factor * compptr.v_samp_factor;
-                byte[][] buf = TIFFjpeg_alloc_sarray(compptr.width_in_blocks * JpegConstants.DCTSIZE, (int)(compptr.v_samp_factor * JpegConstants.DCTSIZE));
+                
+                byte[][] buf = TIFFjpeg_alloc_sarray(
+                    compptr.width_in_blocks * JpegConstants.DCTSIZE, 
+                    (int)(compptr.v_samp_factor * JpegConstants.DCTSIZE));
                 m_ds_buffer[ci] = buf;
             }
 

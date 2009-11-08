@@ -134,10 +134,6 @@ namespace BitMiracle.LibTiff.Internal
             m_oldStyleCodeFound = false;
             m_enc_hashtab = null;
             m_rw_mode = m_tif.m_mode;
-
-            /*
-             * Install codec methods.
-             */
             m_compatDecode = false;
 
             /*
@@ -282,6 +278,7 @@ namespace BitMiracle.LibTiff.Internal
                     tif_setupdecode();
                     m_oldStyleCodeFound = true;
                 }
+
                 m_maxcode = CODE_MIN;
             }
             else
@@ -335,6 +332,7 @@ namespace BitMiracle.LibTiff.Internal
                      * values in the output buffer, and return.
                      */
                     m_dec_restart += occ;
+
                     do
                     {
                         codep = m_dec_codetab[codep].next;

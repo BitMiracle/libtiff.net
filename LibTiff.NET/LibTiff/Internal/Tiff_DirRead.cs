@@ -59,11 +59,6 @@ namespace BitMiracle.LibTiff
             return ((x & 0x07) != 0 ? (x >> 3) + 1 : x >> 3);
         }
 
-        private bool readDirectoryFailed(TiffDirEntry[] dir)
-        {
-            return false;
-        }
-
         private bool estimateStripByteCounts(TiffDirEntry[] dir, ushort dircount)
         {
             const string module = "estimateStripByteCounts";
@@ -334,29 +329,26 @@ namespace BitMiracle.LibTiff
                 {
                     case TiffDataType.TIFF_SHORT:
                     case TiffDataType.TIFF_SSHORT:
-                        {
-                            ushort[] u = ByteArrayToUInt16(cp, 0, cc);
-                            SwabArrayOfShort(u, dir.tdir_count);
-                            UInt16ToByteArray(u, 0, dir.tdir_count, cp, 0);
-                        }
+                        ushort[] s = ByteArrayToUInt16(cp, 0, cc);
+                        SwabArrayOfShort(s, dir.tdir_count);
+                        UInt16ToByteArray(s, 0, dir.tdir_count, cp, 0);
                         break;
+                    
                     case TiffDataType.TIFF_LONG:
                     case TiffDataType.TIFF_SLONG:
                     case TiffDataType.TIFF_FLOAT:
-                        {
-                            int[] u = ByteArrayToInt(cp, 0, cc);
-                            SwabArrayOfLong(u, dir.tdir_count);
-                            IntToByteArray(u, 0, dir.tdir_count, cp, 0);
-                        }
+                        int[] l = ByteArrayToInt(cp, 0, cc);
+                        SwabArrayOfLong(l, dir.tdir_count);
+                        IntToByteArray(l, 0, dir.tdir_count, cp, 0);
                         break;
+                    
                     case TiffDataType.TIFF_RATIONAL:
                     case TiffDataType.TIFF_SRATIONAL:
-                        {
-                            int[] u = ByteArrayToInt(cp, 0, cc);
-                            SwabArrayOfLong(u, 2 * dir.tdir_count);
-                            IntToByteArray(u, 0, 2 * dir.tdir_count, cp, 0);
-                        }
+                        int[] r = ByteArrayToInt(cp, 0, cc);
+                        SwabArrayOfLong(r, 2 * dir.tdir_count);
+                        IntToByteArray(r, 0, 2 * dir.tdir_count, cp, 0);
                         break;
+                    
                     case TiffDataType.TIFF_DOUBLE:
                         swab64BitData(cp, cc);
                         break;
@@ -443,8 +435,7 @@ namespace BitMiracle.LibTiff
         private float fetchFloat(TiffDirEntry dir)
         {
             int l = extractData(dir);
-            float v = BitConverter.ToSingle(BitConverter.GetBytes(l), 0);
-            return v;
+            return BitConverter.ToSingle(BitConverter.GetBytes(l), 0);
         }
 
         /*
@@ -542,7 +533,7 @@ namespace BitMiracle.LibTiff
         private bool fetchShortPair(TiffDirEntry dir)
         {
             /*
-            * Prevent overflowing the v stack arrays below by performing a sanity
+            * Prevent overflowing arrays below by performing a sanity
             * check on tdir_count, this should never be greater than two.
             */
             if (dir.tdir_count > 2) 
@@ -557,16 +548,13 @@ namespace BitMiracle.LibTiff
             {
                 case TiffDataType.TIFF_BYTE:
                 case TiffDataType.TIFF_SBYTE:
-                    {
-                        byte[] v = new byte[4];
-                        return fetchByteArray(dir, v) && SetField(dir.tdir_tag, v[0], v[1]);
-                    }
+                    byte[] bytes = new byte[4];
+                    return fetchByteArray(dir, bytes) && SetField(dir.tdir_tag, bytes[0], bytes[1]);
+
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
-                    {
-                        ushort[] v = new ushort[2];
-                        return fetchShortArray(dir, v) && SetField(dir.tdir_tag, v[0], v[1]);
-                    }
+                    ushort[] shorts = new ushort[2];
+                    return fetchShortArray(dir, shorts) && SetField(dir.tdir_tag, shorts[0], shorts[1]);
             }
 
             return false;
@@ -687,81 +675,78 @@ namespace BitMiracle.LibTiff
         */
         private bool fetchAnyArray(TiffDirEntry dir, double[] v)
         {
+            int i = 0;
+            bool res = false;
             switch (dir.tdir_type)
             {
                 case TiffDataType.TIFF_BYTE:
                 case TiffDataType.TIFF_SBYTE:
+                    byte[] b = new byte[dir.tdir_count];
+                    res = fetchByteArray(dir, b);
+                    if (res)
                     {
-                        byte[] b = new byte[dir.tdir_count];
-                        bool res = fetchByteArray(dir, b);
-                        if (res)
-                        {
-                            for (int i = dir.tdir_count - 1; i >= 0; i--)
-                                v[i] = b[i];
-                        }
-                        
-                        if (!res)
-                            return false;
+                        for (i = dir.tdir_count - 1; i >= 0; i--)
+                            v[i] = b[i];
                     }
+                    
+                    if (!res)
+                        return false;
+
                     break;
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
+                    ushort[] u = new ushort[dir.tdir_count];
+                    res = fetchShortArray(dir, u);
+                    if (res)
                     {
-                        ushort[] u = new ushort[dir.tdir_count];
-                        bool res = fetchShortArray(dir, u);
-                        if (res)
-                        {
-                            for (int i = dir.tdir_count - 1; i >= 0; i--)
-                                v[i] = u[i];
-                        }
-
-                        if (!res)
-                            return false;
+                        for (i = dir.tdir_count - 1; i >= 0; i--)
+                            v[i] = u[i];
                     }
+
+                    if (!res)
+                        return false;
+
                     break;
                 case TiffDataType.TIFF_LONG:
                 case TiffDataType.TIFF_SLONG:
+                    int[] l = new int[dir.tdir_count];
+                    res = fetchLongArray(dir, l);
+                    if (res)
                     {
-                        int[] l = new int[dir.tdir_count];
-                        bool res = fetchLongArray(dir, l);
-                        if (res)
-                        {
-                            for (int i = dir.tdir_count - 1; i >= 0; i--)
-                                v[i] = l[i];
-                        }
-
-                        if (!res)
-                            return false;
+                        for (i = dir.tdir_count - 1; i >= 0; i--)
+                            v[i] = l[i];
                     }
+
+                    if (!res)
+                        return false;
+
                     break;
                 case TiffDataType.TIFF_RATIONAL:
                 case TiffDataType.TIFF_SRATIONAL:
+                    float[] r = new float[dir.tdir_count];
+                    res = fetchRationalArray(dir, r);
+                    if (res)
                     {
-                        float[] f = new float[dir.tdir_count];
-                        bool res = fetchRationalArray(dir, f);
-                        if (res)
-                        {
-                            for (int i = dir.tdir_count - 1; i >= 0; i--)
-                                v[i] = f[i];
-                        }
-
-                        if (!res)
-                            return false;
+                        for (i = dir.tdir_count - 1; i >= 0; i--)
+                            v[i] = r[i];
                     }
+
+                    if (!res)
+                        return false;
+
                     break;
                 case TiffDataType.TIFF_FLOAT:
+                    float[] f = new float[dir.tdir_count];
+                    res = fetchFloatArray(dir, f);
+                    if (res)
                     {
-                        float[] f = new float[dir.tdir_count];
-                        bool res = fetchFloatArray(dir, f);
-                        if (res)
-                        {
-                            for (int i = dir.tdir_count - 1; i >= 0; i--)
-                                v[i] = f[i];
-                        }
-
-                        if (!res)
-                            return false;
+                        for (i = dir.tdir_count - 1; i >= 0; i--)
+                            v[i] = f[i];
                     }
+
+                    if (!res)
+                        return false;
+
                     break;
                 case TiffDataType.TIFF_DOUBLE:
                     return fetchDoubleArray(dir, v);
@@ -792,109 +777,102 @@ namespace BitMiracle.LibTiff
                 {
                     case TiffDataType.TIFF_BYTE:
                     case TiffDataType.TIFF_SBYTE:
+                        byte[] bytes = new byte [dir.tdir_count];
+                        ok = fetchByteArray(dir, bytes);
+                        if (ok)
                         {
-                            byte[] cp = new byte [dir.tdir_count];
-                            ok = fetchByteArray(dir, cp);
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
-                                else
-                                    ok = SetField(dir.tdir_tag, cp);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, bytes);
+                            else
+                                ok = SetField(dir.tdir_tag, bytes);
                         }
                         break;
+
                     case TiffDataType.TIFF_SHORT:
                     case TiffDataType.TIFF_SSHORT:
+                        ushort[] ushorts = new ushort [dir.tdir_count];
+                        ok = fetchShortArray(dir, ushorts);
+                        if (ok)
                         {
-                            ushort[] cp = new ushort [dir.tdir_count];
-                            ok = fetchShortArray(dir, cp);
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
-                                else
-                                    ok = SetField(dir.tdir_tag, cp);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, ushorts);
+                            else
+                                ok = SetField(dir.tdir_tag, ushorts);
                         }
                         break;
+
                     case TiffDataType.TIFF_LONG:
                     case TiffDataType.TIFF_SLONG:
+                        int[] ints = new int [dir.tdir_count];
+                        ok = fetchLongArray(dir, ints);
+                        if (ok)
                         {
-                            int[] cp = new int [dir.tdir_count];
-                            ok = fetchLongArray(dir, cp);
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
-                                else
-                                    ok = SetField(dir.tdir_tag, cp);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, ints);
+                            else
+                                ok = SetField(dir.tdir_tag, ints);
                         }
                         break;
+
                     case TiffDataType.TIFF_RATIONAL:
                     case TiffDataType.TIFF_SRATIONAL:
+                        float[] rs = new float [dir.tdir_count];
+                        ok = fetchRationalArray(dir, rs);
+                        if (ok)
                         {
-                            float[] cp = new float [dir.tdir_count];
-                            ok = fetchRationalArray(dir, cp);
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
-                                else
-                                    ok = SetField(dir.tdir_tag, cp);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, rs);
+                            else
+                                ok = SetField(dir.tdir_tag, rs);
                         }
                         break;
+
                     case TiffDataType.TIFF_FLOAT:
+                        float[] fs = new float [dir.tdir_count];
+                        ok = fetchFloatArray(dir, fs);
+                        if (ok)
                         {
-                            float[] cp = new float [dir.tdir_count];
-                            ok = fetchFloatArray(dir, cp);
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
-                                else
-                                    ok = SetField(dir.tdir_tag, cp);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, fs);
+                            else
+                                ok = SetField(dir.tdir_tag, fs);
                         }
                         break;
+
                     case TiffDataType.TIFF_DOUBLE:
+                        double[] ds = new double [dir.tdir_count];
+                        ok = fetchDoubleArray(dir, ds);
+                        if (ok)
                         {
-                            double[] cp = new double [dir.tdir_count];
-                            ok = fetchDoubleArray(dir, cp);
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
-                                else
-                                    ok = SetField(dir.tdir_tag, cp);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, ds);
+                            else
+                                ok = SetField(dir.tdir_tag, ds);
                         }
                         break;
+
                     case TiffDataType.TIFF_ASCII:
                     case TiffDataType.TIFF_UNDEFINED:
+                        /* bit of a cheat... */
+                        /*
+                         * Some vendors write strings w/o the trailing
+                         * null byte, so always append one just in case.
+                         */
+                        string cp;
+                        ok = fetchString(dir, out cp) != 0;
+                        if (ok)
                         {
-                            /* bit of a cheat... */
-                            /*
-                             * Some vendors write strings w/o the trailing
-                             * null byte, so always append one just in case.
-                             */
-                            string cp;
-                            ok = fetchString(dir, out cp) != 0;
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
-                                else
-                                    ok = SetField(dir.tdir_tag, cp);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
+                            else
+                                ok = SetField(dir.tdir_tag, cp);
                         }
                         break;
                 }        
             }
             else if (checkDirCount(dir, 1))
             {
+                int v32 = 0;
                 /* singleton value */
                 switch (dir.tdir_type)
                 {
@@ -915,90 +893,86 @@ namespace BitMiracle.LibTiff
                          *     for the tag and that that entry is for the
                          *     widest potential data type the tag may have.
                          */
+                        TiffDataType type = fip.field_type;
+                        if (type != TiffDataType.TIFF_LONG && type != TiffDataType.TIFF_SLONG)
                         {
-                            TiffDataType type = fip.field_type;
-                            if (type != TiffDataType.TIFF_LONG && type != TiffDataType.TIFF_SLONG)
-                            {
-                                ushort v = (ushort)extractData(dir);
-                                if (fip.field_passcount)
-                                {
-                                    ushort[] a = new ushort[1];
-                                    a[0] = v;
-                                    ok = SetField(dir.tdir_tag, 1, a);
-                                }
-                                else
-                                    ok = SetField(dir.tdir_tag, v);
-
-                                break;
-                            }
-
-                            int v32 = extractData(dir);
+                            ushort v = (ushort)extractData(dir);
                             if (fip.field_passcount)
                             {
-                                int[] a = new int[1];
-                                a[0] = v32;
-                                ok = SetField(dir.tdir_tag, 1, a);
-                            }
-                            else
-                                ok = SetField(dir.tdir_tag, v32);
-                        }
-                        break;
-
-                    case TiffDataType.TIFF_LONG:
-                    case TiffDataType.TIFF_SLONG:
-                        {
-                            int v32 = extractData(dir);
-                            if (fip.field_passcount)
-                            {
-                                int[] a = new int[1];
-                                a[0] = v32;
-                                ok = SetField(dir.tdir_tag, 1, a);
-                            }
-                            else
-                                ok = SetField(dir.tdir_tag, v32);
-                        }
-                        break;
-                    case TiffDataType.TIFF_RATIONAL:
-                    case TiffDataType.TIFF_SRATIONAL:
-                    case TiffDataType.TIFF_FLOAT:
-                        {
-                            float v = (dir.tdir_type == TiffDataType.TIFF_FLOAT ? fetchFloat(dir): fetchRational(dir));
-                            if (fip.field_passcount)
-                            {
-                                float[] a = new float[1];
+                                ushort[] a = new ushort[1];
                                 a[0] = v;
                                 ok = SetField(dir.tdir_tag, 1, a);
                             }
                             else
                                 ok = SetField(dir.tdir_tag, v);
+
+                            break;
                         }
-                        break;
-                    case TiffDataType.TIFF_DOUBLE:
+
+                        v32 = extractData(dir);
+                        if (fip.field_passcount)
                         {
-                            double[] v = new double[1];
-                            ok = fetchDoubleArray(dir, v);
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, 1, v);
-                                else
-                                    ok = SetField(dir.tdir_tag, v[0]);
-                            }
+                            int[] a = new int[1];
+                            a[0] = v32;
+                            ok = SetField(dir.tdir_tag, 1, a);
+                        }
+                        else
+                            ok = SetField(dir.tdir_tag, v32);
+
+                        break;
+
+                    case TiffDataType.TIFF_LONG:
+                    case TiffDataType.TIFF_SLONG:
+                        v32 = extractData(dir);
+                        if (fip.field_passcount)
+                        {
+                            int[] a = new int[1];
+                            a[0] = v32;
+                            ok = SetField(dir.tdir_tag, 1, a);
+                        }
+                        else
+                            ok = SetField(dir.tdir_tag, v32);
+
+                        break;
+
+                    case TiffDataType.TIFF_RATIONAL:
+                    case TiffDataType.TIFF_SRATIONAL:
+                    case TiffDataType.TIFF_FLOAT:
+                        float f = (dir.tdir_type == TiffDataType.TIFF_FLOAT ? fetchFloat(dir): fetchRational(dir));
+                        if (fip.field_passcount)
+                        {
+                            float[] a = new float[1];
+                            a[0] = f;
+                            ok = SetField(dir.tdir_tag, 1, a);
+                        }
+                        else
+                            ok = SetField(dir.tdir_tag, f);
+
+                        break;
+
+                    case TiffDataType.TIFF_DOUBLE:
+                        double[] ds = new double[1];
+                        ok = fetchDoubleArray(dir, ds);
+                        if (ok)
+                        {
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, 1, ds);
+                            else
+                                ok = SetField(dir.tdir_tag, ds[0]);
                         }
                         break;
+
                     case TiffDataType.TIFF_ASCII:
                     case TiffDataType.TIFF_UNDEFINED:
-                         /* bit of a cheat... */
+                        /* bit of a cheat... */
+                        string c;
+                        ok = fetchString(dir, out c) != 0;
+                        if (ok)
                         {
-                            string c;
-                            ok = fetchString(dir, out c) != 0;
-                            if (ok)
-                            {
-                                if (fip.field_passcount)
-                                    ok = SetField(dir.tdir_tag, 1, c);
-                                else
-                                    ok = SetField(dir.tdir_tag, c);
-                            }
+                            if (fip.field_passcount)
+                                ok = SetField(dir.tdir_tag, 1, c);
+                            else
+                                ok = SetField(dir.tdir_tag, c);
                         }
                         break;
                 }

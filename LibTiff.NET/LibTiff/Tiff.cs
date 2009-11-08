@@ -1105,7 +1105,7 @@ namespace BitMiracle.LibTiff
                 if (dp.tdir_tag == TIFFTAG.TIFFTAG_SAMPLESPERPIXEL)
                 {
                     if (!fetchNormalTag(dir[i]))
-                        return readDirectoryFailed(dir);
+                        return false;
 
                     dp.tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
                 }
@@ -1214,7 +1214,7 @@ namespace BitMiracle.LibTiff
                         {
                             int v = extractData(dir[i]);
                             if (!SetField(dir[i].tdir_tag, (ushort)v))
-                                return readDirectoryFailed(dir);
+                                return false;
                             
                             break;
                             /* XXX: workaround for broken TIFFs */
@@ -1223,13 +1223,13 @@ namespace BitMiracle.LibTiff
                         {
                             int v;
                             if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, (ushort)v))
-                                return readDirectoryFailed(dir);
+                                return false;
                         }
                         else
                         {
                             ushort iv;
                             if (!fetchPerSampleShorts(dir[i], out iv) || !SetField(dir[i].tdir_tag, iv))
-                                return readDirectoryFailed(dir);
+                                return false;
                         }
                         dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
                         break;
@@ -1249,7 +1249,7 @@ namespace BitMiracle.LibTiff
                     case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
                     case TIFFTAG.TIFFTAG_EXTRASAMPLES:
                         if (!fetchNormalTag(dir[i]))
-                            return readDirectoryFailed(dir);
+                            return false;
                         dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
                         break;
                 }
@@ -1283,7 +1283,7 @@ namespace BitMiracle.LibTiff
             if (!fieldSet(FIELD.FIELD_IMAGEDIMENSIONS))
             {
                 missingRequired("ImageLength");
-                return readDirectoryFailed(dir);
+                return false;
             }
 
             /* 
@@ -1306,7 +1306,7 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_nstrips == 0)
             {
                 ErrorExt(this, m_clientdata, module, "{0}: cannot handle zero number of {1}", m_name, IsTiled() ? "tiles" : "strips");
-                return readDirectoryFailed(dir);
+                return false;
             }
 
             m_dir.td_stripsperimage = m_dir.td_nstrips;
@@ -1330,7 +1330,7 @@ namespace BitMiracle.LibTiff
                 else 
                 {
                     missingRequired(IsTiled() ? "TileOffsets" : "StripOffsets");
-                    return readDirectoryFailed(dir);
+                    return false;
                 }
             }
 
@@ -1368,20 +1368,20 @@ namespace BitMiracle.LibTiff
                         {
                             int v = extractData(dir[i]);
                             if (!SetField(dir[i].tdir_tag, (ushort)v))
-                                return readDirectoryFailed(dir);
+                                return false;
                             /* XXX: workaround for broken TIFFs */
                         }
                         else if (dir[i].tdir_tag == TIFFTAG.TIFFTAG_BITSPERSAMPLE && dir[i].tdir_type == TiffDataType.TIFF_LONG)
                         {
                             int v;
                             if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, (ushort)v))
-                                return readDirectoryFailed(dir);
+                                return false;
                         }
                         else
                         {
                             ushort iv;
                             if (!fetchPerSampleShorts(dir[i], out iv) || !SetField(dir[i].tdir_tag, iv))
-                                return readDirectoryFailed(dir);
+                                return false;
                         }
                         break;
                     case TIFFTAG.TIFFTAG_SMINSAMPLEVALUE:
@@ -1389,18 +1389,18 @@ namespace BitMiracle.LibTiff
                         {
                             double dv;
                             if (!fetchPerSampleAnys(dir[i], out dv) || !SetField(dir[i].tdir_tag, dv))
-                                return readDirectoryFailed(dir);
+                                return false;
                         }
                         break;
                     case TIFFTAG.TIFFTAG_STRIPOFFSETS:
                     case TIFFTAG.TIFFTAG_TILEOFFSETS:
                         if (!fetchStripThing(dir[i], m_dir.td_nstrips, ref m_dir.td_stripoffset))
-                            return readDirectoryFailed(dir);
+                            return false;
                         break;
                     case TIFFTAG.TIFFTAG_STRIPBYTECOUNTS:
                     case TIFFTAG.TIFFTAG_TILEBYTECOUNTS:
                         if (!fetchStripThing(dir[i], m_dir.td_nstrips, ref m_dir.td_stripbytecount))
-                            return readDirectoryFailed(dir);
+                            return false;
                         break;
                     case TIFFTAG.TIFFTAG_COLORMAP:
                     case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
@@ -1498,7 +1498,7 @@ namespace BitMiracle.LibTiff
                 {
                     WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag is missing, assuming data is YCbCr");
                     if (!SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_YCBCR))
-                        return readDirectoryFailed(dir);
+                        return false;
                 }
                 else if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_RGB)
                 {
@@ -1510,7 +1510,7 @@ namespace BitMiracle.LibTiff
                 {
                     WarningExt(this, m_clientdata, "ReadDirectory", "BitsPerSample tag is missing, assuming 8 bits per sample");
                     if (!SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, 8))
-                        return readDirectoryFailed(dir);
+                        return false;
                 }
 
                 if (!fieldSet(FIELD.FIELD_SAMPLESPERPIXEL))
@@ -1519,13 +1519,13 @@ namespace BitMiracle.LibTiff
                     {
                         WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 3");
                         if (!SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, 3))
-                            return readDirectoryFailed(dir);
+                            return false;
                     }
                     else if ((m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE) || (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISBLACK))
                     {
                         WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 1");
                         if (!SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, 1))
-                            return readDirectoryFailed(dir);
+                            return false;
                     }
                 }
             }
@@ -1536,7 +1536,7 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_PALETTE && !fieldSet(FIELD.FIELD_COLORMAP))
             {
                 missingRequired("Colormap");
-                return readDirectoryFailed(dir);
+                return false;
             }
 
             /*
@@ -1560,12 +1560,12 @@ namespace BitMiracle.LibTiff
                         (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_dir.td_nstrips != m_dir.td_samplesperpixel))
                     {
                         missingRequired("StripByteCounts");
-                        return readDirectoryFailed(dir);
+                        return false;
                     }
 
                     WarningExt(this, m_clientdata, module, "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
-                        return readDirectoryFailed(dir);
+                        return false;
                 }
                 else if (m_dir.td_nstrips == 1 && m_dir.td_stripoffset[0] != 0 && byteCountLooksBad(m_dir))
                 {
@@ -1577,7 +1577,7 @@ namespace BitMiracle.LibTiff
                      */
                     WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
-                        return readDirectoryFailed(dir);
+                        return false;
                 }
                 else if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_nstrips > 2 && m_dir.td_compression == COMPRESSION.COMPRESSION_NONE && m_dir.td_stripbytecount[0] != m_dir.td_stripbytecount[1])
                 {
@@ -1588,7 +1588,7 @@ namespace BitMiracle.LibTiff
                      */
                     WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
-                        return readDirectoryFailed(dir);
+                        return false;
                 }
             }
 

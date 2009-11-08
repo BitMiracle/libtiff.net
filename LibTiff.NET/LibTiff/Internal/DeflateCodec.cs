@@ -61,21 +61,14 @@ namespace BitMiracle.LibTiff.Internal
 
         public override bool Init()
         {
-            Debug.Assert((m_scheme == COMPRESSION.COMPRESSION_DEFLATE) || (m_scheme == COMPRESSION.COMPRESSION_ADOBE_DEFLATE));
+            Debug.Assert((m_scheme == COMPRESSION.COMPRESSION_DEFLATE) || 
+                (m_scheme == COMPRESSION.COMPRESSION_ADOBE_DEFLATE));
 
             /*
             * Merge codec-specific tag information and
             * override parent get/set field methods.
             */
             m_tif.MergeFieldInfo(zipFieldInfo, zipFieldInfo.Length);
-
-            /*
-             * Allocate state block so tag methods have storage to record values.
-             */
-            //m_stream.zalloc = null;
-            //m_stream.zfree = null;
-            //m_stream.opaque = null;
-            //m_stream.data_type = Z_BINARY;
 
             /* Default values for codec-specific fields */
             m_zipquality = zlibConst.Z_DEFAULT_COMPRESSION; /* default comp. level */
@@ -335,7 +328,8 @@ namespace BitMiracle.LibTiff.Internal
 
             if (m_stream.inflateInit() != zlibConst.Z_OK)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "{0}: {1}", m_tif.m_name, m_stream.msg);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "{0}: {1}",
+                    m_tif.m_name, m_stream.msg);
                 return false;
             }
 
@@ -355,7 +349,8 @@ namespace BitMiracle.LibTiff.Internal
 
             if (m_stream.deflateInit(m_zipquality) != zlibConst.Z_OK)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "{0}: {1}", m_tif.m_name, m_stream.msg);
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "{0}: {1}",
+                    m_tif.m_name, m_stream.msg);
                 return false;
             }
 

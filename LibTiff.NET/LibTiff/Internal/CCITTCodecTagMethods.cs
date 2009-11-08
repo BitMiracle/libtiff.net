@@ -21,7 +21,7 @@ namespace BitMiracle.LibTiff.Internal
     {
         public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
         {
-            CCITTCodec sp = (CCITTCodec)tif.m_currentCodec;
+            CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
 
             switch (tag)
@@ -79,7 +79,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
         {
-            CCITTCodec sp = (CCITTCodec)tif.m_currentCodec;
+            CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
 
             FieldValue[] result = new FieldValue[1];
@@ -126,7 +126,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override void printdir(Tiff tif, Stream fd, TiffPrintDirectoryFlags flags)
         {
-            CCITTCodec sp = (CCITTCodec)tif.m_currentCodec;
+            CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
 
             if (tif.fieldSet(CCITTCodec.FIELD_OPTIONS))

@@ -143,7 +143,6 @@ namespace BitMiracle.LibTiff
         private static TiffExtendProc m_extender;
 
         private TiffStream m_stream; // stream used for read|write|etc.
-        //private bool m_userStream; // if true, then stream in use is provided by user.
 
         private Tiff()
         {
@@ -158,7 +157,6 @@ namespace BitMiracle.LibTiff
 
             m_dirnumber = 0;
             m_dir = null;
-            //tif_header;
             m_typeshift = null;
             m_typemask = null;
             m_row = 0;
@@ -185,7 +183,6 @@ namespace BitMiracle.LibTiff
             m_rawcc = 0;
 
             m_stream = null;
-            //m_userStream = false;
 
             m_clientdata = 0;
 
@@ -243,12 +240,8 @@ namespace BitMiracle.LibTiff
         internal static TiffFieldInfo[] Realloc(TiffFieldInfo[] oldBuffer, int elementCount, int newElementCount)
         {
             TiffFieldInfo[] newBuffer = new TiffFieldInfo [newElementCount];
-            //memset(newBuffer, 0, newElementCount * sizeof(TiffFieldInfo*));
 
-            if (oldBuffer == null)
-                return newBuffer;
-
-            if (newBuffer != null)
+            if (oldBuffer != null)
             {
                 int copyLength = Math.Min(elementCount, newElementCount);
                 Array.Copy(oldBuffer, newBuffer, copyLength);
@@ -260,12 +253,8 @@ namespace BitMiracle.LibTiff
         internal static TiffTagValue[] Realloc(TiffTagValue[] oldBuffer, int elementCount, int newElementCount)
         {
             TiffTagValue[] newBuffer = new TiffTagValue[newElementCount];
-            //memset(newBuffer, 0, newElementCount * sizeof(TiffTagValue));
 
-            if (oldBuffer == null)
-                return newBuffer;
-
-            if (newBuffer != null)
+            if (oldBuffer != null)
             {
                 int copyLength = Math.Min(elementCount, newElementCount);
                 Array.Copy(oldBuffer, newBuffer, copyLength);

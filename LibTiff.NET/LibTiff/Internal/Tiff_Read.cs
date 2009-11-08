@@ -415,7 +415,7 @@ namespace BitMiracle.LibTiff
                     ReadBufferSetup(null, roundUp(bytecount, 1024));
                 }
                 
-                if ((uint)readRawStrip1(strip, m_rawdata, 0, bytecount, module) != bytecount)
+                if (readRawStrip1(strip, m_rawdata, 0, bytecount, module) != bytecount)
                     return false;
                 
                 if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)

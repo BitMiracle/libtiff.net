@@ -71,8 +71,12 @@ namespace BitMiracle.LibTiff
                     fprintf(fd, "{0}", (raw_data as uint[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_SLONG)
                     fprintf(fd, "{0}", (raw_data as int[])[j]);
-                else if (fip.field_type == TiffDataType.TIFF_RATIONAL || fip.field_type == TiffDataType.TIFF_SRATIONAL || fip.field_type == TiffDataType.TIFF_FLOAT)
+                else if (fip.field_type == TiffDataType.TIFF_RATIONAL ||
+                    fip.field_type == TiffDataType.TIFF_SRATIONAL ||
+                    fip.field_type == TiffDataType.TIFF_FLOAT)
+                {
                     fprintf(fd, "{0}", (raw_data as float[])[j]);
+                }
                 else if (fip.field_type == TiffDataType.TIFF_IFD)
                     fprintf(fd, "0x{0:x}", (raw_data as uint[])[j]);
                 else if (fip.field_type == TiffDataType.TIFF_ASCII)

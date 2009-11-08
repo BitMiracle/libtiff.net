@@ -300,22 +300,10 @@ namespace BitMiracle.LibTiff
             MergeFieldInfo(info, n);
         }
 
-        //private static bool tagCompare(TiffFieldInfo info)
-        //{
-        //    if (info != null && info.field_tag == tag && (dt == TiffDataType.TIFF_ANY || dt == info.field_type))
-        //        return true;
-
-        //    return false;
-        //}
-
-        //private static int tagNameCompare(const void* a, const void* b);
-
         private void printFieldInfo(Stream fd)
         {
-            uint i;
-
             fprintf(fd, "{0}: \n", m_name);
-            for (i = 0; i < m_nfields; i++)
+            for (uint i = 0; i < m_nfields; i++)
             {
                 TiffFieldInfo fip = m_fieldinfo[i];
                 fprintf(fd, "field[{0,2:D}] {1,5:D}, {2,2:D}, {3,2:D}, {4}, {5,2:D}, {6,5}, {7,5}, {8}\n",
@@ -387,9 +375,11 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_ASCII:
                 case TiffDataType.TIFF_UNDEFINED:
                     return 1;
+
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
                     return 2;
+
                 case TiffDataType.TIFF_LONG:
                 case TiffDataType.TIFF_SLONG:
                 case TiffDataType.TIFF_FLOAT:
@@ -397,8 +387,10 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_RATIONAL:
                 case TiffDataType.TIFF_SRATIONAL:
                     return 4;
+
                 case TiffDataType.TIFF_DOUBLE:
                     return 8;
+
                 default:
                     return 0;
             }

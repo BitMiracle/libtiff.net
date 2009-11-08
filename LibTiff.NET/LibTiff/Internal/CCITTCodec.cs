@@ -1006,7 +1006,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (m_EOLcnt == 0)
             {
-                for (; ; )
+                for ( ; ; )
                 {
                     if (!NeedBits16(11))
                         return false;
@@ -1049,7 +1049,8 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (m_tif.m_dir.td_bitspersample != 1)
             {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Bits/sample must be 1 for Group 3/4 encoding/decoding");
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "Bits/sample must be 1 for Group 3/4 encoding/decoding");
                 return false;
             }
 
@@ -1075,7 +1076,8 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Allocate any additional space required for decoding/encoding.
              */
-            bool needsRefLine = ((m_groupoptions & GROUP3OPT.GROUP3OPT_2DENCODING) != 0 || m_tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX4);
+            bool needsRefLine = ((m_groupoptions & GROUP3OPT.GROUP3OPT_2DENCODING) != 0 ||
+                m_tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX4);
 
             int nruns = needsRefLine ? 2 * Tiff.roundUp(rowpixels, 32) : rowpixels;
             nruns += 3;
@@ -1226,13 +1228,9 @@ namespace BitMiracle.LibTiff.Internal
 
                     bool expandSucceeded = false;
                     if (is1D != 0)
-                    {
                         expandSucceeded = EXPAND1D(module);
-                    }
                     else
-                    {
                         expandSucceeded = EXPAND2D(module, b1);
-                    }
 
                     if (expandSucceeded)
                     {
@@ -1267,7 +1265,7 @@ namespace BitMiracle.LibTiff.Internal
         private bool Fax3Encode1DRow()
         {
             int bs = 0;
-            for (; ; )
+            for ( ; ; )
             {
                 int span = find0span(m_bp, m_bpPos, bs, m_rowpixels); /* white span */
                 putspan(span, false);
@@ -1460,9 +1458,6 @@ namespace BitMiracle.LibTiff.Internal
             m_tif.SetField(TIFFTAG.TIFFTAG_FAXFILLFUNC, new FaxFillFunc(fax3FillRuns));
             m_refline = null;
 
-            /*
-             * Install codec methods.
-             */
             m_decoder = Decoder.useFax3_1DDecoder;
             m_encodingFax4 = false;
         }
@@ -1617,17 +1612,17 @@ namespace BitMiracle.LibTiff.Internal
             if (m_RunLength != 0)
                 SETVALUE(0);
 
-            if (m_a0 != (int)m_rowpixels)
+            if (m_a0 != m_rowpixels)
             {
                 Fax3BadLength(module);
 
-                while (m_a0 > (int)m_rowpixels && m_pa > m_thisrun)
+                while (m_a0 > m_rowpixels && m_pa > m_thisrun)
                 {
                     m_pa--;
                     m_a0 -= m_runs[m_pa];
                 }
 
-                if (m_a0 < (int)m_rowpixels)
+                if (m_a0 < m_rowpixels)
                 {
                     if (m_a0 < 0)
                         m_a0 = 0;
@@ -1637,7 +1632,7 @@ namespace BitMiracle.LibTiff.Internal
 
                     SETVALUE(m_rowpixels - m_a0);
                 }
-                else if (m_a0 > (int)m_rowpixels)
+                else if (m_a0 > m_rowpixels)
                 {
                     SETVALUE(m_rowpixels);
                     SETVALUE(0);
@@ -1661,9 +1656,9 @@ namespace BitMiracle.LibTiff.Internal
             bool whiteDecodingDone = false;
             bool blackDecodingDone = false;
 
-            for (; ; )
+            for ( ; ; )
             {
-                for (; ; )
+                for ( ; ; )
                 {
                     if (!LOOKUP16(out TabEnt, 12, false))
                     {
@@ -1704,10 +1699,10 @@ namespace BitMiracle.LibTiff.Internal
                 if (decodingDone)
                     break;
 
-                if (m_a0 >= (int)m_rowpixels)
+                if (m_a0 >= m_rowpixels)
                     break;
 
-                for (; ; )
+                for ( ; ; )
                 {
                     if (!LOOKUP16(out TabEnt, 13, true))
                     {
@@ -1748,7 +1743,7 @@ namespace BitMiracle.LibTiff.Internal
                 if (decodingDone)
                     break;
 
-                if (m_a0 >= (int)m_rowpixels)
+                if (m_a0 >= m_rowpixels)
                     break;
 
                 if (m_runs[m_pa - 1] == 0 && m_runs[m_pa - 2] == 0)
@@ -1770,7 +1765,7 @@ namespace BitMiracle.LibTiff.Internal
             faxTableEntry TabEnt;
             bool decodingDone = false;
 
-            while (m_a0 < (int)m_rowpixels)
+            while (m_a0 < m_rowpixels)
             {
                 if (!LOOKUP8(out TabEnt, 7))
                 {
@@ -1793,7 +1788,7 @@ namespace BitMiracle.LibTiff.Internal
                     case S_Horiz:
                         if (((m_pa - m_thisrun) & 1) != 0)
                         {
-                            for (; ; )
+                            for ( ; ; )
                             {
                                 /* black first */
                                 if (!LOOKUP16(out TabEnt, 13, true))
@@ -1830,7 +1825,7 @@ namespace BitMiracle.LibTiff.Internal
                             if (decodingDone)
                                 break;
 
-                            for (; ; )
+                            for ( ; ; )
                             {
                                 /* then white */
                                 if (!LOOKUP16(out TabEnt, 12, false))
@@ -1869,7 +1864,7 @@ namespace BitMiracle.LibTiff.Internal
                         }
                         else
                         {
-                            for (; ; )
+                            for ( ; ; )
                             {
                                 /* white first */
                                 if (!LOOKUP16(out TabEnt, 12, false))
@@ -1906,7 +1901,7 @@ namespace BitMiracle.LibTiff.Internal
                             if (decodingDone)
                                 break;
 
-                            for (; ; )
+                            for ( ; ; )
                             {
                                 /* then black */
                                 if (!LOOKUP16(out TabEnt, 13, true))
@@ -2048,7 +2043,8 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Suppress RTC+EOLs when encoding and byte-align data.
              */
-            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, FAXMODE.FAXMODE_NORTC | FAXMODE.FAXMODE_NOEOL | FAXMODE.FAXMODE_BYTEALIGN);
+            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, 
+                FAXMODE.FAXMODE_NORTC | FAXMODE.FAXMODE_NOEOL | FAXMODE.FAXMODE_BYTEALIGN);
         }
 
         private bool TIFFInitCCITTRLEW()
@@ -2061,7 +2057,8 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Suppress RTC+EOLs when encoding and word-align data.
              */
-            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, FAXMODE.FAXMODE_NORTC | FAXMODE.FAXMODE_NOEOL | FAXMODE.FAXMODE_WORDALIGN);
+            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, 
+                FAXMODE.FAXMODE_NORTC | FAXMODE.FAXMODE_NOEOL | FAXMODE.FAXMODE_WORDALIGN);
         }
 
         /*

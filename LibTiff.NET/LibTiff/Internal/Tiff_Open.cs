@@ -23,36 +23,36 @@ namespace BitMiracle.LibTiff
     {
         private static readonly int[] typemask = 
         {
-            0,           /* TIFF_NOTYPE */
-            0x000000ff,  /* TIFF_BYTE */
-            -1,  /* TIFF_ASCII */
-            0x0000ffff,  /* TIFF_SHORT */
-            -1,  /* TIFF_LONG */
-            -1,  /* TIFF_RATIONAL */
-            0x000000ff,  /* TIFF_SBYTE */
-            0x000000ff,  /* TIFF_UNDEFINED */
-            0x0000ffff,  /* TIFF_SSHORT */
-            -1,  /* TIFF_SLONG */
-            -1,  /* TIFF_SRATIONAL */
-            -1,  /* TIFF_FLOAT */
-            -1,  /* TIFF_DOUBLE */
+            0,              /* TIFF_NOTYPE */
+            0x000000ff,     /* TIFF_BYTE */
+            -1,             /* TIFF_ASCII */
+            0x0000ffff,     /* TIFF_SHORT */
+            -1,             /* TIFF_LONG */
+            -1,             /* TIFF_RATIONAL */
+            0x000000ff,     /* TIFF_SBYTE */
+            0x000000ff,     /* TIFF_UNDEFINED */
+            0x0000ffff,     /* TIFF_SSHORT */
+            -1,             /* TIFF_SLONG */
+            -1,             /* TIFF_SRATIONAL */
+            -1,             /* TIFF_FLOAT */
+            -1,             /* TIFF_DOUBLE */
         };
 
         private static readonly int[] bigTypeshift = 
         {
-            0,  /* TIFF_NOTYPE */
-            24,  /* TIFF_BYTE */
-            0,  /* TIFF_ASCII */
-            16,  /* TIFF_SHORT */
-            0,  /* TIFF_LONG */
-            0,  /* TIFF_RATIONAL */
-            24,  /* TIFF_SBYTE */
-            24,  /* TIFF_UNDEFINED */
-            16,  /* TIFF_SSHORT */
-            0,  /* TIFF_SLONG */
-            0,  /* TIFF_SRATIONAL */
-            0,  /* TIFF_FLOAT */
-            0,  /* TIFF_DOUBLE */
+            0,      /* TIFF_NOTYPE */
+            24,     /* TIFF_BYTE */
+            0,      /* TIFF_ASCII */
+            16,     /* TIFF_SHORT */
+            0,      /* TIFF_LONG */
+            0,      /* TIFF_RATIONAL */
+            24,     /* TIFF_SBYTE */
+            24,     /* TIFF_UNDEFINED */
+            16,     /* TIFF_SSHORT */
+            0,      /* TIFF_SLONG */
+            0,      /* TIFF_SRATIONAL */
+            0,      /* TIFF_FLOAT */
+            0,      /* TIFF_DOUBLE */
         };
 
         private static readonly int[] litTypeshift = 
