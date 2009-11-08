@@ -123,7 +123,10 @@ namespace BitMiracle.TiffCP
                     {
                         case ',':
                             if (arg[1] != '=')
+                            {
                                 usage();
+                                return;
+                            }
 
                             comma = arg[2];
                             break;
@@ -164,7 +167,10 @@ namespace BitMiracle.TiffCP
                         case 'c':
                             /* compression scheme */
                             if (!c.ProcessCompressOptions(optarg))
+                            {
                                 usage();
+                                return;
+                            }
 
                             argn++;
                             break;
@@ -175,7 +181,11 @@ namespace BitMiracle.TiffCP
                             else if (optarg == "msb2lsb")
                                 deffillorder = FILLORDER.FILLORDER_MSB2LSB;
                             else
+                            {
                                 usage();
+                                return;
+                            }
+
                             argn++;
                             break;
                         case 'i':
@@ -199,7 +209,10 @@ namespace BitMiracle.TiffCP
                             else if (optarg == "contig")
                                 defconfig = PLANARCONFIG.PLANARCONFIG_CONTIG;
                             else
+                            {
                                 usage();
+                                return;
+                            }
 
                             argn++;
                             break;
@@ -236,13 +249,16 @@ namespace BitMiracle.TiffCP
                             break;
                         case '?':
                             usage();
-                            break;
+                            return;
                     }
                 }
             }
 
             if (args.Length - argn < 2)
+            {
                 usage();
+                return;
+            }
 
             string smode = new string(mode, 0, mp);
             using (Tiff outImage = Tiff.Open(args[args.Length - 1], smode))
@@ -355,8 +371,6 @@ namespace BitMiracle.TiffCP
                 for (int i = 0; m_stuff[i] != null; i++)
                     stderr.Write("{0}\n", m_stuff[i]);
             }
-
-            throw new Exception();
         }
     }
 }

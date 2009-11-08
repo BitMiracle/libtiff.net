@@ -62,7 +62,7 @@ namespace BitMiracle.LibTiff
         /// </summary>
         internal const bool CHECK_JPEG_YCBCR_SUBSAMPLING = true;
 
-        internal const string TIFFLIB_VERSION_STR = "LIBTIFF, Version 3.9.1\nCopyright (c) 1988-1996 Sam Leffler\nCopyright (c) 1991-1996 Silicon Graphics, Inc.";
+        internal const string TIFFLIB_VERSION_STR = "LibTiff.NET, Version {0}\nCopyright (c) 2008-2009, Bit Miracle.";
 
         /*
          * These constants can be used in code that requires
@@ -92,7 +92,7 @@ namespace BitMiracle.LibTiff
 
         public static string GetVersion()
         {
-            return m_version;
+            return string.Format(TIFFLIB_VERSION_STR, AssemblyVersion);
         }
 
         public static string AssemblyVersion

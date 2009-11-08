@@ -145,8 +145,6 @@ namespace BitMiracle.LibTiff
         private TiffStream m_stream; // stream used for read|write|etc.
         //private bool m_userStream; // if true, then stream in use is provided by user.
 
-        private const string m_version = TIFFLIB_VERSION_STR;
-
         private Tiff()
         {
             m_name = null;
