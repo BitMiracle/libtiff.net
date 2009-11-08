@@ -33,7 +33,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override void init_destination()
         {
-            initInternalBuffer(m_tif.m_rawdata);
+            initInternalBuffer(m_tif.m_rawdata, 0);
         }
 
         public override bool empty_output_buffer()
@@ -42,7 +42,7 @@ namespace BitMiracle.LibTiff.Internal
             m_tif.m_rawcc = m_tif.m_rawdatasize;
             m_tif.flushData1();
 
-            initInternalBuffer(m_tif.m_rawdata);
+            initInternalBuffer(m_tif.m_rawdata, 0);
             return true;
         }
 

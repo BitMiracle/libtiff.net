@@ -21,7 +21,7 @@ namespace BitMiracle.LibJpeg.Classic
 #endif
     abstract class jpeg_destination_mgr
     {
-        private byte[] m_next_output_byte;   /* => next byte to write in buffer */
+        private byte[] m_buffer;
         private int m_position;
         private int m_free_in_buffer;  /* # of byte spaces remaining in buffer */
 
@@ -34,7 +34,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         public virtual bool emit_byte(int val)
         {
-            m_next_output_byte[m_position] = (byte)val;
+            m_buffer[m_position] = (byte)val;
             m_position++;
 
             if (--m_free_in_buffer == 0)
@@ -46,11 +46,11 @@ namespace BitMiracle.LibJpeg.Classic
             return true;
         }
 
-        protected void initInternalBuffer(byte[] buffer)
+        protected void initInternalBuffer(byte[] buffer, int offset)
         {
-            m_next_output_byte = buffer;
-            m_free_in_buffer = buffer.Length;
-            m_position = 0;
+            m_buffer = buffer;
+            m_free_in_buffer = buffer.Length - offset;
+            m_position = offset;
         }
 
         protected int freeInBuffer

@@ -50,7 +50,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             /* Allocate the output buffer --- it will be released when done with image */
             m_buffer = new byte[OUTPUT_BUF_SIZE];
-            initInternalBuffer(m_buffer);
+            initInternalBuffer(m_buffer, 0);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
             }
 
-            initInternalBuffer(m_buffer);
+            initInternalBuffer(m_buffer, 0);
             return true;
         }
 
