@@ -179,8 +179,7 @@ namespace BitMiracle.Tiff2Pdf
         {
             T2P t2p = new T2P();
             string outfilename = null;
-            bool failed = false;
-
+            
             int argn = 0;
             for (; argn < args.Length; argn++)
             {
@@ -281,33 +280,23 @@ namespace BitMiracle.Tiff2Pdf
                         break;
 
                     case 'c': 
-                        t2p.m_pdf_creator = new byte [optarg.Length];
-                        bytes = Encoding.GetEncoding("Latin1").GetBytes(optarg);
-                        Array.Copy(bytes, t2p.m_pdf_creator, bytes.Length);
+                        t2p.m_pdf_creator = Encoding.GetEncoding("Latin1").GetBytes(optarg);
                         break;
                     
                     case 'a': 
-                        t2p.m_pdf_author = new byte [optarg.Length];
-                        bytes = Encoding.GetEncoding("Latin1").GetBytes(optarg);
-                        Array.Copy(bytes, t2p.m_pdf_author, bytes.Length);
+                        t2p.m_pdf_author = Encoding.GetEncoding("Latin1").GetBytes(optarg);
                         break;
 
                     case 't': 
-                        t2p.m_pdf_title = new byte [optarg.Length];
-                        bytes = Encoding.GetEncoding("Latin1").GetBytes(optarg);
-                        Array.Copy(bytes, t2p.m_pdf_title, bytes.Length);
+                        t2p.m_pdf_title = Encoding.GetEncoding("Latin1").GetBytes(optarg);
                         break;
                     
                     case 's': 
-                        t2p.m_pdf_subject = new byte [optarg.Length];
-                        bytes = Encoding.GetEncoding("Latin1").GetBytes(optarg);
-                        Array.Copy(bytes, t2p.m_pdf_subject, bytes.Length);
+                        t2p.m_pdf_subject = Encoding.GetEncoding("Latin1").GetBytes(optarg);
                         break;
 
                     case 'k': 
-                        t2p.m_pdf_keywords = new byte [optarg.Length];
-                        bytes = Encoding.GetEncoding("Latin1").GetBytes(optarg);
-                        Array.Copy(bytes, t2p.m_pdf_keywords, bytes.Length);
+                        t2p.m_pdf_keywords = Encoding.GetEncoding("Latin1").GetBytes(optarg);
                         break;
 
                     case 'b':
@@ -321,93 +310,89 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            Tiff input = null;
-            Tiff output = null;
-
-            if (!failed)
+            /*
+             * Input
+             */
+            string inputFileName = null;
+            if (args.Length > argn)
             {
-                /*
-                * Input
-                */
-                if (args.Length > argn)
+                inputFileName = args[++argn];
+            }
+            else
+            {
+                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No input file specified");
+                tiff2pdf_usage();
+                return;
+            }
+
+            using (Tiff input = Tiff.Open(inputFileName, "r"))
+            {
+                if (input == null)
                 {
-                    input = Tiff.Open(args[++argn], "r");
-                    if (input == null)
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open input file {0} for reading", args[argn - 1]);
+                    return;
+                }
+
+                if ((args.Length - 1) > argn)
+                {
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for multiple input files");
+                    tiff2pdf_usage();
+                    return;
+                }
+
+                /*
+                * Output
+                */
+                t2p.m_outputdisable = false;
+                if (outfilename != null)
+                {
+                    try
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open input file {0} for reading", args[argn - 1]);
-                        failed = true;
+                        t2p.m_outputfile = File.Open(outfilename, FileMode.Create, FileAccess.Write);
+                    }
+                    catch (Exception e)
+                    {
+                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open output file {0} for writing. {1}", outfilename, e.Message);
+                        return;
                     }
                 }
                 else
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No input file specified");
-                    tiff2pdf_usage();
-                    failed = true;
+                    outfilename = "-";
+                    t2p.m_outputfile = Console.OpenStandardOutput();
                 }
 
-                if (!failed && (args.Length - 1) > argn)
+                using (Tiff output = Tiff.ClientOpen(outfilename, "w", t2p, t2p.m_stream))
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for multiple input files"); 
-                    tiff2pdf_usage();
-                    failed = true;
-                }
+                    if (output == null)
+                    {
+                        t2p.m_outputfile.Dispose();
+                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize output descriptor");
+                        return;
+                    }
 
-                if (!failed)
-                {
                     /*
-                    * Output
+                    * Validate
                     */
-                    t2p.m_outputdisable = false;
-                    if (outfilename != null)
+                    t2p.validate();
+
+                    object client = output.Clientdata();
+                    TiffStream stream = output.GetStream();
+                    stream.Seek(client, 0, SeekOrigin.Begin);
+
+                    /*
+                    * Write
+                    */
+                    t2p.write_pdf(input, output);
+                    if (t2p.m_error)
                     {
-                        t2p.m_outputfile = File.Open(outfilename, FileMode.Create, FileAccess.Write);
-                        if (t2p.m_outputfile == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open output file {0} for writing", outfilename);
-                            failed = true;
-                        }
-                    } 
-                    else
-                    {
-                        outfilename = "-";
-                        t2p.m_outputfile = Console.OpenStandardOutput();
-                    }
-
-                    if (!failed)
-                    {
-                        output = Tiff.ClientOpen(outfilename, "w", t2p, t2p.m_stream);
-                        if (output == null)
-                        {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize output descriptor");
-                            failed = true;
-                        }
-
-                        if (!failed)
-                        {
-                            /*
-                            * Validate
-                            */
-                            t2p.validate();
-
-                            object client = output.Clientdata();
-                            TiffStream stream = output.GetStream();
-                            if (stream != null)
-                                stream.Seek(client, 0, SeekOrigin.Begin);
-
-                            /*
-                            * Write
-                            */
-                            t2p.write_pdf(input, output);
-                            if (t2p.m_error)
-                            {
-                                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "An error occurred creating output PDF file");
-                                failed = true;
-                            }
-
-                            t2p.m_outputfile.Dispose();
-                        }
+                        t2p.m_outputfile.Dispose();
+                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "An error occurred creating output PDF file");
+                        return;
                     }
                 }
+
+                t2p.m_outputfile.Dispose();
             }
         }
 

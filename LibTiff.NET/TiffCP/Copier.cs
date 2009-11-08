@@ -432,20 +432,14 @@ namespace BitMiracle.TiffCP
                 result = inImage.GetField(TIFFTAG.TIFFTAG_INKNAMES);
                 if (result != null)
                 {
-                    //string inknames = result[0].ToString();
-                    //int inknameslen = strlen(inknames) + 1;
-                    //const char* cp = inknames;
-                    //while (ninks > 1)
-                    //{
-                    //    cp = strchr(cp, '\0');
-                    //    if (cp != null)
-                    //    {
-                    //        cp++;
-                    //        inknameslen += (strlen(cp) + 1);
-                    //    }
-                    //    ninks--;
-                    //}
-                    //outImage.SetField(TIFFTAG.TIFFTAG_INKNAMES, inknameslen, inknames);
+                    string inknames = result[0].ToString();
+                    string[] parts = inknames.Split(new char[] { '\0' });
+
+                    int inknameslen = 0;
+                    foreach (string part in parts)
+                        inknameslen += part.Length + 1;
+
+                    outImage.SetField(TIFFTAG.TIFFTAG_INKNAMES, inknameslen, inknames);
                 }
             }
 

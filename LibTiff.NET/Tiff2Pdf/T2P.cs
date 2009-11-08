@@ -2258,7 +2258,8 @@ namespace BitMiracle.Tiff2Pdf
             if (m_pdf_yres == 0.0)
                 m_pdf_yres = m_pdf_defaultyres;
 
-            if ((m_tiff_resunit != RESUNIT.RESUNIT_CENTIMETER && m_tiff_resunit != RESUNIT.RESUNIT_INCH) && (m_tiff_xres < Tiff2PdfConstants.PS_UNIT_SIZE && m_tiff_yres < Tiff2PdfConstants.PS_UNIT_SIZE))
+            if ((m_tiff_resunit != RESUNIT.RESUNIT_CENTIMETER && m_tiff_resunit != RESUNIT.RESUNIT_INCH) &&
+                (m_tiff_xres < Tiff2PdfConstants.PS_UNIT_SIZE && m_tiff_yres < Tiff2PdfConstants.PS_UNIT_SIZE))
             {
                 // apply special processing for case when resolution 
                 // unit is unspecified and resolution is "very low" (less then Tiff2PdfConstants.PS_UNIT_SIZE)
@@ -2378,25 +2379,29 @@ namespace BitMiracle.Tiff2Pdf
                 boxp.y1 -= m_pdf_imagebox.y1;
                 boxp.y2 -= m_pdf_imagebox.y1;
 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_TOPRIGHT || m_tiff_orientation == ORIENTATION.ORIENTATION_BOTRIGHT)
+                if (m_tiff_orientation == ORIENTATION.ORIENTATION_TOPRIGHT || 
+                    m_tiff_orientation == ORIENTATION.ORIENTATION_BOTRIGHT)
                 {
                     boxp.x1 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x1;
                     boxp.x2 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x2;
                 }
                 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_BOTRIGHT || m_tiff_orientation == ORIENTATION.ORIENTATION_BOTLEFT)
+                if (m_tiff_orientation == ORIENTATION.ORIENTATION_BOTRIGHT || 
+                    m_tiff_orientation == ORIENTATION.ORIENTATION_BOTLEFT)
                 {
                     boxp.y1 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y1;
                     boxp.y2 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y2;
                 }
                 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTBOT || m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTTOP)
+                if (m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTBOT || 
+                    m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTTOP)
                 {
                     boxp.y1 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y1;
                     boxp.y2 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y2;
                 }
                 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTTOP || m_tiff_orientation == ORIENTATION.ORIENTATION_RIGHTTOP)
+                if (m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTTOP || 
+                    m_tiff_orientation == ORIENTATION.ORIENTATION_RIGHTTOP)
                 {
                     boxp.x1 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x1;
                     boxp.x2 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x2;
@@ -3336,37 +3341,37 @@ namespace BitMiracle.Tiff2Pdf
 
             switch (orientation)
             {
-            case ORIENTATION.ORIENTATION_LEFTTOP:
-                boxp.mat[0] = 0.0F;
-                boxp.mat[1] = 0.0F - m1[4];
-                boxp.mat[3] = 0.0F - m1[0];
-                boxp.mat[4] = 0.0F;
-                boxp.mat[6] += m1[0];
-                boxp.mat[7] += m1[4];
-                break;
+                case ORIENTATION.ORIENTATION_LEFTTOP:
+                    boxp.mat[0] = 0.0F;
+                    boxp.mat[1] = 0.0F - m1[4];
+                    boxp.mat[3] = 0.0F - m1[0];
+                    boxp.mat[4] = 0.0F;
+                    boxp.mat[6] += m1[0];
+                    boxp.mat[7] += m1[4];
+                    break;
 
-            case ORIENTATION.ORIENTATION_RIGHTTOP:
-                boxp.mat[0] = 0.0F;
-                boxp.mat[1] = 0.0F - m1[4];
-                boxp.mat[3] = m1[0];
-                boxp.mat[4] = 0.0F;
-                boxp.mat[7] += m1[4];
-                break;
+                case ORIENTATION.ORIENTATION_RIGHTTOP:
+                    boxp.mat[0] = 0.0F;
+                    boxp.mat[1] = 0.0F - m1[4];
+                    boxp.mat[3] = m1[0];
+                    boxp.mat[4] = 0.0F;
+                    boxp.mat[7] += m1[4];
+                    break;
 
-            case ORIENTATION.ORIENTATION_RIGHTBOT:
-                boxp.mat[0] = 0.0F;
-                boxp.mat[1] = m1[4];
-                boxp.mat[3] = m1[0];
-                boxp.mat[4] = 0.0F;
-                break;
+                case ORIENTATION.ORIENTATION_RIGHTBOT:
+                    boxp.mat[0] = 0.0F;
+                    boxp.mat[1] = m1[4];
+                    boxp.mat[3] = m1[0];
+                    boxp.mat[4] = 0.0F;
+                    break;
 
-            case ORIENTATION.ORIENTATION_LEFTBOT:
-                boxp.mat[0] = 0.0F;
-                boxp.mat[1] = m1[4];
-                boxp.mat[3] = 0.0F - m1[0];
-                boxp.mat[4] = 0.0F;
-                boxp.mat[6] += m1[0];
-                break;
+                case ORIENTATION.ORIENTATION_LEFTBOT:
+                    boxp.mat[0] = 0.0F;
+                    boxp.mat[1] = m1[4];
+                    boxp.mat[3] = 0.0F - m1[0];
+                    boxp.mat[4] = 0.0F;
+                    boxp.mat[6] += m1[0];
+                    break;
             }
         }
 
