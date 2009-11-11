@@ -50,7 +50,7 @@ namespace BitMiracle.LibTiff.Internal
         public float td_xposition;
         public float td_yposition;
         public ushort[] td_pagenumber = new ushort[2];
-        public ushort[][] td_colormap = { null, null, null };
+        public short[][] td_colormap = { null, null, null };
         public ushort[] td_halftonehints = new ushort[2];
         public ushort td_extrasamples;
         public EXTRASAMPLE[] td_sampleinfo;
@@ -65,7 +65,7 @@ namespace BitMiracle.LibTiff.Internal
         public ushort[] td_ycbcrsubsampling = new ushort[2];
         public YCBCRPOSITION td_ycbcrpositioning;
         /* Colorimetry parameters */
-        public ushort[][] td_transferfunction = { null, null, null };
+        public short[][] td_transferfunction = { null, null, null };
         /* CMYK parameters */
         public int td_inknameslen;
         public string td_inknames;

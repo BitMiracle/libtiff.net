@@ -88,7 +88,7 @@ namespace BitMiracle.LibTiff
         /*
         * Convert color value from the CIE L*a*b* 1976 space to CIE XYZ.
         */
-        public void CIELabToXYZ(uint l, int a, int b, out float X, out float Y, out float Z)
+        public void CIELabToXYZ(int l, int a, int b, out float X, out float Y, out float Z)
         {
             float L = (float)l * 100.0F / 255.0F;
             float cby;

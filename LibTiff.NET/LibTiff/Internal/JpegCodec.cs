@@ -283,7 +283,7 @@ namespace BitMiracle.LibTiff.Internal
          */
         public bool InitializeLibJPEG(bool force_encode, bool force_decode)
         {
-            uint[] byte_counts = null;
+            int[] byte_counts = null;
             bool data_is_empty = true;
             bool decompress;
 
@@ -307,7 +307,7 @@ namespace BitMiracle.LibTiff.Internal
             FieldValue[] result = m_tif.GetField(TIFFTAG.TIFFTAG_TILEBYTECOUNTS);
             if (m_tif.IsTiled() && result != null)
             {
-                byte_counts = result[0].ToUIntArray();
+                byte_counts = result[0].ToIntArray();
                 if (byte_counts != null)
                     data_is_empty = byte_counts[0] == 0;
             }
@@ -315,7 +315,7 @@ namespace BitMiracle.LibTiff.Internal
             result = m_tif.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
             if (!m_tif.IsTiled() && result != null)
             {
-                byte_counts = result[0].ToUIntArray();
+                byte_counts = result[0].ToIntArray();
                 if (byte_counts != null)
                     data_is_empty = byte_counts[0] == 0;
             }

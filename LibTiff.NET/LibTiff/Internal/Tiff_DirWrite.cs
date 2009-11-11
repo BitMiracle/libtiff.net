@@ -442,13 +442,13 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_SSHORT:
                     if (fip.field_passcount)
                     {
-                        ushort[] wp;
+                        short[] wp;
                         int wc2;
                         if (wc == TIFF_VARIABLE2)
                         {
                             FieldValue[] result = GetField(fip.field_tag);
                             wc2 = result[0].ToInt();
-                            wp = result[1].ToUShortArray();
+                            wp = result[1].ToShortArray();
 
                             dir.tdir_count = wc2;
                         }
@@ -457,7 +457,7 @@ namespace BitMiracle.LibTiff
                             /* Assume TIFF_VARIABLE */
                             FieldValue[] result = GetField(fip.field_tag);
                             wc = result[0].ToShort();
-                            wp = result[1].ToUShortArray();
+                            wp = result[1].ToShortArray();
                             dir.tdir_count = wc;
                         }
 
@@ -475,7 +475,7 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             FieldValue[] result = GetField(fip.field_tag);
-                            ushort[] wp = result[0].ToUShortArray();
+                            short[] wp = result[0].ToShortArray();
                             if (!writeShortArray(ref dir, wp))
                                 return false;
                         }
@@ -796,10 +796,10 @@ namespace BitMiracle.LibTiff
         */
         private bool writePerSampleShorts(TIFFTAG tag, ref TiffDirEntry dir)
         {
-            ushort[] w = new ushort [m_dir.td_samplesperpixel];
+            short[] w = new short [m_dir.td_samplesperpixel];
 
             FieldValue[] result = GetField(tag);
-            ushort v = result[0].ToUShort();
+            short v = result[0].ToShort();
 
             for (ushort i = 0; i < m_dir.td_samplesperpixel; i++)
                 w[i] = v;
@@ -836,10 +836,10 @@ namespace BitMiracle.LibTiff
         */
         private bool setupShortPair(TIFFTAG tag, ref TiffDirEntry dir)
         {
-            ushort[] v = new ushort[2];
+            short[] v = new short[2];
             FieldValue[] result = GetField(tag);
-            v[0] = result[0].ToUShort();
-            v[1] = result[1].ToUShort();
+            v[0] = result[0].ToShort();
+            v[1] = result[1].ToShort();
 
             dir.tdir_tag = tag;
             dir.tdir_type = TiffDataType.TIFF_SHORT;
@@ -852,7 +852,7 @@ namespace BitMiracle.LibTiff
         * where M is known to be 2**bitspersample, and write
         * the associated indirect data.
         */
-        private bool writeShortTable(TIFFTAG tag, ref TiffDirEntry dir, int n, ushort[][] table)
+        private bool writeShortTable(TIFFTAG tag, ref TiffDirEntry dir, int n, short[][] table)
         {
             dir.tdir_tag = tag;
             dir.tdir_type = TiffDataType.TIFF_SHORT;
@@ -912,7 +912,7 @@ namespace BitMiracle.LibTiff
         * Setup a directory entry of an array of SHORT
         * or SSHORT and write the associated indirect values.
         */
-        private bool writeShortArray(ref TiffDirEntry dir, ushort[] v)
+        private bool writeShortArray(ref TiffDirEntry dir, short[] v)
         {
             if (dir.tdir_count <= 2)
             {
@@ -1043,9 +1043,9 @@ namespace BitMiracle.LibTiff
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
                     {
-                        ushort[] bp = new ushort [n];
+                        short[] bp = new short [n];
                         for (int i = 0; i < n; i++)
-                            bp[i] = (ushort)v[i];
+                            bp[i] = (short)v[i];
                         
                         if (!writeShortArray(ref dir, bp))
                             failed = true;
@@ -1149,14 +1149,14 @@ namespace BitMiracle.LibTiff
             return false;
         }
 
-        private bool writeData(ref TiffDirEntry dir, ushort[] cp, int cc)
+        private bool writeData(ref TiffDirEntry dir, short[] cp, int cc)
         {
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 SwabArrayOfShort(cp, cc);
 
-            int byteCount = cc * sizeof(ushort);
+            int byteCount = cc * sizeof(short);
             byte[] bytes = new byte [byteCount];
-            UInt16ToByteArray(cp, 0, cc, bytes, 0);
+            ShortsToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(ref dir, bytes, byteCount);
             return res;
         }

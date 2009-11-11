@@ -342,7 +342,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private void horAcc16(byte[] cp0, int offset, int cc)
         {
-            ushort[] wp = Tiff.ByteArrayToUInt16(cp0, offset, cc);
+            short[] wp = Tiff.ByteArrayToShorts(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 2;
@@ -373,12 +373,12 @@ namespace BitMiracle.LibTiff.Internal
                 while ((int)wc > 0);
             }
 
-            Tiff.UInt16ToByteArray(wp, 0, cc / 2, cp0, offset);
+            Tiff.ShortsToByteArray(wp, 0, cc / 2, cp0, offset);
         }
 
         private void horAcc32(byte[] cp0, int offset, int cc)
         {
-            uint[] wp = Tiff.ByteArrayToUInt(cp0, offset, cc);
+            int[] wp = Tiff.ByteArrayToInts(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 4;
@@ -408,12 +408,12 @@ namespace BitMiracle.LibTiff.Internal
                 } while ((int) wc > 0);
             }
 
-            Tiff.UIntToByteArray(wp, 0, cc / 4, cp0, offset);
+            Tiff.IntsToByteArray(wp, 0, cc / 4, cp0, offset);
         }
 
         private void swabHorAcc16(byte[] cp0, int offset, int cc)
         {
-            ushort[] wp = Tiff.ByteArrayToUInt16(cp0, offset, cc);
+            short[] wp = Tiff.ByteArrayToShorts(cp0, offset, cc);
             int wpPos= 0;
             
             int wc = cc / 2;
@@ -445,12 +445,12 @@ namespace BitMiracle.LibTiff.Internal
                 while ((int)wc > 0);
             }
 
-            Tiff.UInt16ToByteArray(wp, 0, cc / 2, cp0, offset);
+            Tiff.ShortsToByteArray(wp, 0, cc / 2, cp0, offset);
         }
         
         private void swabHorAcc32(byte[] cp0, int offset, int cc)
         {
-            int[] wp = Tiff.ByteArrayToInt(cp0, offset, cc);
+            int[] wp = Tiff.ByteArrayToInts(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 4;
@@ -574,7 +574,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private void horDiff16(byte[] cp0, int offset, int cc)
         {
-            short[] wp = Tiff.ByteArrayToInt16(cp0, offset, cc);
+            short[] wp = Tiff.ByteArrayToShorts(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 2;
@@ -606,12 +606,12 @@ namespace BitMiracle.LibTiff.Internal
                 while ((int)wc > 0);
             }
 
-            Tiff.Int16ToByteArray(wp, 0, cc / 2, cp0, offset);
+            Tiff.ShortsToByteArray(wp, 0, cc / 2, cp0, offset);
         }
 
         private void horDiff32(byte[] cp0, int offset, int cc)
         {
-            int[] wp = Tiff.ByteArrayToInt(cp0, offset, cc);
+            int[] wp = Tiff.ByteArrayToInts(cp0, offset, cc);
             int wpPos = 0;
 
             int wc = cc / 4;

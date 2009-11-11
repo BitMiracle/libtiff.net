@@ -30,7 +30,7 @@ namespace BitMiracle.LibTiff
     {
         private static bool defaultTransferFunction(TiffDirectory td)
         {
-            ushort[][] tf = td.td_transferfunction;
+            short[][] tf = td.td_transferfunction;
             tf[0] = null;
             tf[1] = null;
             tf[2] = null;
@@ -39,20 +39,20 @@ namespace BitMiracle.LibTiff
                 return false;
 
             int n = 1 << td.td_bitspersample;
-            tf[0] = new ushort [n];
+            tf[0] = new short [n];
             tf[0][0] = 0;
             for (int i = 1; i < n; i++)
             {
                 double t = (double)i / ((double)n - 1.0);
-                tf[0][i] = (ushort)Math.Floor(65535.0 * Math.Pow(t, 2.2) + 0.5);
+                tf[0][i] = (short)Math.Floor(65535.0 * Math.Pow(t, 2.2) + 0.5);
             }
 
             if (td.td_samplesperpixel - td.td_extrasamples > 1)
             {
-                tf[1] = new ushort [n];
+                tf[1] = new short [n];
                 Array.Copy(tf[0], tf[1], tf[0].Length);
 
-                tf[2] = new ushort [n];
+                tf[2] = new short [n];
                 Array.Copy(tf[0], tf[2], tf[0].Length);
             }
 

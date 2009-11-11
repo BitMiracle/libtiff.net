@@ -1478,25 +1478,25 @@ namespace BitMiracle.TiffCP
 
         static void subtract16(byte[] i, byte[] b, int pixels)
         {
-            ushort[] image = Tiff.ByteArrayToUInt16(i, 0, pixels * sizeof(ushort));
-            ushort[] bias = Tiff.ByteArrayToUInt16(b, 0, pixels * sizeof(ushort));
+            short[] image = Tiff.ByteArrayToShorts(i, 0, pixels * sizeof(short));
+            short[] bias = Tiff.ByteArrayToShorts(b, 0, pixels * sizeof(short));
             int imagePos = 0;
             int biasPos = 0;
 
             while (pixels-- != 0)
             {
-                image[imagePos] = image[imagePos] > bias[biasPos] ? (ushort)(image[imagePos] - bias[biasPos]) : (ushort)0;
+                image[imagePos] = image[imagePos] > bias[biasPos] ? (short)(image[imagePos] - bias[biasPos]) : (short)0;
                 imagePos++;
                 biasPos++;
             }
 
-            Tiff.UInt16ToByteArray(image, 0, pixels, i, 0);
+            Tiff.ShortsToByteArray(image, 0, pixels, i, 0);
         }
 
         static void subtract32(byte[] i, byte[] b, int pixels)
         {
-            uint[] image = Tiff.ByteArrayToUInt(i, 0, pixels * sizeof(uint));
-            uint[] bias = Tiff.ByteArrayToUInt(b, 0, pixels * sizeof(uint));
+            int[] image = Tiff.ByteArrayToInts(i, 0, pixels * sizeof(int));
+            int[] bias = Tiff.ByteArrayToInts(b, 0, pixels * sizeof(int));
             int imagePos = 0;
             int biasPos = 0;
 
@@ -1507,7 +1507,7 @@ namespace BitMiracle.TiffCP
                 biasPos++;
             }
 
-            Tiff.UIntToByteArray(image, 0, pixels, i, 0);
+            Tiff.IntsToByteArray(image, 0, pixels, i, 0);
         }
     }
 }

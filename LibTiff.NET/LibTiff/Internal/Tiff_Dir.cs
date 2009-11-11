@@ -156,9 +156,9 @@ namespace BitMiracle.LibTiff
             cpp = cp.Clone() as string;
         }
 
-        internal static void setShortArray(out ushort[] wpp, ushort[] wp, int n)
+        internal static void setShortArray(out short[] wpp, short[] wp, int n)
         {
-            wpp = new ushort[n];
+            wpp = new short[n];
             for (int i = 0; i < n; i++)
                 wpp[i] = wp[i];
         }

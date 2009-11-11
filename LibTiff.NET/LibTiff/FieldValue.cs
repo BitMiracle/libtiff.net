@@ -72,6 +72,7 @@ namespace BitMiracle.LibTiff
         /// <summary>
         /// Retrieves value converted to ushort
         /// </summary>
+        [CLSCompliant(false)]
         public ushort ToUShort()
         {
             return Convert.ToUInt16(m_value);
@@ -88,6 +89,7 @@ namespace BitMiracle.LibTiff
         /// <summary>
         /// Retrieves value converted to uint
         /// </summary>
+        [CLSCompliant(false)]
         public uint ToUInt()
         {
             return Convert.ToUInt32(m_value);
@@ -357,6 +359,7 @@ namespace BitMiracle.LibTiff
         /// resulting array.
         /// If value is of any other type then null is returned.
         /// </summary>
+        [CLSCompliant(false)]
         public ushort[] ToUShortArray()
         {
             if (m_value == null)
@@ -475,6 +478,7 @@ namespace BitMiracle.LibTiff
         /// resulting array.
         /// If value is of any other type then null is returned.
         /// </summary>
+        [CLSCompliant(false)]
         public uint[] ToUIntArray()
         {
             if (m_value == null)

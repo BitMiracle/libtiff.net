@@ -329,22 +329,22 @@ namespace BitMiracle.LibTiff
                 {
                     case TiffDataType.TIFF_SHORT:
                     case TiffDataType.TIFF_SSHORT:
-                        ushort[] s = ByteArrayToUInt16(cp, 0, cc);
+                        short[] s = ByteArrayToShorts(cp, 0, cc);
                         SwabArrayOfShort(s, dir.tdir_count);
-                        UInt16ToByteArray(s, 0, dir.tdir_count, cp, 0);
+                        ShortsToByteArray(s, 0, dir.tdir_count, cp, 0);
                         break;
                     
                     case TiffDataType.TIFF_LONG:
                     case TiffDataType.TIFF_SLONG:
                     case TiffDataType.TIFF_FLOAT:
-                        int[] l = ByteArrayToInt(cp, 0, cc);
+                        int[] l = ByteArrayToInts(cp, 0, cc);
                         SwabArrayOfLong(l, dir.tdir_count);
                         IntsToByteArray(l, 0, dir.tdir_count, cp, 0);
                         break;
                     
                     case TiffDataType.TIFF_RATIONAL:
                     case TiffDataType.TIFF_SRATIONAL:
-                        int[] r = ByteArrayToInt(cp, 0, cc);
+                        int[] r = ByteArrayToInts(cp, 0, cc);
                         SwabArrayOfLong(r, 2 * dir.tdir_count);
                         IntsToByteArray(r, 0, 2 * dir.tdir_count, cp, 0);
                         break;
@@ -488,7 +488,7 @@ namespace BitMiracle.LibTiff
         /*
         * Fetch an array of SHORT or SSHORT values.
         */
-        private bool fetchShortArray(TiffDirEntry dir, ushort[] v)
+        private bool fetchShortArray(TiffDirEntry dir, short[] v)
         {
             if (dir.tdir_count <= 2)
             {
@@ -497,29 +497,29 @@ namespace BitMiracle.LibTiff
                 if (m_header.tiff_magic == TIFF_BIGENDIAN)
                 {
                     if (count == 2)
-                        v[1] = (ushort)(dir.tdir_offset & 0xffff);
+                        v[1] = (short)(dir.tdir_offset & 0xffff);
 
                     if (count >= 1)
-                        v[0] = (ushort)(dir.tdir_offset >> 16);
+                        v[0] = (short)(dir.tdir_offset >> 16);
                 }
                 else
                 {
                     if (count == 2)
-                        v[1] = (ushort)(dir.tdir_offset >> 16);
+                        v[1] = (short)(dir.tdir_offset >> 16);
 
                     if (count >= 1)
-                        v[0] = (ushort)(dir.tdir_offset & 0xffff);
+                        v[0] = (short)(dir.tdir_offset & 0xffff);
                 }
 
                 return true;
             }
 
-            int cc = dir.tdir_count * sizeof(ushort);
+            int cc = dir.tdir_count * sizeof(short);
             byte[] b = new byte[cc];
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                ushort[] u = ByteArrayToUInt16(b, 0, read);
+                short[] u = ByteArrayToShorts(b, 0, read);
                 Array.Copy(u, v, u.Length);
             }
 
@@ -553,7 +553,7 @@ namespace BitMiracle.LibTiff
 
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
-                    ushort[] shorts = new ushort[2];
+                    short[] shorts = new short[2];
                     return fetchShortArray(dir, shorts) && SetField(dir.tdir_tag, shorts[0], shorts[1]);
             }
 
@@ -576,7 +576,7 @@ namespace BitMiracle.LibTiff
             int read = fetchData(dir, b);
             if (read != 0)
             {
-                int[] u = ByteArrayToInt(b, 0, read);
+                int[] u = ByteArrayToInts(b, 0, read);
                 Array.Copy(u, v, u.Length);
             }
 
@@ -695,7 +695,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case TiffDataType.TIFF_SHORT:
                 case TiffDataType.TIFF_SSHORT:
-                    ushort[] u = new ushort[dir.tdir_count];
+                    short[] u = new short[dir.tdir_count];
                     res = fetchShortArray(dir, u);
                     if (res)
                     {
@@ -790,7 +790,7 @@ namespace BitMiracle.LibTiff
 
                     case TiffDataType.TIFF_SHORT:
                     case TiffDataType.TIFF_SSHORT:
-                        ushort[] ushorts = new ushort [dir.tdir_count];
+                        short[] ushorts = new short [dir.tdir_count];
                         ok = fetchShortArray(dir, ushorts);
                         if (ok)
                         {
@@ -986,7 +986,7 @@ namespace BitMiracle.LibTiff
         * the specified tag and verify that
         * all values are the same.
         */
-        private bool fetchPerSampleShorts(TiffDirEntry dir, out ushort pl)
+        private bool fetchPerSampleShorts(TiffDirEntry dir, out short pl)
         {
             pl = 0;
             ushort samples = m_dir.td_samplesperpixel;
@@ -994,7 +994,7 @@ namespace BitMiracle.LibTiff
 
             if (checkDirCount(dir, samples))
             {
-                ushort[] v = new ushort [dir.tdir_count];
+                short[] v = new short [dir.tdir_count];
                 if (fetchShortArray(dir, v))
                 {
                     int check_count = dir.tdir_count;
@@ -1132,9 +1132,9 @@ namespace BitMiracle.LibTiff
             if (dir.tdir_type == TiffDataType.TIFF_SHORT)
             {
                 /*
-                 * Handle uint16.uint expansion.
+                 * Handle ushort -> uint expansion.
                  */
-                ushort[] dp = new ushort[dir.tdir_count];
+                short[] dp = new short[dir.tdir_count];
                 status = fetchShortArray(dir, dp);
                 if (status)
                 {

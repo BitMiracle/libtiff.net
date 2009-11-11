@@ -286,7 +286,7 @@ namespace BitMiracle.LibTiff
             return newBuffer;
         }
 
-        public static int Compare(ushort[] p1, ushort[] p2, int elementCount)
+        public static int Compare(short[] p1, short[] p2, int elementCount)
         {
             for (int i = 0; i < elementCount; i++)
             {
@@ -1225,7 +1225,7 @@ namespace BitMiracle.LibTiff
                         }
                         else
                         {
-                            ushort iv;
+                            short iv;
                             if (!fetchPerSampleShorts(dir[i], out iv) || !SetField(dir[i].tdir_tag, iv))
                                 return false;
                         }
@@ -1377,7 +1377,7 @@ namespace BitMiracle.LibTiff
                         }
                         else
                         {
-                            ushort iv;
+                            short iv;
                             if (!fetchPerSampleShorts(dir[i], out iv) || !SetField(dir[i].tdir_tag, iv))
                                 return false;
                         }
@@ -1426,15 +1426,15 @@ namespace BitMiracle.LibTiff
                                     * only one array to apply to
                                     * all samples.
                                     */
-                                    ushort[] u = ByteArrayToUInt16(cp, 0, dir[i].tdir_count * sizeof(ushort));
+                                    short[] u = ByteArrayToShorts(cp, 0, dir[i].tdir_count * sizeof(short));
                                     SetField(dir[i].tdir_tag, u, u, u);
                                 }
                                 else
                                 {
-                                    v *= sizeof(ushort);
-                                    ushort[] u0 = ByteArrayToUInt16(cp, 0, v);
-                                    ushort[] u1 = ByteArrayToUInt16(cp, v, v);
-                                    ushort[] u2 = ByteArrayToUInt16(cp, 2 * v, v);
+                                    v *= sizeof(short);
+                                    short[] u0 = ByteArrayToShorts(cp, 0, v);
+                                    short[] u1 = ByteArrayToShorts(cp, v, v);
+                                    short[] u2 = ByteArrayToShorts(cp, 2 * v, v);
                                     SetField(dir[i].tdir_tag, u0, u1, u2);
                                 }
                             }
@@ -4408,7 +4408,7 @@ namespace BitMiracle.LibTiff
             dp = BitConverter.ToDouble(bytes, 0);
         }
 
-        public static void SwabArrayOfShort(ushort[] wp, int n)
+        public static void SwabArrayOfShort(short[] wp, int n)
         {
             byte[] cp = new byte[2];
             for (int i = 0; i < n; i++)
@@ -4420,8 +4420,8 @@ namespace BitMiracle.LibTiff
                 cp[1] = cp[0];
                 cp[0] = t;
 
-                wp[i] = (ushort)(cp[0] & 0xFF);
-                wp[i] += (ushort)((cp[1] & 0xFF) << 8);
+                wp[i] = (short)(cp[0] & 0xFF);
+                wp[i] += (short)((cp[1] & 0xFF) << 8);
             }
         }
 
@@ -4470,7 +4470,7 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < n; i++)
                 Array.Copy(BitConverter.GetBytes(dp[i]), 0, bytes, i * sizeof(double), sizeof(double));
 
-            int[] lp = ByteArrayToInt(bytes, 0, n * sizeof(double));
+            int[] lp = ByteArrayToInts(bytes, 0, n * sizeof(double));
             SwabArrayOfLong(lp, n + n);
 
             int lpPos = 0;
@@ -4515,7 +4515,7 @@ namespace BitMiracle.LibTiff
             return (reversed ? TIFFBitRevTable : TIFFNoBitRevTable);
         }
 
-        public static int[] ByteArrayToInt(byte[] b, int byteStartOffset, int byteCount)
+        public static int[] ByteArrayToInts(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 4;
             int[] integers = new int[intCount];
@@ -4548,40 +4548,7 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public static uint[] ByteArrayToUInt(byte[] b, int byteStartOffset, int byteCount)
-        {
-            int intCount = byteCount / 4;
-            uint[] integers = new uint[intCount];
-
-            int byteStopPos = byteStartOffset + intCount * 4;
-            int intPos = 0;
-            for (int i = byteStartOffset; i < byteStopPos; )
-            {
-                uint value = (uint)(b[i++] & 0xFF);
-                value += (uint)((b[i++] & 0xFF) << 8);
-                value += (uint)((b[i++] & 0xFF) << 16);
-                value += (uint)(b[i++] << 24);
-                integers[intPos++] = value;
-            }
-
-            return integers;
-        }
-
-        public static void UIntToByteArray(uint[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
-        {
-            int bytePos = byteStartOffset;
-            int intStopPos = intStartOffset + intCount;
-            for (int i = intStartOffset; i < intStopPos; i++)
-            {
-                uint value = integers[i];
-                bytes[bytePos++] = (byte)value;
-                bytes[bytePos++] = (byte)(value >> 8);
-                bytes[bytePos++] = (byte)(value >> 16);
-                bytes[bytePos++] = (byte)(value >> 24);
-            }
-        }
-
-        public static short[] ByteArrayToInt16(byte[] b, int byteStartOffset, int byteCount)
+        public static short[] ByteArrayToShorts(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 2;
             short[] integers = new short[intCount];
@@ -4598,42 +4565,13 @@ namespace BitMiracle.LibTiff
             return integers;
         }
 
-        public static void Int16ToByteArray(Int16[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        public static void ShortsToByteArray(short[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
             int intStopPos = intStartOffset + intCount;
             for (int i = intStartOffset; i < intStopPos; i++)
             {
                 short value = integers[i];
-                bytes[bytePos++] = (byte)value;
-                bytes[bytePos++] = (byte)(value >> 8);
-            }
-        }
-
-        public static ushort[] ByteArrayToUInt16(byte[] b, int byteStartOffset, int byteCount)
-        {
-            int intCount = byteCount / 2;
-            ushort[] integers = new ushort[intCount];
-
-            int byteStopPos = byteStartOffset + intCount * 2;
-            int intPos = 0;
-            for (int i = byteStartOffset; i < byteStopPos; )
-            {
-                ushort value = (ushort)(b[i++] & 0xFF);
-                value += (ushort)((b[i++] & 0xFF) << 8);
-                integers[intPos++] = value;
-            }
-
-            return integers;
-        }
-
-        public static void UInt16ToByteArray(ushort[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
-        {
-            int bytePos = byteStartOffset;
-            int intStopPos = intStartOffset + intCount;
-            for (int i = intStartOffset; i < intStopPos; i++)
-            {
-                ushort value = integers[i];
                 bytes[bytePos++] = (byte)value;
                 bytes[bytePos++] = (byte)(value >> 8);
             }

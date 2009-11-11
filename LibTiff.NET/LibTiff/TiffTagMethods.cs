@@ -217,9 +217,9 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFFTAG.TIFFTAG_COLORMAP:
                     v32 = (uint)(1L << td.td_bitspersample);
-                    Tiff.setShortArray(out td.td_colormap[0], ap[0].ToUShortArray(), (int)v32);
-                    Tiff.setShortArray(out td.td_colormap[1], ap[1].ToUShortArray(), (int)v32);
-                    Tiff.setShortArray(out td.td_colormap[2], ap[2].ToUShortArray(), (int)v32);
+                    Tiff.setShortArray(out td.td_colormap[0], ap[0].ToShortArray(), (int)v32);
+                    Tiff.setShortArray(out td.td_colormap[1], ap[1].ToShortArray(), (int)v32);
+                    Tiff.setShortArray(out td.td_colormap[2], ap[2].ToShortArray(), (int)v32);
                     break;
                 case TIFFTAG.TIFFTAG_EXTRASAMPLES:
                     if (!setExtraSamples(td, ref v, ap))
@@ -360,7 +360,7 @@ namespace BitMiracle.LibTiff
                     v = ((td.td_samplesperpixel - td.td_extrasamples) > 1 ? 3 : 1);
                     for (uint i = 0; i < v; i++)
                     {
-                        Tiff.setShortArray(out td.td_transferfunction[i], ap[0].ToUShortArray(), 1 << td.td_bitspersample);
+                        Tiff.setShortArray(out td.td_transferfunction[i], ap[0].ToShortArray(), 1 << td.td_bitspersample);
                     }
                     break;
                 case TIFFTAG.TIFFTAG_INKNAMES:

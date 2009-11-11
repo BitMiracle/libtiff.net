@@ -1480,7 +1480,7 @@ namespace BitMiracle.Tiff2Pdf
                         samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_width * m_tiff_length * 4);
                         buffer = samplebuffer;
 
-                        int[] buffer32 = Tiff.ByteArrayToInt(buffer, 0, m_tiff_width * m_tiff_length * 4);
+                        int[] buffer32 = Tiff.ByteArrayToInts(buffer, 0, m_tiff_width * m_tiff_length * 4);
                         if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, ORIENTATION.ORIENTATION_TOPLEFT, false))
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
@@ -3099,12 +3099,12 @@ namespace BitMiracle.Tiff2Pdf
         */
         private static int sample_rgba_to_rgb(byte[] data, int samplecount)
         {
-            uint[] data32 = Tiff.ByteArrayToUInt(data, 0, samplecount * sizeof(uint));
+            int[] data32 = Tiff.ByteArrayToInts(data, 0, samplecount * sizeof(int));
 
             int i = 0;
             for ( ; i < samplecount; i++)
             {
-                uint sample = data32[i];
+                int sample = data32[i];
                 byte alpha = (byte)(255 - (sample & 0xff));
                 data[i * 3] = (byte)(((sample >> 24) & 0xff) + alpha);
                 data[i * 3 + 1] = (byte)(((sample >> 16) & 0xff) + alpha);
@@ -3133,12 +3133,12 @@ namespace BitMiracle.Tiff2Pdf
         */
         private static int sample_abgr_to_rgb(byte[] data, int samplecount)
         {
-            uint[] data32 = Tiff.ByteArrayToUInt(data, 0, samplecount * sizeof(uint));
+            int[] data32 = Tiff.ByteArrayToInts(data, 0, samplecount * sizeof(int));
 
             int i = 0;
             for ( ; i < samplecount; i++)
             {
-                uint sample = data32[i];
+                int sample = data32[i];
                 data[i * 3] = (byte)(sample & 0xff);
                 data[i * 3 + 1] = (byte)((sample >> 8) & 0xff);
                 data[i * 3 + 2] = (byte)((sample >> 16) & 0xff);

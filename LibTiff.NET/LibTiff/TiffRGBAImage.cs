@@ -49,13 +49,13 @@ namespace BitMiracle.LibTiff
         public ORIENTATION orientation; /* image orientation */
         public ORIENTATION req_orientation; /* requested orientation */
         public PHOTOMETRIC photometric; /* image photometric interp */
-        public ushort[] redcmap; /* colormap pallete */
-        public ushort[] greencmap;
-        public ushort[] bluecmap;
+        public short[] redcmap; /* colormap pallete */
+        public short[] greencmap;
+        public short[] bluecmap;
 
         /* get image data routine */
         public delegate bool getRoutine(TiffRGBAImage img, int[] raster, int offset, int w, int h);
-        public getRoutine get;
+        public getRoutine getRoutineInstance;
 
         public tileContigRoutine contig;
         public tileSeparateRoutine separate;
@@ -210,9 +210,9 @@ namespace BitMiracle.LibTiff
 
                     /* copy the colormaps so we can modify them */
                     int n_color = (1 << img.bitspersample);
-                    img.redcmap = new ushort [n_color];
-                    img.greencmap = new ushort [n_color];
-                    img.bluecmap = new ushort [n_color];
+                    img.redcmap = new short [n_color];
+                    img.greencmap = new short [n_color];
+                    img.bluecmap = new short [n_color];
 
                     Array.Copy(red_orig, img.redcmap, n_color);
                     Array.Copy(green_orig, img.greencmap, n_color);
@@ -373,13 +373,13 @@ namespace BitMiracle.LibTiff
 
         public bool Get(int[] raster, int offset, int w, int h)
         {
-            if (get == null)
+            if (getRoutineInstance == null)
             {
                 Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"get\" routine setup");
                 return false;
             }
             
-            return get(this, raster, offset, w, h);
+            return getRoutineInstance(this, raster, offset, w, h);
         }
 
         protected TiffRGBAImage()
@@ -406,17 +406,17 @@ namespace BitMiracle.LibTiff
             return (int)((uint)r | ((uint)g << 8) | ((uint)b << 16) | ((uint)a << 24));
         }
 
-        private static int W2B(ushort v)
+        private static int W2B(short v)
         {
             return ((v >> 8) & 0xff);
         }
 
-        private static int PACKW(ushort r, ushort g, ushort b)
+        private static int PACKW(short r, short g, short b)
         {
             return (int)((uint)W2B(r) | ((uint)W2B(g) << 8) | ((uint)W2B(b) << 16) | A1);
         }
 
-        private static int PACKW4(ushort r, ushort g, ushort b, ushort a)
+        private static int PACKW4(short r, short g, short b, short a)
         {
             return (int)((uint)W2B(r) | ((uint)W2B(g) << 8) | ((uint)W2B(b) << 16) | ((uint)W2B(a) << 24));
         }
@@ -898,7 +898,7 @@ namespace BitMiracle.LibTiff
         */
         private bool pickContigCase()
         {
-            get = tif.IsTiled() ? new getRoutine(gtTileContig) : new getRoutine(gtStripContig);
+            getRoutineInstance = tif.IsTiled() ? new getRoutine(gtTileContig) : new getRoutine(gtStripContig);
             contig = null;
 
             switch (photometric)
@@ -1051,7 +1051,7 @@ namespace BitMiracle.LibTiff
         */
         private bool pickSeparateCase()
         {
-            get = tif.IsTiled() ? new getRoutine(gtTileSeparate) : new getRoutine(gtStripSeparate);
+            getRoutineInstance = tif.IsTiled() ? new getRoutine(gtTileSeparate) : new getRoutine(gtStripSeparate);
             separate = null;
 
             switch (photometric)
@@ -1314,7 +1314,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
+                short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
                 int wpPos = 0;
 
                 for (x = w; x-- > 0;)
@@ -1593,7 +1593,7 @@ namespace BitMiracle.LibTiff
             int ppPos = ppOffset;
             fromskew *= samplesperpixel;
 
-            ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
+            short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
             int wpPos = 0;
 
             while (h-- > 0)
@@ -1620,7 +1620,7 @@ namespace BitMiracle.LibTiff
             int cpPos = cpOffset;
             int ppPos = ppOffset;
 
-            ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
+            short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
             int wpPos = 0;
 
             fromskew *= samplesperpixel;
@@ -1650,7 +1650,7 @@ namespace BitMiracle.LibTiff
             int cpPos = cpOffset;
             int ppPos = ppOffset;
 
-            ushort[] wp = Tiff.ByteArrayToUInt16(pp, ppPos, pp.Length);
+            short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
             int wpPos = 0;
             
             while (h-- > 0)
@@ -1892,9 +1892,9 @@ namespace BitMiracle.LibTiff
         */
         private static void putRGBseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            ushort[] wrgba = Tiff.ByteArrayToUInt16(rgba, 0, rgba.Length);
+            short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
     
-            int wrPos = rOffset / sizeof(UInt16);
+            int wrPos = rOffset / sizeof(ushort);
             int wgPos = gOffset / sizeof(ushort);
             int wbPos = bOffset / sizeof(ushort);
             int cpPos = cpOffset;
@@ -1922,12 +1922,12 @@ namespace BitMiracle.LibTiff
         */
         private static void putRGBAAseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            ushort[] wrgba = Tiff.ByteArrayToUInt16(rgba, 0, rgba.Length);
+            short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
     
-            int wrPos = rOffset / sizeof(ushort);
-            int wgPos = gOffset / sizeof(ushort);
-            int wbPos = bOffset / sizeof(ushort);
-            int waPos = aOffset / sizeof(ushort);
+            int wrPos = rOffset / sizeof(short);
+            int wgPos = gOffset / sizeof(short);
+            int wbPos = bOffset / sizeof(short);
+            int waPos = aOffset / sizeof(short);
             int cpPos = cpOffset;
 
             while (h-- > 0)
@@ -1956,12 +1956,12 @@ namespace BitMiracle.LibTiff
         */
         private static void putRGBUAseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            ushort[] wrgba = Tiff.ByteArrayToUInt16(rgba, 0, rgba.Length);
+            short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
 
-            int wrPos = rOffset / sizeof(ushort);
-            int wgPos = gOffset / sizeof(ushort);
-            int wbPos = bOffset / sizeof(ushort);
-            int waPos = aOffset / sizeof(ushort);
+            int wrPos = rOffset / sizeof(short);
+            int wgPos = gOffset / sizeof(short);
+            int wbPos = bOffset / sizeof(short);
+            int waPos = aOffset / sizeof(short);
             int cpPos = cpOffset;
 
             while (h-- > 0)
@@ -2162,9 +2162,9 @@ namespace BitMiracle.LibTiff
         {
             for (int i = (1 << bitspersample) - 1; i >= 0; i--)
             {
-                redcmap[i] = (ushort)(redcmap[i] >> 8);
-                greencmap[i] = (ushort)(greencmap[i] >> 8);
-                bluecmap[i] = (ushort)(bluecmap[i] >> 8);
+                redcmap[i] = (short)(redcmap[i] >> 8);
+                greencmap[i] = (short)(greencmap[i] >> 8);
+                bluecmap[i] = (short)(bluecmap[i] >> 8);
             }
         }
 
