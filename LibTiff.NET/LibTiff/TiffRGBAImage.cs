@@ -471,12 +471,12 @@ namespace BitMiracle.LibTiff
             if ((flip & FLIP_VERTICALLY) != 0)
             {
                 y = h - 1;
-                toskew = -(int)(tw + w);
+                toskew = -(tw + w);
             }
             else
             {
                 y = 0;
-                toskew = -(int)(tw - w);
+                toskew = -(tw - w);
             }
 
             bool ret = true;
@@ -510,7 +510,7 @@ namespace BitMiracle.LibTiff
                     }
                 }
 
-                y += ((flip & FLIP_VERTICALLY) != 0 ?  -(int)nrow : (int)nrow);
+                y += ((flip & FLIP_VERTICALLY) != 0 ?  -nrow : nrow);
                 row += nrow;
             }
 
@@ -566,12 +566,12 @@ namespace BitMiracle.LibTiff
             if ((flip & FLIP_VERTICALLY) != 0)
             {
                 y = h - 1;
-                toskew = -(int)(tw + w);
+                toskew = -(tw + w);
             }
             else
             {
                 y = 0;
-                toskew = -(int)(tw - w);
+                toskew = -(tw - w);
             }
 
             bool ret = true;
@@ -670,12 +670,12 @@ namespace BitMiracle.LibTiff
             if ((flip & FLIP_VERTICALLY) != 0)
             {
                 y = h - 1;
-                toskew = -(int)(w + w);
+                toskew = -(w + w);
             }
             else
             {
                 y = 0;
-                toskew = -(int)(w - w);
+                toskew = -(w - w);
             }
 
             FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
@@ -756,12 +756,12 @@ namespace BitMiracle.LibTiff
             if ((flip & FLIP_VERTICALLY) != 0)
             {
                 y = h - 1;
-                toskew = -(int)(w + w);
+                toskew = -(w + w);
             }
             else
             {
                 y = 0;
-                toskew = -(int)(w - w);
+                toskew = -(w - w);
             }
 
             FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
@@ -2104,7 +2104,7 @@ namespace BitMiracle.LibTiff
         */
         private bool setupMap()
         {
-            int range = (int)((1L << bitspersample) - 1);
+            int range = (1 << bitspersample) - 1;
 
             /* treat 16 bit the same as eight bit */
             if (bitspersample == 16)

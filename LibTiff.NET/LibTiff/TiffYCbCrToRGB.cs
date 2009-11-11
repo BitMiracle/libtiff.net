@@ -27,7 +27,7 @@ namespace BitMiracle.LibTiff
     {
         public const int clamptabOffset = 256;
         private const int SHIFT = 16;
-        private const int ONE_HALF = (int)(1 << (SHIFT - 1));
+        private const int ONE_HALF = 1 << (SHIFT - 1);
 
         public byte[] clamptab; /* range clamping table */
         public int[] Cr_r_tab;
@@ -103,8 +103,8 @@ namespace BitMiracle.LibTiff
                 int Cr = code2V(x, refBlackWhite[4] - 128.0F, refBlackWhite[5] - 128.0F, 127);
                 int Cb = code2V(x, refBlackWhite[2] - 128.0F, refBlackWhite[3] - 128.0F, 127);
 
-                Cr_r_tab[i] = (int)((D1 * Cr + ONE_HALF) >> SHIFT);
-                Cb_b_tab[i] = (int)((D3 * Cb + ONE_HALF) >> SHIFT);
+                Cr_r_tab[i] = (D1 * Cr + ONE_HALF) >> SHIFT;
+                Cb_b_tab[i] = (D3 * Cb + ONE_HALF) >> SHIFT;
                 Cr_g_tab[i] = D2 * Cr;
                 Cb_g_tab[i] = D4 * Cb + ONE_HALF;
                 Y_tab[i] = code2V(x + 128, refBlackWhite[0], refBlackWhite[1], 255);
@@ -119,7 +119,7 @@ namespace BitMiracle.LibTiff
             Cr = clamp(Cr, 0, 255);
 
             r = clamptab[clamptabOffset + Y_tab[Y] + Cr_r_tab[Cr]];
-            g = clamptab[clamptabOffset + Y_tab[Y] + (int)((Cb_g_tab[Cb] + Cr_g_tab[Cr]) >> SHIFT)];
+            g = clamptab[clamptabOffset + Y_tab[Y] + ((Cb_g_tab[Cb] + Cr_g_tab[Cr]) >> SHIFT)];
             b = clamptab[clamptabOffset + Y_tab[Y] + Cb_b_tab[Cb]];
         }
 

@@ -86,10 +86,10 @@ namespace BitMiracle.LibTiff
             value = 0;
             if (res)
             {
-                value = (cp[0] & 0xFF);
-                value += (int)((cp[1] & 0xFF) << 8);
-                value += (int)((cp[2] & 0xFF) << 16);
-                value += (int)(cp[3] << 24);
+                value = cp[0] & 0xFF;
+                value += (cp[1] & 0xFF) << 8;
+                value += (cp[2] & 0xFF) << 16;
+                value += cp[3] << 24;
             }
 
             return res;
@@ -109,7 +109,7 @@ namespace BitMiracle.LibTiff
 
         private void readDirEntry(TiffDirEntry[] dir, short dircount, byte[] bytes, int offset)
         {
-            int pos = (int)offset;
+            int pos = offset;
             for (int i = 0; i < dircount; i++)
             {
                 TiffDirEntry entry = new TiffDirEntry();
@@ -166,10 +166,10 @@ namespace BitMiracle.LibTiff
                     return false;
                 }
 
-                strip = (int)(sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip);
+                strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
             }
             else
-                strip = (int)(row / m_dir.td_rowsperstrip);
+                strip = row / m_dir.td_rowsperstrip;
             
             if (strip != m_curstrip)
             {
@@ -272,7 +272,7 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_NOREADRAW) != 0)
                 m_rawcc = 0;
             else
-                m_rawcc = (int)m_dir.td_stripbytecount[strip];
+                m_rawcc = m_dir.td_stripbytecount[strip];
 
             return m_currentCodec.tif_predecode((short)(strip / m_dir.td_stripsperimage));
         }
@@ -298,7 +298,7 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_NOREADRAW) != 0)
                 m_rawcc = 0;
             else
-                m_rawcc = (int)m_dir.td_stripbytecount[tile];
+                m_rawcc = m_dir.td_stripbytecount[tile];
 
             return m_currentCodec.tif_predecode((short)(tile / m_dir.td_stripsperimage));
         }

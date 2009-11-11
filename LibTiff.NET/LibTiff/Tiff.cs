@@ -1638,7 +1638,7 @@ namespace BitMiracle.LibTiff
             m_curstrip = -1;
             m_col = -1;
             m_curtile = -1;
-            m_tilesize = (int)-1;
+            m_tilesize = -1;
 
             m_scanlinesize = ScanlineSize();
             if (m_scanlinesize == 0)
@@ -2010,7 +2010,7 @@ namespace BitMiracle.LibTiff
             {
                 ErrorExt(this, m_clientdata, m_name,
                     "{0}: Invalid strip byte count, strip {1}", bytecount, strip);
-                bytecount = (int)-1;
+                bytecount = -1;
             }
 
             return bytecount;
@@ -2432,7 +2432,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            m_tilesize = IsTiled() ? TileSize() : (int)-1;
+            m_tilesize = IsTiled() ? TileSize() : -1;
             m_scanlinesize = ScanlineSize();
             m_flags |= TIFF_BEENWRITING;
             return true;
@@ -3863,7 +3863,7 @@ namespace BitMiracle.LibTiff
                 return -1;
             }
             
-            if (size == (int)-1)
+            if (size == -1)
                 size = m_tilesize;
             else if (size > m_tilesize)
                 size = m_tilesize;
@@ -3904,7 +3904,7 @@ namespace BitMiracle.LibTiff
             }
 
             int bytecount = m_dir.td_stripbytecount[tile];
-            if (size != (int)-1 && size < bytecount)
+            if (size != -1 && size < bytecount)
                 bytecount = size;
             
             return readRawTile1(tile, buf, offset, bytecount, module);
@@ -3993,7 +3993,7 @@ namespace BitMiracle.LibTiff
                 nrows = m_dir.td_rowsperstrip;
 
             int stripsize = VStripSize(nrows);
-            if (size == (int)-1)
+            if (size == -1)
                 size = stripsize;
             else if (size > stripsize)
                 size = stripsize;
@@ -4040,7 +4040,7 @@ namespace BitMiracle.LibTiff
                 return -1;
             }
 
-            if (size != (int)-1 && size < bytecount)
+            if (size != -1 && size < bytecount)
                 bytecount = size;
             
             return readRawStrip1(strip, buf, offset, bytecount, module);

@@ -772,7 +772,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (m_tif.m_rawcp > m_enc_rawlimit)
             {
-                m_tif.m_rawcc = (int)m_tif.m_rawcp;
+                m_tif.m_rawcc = m_tif.m_rawcp;
                 m_tif.flushData1();
                 m_tif.m_rawcp = 0;
             }
@@ -791,7 +791,7 @@ namespace BitMiracle.LibTiff.Internal
                 m_tif.m_rawcp++;
             }
 
-            m_tif.m_rawcc = (int)m_tif.m_rawcp;
+            m_tif.m_rawcc = m_tif.m_rawcp;
             return true;
         }
 
@@ -887,7 +887,7 @@ namespace BitMiracle.LibTiff.Internal
                      */
                     if (m_tif.m_rawcp > m_enc_rawlimit)
                     {
-                        m_tif.m_rawcc = (int)m_tif.m_rawcp;
+                        m_tif.m_rawcc = m_tif.m_rawcp;
                         m_tif.flushData1();
                         m_tif.m_rawcp = 0;
                     }

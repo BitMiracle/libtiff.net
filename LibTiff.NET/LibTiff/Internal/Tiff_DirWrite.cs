@@ -31,9 +31,9 @@ namespace BitMiracle.LibTiff
         private int insertData(TiffDataType type, int v)
         {
             if (m_header.tiff_magic == TIFF_BIGENDIAN)
-                return (int)((v & m_typemask[(int)type]) << m_typeshift[(int)type]);
+                return ((v & m_typemask[(int)type]) << m_typeshift[(int)type]);
             
-            return (int)(v & m_typemask[(int)type]);
+            return (v & m_typemask[(int)type]);
         }
 
         private static void resetFieldBit(int[] fields, short f)

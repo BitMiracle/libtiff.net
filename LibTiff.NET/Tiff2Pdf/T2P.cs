@@ -2558,7 +2558,7 @@ namespace BitMiracle.Tiff2Pdf
             string buffer = string.Format("/Size [{0}] \n", (1 << m_tiff_bitspersample));
             written += writeToFile(buffer);
             written += writeToFile("/BitsPerSample 16 \n");
-            written += write_pdf_stream_dict(((int)1) << (m_tiff_bitspersample + 1), 0);
+            written += write_pdf_stream_dict(1 << (m_tiff_bitspersample + 1), 0);
 
             return written;
         }
@@ -3205,7 +3205,7 @@ namespace BitMiracle.Tiff2Pdf
         private static string encodeOctalString(byte value)
         {
             //convert to int, for cleaner syntax below. 
-            int x = (int)value;
+            int x = value;
 
             //return octal encoding \ddd of the character value. 
             return string.Format(@"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);

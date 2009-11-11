@@ -1128,11 +1128,11 @@ namespace BitMiracle.LibTiff
                 status = fetchShortArray(dir, dp);
                 if (status)
                 {
-                    for (int i = 0; i < nstrips && i < (int)dir.tdir_count; i++)
+                    for (int i = 0; i < nstrips && i < dir.tdir_count; i++)
                         lpp[i] = dp[i];
                 }
             }
-            else if (nstrips != (int)dir.tdir_count)
+            else if (nstrips != dir.tdir_count)
             {
                 /* Special case to correct length */
 
@@ -1140,7 +1140,7 @@ namespace BitMiracle.LibTiff
                 status = fetchLongArray(dir, dp);
                 if (status)
                 {
-                    for (int i = 0; i < nstrips && i < (int)dir.tdir_count; i++)
+                    for (int i = 0; i < nstrips && i < dir.tdir_count; i++)
                         lpp[i] = dp[i];
                 }
             }

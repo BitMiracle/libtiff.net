@@ -158,7 +158,7 @@ namespace BitMiracle.LibTiff
 
         private static int rInt(float R)
         {
-            return ((int)(R > 0 ? (R + 0.5) : (R - 0.5)));
+            return (int)(R > 0 ? (R + 0.5) : (R - 0.5));
         }
     }
 }

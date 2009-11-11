@@ -93,7 +93,7 @@ namespace BitMiracle.LibTiff
         private static string encodeOctalString(byte value)
         {
             //convert to int, for cleaner syntax below. 
-            int x = (int)value;
+            int x = value;
 
             //return octal encoding \ddd of the character value. 
             return string.Format(@"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);

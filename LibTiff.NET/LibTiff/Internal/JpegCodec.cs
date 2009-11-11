@@ -372,7 +372,7 @@ namespace BitMiracle.LibTiff.Internal
             * Must recalculate cached tile size in case sampling state changed.
             * Should we really be doing this now if image size isn't set? 
             */
-            m_tif.m_tilesize = m_tif.IsTiled() ? m_tif.TileSize() : (int)-1;
+            m_tif.m_tilesize = m_tif.IsTiled() ? m_tif.TileSize() : -1;
         }
 
         /*
@@ -1337,7 +1337,7 @@ namespace BitMiracle.LibTiff.Internal
                     jpeg_component_info compptr = m_compression.m_comp_info[ci];
                     int hsamp = compptr.h_samp_factor;
                     int vsamp = compptr.v_samp_factor;
-                    int padding = (int)(compptr.width_in_blocks * JpegConstants.DCTSIZE - clumps_per_line * hsamp);
+                    int padding = compptr.width_in_blocks * JpegConstants.DCTSIZE - clumps_per_line * hsamp;
                     for (int ypos = 0; ypos < vsamp; ypos++)
                     {
                         int inptr = bufOffset + clumpoffset;
@@ -1528,7 +1528,7 @@ namespace BitMiracle.LibTiff.Internal
             int n = 0;
             try
             {
-                n = m_compression.jpeg_write_scanlines(scanlines, (int)num_lines);
+                n = m_compression.jpeg_write_scanlines(scanlines, num_lines);
             }
             catch (Exception)
             {
@@ -1543,7 +1543,7 @@ namespace BitMiracle.LibTiff.Internal
             int n = 0;
             try
             {
-                n = m_compression.jpeg_write_raw_data(data, (int)num_lines);
+                n = m_compression.jpeg_write_raw_data(data, num_lines);
             }
             catch (Exception)
             {
@@ -1615,7 +1615,7 @@ namespace BitMiracle.LibTiff.Internal
             int n = 0;
             try
             {
-                n = m_decompression.jpeg_read_raw_data(data, (int)max_lines);
+                n = m_decompression.jpeg_read_raw_data(data, max_lines);
             }
             catch (Exception)
             {
@@ -1694,7 +1694,7 @@ namespace BitMiracle.LibTiff.Internal
                 
                 byte[][] buf = TIFFjpeg_alloc_sarray(
                     compptr.width_in_blocks * JpegConstants.DCTSIZE, 
-                    (int)(compptr.v_samp_factor * JpegConstants.DCTSIZE));
+                    compptr.v_samp_factor * JpegConstants.DCTSIZE);
                 m_ds_buffer[ci] = buf;
             }
 

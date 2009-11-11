@@ -370,7 +370,7 @@ namespace BitMiracle.LibTiff.Internal
 
                     wc -= stride;
                 }
-                while ((int)wc > 0);
+                while (wc > 0);
             }
 
             Tiff.ShortsToByteArray(wp, 0, cc / 2, cp0, offset);
@@ -405,7 +405,7 @@ namespace BitMiracle.LibTiff.Internal
                     }
 
                     wc -= stride;
-                } while ((int) wc > 0);
+                } while (wc > 0);
             }
 
             Tiff.IntsToByteArray(wp, 0, cc / 4, cp0, offset);
@@ -442,7 +442,7 @@ namespace BitMiracle.LibTiff.Internal
 
                     wc -= stride;
                 }
-                while ((int)wc > 0);
+                while (wc > 0);
             }
 
             Tiff.ShortsToByteArray(wp, 0, cc / 2, cp0, offset);
@@ -603,7 +603,7 @@ namespace BitMiracle.LibTiff.Internal
 
                     wc -= stride;
                 }
-                while ((int)wc > 0);
+                while (wc > 0);
             }
 
             Tiff.ShortsToByteArray(wp, 0, cc / 2, cp0, offset);
@@ -639,7 +639,7 @@ namespace BitMiracle.LibTiff.Internal
                     }
 
                     wc -= stride;
-                } while ((int) wc > 0);
+                } while (wc > 0);
             }
 
             Tiff.IntsToByteArray(wp, 0, cc / 4, cp0, offset);

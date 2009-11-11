@@ -423,7 +423,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             if (m_pa != m_thisrun)
             {
-                while (b1 <= m_a0 && b1 < (int)m_rowpixels)
+                while (b1 <= m_a0 && b1 < m_rowpixels)
                 {
                     b1 += m_runs[m_pb] + m_runs[m_pb + 1];
                     m_pb += 2;
@@ -1141,7 +1141,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                 "{0}: {1} at line {2} of {3} {4} (got {5}, expected {6})",
-                m_tif.m_name, m_a0 < (int)m_rowpixels ? "Premature EOL" : "Line length mismatch",
+                m_tif.m_name, m_a0 < m_rowpixels ? "Premature EOL" : "Line length mismatch",
                 m_line, m_tif.IsTiled() ? "tile" : "strip", 
                 (m_tif.IsTiled() ? m_tif.m_curtile : m_tif.m_curstrip), m_a0, m_rowpixels);
         }
@@ -2000,7 +2000,7 @@ namespace BitMiracle.LibTiff.Internal
 
             if (!decodingDone && m_RunLength != 0)
             {
-                if (m_RunLength + m_a0 < (int)m_rowpixels)
+                if (m_RunLength + m_a0 < m_rowpixels)
                 {
                     /* expect a final V0 */
                     if (!NeedBits8(1))

@@ -151,7 +151,7 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_stripoffset[strip] == 0 || m_curoff == 0)
             {
                 Debug.Assert(m_dir.td_nstrips > 0);
-                if (m_dir.td_stripbytecount[strip] != 0 && m_dir.td_stripoffset[strip] != 0 && (int)m_dir.td_stripbytecount[strip] >= cc)
+                if (m_dir.td_stripbytecount[strip] != 0 && m_dir.td_stripoffset[strip] != 0 && m_dir.td_stripbytecount[strip] >= cc)
                 {
                     /* 
                     * There is already tile data on disk, and the new tile

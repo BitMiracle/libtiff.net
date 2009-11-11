@@ -155,10 +155,10 @@ namespace BitMiracle.LibTiff
                         break;
                     }
 
-                    td.td_rowsperstrip = (int)v32;
+                    td.td_rowsperstrip = v32;
                     if (!tif.fieldSet(FIELD.FIELD_TILEDIMENSIONS))
                     {
-                        td.td_tilelength = (int)v32;
+                        td.td_tilelength = v32;
                         td.td_tilewidth = td.td_imagewidth;
                     }
                     break;
@@ -217,9 +217,9 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFFTAG.TIFFTAG_COLORMAP:
                     v32 = 1 << td.td_bitspersample;
-                    Tiff.setShortArray(out td.td_colormap[0], ap[0].ToShortArray(), (int)v32);
-                    Tiff.setShortArray(out td.td_colormap[1], ap[1].ToShortArray(), (int)v32);
-                    Tiff.setShortArray(out td.td_colormap[2], ap[2].ToShortArray(), (int)v32);
+                    Tiff.setShortArray(out td.td_colormap[0], ap[0].ToShortArray(), v32);
+                    Tiff.setShortArray(out td.td_colormap[1], ap[1].ToShortArray(), v32);
+                    Tiff.setShortArray(out td.td_colormap[2], ap[2].ToShortArray(), v32);
                     break;
                 case TIFFTAG.TIFFTAG_EXTRASAMPLES:
                     if (!setExtraSamples(td, ref v, ap))
@@ -270,7 +270,7 @@ namespace BitMiracle.LibTiff
                         Tiff.WarningExt(tif, tif.m_clientdata, tif.m_name,
                             "Nonstandard tile length {0}, convert file", v32);
                     }
-                    td.td_tilelength = (int)v32;
+                    td.td_tilelength = v32;
                     tif.m_flags |= Tiff.TIFF_ISTILED;
                     break;
                 case TIFFTAG.TIFFTAG_TILEDEPTH:
@@ -281,7 +281,7 @@ namespace BitMiracle.LibTiff
                         break;
                     }
 
-                    td.td_tiledepth = (int)v32;
+                    td.td_tiledepth = v32;
                     break;
                 case TIFFTAG.TIFFTAG_DATATYPE:
                     v = ap[0].ToInt();
@@ -366,12 +366,12 @@ namespace BitMiracle.LibTiff
                 case TIFFTAG.TIFFTAG_INKNAMES:
                     v = ap[0].ToInt();
                     string s = ap[1].ToString();
-                    v = checkInkNamesString(tif, (int)v, s);
+                    v = checkInkNamesString(tif, v, s);
                     status = v > 0;
                     if (v > 0)
                     {
-                        setNString(out td.td_inknames, s, (int)v);
-                        td.td_inknameslen = (int)v;
+                        setNString(out td.td_inknames, s, v);
+                        td.td_inknameslen = v;
                     }
                     break;
                 default:
