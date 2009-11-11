@@ -204,9 +204,9 @@ namespace BitMiracle.LibTiff
                         return null;
                     }
 
-                    ushort[] red_orig = result[0].ToUShortArray();
-                    ushort[] green_orig = result[1].ToUShortArray();
-                    ushort[] blue_orig = result[2].ToUShortArray();
+                    short[] red_orig = result[0].ToShortArray();
+                    short[] green_orig = result[1].ToShortArray();
+                    short[] blue_orig = result[2].ToShortArray();
 
                     /* copy the colormaps so we can modify them */
                     int n_color = (1 << img.bitspersample);

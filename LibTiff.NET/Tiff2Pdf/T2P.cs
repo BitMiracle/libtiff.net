@@ -690,10 +690,10 @@ namespace BitMiracle.Tiff2Pdf
             else
                 m_tiff_photometric = (PHOTOMETRIC)result[0].ToInt();
 
-            ushort[] r;
-            ushort[] g;
-            ushort[] b;
-            ushort[] a;
+            short[] r;
+            short[] g;
+            short[] b;
+            short[] a;
             bool photometric_palette;
             bool photometric_palette_cmyk;
 
@@ -810,9 +810,9 @@ namespace BitMiracle.Tiff2Pdf
                         }
                         else
                         {
-                            r = result[0].ToUShortArray();
-                            g = result[1].ToUShortArray();
-                            b = result[2].ToUShortArray();
+                            r = result[0].ToShortArray();
+                            g = result[1].ToShortArray();
+                            b = result[2].ToShortArray();
                         }
 
                         m_pdf_palette = new byte [m_pdf_palettesize * 3];
@@ -887,10 +887,10 @@ namespace BitMiracle.Tiff2Pdf
                         }
                         else
                         {
-                            r = result[0].ToUShortArray();
-                            g = result[1].ToUShortArray();
-                            b = result[2].ToUShortArray();
-                            a = result[3].ToUShortArray();
+                            r = result[0].ToShortArray();
+                            g = result[1].ToShortArray();
+                            b = result[2].ToShortArray();
+                            a = result[3].ToShortArray();
                         }
                         
                         m_pdf_palette = new byte [m_pdf_palettesize * 4];
