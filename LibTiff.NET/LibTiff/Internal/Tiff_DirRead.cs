@@ -67,7 +67,7 @@ namespace BitMiracle.LibTiff
 
             if (m_dir.td_compression != COMPRESSION.COMPRESSION_NONE)
             {
-                int space = TiffHeader.SizeInBytes + sizeof(short) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(uint);
+                int space = TiffHeader.SizeInBytes + sizeof(short) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(int);
                 int filesize = getFileSize();
 
                 /* calculate amount of space used by indirect values */
@@ -83,7 +83,7 @@ namespace BitMiracle.LibTiff
                     }
 
                     cc = cc * dir[n].tdir_count;
-                    if (cc > sizeof(uint))
+                    if (cc > sizeof(int))
                         space += cc;
                 }
 
@@ -91,7 +91,7 @@ namespace BitMiracle.LibTiff
                 if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
                     space /= m_dir.td_samplesperpixel;
                 
-                uint strip = 0;
+                int strip = 0;
                 for ( ; strip < m_dir.td_nstrips; strip++)
                     m_dir.td_stripbytecount[strip] = space;
                 
@@ -110,14 +110,14 @@ namespace BitMiracle.LibTiff
             {
                 int bytespertile = TileSize();
 
-                for (uint strip = 0; strip < m_dir.td_nstrips; strip++)
+                for (int strip = 0; strip < m_dir.td_nstrips; strip++)
                     m_dir.td_stripbytecount[strip] = bytespertile;
             }
             else
             {
                 int rowbytes = ScanlineSize();
                 int rowsperstrip = m_dir.td_imagelength / m_dir.td_stripsperimage;
-                for (uint strip = 0; strip < m_dir.td_nstrips; strip++)
+                for (int strip = 0; strip < m_dir.td_nstrips; strip++)
                     m_dir.td_stripbytecount[strip] = rowbytes * rowsperstrip;
             }
             
@@ -249,7 +249,7 @@ namespace BitMiracle.LibTiff
         {
             bool ok = false;
 
-            byte[] b = new byte[2 * sizeof(uint)];
+            byte[] b = new byte[2 * sizeof(int)];
             int read = fetchData(dir, b);
             if (read != 0)
             {
@@ -303,13 +303,6 @@ namespace BitMiracle.LibTiff
         */
         private int fetchData(TiffDirEntry dir, byte[] cp)
         {
-            /* 
-            * FIXME: bytecount should have int type, but for now libtiff
-            * defines int as a signed 32-bit integer and we are losing
-            * ability to read arrays larger than 2^31 bytes. So we are using
-            * uint instead of int here.
-            */
-
             int w = DataWidth(dir.tdir_type);
             int cc = dir.tdir_count * w;
 
@@ -371,7 +364,7 @@ namespace BitMiracle.LibTiff
                 if ((m_flags & Tiff.TIFF_SWAB) != 0)
                     SwabLong(ref l);
 
-                bytes = new byte[sizeof(uint)];
+                bytes = new byte[sizeof(int)];
                 writeInt(l, bytes, 0);
                 cp = Latin1Encoding.GetString(bytes, 0, dir.tdir_count);
                 return 1;
@@ -410,7 +403,7 @@ namespace BitMiracle.LibTiff
         */
         private float fetchRational(TiffDirEntry dir)
         {
-            byte[] bytes = new byte[sizeof(uint) * 2];
+            byte[] bytes = new byte[sizeof(int) * 2];
             int read = fetchData(dir, bytes);
             if (read != 0)
             {
@@ -588,7 +581,7 @@ namespace BitMiracle.LibTiff
         */
         private bool fetchRationalArray(TiffDirEntry dir, float[] v)
         {
-            Debug.Assert(sizeof(float) == sizeof(uint));
+            Debug.Assert(sizeof(float) == sizeof(int));
 
             bool ok = false;
             byte[] l = new byte [dir.tdir_count * DataWidth(dir.tdir_type)];
@@ -596,7 +589,7 @@ namespace BitMiracle.LibTiff
             {
                 int offset = 0;
                 int[] pair = new int[2];
-                for (uint i = 0; i < dir.tdir_count; i++)
+                for (int i = 0; i < dir.tdir_count; i++)
                 {
                     pair[0] = readInt(l, offset);
                     offset += sizeof(int);
@@ -882,11 +875,8 @@ namespace BitMiracle.LibTiff
                     case TiffDataType.TIFF_SSHORT:
                         /*
                          * If the tag is also acceptable as a LONG or SLONG
-                         * then SetField will expect an uint parameter
-                         * passed to it (through varargs).  Thus, for machines
-                         * where sizeof (int) != sizeof (uint) we must do
-                         * a careful check here.  It's hard to say if this
-                         * is worth optimizing.
+                         * then SetField will expect an int parameter
+                         * passed to it. 
                          *
                          * NB: We use FieldWithTag here knowing that
                          *     it returns us the first entry in the table
@@ -1176,7 +1166,7 @@ namespace BitMiracle.LibTiff
             if (ok)
             {
                 float[] fp = new float [dir.tdir_count];
-                for (uint i = 0; i < dir.tdir_count; i++)
+                for (int i = 0; i < dir.tdir_count; i++)
                     fp[i] = (float)cp[i];
 
                 ok = SetField(dir.tdir_tag, fp);
@@ -1237,7 +1227,7 @@ namespace BitMiracle.LibTiff
              * Fill the strip information arrays with new bytecounts and offsets
              * that reflect the broken-up format.
              */
-            for (uint strip = 0; strip < nstrips; strip++)
+            for (int strip = 0; strip < nstrips; strip++)
             {
                 if (stripbytes > bytecount)
                     stripbytes = bytecount;

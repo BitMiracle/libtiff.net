@@ -268,9 +268,9 @@ namespace BitMiracle.LibTiff.Internal
                 */
                 if (stride == 3)
                 {
-                    uint cr = cp0[cp];
-                    uint cg = cp0[cp + 1];
-                    uint cb = cp0[cp + 2];
+                    int cr = cp0[cp];
+                    int cg = cp0[cp + 1];
+                    int cb = cp0[cp + 2];
                     do
                     {
                         cc -= 3;
@@ -289,10 +289,10 @@ namespace BitMiracle.LibTiff.Internal
                 }
                 else if (stride == 4)
                 {
-                    uint cr = cp0[cp];
-                    uint cg = cp0[cp + 1];
-                    uint cb = cp0[cp + 2];
-                    uint ca = cp0[cp + 3];
+                    int cr = cp0[cp];
+                    int cg = cp0[cp + 1];
+                    int cb = cp0[cp + 2];
+                    int ca = cp0[cp + 3];
                     do
                     {
                         cc -= 4;
@@ -681,11 +681,8 @@ namespace BitMiracle.LibTiff.Internal
             Array.Copy(cp0, offset, tmp, 0, cc);
             for (count = 0; count < wc; count++)
             {
-                uint b;
-                for (b = 0; b < bps; b++)
-                {
+                for (int b = 0; b < bps; b++)
                     cp0[offset + bps * count + b] = tmp[(bps - b - 1) * wc + count];
-                }
             }
         }
 
@@ -701,11 +698,8 @@ namespace BitMiracle.LibTiff.Internal
             int wc = cc / bps;
             for (int count = 0; count < wc; count++)
             {
-                uint b;
-                for (b = 0; b < bps; b++)
-                {
+                for (int b = 0; b < bps; b++)
                     cp0[offset + (bps - b - 1) * wc + count] = tmp[bps * count + b];
-                }
             }
 
             int cp = offset + cc - stride - 1;

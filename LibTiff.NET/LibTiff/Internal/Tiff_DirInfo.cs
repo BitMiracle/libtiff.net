@@ -303,7 +303,7 @@ namespace BitMiracle.LibTiff
         private void printFieldInfo(Stream fd)
         {
             fprintf(fd, "{0}: \n", m_name);
-            for (uint i = 0; i < m_nfields; i++)
+            for (int i = 0; i < m_nfields; i++)
             {
                 TiffFieldInfo fip = m_fieldinfo[i];
                 fprintf(fd, "field[{0,2:D}] {1,5:D}, {2,2:D}, {3,2:D}, {4}, {5,2:D}, {6,5}, {7,5}, {8}\n",

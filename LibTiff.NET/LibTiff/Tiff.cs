@@ -46,7 +46,7 @@ namespace BitMiracle.LibTiff
         /// Support strip chopping (whether or not to convert single-strip 
         /// uncompressed images to mutiple strips of ~8Kb to reduce memory usage)
         /// </summary>
-        internal const uint STRIPCHOP_DEFAULT = TIFF_STRIPCHOP;
+        internal const int STRIPCHOP_DEFAULT = TIFF_STRIPCHOP;
 
         /// <summary>
         /// Treat extra sample as alpha (default enabled). The RGBA interface 
@@ -88,7 +88,7 @@ namespace BitMiracle.LibTiff
 
         internal const short TIFF_VARIABLE = -1; /* marker for variable length tags */
         internal const short TIFF_SPP = -2; /* marker for SamplesPerPixel tags */
-        internal const short TIFF_VARIABLE2 = -3; /* marker for uint var-length tags */
+        internal const short TIFF_VARIABLE2 = -3; /* marker for int var-length tags */
 
         internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
 
@@ -376,7 +376,7 @@ namespace BitMiracle.LibTiff
              * use of memory-mapped files and strip chopping when
              * a file is opened read-only.
              */
-            tif.m_flags = (uint)FILLORDER.FILLORDER_MSB2LSB;
+            tif.m_flags = (int)FILLORDER.FILLORDER_MSB2LSB;
 
             if (m == O_RDONLY || m == O_RDWR)
                 tif.m_flags |= STRIPCHOP_DEFAULT;
@@ -436,13 +436,13 @@ namespace BitMiracle.LibTiff
                     case 'l':
                         break;
                     case 'B':
-                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (uint)FILLORDER.FILLORDER_MSB2LSB;
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FILLORDER.FILLORDER_MSB2LSB;
                         break;
                     case 'L':
-                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (uint)FILLORDER.FILLORDER_LSB2MSB;
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FILLORDER.FILLORDER_LSB2MSB;
                         break;
                     case 'H':
-                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (uint)FILLORDER.FILLORDER_LSB2MSB;
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FILLORDER.FILLORDER_LSB2MSB;
                         break;
                     case 'C':
                         if (m == O_RDONLY)
@@ -1112,7 +1112,7 @@ namespace BitMiracle.LibTiff
             /*
              * First real pass over the directory.
              */
-            uint fix = 0;
+            int fix = 0;
             bool diroutoforderwarning = false;
             for (int i = 0; i < dircount; i++)
             {
@@ -1606,7 +1606,7 @@ namespace BitMiracle.LibTiff
             if (m_dir.td_nstrips > 1)
             {
                 m_dir.td_stripbytecountsorted = 1;
-                for (uint strip = 1; strip < m_dir.td_nstrips; strip++)
+                for (int strip = 1; strip < m_dir.td_nstrips; strip++)
                 {
                     if (m_dir.td_stripoffset[strip - 1] > m_dir.td_stripoffset[strip])
                     {
@@ -1690,7 +1690,7 @@ namespace BitMiracle.LibTiff
             FreeDirectory();
             m_dir = new TiffDirectory();
 
-            uint fix = 0;
+            int fix = 0;
             for (short i = 0; i < dircount; i++)
             {
                 if ((m_flags & Tiff.TIFF_SWAB) != 0)
@@ -1818,7 +1818,7 @@ namespace BitMiracle.LibTiff
             * Put the directory  at the end of the file.
             */
             m_diroff = (seekFile(0, SeekOrigin.End) + 1) & ~1;
-            m_dataoff = m_diroff + sizeof(short) + dirsize + sizeof(uint);
+            m_dataoff = m_diroff + sizeof(short) + dirsize + sizeof(int);
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
@@ -1829,7 +1829,7 @@ namespace BitMiracle.LibTiff
             * Setup external form of directory
             * entries and write data items.
             */
-            uint[] fields = new uint[FIELD.FIELD_SETLONGS];
+            int[] fields = new int[FIELD.FIELD_SETLONGS];
             Array.Copy(m_dir.td_fieldsset, fields, FIELD.FIELD_SETLONGS);
 
             for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
@@ -3156,7 +3156,7 @@ namespace BitMiracle.LibTiff
             if ((flags & TiffPrintDirectoryFlags.TIFFPRINT_STRIPS) != 0 && fieldSet(FIELD.FIELD_STRIPOFFSETS))
             {
                 fprintf(fd, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
-                for (uint s = 0; s < m_dir.td_nstrips; s++)
+                for (int s = 0; s < m_dir.td_nstrips; s++)
                     fprintf(fd, "    {0,3}: [{0,8}, {0,8}]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
             }
         }
@@ -3888,12 +3888,6 @@ namespace BitMiracle.LibTiff
         {
             const string module = "ReadRawTile";
     
-            /*
-            * FIXME: bytecount should have int type, but for now libtiff
-            * defines int as a signed 32-bit integer and we are losing
-            * ability to read arrays larger than 2^31 bytes. So we are using
-            * uint instead of int here.
-            */
             if (!checkRead(1))
                 return -1;
             
@@ -3910,7 +3904,7 @@ namespace BitMiracle.LibTiff
             }
 
             int bytecount = m_dir.td_stripbytecount[tile];
-            if (size != (int)-1 && (uint)size < bytecount)
+            if (size != (int)-1 && size < bytecount)
                 bytecount = size;
             
             return readRawTile1(tile, buf, offset, bytecount, module);
@@ -4024,12 +4018,6 @@ namespace BitMiracle.LibTiff
         {
             const string module = "ReadRawStrip";
 
-            /*
-            * FIXME: bytecount should have int type, but for now libtiff
-            * defines int as a signed 32-bit integer and we are losing
-            * ability to read arrays larger than 2^31 bytes. So we are using
-            * uint instead of int here.
-            */
             if (!checkRead(0))
                 return -1;
             
@@ -4052,7 +4040,7 @@ namespace BitMiracle.LibTiff
                 return -1;
             }
 
-            if (size != (int)-1 && (uint)size < bytecount)
+            if (size != (int)-1 && size < bytecount)
                 bytecount = size;
             
             return readRawStrip1(strip, buf, offset, bytecount, module);

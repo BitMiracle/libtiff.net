@@ -39,9 +39,9 @@ namespace BitMiracle.LibTiff
             return ((m_flags & (int)o) != 0);
         }
 
-        private static uint BITn(int n)
+        private static int BITn(int n)
         {
-            return (((uint)1L) << (n & 0x1f));
+            return (1 << (n & 0x1f));
         }
 
         /*

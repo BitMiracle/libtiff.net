@@ -80,7 +80,7 @@ namespace BitMiracle.LibTiff
             2.4F, 2.4F, 2.4F  /* Gamma values for the three guns */
         );
 
-        private const uint A1 = (((uint)0xffL) << 24);
+        private const int A1 = 0xff << 24;
 
         /* 
         * Helper constants used in Orientation tag handling
@@ -398,12 +398,12 @@ namespace BitMiracle.LibTiff
 
         private static int PACK(int r, int g, int b)
         {
-            return (int)((uint)r | ((uint)g << 8) | ((uint)b << 16) | A1);
+            return (r | (g << 8) | (b << 16) | A1);
         }
 
         private static int PACK4(int r, int g, int b, int a)
         {
-            return (int)((uint)r | ((uint)g << 8) | ((uint)b << 16) | ((uint)a << 24));
+            return (r | (g << 8) | (b << 16) | (a << 24));
         }
 
         private static int W2B(short v)
@@ -413,12 +413,12 @@ namespace BitMiracle.LibTiff
 
         private static int PACKW(short r, short g, short b)
         {
-            return (int)((uint)W2B(r) | ((uint)W2B(g) << 8) | ((uint)W2B(b) << 16) | A1);
+            return (W2B(r) | (W2B(g) << 8) | (W2B(b) << 16) | A1);
         }
 
         private static int PACKW4(short r, short g, short b, short a)
         {
-            return (int)((uint)W2B(r) | ((uint)W2B(g) << 8) | ((uint)W2B(b) << 16) | ((uint)W2B(a) << 24));
+            return (W2B(r) | (W2B(g) << 8) | (W2B(b) << 16) | (W2B(a) << 24));
         }
 
         /*

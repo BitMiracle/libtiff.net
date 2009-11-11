@@ -26,12 +26,7 @@ namespace BitMiracle.LibTiff
     {
         private int summarize(int summand1, int summand2, string where)
         {
-            /*
-             * XXX: We are using casting to uint here, bacause sizeof(uint)
-             * may be larger than sizeof(uint) on 64-bit architectures.
-             */
             int bytes = summand1 + summand2;
-
             if (bytes - summand1 != summand2)
             {
                 ErrorExt(this, m_clientdata, m_name, "Integer overflow in {0}", where);
@@ -44,7 +39,6 @@ namespace BitMiracle.LibTiff
         private int multiply(int nmemb, int elem_size, string where)
         {
             int bytes = nmemb * elem_size;
-
             if (elem_size != 0 && bytes / elem_size != nmemb)
             {
                 ErrorExt(this, m_clientdata, m_name, "Integer overflow in {0}", where);

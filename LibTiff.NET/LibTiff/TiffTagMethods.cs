@@ -358,7 +358,7 @@ namespace BitMiracle.LibTiff
                     break;
                 case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
                     v = ((td.td_samplesperpixel - td.td_extrasamples) > 1 ? 3 : 1);
-                    for (uint i = 0; i < v; i++)
+                    for (int i = 0; i < v; i++)
                     {
                         Tiff.setShortArray(out td.td_transferfunction[i], ap[0].ToShortArray(), 1 << td.td_bitspersample);
                     }
@@ -826,21 +826,15 @@ namespace BitMiracle.LibTiff
                                     {
                                         case TiffDataType.TIFF_BYTE:
                                         case TiffDataType.TIFF_UNDEFINED:
-                                            result[j].Set(val[valPos]);
-                                            break;
                                         case TiffDataType.TIFF_SBYTE:
                                             result[j].Set(val[valPos]);
                                             break;
                                         case TiffDataType.TIFF_SHORT:
-                                            result[j].Set(BitConverter.ToUInt16(val, valPos));
-                                            break;
                                         case TiffDataType.TIFF_SSHORT:
                                             result[j].Set(BitConverter.ToInt16(val, valPos));
                                             break;
                                         case TiffDataType.TIFF_LONG:
                                         case TiffDataType.TIFF_IFD:
-                                            result[j].Set(BitConverter.ToUInt32(val, valPos));
-                                            break;
                                         case TiffDataType.TIFF_SLONG:
                                             result[j].Set(BitConverter.ToInt32(val, valPos));
                                             break;
@@ -891,7 +885,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            for (uint i = 0; i < v; i++)
+            for (int i = 0; i < v; i++)
             {
                 if ((EXTRASAMPLE)va[i] > EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
                 {

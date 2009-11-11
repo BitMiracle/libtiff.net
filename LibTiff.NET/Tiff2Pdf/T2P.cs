@@ -1241,7 +1241,7 @@ namespace BitMiracle.Tiff2Pdf
                     else
                         sbc = result[0].ToIntArray();
 
-                    for (uint i = 0; i < stripcount; i++)
+                    for (int i = 0; i < stripcount; i++)
                     {
                         m_tiff_datasize += sbc[i];
                         m_tiff_datasize -= 4; /* don't use SOI or EOI of strip */
@@ -1897,7 +1897,7 @@ namespace BitMiracle.Tiff2Pdf
             {
                 int palette_offset = buffer[i - 1] * component_count;
                 int sample_offset = (i - 1) * component_count;
-                for (uint j = 0; j < component_count; j++)
+                for (int j = 0; j < component_count; j++)
                 {
                     buffer[sample_offset + j] = m_pdf_palette[palette_offset + j];
                 }
@@ -2342,8 +2342,8 @@ namespace BitMiracle.Tiff2Pdf
                 m_tiff_tiles[m_pdf_page].tiles_edgetilelength = m_tiff_length % tilelength;
                 tiles = m_tiff_tiles[m_pdf_page].tiles_tiles;
                 
-                uint i = 0;
-                uint i2 = 0;
+                int i = 0;
+                int i2 = 0;
                 T2P_BOX boxp = null;
                 for (i2 = 0; i2 < tilecounty - 1; i2++)
                 {
@@ -2381,13 +2381,13 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_tiff_orientation == 0 || m_tiff_orientation == ORIENTATION.ORIENTATION_TOPLEFT)
             {
-                for (uint i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+                for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
                     compose_pdf_page_orient(tiles[i].tile_box, 0);
 
                 return;
             }
 
-            for (uint i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+            for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
             {
                 T2P_BOX boxp = tiles[i].tile_box;
                 boxp.x1 -= m_pdf_imagebox.x1;
@@ -2719,7 +2719,7 @@ namespace BitMiracle.Tiff2Pdf
             string buffer = string.Format("{0}", m_pdf_xrefcount + 1);
             written += writeToFile(buffer);
             written += writeToFile(" \n0000000000 65535 f \n");
-            for (uint i = 0; i < m_pdf_xrefcount; i++)
+            for (int i = 0; i < m_pdf_xrefcount; i++)
             {
                 buffer = string.Format("{0:D10} 00000 n \n", m_pdf_xrefoffsets[i]);
                 written += writeToFile(buffer);
@@ -2951,7 +2951,7 @@ namespace BitMiracle.Tiff2Pdf
             int written = 0;
             if (m_tiff_tiles[m_pdf_page].tiles_tilecount > 0)
             {
-                for (uint i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+                for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
                 {
                     T2P_BOX box = m_tiff_tiles[m_pdf_page].tiles_tiles[i].tile_box;
                     buffer = string.Format(CultureInfo.InvariantCulture, 
@@ -3157,7 +3157,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private static int sample_lab_signed_to_unsigned(byte[] buffer, int samplecount)
         {
-            for (uint i = 0; i < samplecount; i++)
+            for (int i = 0; i < samplecount; i++)
             {
                 if ((buffer[i * 3 + 1] & 0x80) != 0)
                     buffer[i * 3 + 1] = (byte)(0x80 + (sbyte)buffer[i * 3 + 1]); // cast to signed int is important
@@ -3198,7 +3198,7 @@ namespace BitMiracle.Tiff2Pdf
         private static void tile_collapse_left(byte[] buffer, int scanwidth, int tilewidth, int edgetilewidth, int tilelength)
         {
             int edgescanwidth = (scanwidth * edgetilewidth + tilewidth - 1) / tilewidth;
-            for (uint i = 0; i < tilelength; i++)
+            for (int i = 0; i < tilelength; i++)
                 Array.Copy(buffer, scanwidth * i, buffer, edgescanwidth * i, edgescanwidth);
         }
 
@@ -3535,7 +3535,7 @@ namespace BitMiracle.Tiff2Pdf
             if (m_tiff_tiles[m_pdf_page].tiles_tilecount != 0)
             {
                 written += writeToFile("/XObject <<\n");
-                for (uint i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+                for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
                 {
                     written += writeToFile("/Im");
                     buffer = string.Format("{0}", m_pdf_page + 1);

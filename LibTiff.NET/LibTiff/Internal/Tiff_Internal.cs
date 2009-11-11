@@ -25,21 +25,21 @@ namespace BitMiracle.LibTiff
     {
         internal const int STRIP_SIZE_DEFAULT = 8192;
 
-        internal const uint TIFF_FILLORDER = 0x0003;  /* natural bit fill order for machine */
-        internal const uint TIFF_DIRTYDIRECT = 0x0008;  /* current directory must be written */
-        internal const uint TIFF_BUFFERSETUP = 0x0010;  /* data buffers setup */
-        internal const uint TIFF_CODERSETUP = 0x0020;  /* encoder/decoder setup done */
-        internal const uint TIFF_BEENWRITING = 0x0040;  /* written 1+ scanlines to file */
-        internal const uint TIFF_SWAB = 0x0080;  /* byte swap file information */
-        internal const uint TIFF_NOBITREV = 0x0100;  /* inhibit bit reversal logic */
-        internal const uint TIFF_MYBUFFER = 0x0200;  /* my raw data buffer; free on close */
-        internal const uint TIFF_ISTILED = 0x0400;  /* file is tile, not strip- based */
-        internal const uint TIFF_POSTENCODE = 0x1000;  /* need call to postencode routine */
-        internal const uint TIFF_INSUBIFD = 0x2000;  /* currently writing a subifd */
-        internal const uint TIFF_UPSAMPLED = 0x4000;  /* library is doing data up-sampling */
-        internal const uint TIFF_STRIPCHOP = 0x8000;  /* enable strip chopping support */
-        internal const uint TIFF_HEADERONLY = 0x10000; /* read header only, do not process the first directory*/
-        internal const uint TIFF_NOREADRAW = 0x20000; /* skip reading of raw uncompressed image data*/
+        internal const int TIFF_FILLORDER = 0x0003;  /* natural bit fill order for machine */
+        internal const int TIFF_DIRTYDIRECT = 0x0008;  /* current directory must be written */
+        internal const int TIFF_BUFFERSETUP = 0x0010;  /* data buffers setup */
+        internal const int TIFF_CODERSETUP = 0x0020;  /* encoder/decoder setup done */
+        internal const int TIFF_BEENWRITING = 0x0040;  /* written 1+ scanlines to file */
+        internal const int TIFF_SWAB = 0x0080;  /* byte swap file information */
+        internal const int TIFF_NOBITREV = 0x0100;  /* inhibit bit reversal logic */
+        internal const int TIFF_MYBUFFER = 0x0200;  /* my raw data buffer; free on close */
+        internal const int TIFF_ISTILED = 0x0400;  /* file is tile, not strip- based */
+        internal const int TIFF_POSTENCODE = 0x1000;  /* need call to postencode routine */
+        internal const int TIFF_INSUBIFD = 0x2000;  /* currently writing a subifd */
+        internal const int TIFF_UPSAMPLED = 0x4000;  /* library is doing data up-sampling */
+        internal const int TIFF_STRIPCHOP = 0x8000;  /* enable strip chopping support */
+        internal const int TIFF_HEADERONLY = 0x10000; /* read header only, do not process the first directory*/
+        internal const int TIFF_NOREADRAW = 0x20000; /* skip reading of raw uncompressed image data*/
 
         internal enum PostDecodeMethodType
         {
@@ -52,7 +52,7 @@ namespace BitMiracle.LibTiff
 
         internal string m_name; /* name of open file */
         internal int m_mode; /* open mode (O_*) */
-        internal uint m_flags;
+        internal int m_flags;
 
         /* the first directory */
         internal int m_diroff; /* file offset of current directory */

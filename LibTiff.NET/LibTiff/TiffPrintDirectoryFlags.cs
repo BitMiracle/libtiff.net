@@ -15,7 +15,6 @@ using System.Text;
 
 namespace BitMiracle.LibTiff
 {
-
     /// <summary>
     /// Flags to pass to PrintDirectory to control printing of data structures 
     /// that are potentially very large. Bit-or these flags to enable printing

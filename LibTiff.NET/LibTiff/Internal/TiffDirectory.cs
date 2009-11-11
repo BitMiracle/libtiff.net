@@ -21,7 +21,7 @@ namespace BitMiracle.LibTiff.Internal
     class TiffDirectory
     {
         /* bit vector of fields that are set */
-        public uint[] td_fieldsset = new uint[FIELD.FIELD_SETLONGS];
+        public int[] td_fieldsset = new int[FIELD.FIELD_SETLONGS];
 
         public int td_imagewidth;
         public int td_imagelength;

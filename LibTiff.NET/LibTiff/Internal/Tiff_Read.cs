@@ -97,7 +97,7 @@ namespace BitMiracle.LibTiff
 
         private bool readDirEntryOk(TiffDirEntry[] dir, short dircount)
         {
-            int entrySize = sizeof(short) * 2 + sizeof(uint) * 2;
+            int entrySize = sizeof(short) * 2 + sizeof(int) * 2;
             int totalSize = entrySize * dircount;
             byte[] bytes = new byte[totalSize];
             bool res = readOK(bytes, totalSize);
@@ -107,7 +107,7 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private void readDirEntry(TiffDirEntry[] dir, short dircount, byte[] bytes, uint offset)
+        private void readDirEntry(TiffDirEntry[] dir, short dircount, byte[] bytes, int offset)
         {
             int pos = (int)offset;
             for (int i = 0; i < dircount; i++)
@@ -118,9 +118,9 @@ namespace BitMiracle.LibTiff
                 entry.tdir_type = (TiffDataType)readShort(bytes, pos);
                 pos += sizeof(short);
                 entry.tdir_count = readInt(bytes, pos);
-                pos += sizeof(uint);
+                pos += sizeof(int);
                 entry.tdir_offset = readInt(bytes, pos);
-                pos += sizeof(uint);
+                pos += sizeof(int);
                 dir[i] = entry;
             }
         }
@@ -381,13 +381,6 @@ namespace BitMiracle.LibTiff
     
             if ((m_flags & TIFF_NOREADRAW) == 0)
             {
-                /*
-                * FIXME: bytecount should have int type, but for now
-                * libtiff defines int as a signed 32-bit integer and we
-                * are losing ability to read arrays larger than 2^31 bytes.
-                * So we are using uint instead of int here.
-                */
-
                 int bytecount = m_dir.td_stripbytecount[strip];
                 if (bytecount <= 0)
                 {
@@ -402,7 +395,7 @@ namespace BitMiracle.LibTiff
                  * (perhaps should set upper bound on
                  *  the size of a buffer we'll use?).
                  */
-                if (bytecount > (uint)m_rawdatasize)
+                if (bytecount > m_rawdatasize)
                 {
                     m_curstrip = NOSTRIP;
                     if ((m_flags & TIFF_MYBUFFER) == 0)
@@ -436,13 +429,6 @@ namespace BitMiracle.LibTiff
 
             if ((m_flags & TIFF_NOREADRAW) == 0)
             {
-                /*
-                * FIXME: butecount should have int type, but for now
-                * libtiff defines int as a signed 32-bit integer and we
-                * are losing ability to read arrays larger than 2^31 bytes.
-                * So we are using uint instead of int here.
-                */
-
                 int bytecount = m_dir.td_stripbytecount[tile];
                 if (bytecount <= 0)
                 {
@@ -457,7 +443,7 @@ namespace BitMiracle.LibTiff
                  * (perhaps should set upper bound on
                  *  the size of a buffer we'll use?).
                  */
-                if (bytecount > (uint)m_rawdatasize)
+                if (bytecount > m_rawdatasize)
                 {
                     m_curtile = NOTILE;
                     if ((m_flags & TIFF_MYBUFFER) == 0)
@@ -470,7 +456,7 @@ namespace BitMiracle.LibTiff
                     ReadBufferSetup(null, roundUp(bytecount, 1024));
                 }
 
-                if ((uint)readRawTile1(tile, m_rawdata, 0, bytecount, module) != bytecount)
+                if (readRawTile1(tile, m_rawdata, 0, bytecount, module) != bytecount)
                     return false;
 
                 if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)

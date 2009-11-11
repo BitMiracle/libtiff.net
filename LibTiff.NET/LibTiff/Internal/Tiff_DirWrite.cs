@@ -36,12 +36,12 @@ namespace BitMiracle.LibTiff
             return (int)(v & m_typemask[(int)type]);
         }
 
-        private static void resetFieldBit(uint[] fields, short f)
+        private static void resetFieldBit(int[] fields, short f)
         {
             fields[f / 32] &= ~BITn(f);
         }
 
-        private static bool fieldSet(uint[] fields, short f)
+        private static bool fieldSet(int[] fields, short f)
         {
             return ((fields[f / 32] & BITn(f)) != 0);
         }
@@ -149,7 +149,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            m_dataoff = m_diroff + sizeof(short) + dirsize + sizeof(uint);
+            m_dataoff = m_diroff + sizeof(short) + dirsize + sizeof(int);
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
@@ -161,7 +161,7 @@ namespace BitMiracle.LibTiff
              * Setup external form of directory
              * entries and write data items.
              */
-            uint[] fields = new uint[FIELD.FIELD_SETLONGS];
+            int[] fields = new int[FIELD.FIELD_SETLONGS];
             Array.Copy(m_dir.td_fieldsset, fields, FIELD.FIELD_SETLONGS);
 
             /*
@@ -332,7 +332,7 @@ namespace BitMiracle.LibTiff
                             else
                             {
                                 Debug.Assert(false);
-                                m_subifdoff = m_diroff + sizeof(short) + dir * TiffDirEntry.SizeInBytes + sizeof(short) * 2 + sizeof(uint);
+                                m_subifdoff = m_diroff + sizeof(short) + dir * TiffDirEntry.SizeInBytes + sizeof(short) * 2 + sizeof(int);
                             }
                         }
                         break;
@@ -859,7 +859,7 @@ namespace BitMiracle.LibTiff
             /* XXX -- yech, fool writeData */
             dir.tdir_count = 1 << m_dir.td_bitspersample;
             int off = m_dataoff;
-            for (uint i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
             {
                 if (!writeData(ref dir, table[i], dir.tdir_count))
                     return false;
@@ -957,7 +957,7 @@ namespace BitMiracle.LibTiff
         private bool writeRationalArray(ref TiffDirEntry dir, float[] v)
         {
             int[] t = new int [2 * dir.tdir_count];
-            for (uint i = 0; i < dir.tdir_count; i++)
+            for (int i = 0; i < dir.tdir_count; i++)
             {
                 int sign = 1;
                 float fv = v[i];
@@ -1236,7 +1236,7 @@ namespace BitMiracle.LibTiff
                 --m_nsubifd;
 
                 if (m_nsubifd != 0)
-                    m_subifdoff += sizeof(uint);
+                    m_subifdoff += sizeof(int);
                 else
                     m_flags &= ~TIFF_INSUBIFD;
                 
@@ -1288,7 +1288,7 @@ namespace BitMiracle.LibTiff
             while (nextdir != 0);
 
             int off = seekFile(0, SeekOrigin.Current); /* get current offset */
-            seekFile(off - sizeof(uint), SeekOrigin.Begin);
+            seekFile(off - sizeof(int), SeekOrigin.Begin);
             if (!writeIntOK(diroff))
             {
                 ErrorExt(this, m_clientdata, module, "Error writing directory link");

@@ -55,7 +55,7 @@ namespace BitMiracle.LibTiff
         {
             fprintf(fd, "  {0}: ", fip.field_name);
 
-            for (uint j = 0; j < value_count; j++)
+            for (int j = 0; j < value_count; j++)
             {
                 if (fip.field_type == TiffDataType.TIFF_BYTE || 
                     fip.field_type == TiffDataType.TIFF_SBYTE)
