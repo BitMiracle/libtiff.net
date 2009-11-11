@@ -541,7 +541,9 @@ namespace BitMiracle.LibJpeg.Classic
                 m_src = new my_source_mgr(this);
             }
 
-            (m_src as my_source_mgr).Attach(infile);
+            my_source_mgr m = m_src as my_source_mgr;
+            if (m != null)
+                m.Attach(infile);
         }
 
         /// <summary>

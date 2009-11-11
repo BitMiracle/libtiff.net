@@ -169,10 +169,13 @@ namespace BitMiracle.LibJpeg.Classic
             if (m_is_decompressor)
             {
                 m_global_state = JpegState.DSTATE_START;
+
                 /* Try to keep application from accessing now-deleted marker list.
                  * A bit kludgy to do it here, but this is the most central place.
                  */
-                (this as jpeg_decompress_struct).m_marker_list = null;
+                jpeg_decompress_struct s = this as jpeg_decompress_struct;
+                if (s != null)
+                    s.m_marker_list = null;
             }
             else
             {
