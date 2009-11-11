@@ -24,13 +24,18 @@ namespace BitMiracle.LibTiff
         public virtual int Read(object fd, byte[] buf, int offset, int size)
         {
             Stream s = fd as Stream;
-            int read = s.Read(buf, offset, size);
-            return read;
+            if (s == null)
+                throw new ArgumentException();
+
+            return s.Read(buf, offset, size);
         }
 
         public virtual void Write(object fd, byte[] buf, int size)
         {
             Stream s = fd as Stream;
+            if (s == null)
+                throw new ArgumentException();
+            
             s.Write(buf, 0, size);
         }
 
@@ -41,18 +46,27 @@ namespace BitMiracle.LibTiff
                 return -1; // was 0xFFFFFFFF
 
             Stream s = fd as Stream;
+            if (s == null)
+                throw new ArgumentException();
+
             return s.Seek(off, whence);
         }
 
         public virtual void Close(object fd)
         {
             Stream s = fd as Stream;
+            if (s == null)
+                throw new ArgumentException();
+
             s.Close();
         }
 
         public virtual long Size(object fd)
         {
             Stream s = fd as Stream;
+            if (s == null)
+                throw new ArgumentException();
+
             return s.Length;
         }
     }

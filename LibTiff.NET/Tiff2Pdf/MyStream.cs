@@ -28,6 +28,9 @@ namespace BitMiracle.Tiff2Pdf
         public override void Write(object fd, byte[] buf, int size)
         {
             T2P t2p = fd as T2P;
+            if (t2p == null)
+                throw new ArgumentException();
+
             if (!t2p.m_outputdisable && t2p.m_outputfile != null)
             {
                 t2p.m_outputfile.Write(buf, 0, size);
@@ -38,6 +41,9 @@ namespace BitMiracle.Tiff2Pdf
         public override long Seek(object fd, long off, SeekOrigin whence)
         {
             T2P t2p = fd as T2P;
+            if (t2p == null)
+                throw new ArgumentException();
+
             if (!t2p.m_outputdisable && t2p.m_outputfile != null)
                 return t2p.m_outputfile.Seek(off, whence);
 

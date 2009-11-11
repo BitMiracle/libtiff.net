@@ -17,6 +17,7 @@ using System.Collections;
 
 using BitMiracle.LibTiff;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace BitMiracle.Tiff2Pdf
 {
@@ -30,6 +31,9 @@ namespace BitMiracle.Tiff2Pdf
         {
             T2P_PAGE e1 = x as T2P_PAGE;
             T2P_PAGE e2 = y as T2P_PAGE;
+
+            Debug.Assert(e1 != null);
+            Debug.Assert(e2 != null);
 
             return e1.page_number - e2.page_number;
         }
@@ -3172,12 +3176,18 @@ namespace BitMiracle.Tiff2Pdf
         private static void disable(Tiff tif)
         {
             T2P t2p = tif.Clientdata() as T2P;
+            if (t2p == null)
+                throw new ArgumentException();
+
             t2p.m_outputdisable = true;
         }
 
         private static void enable(Tiff tif)
         {
             T2P t2p = tif.Clientdata() as T2P;
+            if (t2p == null)
+                throw new ArgumentException();
+
             t2p.m_outputdisable = false;
         }
 

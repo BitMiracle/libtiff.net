@@ -10,6 +10,7 @@
  */
 
 using System.Collections;
+using System.Diagnostics;
 
 namespace BitMiracle.LibTiff.Internal
 {
@@ -19,6 +20,9 @@ namespace BitMiracle.LibTiff.Internal
         {
             TiffFieldInfo ta = x as TiffFieldInfo;
             TiffFieldInfo tb = y as TiffFieldInfo;
+
+            Debug.Assert(ta != null);
+            Debug.Assert(tb != null);
 
             /* NB: be careful of return values for 16-bit platforms */
             if (ta.field_tag != tb.field_tag)

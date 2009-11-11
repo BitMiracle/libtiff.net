@@ -210,6 +210,8 @@ namespace BitMiracle.LibTiff.Internal
             if (Tiff.CHECK_JPEG_YCBCR_SUBSAMPLING)
             {
                 JpegCodec sp = tif.m_currentCodec as JpegCodec;
+                Debug.Assert(sp != null);
+
                 sp.InitializeLibJPEG(false, false);
 
                 /*

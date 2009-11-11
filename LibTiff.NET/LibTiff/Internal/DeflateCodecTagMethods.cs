@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using ComponentAce.Compression.Libs.zlib;
+using System.Diagnostics;
 
 namespace BitMiracle.LibTiff.Internal
 {
@@ -22,6 +23,8 @@ namespace BitMiracle.LibTiff.Internal
         public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
         {
             DeflateCodec sp = tif.m_currentCodec as DeflateCodec;
+            Debug.Assert(sp != null);
+
             const string module = "ZIPVSetField";
 
             switch (tag)
@@ -47,6 +50,7 @@ namespace BitMiracle.LibTiff.Internal
         public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
         {
             DeflateCodec sp = tif.m_currentCodec as DeflateCodec;
+            Debug.Assert(sp != null);
 
             switch (tag)
             {

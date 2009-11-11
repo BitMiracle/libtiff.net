@@ -63,6 +63,7 @@ namespace BitMiracle.LibTiff.Internal
         public override void printdir(Tiff tif, Stream fd, TiffPrintDirectoryFlags flags)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
+            Debug.Assert(sp != null);
 
             if (tif.fieldSet(CodecWithPredictor.FIELD_PREDICTOR))
             {

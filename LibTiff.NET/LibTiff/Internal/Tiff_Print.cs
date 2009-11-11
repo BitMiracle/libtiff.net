@@ -57,37 +57,77 @@ namespace BitMiracle.LibTiff
 
             for (uint j = 0; j < value_count; j++)
             {
-                if (fip.field_type == TiffDataType.TIFF_BYTE)
-                    fprintf(fd, "{0}", (raw_data as byte[])[j]);
+                if (fip.field_type == TiffDataType.TIFF_BYTE || 
+                    fip.field_type == TiffDataType.TIFF_SBYTE)
+                {
+                    byte[] bytes = raw_data as byte[];
+                    sbyte[] sbytes = raw_data as sbyte[];
+                    if (bytes != null)
+                        fprintf(fd, "{0}", bytes[j]);
+                    else if (sbytes != null)
+                        fprintf(fd, "{0}", sbytes[j]);
+                }
                 else if (fip.field_type == TiffDataType.TIFF_UNDEFINED)
-                    fprintf(fd, "0x{0:x}", (raw_data as byte[])[j]);
-                else if (fip.field_type == TiffDataType.TIFF_SBYTE)
-                    fprintf(fd, "{0}", (raw_data as sbyte[])[j]);
-                else if (fip.field_type == TiffDataType.TIFF_SHORT)
-                    fprintf(fd, "{0}", (raw_data as ushort[])[j]);
-                else if (fip.field_type == TiffDataType.TIFF_SSHORT)
-                    fprintf(fd, "{0}", (raw_data as short[])[j]);
-                else if (fip.field_type == TiffDataType.TIFF_LONG)
-                    fprintf(fd, "{0}", (raw_data as uint[])[j]);
-                else if (fip.field_type == TiffDataType.TIFF_SLONG)
-                    fprintf(fd, "{0}", (raw_data as int[])[j]);
+                {
+                    byte[] bytes = raw_data as byte[];
+                    if (bytes != null)
+                        fprintf(fd, "0x{0:x}", bytes[j]);
+                }
+                else if (fip.field_type == TiffDataType.TIFF_SHORT || 
+                    fip.field_type == TiffDataType.TIFF_SSHORT)
+                {
+                    short[] shorts = raw_data as short[];
+                    ushort[] ushorts = raw_data as ushort[];
+                    if (shorts != null)
+                        fprintf(fd, "{0}", shorts[j]);
+                    else if (ushorts != null)
+                        fprintf(fd, "{0}", ushorts[j]);
+                }
+                else if (fip.field_type == TiffDataType.TIFF_LONG || 
+                    fip.field_type == TiffDataType.TIFF_SLONG)
+                {
+                    int[] ints = raw_data as int[];
+                    uint[] uints = raw_data as uint[];
+                    if (ints != null)
+                        fprintf(fd, "{0}", ints[j]);
+                    else if (uints != null)
+                        fprintf(fd, "{0}", uints[j]);
+                }
                 else if (fip.field_type == TiffDataType.TIFF_RATIONAL ||
                     fip.field_type == TiffDataType.TIFF_SRATIONAL ||
                     fip.field_type == TiffDataType.TIFF_FLOAT)
                 {
-                    fprintf(fd, "{0}", (raw_data as float[])[j]);
+                    float[] floats = raw_data as float[];
+                    if (floats != null)
+                        fprintf(fd, "{0}", floats[j]);
                 }
                 else if (fip.field_type == TiffDataType.TIFF_IFD)
-                    fprintf(fd, "0x{0:x}", (raw_data as uint[])[j]);
+                {
+                    int[] ints = raw_data as int[];
+                    uint[] uints = raw_data as uint[];
+                    if (ints != null)
+                        fprintf(fd, "0x{0:x}", ints[j]);
+                    else if (uints != null)
+                        fprintf(fd, "0x{0:x}", uints[j]);
+                }
                 else if (fip.field_type == TiffDataType.TIFF_ASCII)
                 {
-                    fprintf(fd, "{0}", raw_data as string);
+                    string s = raw_data as string;
+                    if (s != null)
+                        fprintf(fd, "{0}", s);
+
                     break;
                 }
-                else if (fip.field_type == TiffDataType.TIFF_DOUBLE)
-                    fprintf(fd, "{0}", (raw_data as double[])[j]);
-                else if (fip.field_type == TiffDataType.TIFF_FLOAT)
-                    fprintf(fd, "{0}", (raw_data as float[])[j]);
+                else if (fip.field_type == TiffDataType.TIFF_DOUBLE ||
+                    fip.field_type == TiffDataType.TIFF_FLOAT)
+                {
+                    float[] floats = raw_data as float[];
+                    double[] doubles = raw_data as double[];
+                    if (floats != null)
+                        fprintf(fd, "{0}", floats[j]);
+                    else if (doubles != null)
+                        fprintf(fd, "{0}", doubles[j]);
+                }
                 else
                 {
                     fprintf(fd, "<unsupported data type in printField>");
@@ -103,41 +143,67 @@ namespace BitMiracle.LibTiff
 
         private bool prettyPrintField(Stream fd, TIFFTAG tag, int value_count, object raw_data)
         {
+            FieldValue value = new FieldValue(raw_data);
+            short[] sdata = value.ToShortArray();
+            float[] fdata = value.ToFloatArray();
+            double[] ddata = value.ToDoubleArray();
+
             switch (tag)
             {
                 case TIFFTAG.TIFFTAG_INKSET:
-                    fprintf(fd, "  Ink Set: ");
-                    ushort[] udata = raw_data as ushort[];
-                    switch ((INKSET)udata[0])
+                    if (sdata != null)
                     {
-                        case INKSET.INKSET_CMYK:
-                            fprintf(fd, "CMYK\n");
-                            break;
-                        default:
-                            fprintf(fd, "{0} (0x{1:x})\n", udata[0], udata[0]);
-                            break;
+                        fprintf(fd, "  Ink Set: ");
+                        switch ((INKSET)sdata[0])
+                        {
+                            case INKSET.INKSET_CMYK:
+                                fprintf(fd, "CMYK\n");
+                                break;
+
+                            default:
+                                fprintf(fd, "{0} (0x{1:x})\n", sdata[0], sdata[0]);
+                                break;
+                        }
+                        return true;
                     }
-                    return true;
+                    return false;
+
                 case TIFFTAG.TIFFTAG_DOTRANGE:
-                    udata = raw_data as ushort[];
-                    fprintf(fd, "  Dot Range: {0}-{1}\n", udata[0], udata[1]);
-                    return true;
+                    if (sdata != null)
+                    {
+                        fprintf(fd, "  Dot Range: {0}-{1}\n", sdata[0], sdata[1]);
+                        return true;
+                    }
+                    return false;
+
                 case TIFFTAG.TIFFTAG_WHITEPOINT:
-                    float[] fdata = raw_data as float[];
-                    fprintf(fd, "  White Point: {0:G}-{1:G}\n", fdata[0], fdata[1]);
-                    return true;
+                    if (fdata != null)
+                    {
+                        fprintf(fd, "  White Point: {0:G}-{1:G}\n", fdata[0], fdata[1]);
+                        return true;
+                    }
+                    return false;
+
                 case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
-                    fdata = raw_data as float[];
-                    fprintf(fd, "  Reference Black/White:\n");
-                    for (ushort i = 0; i < m_dir.td_samplesperpixel; i++)
-                        fprintf(fd, "    {0,2:D}: {1,5:G} {2,5:G}\n", i, fdata[2 * i + 0], fdata[2 * i + 1]);
-                    return true;
+                    if (fdata != null)
+                    {
+                        fprintf(fd, "  Reference Black/White:\n");
+                        for (short i = 0; i < m_dir.td_samplesperpixel; i++)
+                            fprintf(fd, "    {0,2:D}: {1,5:G} {2,5:G}\n", i, fdata[2 * i + 0], fdata[2 * i + 1]);
+                        return true;
+                    }
+                    return false;
+
                 case TIFFTAG.TIFFTAG_XMLPACKET:
-                    fprintf(fd, "  XMLPacket (XMP Metadata):\n");
-                    string sdata = raw_data as string;
-                    fprintf(fd, sdata.Substring(0, value_count));
-                    fprintf(fd, "\n");
-                    return true;
+                    string s = raw_data as string;
+                    if (s != null)
+                    {
+                        fprintf(fd, "  XMLPacket (XMP Metadata):\n");
+                        fprintf(fd, s.Substring(0, value_count));
+                        fprintf(fd, "\n");
+                        return true;
+                    }
+                    return false;
 
                 case TIFFTAG.TIFFTAG_RICHTIFFIPTC:
                     /*
@@ -146,16 +212,22 @@ namespace BitMiracle.LibTiff
                      */
                     fprintf(fd, "  RichTIFFIPTC Data: <present>, {0} bytes\n", value_count * 4);
                     return true;
+
                 case TIFFTAG.TIFFTAG_PHOTOSHOP:
                     fprintf(fd, "  Photoshop Data: <present>, {0} bytes\n", value_count);
                     return true;
+
                 case TIFFTAG.TIFFTAG_ICCPROFILE:
                     fprintf(fd, "  ICC Profile: <present>, {0} bytes\n", value_count);
                     return true;
+
                 case TIFFTAG.TIFFTAG_STONITS:
-                    double[] ddata = raw_data as double[];
-                    fprintf(fd, "  Sample to Nits conversion factor: {0:e4}\n", ddata[0]);
-                    return true;
+                    if (ddata != null)
+                    {
+                        fprintf(fd, "  Sample to Nits conversion factor: {0:e4}\n", ddata[0]);
+                        return true;
+                    }
+                    return false;
             }
 
             return false;
