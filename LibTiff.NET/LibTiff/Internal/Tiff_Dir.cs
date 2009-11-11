@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff
 
         private bool isFillOrder(FILLORDER o)
         {
-            return ((m_flags & (ushort)o) != 0);
+            return ((m_flags & (int)o) != 0);
         }
 
         private static uint BITn(int n)

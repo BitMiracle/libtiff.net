@@ -97,7 +97,7 @@ namespace BitMiracle.LibTiff
 
         private bool readDirEntryOk(TiffDirEntry[] dir, short dircount)
         {
-            int entrySize = sizeof(ushort) * 2 + sizeof(uint) * 2;
+            int entrySize = sizeof(short) * 2 + sizeof(uint) * 2;
             int totalSize = entrySize * dircount;
             byte[] bytes = new byte[totalSize];
             bool res = readOK(bytes, totalSize);
@@ -113,10 +113,10 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < dircount; i++)
             {
                 TiffDirEntry entry = new TiffDirEntry();
-                entry.tdir_tag = (TIFFTAG)readUInt16(bytes, pos);
-                pos += sizeof(ushort);
-                entry.tdir_type = (TiffDataType)readUInt16(bytes, pos);
-                pos += sizeof(ushort);
+                entry.tdir_tag = (TIFFTAG)readShort(bytes, pos);
+                pos += sizeof(short);
+                entry.tdir_type = (TiffDataType)readShort(bytes, pos);
+                pos += sizeof(short);
                 entry.tdir_count = readInt(bytes, pos);
                 pos += sizeof(uint);
                 entry.tdir_offset = readInt(bytes, pos);

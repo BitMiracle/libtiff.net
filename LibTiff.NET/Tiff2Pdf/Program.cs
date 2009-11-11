@@ -222,7 +222,7 @@ namespace BitMiracle.Tiff2Pdf
                         break;
                     
                     case 'q': 
-                        t2p.m_pdf_defaultcompressionquality = ushort.Parse(optarg, CultureInfo.InvariantCulture);
+                        t2p.m_pdf_defaultcompressionquality = short.Parse(optarg, CultureInfo.InvariantCulture);
                         break;
                     
                     case 'n': 

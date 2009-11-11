@@ -1691,10 +1691,10 @@ namespace BitMiracle.LibTiff
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        ushort k = (ushort)(255 - pp[ppPos + 3]);
-                        ushort r = (ushort)((k * (255 - pp[ppPos])) / 255);
-                        ushort g = (ushort)((k * (255 - pp[ppPos + 1])) / 255);
-                        ushort b = (ushort)((k * (255 - pp[ppPos + 2])) / 255);
+                        short k = (short)(255 - pp[ppPos + 3]);
+                        short r = (short)((k * (255 - pp[ppPos])) / 255);
+                        short g = (short)((k * (255 - pp[ppPos + 1])) / 255);
+                        short b = (short)((k * (255 - pp[ppPos + 2])) / 255);
                         cp[cpPos] = PACK(r, g, b);
                         cpPos++;
                         ppPos += samplesperpixel;
@@ -1707,10 +1707,10 @@ namespace BitMiracle.LibTiff
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            ushort k = (ushort)(255 - pp[ppPos + 3]);
-                            ushort r = (ushort)((k * (255 - pp[ppPos])) / 255);
-                            ushort g = (ushort)((k * (255 - pp[ppPos + 1])) / 255);
-                            ushort b = (ushort)((k * (255 - pp[ppPos + 2])) / 255);
+                            short k = (short)(255 - pp[ppPos + 3]);
+                            short r = (short)((k * (255 - pp[ppPos])) / 255);
+                            short g = (short)((k * (255 - pp[ppPos + 1])) / 255);
+                            short b = (short)((k * (255 - pp[ppPos + 2])) / 255);
                             cp[cpPos] = PACK(r, g, b);
                             cpPos++;
                             ppPos += samplesperpixel;
@@ -1740,10 +1740,10 @@ namespace BitMiracle.LibTiff
             {
                 for (x = w; x-- > 0; )
                 {
-                    ushort k = (ushort)(255 - pp[ppPos + 3]);
-                    ushort r = (ushort)((k * (255 - pp[ppPos])) / 255);
-                    ushort g = (ushort)((k * (255 - pp[ppPos + 1])) / 255);
-                    ushort b = (ushort)((k * (255 - pp[ppPos + 2])) / 255);
+                    short k = (short)(255 - pp[ppPos + 3]);
+                    short r = (short)((k * (255 - pp[ppPos])) / 255);
+                    short g = (short)((k * (255 - pp[ppPos + 1])) / 255);
+                    short b = (short)((k * (255 - pp[ppPos + 2])) / 255);
                     cp[cpPos] = PACK(Map[r], Map[g], Map[b]);
                     cpPos++;
                     ppPos += samplesperpixel;
@@ -1894,9 +1894,9 @@ namespace BitMiracle.LibTiff
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
     
-            int wrPos = rOffset / sizeof(ushort);
-            int wgPos = gOffset / sizeof(ushort);
-            int wbPos = bOffset / sizeof(ushort);
+            int wrPos = rOffset / sizeof(short);
+            int wgPos = gOffset / sizeof(short);
+            int wbPos = bOffset / sizeof(short);
             int cpPos = cpOffset;
 
             while (h-- > 0)

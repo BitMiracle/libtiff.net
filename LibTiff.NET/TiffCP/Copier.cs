@@ -1202,7 +1202,7 @@ namespace BitMiracle.TiffCP
 
             Debug.Assert(bps % 8 == 0);
 
-            ushort bytes_per_sample = (ushort)(bps / 8);
+            short bytes_per_sample = (short)(bps / 8);
 
             int imagew = inImage.RasterScanlineSize();
             int tilew = inImage.TileRowSize();
@@ -1285,7 +1285,7 @@ namespace BitMiracle.TiffCP
             int rowsize = imagewidth * spp;
             int strip = 0;
 
-            for (ushort s = 0; s < spp; s++)
+            for (short s = 0; s < spp; s++)
             {
                 for (int row = 0; row < imagelength; row += rowsperstrip)
                 {
@@ -1370,7 +1370,7 @@ namespace BitMiracle.TiffCP
 
             Debug.Assert(bps % 8 == 0);
 
-            ushort bytes_per_sample = (ushort)(bps / 8);
+            short bytes_per_sample = (short)(bps / 8);
 
             int imagew = outImage.ScanlineSize();
             int tilew = outImage.TileRowSize();

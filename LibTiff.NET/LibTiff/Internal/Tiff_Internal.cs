@@ -101,7 +101,7 @@ namespace BitMiracle.LibTiff
         private int m_nextdiroff; /* file offset of following directory */
         private int[] m_dirlist; /* list of offsets to already seen directories to prevent IFD looping */
         private int m_dirlistsize; /* number of entires in offset list */
-        private ushort m_dirnumber; /* number of already seen directories */
+        private short m_dirnumber; /* number of already seen directories */
         private TiffHeader m_header; /* file's header block */
         private int[] m_typeshift; /* data type shift counts */
         private int[] m_typemask; /* data type masks */
@@ -110,7 +110,7 @@ namespace BitMiracle.LibTiff
         private int m_dataoff; /* current offset for writing dir */
 
         /* SubIFD support */
-        private ushort m_nsubifd; /* remaining subifds to write */
+        private short m_nsubifd; /* remaining subifds to write */
         private int m_subifdoff; /* offset for patching SubIFD link */
 
         /* tiling support */

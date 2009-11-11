@@ -37,7 +37,7 @@ namespace BitMiracle.LibTiff.Internal
         public THRESHHOLD td_threshholding;
         public FILLORDER td_fillorder;
         public ORIENTATION td_orientation;
-        public ushort td_samplesperpixel;
+        public short td_samplesperpixel;
         public int td_rowsperstrip;
         public short td_minsamplevalue;
         public short td_maxsamplevalue;
@@ -52,7 +52,7 @@ namespace BitMiracle.LibTiff.Internal
         public short[] td_pagenumber = new short[2];
         public short[][] td_colormap = { null, null, null };
         public short[] td_halftonehints = new short[2];
-        public ushort td_extrasamples;
+        public short td_extrasamples;
         public EXTRASAMPLE[] td_sampleinfo;
         public int td_stripsperimage;
         public int td_nstrips; /* size of offset & bytecount arrays */

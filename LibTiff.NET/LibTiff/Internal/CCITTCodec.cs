@@ -100,7 +100,11 @@ namespace BitMiracle.LibTiff.Internal
         */
         private struct tableEntry
         {
-            public tableEntry(ushort _length, ushort _code, short _runlen)
+            public short length; /* bit length of g3 code */
+            public short code; /* g3 code */
+            public short runlen; /* run length in bits */
+
+            public tableEntry(short _length, short _code, short _runlen)
             {
                 length = _length;
                 code = _code;
@@ -110,12 +114,8 @@ namespace BitMiracle.LibTiff.Internal
             public static tableEntry FromArray(short[] array, int entryNumber)
             {
                 int offset = entryNumber * 3; // we have 3 elements in entry
-                return new tableEntry((ushort)array[offset], (ushort)array[offset + 1], array[offset + 2]);
+                return new tableEntry(array[offset], array[offset + 1], array[offset + 2]);
             }
-
-            public ushort length; /* bit length of g3 code */
-            public ushort code; /* g3 code */
-            public short runlen; /* run length in bits */
         };
 
         private struct faxTableEntry
@@ -443,9 +443,9 @@ namespace BitMiracle.LibTiff.Internal
             return (offset % sizeof(int) == 0);
         }
 
-        private static bool isUint16Aligned(int offset)
+        private static bool isShortAligned(int offset)
         {
-            return (offset % sizeof(ushort) == 0);
+            return (offset % sizeof(short) == 0);
         }
 
         /*
@@ -1288,7 +1288,7 @@ namespace BitMiracle.LibTiff.Internal
                     flushBits();
                 }
 
-                if ((m_mode & FAXMODE.FAXMODE_WORDALIGN) != 0 && !isUint16Aligned(m_tif.m_rawcp))
+                if ((m_mode & FAXMODE.FAXMODE_WORDALIGN) != 0 && !isShortAligned(m_tif.m_rawcp))
                     flushBits();
             }
 
@@ -2094,7 +2094,7 @@ namespace BitMiracle.LibTiff.Internal
                     {
                         int n = m_bit - (m_bit & ~15);
                         ClrBits(n);
-                        if (m_bit == 0 && !isUint16Aligned(m_tif.m_rawcp))
+                        if (m_bit == 0 && !isShortAligned(m_tif.m_rawcp))
                             m_tif.m_rawcp++;
                     }
 

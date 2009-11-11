@@ -149,7 +149,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            m_dataoff = m_diroff + sizeof(ushort) + dirsize + sizeof(uint);
+            m_dataoff = m_diroff + sizeof(short) + dirsize + sizeof(uint);
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
@@ -256,10 +256,10 @@ namespace BitMiracle.LibTiff
                         setupShortLong(TIFFTAG.TIFFTAG_TILELENGTH, ref data[dir], m_dir.td_tilelength);
                         break;
                     case FIELD.FIELD_COMPRESSION:
-                        setupShort((uint)TIFFTAG.TIFFTAG_COMPRESSION, ref data[dir], (ushort)m_dir.td_compression);
+                        setupShort(TIFFTAG.TIFFTAG_COMPRESSION, ref data[dir], (short)m_dir.td_compression);
                         break;
                     case FIELD.FIELD_PHOTOMETRIC:
-                        setupShort((uint)TIFFTAG.TIFFTAG_PHOTOMETRIC, ref data[dir], (ushort)m_dir.td_photometric);
+                        setupShort(TIFFTAG.TIFFTAG_PHOTOMETRIC, ref data[dir], (short)m_dir.td_photometric);
                         break;
                     case FIELD.FIELD_POSITION:
                         if (!writeRationalPair(data, dir, TiffDataType.TIFF_RATIONAL, TIFFTAG.TIFFTAG_XPOSITION, m_dir.td_xposition, TIFFTAG.TIFFTAG_YPOSITION, m_dir.td_yposition))
@@ -326,13 +326,13 @@ namespace BitMiracle.LibTiff
                         if (data[dir].tdir_count > 0)
                         {
                             m_flags |= TIFF_INSUBIFD;
-                            m_nsubifd = (ushort)data[dir].tdir_count;
+                            m_nsubifd = (short)data[dir].tdir_count;
                             if (data[dir].tdir_count > 1)
                                 m_subifdoff = data[dir].tdir_offset;
                             else
                             {
                                 Debug.Assert(false);
-                                m_subifdoff = m_diroff + sizeof(ushort) + dir * TiffDirEntry.SizeInBytes + sizeof(ushort) * 2 + sizeof(uint);
+                                m_subifdoff = m_diroff + sizeof(short) + dir * TiffDirEntry.SizeInBytes + sizeof(short) * 2 + sizeof(uint);
                             }
                         }
                         break;
@@ -780,9 +780,9 @@ namespace BitMiracle.LibTiff
         /*
         * Setup a SHORT directory entry
         */
-        private void setupShort(uint tag, ref TiffDirEntry dir, ushort v)
+        private void setupShort(TIFFTAG tag, ref TiffDirEntry dir, short v)
         {
-            dir.tdir_tag = (TIFFTAG)tag;
+            dir.tdir_tag = tag;
             dir.tdir_count = 1;
             dir.tdir_type = TiffDataType.TIFF_SHORT;
             dir.tdir_offset = insertData(TiffDataType.TIFF_SHORT, v);
@@ -801,7 +801,7 @@ namespace BitMiracle.LibTiff
             FieldValue[] result = GetField(tag);
             short v = result[0].ToShort();
 
-            for (ushort i = 0; i < m_dir.td_samplesperpixel; i++)
+            for (short i = 0; i < m_dir.td_samplesperpixel; i++)
                 w[i] = v;
 
             dir.tdir_tag = tag;
@@ -823,7 +823,7 @@ namespace BitMiracle.LibTiff
             FieldValue[] result = GetField(tag);
             double v = result[0].ToDouble();
 
-            for (ushort i = 0; i < m_dir.td_samplesperpixel; i++)
+            for (short i = 0; i < m_dir.td_samplesperpixel; i++)
                 w[i] = v;
             
             bool status = writeAnyArray(type, tag, ref dir, m_dir.td_samplesperpixel, w);

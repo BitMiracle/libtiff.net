@@ -26,10 +26,10 @@ namespace BitMiracle.LibTiff
         /*
          * These are used in the backwards compatibility code...
          */
-        private const ushort DATATYPE_VOID = 0;       /* !untyped data */
-        private const ushort DATATYPE_INT = 1;       /* !signed integer data */
-        private const ushort DATATYPE_UINT = 2;       /* !unsigned integer data */
-        private const ushort DATATYPE_IEEEFP = 3;       /* !IEEE floating point data */
+        private const short DATATYPE_VOID = 0;      /* !untyped data */
+        private const short DATATYPE_INT = 1;       /* !signed integer data */
+        private const short DATATYPE_UINT = 2;      /* !unsigned integer data */
+        private const short DATATYPE_IEEEFP = 3;    /* !IEEE floating point data */
 
         /* tag set routine */
         public virtual bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
@@ -145,7 +145,7 @@ namespace BitMiracle.LibTiff
                         break;
                     }
 
-                    td.td_samplesperpixel = (ushort)v;
+                    td.td_samplesperpixel = (short)v;
                     break;
                 case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
                     v32 = ap[0].ToInt();
@@ -878,7 +878,7 @@ namespace BitMiracle.LibTiff
         private static bool setExtraSamples(TiffDirectory td, ref int v, FieldValue[] ap)
         {
             /* XXX: Unassociated alpha data == 999 is a known Corel Draw bug, see below */
-            const ushort EXTRASAMPLE_COREL_UNASSALPHA = 999;
+            const short EXTRASAMPLE_COREL_UNASSALPHA = 999;
 
             v = ap[0].ToInt();
             if (v > td.td_samplesperpixel)
@@ -901,14 +901,14 @@ namespace BitMiracle.LibTiff
                     * want to be able to open some of the damaged TIFF
                     * files: 
                     */
-                    if ((ushort)va[i] == EXTRASAMPLE_COREL_UNASSALPHA)
+                    if ((short)va[i] == EXTRASAMPLE_COREL_UNASSALPHA)
                         va[i] = (byte)EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA;
                     else
                         return false;
                 }
             }
 
-            td.td_extrasamples = (ushort)v;
+            td.td_extrasamples = (short)v;
             td.td_sampleinfo = new EXTRASAMPLE[td.td_extrasamples];
             for (int i = 0; i < td.td_extrasamples; i++)
                 td.td_sampleinfo[i] = (EXTRASAMPLE)va[i];
@@ -919,7 +919,7 @@ namespace BitMiracle.LibTiff
         private static int checkInkNamesString(Tiff tif, int slen, string s)
         {
             bool failed = false;
-            ushort i = tif.m_dir.td_samplesperpixel;
+            short i = tif.m_dir.td_samplesperpixel;
 
             if (slen > 0)
             {

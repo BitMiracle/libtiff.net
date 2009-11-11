@@ -54,15 +54,15 @@ namespace BitMiracle.LibTiff.Internal
         * The TIFF spec specifies that encoded bit
         * strings range from 9 to 12 bits.
         */
-        private const ushort BITS_MIN = 9;       /* start with 9 bits */
-        private const ushort BITS_MAX = 12;      /* max of 12 bit strings */
+        private const short BITS_MIN = 9;       /* start with 9 bits */
+        private const short BITS_MAX = 12;      /* max of 12 bit strings */
 
         /* predefined codes */
-        private const ushort CODE_CLEAR = 256;     /* code to clear string table */
-        private const ushort CODE_EOI = 257;     /* end-of-information code */
-        private const ushort CODE_FIRST = 258;     /* first free code entry */
-        private const ushort CODE_MAX = ((1 << BITS_MAX) - 1);
-        private const ushort CODE_MIN = ((1 << BITS_MIN) - 1);
+        private const short CODE_CLEAR = 256;     /* code to clear string table */
+        private const short CODE_EOI = 257;     /* end-of-information code */
+        private const short CODE_FIRST = 258;     /* first free code entry */
+        private const short CODE_MAX = ((1 << BITS_MAX) - 1);
+        private const short CODE_MIN = ((1 << BITS_MIN) - 1);
 
         private const int HSIZE = 9001;       /* 91% occupancy */
         private const int HSHIFT = (13 - 8);
@@ -77,7 +77,7 @@ namespace BitMiracle.LibTiff.Internal
         private struct code_t
         {
             public int next;
-            public ushort length; /* string len, including this token */
+            public short length; /* string len, including this token */
             public byte value; /* data value */
             public byte firstchar; /* first token of string */
         };
@@ -88,14 +88,14 @@ namespace BitMiracle.LibTiff.Internal
         private struct hash_t
         {
             public int hash;
-            public ushort code;
+            public short code;
         };
 
         private bool m_compatDecode;
 
-        private ushort m_nbits; /* # of bits/code */
-        private ushort m_maxcode; /* maximum code for base.nbits */
-        private ushort m_free_ent; /* next free entry in hash table */
+        private short m_nbits; /* # of bits/code */
+        private short m_maxcode; /* maximum code for base.nbits */
+        private short m_free_ent; /* next free entry in hash table */
         private int m_nextdata; /* next bits of i/o */
         private int m_nextbits; /* # of valid bits in base.nextdata */
 
@@ -374,7 +374,7 @@ namespace BitMiracle.LibTiff.Internal
 
             while (occ > 0)
             {
-                ushort code;
+                short code;
                 NextCode(out code, false);
                 if (code == CODE_EOI)
                     break;
@@ -427,7 +427,7 @@ namespace BitMiracle.LibTiff.Internal
                 }
 
                 m_dec_codetab[m_dec_free_entp].firstchar = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].firstchar;
-                m_dec_codetab[m_dec_free_entp].length = (ushort)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
+                m_dec_codetab[m_dec_free_entp].length = (short)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
                 m_dec_codetab[m_dec_free_entp].value = (codep < m_dec_free_entp) ? m_dec_codetab[codep].firstchar : m_dec_codetab[m_dec_free_entp].firstchar;
 
                 if (++m_dec_free_entp > m_dec_maxcodep)
@@ -589,7 +589,7 @@ namespace BitMiracle.LibTiff.Internal
 
             while (occ > 0)
             {
-                ushort code;
+                short code;
                 NextCode(out code, true);
                 if (code == CODE_EOI)
                     break;
@@ -642,7 +642,7 @@ namespace BitMiracle.LibTiff.Internal
                 }
 
                 m_dec_codetab[m_dec_free_entp].firstchar = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].firstchar;
-                m_dec_codetab[m_dec_free_entp].length = (ushort)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
+                m_dec_codetab[m_dec_free_entp].length = (short)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
                 m_dec_codetab[m_dec_free_entp].value = (codep < m_dec_free_entp) ? m_dec_codetab[codep].firstchar : m_dec_codetab[m_dec_free_entp].firstchar;
                 if (++m_dec_free_entp > m_dec_maxcodep)
                 {
@@ -893,8 +893,8 @@ namespace BitMiracle.LibTiff.Internal
                     }
 
                     PutNextCode(m_enc_oldcode);
-                    m_enc_oldcode = (ushort)c;
-                    m_enc_hashtab[h].code = (ushort)m_free_ent;
+                    m_enc_oldcode = c;
+                    m_enc_hashtab[h].code = m_free_ent;
                     m_free_ent++;
                     m_enc_hashtab[h].hash = fcode;
                     if (m_free_ent == CODE_MAX - 1)
@@ -919,7 +919,7 @@ namespace BitMiracle.LibTiff.Internal
                         {
                             m_nbits++;
                             Debug.Assert(m_nbits <= BITS_MAX);
-                            m_maxcode = (ushort)MAXCODE(m_nbits);
+                            m_maxcode = (short)MAXCODE(m_nbits);
                         }
                         else if (m_enc_incount >= m_enc_checkpoint)
                         {
@@ -1017,7 +1017,7 @@ namespace BitMiracle.LibTiff.Internal
                 m_enc_hashtab[hp].hash = -1;
         }
 
-        private void NextCode(out ushort _code, bool compat)
+        private void NextCode(out short _code, bool compat)
         {
             if (LZW_CHECKEOS)
             {
@@ -1046,7 +1046,7 @@ namespace BitMiracle.LibTiff.Internal
             }
         }
 
-        private void GetNextCode(out ushort code)
+        private void GetNextCode(out short code)
         {
             m_nextdata = (m_nextdata << 8) | m_tif.m_rawdata[m_tif.m_rawcp];
             m_tif.m_rawcp++;
@@ -1057,11 +1057,11 @@ namespace BitMiracle.LibTiff.Internal
                 m_tif.m_rawcp++;
                 m_nextbits += 8;
             }
-            code = (ushort)((m_nextdata >> (m_nextbits - m_nbits)) & m_dec_nbitsmask);
+            code = (short)((m_nextdata >> (m_nextbits - m_nbits)) & m_dec_nbitsmask);
             m_nextbits -= m_nbits;
         }
 
-        private void GetNextCodeCompat(out ushort code)
+        private void GetNextCodeCompat(out short code)
         {
             m_nextdata |= m_tif.m_rawdata[m_tif.m_rawcp] << m_nextbits;
             m_tif.m_rawcp++;
@@ -1072,7 +1072,7 @@ namespace BitMiracle.LibTiff.Internal
                 m_tif.m_rawcp++;
                 m_nextbits += 8;
             }
-            code = (ushort)(m_nextdata & m_dec_nbitsmask);
+            code = (short)(m_nextdata & m_dec_nbitsmask);
             m_nextdata >>= m_nbits;
             m_nextbits -= m_nbits;
         }

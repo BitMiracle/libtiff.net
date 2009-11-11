@@ -1211,7 +1211,7 @@ namespace BitMiracle.LibTiff
                         if (dir[i].tdir_count == 1)
                         {
                             int v = extractData(dir[i]);
-                            if (!SetField(dir[i].tdir_tag, (ushort)v))
+                            if (!SetField(dir[i].tdir_tag, v))
                                 return false;
                             
                             break;
@@ -1220,7 +1220,7 @@ namespace BitMiracle.LibTiff
                         else if (dir[i].tdir_type == TiffDataType.TIFF_LONG)
                         {
                             int v;
-                            if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, (ushort)v))
+                            if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, v))
                                 return false;
                         }
                         else
@@ -1365,14 +1365,14 @@ namespace BitMiracle.LibTiff
                         if (dir[i].tdir_count == 1)
                         {
                             int v = extractData(dir[i]);
-                            if (!SetField(dir[i].tdir_tag, (ushort)v))
+                            if (!SetField(dir[i].tdir_tag, v))
                                 return false;
                             /* XXX: workaround for broken TIFFs */
                         }
                         else if (dir[i].tdir_tag == TIFFTAG.TIFFTAG_BITSPERSAMPLE && dir[i].tdir_type == TiffDataType.TIFF_LONG)
                         {
                             int v;
-                            if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, (ushort)v))
+                            if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, v))
                                 return false;
                         }
                         else
@@ -1415,7 +1415,7 @@ namespace BitMiracle.LibTiff
                                     break;
                             }
 
-                            byte[] cp = new byte [dir[i].tdir_count * sizeof(ushort)];
+                            byte[] cp = new byte [dir[i].tdir_count * sizeof(short)];
                             if (fetchData(dir[i], cp) != 0)
                             {
                                 int c = 1 << m_dir.td_bitspersample;
@@ -1691,7 +1691,7 @@ namespace BitMiracle.LibTiff
             m_dir = new TiffDirectory();
 
             uint fix = 0;
-            for (ushort i = 0; i < dircount; i++)
+            for (short i = 0; i < dircount; i++)
             {
                 if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 {
@@ -1818,7 +1818,7 @@ namespace BitMiracle.LibTiff
             * Put the directory  at the end of the file.
             */
             m_diroff = (seekFile(0, SeekOrigin.End) + 1) & ~1;
-            m_dataoff = m_diroff + sizeof(ushort) + dirsize + sizeof(uint);
+            m_dataoff = m_diroff + sizeof(short) + dirsize + sizeof(uint);
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
@@ -2546,7 +2546,7 @@ namespace BitMiracle.LibTiff
              * field we'll need to patch.
              */
             int nextdir = m_header.tiff_diroff;
-            int off = sizeof(ushort) + sizeof(ushort);
+            int off = sizeof(short) + sizeof(short);
             for (int n = dirn - 1; n > 0; n--)
             {
                 if (nextdir == 0)
@@ -2868,7 +2868,7 @@ namespace BitMiracle.LibTiff
             {
                 fprintf(fd, "  Extra Samples: {0}<", m_dir.td_extrasamples);
                 string sep = "";
-                for (ushort i = 0; i < m_dir.td_extrasamples; i++)
+                for (short i = 0; i < m_dir.td_extrasamples; i++)
                 {
                     switch (m_dir.td_sampleinfo[i])
                     {
@@ -3051,7 +3051,7 @@ namespace BitMiracle.LibTiff
                     for (int l = 0; l < n; l++)
                     {
                         fprintf(fd, "    {0,2}: {0,5}", l, m_dir.td_transferfunction[0][l]);
-                        for (ushort i = 1; i < m_dir.td_samplesperpixel; i++)
+                        for (short i = 1; i < m_dir.td_samplesperpixel; i++)
                             fprintf(fd, " {0,5}", m_dir.td_transferfunction[i][l]);
                         fprintf(fd, "\n");
                     }
@@ -3063,7 +3063,7 @@ namespace BitMiracle.LibTiff
             if (fieldSet(FIELD.FIELD_SUBIFD) && m_dir.td_subifd != null)
             {
                 fprintf(fd, "  SubIFD Offsets:");
-                for (ushort i = 0; i < m_dir.td_nsubifd; i++)
+                for (short i = 0; i < m_dir.td_nsubifd; i++)
                     fprintf(fd, " {0,5}", m_dir.td_subifd[i]);
                 fprintf(fd, "\n");
             }

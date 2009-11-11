@@ -48,7 +48,7 @@ namespace BitMiracle.Tiff2Pdf
         public bool m_error;
 
         public t2p_compress_t m_pdf_defaultcompression;
-        public ushort m_pdf_defaultcompressionquality;
+        public short m_pdf_defaultcompressionquality;
 
         public bool m_pdf_nopassthrough;
         public bool m_pdf_colorspace_invert;
@@ -82,7 +82,7 @@ namespace BitMiracle.Tiff2Pdf
 
         private T2P_PAGE[] m_tiff_pages;
         private T2P_TILES[] m_tiff_tiles;
-        private ushort m_tiff_pagecount;
+        private short m_tiff_pagecount;
         private COMPRESSION m_tiff_compression;
         private PHOTOMETRIC m_tiff_photometric;
         private FILLORDER m_tiff_fillorder;
@@ -106,8 +106,8 @@ namespace BitMiracle.Tiff2Pdf
         private float m_pdf_imagelength;
         private T2P_BOX m_pdf_mediabox = new T2P_BOX();
         private T2P_BOX m_pdf_imagebox = new T2P_BOX();
-        private ushort m_pdf_majorversion;
-        private ushort m_pdf_minorversion;
+        private short m_pdf_majorversion;
+        private short m_pdf_minorversion;
         private int m_pdf_catalog;
         private int m_pdf_pages;
         private int m_pdf_info;
@@ -129,12 +129,12 @@ namespace BitMiracle.Tiff2Pdf
         private t2p_sample_t m_pdf_sample;
         private int[] m_pdf_xrefoffsets;
         private int m_pdf_xrefcount;
-        private ushort m_pdf_page;
+        private short m_pdf_page;
         private float[] m_tiff_whitechromaticities = new float[2];
         private float[] m_tiff_primarychromaticities = new float[6];
         private byte[][] m_tiff_transferfunction = new byte[3][];
         
-        private ushort m_tiff_transferfunctioncount;
+        private short m_tiff_transferfunctioncount;
         private int m_pdf_icccs;
         private int m_tiff_iccprofilelength;
         private byte[] m_tiff_iccprofile;
@@ -292,7 +292,7 @@ namespace BitMiracle.Tiff2Pdf
                     written += write_pdf_transfer();
                     written += write_pdf_obj_end();
                     
-                    for (ushort i = 0; i < m_tiff_transferfunctioncount; i++)
+                    for (short i = 0; i < m_tiff_transferfunctioncount; i++)
                     {
                         m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
                         written += write_pdf_obj_start(m_pdf_xrefcount);
@@ -471,7 +471,7 @@ namespace BitMiracle.Tiff2Pdf
             IComparer myComparer = new cmp_t2p_page();
             Array.Sort(m_tiff_pages, myComparer);
 
-            for (ushort i = 0; i < m_tiff_pagecount; i++)
+            for (short i = 0; i < m_tiff_pagecount; i++)
             {
                 m_pdf_xrefcount += 5;
                 input.SetDirectory(m_tiff_pages[i].page_directory);
@@ -1701,7 +1701,7 @@ namespace BitMiracle.Tiff2Pdf
                     buffer = new byte [m_tiff_datasize];
                     byte[] samplebuffer = new byte [m_tiff_datasize];
                     int samplebufferoffset = 0;
-                    for (ushort i = 0; i < m_tiff_samplesperpixel; i++)
+                    for (short i = 0; i < m_tiff_samplesperpixel; i++)
                     {
                         int read = input.ReadEncodedTile(tile + i * tilecount, samplebuffer, samplebufferoffset, septilesize);
                         if (read == -1)
@@ -2228,7 +2228,7 @@ namespace BitMiracle.Tiff2Pdf
             int page = m_pdf_pages + 1;
 
             string buffer = null;
-            for (ushort i = 0; i < m_tiff_pagecount; i++)
+            for (short i = 0; i < m_tiff_pagecount; i++)
             {
                 buffer = string.Format("{0}", page);
                 written += writeToFile(buffer);
@@ -2563,7 +2563,7 @@ namespace BitMiracle.Tiff2Pdf
             return written;
         }
 
-        private int write_pdf_transfer_stream(ushort i)
+        private int write_pdf_transfer_stream(short i)
         {
             return write_pdf_stream(m_tiff_transferfunction[i], (1 << (m_tiff_bitspersample + 1)));
         }
@@ -3030,21 +3030,21 @@ namespace BitMiracle.Tiff2Pdf
                         {
                             Array.Copy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
                             
-                            ushort v_samp = 1;
-                            ushort h_samp = 1;
+                            short v_samp = 1;
+                            short h_samp = 1;
                             for (int j = 0; j < buffer[bufferoffset + 9]; j++)
                             {
                                 if ((buffer[bufferoffset + 11 + (2 * j)] >> 4) > h_samp)
-                                    h_samp = (ushort)(buffer[bufferoffset + 11 + (2 * j)] >> 4);
+                                    h_samp = (short)(buffer[bufferoffset + 11 + (2 * j)] >> 4);
 
                                 if ((buffer[bufferoffset + 11 + (2 * j)] & 0x0f) > v_samp)
-                                    v_samp = (ushort)(buffer[bufferoffset + 11 + (2 * j)] & 0x0f);
+                                    v_samp = (short)(buffer[bufferoffset + 11 + (2 * j)] & 0x0f);
                             }
 
                             v_samp *= 8;
                             h_samp *= 8;
-                            ushort ri = (ushort)(((((ushort)(buffer[bufferoffset + 5]) << 8) | (ushort)buffer[bufferoffset + 6]) + v_samp - 1) / v_samp);
-                            ri *= (ushort)(((((ushort)(buffer[bufferoffset + 7]) << 8) | (ushort)buffer[bufferoffset + 8]) + h_samp - 1) / h_samp);
+                            short ri = (short)((((buffer[bufferoffset + 5] << 8) | buffer[bufferoffset + 6]) + v_samp - 1) / v_samp);
+                            ri *= (short)((((buffer[bufferoffset + 7] << 8) | buffer[bufferoffset + 8]) + h_samp - 1) / h_samp);
                             buffer[bufferoffset + 5] = (byte)((height >> 8) & 0xff);
                             buffer[bufferoffset + 6] = (byte)(height & 0xff);
                             bufferoffset += strip[i + 2] + 2;

@@ -76,10 +76,10 @@ namespace BitMiracle.LibTiff
             b[byteStartOffset++] = (byte)(value >> 24);
         }
 
-        internal ushort readUInt16(byte[] b, int byteStartOffset)
+        internal short readShort(byte[] b, int byteStartOffset)
         {
-            ushort value = (ushort)(b[byteStartOffset] & 0xFF);
-            value += (ushort)((b[byteStartOffset + 1] & 0xFF) << 8);
+            short value = (short)(b[byteStartOffset] & 0xFF);
+            value += (short)((b[byteStartOffset + 1] & 0xFF) << 8);
             return value;
         }
 
