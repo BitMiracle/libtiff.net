@@ -107,7 +107,7 @@ namespace BitMiracle.LibTiff.Internal
             return PredictorSetupDecode();
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, ushort s)
+        public override bool tif_decoderow(byte[] pp, int cc, short s)
         {
             if (!m_passThruDecode)
                 return PredictorDecodeRow(pp, cc, s);
@@ -115,7 +115,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_decoderow(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, ushort s)
+        public override bool tif_decodestrip(byte[] pp, int cc, short s)
         {
             if (!m_passThruDecode)
                 return PredictorDecodeTile(pp, cc, s);
@@ -123,7 +123,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_decodestrip(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, ushort s)
+        public override bool tif_decodetile(byte[] pp, int cc, short s)
         {
             if (!m_passThruDecode)
                 return PredictorDecodeTile(pp, cc, s);
@@ -136,7 +136,7 @@ namespace BitMiracle.LibTiff.Internal
             return PredictorSetupEncode();
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, ushort s)
+        public override bool tif_encoderow(byte[] pp, int cc, short s)
         {
             if (!m_passThruEncode)
                 return PredictorEncodeRow(pp, cc, s);
@@ -144,7 +144,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_encoderow(pp, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, ushort s)
+        public override bool tif_encodestrip(byte[] pp, int cc, short s)
         {
             if (!m_passThruEncode)
                 return PredictorEncodeTile(pp, cc, s);
@@ -152,7 +152,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_encodestrip(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, ushort s)
+        public override bool tif_encodetile(byte[] pp, int cc, short s)
         {
             if (!m_passThruEncode)
                 return PredictorEncodeTile(pp, cc, s);
@@ -169,17 +169,17 @@ namespace BitMiracle.LibTiff.Internal
             return base.tif_setupdecode();
         }
 
-        public virtual bool predictor_decoderow(byte[] pp, int cc, ushort s)
+        public virtual bool predictor_decoderow(byte[] pp, int cc, short s)
         {
             return base.tif_decoderow(pp, cc, s);
         }
 
-        public virtual bool predictor_decodestrip(byte[] pp, int cc, ushort s)
+        public virtual bool predictor_decodestrip(byte[] pp, int cc, short s)
         {
             return base.tif_decodestrip(pp, cc, s);
         }
 
-        public virtual bool predictor_decodetile(byte[] pp, int cc, ushort s)
+        public virtual bool predictor_decodetile(byte[] pp, int cc, short s)
         {
             return base.tif_decodetile(pp, cc, s);
         }
@@ -189,17 +189,17 @@ namespace BitMiracle.LibTiff.Internal
             return base.tif_setupencode();
         }
 
-        public virtual bool predictor_encoderow(byte[] pp, int cc, ushort s)
+        public virtual bool predictor_encoderow(byte[] pp, int cc, short s)
         {
             return base.tif_encoderow(pp, cc, s);
         }
 
-        public virtual bool predictor_encodestrip(byte[] pp, int cc, ushort s)
+        public virtual bool predictor_encodestrip(byte[] pp, int cc, short s)
         {
             return base.tif_encodestrip(pp, cc, s);
         }
 
-        public virtual bool predictor_encodetile(byte[] pp, int cc, ushort s)
+        public virtual bool predictor_encodetile(byte[] pp, int cc, short s)
         {
             return base.tif_encodetile(pp, cc, s);
         }
@@ -733,7 +733,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Decode a scanline and apply the predictor routine.
         */
-        private bool PredictorDecodeRow(byte[] op0, int occ0, ushort s)
+        private bool PredictorDecodeRow(byte[] op0, int occ0, short s)
         {
             Debug.Assert(m_predictorType != PredictorType.ptNone);
 
@@ -753,7 +753,7 @@ namespace BitMiracle.LibTiff.Internal
         * been calculated at pre-decode time according to the
         * strip/tile dimensions.
         */
-        private bool PredictorDecodeTile(byte[] op0, int occ0, ushort s)
+        private bool PredictorDecodeTile(byte[] op0, int occ0, short s)
         {
             if (predictor_decodetile(op0, occ0, s))
             {
@@ -774,7 +774,7 @@ namespace BitMiracle.LibTiff.Internal
             return false;
         }
 
-        private bool PredictorEncodeRow(byte[] op0, int occ0, ushort s)
+        private bool PredictorEncodeRow(byte[] op0, int occ0, short s)
         {
             Debug.Assert(m_predictorType != PredictorType.ptNone);
 
@@ -783,7 +783,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_encoderow(op0, occ0, s);
         }
 
-        private bool PredictorEncodeTile(byte[] op0, int occ0, ushort s)
+        private bool PredictorEncodeTile(byte[] op0, int occ0, short s)
         {
             Debug.Assert(m_predictorType != PredictorType.ptNone);
 

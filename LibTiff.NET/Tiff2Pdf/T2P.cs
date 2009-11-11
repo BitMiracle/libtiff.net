@@ -403,7 +403,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private void read_tiff_init(Tiff input)
         {
-            ushort directorycount = input.NumberOfDirectories();
+            short directorycount = input.NumberOfDirectories();
             m_tiff_pages = new T2P_PAGE [directorycount];
             for (int p = 0; p < directorycount; p++)
                 m_tiff_pages[p] = new T2P_PAGE();

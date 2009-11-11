@@ -251,7 +251,7 @@ namespace BitMiracle.LibTiff.Internal
             return setupState();
         }
 
-        public override bool tif_predecode(ushort s)
+        public override bool tif_predecode(short s)
         {
             m_bit = 0; /* force initial read */
             m_data = 0;
@@ -276,7 +276,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, ushort s)
+        public override bool tif_decoderow(byte[] pp, int cc, short s)
         {
             switch (m_decoder)
             {
@@ -293,12 +293,12 @@ namespace BitMiracle.LibTiff.Internal
             return false;
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, ushort s)
+        public override bool tif_decodestrip(byte[] pp, int cc, short s)
         {
             return tif_decoderow(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, ushort s)
+        public override bool tif_decodetile(byte[] pp, int cc, short s)
         {
             return tif_decoderow(pp, cc, s);
         }
@@ -309,7 +309,7 @@ namespace BitMiracle.LibTiff.Internal
             return setupState();
         }
 
-        public override bool tif_preencode(ushort s)
+        public override bool tif_preencode(short s)
         {
             m_bit = 8;
             m_data = 0;
@@ -363,7 +363,7 @@ namespace BitMiracle.LibTiff.Internal
             return Fax3PostEncode();
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, ushort s)
+        public override bool tif_encoderow(byte[] pp, int cc, short s)
         {
             if (m_encodingFax4)
                 return Fax4Encode(pp, cc);
@@ -371,12 +371,12 @@ namespace BitMiracle.LibTiff.Internal
             return Fax3Encode(pp, cc);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, ushort s)
+        public override bool tif_encodestrip(byte[] pp, int cc, short s)
         {
             return tif_encoderow(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, ushort s)
+        public override bool tif_encodetile(byte[] pp, int cc, short s)
         {
             return tif_encoderow(pp, cc, s);
         }

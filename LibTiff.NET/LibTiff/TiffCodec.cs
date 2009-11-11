@@ -63,25 +63,25 @@ namespace BitMiracle.LibTiff
         }
 
         /* pre-row/strip/tile decoding */
-        public virtual bool tif_predecode(ushort s)
+        public virtual bool tif_predecode(short s)
         {
             return true;
         }
 
         /* scanline decoding routine */
-        public virtual bool tif_decoderow(byte[] pp, int cc, ushort s)
+        public virtual bool tif_decoderow(byte[] pp, int cc, short s)
         {
             return noDecode("scanline");
         }
 
         /* strip decoding routine */
-        public virtual bool tif_decodestrip(byte[] pp, int cc, ushort s)
+        public virtual bool tif_decodestrip(byte[] pp, int cc, short s)
         {
             return noDecode("strip");
         }
 
         /* tile decoding routine */
-        public virtual bool tif_decodetile(byte[] pp, int cc, ushort s)
+        public virtual bool tif_decodetile(byte[] pp, int cc, short s)
         {
             return noDecode("tile");
         }
@@ -95,7 +95,7 @@ namespace BitMiracle.LibTiff
         }
 
         /* pre-row/strip/tile encoding */
-        public virtual bool tif_preencode(ushort s)
+        public virtual bool tif_preencode(short s)
         {
             return true;
         }
@@ -107,19 +107,19 @@ namespace BitMiracle.LibTiff
         }
 
         /* scanline encoding routine */
-        public virtual bool tif_encoderow(byte[] pp, int cc, ushort s)
+        public virtual bool tif_encoderow(byte[] pp, int cc, short s)
         {
             return noEncode("scanline");
         }
 
         /* strip encoding routine */
-        public virtual bool tif_encodestrip(byte[] pp, int cc, ushort s)
+        public virtual bool tif_encodestrip(byte[] pp, int cc, short s)
         {
             return noEncode("strip");
         }
 
         /* tile encoding routine */
-        public virtual bool tif_encodetile(byte[] pp, int cc, ushort s)
+        public virtual bool tif_encodetile(byte[] pp, int cc, short s)
         {
             return noEncode("tile");
         }

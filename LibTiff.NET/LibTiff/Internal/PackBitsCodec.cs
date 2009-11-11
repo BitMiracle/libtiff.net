@@ -51,42 +51,42 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, ushort s)
+        public override bool tif_decoderow(byte[] pp, int cc, short s)
         {
             return PackBitsDecode(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, ushort s)
+        public override bool tif_decodestrip(byte[] pp, int cc, short s)
         {
             return PackBitsDecode(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, ushort s)
+        public override bool tif_decodetile(byte[] pp, int cc, short s)
         {
             return PackBitsDecode(pp, cc, s);
         }
 
-        public override bool tif_preencode(ushort s)
+        public override bool tif_preencode(short s)
         {
             return PackBitsPreEncode(s);
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, ushort s)
+        public override bool tif_encoderow(byte[] pp, int cc, short s)
         {
             return PackBitsEncode(pp, 0, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, ushort s)
+        public override bool tif_encodestrip(byte[] pp, int cc, short s)
         {
             return PackBitsEncodeChunk(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, ushort s)
+        public override bool tif_encodetile(byte[] pp, int cc, short s)
         {
             return PackBitsEncodeChunk(pp, cc, s);
         }
 
-        private bool PackBitsPreEncode(ushort s)
+        private bool PackBitsPreEncode(short s)
         {
             /*
              * Calculate the scanline/tile-width size in bytes.
@@ -101,7 +101,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
         * Encode a run of pixels.
         */
-        private bool PackBitsEncode(byte[] buf, int offset, int cc, ushort s)
+        private bool PackBitsEncode(byte[] buf, int offset, int cc, short s)
         {
             int op = m_tif.m_rawcp;
             EncodingState state = EncodingState.BASE;
@@ -291,7 +291,7 @@ namespace BitMiracle.LibTiff.Internal
         * the decoder if data is read, for example, by scanlines
         * when it was encoded by strips.
         */
-        private bool PackBitsEncodeChunk(byte[] bp, int cc, ushort s)
+        private bool PackBitsEncodeChunk(byte[] bp, int cc, short s)
         {
             int offset = 0;
             while (cc > 0)
@@ -310,7 +310,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        private bool PackBitsDecode(byte[] op, int occ, ushort s)
+        private bool PackBitsDecode(byte[] op, int occ, short s)
         {
             int bp = m_tif.m_rawcp;
             int cc = m_tif.m_rawcc;

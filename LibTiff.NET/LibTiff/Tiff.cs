@@ -265,27 +265,23 @@ namespace BitMiracle.LibTiff
         public static byte[] Realloc(byte[] oldBuffer, int elementCount, int newElementCount)
         {
             byte[] newBuffer = new byte[newElementCount];
-            //memset(newBuffer, 0, newElementCount * sizeof(byte));
-
-            if (oldBuffer == null)
-                return newBuffer;
-
-            int copyLength = Math.Min(elementCount, newElementCount);
-            Array.Copy(oldBuffer, newBuffer, copyLength);
-
+            if (oldBuffer != null)
+            {
+                int copyLength = Math.Min(elementCount, newElementCount);
+                Array.Copy(oldBuffer, newBuffer, copyLength);
+            }
+            
             return newBuffer;
         }
 
         public static int[] Realloc(int[] oldBuffer, int elementCount, int newElementCount)
         {
             int[] newBuffer = new int[newElementCount];
-            //memset(newBuffer, 0, newElementCount * sizeof(uint));
-
-            if (oldBuffer == null)
-                return newBuffer;
-
-            int copyLength = Math.Min(elementCount, newElementCount);
-            Array.Copy(oldBuffer, newBuffer, copyLength);
+            if (oldBuffer != null)
+            {
+                int copyLength = Math.Min(elementCount, newElementCount);
+                Array.Copy(oldBuffer, newBuffer, copyLength);
+            }
 
             return newBuffer;
         }
@@ -2007,7 +2003,7 @@ namespace BitMiracle.LibTiff
         /*
         * Compute the # bytes in a raw strip.
         */
-        public int RawStripSize(uint strip)
+        public int RawStripSize(int strip)
         {
             int bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
@@ -2245,10 +2241,10 @@ namespace BitMiracle.LibTiff
         /*
         * Count the number of directories in a file.
         */
-        public ushort NumberOfDirectories()
+        public short NumberOfDirectories()
         {
             int nextdir = m_header.tiff_diroff;
-            ushort n = 0;
+            short n = 0;
             int dummyOff;
             while (nextdir != 0 && advanceDirectory(ref nextdir, out dummyOff))
                 n++;
@@ -2534,7 +2530,7 @@ namespace BitMiracle.LibTiff
         /*
         * Unlink the specified directory from the directory chain.
         */
-        public bool UnlinkDirectory(ushort dirn)
+        public bool UnlinkDirectory(short dirn)
         {
             const string module = "UnlinkDirectory";
 
@@ -3170,7 +3166,7 @@ namespace BitMiracle.LibTiff
             return ReadScanline(buf, row, 0);
         }
 
-        public bool ReadScanline(byte[] buf, int row, ushort sample)
+        public bool ReadScanline(byte[] buf, int row, short sample)
         {
             if (!checkRead(0))
                 return false;
@@ -3198,7 +3194,7 @@ namespace BitMiracle.LibTiff
             return WriteScanline(buf, row, 0);
         }
 
-        public bool WriteScanline(byte[] buf, int row, ushort sample)
+        public bool WriteScanline(byte[] buf, int row, short sample)
         {
             const string module = "WriteScanline";
 
@@ -3875,7 +3871,7 @@ namespace BitMiracle.LibTiff
             byte[] tempBuf = new byte [size];
             Array.Copy(buf, offset, tempBuf, 0, size);
 
-            if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (ushort)(tile / m_dir.td_stripsperimage)))
+            if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (short)(tile / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
                 Array.Copy(tempBuf, 0, buf, offset, size);
@@ -4011,7 +4007,7 @@ namespace BitMiracle.LibTiff
             byte[] tempBuf = new byte[size];
             Array.Copy(buf, offset, tempBuf, 0, size);
 
-            if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (ushort)(strip / m_dir.td_stripsperimage)))
+            if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (short)(strip / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
                 Array.Copy(tempBuf, 0, buf, offset, size);
@@ -4125,7 +4121,7 @@ namespace BitMiracle.LibTiff
             }
 
             m_flags &= ~TIFF_POSTENCODE;
-            ushort sample = (ushort)(strip / m_dir.td_stripsperimage);
+            short sample = (short)(strip / m_dir.td_stripsperimage);
             if (!m_currentCodec.tif_preencode(sample))
                 return -1;
 
@@ -4254,7 +4250,7 @@ namespace BitMiracle.LibTiff
             }
 
             m_flags &= ~TIFF_POSTENCODE;
-            ushort sample = (ushort)(tile / m_dir.td_stripsperimage);
+            short sample = (short)(tile / m_dir.td_stripsperimage);
             if (!m_currentCodec.tif_preencode(sample))
                 return -1;
 

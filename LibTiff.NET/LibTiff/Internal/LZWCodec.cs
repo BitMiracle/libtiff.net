@@ -153,12 +153,12 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_predecode(ushort s)
+        public override bool tif_predecode(short s)
         {
             return LZWPreDecode(s);
         }
 
-        public override bool tif_preencode(ushort s)
+        public override bool tif_preencode(short s)
         {
             return LZWPreEncode(s);
         }
@@ -180,7 +180,7 @@ namespace BitMiracle.LibTiff.Internal
             return LZWSetupDecode();
         }
 
-        public override bool predictor_decoderow(byte[] pp, int cc, ushort s)
+        public override bool predictor_decoderow(byte[] pp, int cc, short s)
         {
             if (m_compatDecode)
                 return LZWDecodeCompat(pp, cc, s);
@@ -188,7 +188,7 @@ namespace BitMiracle.LibTiff.Internal
             return LZWDecode(pp, cc, s);
         }
 
-        public override bool predictor_decodestrip(byte[] pp, int cc, ushort s)
+        public override bool predictor_decodestrip(byte[] pp, int cc, short s)
         {
             if (m_compatDecode)
                 return LZWDecodeCompat(pp, cc, s);
@@ -196,7 +196,7 @@ namespace BitMiracle.LibTiff.Internal
             return LZWDecode(pp, cc, s);
         }
 
-        public override bool predictor_decodetile(byte[] pp, int cc, ushort s)
+        public override bool predictor_decodetile(byte[] pp, int cc, short s)
         {
             if (m_compatDecode)
                 return LZWDecodeCompat(pp, cc, s);
@@ -209,17 +209,17 @@ namespace BitMiracle.LibTiff.Internal
             return LZWSetupEncode();
         }
 
-        public override bool predictor_encoderow(byte[] pp, int cc, ushort s)
+        public override bool predictor_encoderow(byte[] pp, int cc, short s)
         {
             return LZWEncode(pp, cc, s);
         }
 
-        public override bool predictor_encodestrip(byte[] pp, int cc, ushort s)
+        public override bool predictor_encodestrip(byte[] pp, int cc, short s)
         {
             return LZWEncode(pp, cc, s);
         }
 
-        public override bool predictor_encodetile(byte[] pp, int cc, ushort s)
+        public override bool predictor_encodetile(byte[] pp, int cc, short s)
         {
             return LZWEncode(pp, cc, s);
         }
@@ -255,7 +255,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
          * Setup state for decoding a strip.
          */
-        private bool LZWPreDecode(ushort s)
+        private bool LZWPreDecode(short s)
         {
             if (m_dec_codetab == null)
                 tif_setupdecode();
@@ -309,7 +309,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        private bool LZWDecode(byte[] op0, int occ0, ushort s)
+        private bool LZWDecode(byte[] op0, int occ0, short s)
         {
             Debug.Assert(m_dec_codetab != null);
 
@@ -529,7 +529,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        private bool LZWDecodeCompat(byte[] op0, int occ0, ushort s)
+        private bool LZWDecodeCompat(byte[] op0, int occ0, short s)
         {
             int occ = occ0;
             int op = 0;
@@ -739,7 +739,7 @@ namespace BitMiracle.LibTiff.Internal
         /*
          * Reset encoding state at the start of a strip.
          */
-        private bool LZWPreEncode(ushort s)
+        private bool LZWPreEncode(short s)
         {
             if (m_enc_hashtab == null)
                 tif_setupencode();
@@ -809,7 +809,7 @@ namespace BitMiracle.LibTiff.Internal
         * are re-sized at this point, and a CODE_CLEAR is generated
         * for the decoder. 
         */
-        private bool LZWEncode(byte[] bp, int cc, ushort s)
+        private bool LZWEncode(byte[] bp, int cc, short s)
         {
             Debug.Assert(m_enc_hashtab != null);
             int bpPos = 0;

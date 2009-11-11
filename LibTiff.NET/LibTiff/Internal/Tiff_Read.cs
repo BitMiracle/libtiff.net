@@ -146,7 +146,7 @@ namespace BitMiracle.LibTiff
         /*
         * Seek to a random row+sample in a file.
         */
-        private bool seek(int row, ushort sample)
+        private bool seek(int row, short sample)
         {
             if (row >= m_dir.td_imagelength)
             {
@@ -274,7 +274,7 @@ namespace BitMiracle.LibTiff
             else
                 m_rawcc = (int)m_dir.td_stripbytecount[strip];
 
-            return m_currentCodec.tif_predecode((ushort)(strip / m_dir.td_stripsperimage));
+            return m_currentCodec.tif_predecode((short)(strip / m_dir.td_stripsperimage));
         }
 
         /*
@@ -300,7 +300,7 @@ namespace BitMiracle.LibTiff
             else
                 m_rawcc = (int)m_dir.td_stripbytecount[tile];
 
-            return m_currentCodec.tif_predecode((ushort)(tile / m_dir.td_stripsperimage));
+            return m_currentCodec.tif_predecode((short)(tile / m_dir.td_stripsperimage));
         }
 
         private bool checkRead(int tiles)
