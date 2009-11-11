@@ -413,7 +413,7 @@ namespace BitMiracle.Tiff2Pdf
 
             for (short i = 0; i < directorycount; i++)
             {
-                uint subfiletype = 0;
+                int subfiletype = 0;
 
                 if (!input.SetDirectory(i))
                 {
@@ -438,7 +438,7 @@ namespace BitMiracle.Tiff2Pdf
                     result = input.GetField(TIFFTAG.TIFFTAG_SUBFILETYPE);
                     if (result != null)
                     {
-                        subfiletype = result[0].ToUInt();
+                        subfiletype = result[0].ToInt();
                         if ((((FILETYPE)subfiletype & FILETYPE.FILETYPE_PAGE) == 0) && (subfiletype != 0))
                             continue;
                     }
@@ -447,7 +447,7 @@ namespace BitMiracle.Tiff2Pdf
                         result = input.GetField(TIFFTAG.TIFFTAG_OSUBFILETYPE);
                         if (result != null)
                         {
-                            subfiletype = result[0].ToUInt();
+                            subfiletype = result[0].ToInt();
                             if (((OFILETYPE)subfiletype != OFILETYPE.OFILETYPE_IMAGE) && ((OFILETYPE)subfiletype != OFILETYPE.OFILETYPE_PAGE) && (subfiletype != 0))
                                 continue;
                         }

@@ -43,22 +43,22 @@ namespace BitMiracle.LibTiff.Internal
                         sp.m_groupoptions = (GROUP3OPT)ap[0].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_BADFAXLINES:
-                    sp.m_badfaxlines = ap[0].ToUInt();
+                    sp.m_badfaxlines = ap[0].ToInt();
                     break;
                 case TIFFTAG.TIFFTAG_CLEANFAXDATA:
                     sp.m_cleanfaxdata = (CLEANFAXDATA)ap[0].ToByte();
                     break;
                 case TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES:
-                    sp.m_badfaxrun = ap[0].ToUInt();
+                    sp.m_badfaxrun = ap[0].ToInt();
                     break;
                 case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
-                    sp.m_recvparams = ap[0].ToUInt();
+                    sp.m_recvparams = ap[0].ToInt();
                     break;
                 case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
                     Tiff.setString(out sp.m_subaddress, ap[0].ToString());
                     break;
                 case TIFFTAG.TIFFTAG_FAXRECVTIME:
-                    sp.m_recvtime = ap[0].ToUInt();
+                    sp.m_recvtime = ap[0].ToInt();
                     break;
                 case TIFFTAG.TIFFTAG_FAXDCS:
                     Tiff.setString(out sp.m_faxdcs, ap[0].ToString());

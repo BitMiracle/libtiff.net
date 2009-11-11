@@ -482,10 +482,10 @@ namespace BitMiracle.TiffCP
                 }
 
                 result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
-                uint w = result[0].ToUInt();
+                int w = result[0].ToInt();
 
                 result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
-                uint l = result[0].ToUInt();
+                int l = result[0].ToInt();
 
                 bool bychunk;
                 if (!(outImage.IsTiled() || inImage.IsTiled()))
@@ -507,19 +507,19 @@ namespace BitMiracle.TiffCP
 
                     if (outImage.IsTiled())
                     {
-                        uint tw;
+                        int tw;
                         result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
                         if (result == null)
                             tw = w;
                         else
-                            tw = result[0].ToUInt();
+                            tw = result[0].ToInt();
 
-                        uint tl;
+                        int tl;
                         result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
                         if (result == null)
                             tl = l;
                         else
-                            tl = result[0].ToUInt();
+                            tl = result[0].ToInt();
 
                         bychunk = (tw == m_tilewidth && tl == m_tilelength);
                     }
@@ -527,10 +527,10 @@ namespace BitMiracle.TiffCP
                     {
                         /* outImage's not, so inImage must be tiled */
                         result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
-                        uint tw = result[0].ToUInt();
+                        int tw = result[0].ToInt();
 
                         result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
-                        uint tl = result[0].ToUInt();
+                        int tl = result[0].ToInt();
 
                         bychunk = (tw == w && tl == m_rowsperstrip);
                     }
@@ -639,10 +639,10 @@ namespace BitMiracle.TiffCP
                 int bufSize = inImage.ScanlineSize();
 
                 FieldValue[] result = m_bias.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
-                uint biasWidth = result[0].ToUInt();
+                int biasWidth = result[0].ToInt();
 
                 result = m_bias.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
-                uint biasLength = result[0].ToUInt();
+                int biasLength = result[0].ToInt();
 
                 if (biasSize == bufSize && imagelength == biasLength && imagewidth == biasWidth)
                 {

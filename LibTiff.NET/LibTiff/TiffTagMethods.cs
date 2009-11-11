@@ -38,7 +38,7 @@ namespace BitMiracle.LibTiff
 
             TiffDirectory td = tif.m_dir;
             bool status = true;
-            uint v32 = 0;
+            int v32 = 0;
             int v = 0;
 
             bool end = false;
@@ -148,7 +148,7 @@ namespace BitMiracle.LibTiff
                     td.td_samplesperpixel = (ushort)v;
                     break;
                 case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
-                    v32 = (uint)ap[0].ToInt();
+                    v32 = ap[0].ToInt();
                     if (v32 == 0)
                     {
                         badvalue32 = true;
@@ -208,15 +208,15 @@ namespace BitMiracle.LibTiff
                     td.td_resolutionunit = ru;
                     break;
                 case TIFFTAG.TIFFTAG_PAGENUMBER:
-                    td.td_pagenumber[0] = ap[0].ToUShort();
-                    td.td_pagenumber[1] = ap[1].ToUShort();
+                    td.td_pagenumber[0] = ap[0].ToShort();
+                    td.td_pagenumber[1] = ap[1].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_HALFTONEHINTS:
-                    td.td_halftonehints[0] = ap[0].ToUShort();
-                    td.td_halftonehints[1] = ap[1].ToUShort();
+                    td.td_halftonehints[0] = ap[0].ToShort();
+                    td.td_halftonehints[1] = ap[1].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_COLORMAP:
-                    v32 = (uint)(1L << td.td_bitspersample);
+                    v32 = 1 << td.td_bitspersample;
                     Tiff.setShortArray(out td.td_colormap[0], ap[0].ToShortArray(), (int)v32);
                     Tiff.setShortArray(out td.td_colormap[1], ap[1].ToShortArray(), (int)v32);
                     Tiff.setShortArray(out td.td_colormap[2], ap[2].ToShortArray(), (int)v32);
@@ -242,7 +242,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
                 case TIFFTAG.TIFFTAG_TILEWIDTH:
-                    v32 = ap[0].ToUInt();
+                    v32 = ap[0].ToInt();
                     if ((v32 % 16) != 0)
                     {
                         if (tif.m_mode != Tiff.O_RDONLY)
@@ -254,11 +254,11 @@ namespace BitMiracle.LibTiff
                         Tiff.WarningExt(tif, tif.m_clientdata, tif.m_name,
                             "Nonstandard tile width {0}, convert file", v32);
                     }
-                    td.td_tilewidth = (int)v32;
+                    td.td_tilewidth = v32;
                     tif.m_flags |= Tiff.TIFF_ISTILED;
                     break;
                 case TIFFTAG.TIFFTAG_TILELENGTH:
-                    v32 = ap[0].ToUInt();
+                    v32 = ap[0].ToInt();
                     if ((v32 % 16) != 0)
                     {
                         if (tif.m_mode != Tiff.O_RDONLY)
@@ -274,7 +274,7 @@ namespace BitMiracle.LibTiff
                     tif.m_flags |= Tiff.TIFF_ISTILED;
                     break;
                 case TIFFTAG.TIFFTAG_TILEDEPTH:
-                    v32 = ap[0].ToUInt();
+                    v32 = ap[0].ToInt();
                     if (v32 == 0)
                     {
                         badvalue32 = true;
@@ -353,8 +353,8 @@ namespace BitMiracle.LibTiff
                     td.td_ycbcrpositioning = (YCBCRPOSITION)ap[0].ToByte();
                     break;
                 case TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING:
-                    td.td_ycbcrsubsampling[0] = ap[0].ToUShort();
-                    td.td_ycbcrsubsampling[1] = ap[1].ToUShort();
+                    td.td_ycbcrsubsampling[0] = ap[0].ToShort();
+                    td.td_ycbcrsubsampling[1] = ap[1].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
                     v = ((td.td_samplesperpixel - td.td_extrasamples) > 1 ? 3 : 1);
@@ -504,7 +504,7 @@ namespace BitMiracle.LibTiff
                                         break;
                                     case TiffDataType.TIFF_LONG:
                                     case TiffDataType.TIFF_IFD:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUInt()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffDataType.TIFF_SLONG:
                                         Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToInt()), 0, val, valPos, tv_size);

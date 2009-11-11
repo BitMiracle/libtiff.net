@@ -49,9 +49,9 @@ namespace BitMiracle.LibTiff.Internal
         public PLANARCONFIG td_planarconfig;
         public float td_xposition;
         public float td_yposition;
-        public ushort[] td_pagenumber = new ushort[2];
+        public short[] td_pagenumber = new short[2];
         public short[][] td_colormap = { null, null, null };
-        public ushort[] td_halftonehints = new ushort[2];
+        public short[] td_halftonehints = new short[2];
         public ushort td_extrasamples;
         public EXTRASAMPLE[] td_sampleinfo;
         public int td_stripsperimage;
@@ -62,7 +62,7 @@ namespace BitMiracle.LibTiff.Internal
         public ushort td_nsubifd;
         public int[] td_subifd;
         /* YCbCr parameters */
-        public ushort[] td_ycbcrsubsampling = new ushort[2];
+        public short[] td_ycbcrsubsampling = new short[2];
         public YCBCRPOSITION td_ycbcrpositioning;
         /* Colorimetry parameters */
         public short[][] td_transferfunction = { null, null, null };

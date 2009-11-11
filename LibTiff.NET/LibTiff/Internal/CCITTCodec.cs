@@ -59,11 +59,11 @@ namespace BitMiracle.LibTiff.Internal
         internal FAXMODE m_mode; /* operating mode */
         internal GROUP3OPT m_groupoptions; /* Group 3/4 options tag */
         internal CLEANFAXDATA m_cleanfaxdata; /* CleanFaxData tag */
-        internal uint m_badfaxlines; /* BadFaxLines tag */
-        internal uint m_badfaxrun; /* BadFaxRun tag */
-        internal uint m_recvparams; /* encoded Class 2 session params */
+        internal int m_badfaxlines; /* BadFaxLines tag */
+        internal int m_badfaxrun; /* BadFaxRun tag */
+        internal int m_recvparams; /* encoded Class 2 session params */
         internal string m_subaddress; /* subaddress string */
-        internal uint m_recvtime; /* time spent receiving (secs) */
+        internal int m_recvtime; /* time spent receiving (secs) */
         internal string m_faxdcs; /* Table 2/T.30 encoded session params */
 
         /* Decoder state info */

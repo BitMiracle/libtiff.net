@@ -65,7 +65,7 @@ namespace BitMiracle.LibTiff.Internal
                     return base.vsetfield(tif, tag, ap);
                 
                 case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
-                    sp.m_recvparams = ap[0].ToUInt();
+                    sp.m_recvparams = ap[0].ToInt();
                     break;
                 
                 case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
@@ -73,7 +73,7 @@ namespace BitMiracle.LibTiff.Internal
                     break;
                 
                 case TIFFTAG.TIFFTAG_FAXRECVTIME:
-                    sp.m_recvtime = ap[0].ToUInt();
+                    sp.m_recvtime = ap[0].ToInt();
                     break;
                 
                 case TIFFTAG.TIFFTAG_FAXDCS:

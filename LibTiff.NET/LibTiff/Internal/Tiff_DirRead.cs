@@ -896,10 +896,10 @@ namespace BitMiracle.LibTiff
                         TiffDataType type = fip.field_type;
                         if (type != TiffDataType.TIFF_LONG && type != TiffDataType.TIFF_SLONG)
                         {
-                            ushort v = (ushort)extractData(dir);
+                            short v = (short)extractData(dir);
                             if (fip.field_passcount)
                             {
-                                ushort[] a = new ushort[1];
+                                short[] a = new short[1];
                                 a[0] = v;
                                 ok = SetField(dir.tdir_tag, 1, a);
                             }

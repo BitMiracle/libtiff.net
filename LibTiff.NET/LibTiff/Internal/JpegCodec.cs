@@ -41,8 +41,8 @@ namespace BitMiracle.LibTiff.Internal
         internal jpeg_decompress_struct m_decompression;
         internal jpeg_common_struct m_common;
 
-        internal ushort m_h_sampling; /* luminance sampling factors */
-        internal ushort m_v_sampling;
+        internal int m_h_sampling; /* luminance sampling factors */
+        internal int m_v_sampling;
 
         /* pseudo-tag fields */
         internal byte[] m_jpegtables; /* JPEGTables tag value, or null */
@@ -53,9 +53,9 @@ namespace BitMiracle.LibTiff.Internal
 
         internal bool m_ycbcrsampling_fetched;
 
-        internal uint m_recvparams; /* encoded Class 2 session params */
+        internal int m_recvparams; /* encoded Class 2 session params */
         internal string m_subaddress; /* subaddress string */
-        internal uint m_recvtime; /* time spent receiving (secs) */
+        internal int m_recvtime; /* time spent receiving (secs) */
         internal string m_faxdcs; /* encoded fax parameters (DCS, Table 2/T.30) */
 
         private static TiffFieldInfo[] jpegFieldInfo = 
@@ -817,8 +817,8 @@ namespace BitMiracle.LibTiff.Internal
                             m_decompression.m_comp_info[0].h_samp_factor,
                             m_decompression.m_comp_info[0].v_samp_factor);
 
-                        m_h_sampling = (ushort)m_decompression.m_comp_info[0].h_samp_factor;
-                        m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
+                        m_h_sampling = m_decompression.m_comp_info[0].h_samp_factor;
+                        m_v_sampling = m_decompression.m_comp_info[0].v_samp_factor;
                     }
                 }
 
@@ -1103,8 +1103,8 @@ namespace BitMiracle.LibTiff.Internal
                             m_decompression.m_comp_info[0].h_samp_factor,
                             m_decompression.m_comp_info[0].v_samp_factor);
 
-                        m_h_sampling = (ushort)m_decompression.m_comp_info[0].h_samp_factor;
-                        m_v_sampling = (ushort)m_decompression.m_comp_info[0].v_samp_factor;
+                        m_h_sampling = m_decompression.m_comp_info[0].h_samp_factor;
+                        m_v_sampling = m_decompression.m_comp_info[0].v_samp_factor;
                     }
                 }
 
