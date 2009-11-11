@@ -3337,12 +3337,12 @@ namespace BitMiracle.LibTiff
         * Read the specified image into an ABGR-format raster. Use bottom left
         * origin for raster by default.
         */
-        public bool ReadRGBAImage(int rwidth, int rheight, uint[] raster)
+        public bool ReadRGBAImage(int rwidth, int rheight, int[] raster)
         {
             return ReadRGBAImage(rwidth, rheight, raster, false);
         }
 
-        public bool ReadRGBAImage(int rwidth, int rheight, uint[] raster, bool stop)
+        public bool ReadRGBAImage(int rwidth, int rheight, int[] raster, bool stop)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION.ORIENTATION_BOTLEFT, stop);
         }
@@ -3351,17 +3351,17 @@ namespace BitMiracle.LibTiff
         * Read the specified image into an ABGR-format raster taking in account
         * specified orientation.
         */
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, uint[] raster)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION.ORIENTATION_BOTLEFT, false);
         }
 
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, uint[] raster, ORIENTATION orientation)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, ORIENTATION orientation)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, orientation, false);
         }
 
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, uint[] raster, ORIENTATION orientation, bool stop)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, ORIENTATION orientation, bool stop)
         {
             bool ok = true;
             string emsg;
@@ -3390,7 +3390,7 @@ namespace BitMiracle.LibTiff
         * the strip that is actually within the image space.  The result is
         * organized in bottom to top form.
         */
-        public bool ReadRGBAStrip(int row, uint[] raster)
+        public bool ReadRGBAStrip(int row, int[] raster)
         {
             if (IsTiled())
             {
@@ -3435,7 +3435,7 @@ namespace BitMiracle.LibTiff
         * The returned RGBA data is organized from bottom to top of tile,
         * and may include zeroed areas if the tile extends off the image.
         */
-        public bool ReadRGBATile(int col, int row, uint[] raster)
+        public bool ReadRGBATile(int col, int row, int[] raster)
         {
             /*
              * Verify that our request is legal - on a tile file, and on a
@@ -3741,7 +3741,7 @@ namespace BitMiracle.LibTiff
         /*
         * Compute which tile an (x,y,z,s) value is in.
         */
-        public int ComputeTile(int x, int y, int z, ushort s)
+        public int ComputeTile(int x, int y, int z, short s)
         {
             if (m_dir.td_imagedepth == 1)
                 z = 0;
@@ -3778,7 +3778,7 @@ namespace BitMiracle.LibTiff
         * Check an (x,y,z,s) coordinate
         * against the image bounds.
         */
-        public bool CheckTile(int x, int y, int z, ushort s)
+        public bool CheckTile(int x, int y, int z, short s)
         {
             if (x >= m_dir.td_imagewidth)
             {
@@ -3840,7 +3840,7 @@ namespace BitMiracle.LibTiff
         * Read and decompress a tile of data.  The
         * tile is selected by the (x,y,z,s) coordinates.
         */
-        public int ReadTile(byte[] buf, int offset, int x, int y, int z, ushort s)
+        public int ReadTile(byte[] buf, int offset, int x, int y, int z, short s)
         {
             if (!checkRead(1) || !CheckTile(x, y, z, s))
                 return -1;
@@ -3920,7 +3920,7 @@ namespace BitMiracle.LibTiff
         * Write and compress a tile of data.  The
         * tile is selected by the (x,y,z,s) coordinates.
         */
-        public int WriteTile(byte[] buf, int x, int y, int z, ushort s)
+        public int WriteTile(byte[] buf, int x, int y, int z, short s)
         {
             if (!CheckTile(x, y, z, s))
                 return -1;
@@ -3937,7 +3937,7 @@ namespace BitMiracle.LibTiff
         /*
         * Compute which strip a (row,sample) value is in.
         */
-        public int ComputeStrip(int row, ushort sample)
+        public int ComputeStrip(int row, short sample)
         {
             int strip = row / m_dir.td_rowsperstrip;
             if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
@@ -4482,7 +4482,7 @@ namespace BitMiracle.LibTiff
                 lpPos += 2;
             }
 
-            IntToByteArray(lp, 0, n + n, bytes, 0);
+            IntsToByteArray(lp, 0, n + n, bytes, 0);
             for (int i = 0; i < n; i++)
                 dp[i] = BitConverter.ToDouble(bytes, i * sizeof(double));
         }
@@ -4534,7 +4534,7 @@ namespace BitMiracle.LibTiff
             return integers;
         }
 
-        public static void IntToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        public static void IntsToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
             int intStopPos = intStartOffset + intCount;

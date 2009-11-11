@@ -1480,7 +1480,7 @@ namespace BitMiracle.Tiff2Pdf
                         samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_width * m_tiff_length * 4);
                         buffer = samplebuffer;
 
-                        uint[] buffer32 = Tiff.ByteArrayToUInt(buffer, 0, m_tiff_width * m_tiff_length * 4);
+                        int[] buffer32 = Tiff.ByteArrayToInt(buffer, 0, m_tiff_width * m_tiff_length * 4);
                         if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, ORIENTATION.ORIENTATION_TOPLEFT, false))
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
@@ -1490,7 +1490,7 @@ namespace BitMiracle.Tiff2Pdf
                             return 0;
                         }
 
-                        Tiff.UIntToByteArray(buffer32, 0, m_tiff_width * m_tiff_length, buffer, 0);
+                        Tiff.IntsToByteArray(buffer32, 0, m_tiff_width * m_tiff_length, buffer, 0);
 
                         m_tiff_datasize = sample_abgr_to_rgb(buffer, m_tiff_width * m_tiff_length);
                     }

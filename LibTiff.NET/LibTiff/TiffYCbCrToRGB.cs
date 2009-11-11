@@ -111,7 +111,7 @@ namespace BitMiracle.LibTiff
             }
         }
 
-        public void YCbCrtoRGB(uint Y, int Cb, int Cr, out uint r, out uint g, out uint b)
+        public void YCbCrtoRGB(int Y, int Cb, int Cr, out int r, out int g, out int b)
         {
             /* XXX: Only 8-bit YCbCr input supported for now */
             Y = hiClamp(Y, 255);
@@ -138,7 +138,7 @@ namespace BitMiracle.LibTiff
             return (f < min ? min : f > max ? max : f);
         }
 
-        private static uint hiClamp(uint f, uint max)
+        private static int hiClamp(int f, int max)
         {
             return (f > max ? max : f);
         }

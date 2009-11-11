@@ -1168,7 +1168,7 @@ namespace BitMiracle.LibTiff
 
             int byteCount = cc * sizeof(int);
             byte[] bytes = new byte [byteCount];
-            IntToByteArray(cp, 0, cc, bytes, 0);
+            IntsToByteArray(cp, 0, cc, bytes, 0);
             bool res = writeData(ref dir, bytes, byteCount);
             return res;
         }

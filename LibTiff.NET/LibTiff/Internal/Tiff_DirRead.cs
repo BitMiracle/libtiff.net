@@ -339,14 +339,14 @@ namespace BitMiracle.LibTiff
                     case TiffDataType.TIFF_FLOAT:
                         int[] l = ByteArrayToInt(cp, 0, cc);
                         SwabArrayOfLong(l, dir.tdir_count);
-                        IntToByteArray(l, 0, dir.tdir_count, cp, 0);
+                        IntsToByteArray(l, 0, dir.tdir_count, cp, 0);
                         break;
                     
                     case TiffDataType.TIFF_RATIONAL:
                     case TiffDataType.TIFF_SRATIONAL:
                         int[] r = ByteArrayToInt(cp, 0, cc);
                         SwabArrayOfLong(r, 2 * dir.tdir_count);
-                        IntToByteArray(r, 0, 2 * dir.tdir_count, cp, 0);
+                        IntsToByteArray(r, 0, 2 * dir.tdir_count, cp, 0);
                         break;
                     
                     case TiffDataType.TIFF_DOUBLE:

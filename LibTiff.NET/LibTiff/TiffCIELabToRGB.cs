@@ -120,7 +120,7 @@ namespace BitMiracle.LibTiff
         /*
         * Convert color value from the XYZ space to RGB.
         */
-        public void XYZToRGB(float X, float Y, float Z, out uint r, out uint g, out uint b)
+        public void XYZToRGB(float X, float Y, float Z, out int r, out int g, out int b)
         {
             /* Multiply through the matrix to get luminosity values. */
             float Yr = display.d_mat[0][0] * X + display.d_mat[0][1] * Y + display.d_mat[0][2] * Z;
@@ -156,9 +156,9 @@ namespace BitMiracle.LibTiff
             b = Math.Min(b, display.d_Vrwb);
         }
 
-        private static uint rInt(float R)
+        private static int rInt(float R)
         {
-            return ((uint)(R > 0 ? (R + 0.5) : (R - 0.5)));
+            return ((int)(R > 0 ? (R + 0.5) : (R - 0.5)));
         }
     }
 }

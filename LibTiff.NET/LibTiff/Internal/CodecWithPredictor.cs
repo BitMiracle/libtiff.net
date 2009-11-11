@@ -481,7 +481,7 @@ namespace BitMiracle.LibTiff.Internal
                 } while (wc > 0);
             }
 
-            Tiff.IntToByteArray(wp, 0, cc / 4, cp0, offset);
+            Tiff.IntsToByteArray(wp, 0, cc / 4, cp0, offset);
         }
 
         private void horDiff8(byte[] cp0, int offset, int cc)
@@ -642,7 +642,7 @@ namespace BitMiracle.LibTiff.Internal
                 } while ((int) wc > 0);
             }
 
-            Tiff.IntToByteArray(wp, 0, cc / 4, cp0, offset);
+            Tiff.IntsToByteArray(wp, 0, cc / 4, cp0, offset);
         }
         
         /*

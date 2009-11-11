@@ -1217,7 +1217,7 @@ namespace BitMiracle.TiffCP
 
                 for (int col = 0; col < imagewidth; col += tw)
                 {
-                    for (ushort s = 0; s < spp; s++)
+                    for (short s = 0; s < spp; s++)
                     {
                         if (inImage.ReadTile(tilebuf, 0, col, row, 0, s) < 0 && !m_ignore)
                         {
@@ -1386,7 +1386,7 @@ namespace BitMiracle.TiffCP
 
                 for (int col = 0; col < imagewidth; col += tw)
                 {
-                    for (ushort s = 0; s < spp; s++)
+                    for (short s = 0; s < spp; s++)
                     {
                         /*
                          * Tile is clipped horizontally.  Calculate

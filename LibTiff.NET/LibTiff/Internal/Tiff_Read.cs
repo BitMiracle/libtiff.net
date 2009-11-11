@@ -343,7 +343,7 @@ namespace BitMiracle.LibTiff
             Debug.Assert((cc & 3) == 0);
             int[] swabee = ByteArrayToInt(buf, 0, cc);
             SwabArrayOfLong(swabee, cc / 4);
-            IntToByteArray(swabee, 0, cc / 4, buf, 0);
+            IntsToByteArray(swabee, 0, cc / 4, buf, 0);
         }
 
         private static void swab64BitData(byte[] buf, int cc)
