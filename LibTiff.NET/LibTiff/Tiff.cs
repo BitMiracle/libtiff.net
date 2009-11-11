@@ -1593,7 +1593,7 @@ namespace BitMiracle.LibTiff
             dir = null;
 
             if (!fieldSet(FIELD.FIELD_MAXSAMPLEVALUE))
-                m_dir.td_maxsamplevalue = (ushort)((1L << m_dir.td_bitspersample) - 1);
+                m_dir.td_maxsamplevalue = (short)((1 << m_dir.td_bitspersample) - 1);
 
             /*
              * Setup default compression scheme.
@@ -1942,7 +1942,7 @@ namespace BitMiracle.LibTiff
                 if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
                 {
                     FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                    ushort ycbcrsubsampling0 = result[0].ToUShort();
+                    short ycbcrsubsampling0 = result[0].ToShort();
 
                     if (ycbcrsubsampling0 == 0)
                     {
@@ -2035,8 +2035,8 @@ namespace BitMiracle.LibTiff
                  * YCbCr data for the extended image.
                  */
                 FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                ushort ycbcrsubsampling0 = result[0].ToUShort();
-                ushort ycbcrsubsampling1 = result[1].ToUShort();
+                short ycbcrsubsampling0 = result[0].ToShort();
+                short ycbcrsubsampling1 = result[1].ToShort();
 
                 int samplingarea = ycbcrsubsampling0 * ycbcrsubsampling1;
                 if (samplingarea == 0)
@@ -2949,8 +2949,8 @@ namespace BitMiracle.LibTiff
                  * structures.
                  */
                 FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                ushort subsampling0 = result[0].ToUShort();
-                ushort subsampling1 = result[1].ToUShort();
+                short subsampling0 = result[0].ToShort();
+                short subsampling1 = result[1].ToShort();
                 fprintf(fd, "  YCbCr Subsampling: {0}, {1}\n", subsampling0, subsampling1);
             }
 

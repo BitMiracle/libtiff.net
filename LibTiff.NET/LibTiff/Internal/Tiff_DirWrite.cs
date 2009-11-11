@@ -469,7 +469,7 @@ namespace BitMiracle.LibTiff
                         if (wc == 1)
                         {
                             FieldValue[] result = GetField(fip.field_tag);
-                            ushort sv = result[0].ToUShort();
+                            short sv = result[0].ToShort();
                             dir.tdir_offset = insertData(dir.tdir_type, sv);
                         }
                         else

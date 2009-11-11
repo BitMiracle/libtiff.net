@@ -86,8 +86,8 @@ namespace BitMiracle.Tiff2Pdf
         private COMPRESSION m_tiff_compression;
         private PHOTOMETRIC m_tiff_photometric;
         private FILLORDER m_tiff_fillorder;
-        private ushort m_tiff_bitspersample;
-        private ushort m_tiff_samplesperpixel;
+        private short m_tiff_bitspersample;
+        private short m_tiff_samplesperpixel;
         private PLANARCONFIG m_tiff_planar;
         private int m_tiff_width;
         private int m_tiff_length;
@@ -429,8 +429,8 @@ namespace BitMiracle.Tiff2Pdf
                 result = input.GetField(TIFFTAG.TIFFTAG_PAGENUMBER);
                 if (result != null)
                 {
-                    ushort pagen = result[0].ToUShort();
-                    ushort paged = result[1].ToUShort();
+                    short pagen = result[0].ToShort();
+                    short paged = result[1].ToShort();
 
                     if ((pagen > paged) && (paged != 0))
                         m_tiff_pages[m_tiff_pagecount].page_number = paged;
@@ -622,7 +622,7 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-            m_tiff_bitspersample = result[0].ToUShort();
+            m_tiff_bitspersample = result[0].ToShort();
 
             switch (m_tiff_bitspersample)
             {
@@ -645,7 +645,7 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
-            m_tiff_samplesperpixel = result[0].ToUShort();
+            m_tiff_samplesperpixel = result[0].ToShort();
             if (m_tiff_samplesperpixel > 4)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
@@ -1530,8 +1530,8 @@ namespace BitMiracle.Tiff2Pdf
                         result = input.GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
                         if (result != null)
                         {
-                            ushort hor = result[0].ToUShort();
-                            ushort ver = result[1].ToUShort();
+                            short hor = result[0].ToShort();
+                            short ver = result[1].ToShort();
                             if (hor != 0 && ver != 0)
                                 m_output.SetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, hor, ver);
                         }
@@ -1795,8 +1795,8 @@ namespace BitMiracle.Tiff2Pdf
                         result = input.GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
                         if (result != null)
                         {
-                            ushort hor = result[0].ToUShort();
-                            ushort ver = result[1].ToUShort();
+                            short hor = result[0].ToShort();
+                            short ver = result[1].ToShort();
                             if (hor != 0 && ver != 0)
                                 m_output.SetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, hor, ver);
                         }
@@ -1891,7 +1891,7 @@ namespace BitMiracle.Tiff2Pdf
         private void sample_realize_palette(byte[] buffer)
         {
             int sample_count = m_tiff_width * m_tiff_length;
-            ushort component_count = m_tiff_samplesperpixel;
+            short component_count = m_tiff_samplesperpixel;
 
             for (int i = sample_count; i > 0; i--)
             {

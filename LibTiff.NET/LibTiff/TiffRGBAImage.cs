@@ -124,7 +124,7 @@ namespace BitMiracle.LibTiff
             img.samplesperpixel = result[0].ToShort();
 
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_EXTRASAMPLES);
-            ushort extrasamples = result[0].ToUShort();
+            short extrasamples = result[0].ToShort();
             byte[] sampleinfo = result[1].ToByteArray();
 
             if (extrasamples >= 1)
@@ -682,8 +682,8 @@ namespace BitMiracle.LibTiff
             int rowsperstrip = result[0].ToInt();
 
             result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-            ushort subsamplinghor = result[0].ToUShort();
-            ushort subsamplingver = result[1].ToUShort();
+            short subsamplinghor = result[0].ToShort();
+            short subsamplingver = result[1].ToShort();
 
             int scanline = tif.newScanlineSize();
             int fromskew = (w < img.width ? img.width - w : 0);
@@ -1000,10 +1000,10 @@ namespace BitMiracle.LibTiff
                             * some OJPEG files
                             */
                             FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                            ushort SubsamplingHor = result[0].ToUShort();
-                            ushort SubsamplingVer = result[1].ToUShort();
+                            short SubsamplingHor = result[0].ToShort();
+                            short SubsamplingVer = result[1].ToShort();
 
-                            switch ((SubsamplingHor << 4) | SubsamplingVer)
+                            switch (((ushort)SubsamplingHor << 4) | (ushort)SubsamplingVer)
                             {
                                 case 0x44:
                                     contig = putcontig8bitYCbCr44tile;
@@ -1085,10 +1085,10 @@ namespace BitMiracle.LibTiff
                         if (initYCbCrConversion())
                         {
                             FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
-                            ushort hs = result[0].ToUShort();
-                            ushort vs = result[0].ToUShort();
+                            short hs = result[0].ToShort();
+                            short vs = result[0].ToShort();
 
-                            switch ((hs << 4) | vs)
+                            switch (((ushort)hs << 4) | (ushort)vs)
                             {
                                 case 0x11:
                                     separate = putseparate8bitYCbCr11tile;

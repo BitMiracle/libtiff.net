@@ -72,8 +72,8 @@ namespace BitMiracle.TiffCP
             new tagToCopy(TIFFTAG.TIFFTAG_STONITS, 1, TiffDataType.TIFF_DOUBLE), 
         };
 
-        delegate bool readFunc(Tiff inImage, byte[] buf, int imagelength, int imagewidth, ushort spp);
-        delegate bool writeFunc(Tiff outImage, byte[] buf, int imagelength, int imagewidth, ushort spp);
+        delegate bool readFunc(Tiff inImage, byte[] buf, int imagelength, int imagewidth, short spp);
+        delegate bool writeFunc(Tiff outImage, byte[] buf, int imagelength, int imagewidth, short spp);
 
         public int m_outtiled = -1;
         public int m_tilewidth;
@@ -195,19 +195,19 @@ namespace BitMiracle.TiffCP
                 outImage.SetField(TIFFTAG.TIFFTAG_IMAGELENGTH, length);
             }
 
-            ushort bitspersample = 1;
+            short bitspersample = 1;
             result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
             if (result != null)
             {
-                bitspersample = result[0].ToUShort();
+                bitspersample = result[0].ToShort();
                 outImage.SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, bitspersample);
             }
 
-            ushort samplesperpixel = 1;
+            short samplesperpixel = 1;
             result = inImage.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
             if (result != null)
             {
-                samplesperpixel = result[0].ToUShort();
+                samplesperpixel = result[0].ToShort();
                 outImage.SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, samplesperpixel);
             }
 
@@ -426,7 +426,7 @@ namespace BitMiracle.TiffCP
             result = inImage.GetField(TIFFTAG.TIFFTAG_NUMBEROFINKS);
             if (result != null)
             {
-                ushort ninks = result[0].ToUShort();
+                short ninks = result[0].ToShort();
                 outImage.SetField(TIFFTAG.TIFFTAG_NUMBEROFINKS, ninks);
 
                 result = inImage.GetField(TIFFTAG.TIFFTAG_INKNAMES);
@@ -468,7 +468,7 @@ namespace BitMiracle.TiffCP
         /*
          * Select the appropriate copy function to use.
          */
-        bool pickFuncAndCopy(Tiff inImage, Tiff outImage, ushort bitspersample, ushort samplesperpixel, int length, int width)
+        bool pickFuncAndCopy(Tiff inImage, Tiff outImage, short bitspersample, short samplesperpixel, int length, int width)
         {
             using (TextWriter stderr = Console.Error)
             {
@@ -607,7 +607,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig -> contig by scanline for rows/strip change.
          */
-        bool cpContig2ContigByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContig2ContigByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             byte[] buf = new byte[inImage.ScanlineSize()];
             for (int row = 0; row < imagelength; row++)
@@ -631,7 +631,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig -> contig by scanline while subtracting a bias image.
          */
-        bool cpBiasedContig2Contig(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpBiasedContig2Contig(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             if (spp == 1)
             {
@@ -647,7 +647,7 @@ namespace BitMiracle.TiffCP
                 if (biasSize == bufSize && imagelength == biasLength && imagewidth == biasWidth)
                 {
                     result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-                    ushort sampleBits = result[0].ToUShort();
+                    short sampleBits = result[0].ToShort();
 
                     if (sampleBits == 8 || sampleBits == 16 || sampleBits == 32)
                     {
@@ -707,7 +707,7 @@ namespace BitMiracle.TiffCP
         /*
          * Strip -> strip for change in encoding.
          */
-        bool cpDecodedStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpDecodedStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             int stripsize = inImage.StripSize();
             byte[] buf = new byte[stripsize];
@@ -737,7 +737,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate -> separate by row for rows/strip change.
          */
-        bool cpSeparate2SeparateByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparate2SeparateByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             byte[] buf = new byte[inImage.ScanlineSize()];
 
@@ -765,7 +765,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig -> separate by row.
          */
-        bool cpContig2SeparateByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContig2SeparateByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             byte[] inbuf = new byte[inImage.ScanlineSize()];
             byte[] outbuf = new byte[outImage.ScanlineSize()];
@@ -805,7 +805,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate -> contig by row.
          */
-        bool cpSeparate2ContigByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparate2ContigByRow(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             byte[] inbuf = new byte[inImage.ScanlineSize()];
             byte[] outbuf = new byte[outImage.ScanlineSize()];
@@ -862,7 +862,7 @@ namespace BitMiracle.TiffCP
             }
         }
 
-        static void cpContigBufToSeparateBuf(byte[] outImage, byte[] inImage, int inOffset, int rows, int cols, int outskew, int inskew, ushort spp, int bytes_per_sample)
+        static void cpContigBufToSeparateBuf(byte[] outImage, byte[] inImage, int inOffset, int rows, int cols, int outskew, int inskew, short spp, int bytes_per_sample)
         {
             int outPos = 0;
             int inPos = inOffset;
@@ -888,7 +888,7 @@ namespace BitMiracle.TiffCP
             }
         }
 
-        static void cpSeparateBufToContigBuf(byte[] outImage, int outOffset, byte[] inImage, int rows, int cols, int outskew, int inskew, ushort spp, int bytes_per_sample)
+        static void cpSeparateBufToContigBuf(byte[] outImage, int outOffset, byte[] inImage, int rows, int cols, int outskew, int inskew, short spp, int bytes_per_sample)
         {
             int inPos = 0;
             int outPos = outOffset;
@@ -914,7 +914,7 @@ namespace BitMiracle.TiffCP
             }
         }
 
-        static bool cpImage(Tiff inImage, Tiff outImage, readFunc fin, writeFunc fout, int imagelength, int imagewidth, ushort spp)
+        static bool cpImage(Tiff inImage, Tiff outImage, readFunc fin, writeFunc fout, int imagelength, int imagewidth, short spp)
         {
             bool status = false;
 
@@ -941,7 +941,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig strips -> contig tiles.
          */
-        bool cpContigStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContigStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -953,7 +953,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig strips -> separate tiles.
          */
-        bool cpContigStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContigStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -965,7 +965,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate strips -> contig tiles.
          */
-        bool cpSeparateStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparateStrips2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -977,7 +977,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate strips -> separate tiles.
          */
-        bool cpSeparateStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparateStrips2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -989,7 +989,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig strips -> contig tiles.
          */
-        bool cpContigTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContigTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1001,7 +1001,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig tiles -> separate tiles.
          */
-        bool cpContigTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContigTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1013,7 +1013,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate tiles -> contig tiles.
          */
-        bool cpSeparateTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparateTiles2ContigTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1025,7 +1025,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate tiles -> separate tiles (tile dimension change).
          */
-        bool cpSeparateTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparateTiles2SeparateTiles(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1037,7 +1037,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig tiles -> contig tiles (tile dimension change).
          */
-        bool cpContigTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContigTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1049,7 +1049,7 @@ namespace BitMiracle.TiffCP
         /*
          * Contig tiles -> separate strips.
          */
-        bool cpContigTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpContigTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1061,7 +1061,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate tiles -> contig strips.
          */
-        bool cpSeparateTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparateTiles2ContigStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1073,7 +1073,7 @@ namespace BitMiracle.TiffCP
         /*
          * Separate tiles -> separate strips.
          */
-        bool cpSeparateTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, ushort spp)
+        bool cpSeparateTiles2SeparateStrips(Tiff inImage, Tiff outImage, int imagelength, int imagewidth, short spp)
         {
             return cpImage(
                 inImage, outImage,
@@ -1082,7 +1082,7 @@ namespace BitMiracle.TiffCP
                 imagelength, imagewidth, spp);
         }
 
-        bool readContigStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        bool readContigStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             int scanlinesize = inImage.ScanlineSize();
             byte[] scanline = new byte[scanlinesize];
@@ -1104,7 +1104,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        bool readSeparateStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        bool readSeparateStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             int scanlinesize = inImage.ScanlineSize();
             if (scanlinesize == 0)
@@ -1140,7 +1140,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        bool readContigTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        bool readContigTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             byte[] tilebuf = new byte[inImage.TileSize()];
 
@@ -1187,7 +1187,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        bool readSeparateTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        bool readSeparateTilesIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             byte[] tilebuf = new byte[inImage.TileSize()];
 
@@ -1198,7 +1198,7 @@ namespace BitMiracle.TiffCP
             int tl = result[0].ToInt();
 
             result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-            ushort bps = result[0].ToUShort();
+            short bps = result[0].ToShort();
 
             Debug.Assert(bps % 8 == 0);
 
@@ -1248,7 +1248,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        static bool writeBufferToContigStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        static bool writeBufferToContigStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             FieldValue[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
@@ -1275,7 +1275,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        static bool writeBufferToSeparateStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        static bool writeBufferToSeparateStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             byte[] obuf = new byte[outImage.StripSize()];
 
@@ -1304,7 +1304,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        bool writeBufferToContigTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        bool writeBufferToContigTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             byte[] obuf = new byte[outImage.TileSize()];
 
@@ -1355,7 +1355,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        bool writeBufferToSeparateTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, ushort spp)
+        bool writeBufferToSeparateTiles(Tiff outImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
             byte[] obuf = new byte[outImage.TileSize()];
 
@@ -1366,7 +1366,7 @@ namespace BitMiracle.TiffCP
             int tw = result[0].ToInt();
 
             result = outImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
-            ushort bps = result[0].ToUShort();
+            short bps = result[0].ToShort();
 
             Debug.Assert(bps % 8 == 0);
 

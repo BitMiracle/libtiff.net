@@ -30,7 +30,7 @@ namespace BitMiracle.LibTiff.Internal
         public int td_tilelength;
         public int td_tiledepth;
         public FILETYPE td_subfiletype;
-        public ushort td_bitspersample;
+        public short td_bitspersample;
         public SAMPLEFORMAT td_sampleformat;
         public COMPRESSION td_compression;
         public PHOTOMETRIC td_photometric;
@@ -39,8 +39,8 @@ namespace BitMiracle.LibTiff.Internal
         public ORIENTATION td_orientation;
         public ushort td_samplesperpixel;
         public int td_rowsperstrip;
-        public ushort td_minsamplevalue;
-        public ushort td_maxsamplevalue;
+        public short td_minsamplevalue;
+        public short td_maxsamplevalue;
         public double td_sminsamplevalue;
         public double td_smaxsamplevalue;
         public float td_xresolution;
@@ -59,7 +59,7 @@ namespace BitMiracle.LibTiff.Internal
         public int[] td_stripoffset;
         public int[] td_stripbytecount;
         public int td_stripbytecountsorted; /* is the bytecount array sorted ascending? */
-        public ushort td_nsubifd;
+        public short td_nsubifd;
         public int[] td_subifd;
         /* YCbCr parameters */
         public short[] td_ycbcrsubsampling = new short[2];

@@ -163,7 +163,7 @@ namespace BitMiracle.LibTiff
                 wpp[i] = wp[i];
         }
 
-        internal static void setLongArray(out int[] lpp, int[] lp, uint n)
+        internal static void setLongArray(out int[] lpp, int[] lp, int n)
         {
             lpp = new int[n];
             for (int i = 0; i < n; i++)

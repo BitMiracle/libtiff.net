@@ -57,7 +57,7 @@ namespace BitMiracle.LibTiff
                     td.td_imagelength = ap[0].ToInt();
                     break;
                 case TIFFTAG.TIFFTAG_BITSPERSAMPLE:
-                    td.td_bitspersample = ap[0].ToUShort();
+                    td.td_bitspersample = ap[0].ToShort();
                     /*
                     * If the data require post-decoding processing to byte-swap
                     * samples, set it up here.  Note that since tags are required
@@ -163,10 +163,10 @@ namespace BitMiracle.LibTiff
                     }
                     break;
                 case TIFFTAG.TIFFTAG_MINSAMPLEVALUE:
-                    td.td_minsamplevalue = ap[0].ToUShort();
+                    td.td_minsamplevalue = ap[0].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_MAXSAMPLEVALUE:
-                    td.td_maxsamplevalue = ap[0].ToUShort();
+                    td.td_maxsamplevalue = ap[0].ToShort();
                     break;
                 case TIFFTAG.TIFFTAG_SMINSAMPLEVALUE:
                     td.td_sminsamplevalue = ap[0].ToDouble();
@@ -230,7 +230,7 @@ namespace BitMiracle.LibTiff
 
                     break;
                 case TIFFTAG.TIFFTAG_MATTEING:
-                    if (ap[0].ToUShort() != 0)
+                    if (ap[0].ToShort() != 0)
                         td.td_extrasamples = 1;
                     else
                         td.td_extrasamples = 0;
@@ -339,7 +339,7 @@ namespace BitMiracle.LibTiff
                 case TIFFTAG.TIFFTAG_SUBIFD:
                     if ((tif.m_flags & Tiff.TIFF_INSUBIFD) == 0)
                     {
-                        td.td_nsubifd = ap[0].ToUShort();
+                        td.td_nsubifd = ap[0].ToShort();
                         Tiff.setLongArray(out td.td_subifd, ap[1].ToIntArray(), td.td_nsubifd);
                     }
                     else
@@ -497,7 +497,7 @@ namespace BitMiracle.LibTiff
                                         val[valPos] = ap[paramIndex + i].ToByte();
                                         break;
                                     case TiffDataType.TIFF_SHORT:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToUShort()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffDataType.TIFF_SSHORT:
                                         Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
