@@ -358,7 +358,7 @@ namespace BitMiracle.LibTiff
             /*
              * Write directory.
              */
-            ushort dircount = (ushort)nfields;
+            short dircount = (short)nfields;
             int diroff = m_nextdiroff;
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
             {
@@ -374,11 +374,11 @@ namespace BitMiracle.LibTiff
                  */
                 for (dir = 0; dircount != 0; dir++, dircount--)
                 {
-                    ushort temp = (ushort)data[dir].tdir_tag;
+                    short temp = (short)data[dir].tdir_tag;
                     SwabShort(ref temp);
                     data[dir].tdir_tag = (TIFFTAG)temp;
 
-                    temp = (ushort)data[dir].tdir_type;
+                    temp = (short)data[dir].tdir_type;
                     SwabShort(ref temp);
                     data[dir].tdir_type = (TiffDataType)temp;
 
@@ -386,13 +386,13 @@ namespace BitMiracle.LibTiff
                     SwabLong(ref data[dir].tdir_offset);
                 }
 
-                dircount = (ushort)nfields;
+                dircount = (short)nfields;
                 SwabShort(ref dircount);
                 SwabLong(ref diroff);
             }
 
             seekFile(m_diroff, SeekOrigin.Begin);
-            if (!writeUInt16OK(dircount))
+            if (!writeShortOK(dircount))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
                 return false;
@@ -1265,8 +1265,8 @@ namespace BitMiracle.LibTiff
             int nextdir = m_header.tiff_diroff;
             do
             {
-                ushort dircount;
-                if (!seekOK(nextdir) || !readUInt16OK(out dircount))
+                short dircount;
+                if (!seekOK(nextdir) || !readShortOK(out dircount))
                 {
                     ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                     return false;

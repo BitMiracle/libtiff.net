@@ -65,15 +65,15 @@ namespace BitMiracle.LibTiff
             return (readFile(buf, 0, size) == size);
         }
 
-        private bool readUInt16OK(out ushort value)
+        private bool readShortOK(out short value)
         {
             byte[] bytes = new byte[2];
             bool res = readOK(bytes, 2);
             value = 0;
             if (res)
             {
-                value = (ushort)(bytes[0] & 0xFF);
-                value += (ushort)((bytes[1] & 0xFF) << 8);
+                value = (short)(bytes[0] & 0xFF);
+                value += (short)((bytes[1] & 0xFF) << 8);
             }
 
             return res;
@@ -95,7 +95,7 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private bool readDirEntryOk(TiffDirEntry[] dir, ushort dircount)
+        private bool readDirEntryOk(TiffDirEntry[] dir, short dircount)
         {
             int entrySize = sizeof(ushort) * 2 + sizeof(uint) * 2;
             int totalSize = entrySize * dircount;
@@ -107,7 +107,7 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private void readDirEntry(TiffDirEntry[] dir, ushort dircount, byte[] bytes, uint offset)
+        private void readDirEntry(TiffDirEntry[] dir, short dircount, byte[] bytes, uint offset)
         {
             int pos = (int)offset;
             for (int i = 0; i < dircount; i++)
@@ -127,10 +127,10 @@ namespace BitMiracle.LibTiff
 
         private bool readHeaderOk(ref TiffHeader header)
         {
-            bool res = readUInt16OK(out header.tiff_magic);
+            bool res = readShortOK(out header.tiff_magic);
 
             if (res)
-                res = readUInt16OK(out header.tiff_version);
+                res = readShortOK(out header.tiff_version);
 
             if (res)
                 res = readIntOK(out header.tiff_diroff);

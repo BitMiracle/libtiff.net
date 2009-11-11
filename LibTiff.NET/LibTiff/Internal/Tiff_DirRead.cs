@@ -59,7 +59,7 @@ namespace BitMiracle.LibTiff
             return ((x & 0x07) != 0 ? (x >> 3) + 1 : x >> 3);
         }
 
-        private bool estimateStripByteCounts(TiffDirEntry[] dir, ushort dircount)
+        private bool estimateStripByteCounts(TiffDirEntry[] dir, short dircount)
         {
             const string module = "estimateStripByteCounts";
 
@@ -143,9 +143,9 @@ namespace BitMiracle.LibTiff
             return 0;
         }
 
-        private static int readDirectoryFind(TiffDirEntry[] dir, ushort dircount, TIFFTAG tagid)
+        private static int readDirectoryFind(TiffDirEntry[] dir, short dircount, TIFFTAG tagid)
         {
-            for (ushort n = 0; n < dircount; n++)
+            for (short n = 0; n < dircount; n++)
             {
                 if (dir[n].tdir_tag == tagid)
                     return n;
@@ -195,14 +195,14 @@ namespace BitMiracle.LibTiff
         * nextdiroff variable has been specified, read it too. Function returns a
         * number of fields in the directory or 0 if failed.
         */
-        private ushort fetchDirectory(int diroff, out TiffDirEntry[] pdir, out int nextdiroff)
+        private short fetchDirectory(int diroff, out TiffDirEntry[] pdir, out int nextdiroff)
         {
             const string module = "fetchDirectory";
 
             m_diroff = diroff;
             nextdiroff = 0;
 
-            ushort dircount;
+            short dircount;
             TiffDirEntry[] dir = null;
             pdir = null;
 
@@ -213,7 +213,7 @@ namespace BitMiracle.LibTiff
                 return 0;
             }
             
-            if (!readUInt16OK(out dircount)) 
+            if (!readShortOK(out dircount)) 
             {
                 ErrorExt(this, m_clientdata, module,
                     "{0}: Can not read TIFF directory count", m_name);

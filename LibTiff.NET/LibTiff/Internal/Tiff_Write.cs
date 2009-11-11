@@ -66,10 +66,10 @@ namespace BitMiracle.LibTiff
 
         private bool writeHeaderOK(TiffHeader header)
         {
-            bool res = writeUInt16OK(header.tiff_magic);
+            bool res = writeShortOK(header.tiff_magic);
 
             if (res)
-                res = writeUInt16OK(header.tiff_version);
+                res = writeShortOK(header.tiff_version);
 
             if (res)
                 res = writeIntOK(header.tiff_diroff);
@@ -82,10 +82,10 @@ namespace BitMiracle.LibTiff
             bool res = true;
             for (int i = 0; i < count; i++)
             {
-                res = writeUInt16OK((ushort)entries[i].tdir_tag);
+                res = writeShortOK((short)entries[i].tdir_tag);
 
                 if (res)
-                    res = writeUInt16OK((ushort)entries[i].tdir_type);
+                    res = writeShortOK((short)entries[i].tdir_type);
 
                 if (res)
                     res = writeIntOK(entries[i].tdir_count);
@@ -100,7 +100,7 @@ namespace BitMiracle.LibTiff
             return res;
         }
 
-        private bool writeUInt16OK(ushort value)
+        private bool writeShortOK(short value)
         {
             byte[] cp = new byte[2];
             cp[0] = (byte)value;

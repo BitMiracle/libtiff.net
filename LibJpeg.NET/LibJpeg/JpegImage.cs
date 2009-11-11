@@ -8,8 +8,6 @@ using System.Text;
 
 using BitMiracle.LibJpeg.Classic;
 
-[assembly: CLSCompliant(true)]
-
 namespace BitMiracle.LibJpeg
 {
     /// <summary>
@@ -38,7 +36,6 @@ namespace BitMiracle.LibJpeg
         private MemoryStream m_decompressedData;                        //!< Bytes of decompressed image (bitmap)
 
         private Bitmap m_bitmap;                                        //!< .NET bitmap associated with this image
-
 
         /// <summary>
         /// Creates JpegImage from .NET bitmap

@@ -126,9 +126,9 @@ namespace BitMiracle.LibTiff
             off = 0;
 
             const string module = "advanceDirectory";
-            ushort dircount;
+            short dircount;
             
-            if (!seekOK(nextdir) || !readUInt16OK(out dircount))
+            if (!seekOK(nextdir) || !readShortOK(out dircount))
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory count", m_name);
                 return false;

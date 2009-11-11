@@ -77,9 +77,9 @@ namespace BitMiracle.LibTiff
         public const int TIFF_VERSION = 42;
         public const int TIFF_BIGTIFF_VERSION = 43;
 
-        public const ushort TIFF_BIGENDIAN = 0x4d4d;
-        public const ushort TIFF_LITTLEENDIAN = 0x4949;
-        public const ushort MDI_LITTLEENDIAN = 0x5045;
+        public const short TIFF_BIGENDIAN = 0x4d4d;
+        public const short TIFF_LITTLEENDIAN = 0x4949;
+        public const short MDI_LITTLEENDIAN = 0x5045;
 
         /* reference white */
         public const float D50_X0 = 96.4250F;
@@ -115,22 +115,22 @@ namespace BitMiracle.LibTiff
         * Macros for extracting components from the
         * packed ABGR form returned by ReadRGBAImage.
         */
-        public static uint GetR(uint abgr)
+        public static int GetR(int abgr)
         {
             return (abgr & 0xff);
         }
 
-        public static uint GetG(uint abgr)
+        public static int GetG(int abgr)
         {
             return ((abgr >> 8) & 0xff);
         }
 
-        public static uint GetB(uint abgr)
+        public static int GetB(int abgr)
         {
             return ((abgr >> 16) & 0xff);
         }
 
-        public static uint GetA(uint abgr)
+        public static int GetA(int abgr)
         {
             return ((abgr >> 24) & 0xff);
         }
@@ -1040,7 +1040,7 @@ namespace BitMiracle.LibTiff
             m_currentCodec.tif_cleanup();
             m_curdir++;
             TiffDirEntry[] dir;
-            ushort dircount = fetchDirectory(m_nextdiroff, out dir, out m_nextdiroff);
+            short dircount = fetchDirectory(m_nextdiroff, out dir, out m_nextdiroff);
             if (dircount == 0)
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Failed to read directory at offset {1}", m_name, m_nextdiroff);
@@ -1092,11 +1092,11 @@ namespace BitMiracle.LibTiff
                 TiffDirEntry dp = dir[i];
                 if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 {
-                    ushort temp = (ushort)dp.tdir_tag;
+                    short temp = (short)dp.tdir_tag;
                     SwabShort(ref temp);
                     dp.tdir_tag = (TIFFTAG)temp;
 
-                    temp = (ushort)dp.tdir_type;
+                    temp = (short)dp.tdir_type;
                     SwabShort(ref temp);
                     dp.tdir_type = (TiffDataType)temp;
 
@@ -1684,7 +1684,7 @@ namespace BitMiracle.LibTiff
 
             int dummyNextDirOff;
             TiffDirEntry[] dir;
-            ushort dircount = fetchDirectory(diroff, out dir, out dummyNextDirOff);
+            short dircount = fetchDirectory(diroff, out dir, out dummyNextDirOff);
             if (dircount == 0)
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Failed to read custom directory at offset {1}", m_name, diroff);
@@ -1699,11 +1699,11 @@ namespace BitMiracle.LibTiff
             {
                 if ((m_flags & Tiff.TIFF_SWAB) != 0)
                 {
-                    ushort temp = (ushort)dir[i].tdir_tag;
+                    short temp = (short)dir[i].tdir_tag;
                     SwabShort(ref temp);
                     dir[i].tdir_tag = (TIFFTAG)temp;
 
-                    temp = (ushort)dir[i].tdir_type;
+                    temp = (short)dir[i].tdir_type;
                     SwabShort(ref temp);
                     dir[i].tdir_type = (TiffDataType)temp;
 
@@ -1864,7 +1864,7 @@ namespace BitMiracle.LibTiff
             /*
             * Write directory.
             */
-            ushort dircount = (ushort)nfields;
+            short dircount = (short)nfields;
             pdiroff = m_nextdiroff;
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
             {
@@ -1882,11 +1882,11 @@ namespace BitMiracle.LibTiff
                 {
                     TiffDirEntry dirEntry = data[i];
 
-                    ushort temp = (ushort)dirEntry.tdir_tag;
+                    short temp = (short)dirEntry.tdir_tag;
                     SwabShort(ref temp);
                     dirEntry.tdir_tag = (TIFFTAG)temp;
 
-                    temp = (ushort)dirEntry.tdir_type;
+                    temp = (short)dirEntry.tdir_type;
                     SwabShort(ref temp);
                     dirEntry.tdir_type = (TiffDataType)temp;
 
@@ -1894,13 +1894,13 @@ namespace BitMiracle.LibTiff
                     SwabLong(ref dirEntry.tdir_offset);
                 }
                 
-                dircount = (ushort) nfields;
+                dircount = (short)nfields;
                 SwabShort(ref dircount);
                 SwabLong(ref pdiroff);
             }
 
             seekFile(m_diroff, SeekOrigin.Begin);
-            if (!writeUInt16OK(dircount))
+            if (!writeShortOK(dircount))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
                 return false;
@@ -2686,8 +2686,8 @@ namespace BitMiracle.LibTiff
                 int nextdir = m_header.tiff_diroff;
                 do
                 {
-                    ushort dircount;
-                    if (!seekOK(nextdir) || !readUInt16OK(out dircount))
+                    short dircount;
+                    if (!seekOK(nextdir) || !readShortOK(out dircount))
                     {
                         ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                         return false;
@@ -4358,7 +4358,7 @@ namespace BitMiracle.LibTiff
         *
         * XXX We assume short = 16-bits and long = 32-bits XXX
         */
-        public static void SwabShort(ref ushort wp)
+        public static void SwabShort(ref short wp)
         {
             byte[] cp = new byte[2];
             cp[0] = (byte)wp;
@@ -4368,8 +4368,8 @@ namespace BitMiracle.LibTiff
             cp[1] = cp[0];
             cp[0] = t;
 
-            wp = (ushort)(cp[0] & 0xFF);
-            wp += (ushort)((cp[1] & 0xFF) << 8);
+            wp = (short)(cp[0] & 0xFF);
+            wp += (short)((cp[1] & 0xFF) << 8);
         }
 
         public static void SwabLong(ref int lp)
