@@ -49,8 +49,8 @@ namespace BitMiracle.LibTiff
             return
             (
                 (td.td_stripbytecount[0] == 0 && td.td_stripoffset[0] != 0) ||
-                (td.td_compression == COMPRESSION.COMPRESSION_NONE && td.td_stripbytecount[0] > getFileSize() - td.td_stripoffset[0]) ||
-                (m_mode == O_RDONLY && td.td_compression == COMPRESSION.COMPRESSION_NONE && td.td_stripbytecount[0] < ScanlineSize() * td.td_imagelength)
+                (td.td_compression == Compression.NONE && td.td_stripbytecount[0] > getFileSize() - td.td_stripoffset[0]) ||
+                (m_mode == O_RDONLY && td.td_compression == Compression.NONE && td.td_stripbytecount[0] < ScanlineSize() * td.td_imagelength)
             );
         }
 
@@ -65,7 +65,7 @@ namespace BitMiracle.LibTiff
 
             m_dir.td_stripbytecount = new int [m_dir.td_nstrips];
 
-            if (m_dir.td_compression != COMPRESSION.COMPRESSION_NONE)
+            if (m_dir.td_compression != Compression.NONE)
             {
                 int space = TiffHeader.SizeInBytes + sizeof(short) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(int);
                 int filesize = getFileSize();
@@ -73,7 +73,7 @@ namespace BitMiracle.LibTiff
                 /* calculate amount of space used by indirect values */
                 for (short n = 0; n < dircount; n++)
                 {
-                    int cc = DataWidth((TiffDataType)dir[n].tdir_type);
+                    int cc = DataWidth((TiffType)dir[n].tdir_type);
                     if (cc == 0)
                     {
                         ErrorExt(this, m_clientdata, module,
@@ -88,7 +88,7 @@ namespace BitMiracle.LibTiff
                 }
 
                 space = filesize - space;
-                if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                     space /= m_dir.td_samplesperpixel;
                 
                 int strip = 0;
@@ -143,7 +143,7 @@ namespace BitMiracle.LibTiff
             return 0;
         }
 
-        private static int readDirectoryFind(TiffDirEntry[] dir, short dircount, TIFFTAG tagid)
+        private static int readDirectoryFind(TiffDirEntry[] dir, short dircount, TiffTag tagid)
         {
             for (short n = 0; n < dircount; n++)
             {
@@ -320,29 +320,29 @@ namespace BitMiracle.LibTiff
             {
                 switch (dir.tdir_type)
                 {
-                    case TiffDataType.TIFF_SHORT:
-                    case TiffDataType.TIFF_SSHORT:
+                    case TiffType.SHORT:
+                    case TiffType.SSHORT:
                         short[] s = ByteArrayToShorts(cp, 0, cc);
                         SwabArrayOfShort(s, dir.tdir_count);
                         ShortsToByteArray(s, 0, dir.tdir_count, cp, 0);
                         break;
                     
-                    case TiffDataType.TIFF_LONG:
-                    case TiffDataType.TIFF_SLONG:
-                    case TiffDataType.TIFF_FLOAT:
+                    case TiffType.LONG:
+                    case TiffType.SLONG:
+                    case TiffType.FLOAT:
                         int[] l = ByteArrayToInts(cp, 0, cc);
                         SwabArrayOfLong(l, dir.tdir_count);
                         IntsToByteArray(l, 0, dir.tdir_count, cp, 0);
                         break;
                     
-                    case TiffDataType.TIFF_RATIONAL:
-                    case TiffDataType.TIFF_SRATIONAL:
+                    case TiffType.RATIONAL:
+                    case TiffType.SRATIONAL:
                         int[] r = ByteArrayToInts(cp, 0, cc);
                         SwabArrayOfLong(r, 2 * dir.tdir_count);
                         IntsToByteArray(r, 0, 2 * dir.tdir_count, cp, 0);
                         break;
                     
-                    case TiffDataType.TIFF_DOUBLE:
+                    case TiffType.DOUBLE:
                         swab64BitData(cp, cc);
                         break;
                 }
@@ -539,13 +539,13 @@ namespace BitMiracle.LibTiff
 
             switch (dir.tdir_type)
             {
-                case TiffDataType.TIFF_BYTE:
-                case TiffDataType.TIFF_SBYTE:
+                case TiffType.BYTE:
+                case TiffType.SBYTE:
                     byte[] bytes = new byte[4];
                     return fetchByteArray(dir, bytes) && SetField(dir.tdir_tag, bytes[0], bytes[1]);
 
-                case TiffDataType.TIFF_SHORT:
-                case TiffDataType.TIFF_SSHORT:
+                case TiffType.SHORT:
+                case TiffType.SSHORT:
                     short[] shorts = new short[2];
                     return fetchShortArray(dir, shorts) && SetField(dir.tdir_tag, shorts[0], shorts[1]);
             }
@@ -672,8 +672,8 @@ namespace BitMiracle.LibTiff
             bool res = false;
             switch (dir.tdir_type)
             {
-                case TiffDataType.TIFF_BYTE:
-                case TiffDataType.TIFF_SBYTE:
+                case TiffType.BYTE:
+                case TiffType.SBYTE:
                     byte[] b = new byte[dir.tdir_count];
                     res = fetchByteArray(dir, b);
                     if (res)
@@ -686,8 +686,8 @@ namespace BitMiracle.LibTiff
                         return false;
 
                     break;
-                case TiffDataType.TIFF_SHORT:
-                case TiffDataType.TIFF_SSHORT:
+                case TiffType.SHORT:
+                case TiffType.SSHORT:
                     short[] u = new short[dir.tdir_count];
                     res = fetchShortArray(dir, u);
                     if (res)
@@ -700,8 +700,8 @@ namespace BitMiracle.LibTiff
                         return false;
 
                     break;
-                case TiffDataType.TIFF_LONG:
-                case TiffDataType.TIFF_SLONG:
+                case TiffType.LONG:
+                case TiffType.SLONG:
                     int[] l = new int[dir.tdir_count];
                     res = fetchLongArray(dir, l);
                     if (res)
@@ -714,8 +714,8 @@ namespace BitMiracle.LibTiff
                         return false;
 
                     break;
-                case TiffDataType.TIFF_RATIONAL:
-                case TiffDataType.TIFF_SRATIONAL:
+                case TiffType.RATIONAL:
+                case TiffType.SRATIONAL:
                     float[] r = new float[dir.tdir_count];
                     res = fetchRationalArray(dir, r);
                     if (res)
@@ -728,7 +728,7 @@ namespace BitMiracle.LibTiff
                         return false;
 
                     break;
-                case TiffDataType.TIFF_FLOAT:
+                case TiffType.FLOAT:
                     float[] f = new float[dir.tdir_count];
                     res = fetchFloatArray(dir, f);
                     if (res)
@@ -741,12 +741,12 @@ namespace BitMiracle.LibTiff
                         return false;
 
                     break;
-                case TiffDataType.TIFF_DOUBLE:
+                case TiffType.DOUBLE:
                     return fetchDoubleArray(dir, v);
                 default:
                     /* TIFF_NOTYPE */
-                    /* TIFF_ASCII */
-                    /* TIFF_UNDEFINED */
+                    /* ASCII */
+                    /* UNDEFINED */
                     ErrorExt(this, m_clientdata, m_name,
                         "cannot read TIFF_ANY type {0} for field \"{1}\"",
                         dir.tdir_type, FieldWithTag(dir.tdir_tag).field_name);
@@ -768,8 +768,8 @@ namespace BitMiracle.LibTiff
             {
                 switch (dir.tdir_type)
                 {
-                    case TiffDataType.TIFF_BYTE:
-                    case TiffDataType.TIFF_SBYTE:
+                    case TiffType.BYTE:
+                    case TiffType.SBYTE:
                         byte[] bytes = new byte [dir.tdir_count];
                         ok = fetchByteArray(dir, bytes);
                         if (ok)
@@ -781,8 +781,8 @@ namespace BitMiracle.LibTiff
                         }
                         break;
 
-                    case TiffDataType.TIFF_SHORT:
-                    case TiffDataType.TIFF_SSHORT:
+                    case TiffType.SHORT:
+                    case TiffType.SSHORT:
                         short[] shorts = new short [dir.tdir_count];
                         ok = fetchShortArray(dir, shorts);
                         if (ok)
@@ -794,8 +794,8 @@ namespace BitMiracle.LibTiff
                         }
                         break;
 
-                    case TiffDataType.TIFF_LONG:
-                    case TiffDataType.TIFF_SLONG:
+                    case TiffType.LONG:
+                    case TiffType.SLONG:
                         int[] ints = new int [dir.tdir_count];
                         ok = fetchLongArray(dir, ints);
                         if (ok)
@@ -807,8 +807,8 @@ namespace BitMiracle.LibTiff
                         }
                         break;
 
-                    case TiffDataType.TIFF_RATIONAL:
-                    case TiffDataType.TIFF_SRATIONAL:
+                    case TiffType.RATIONAL:
+                    case TiffType.SRATIONAL:
                         float[] rs = new float [dir.tdir_count];
                         ok = fetchRationalArray(dir, rs);
                         if (ok)
@@ -820,7 +820,7 @@ namespace BitMiracle.LibTiff
                         }
                         break;
 
-                    case TiffDataType.TIFF_FLOAT:
+                    case TiffType.FLOAT:
                         float[] fs = new float [dir.tdir_count];
                         ok = fetchFloatArray(dir, fs);
                         if (ok)
@@ -832,7 +832,7 @@ namespace BitMiracle.LibTiff
                         }
                         break;
 
-                    case TiffDataType.TIFF_DOUBLE:
+                    case TiffType.DOUBLE:
                         double[] ds = new double [dir.tdir_count];
                         ok = fetchDoubleArray(dir, ds);
                         if (ok)
@@ -844,8 +844,8 @@ namespace BitMiracle.LibTiff
                         }
                         break;
 
-                    case TiffDataType.TIFF_ASCII:
-                    case TiffDataType.TIFF_UNDEFINED:
+                    case TiffType.ASCII:
+                    case TiffType.UNDEFINED:
                         /* bit of a cheat... */
                         /*
                          * Some vendors write strings w/o the trailing
@@ -869,10 +869,10 @@ namespace BitMiracle.LibTiff
                 /* singleton value */
                 switch (dir.tdir_type)
                 {
-                    case TiffDataType.TIFF_BYTE:
-                    case TiffDataType.TIFF_SBYTE:
-                    case TiffDataType.TIFF_SHORT:
-                    case TiffDataType.TIFF_SSHORT:
+                    case TiffType.BYTE:
+                    case TiffType.SBYTE:
+                    case TiffType.SHORT:
+                    case TiffType.SSHORT:
                         /*
                          * If the tag is also acceptable as a LONG or SLONG
                          * then SetField will expect an int parameter
@@ -883,8 +883,8 @@ namespace BitMiracle.LibTiff
                          *     for the tag and that that entry is for the
                          *     widest potential data type the tag may have.
                          */
-                        TiffDataType type = fip.field_type;
-                        if (type != TiffDataType.TIFF_LONG && type != TiffDataType.TIFF_SLONG)
+                        TiffType type = fip.field_type;
+                        if (type != TiffType.LONG && type != TiffType.SLONG)
                         {
                             short v = (short)extractData(dir);
                             if (fip.field_passcount)
@@ -911,8 +911,8 @@ namespace BitMiracle.LibTiff
 
                         break;
 
-                    case TiffDataType.TIFF_LONG:
-                    case TiffDataType.TIFF_SLONG:
+                    case TiffType.LONG:
+                    case TiffType.SLONG:
                         v32 = extractData(dir);
                         if (fip.field_passcount)
                         {
@@ -925,10 +925,10 @@ namespace BitMiracle.LibTiff
 
                         break;
 
-                    case TiffDataType.TIFF_RATIONAL:
-                    case TiffDataType.TIFF_SRATIONAL:
-                    case TiffDataType.TIFF_FLOAT:
-                        float f = (dir.tdir_type == TiffDataType.TIFF_FLOAT ? fetchFloat(dir): fetchRational(dir));
+                    case TiffType.RATIONAL:
+                    case TiffType.SRATIONAL:
+                    case TiffType.FLOAT:
+                        float f = (dir.tdir_type == TiffType.FLOAT ? fetchFloat(dir): fetchRational(dir));
                         if (fip.field_passcount)
                         {
                             float[] a = new float[1];
@@ -940,7 +940,7 @@ namespace BitMiracle.LibTiff
 
                         break;
 
-                    case TiffDataType.TIFF_DOUBLE:
+                    case TiffType.DOUBLE:
                         double[] ds = new double[1];
                         ok = fetchDoubleArray(dir, ds);
                         if (ok)
@@ -952,8 +952,8 @@ namespace BitMiracle.LibTiff
                         }
                         break;
 
-                    case TiffDataType.TIFF_ASCII:
-                    case TiffDataType.TIFF_UNDEFINED:
+                    case TiffType.ASCII:
+                    case TiffType.UNDEFINED:
                         /* bit of a cheat... */
                         string c;
                         ok = fetchString(dir, out c) != 0;
@@ -1119,7 +1119,7 @@ namespace BitMiracle.LibTiff
                 Array.Clear(lpp, 0, lpp.Length);
 
             bool status = false;
-            if (dir.tdir_type == TiffDataType.TIFF_SHORT)
+            if (dir.tdir_type == TiffType.SHORT)
             {
                 /*
                  * Handle short -> int expansion.
@@ -1155,7 +1155,7 @@ namespace BitMiracle.LibTiff
         */
         private bool fetchRefBlackWhite(TiffDirEntry dir)
         {
-            if (dir.tdir_type == TiffDataType.TIFF_RATIONAL)
+            if (dir.tdir_type == TiffType.RATIONAL)
                 return fetchNormalTag(dir);
             
             /*
@@ -1243,7 +1243,7 @@ namespace BitMiracle.LibTiff
              */
             m_dir.td_nstrips = nstrips;
             m_dir.td_stripsperimage = nstrips;
-            SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, rowsperstrip);
+            SetField(TiffTag.ROWSPERSTRIP, rowsperstrip);
 
             m_dir.td_stripbytecount = newcounts;
             m_dir.td_stripoffset = newoffsets;

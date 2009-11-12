@@ -98,10 +98,10 @@ namespace BitMiracle.TiffCP
             int mp = 1;
 
             char comma = ','; /* (default) comma separator character */
-            FILLORDER deffillorder = 0;
+            FillOrder deffillorder = 0;
             int deftilelength = -1;
             int diroff = 0;
-            PLANARCONFIG defconfig = PLANARCONFIG.PLANARCONFIG_UNKNOWN;
+            PlanarConfig defconfig = PlanarConfig.UNKNOWN;
             int defrowsperstrip = 0;
             int deftilewidth = -1;
 
@@ -150,7 +150,7 @@ namespace BitMiracle.TiffCP
                                 return;
                             }
 
-                            FieldValue[] result = c.m_bias.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+                            FieldValue[] result = c.m_bias.GetField(TiffTag.SAMPLESPERPIXEL);
                             short samples = result[0].ToShort();
                             if (samples != 1)
                             {
@@ -177,9 +177,9 @@ namespace BitMiracle.TiffCP
                         case 'f':
                             /* fill order */
                             if (optarg == "lsb2msb")
-                                deffillorder = FILLORDER.FILLORDER_LSB2MSB;
+                                deffillorder = FillOrder.LSB2MSB;
                             else if (optarg == "msb2lsb")
-                                deffillorder = FILLORDER.FILLORDER_MSB2LSB;
+                                deffillorder = FillOrder.MSB2LSB;
                             else
                             {
                                 usage();
@@ -205,9 +205,9 @@ namespace BitMiracle.TiffCP
                         case 'p':
                             /* planar configuration */
                             if (optarg == "separate")
-                                defconfig = PLANARCONFIG.PLANARCONFIG_SEPARATE;
+                                defconfig = PlanarConfig.SEPARATE;
                             else if (optarg == "contig")
-                                defconfig = PLANARCONFIG.PLANARCONFIG_CONTIG;
+                                defconfig = PlanarConfig.CONTIG;
                             else
                             {
                                 usage();

@@ -80,11 +80,11 @@
     <Compile Include="Tiff.cs" />
     <Compile Include="TiffCIELabToRGB.cs" />
     <Compile Include="TiffCodec.cs" />
-    <Compile Include="TiffDataType.cs" />
+    <Compile Include="TiffType.cs" />
     <Compile Include="TiffDisplay.cs" />
     <Compile Include="TiffErrorHandler.cs" />
     <Compile Include="TiffFieldInfo.cs" />
-    <Compile Include="TiffPrintDirectoryFlags.cs" />
+    <Compile Include="TiffPrintFlags.cs" />
     <Compile Include="TiffRGBAImage.cs" />
     <Compile Include="TiffStream.cs" />
     <Compile Include="TiffTagMethods.cs" />

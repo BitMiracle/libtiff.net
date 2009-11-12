@@ -31,7 +31,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private int m_rowsize;
 
-        public PackBitsCodec(Tiff tif, COMPRESSION scheme, string name)
+        public PackBitsCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
         {
         }

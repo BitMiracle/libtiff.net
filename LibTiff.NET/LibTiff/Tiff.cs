@@ -140,7 +140,7 @@ namespace BitMiracle.LibTiff
         * schemes can also override the built in versions provided
         * by this library.
         */
-        public TiffCodec FindCodec(COMPRESSION scheme)
+        public TiffCodec FindCodec(Compression scheme)
         {
             for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
             {
@@ -206,7 +206,7 @@ namespace BitMiracle.LibTiff
         * @return returns true if the codec is configured and working. Otherwise
         * false will be returned.
         */
-        public bool IsCodecConfigured(COMPRESSION scheme)
+        public bool IsCodecConfigured(Compression scheme)
         {
             TiffCodec codec = FindCodec(scheme);
 
@@ -376,7 +376,7 @@ namespace BitMiracle.LibTiff
              * use of memory-mapped files and strip chopping when
              * a file is opened read-only.
              */
-            tif.m_flags = (int)FILLORDER.FILLORDER_MSB2LSB;
+            tif.m_flags = (int)FillOrder.MSB2LSB;
 
             if (m == O_RDONLY || m == O_RDWR)
                 tif.m_flags |= STRIPCHOP_DEFAULT;
@@ -436,13 +436,13 @@ namespace BitMiracle.LibTiff
                     case 'l':
                         break;
                     case 'B':
-                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FILLORDER.FILLORDER_MSB2LSB;
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FillOrder.MSB2LSB;
                         break;
                     case 'L':
-                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FILLORDER.FILLORDER_LSB2MSB;
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FillOrder.LSB2MSB;
                         break;
                     case 'H':
-                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FILLORDER.FILLORDER_LSB2MSB;
+                        tif.m_flags = (tif.m_flags & ~TIFF_FILLORDER) | (int)FillOrder.LSB2MSB;
                         break;
                     case 'C':
                         if (m == O_RDONLY)
@@ -627,9 +627,9 @@ namespace BitMiracle.LibTiff
             Array.Sort(m_fieldinfo, myComparer);
         }
 
-        public TiffFieldInfo FindFieldInfo(TIFFTAG tag, TiffDataType dt)
+        public TiffFieldInfo FindFieldInfo(TiffTag tag, TiffType dt)
         {
-            if (m_foundfield != null && m_foundfield.field_tag == tag && (dt == TiffDataType.TIFF_ANY || dt == m_foundfield.field_type))
+            if (m_foundfield != null && m_foundfield.field_tag == tag && (dt == TiffType.ANY || dt == m_foundfield.field_type))
                 return m_foundfield;
 
             /* If we are invoked with no field information, then just return. */
@@ -640,7 +640,7 @@ namespace BitMiracle.LibTiff
 
             foreach (TiffFieldInfo info in m_fieldinfo)
             {
-                if (info != null && info.field_tag == tag && (dt == TiffDataType.TIFF_ANY || dt == info.field_type))
+                if (info != null && info.field_tag == tag && (dt == TiffType.ANY || dt == info.field_type))
                 {
                     m_foundfield = info;
                     break;
@@ -650,9 +650,9 @@ namespace BitMiracle.LibTiff
             return m_foundfield;
         }
 
-        public TiffFieldInfo FindFieldInfoByName(string field_name, TiffDataType dt)
+        public TiffFieldInfo FindFieldInfoByName(string field_name, TiffType dt)
         {
-            if (m_foundfield != null && m_foundfield.field_name == field_name && (dt == TiffDataType.TIFF_ANY || dt == m_foundfield.field_type))
+            if (m_foundfield != null && m_foundfield.field_name == field_name && (dt == TiffType.ANY || dt == m_foundfield.field_type))
                 return m_foundfield;
 
             /* If we are invoked with no field information, then just return. */
@@ -663,7 +663,7 @@ namespace BitMiracle.LibTiff
 
             foreach (TiffFieldInfo info in m_fieldinfo)
             {
-                if (info != null && info.field_name == field_name && (dt == TiffDataType.TIFF_ANY || dt == info.field_type))
+                if (info != null && info.field_name == field_name && (dt == TiffType.ANY || dt == info.field_type))
                 {
                     m_foundfield = info;
                     break;
@@ -673,9 +673,9 @@ namespace BitMiracle.LibTiff
             return m_foundfield;
         }
 
-        public TiffFieldInfo FieldWithTag(TIFFTAG tag)
+        public TiffFieldInfo FieldWithTag(TiffTag tag)
         {
-            TiffFieldInfo fip = FindFieldInfo(tag, TiffDataType.TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
             if (fip == null)
             {
                 ErrorExt(this, m_clientdata, "FieldWithTag",
@@ -689,7 +689,7 @@ namespace BitMiracle.LibTiff
 
         public TiffFieldInfo FieldWithName(string field_name)
         {
-            TiffFieldInfo fip = FindFieldInfoByName(field_name, TiffDataType.TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfoByName(field_name, TiffType.ANY);
             if (fip == null)
             {
                 ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag {0}", field_name);
@@ -800,9 +800,9 @@ namespace BitMiracle.LibTiff
         * Return the value of a field in the
         * internal directory structure.
         */
-        public FieldValue[] GetField(TIFFTAG tag)
+        public FieldValue[] GetField(TiffTag tag)
         {
-            TiffFieldInfo fip = FindFieldInfo(tag, TiffDataType.TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
             if (fip != null && (isPseudoTag(tag) || fieldSet(fip.field_bit)))
                 return m_tagmethods.vgetfield(this, tag);
             
@@ -817,7 +817,7 @@ namespace BitMiracle.LibTiff
         *  explicit values so that defaults exist only one
         *  place in the library -- in setupDefaultDirectory.
         */
-        public FieldValue[] GetFieldDefaulted(TIFFTAG tag)
+        public FieldValue[] GetFieldDefaulted(TiffTag tag)
         {
             TiffDirectory td = m_dir;
 
@@ -827,51 +827,51 @@ namespace BitMiracle.LibTiff
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_SUBFILETYPE:
+                case TiffTag.SUBFILETYPE:
                     result = new FieldValue[1];
                     result[0].Set(td.td_subfiletype);
                     break;
-                case TIFFTAG.TIFFTAG_BITSPERSAMPLE:
+                case TiffTag.BITSPERSAMPLE:
                     result = new FieldValue[1];
                     result[0].Set(td.td_bitspersample);
                     break;
-                case TIFFTAG.TIFFTAG_THRESHHOLDING:
+                case TiffTag.THRESHHOLDING:
                     result = new FieldValue[1];
                     result[0].Set(td.td_threshholding);
                     break;
-                case TIFFTAG.TIFFTAG_FILLORDER:
+                case TiffTag.FILLORDER:
                     result = new FieldValue[1];
                     result[0].Set(td.td_fillorder);
                     break;
-                case TIFFTAG.TIFFTAG_ORIENTATION:
+                case TiffTag.ORIENTATION:
                     result = new FieldValue[1];
                     result[0].Set(td.td_orientation);
                     break;
-                case TIFFTAG.TIFFTAG_SAMPLESPERPIXEL:
+                case TiffTag.SAMPLESPERPIXEL:
                     result = new FieldValue[1];
                     result[0].Set(td.td_samplesperpixel);
                     break;
-                case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
+                case TiffTag.ROWSPERSTRIP:
                     result = new FieldValue[1];
                     result[0].Set(td.td_rowsperstrip);
                     break;
-                case TIFFTAG.TIFFTAG_MINSAMPLEVALUE:
+                case TiffTag.MINSAMPLEVALUE:
                     result = new FieldValue[1];
                     result[0].Set(td.td_minsamplevalue);
                     break;
-                case TIFFTAG.TIFFTAG_MAXSAMPLEVALUE:
+                case TiffTag.MAXSAMPLEVALUE:
                     result = new FieldValue[1];
                     result[0].Set(td.td_maxsamplevalue);
                     break;
-                case TIFFTAG.TIFFTAG_PLANARCONFIG:
+                case TiffTag.PLANARCONFIG:
                     result = new FieldValue[1];
                     result[0].Set(td.td_planarconfig);
                     break;
-                case TIFFTAG.TIFFTAG_RESOLUTIONUNIT:
+                case TiffTag.RESOLUTIONUNIT:
                     result = new FieldValue[1];
                     result[0].Set(td.td_resolutionunit);
                     break;
-                case TIFFTAG.TIFFTAG_PREDICTOR:
+                case TiffTag.PREDICTOR:
                     CodecWithPredictor sp = m_currentCodec as CodecWithPredictor;
                     if (sp != null)
                     {
@@ -879,45 +879,45 @@ namespace BitMiracle.LibTiff
                         result[0].Set(sp.GetPredictorValue());
                     }
                     break;
-                case TIFFTAG.TIFFTAG_DOTRANGE:
+                case TiffTag.DOTRANGE:
                     result = new FieldValue[2];
                     result[0].Set(0);
                     result[1].Set((1 << td.td_bitspersample) - 1);
                     break;
-                case TIFFTAG.TIFFTAG_INKSET:
+                case TiffTag.INKSET:
                     result = new FieldValue[1];
-                    result[0].Set(INKSET.INKSET_CMYK);
+                    result[0].Set(InkSet.CMYK);
                     break;
-                case TIFFTAG.TIFFTAG_NUMBEROFINKS:
+                case TiffTag.NUMBEROFINKS:
                     result = new FieldValue[1];
                     result[0].Set(4);
                     break;
-                case TIFFTAG.TIFFTAG_EXTRASAMPLES:
+                case TiffTag.EXTRASAMPLES:
                     result = new FieldValue[2];
                     result[0].Set(td.td_extrasamples);
                     result[1].Set(td.td_sampleinfo);
                     break;
-                case TIFFTAG.TIFFTAG_MATTEING:
+                case TiffTag.MATTEING:
                     result = new FieldValue[1];
-                    result[0].Set((td.td_extrasamples == 1 && td.td_sampleinfo[0] == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA));
+                    result[0].Set((td.td_extrasamples == 1 && td.td_sampleinfo[0] == ExtraSample.ASSOCALPHA));
                     break;
-                case TIFFTAG.TIFFTAG_TILEDEPTH:
+                case TiffTag.TILEDEPTH:
                     result = new FieldValue[1];
                     result[0].Set(td.td_tiledepth);
                     break;
-                case TIFFTAG.TIFFTAG_DATATYPE:
+                case TiffTag.DATATYPE:
                     result = new FieldValue[1];
                     result[0].Set(td.td_sampleformat - 1);
                     break;
-                case TIFFTAG.TIFFTAG_SAMPLEFORMAT:
+                case TiffTag.SAMPLEFORMAT:
                     result = new FieldValue[1];
                     result[0].Set(td.td_sampleformat);
                     break;
-                case TIFFTAG.TIFFTAG_IMAGEDEPTH:
+                case TiffTag.IMAGEDEPTH:
                     result = new FieldValue[1];
                     result[0].Set(td.td_imagedepth);
                     break;
-                case TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS:
+                case TiffTag.YCBCRCOEFFICIENTS:
                     {
                         /* defaults are from CCIR Recommendation 601-1 */
                         float[] ycbcrcoeffs = new float [3];
@@ -929,16 +929,16 @@ namespace BitMiracle.LibTiff
                         result[0].Set(ycbcrcoeffs);
                         break;
                     }
-                case TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING:
+                case TiffTag.YCBCRSUBSAMPLING:
                     result = new FieldValue[2];
                     result[0].Set(td.td_ycbcrsubsampling[0]);
                     result[1].Set(td.td_ycbcrsubsampling[1]);
                     break;
-                case TIFFTAG.TIFFTAG_YCBCRPOSITIONING:
+                case TiffTag.YCBCRPOSITIONING:
                     result = new FieldValue[1];
                     result[0].Set(td.td_ycbcrpositioning);
                     break;
-                case TIFFTAG.TIFFTAG_WHITEPOINT:
+                case TiffTag.WHITEPOINT:
                     {
                         /* TIFF 6.0 specification tells that it is no default
                         value for the WhitePoint, but AdobePhotoshop TIFF
@@ -951,7 +951,7 @@ namespace BitMiracle.LibTiff
                         result[0].Set(whitepoint);
                         break;
                     }
-                case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
+                case TiffTag.TRANSFERFUNCTION:
                     if (td.td_transferfunction[0] == null && !defaultTransferFunction(td))
                     {
                         ErrorExt(this, m_clientdata, m_name, "No space for \"TransferFunction\" tag");
@@ -966,7 +966,7 @@ namespace BitMiracle.LibTiff
                         result[2].Set(td.td_transferfunction[2]);
                     }
                     break;
-                case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
+                case TiffTag.REFERENCEBLACKWHITE:
                     {
                         float[] ycbcr_refblackwhite = new float [6];
                         ycbcr_refblackwhite[0] = 0.0F;
@@ -984,7 +984,7 @@ namespace BitMiracle.LibTiff
                         }
 
                         result = new FieldValue[1];
-                        if (td.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+                        if (td.td_photometric == Photometric.YCBCR)
                         {
                             /*
                              * YCbCr (Class Y) images must have the
@@ -1063,7 +1063,7 @@ namespace BitMiracle.LibTiff
              * Thus we setup a default value here, even though
              * the TIFF spec says there is no default value.
              */
-            SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, PLANARCONFIG.PLANARCONFIG_CONTIG);
+            SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
             /*
              * Sigh, we must make a separate pass through the
@@ -1090,22 +1090,22 @@ namespace BitMiracle.LibTiff
                 {
                     short temp = (short)dp.tdir_tag;
                     SwabShort(ref temp);
-                    dp.tdir_tag = (TIFFTAG)temp;
+                    dp.tdir_tag = (TiffTag)temp;
 
                     temp = (short)dp.tdir_type;
                     SwabShort(ref temp);
-                    dp.tdir_type = (TiffDataType)temp;
+                    dp.tdir_type = (TiffType)temp;
 
                     SwabLong(ref dp.tdir_count);
                     SwabLong(ref dp.tdir_offset);
                 }
                 
-                if (dp.tdir_tag == TIFFTAG.TIFFTAG_SAMPLESPERPIXEL)
+                if (dp.tdir_tag == TiffTag.SAMPLESPERPIXEL)
                 {
                     if (!fetchNormalTag(dir[i]))
                         return false;
 
-                    dp.tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                    dp.tdir_tag = TiffTag.IGNORE;
                 }
             }
 
@@ -1116,7 +1116,7 @@ namespace BitMiracle.LibTiff
             bool diroutoforderwarning = false;
             for (int i = 0; i < dircount; i++)
             {
-                if (fix >= m_nfields || dir[i].tdir_tag == TIFFTAG.TIFFTAG_IGNORE)
+                if (fix >= m_nfields || dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
 
                 /*
@@ -1158,7 +1158,7 @@ namespace BitMiracle.LibTiff
                  */
                 if (m_fieldinfo[fix].field_bit == FIELD.FIELD_IGNORE)
                 {
-                    dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                    dir[i].tdir_tag = TiffTag.IGNORE;
                     continue;
                 }
 
@@ -1168,7 +1168,7 @@ namespace BitMiracle.LibTiff
                 TiffFieldInfo fip = m_fieldinfo[fix];
                 while (dir[i].tdir_type != fip.field_type && fix < m_nfields)
                 {
-                    if (fip.field_type == TiffDataType.TIFF_ANY)
+                    if (fip.field_type == TiffType.ANY)
                     {
                         /* wildcard */
                         break;
@@ -1178,7 +1178,7 @@ namespace BitMiracle.LibTiff
                     if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
                     {
                         WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
-                        dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                        dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
                 }
@@ -1194,14 +1194,14 @@ namespace BitMiracle.LibTiff
 
                     if (!checkDirCount(dir[i], expected))
                     {
-                        dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                        dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
                 }
 
                 switch (dir[i].tdir_tag)
                 {
-                    case TIFFTAG.TIFFTAG_COMPRESSION:
+                    case TiffTag.COMPRESSION:
                         /*
                          * The 5.0 spec says the Compression tag has
                          * one value, while earlier specs say it has
@@ -1217,7 +1217,7 @@ namespace BitMiracle.LibTiff
                             break;
                             /* XXX: workaround for broken TIFFs */
                         }
-                        else if (dir[i].tdir_type == TiffDataType.TIFF_LONG)
+                        else if (dir[i].tdir_type == TiffType.LONG)
                         {
                             int v;
                             if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, v))
@@ -1229,26 +1229,26 @@ namespace BitMiracle.LibTiff
                             if (!fetchPerSampleShorts(dir[i], out iv) || !SetField(dir[i].tdir_tag, iv))
                                 return false;
                         }
-                        dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                        dir[i].tdir_tag = TiffTag.IGNORE;
                         break;
-                    case TIFFTAG.TIFFTAG_STRIPOFFSETS:
-                    case TIFFTAG.TIFFTAG_STRIPBYTECOUNTS:
-                    case TIFFTAG.TIFFTAG_TILEOFFSETS:
-                    case TIFFTAG.TIFFTAG_TILEBYTECOUNTS:
+                    case TiffTag.STRIPOFFSETS:
+                    case TiffTag.STRIPBYTECOUNTS:
+                    case TiffTag.TILEOFFSETS:
+                    case TiffTag.TILEBYTECOUNTS:
                         setFieldBit(fip.field_bit);
                         break;
-                    case TIFFTAG.TIFFTAG_IMAGEWIDTH:
-                    case TIFFTAG.TIFFTAG_IMAGELENGTH:
-                    case TIFFTAG.TIFFTAG_IMAGEDEPTH:
-                    case TIFFTAG.TIFFTAG_TILELENGTH:
-                    case TIFFTAG.TIFFTAG_TILEWIDTH:
-                    case TIFFTAG.TIFFTAG_TILEDEPTH:
-                    case TIFFTAG.TIFFTAG_PLANARCONFIG:
-                    case TIFFTAG.TIFFTAG_ROWSPERSTRIP:
-                    case TIFFTAG.TIFFTAG_EXTRASAMPLES:
+                    case TiffTag.IMAGEWIDTH:
+                    case TiffTag.IMAGELENGTH:
+                    case TiffTag.IMAGEDEPTH:
+                    case TiffTag.TILELENGTH:
+                    case TiffTag.TILEWIDTH:
+                    case TiffTag.TILEDEPTH:
+                    case TiffTag.PLANARCONFIG:
+                    case TiffTag.ROWSPERSTRIP:
+                    case TiffTag.EXTRASAMPLES:
                         if (!fetchNormalTag(dir[i]))
                             return false;
-                        dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                        dir[i].tdir_tag = TiffTag.IGNORE;
                         break;
                 }
             }
@@ -1261,15 +1261,15 @@ namespace BitMiracle.LibTiff
             * that the buggy implementation of the buggy compression scheme
             * matches contig planarconfig best. So we 'fix-up' the tag here
             */
-            if ((m_dir.td_compression == COMPRESSION.COMPRESSION_OJPEG) && (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)) 
+            if ((m_dir.td_compression == Compression.OJPEG) && (m_dir.td_planarconfig == PlanarConfig.SEPARATE)) 
             {
-                int dpIndex = readDirectoryFind(dir, dircount, TIFFTAG.TIFFTAG_STRIPOFFSETS);
+                int dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPOFFSETS);
                 if (dpIndex != -1 && dir[dpIndex].tdir_count == 1) 
                 {
-                    dpIndex = readDirectoryFind(dir, dircount, TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
+                    dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPBYTECOUNTS);
                     if (dpIndex != -1 && dir[dpIndex].tdir_count == 1) 
                     {
-                        m_dir.td_planarconfig = PLANARCONFIG.PLANARCONFIG_CONTIG;
+                        m_dir.td_planarconfig = PlanarConfig.CONTIG;
                         WarningExt(this, m_clientdata, "ReadDirectory", "Planarconfig tag value assumed incorrect, assuming data is contig instead of chunky");
                     }
                 }
@@ -1308,12 +1308,12 @@ namespace BitMiracle.LibTiff
             }
 
             m_dir.td_stripsperimage = m_dir.td_nstrips;
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
 
             if (!fieldSet(FIELD.FIELD_STRIPOFFSETS))
             {
-                if ((m_dir.td_compression == COMPRESSION.COMPRESSION_OJPEG) && !IsTiled() && (m_dir.td_nstrips == 1)) 
+                if ((m_dir.td_compression == Compression.OJPEG) && !IsTiled() && (m_dir.td_nstrips == 1)) 
                 {
                     /*
                     * XXX: OJPEG hack.
@@ -1337,16 +1337,16 @@ namespace BitMiracle.LibTiff
              */
             for (int i = 0; i < dircount; i++)
             {
-                if (dir[i].tdir_tag == TIFFTAG.TIFFTAG_IGNORE)
+                if (dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
                 
                 switch (dir[i].tdir_tag)
                 {
-                    case TIFFTAG.TIFFTAG_MINSAMPLEVALUE:
-                    case TIFFTAG.TIFFTAG_MAXSAMPLEVALUE:
-                    case TIFFTAG.TIFFTAG_BITSPERSAMPLE:
-                    case TIFFTAG.TIFFTAG_DATATYPE:
-                    case TIFFTAG.TIFFTAG_SAMPLEFORMAT:
+                    case TiffTag.MINSAMPLEVALUE:
+                    case TiffTag.MAXSAMPLEVALUE:
+                    case TiffTag.BITSPERSAMPLE:
+                    case TiffTag.DATATYPE:
+                    case TiffTag.SAMPLEFORMAT:
                         /*
                          * The 5.0 spec says the Compression tag has
                          * one value, while earlier specs say it has
@@ -1369,7 +1369,7 @@ namespace BitMiracle.LibTiff
                                 return false;
                             /* XXX: workaround for broken TIFFs */
                         }
-                        else if (dir[i].tdir_tag == TIFFTAG.TIFFTAG_BITSPERSAMPLE && dir[i].tdir_type == TiffDataType.TIFF_LONG)
+                        else if (dir[i].tdir_tag == TiffTag.BITSPERSAMPLE && dir[i].tdir_type == TiffType.LONG)
                         {
                             int v;
                             if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, v))
@@ -1382,26 +1382,26 @@ namespace BitMiracle.LibTiff
                                 return false;
                         }
                         break;
-                    case TIFFTAG.TIFFTAG_SMINSAMPLEVALUE:
-                    case TIFFTAG.TIFFTAG_SMAXSAMPLEVALUE:
+                    case TiffTag.SMINSAMPLEVALUE:
+                    case TiffTag.SMAXSAMPLEVALUE:
                         {
                             double dv;
                             if (!fetchPerSampleAnys(dir[i], out dv) || !SetField(dir[i].tdir_tag, dv))
                                 return false;
                         }
                         break;
-                    case TIFFTAG.TIFFTAG_STRIPOFFSETS:
-                    case TIFFTAG.TIFFTAG_TILEOFFSETS:
+                    case TiffTag.STRIPOFFSETS:
+                    case TiffTag.TILEOFFSETS:
                         if (!fetchStripThing(dir[i], m_dir.td_nstrips, ref m_dir.td_stripoffset))
                             return false;
                         break;
-                    case TIFFTAG.TIFFTAG_STRIPBYTECOUNTS:
-                    case TIFFTAG.TIFFTAG_TILEBYTECOUNTS:
+                    case TiffTag.STRIPBYTECOUNTS:
+                    case TiffTag.TILEBYTECOUNTS:
                         if (!fetchStripThing(dir[i], m_dir.td_nstrips, ref m_dir.td_stripbytecount))
                             return false;
                         break;
-                    case TIFFTAG.TIFFTAG_COLORMAP:
-                    case TIFFTAG.TIFFTAG_TRANSFERFUNCTION:
+                    case TiffTag.COLORMAP:
+                    case TiffTag.TRANSFERFUNCTION:
                         {
                             /*
                              * TransferFunction can have either 1x or 3x
@@ -1409,7 +1409,7 @@ namespace BitMiracle.LibTiff
                              * items.
                              */
                             int v = 1 << m_dir.td_bitspersample;
-                            if (dir[i].tdir_tag == TIFFTAG.TIFFTAG_COLORMAP || dir[i].tdir_count != v)
+                            if (dir[i].tdir_tag == TiffTag.COLORMAP || dir[i].tdir_count != v)
                             {
                                 if (!checkDirCount(dir[i], 3 * v))
                                     break;
@@ -1440,31 +1440,31 @@ namespace BitMiracle.LibTiff
                             }
                             break;
                         }
-                    case TIFFTAG.TIFFTAG_PAGENUMBER:
-                    case TIFFTAG.TIFFTAG_HALFTONEHINTS:
-                    case TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING:
-                    case TIFFTAG.TIFFTAG_DOTRANGE:
+                    case TiffTag.PAGENUMBER:
+                    case TiffTag.HALFTONEHINTS:
+                    case TiffTag.YCBCRSUBSAMPLING:
+                    case TiffTag.DOTRANGE:
                         fetchShortPair(dir[i]);
                         break;
-                    case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
+                    case TiffTag.REFERENCEBLACKWHITE:
                         fetchRefBlackWhite(dir[i]);
                         break;
                         /* BEGIN REV 4.0 COMPATIBILITY */
-                    case TIFFTAG.TIFFTAG_OSUBFILETYPE:
+                    case TiffTag.OSUBFILETYPE:
                         {
-                            FILETYPE v = 0;
-                            switch ((OFILETYPE)extractData(dir[i]))
+                            FileType v = 0;
+                            switch ((OFileType)extractData(dir[i]))
                             {
-                                case OFILETYPE.OFILETYPE_REDUCEDIMAGE:
-                                    v = FILETYPE.FILETYPE_REDUCEDIMAGE;
+                                case OFileType.REDUCEDIMAGE:
+                                    v = FileType.REDUCEDIMAGE;
                                     break;
-                                case OFILETYPE.OFILETYPE_PAGE:
-                                    v = FILETYPE.FILETYPE_PAGE;
+                                case OFileType.PAGE:
+                                    v = FileType.PAGE;
                                     break;
                             }
 
                             if (v != 0)
-                                SetField(TIFFTAG.TIFFTAG_SUBFILETYPE, v);
+                                SetField(TiffTag.SUBFILETYPE, v);
                         }
                         break;
                         /* END REV 4.0 COMPATIBILITY */
@@ -1490,39 +1490,39 @@ namespace BitMiracle.LibTiff
             * and c) photometric is MINISWHITE or MINISBLACK, then we consistently
             * find samplesperpixel should be 3
             */
-            if (m_dir.td_compression == COMPRESSION.COMPRESSION_OJPEG)
+            if (m_dir.td_compression == Compression.OJPEG)
             {
                 if (!fieldSet(FIELD.FIELD_PHOTOMETRIC))
                 {
                     WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag is missing, assuming data is YCbCr");
-                    if (!SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_YCBCR))
+                    if (!SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR))
                         return false;
                 }
-                else if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_RGB)
+                else if (m_dir.td_photometric == Photometric.RGB)
                 {
-                    m_dir.td_photometric = PHOTOMETRIC.PHOTOMETRIC_YCBCR;
+                    m_dir.td_photometric = Photometric.YCBCR;
                     WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag value assumed incorrect, assuming data is YCbCr instead of RGB");
                 }
                 
                 if (!fieldSet(FIELD.FIELD_BITSPERSAMPLE))
                 {
                     WarningExt(this, m_clientdata, "ReadDirectory", "BitsPerSample tag is missing, assuming 8 bits per sample");
-                    if (!SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, 8))
+                    if (!SetField(TiffTag.BITSPERSAMPLE, 8))
                         return false;
                 }
 
                 if (!fieldSet(FIELD.FIELD_SAMPLESPERPIXEL))
                 {
-                    if ((m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_RGB) || (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR))
+                    if ((m_dir.td_photometric == Photometric.RGB) || (m_dir.td_photometric == Photometric.YCBCR))
                     {
                         WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 3");
-                        if (!SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, 3))
+                        if (!SetField(TiffTag.SAMPLESPERPIXEL, 3))
                             return false;
                     }
-                    else if ((m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE) || (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISBLACK))
+                    else if ((m_dir.td_photometric == Photometric.MINISWHITE) || (m_dir.td_photometric == Photometric.MINISBLACK))
                     {
                         WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 1");
-                        if (!SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, 1))
+                        if (!SetField(TiffTag.SAMPLESPERPIXEL, 1))
                             return false;
                     }
                 }
@@ -1531,7 +1531,7 @@ namespace BitMiracle.LibTiff
             /*
              * Verify Palette image has a Colormap.
              */
-            if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_PALETTE && !fieldSet(FIELD.FIELD_COLORMAP))
+            if (m_dir.td_photometric == Photometric.PALETTE && !fieldSet(FIELD.FIELD_COLORMAP))
             {
                 missingRequired("Colormap");
                 return false;
@@ -1542,7 +1542,7 @@ namespace BitMiracle.LibTiff
             * We do no further messing with strip/tile offsets/bytecounts in OJPEG
             * TIFFs
             */
-            if (m_dir.td_compression != COMPRESSION.COMPRESSION_OJPEG)
+            if (m_dir.td_compression != Compression.OJPEG)
             {
                 /*
                  * Attempt to deal with a missing StripByteCounts tag.
@@ -1554,14 +1554,14 @@ namespace BitMiracle.LibTiff
                      * the size of the strips.  In this case, assume there
                      * is one uncompressed strip of data.
                      */
-                    if ((m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_nstrips > 1) || 
-                        (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_dir.td_nstrips != m_dir.td_samplesperpixel))
+                    if ((m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 1) || 
+                        (m_dir.td_planarconfig == PlanarConfig.SEPARATE && m_dir.td_nstrips != m_dir.td_samplesperpixel))
                     {
                         missingRequired("StripByteCounts");
                         return false;
                     }
 
-                    WarningExt(this, m_clientdata, module, "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
@@ -1573,18 +1573,18 @@ namespace BitMiracle.LibTiff
                      * and handle the simple case of estimating the size of a one
                      * strip image.
                      */
-                    WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
-                else if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_nstrips > 2 && m_dir.td_compression == COMPRESSION.COMPRESSION_NONE && m_dir.td_stripbytecount[0] != m_dir.td_stripbytecount[1])
+                else if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 2 && m_dir.td_compression == Compression.NONE && m_dir.td_stripbytecount[0] != m_dir.td_stripbytecount[1])
                 {
                     /*
                      * XXX: Some vendors fill StripByteCount array with absolutely
                      * wrong values (it can be equal to StripOffset array, for
                      * example). Catch this case here.
                      */
-                    WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
@@ -1617,7 +1617,7 @@ namespace BitMiracle.LibTiff
             }
 
             if (!fieldSet(FIELD.FIELD_COMPRESSION))
-                SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_NONE);
+                SetField(TiffTag.COMPRESSION, Compression.NONE);
 
             /*
              * Some manufacturers make life difficult by writing
@@ -1628,7 +1628,7 @@ namespace BitMiracle.LibTiff
              * side effect, however, is that the RowsPerStrip tag
              * value may be changed.
              */
-            if (m_dir.td_nstrips == 1 && m_dir.td_compression == COMPRESSION.COMPRESSION_NONE && (m_flags & (TIFF_STRIPCHOP | TIFF_ISTILED)) == TIFF_STRIPCHOP)
+            if (m_dir.td_nstrips == 1 && m_dir.td_compression == Compression.NONE && (m_flags & (TIFF_STRIPCHOP | TIFF_ISTILED)) == TIFF_STRIPCHOP)
                 chopUpSingleUncompressedStrip();
 
             /*
@@ -1697,17 +1697,17 @@ namespace BitMiracle.LibTiff
                 {
                     short temp = (short)dir[i].tdir_tag;
                     SwabShort(ref temp);
-                    dir[i].tdir_tag = (TIFFTAG)temp;
+                    dir[i].tdir_tag = (TiffTag)temp;
 
                     temp = (short)dir[i].tdir_type;
                     SwabShort(ref temp);
-                    dir[i].tdir_type = (TiffDataType)temp;
+                    dir[i].tdir_type = (TiffType)temp;
 
                     SwabLong(ref dir[i].tdir_count);
                     SwabLong(ref dir[i].tdir_offset);
                 }
 
-                if (fix >= m_nfields || dir[i].tdir_tag == TIFFTAG.TIFFTAG_IGNORE)
+                if (fix >= m_nfields || dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
 
                 while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
@@ -1733,7 +1733,7 @@ namespace BitMiracle.LibTiff
                  */
                 if (m_fieldinfo[fix].field_bit == FIELD.FIELD_IGNORE)
                 {
-                    dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                    dir[i].tdir_tag = TiffTag.IGNORE;
                     continue;
                 }
 
@@ -1743,7 +1743,7 @@ namespace BitMiracle.LibTiff
                 TiffFieldInfo fip = m_fieldinfo[fix];
                 while (dir[i].tdir_type != fip.field_type && fix < m_nfields)
                 {
-                    if (fip.field_type == TiffDataType.TIFF_ANY)
+                    if (fip.field_type == TiffType.ANY)
                     {
                         /* wildcard */
                         break;
@@ -1753,7 +1753,7 @@ namespace BitMiracle.LibTiff
                     if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
                     {
                         WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
-                        dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                        dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
                 }
@@ -1769,7 +1769,7 @@ namespace BitMiracle.LibTiff
 
                     if (!checkDirCount(dir[i], expected))
                     {
-                        dir[i].tdir_tag = TIFFTAG.TIFFTAG_IGNORE;
+                        dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
                 }
@@ -1779,7 +1779,7 @@ namespace BitMiracle.LibTiff
                 */
                 switch (dir[i].tdir_tag) 
                 {
-                    case TIFFTAG.EXIFTAG_SUBJECTDISTANCE:
+                    case TiffTag.EXIF_SUBJECTDISTANCE:
                         fetchSubjectDistance(dir[i]);
                         break;
                     default:
@@ -1880,11 +1880,11 @@ namespace BitMiracle.LibTiff
 
                     short temp = (short)dirEntry.tdir_tag;
                     SwabShort(ref temp);
-                    dirEntry.tdir_tag = (TIFFTAG)temp;
+                    dirEntry.tdir_tag = (TiffTag)temp;
 
                     temp = (short)dirEntry.tdir_type;
                     SwabShort(ref temp);
-                    dirEntry.tdir_type = (TiffDataType)temp;
+                    dirEntry.tdir_type = (TiffType)temp;
 
                     SwabLong(ref dirEntry.tdir_count);
                     SwabLong(ref dirEntry.tdir_offset);
@@ -1937,11 +1937,11 @@ namespace BitMiracle.LibTiff
         public int ScanlineSize()
         {
             int scanline;
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG)
             {
-                if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
+                if (m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
                 {
-                    FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                    FieldValue[] result = GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
                     short ycbcrsubsampling0 = result[0].ToShort();
 
                     if (ycbcrsubsampling0 == 0)
@@ -1974,7 +1974,7 @@ namespace BitMiracle.LibTiff
         public int RasterScanlineSize()
         {
             int scanline = multiply(m_dir.td_bitspersample, m_dir.td_imagewidth, "RasterScanlineSize");
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG)
             {
                 scanline = multiply(scanline, m_dir.td_samplesperpixel, "RasterScanlineSize");
                 return howMany8(scanline);
@@ -2024,7 +2024,7 @@ namespace BitMiracle.LibTiff
             if (nrows == -1)
                 nrows = m_dir.td_imagelength;
 
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
             {
                 /*
                  * Packed YCbCr data contain one Cb+Cr for every
@@ -2034,7 +2034,7 @@ namespace BitMiracle.LibTiff
                  * horizontal/vertical subsampling area include
                  * YCbCr data for the extended image.
                  */
-                FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                FieldValue[] result = GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
                 short ycbcrsubsampling0 = result[0].ToShort();
                 short ycbcrsubsampling1 = result[1].ToShort();
 
@@ -2065,7 +2065,7 @@ namespace BitMiracle.LibTiff
                 return 0;
 
             int rowsize = multiply(m_dir.td_bitspersample, m_dir.td_tilewidth, "TileRowSize");
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG)
                 rowsize = multiply(rowsize, m_dir.td_samplesperpixel, "TileRowSize");
 
             return howMany8(rowsize);
@@ -2088,7 +2088,7 @@ namespace BitMiracle.LibTiff
                 return 0;
 
             int tilesize;
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
             {
                 /*
                  * Packed YCbCr data contain one Cb+Cr for every
@@ -2206,7 +2206,7 @@ namespace BitMiracle.LibTiff
         */
         public bool IsMSB2LSB()
         {
-            return isFillOrder(FILLORDER.FILLORDER_MSB2LSB);
+            return isFillOrder(FillOrder.MSB2LSB);
         }
 
         /*
@@ -2354,7 +2354,7 @@ namespace BitMiracle.LibTiff
 
             m_dir.td_nstrips = m_dir.td_stripsperimage;
 
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
 
             m_dir.td_stripoffset = new int[m_dir.td_nstrips];
@@ -2414,7 +2414,7 @@ namespace BitMiracle.LibTiff
                  * in the single band case.
                  */
                 if (!fieldSet(FIELD.FIELD_PLANARCONFIG))
-                    m_dir.td_planarconfig = PLANARCONFIG.PLANARCONFIG_CONTIG;
+                    m_dir.td_planarconfig = PlanarConfig.CONTIG;
             }
             else
             {
@@ -2615,7 +2615,7 @@ namespace BitMiracle.LibTiff
         * when/if the directory structure is
         * updated.
         */
-        public bool SetField(TIFFTAG tag, params object[] ap)
+        public bool SetField(TiffTag tag, params object[] ap)
         {
             if (okToChangeTag(tag))
                 return m_tagmethods.vsetfield(this, tag, FieldValue.FromParams(ap));
@@ -2728,10 +2728,10 @@ namespace BitMiracle.LibTiff
         */
         public void PrintDirectory(Stream fd)
         {
-            PrintDirectory(fd, TiffPrintDirectoryFlags.TIFFPRINT_NONE);
+            PrintDirectory(fd, TiffPrintFlags.NONE);
         }
 
-        public void PrintDirectory(Stream fd, TiffPrintDirectoryFlags flags)
+        public void PrintDirectory(Stream fd, TiffPrintFlags flags)
         {
             fprintf(fd, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
     
@@ -2739,19 +2739,19 @@ namespace BitMiracle.LibTiff
             {
                 fprintf(fd, "  Subfile Type:");
                 string sep = " ";
-                if ((m_dir.td_subfiletype & FILETYPE.FILETYPE_REDUCEDIMAGE) != 0)
+                if ((m_dir.td_subfiletype & FileType.REDUCEDIMAGE) != 0)
                 {
                     fprintf(fd, "{0}reduced-resolution image", sep);
                     sep = "/";
                 }
 
-                if ((m_dir.td_subfiletype & FILETYPE.FILETYPE_PAGE) != 0)
+                if ((m_dir.td_subfiletype & FileType.PAGE) != 0)
                 {
                     fprintf(fd, "{0}multi-page document", sep);
                     sep = "/";
                 }
                 
-                if ((m_dir.td_subfiletype & FILETYPE.FILETYPE_MASK) != 0)
+                if ((m_dir.td_subfiletype & FileType.MASK) != 0)
                     fprintf(fd, "{0}transparency mask", sep);
 
                 fprintf(fd, " ({0} = 0x{1:x})\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
@@ -2780,13 +2780,13 @@ namespace BitMiracle.LibTiff
                 {
                     switch (m_dir.td_resolutionunit)
                     {
-                        case RESUNIT.RESUNIT_NONE:
+                        case ResUnit.NONE:
                             fprintf(fd, " (unitless)");
                             break;
-                        case RESUNIT.RESUNIT_INCH:
+                        case ResUnit.INCH:
                             fprintf(fd, " pixels/inch");
                             break;
-                        case RESUNIT.RESUNIT_CENTIMETER:
+                        case ResUnit.CENTIMETER:
                             fprintf(fd, " pixels/cm");
                             break;
                         default:
@@ -2808,22 +2808,22 @@ namespace BitMiracle.LibTiff
                 fprintf(fd, "  Sample Format: ");
                 switch (m_dir.td_sampleformat)
                 {
-                    case SAMPLEFORMAT.SAMPLEFORMAT_VOID:
+                    case SampleFormat.VOID:
                         fprintf(fd, "void\n");
                         break;
-                    case SAMPLEFORMAT.SAMPLEFORMAT_INT:
+                    case SampleFormat.INT:
                         fprintf(fd, "signed integer\n");
                         break;
-                    case SAMPLEFORMAT.SAMPLEFORMAT_UINT:
+                    case SampleFormat.UINT:
                         fprintf(fd, "unsigned integer\n");
                         break;
-                    case SAMPLEFORMAT.SAMPLEFORMAT_IEEEFP:
+                    case SampleFormat.IEEEFP:
                         fprintf(fd, "IEEE floating point\n");
                         break;
-                    case SAMPLEFORMAT.SAMPLEFORMAT_COMPLEXINT:
+                    case SampleFormat.COMPLEXINT:
                         fprintf(fd, "complex signed integer\n");
                         break;
-                    case SAMPLEFORMAT.SAMPLEFORMAT_COMPLEXIEEEFP:
+                    case SampleFormat.COMPLEXIEEEFP:
                         fprintf(fd, "complex IEEE floating point\n");
                         break;
                     default:
@@ -2851,10 +2851,10 @@ namespace BitMiracle.LibTiff
                 {
                     switch (m_dir.td_photometric)
                     {
-                        case PHOTOMETRIC.PHOTOMETRIC_LOGL:
+                        case Photometric.LOGL:
                             fprintf(fd, "CIE Log2(L)\n");
                             break;
-                        case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
+                        case Photometric.LOGLUV:
                             fprintf(fd, "CIE Log2(L) (u',v')\n");
                             break;
                         default:
@@ -2872,13 +2872,13 @@ namespace BitMiracle.LibTiff
                 {
                     switch (m_dir.td_sampleinfo[i])
                     {
-                        case EXTRASAMPLE.EXTRASAMPLE_UNSPECIFIED:
+                        case ExtraSample.UNSPECIFIED:
                             fprintf(fd, "{0}unspecified", sep);
                             break;
-                        case EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA:
+                        case ExtraSample.ASSOCALPHA:
                             fprintf(fd, "{0}assoc-alpha", sep);
                             break;
-                        case EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA:
+                        case ExtraSample.UNASSALPHA:
                             fprintf(fd, "{0}unassoc-alpha", sep);
                             break;
                         default:
@@ -2909,13 +2909,13 @@ namespace BitMiracle.LibTiff
                 fprintf(fd, "  Thresholding: ");
                 switch (m_dir.td_threshholding)
                 {
-                    case THRESHHOLD.THRESHHOLD_BILEVEL:
+                    case Threshold.BILEVEL:
                         fprintf(fd, "bilevel art scan\n");
                         break;
-                    case THRESHHOLD.THRESHHOLD_HALFTONE:
+                    case Threshold.HALFTONE:
                         fprintf(fd, "halftone or dithered scan\n");
                         break;
-                    case THRESHHOLD.THRESHHOLD_ERRORDIFFUSE:
+                    case Threshold.ERRORDIFFUSE:
                         fprintf(fd, "error diffused\n");
                         break;
                     default:
@@ -2929,10 +2929,10 @@ namespace BitMiracle.LibTiff
                 fprintf(fd, "  FillOrder: ");
                 switch (m_dir.td_fillorder)
                 {
-                    case FILLORDER.FILLORDER_MSB2LSB:
+                    case FillOrder.MSB2LSB:
                         fprintf(fd, "msb-to-lsb\n");
                         break;
-                    case FILLORDER.FILLORDER_LSB2MSB:
+                    case FillOrder.LSB2MSB:
                         fprintf(fd, "lsb-to-msb\n");
                         break;
                     default:
@@ -2948,7 +2948,7 @@ namespace BitMiracle.LibTiff
                  * we need to fetch this rather than trust what is in our
                  * structures.
                  */
-                FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                FieldValue[] result = GetField(TiffTag.YCBCRSUBSAMPLING);
                 short subsampling0 = result[0].ToShort();
                 short subsampling1 = result[1].ToShort();
                 fprintf(fd, "  YCbCr Subsampling: {0}, {1}\n", subsampling0, subsampling1);
@@ -2959,10 +2959,10 @@ namespace BitMiracle.LibTiff
                 fprintf(fd, "  YCbCr Positioning: ");
                 switch (m_dir.td_ycbcrpositioning)
                 {
-                    case YCBCRPOSITION.YCBCRPOSITION_CENTERED:
+                    case YCbCrPosition.CENTERED:
                         fprintf(fd, "centered\n");
                         break;
-                    case YCBCRPOSITION.YCBCRPOSITION_COSITED:
+                    case YCbCrPosition.COSITED:
                         fprintf(fd, "cosited\n");
                         break;
                     default:
@@ -3012,10 +3012,10 @@ namespace BitMiracle.LibTiff
                 fprintf(fd, "  Planar Configuration: ");
                 switch (m_dir.td_planarconfig)
                 {
-                    case PLANARCONFIG.PLANARCONFIG_CONTIG:
+                    case PlanarConfig.CONTIG:
                         fprintf(fd, "single image plane\n");
                         break;
-                    case PLANARCONFIG.PLANARCONFIG_SEPARATE:
+                    case PlanarConfig.SEPARATE:
                         fprintf(fd, "separate image planes\n");
                         break;
                     default:
@@ -3030,7 +3030,7 @@ namespace BitMiracle.LibTiff
             if (fieldSet(FIELD.FIELD_COLORMAP))
             {
                 fprintf(fd, "  Color Map: ");
-                if ((flags & TiffPrintDirectoryFlags.TIFFPRINT_COLORMAP) != 0)
+                if ((flags & TiffPrintFlags.COLORMAP) != 0)
                 {
                     fprintf(fd, "\n");
                     int n = 1 << m_dir.td_bitspersample;
@@ -3044,7 +3044,7 @@ namespace BitMiracle.LibTiff
             if (fieldSet(FIELD.FIELD_TRANSFERFUNCTION))
             {
                 fprintf(fd, "  Transfer Function: ");
-                if ((flags & TiffPrintDirectoryFlags.TIFFPRINT_CURVES) != 0)
+                if ((flags & TiffPrintFlags.CURVES) != 0)
                 {
                     fprintf(fd, "\n");
                     int n = 1 << m_dir.td_bitspersample;
@@ -3074,8 +3074,8 @@ namespace BitMiracle.LibTiff
             int count = GetTagListCount();
             for (int i = 0; i < count; i++)
             {
-                TIFFTAG tag = (TIFFTAG)GetTagListEntry(i);
-                TiffFieldInfo fip = FieldWithTag((TIFFTAG)tag);
+                TiffTag tag = (TiffTag)GetTagListEntry(i);
+                TiffFieldInfo fip = FieldWithTag((TiffTag)tag);
                 if (fip == null)
                     continue;
 
@@ -3099,7 +3099,7 @@ namespace BitMiracle.LibTiff
                     else
                         value_count = fip.field_readcount;
 
-                    if ((fip.field_type == TiffDataType.TIFF_ASCII || fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2 || fip.field_readcount == TIFF_SPP || value_count > 1) && fip.field_tag != TIFFTAG.TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG.TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
+                    if ((fip.field_type == TiffType.ASCII || fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2 || fip.field_readcount == TIFF_SPP || value_count > 1) && fip.field_tag != TiffTag.PAGENUMBER && fip.field_tag != TiffTag.HALFTONEHINTS && fip.field_tag != TiffTag.YCBCRSUBSAMPLING && fip.field_tag != TiffTag.DOTRANGE)
                     {
                         FieldValue[] result = GetField(tag);
                         if (result == null)
@@ -3107,7 +3107,7 @@ namespace BitMiracle.LibTiff
 
                         raw_data = result[0].ToByteArray();
                     }
-                    else if (fip.field_tag != TIFFTAG.TIFFTAG_PAGENUMBER && fip.field_tag != TIFFTAG.TIFFTAG_HALFTONEHINTS && fip.field_tag != TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING && fip.field_tag != TIFFTAG.TIFFTAG_DOTRANGE)
+                    else if (fip.field_tag != TiffTag.PAGENUMBER && fip.field_tag != TiffTag.HALFTONEHINTS && fip.field_tag != TiffTag.YCBCRSUBSAMPLING && fip.field_tag != TiffTag.DOTRANGE)
                     {
                         raw_data = new byte [dataSize(fip.field_type) * value_count];
 
@@ -3121,10 +3121,10 @@ namespace BitMiracle.LibTiff
                     {
                         /* 
                          * XXX: Should be fixed and removed, see the
-                         * notes related to TIFFTAG_PAGENUMBER,
-                         * TIFFTAG_HALFTONEHINTS,
-                         * TIFFTAG_YCBCRSUBSAMPLING and
-                         * TIFFTAG_DOTRANGE tags in tif_dir.c. */
+                         * notes related to PAGENUMBER,
+                         * HALFTONEHINTS,
+                         * YCBCRSUBSAMPLING and
+                         * DOTRANGE tags in tif_dir.c. */
                         raw_data = new byte [dataSize(fip.field_type) * value_count];
 
                         FieldValue[] result = GetField(tag);
@@ -3153,7 +3153,7 @@ namespace BitMiracle.LibTiff
 
             m_tagmethods.printdir(this, fd, flags);
 
-            if ((flags & TiffPrintDirectoryFlags.TIFFPRINT_STRIPS) != 0 && fieldSet(FIELD.FIELD_STRIPOFFSETS))
+            if ((flags & TiffPrintFlags.STRIPS) != 0 && fieldSet(FIELD.FIELD_STRIPOFFSETS))
             {
                 fprintf(fd, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
                 for (int s = 0; s < m_dir.td_nstrips; s++)
@@ -3216,7 +3216,7 @@ namespace BitMiracle.LibTiff
             if (row >= m_dir.td_imagelength)
             {
                 /* extend image */
-                if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 {
                     ErrorExt(this, m_clientdata, m_name, "Can not change \"ImageLength\" when using separate planes");
                     return false;
@@ -3229,7 +3229,7 @@ namespace BitMiracle.LibTiff
              * Calculate strip and check for crossings.
              */
             int strip;
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
@@ -3344,7 +3344,7 @@ namespace BitMiracle.LibTiff
 
         public bool ReadRGBAImage(int rwidth, int rheight, int[] raster, bool stop)
         {
-            return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION.ORIENTATION_BOTLEFT, stop);
+            return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, stop);
         }
         
         /*
@@ -3353,15 +3353,15 @@ namespace BitMiracle.LibTiff
         */
         public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster)
         {
-            return ReadRGBAImageOriented(rwidth, rheight, raster, ORIENTATION.ORIENTATION_BOTLEFT, false);
+            return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, false);
         }
 
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, ORIENTATION orientation)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, Orientation orientation)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, orientation, false);
         }
 
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, ORIENTATION orientation, bool stop)
+        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, Orientation orientation, bool stop)
         {
             bool ok = true;
             string emsg;
@@ -3398,7 +3398,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            FieldValue[] result = GetFieldDefaulted(TiffTag.ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
             if ((row % rowsperstrip) != 0)
             {
@@ -3448,9 +3448,9 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            FieldValue[] result = GetFieldDefaulted(TIFFTAG.TIFFTAG_TILEWIDTH);
+            FieldValue[] result = GetFieldDefaulted(TiffTag.TILEWIDTH);
             int tile_xsize = result[0].ToInt();
-            result = GetFieldDefaulted(TIFFTAG.TIFFTAG_TILELENGTH);
+            result = GetFieldDefaulted(TiffTag.TILELENGTH);
             int tile_ysize = result[0].ToInt();
 
             if ((col % tile_xsize) != 0 || (row % tile_ysize) != 0)
@@ -3552,17 +3552,17 @@ namespace BitMiracle.LibTiff
             }
             
             int colorchannels = m_dir.td_samplesperpixel - m_dir.td_extrasamples;
-            PHOTOMETRIC photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
-            FieldValue[] result = GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+            Photometric photometric = Photometric.RGB;
+            FieldValue[] result = GetField(TiffTag.PHOTOMETRIC);
             if (result == null)
             {
                 switch (colorchannels)
                 {
                     case 1:
-                        photometric = PHOTOMETRIC.PHOTOMETRIC_MINISBLACK;
+                        photometric = Photometric.MINISBLACK;
                         break;
                     case 3:
-                        photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
+                        photometric = Photometric.RGB;
                         break;
                     default:
                         emsg = string.Format("Missing needed {0} tag", TiffRGBAImage.photoTag);
@@ -3572,10 +3572,10 @@ namespace BitMiracle.LibTiff
 
             switch (photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
-                case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
-                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
-                    if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
+                case Photometric.MINISWHITE:
+                case Photometric.MINISBLACK:
+                case Photometric.PALETTE:
+                    if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
                     {
                         emsg = string.Format(
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}", 
@@ -3590,7 +3590,7 @@ namespace BitMiracle.LibTiff
                      * them.  But for now we won't bother with this. 
                      */
                     break;
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case Photometric.YCBCR:
                     /*
                     * TODO: if at all meaningful and useful, make more complete
                     * support check here, or better still, refactor to let supporting
@@ -3598,7 +3598,7 @@ namespace BitMiracle.LibTiff
                     * error to return
                     */
                     break;
-                case PHOTOMETRIC.PHOTOMETRIC_RGB:
+                case Photometric.RGB:
                     if (colorchannels < 3)
                     {
                         emsg = string.Format(
@@ -3608,11 +3608,11 @@ namespace BitMiracle.LibTiff
                         return false;
                     }
                     break;
-                case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
+                case Photometric.SEPARATED:
                     {
-                        result = GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET);
-                        INKSET inkset = (INKSET)result[0].ToByte();
-                        if (inkset != INKSET.INKSET_CMYK)
+                        result = GetFieldDefaulted(TiffTag.INKSET);
+                        InkSet inkset = (InkSet)result[0].ToByte();
+                        if (inkset != InkSet.CMYK)
                         {
                             emsg = string.Format(
                                 "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
@@ -3626,31 +3626,31 @@ namespace BitMiracle.LibTiff
                         }
                         break;
                     }
-                case PHOTOMETRIC.PHOTOMETRIC_LOGL:
-                    if (m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG)
+                case Photometric.LOGL:
+                    if (m_dir.td_compression != Compression.SGILOG)
                     {
                         emsg = string.Format("Sorry, LogL data must have {0}={1}",
-                            "Compression", COMPRESSION.COMPRESSION_SGILOG);
+                            "Compression", Compression.SGILOG);
                         return false;
                     }
                     break;
-                case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
-                    if (m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG &&
-                        m_dir.td_compression != COMPRESSION.COMPRESSION_SGILOG24)
+                case Photometric.LOGLUV:
+                    if (m_dir.td_compression != Compression.SGILOG &&
+                        m_dir.td_compression != Compression.SGILOG24)
                     {
                         emsg = string.Format("Sorry, LogLuv data must have {0}={1} or {2}",
-                            "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
+                            "Compression", Compression.SGILOG, Compression.SGILOG24);
                         return false;
                     }
 
-                    if (m_dir.td_planarconfig != PLANARCONFIG.PLANARCONFIG_CONTIG)
+                    if (m_dir.td_planarconfig != PlanarConfig.CONTIG)
                     {
                         emsg = string.Format("Sorry, can not handle LogLuv images with {0}={1}",
                             "Planarconfiguration", m_dir.td_planarconfig);
                         return false;
                     }
                     break;
-                case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
+                case Photometric.CIELAB:
                     break;
                 default:
                     emsg = string.Format("Sorry, can not handle image with {0}={1}",
@@ -3765,7 +3765,7 @@ namespace BitMiracle.LibTiff
                 int ypt = howMany(m_dir.td_imagelength, dy);
                 int zpt = howMany(m_dir.td_imagedepth, dz);
 
-                if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                     tile = (xpt * ypt * zpt) * s + (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
                 else
                     tile = (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
@@ -3798,7 +3798,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && s >= m_dir.td_samplesperpixel)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE && s >= m_dir.td_samplesperpixel)
             {
                 ErrorExt(this, m_clientdata, m_name, "{0}: Sample out of range, max {1}", s, m_dir.td_samplesperpixel - 1);
                 return false;
@@ -3825,7 +3825,7 @@ namespace BitMiracle.LibTiff
                 dz = m_dir.td_imagedepth;
             
             int ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
             
             return ntiles;
@@ -3934,7 +3934,7 @@ namespace BitMiracle.LibTiff
         public int ComputeStrip(int row, short sample)
         {
             int strip = row / m_dir.td_rowsperstrip;
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {
@@ -3954,7 +3954,7 @@ namespace BitMiracle.LibTiff
         public int NumberOfStrips()
         {
             int nstrips = (m_dir.td_rowsperstrip == -1 ? 1: howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 nstrips = multiply(nstrips, m_dir.td_samplesperpixel, "NumberOfStrips");
 
             return nstrips;
@@ -4070,7 +4070,7 @@ namespace BitMiracle.LibTiff
              */
             if (strip >= m_dir.td_nstrips)
             {
-                if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 {
                     ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
                     return -1;
@@ -4156,7 +4156,7 @@ namespace BitMiracle.LibTiff
              */
             if (strip >= m_dir.td_nstrips)
             {
-                if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 {
                     ErrorExt(this, m_clientdata, m_name, "Can not grow image by strips when using separate planes");
                     return -1;
@@ -4309,27 +4309,27 @@ namespace BitMiracle.LibTiff
         /*
         * Return size of TiffDataType in bytes
         */
-        public static int DataWidth(TiffDataType type)
+        public static int DataWidth(TiffType type)
         {
             switch (type)
             {
-                case TiffDataType.TIFF_NOTYPE:
-                case TiffDataType.TIFF_BYTE:
-                case TiffDataType.TIFF_ASCII:
-                case TiffDataType.TIFF_SBYTE:
-                case TiffDataType.TIFF_UNDEFINED:
+                case TiffType.NOTYPE:
+                case TiffType.BYTE:
+                case TiffType.ASCII:
+                case TiffType.SBYTE:
+                case TiffType.UNDEFINED:
                     return 1;
-                case TiffDataType.TIFF_SHORT:
-                case TiffDataType.TIFF_SSHORT:
+                case TiffType.SHORT:
+                case TiffType.SSHORT:
                     return 2;
-                case TiffDataType.TIFF_LONG:
-                case TiffDataType.TIFF_SLONG:
-                case TiffDataType.TIFF_FLOAT:
-                case TiffDataType.TIFF_IFD:
+                case TiffType.LONG:
+                case TiffType.SLONG:
+                case TiffType.FLOAT:
+                case TiffType.IFD:
                     return 4;
-                case TiffDataType.TIFF_RATIONAL:
-                case TiffDataType.TIFF_SRATIONAL:
-                case TiffDataType.TIFF_DOUBLE:
+                case TiffType.RATIONAL:
+                case TiffType.SRATIONAL:
+                case TiffType.DOUBLE:
                     return 8;
                 default:
                     /* will return 0 for unknown types */

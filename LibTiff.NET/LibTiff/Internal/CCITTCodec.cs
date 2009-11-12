@@ -31,7 +31,7 @@ namespace BitMiracle.LibTiff.Internal
     {
         /*
         * To override the default routine used to image decoded
-        * spans one can use the pseduo tag TIFFTAG_FAXFILLFUNC.
+        * spans one can use the pseduo tag FAXFILLFUNC.
         * The routine must have the type signature given below;
         * for example:
         *
@@ -56,9 +56,9 @@ namespace BitMiracle.LibTiff.Internal
         public const int FIELD_FAXDCS = (FIELD.FIELD_CODEC + 6);
         public const int FIELD_OPTIONS = (FIELD.FIELD_CODEC + 7);
 
-        internal FAXMODE m_mode; /* operating mode */
-        internal GROUP3OPT m_groupoptions; /* Group 3/4 options tag */
-        internal CLEANFAXDATA m_cleanfaxdata; /* CleanFaxData tag */
+        internal FaxMode m_mode; /* operating mode */
+        internal Group3Opt m_groupoptions; /* Group 3/4 options tag */
+        internal CleanFaxData m_cleanfaxdata; /* CleanFaxData tag */
         internal int m_badfaxlines; /* BadFaxLines tag */
         internal int m_badfaxrun; /* BadFaxRun tag */
         internal int m_recvparams; /* encoded Class 2 session params */
@@ -155,27 +155,27 @@ namespace BitMiracle.LibTiff.Internal
 
         private static TiffFieldInfo[] m_faxFieldInfo =
         {
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXMODE, 0, 0, TiffDataType.TIFF_ANY, FIELD.FIELD_PSEUDO, false, false, "FaxMode"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXFILLFUNC, 0, 0, TiffDataType.TIFF_ANY, FIELD.FIELD_PSEUDO, false, false, "FaxFillFunc"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_BADFAXLINES, 1, 1, TiffDataType.TIFF_LONG, FIELD_BADFAXLINES, true, false, "BadFaxLines"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_BADFAXLINES, 1, 1, TiffDataType.TIFF_SHORT, FIELD_BADFAXLINES, true, false, "BadFaxLines"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_CLEANFAXDATA, 1, 1, TiffDataType.TIFF_SHORT, FIELD_CLEANFAXDATA, true, false, "CleanFaxData"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES, 1, 1, TiffDataType.TIFF_LONG, FIELD_BADFAXRUN, true, false, "ConsecutiveBadFaxLines"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES, 1, 1, TiffDataType.TIFF_SHORT, FIELD_BADFAXRUN, true, false, "ConsecutiveBadFaxLines"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXRECVPARAMS, 1, 1, TiffDataType.TIFF_LONG, FIELD_RECVPARAMS, true, false, "FaxRecvParams"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXSUBADDRESS, -1, -1, TiffDataType.TIFF_ASCII, FIELD_SUBADDRESS, true, false, "FaxSubAddress"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXRECVTIME, 1, 1, TiffDataType.TIFF_LONG, FIELD_RECVTIME, true, false, "FaxRecvTime"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXDCS, -1, -1, TiffDataType.TIFF_ASCII, FIELD_FAXDCS, true, false, "FaxDcs"), 
+            new TiffFieldInfo(TiffTag.FAXMODE, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, "FaxMode"), 
+            new TiffFieldInfo(TiffTag.FAXFILLFUNC, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, "FaxFillFunc"), 
+            new TiffFieldInfo(TiffTag.BADFAXLINES, 1, 1, TiffType.LONG, FIELD_BADFAXLINES, true, false, "BadFaxLines"), 
+            new TiffFieldInfo(TiffTag.BADFAXLINES, 1, 1, TiffType.SHORT, FIELD_BADFAXLINES, true, false, "BadFaxLines"), 
+            new TiffFieldInfo(TiffTag.CLEANFAXDATA, 1, 1, TiffType.SHORT, FIELD_CLEANFAXDATA, true, false, "CleanFaxData"), 
+            new TiffFieldInfo(TiffTag.CONSECUTIVEBADFAXLINES, 1, 1, TiffType.LONG, FIELD_BADFAXRUN, true, false, "ConsecutiveBadFaxLines"), 
+            new TiffFieldInfo(TiffTag.CONSECUTIVEBADFAXLINES, 1, 1, TiffType.SHORT, FIELD_BADFAXRUN, true, false, "ConsecutiveBadFaxLines"), 
+            new TiffFieldInfo(TiffTag.FAXRECVPARAMS, 1, 1, TiffType.LONG, FIELD_RECVPARAMS, true, false, "FaxRecvParams"), 
+            new TiffFieldInfo(TiffTag.FAXSUBADDRESS, -1, -1, TiffType.ASCII, FIELD_SUBADDRESS, true, false, "FaxSubAddress"), 
+            new TiffFieldInfo(TiffTag.FAXRECVTIME, 1, 1, TiffType.LONG, FIELD_RECVTIME, true, false, "FaxRecvTime"), 
+            new TiffFieldInfo(TiffTag.FAXDCS, -1, -1, TiffType.ASCII, FIELD_FAXDCS, true, false, "FaxDcs"), 
         };
         
         private static TiffFieldInfo[] m_fax3FieldInfo = 
         {
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_GROUP3OPTIONS, 1, 1, TiffDataType.TIFF_LONG, FIELD_OPTIONS, false, false, "Group3Options"), 
+            new TiffFieldInfo(TiffTag.GROUP3OPTIONS, 1, 1, TiffType.LONG, FIELD_OPTIONS, false, false, "Group3Options"), 
         };
 
         private static TiffFieldInfo[] m_fax4FieldInfo = 
         {
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_GROUP4OPTIONS, 1, 1, TiffDataType.TIFF_LONG, FIELD_OPTIONS, false, false, "Group4Options"), 
+            new TiffFieldInfo(TiffTag.GROUP4OPTIONS, 1, 1, TiffType.LONG, FIELD_OPTIONS, false, false, "Group4Options"), 
         };
 
         private TiffTagMethods m_parentTagMethods;
@@ -212,7 +212,7 @@ namespace BitMiracle.LibTiff.Internal
         private byte[] m_bp; // pointer to data to encode
         private int m_bpPos;   // current position in m_bp
 
-        public CCITTCodec(Tiff tif, COMPRESSION scheme, string name)
+        public CCITTCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
         {
             m_tagMethods = new CCITTCodecTagMethods();
@@ -222,13 +222,13 @@ namespace BitMiracle.LibTiff.Internal
         {
             switch (m_scheme)
             {
-                case COMPRESSION.COMPRESSION_CCITTRLE:
+                case Compression.CCITTRLE:
                     return TIFFInitCCITTRLE();
-                case COMPRESSION.COMPRESSION_CCITTRLEW:
+                case Compression.CCITTRLEW:
                     return TIFFInitCCITTRLEW();
-                case COMPRESSION.COMPRESSION_CCITTFAX3:
+                case Compression.CCITTFAX3:
                     return TIFFInitCCITTFax3();
-                case COMPRESSION.COMPRESSION_CCITTFAX4:
+                case Compression.CCITTFAX4:
                     return TIFFInitCCITTFax4();
             }
 
@@ -264,7 +264,7 @@ namespace BitMiracle.LibTiff.Internal
             * and then re-decode the image.  Otherwise they'd need to close
             * and open the image to get the state reset.
             */
-            m_bitmap = Tiff.GetBitRevTable(m_tif.m_dir.td_fillorder != FILLORDER.FILLORDER_LSB2MSB);
+            m_bitmap = Tiff.GetBitRevTable(m_tif.m_dir.td_fillorder != FillOrder.LSB2MSB);
             if (m_refruns >= 0)
             {
                 /* init reference line to white */
@@ -336,7 +336,7 @@ namespace BitMiracle.LibTiff.Internal
                 * appropriately.  (Note also that we fudge a little here
                 * and use 150 lpi to avoid problems with units conversion.)
                 */
-                if (m_tif.m_dir.td_resolutionunit == RESUNIT.RESUNIT_CENTIMETER)
+                if (m_tif.m_dir.td_resolutionunit == ResUnit.CENTIMETER)
                 {
                     /* convert to inches */
                     res *= 2.54f;
@@ -383,7 +383,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override void tif_close()
         {
-            if ((m_mode & FAXMODE.FAXMODE_NORTC) == 0)
+            if ((m_mode & FaxMode.NORTC) == 0)
             {
                 int code = EOL_CODE;
                 int length = 12;
@@ -412,7 +412,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private bool is2DEncoding()
         {
-            return (m_groupoptions & GROUP3OPT.GROUP3OPT_2DENCODING) != 0;
+            return (m_groupoptions & Group3Opt.ENCODING2D) != 0;
         }
 
         /*
@@ -1076,8 +1076,8 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Allocate any additional space required for decoding/encoding.
              */
-            bool needsRefLine = ((m_groupoptions & GROUP3OPT.GROUP3OPT_2DENCODING) != 0 ||
-                m_tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX4);
+            bool needsRefLine = ((m_groupoptions & Group3Opt.ENCODING2D) != 0 ||
+                m_tif.m_dir.td_compression == Compression.CCITTFAX4);
 
             int nruns = needsRefLine ? 2 * Tiff.roundUp(rowpixels, 32) : rowpixels;
             nruns += 3;
@@ -1089,7 +1089,7 @@ namespace BitMiracle.LibTiff.Internal
             else
                 m_refruns = -1;
             
-            if (m_tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX3 && is2DEncoding())
+            if (m_tif.m_dir.td_compression == Compression.CCITTFAX3 && is2DEncoding())
             {
                 /* NB: default is 1D routine */
                 m_decoder = Decoder.useFax3_2DDecoder;
@@ -1280,7 +1280,7 @@ namespace BitMiracle.LibTiff.Internal
                     break;
             }
 
-            if ((m_mode & (FAXMODE.FAXMODE_BYTEALIGN | FAXMODE.FAXMODE_WORDALIGN)) != 0)
+            if ((m_mode & (FaxMode.BYTEALIGN | FaxMode.WORDALIGN)) != 0)
             {
                 if (m_bit != 8)
                 {
@@ -1288,7 +1288,7 @@ namespace BitMiracle.LibTiff.Internal
                     flushBits();
                 }
 
-                if ((m_mode & FAXMODE.FAXMODE_WORDALIGN) != 0 && !isShortAligned(m_tif.m_rawcp))
+                if ((m_mode & FaxMode.WORDALIGN) != 0 && !isShortAligned(m_tif.m_rawcp))
                     flushBits();
             }
 
@@ -1377,7 +1377,7 @@ namespace BitMiracle.LibTiff.Internal
 
             while (cc > 0)
             {
-                if ((m_mode & FAXMODE.FAXMODE_NOEOL) == 0)
+                if ((m_mode & FaxMode.NOEOL) == 0)
                     Fax3PutEOL();
 
                 if (is2DEncoding())
@@ -1455,7 +1455,7 @@ namespace BitMiracle.LibTiff.Internal
             }
 
             m_runs = null;
-            m_tif.SetField(TIFFTAG.TIFFTAG_FAXFILLFUNC, new FaxFillFunc(fax3FillRuns));
+            m_tif.SetField(TiffTag.FAXFILLFUNC, new FaxFillFunc(fax3FillRuns));
             m_refline = null;
 
             m_decoder = Decoder.useFax3_1DDecoder;
@@ -1470,7 +1470,7 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * The default format is Class/F-style w/o RTC.
              */
-            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, FAXMODE.FAXMODE_CLASSF);
+            return m_tif.SetField(TiffTag.FAXMODE, FaxMode.CLASSF);
         }
 
         /*
@@ -1557,7 +1557,7 @@ namespace BitMiracle.LibTiff.Internal
         */
         private void Fax3PutEOL()
         {
-            if ((m_groupoptions & GROUP3OPT.GROUP3OPT_FILLBITS) != 0)
+            if ((m_groupoptions & Group3Opt.FILLBITS) != 0)
             {
                 /*
                  * Force bit alignment so EOL will terminate on
@@ -2043,8 +2043,8 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Suppress RTC+EOLs when encoding and byte-align data.
              */
-            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, 
-                FAXMODE.FAXMODE_NORTC | FAXMODE.FAXMODE_NOEOL | FAXMODE.FAXMODE_BYTEALIGN);
+            return m_tif.SetField(TiffTag.FAXMODE, 
+                FaxMode.NORTC | FaxMode.NOEOL | FaxMode.BYTEALIGN);
         }
 
         private bool TIFFInitCCITTRLEW()
@@ -2057,8 +2057,8 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Suppress RTC+EOLs when encoding and word-align data.
              */
-            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, 
-                FAXMODE.FAXMODE_NORTC | FAXMODE.FAXMODE_NOEOL | FAXMODE.FAXMODE_WORDALIGN);
+            return m_tif.SetField(TiffTag.FAXMODE, 
+                FaxMode.NORTC | FaxMode.NOEOL | FaxMode.WORDALIGN);
         }
 
         /*
@@ -2085,12 +2085,12 @@ namespace BitMiracle.LibTiff.Internal
                     /*
                      * Cleanup at the end of the row.
                      */
-                    if ((m_mode & FAXMODE.FAXMODE_BYTEALIGN) != 0)
+                    if ((m_mode & FaxMode.BYTEALIGN) != 0)
                     {
                         int n = m_bit - (m_bit & ~7);
                         ClrBits(n);
                     }
-                    else if ((m_mode & FAXMODE.FAXMODE_WORDALIGN) != 0)
+                    else if ((m_mode & FaxMode.WORDALIGN) != 0)
                     {
                         int n = m_bit - (m_bit & ~15);
                         ClrBits(n);
@@ -2130,7 +2130,7 @@ namespace BitMiracle.LibTiff.Internal
             /*
              * Suppress RTC at the end of each strip.
              */
-            return m_tif.SetField(TIFFTAG.TIFFTAG_FAXMODE, FAXMODE.FAXMODE_NORTC);
+            return m_tif.SetField(TiffTag.FAXMODE, FaxMode.NORTC);
         }
 
         /*

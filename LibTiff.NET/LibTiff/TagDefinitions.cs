@@ -31,552 +31,552 @@ namespace BitMiracle.LibTiff
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum FILETYPE
+    enum FileType
     {
-        FILETYPE_REDUCEDIMAGE = 0x1,  /* reduced resolution version */
-        FILETYPE_PAGE = 0x2,  /* one page of many */
-        FILETYPE_MASK = 0x4 /* transparency mask */
+        REDUCEDIMAGE = 0x1, /* reduced resolution version */
+        PAGE = 0x2,         /* one page of many */
+        MASK = 0x4          /* transparency mask */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum OFILETYPE
+    enum OFileType
     {
-        OFILETYPE_IMAGE = 1,  /* full resolution image data */
-        OFILETYPE_REDUCEDIMAGE = 2,  /* reduced size image data */
-        OFILETYPE_PAGE = 3 /* one page of many */
+        IMAGE = 1,          /* full resolution image data */
+        REDUCEDIMAGE = 2,   /* reduced size image data */
+        PAGE = 3            /* one page of many */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum COMPRESSION
+    enum Compression
     {
-        COMPRESSION_NONE = 1,  /* dump mode */
-        COMPRESSION_CCITTRLE = 2,  /* CCITT modified Huffman RLE */
-        COMPRESSION_CCITTFAX3 = 3,  /* CCITT Group 3 fax encoding */
-        COMPRESSION_CCITT_T4 = 3,  /* CCITT T.4 (TIFF 6 name) */
-        COMPRESSION_CCITTFAX4 = 4,  /* CCITT Group 4 fax encoding */
-        COMPRESSION_CCITT_T6 = 4,  /* CCITT T.6 (TIFF 6 name) */
-        COMPRESSION_LZW = 5,  /* Lempel-Ziv  & Welch */
-        COMPRESSION_OJPEG = 6,  /* !6.0 JPEG */
-        COMPRESSION_JPEG = 7,  /* %JPEG DCT compression */
-        COMPRESSION_NEXT = 32766,  /* NeXT 2-bit RLE */
-        COMPRESSION_CCITTRLEW = 32771,  /* #1 w/ word alignment */
-        COMPRESSION_PACKBITS = 32773,  /* Macintosh RLE */
-        COMPRESSION_THUNDERSCAN = 32809,  /* ThunderScan RLE */
+        NONE = 1,               /* dump mode */
+        CCITTRLE = 2,           /* CCITT modified Huffman RLE */
+        CCITTFAX3 = 3,          /* CCITT Group 3 fax encoding */
+        CCITT_T4 = 3,           /* CCITT T.4 (TIFF 6 name) */
+        CCITTFAX4 = 4,          /* CCITT Group 4 fax encoding */
+        CCITT_T6 = 4,           /* CCITT T.6 (TIFF 6 name) */
+        LZW = 5,                /* Lempel-Ziv  & Welch */
+        OJPEG = 6,              /* !6.0 JPEG */
+        JPEG = 7,               /* %JPEG DCT compression */
+        NEXT = 32766,           /* NeXT 2-bit RLE */
+        CCITTRLEW = 32771,      /* #1 w/ word alignment */
+        PACKBITS = 32773,       /* Macintosh RLE */
+        THUNDERSCAN = 32809,    /* ThunderScan RLE */
         /* codes 32895-32898 are reserved for ANSI IT8 TIFF/IT <dkelly@apago.com) */
-        COMPRESSION_IT8CTPAD = 32895,  /* IT8 CT w/padding */
-        COMPRESSION_IT8LW = 32896,  /* IT8 Linework RLE */
-        COMPRESSION_IT8MP = 32897,  /* IT8 Monochrome picture */
-        COMPRESSION_IT8BL = 32898,  /* IT8 Binary line art */
+        IT8CTPAD = 32895,       /* IT8 CT w/padding */
+        IT8LW = 32896,          /* IT8 Linework RLE */
+        IT8MP = 32897,          /* IT8 Monochrome picture */
+        IT8BL = 32898,          /* IT8 Binary line art */
         /* compression codes 32908-32911 are reserved for Pixar */
-        COMPRESSION_PIXARFILM = 32908,  /* Pixar companded 10bit LZW */
-        COMPRESSION_PIXARLOG = 32909,  /* Pixar companded 11bit ZIP */
-        COMPRESSION_DEFLATE = 32946,  /* Deflate compression */
-        COMPRESSION_ADOBE_DEFLATE = 8,  /* Deflate compression, as recognized by Adobe */
+        PIXARFILM = 32908,      /* Pixar companded 10bit LZW */
+        PIXARLOG = 32909,       /* Pixar companded 11bit ZIP */
+        DEFLATE = 32946,        /* Deflate compression */
+        ADOBE_DEFLATE = 8,      /* Deflate compression, as recognized by Adobe */
         /* compression code 32947 is reserved for Oceana Matrix <dev@oceana.com> */
-        COMPRESSION_DCS = 32947,  /* Kodak DCS encoding */
-        COMPRESSION_JBIG = 34661,  /* ISO JBIG */
-        COMPRESSION_SGILOG = 34676,  /* SGI Log Luminance RLE */
-        COMPRESSION_SGILOG24 = 34677,  /* SGI Log 24-bit packed */
-        COMPRESSION_JP2000 = 34712,  /* Leadtools JPEG2000 */
+        DCS = 32947,            /* Kodak DCS encoding */
+        JBIG = 34661,           /* ISO JBIG */
+        SGILOG = 34676,         /* SGI Log Luminance RLE */
+        SGILOG24 = 34677,       /* SGI Log 24-bit packed */
+        JP2000 = 34712,         /* Leadtools JPEG2000 */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum PHOTOMETRIC
+    enum Photometric
     {
-        PHOTOMETRIC_MINISWHITE = 0,  /* min value is white */
-        PHOTOMETRIC_MINISBLACK = 1,  /* min value is black */
-        PHOTOMETRIC_RGB = 2,  /* RGB color model */
-        PHOTOMETRIC_PALETTE = 3,  /* color map indexed */
-        PHOTOMETRIC_MASK = 4,  /* $holdout mask */
-        PHOTOMETRIC_SEPARATED = 5,  /* !color separations */
-        PHOTOMETRIC_YCBCR = 6,  /* !CCIR 601 */
-        PHOTOMETRIC_CIELAB = 8,  /* !1976 CIE L*a*b* */
-        PHOTOMETRIC_ICCLAB = 9,  /* ICC L*a*b* [Adobe TIFF Technote 4] */
-        PHOTOMETRIC_ITULAB = 10,  /* ITU L*a*b* */
-        PHOTOMETRIC_LOGL = 32844,  /* CIE Log2(L) */
-        PHOTOMETRIC_LOGLUV = 32845,  /* CIE Log2(L) (u',v') */
+        MINISWHITE = 0,     /* min value is white */
+        MINISBLACK = 1,     /* min value is black */
+        RGB = 2,            /* RGB color model */
+        PALETTE = 3,        /* color map indexed */
+        MASK = 4,           /* $holdout mask */
+        SEPARATED = 5,      /* !color separations */
+        YCBCR = 6,          /* !CCIR 601 */
+        CIELAB = 8,         /* !1976 CIE L*a*b* */
+        ICCLAB = 9,         /* ICC L*a*b* [Adobe TIFF Technote 4] */
+        ITULAB = 10,        /* ITU L*a*b* */
+        LOGL = 32844,       /* CIE Log2(L) */
+        LOGLUV = 32845,     /* CIE Log2(L) (u',v') */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum THRESHHOLD
+    enum Threshold
     {
-        THRESHHOLD_BILEVEL = 1,  /* b&w art scan */
-        THRESHHOLD_HALFTONE = 2,  /* or dithered scan */
-        THRESHHOLD_ERRORDIFFUSE = 3,  /* usually floyd-steinberg */
+        BILEVEL = 1,        /* b&w art scan */
+        HALFTONE = 2,       /* or dithered scan */
+        ERRORDIFFUSE = 3,   /* usually floyd-steinberg */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum FILLORDER
+    enum FillOrder
     {
-        FILLORDER_MSB2LSB = 1,  /* most significant -> least */
-        FILLORDER_LSB2MSB = 2,  /* least significant -> most */
+        MSB2LSB = 1,    /* most significant -> least */
+        LSB2MSB = 2,    /* least significant -> most */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum ORIENTATION
+    enum Orientation
     {
-        ORIENTATION_TOPLEFT = 1,  /* row 0 top, col 0 lhs */
-        ORIENTATION_TOPRIGHT = 2,  /* row 0 top, col 0 rhs */
-        ORIENTATION_BOTRIGHT = 3,  /* row 0 bottom, col 0 rhs */
-        ORIENTATION_BOTLEFT = 4,  /* row 0 bottom, col 0 lhs */
-        ORIENTATION_LEFTTOP = 5,  /* row 0 lhs, col 0 top */
-        ORIENTATION_RIGHTTOP = 6,  /* row 0 rhs, col 0 top */
-        ORIENTATION_RIGHTBOT = 7,  /* row 0 rhs, col 0 bottom */
-        ORIENTATION_LEFTBOT = 8,  /* row 0 lhs, col 0 bottom */
+        TOPLEFT = 1,    /* row 0 top, col 0 lhs */
+        TOPRIGHT = 2,   /* row 0 top, col 0 rhs */
+        BOTRIGHT = 3,   /* row 0 bottom, col 0 rhs */
+        BOTLEFT = 4,    /* row 0 bottom, col 0 lhs */
+        LEFTTOP = 5,    /* row 0 lhs, col 0 top */
+        RIGHTTOP = 6,   /* row 0 rhs, col 0 top */
+        RIGHTBOT = 7,   /* row 0 rhs, col 0 bottom */
+        LEFTBOT = 8,    /* row 0 lhs, col 0 bottom */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum PLANARCONFIG
+    enum PlanarConfig
     {
-        PLANARCONFIG_UNKNOWN = 0,  // unknown (uninitialized)
-        PLANARCONFIG_CONTIG = 1,  /* single image plane */
-        PLANARCONFIG_SEPARATE = 2 /* separate planes of data */
+        UNKNOWN = 0,    // unknown (uninitialized)
+        CONTIG = 1,     /* single image plane */
+        SEPARATE = 2    /* separate planes of data */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum GRAYRESPONSEUNIT
+    enum GrayResponseUnit
     {
-        GRAYRESPONSEUNIT_10S = 1,  /* tenths of a unit */
-        GRAYRESPONSEUNIT_100S = 2,  /* hundredths of a unit */
-        GRAYRESPONSEUNIT_1000S = 3,  /* thousandths of a unit */
-        GRAYRESPONSEUNIT_10000S = 4,  /* ten-thousandths of a unit */
-        GRAYRESPONSEUNIT_100000S = 5,  /* hundred-thousandths */
+        GRU10S = 1,     /* tenths of a unit */
+        GRU100S = 2,    /* hundredths of a unit */
+        GRU1000S = 3,   /* thousandths of a unit */
+        GRU10000S = 4,  /* ten-thousandths of a unit */
+        GRU100000S = 5, /* hundred-thousandths */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum GROUP3OPT
+    enum Group3Opt
     {
-        GROUP3OPT_UNKNOWN = -1, // unknown (uninitialized)
-        GROUP3OPT_2DENCODING = 0x1,  /* 2-dimensional coding */
-        GROUP3OPT_UNCOMPRESSED = 0x2,  /* data not compressed */
-        GROUP3OPT_FILLBITS = 0x4,  /* fill to byte boundary */
+        UNKNOWN = -1,       // unknown (uninitialized)
+        ENCODING2D = 0x1,   /* 2-dimensional coding */
+        UNCOMPRESSED = 0x2, /* data not compressed */
+        FILLBITS = 0x4,     /* fill to byte boundary */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum RESUNIT
+    enum ResUnit
     {
-        RESUNIT_NONE = 1,  /* no meaningful units */
-        RESUNIT_INCH = 2,  /* english */
-        RESUNIT_CENTIMETER = 3,  /* metric */
+        NONE = 1,           /* no meaningful units */
+        INCH = 2,           /* english */
+        CENTIMETER = 3,     /* metric */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum COLORRESPONSEUNIT
+    enum ColorResponseUnit
     {
-        COLORRESPONSEUNIT_10S = 1,  /* tenths of a unit */
-        COLORRESPONSEUNIT_100S = 2,  /* hundredths of a unit */
-        COLORRESPONSEUNIT_1000S = 3,  /* thousandths of a unit */
-        COLORRESPONSEUNIT_10000S = 4,  /* ten-thousandths of a unit */
-        COLORRESPONSEUNIT_100000S = 5,  /* hundred-thousandths */
+        CRU10S = 1,         /* tenths of a unit */
+        CRU100S = 2,        /* hundredths of a unit */
+        CRU1000S = 3,       /* thousandths of a unit */
+        CRU10000S = 4,      /* ten-thousandths of a unit */
+        CRU100000S = 5,     /* hundred-thousandths */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum PREDICTOR
+    enum Predictor
     {
-        PREDICTOR_NONE = 1,  /* no prediction scheme used */
-        PREDICTOR_HORIZONTAL = 2,  /* horizontal differencing */
-        PREDICTOR_FLOATINGPOINT = 3,  /* floating point predictor */
+        NONE = 1,           /* no prediction scheme used */
+        HORIZONTAL = 2,     /* horizontal differencing */
+        FLOATINGPOINT = 3,  /* floating point predictor */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum CLEANFAXDATA
+    enum CleanFaxData
     {
-        CLEANFAXDATA_CLEAN = 0,  /* no errors detected */
-        CLEANFAXDATA_REGENERATED = 1,  /* receiver regenerated lines */
-        CLEANFAXDATA_UNCLEAN = 2,  /* uncorrected errors exist */
+        CLEAN = 0,          /* no errors detected */
+        REGENERATED = 1,    /* receiver regenerated lines */
+        UNCLEAN = 2,        /* uncorrected errors exist */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum INKSET
+    enum InkSet
     {
-        INKSET_CMYK = 1,  /* !cyan-magenta-yellow-black color */
-        INKSET_MULTIINK = 2,  /* !multi-ink or hi-fi color */
+        CMYK = 1,       /* !cyan-magenta-yellow-black color */
+        MULTIINK = 2,   /* !multi-ink or hi-fi color */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum EXTRASAMPLE
+    enum ExtraSample
     {
-        EXTRASAMPLE_UNSPECIFIED = 0,  /* !unspecified data */
-        EXTRASAMPLE_ASSOCALPHA = 1,  /* !associated alpha data */
-        EXTRASAMPLE_UNASSALPHA = 2,  /* !unassociated alpha data */
+        UNSPECIFIED = 0,    /* !unspecified data */
+        ASSOCALPHA = 1,     /* !associated alpha data */
+        UNASSALPHA = 2,     /* !unassociated alpha data */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum SAMPLEFORMAT
+    enum SampleFormat
     {
-        SAMPLEFORMAT_UINT = 1,  /* !unsigned integer data */
-        SAMPLEFORMAT_INT = 2,  /* !signed integer data */
-        SAMPLEFORMAT_IEEEFP = 3,  /* !IEEE floating point data */
-        SAMPLEFORMAT_VOID = 4,  /* !untyped data */
-        SAMPLEFORMAT_COMPLEXINT = 5,  /* !complex signed int */
-        SAMPLEFORMAT_COMPLEXIEEEFP = 6,  /* !complex ieee floating */
+        UINT = 1,           /* !unsigned integer data */
+        INT = 2,            /* !signed integer data */
+        IEEEFP = 3,         /* !IEEE floating point data */
+        VOID = 4,           /* !untyped data */
+        COMPLEXINT = 5,     /* !complex signed int */
+        COMPLEXIEEEFP = 6,  /* !complex ieee floating */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum JPEGPROC
+    enum JpegProc
     {
-        JPEGPROC_BASELINE = 1,  /* !baseline sequential */
-        JPEGPROC_LOSSLESS = 14,  /* !Huffman coded lossless */
+        BASELINE = 1,   /* !baseline sequential */
+        LOSSLESS = 14,  /* !Huffman coded lossless */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum YCBCRPOSITION
+    enum YCbCrPosition
     {
-        YCBCRPOSITION_CENTERED = 1,  /* !as in PostScript Level 2 */
-        YCBCRPOSITION_COSITED = 2,  /* !as in CCIR 601-1 */
+        CENTERED = 1,   /* !as in PostScript Level 2 */
+        COSITED = 2,    /* !as in CCIR 601-1 */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum FAXMODE
+    enum FaxMode
     {
-        FAXMODE_CLASSIC = 0x0000,  /* default, include RTC */
-        FAXMODE_NORTC = 0x0001,  /* no RTC at end of data */
-        FAXMODE_NOEOL = 0x0002,  /* no EOL code at end of row */
-        FAXMODE_BYTEALIGN = 0x0004,  /* byte align row */
-        FAXMODE_WORDALIGN = 0x0008,  /* word align row */
-        FAXMODE_CLASSF = FAXMODE_NORTC,  /* TIFF Class F */
+        CLASSIC = 0x0000,       /* default, include RTC */
+        NORTC = 0x0001,         /* no RTC at end of data */
+        NOEOL = 0x0002,         /* no EOL code at end of row */
+        BYTEALIGN = 0x0004,     /* byte align row */
+        WORDALIGN = 0x0008,     /* word align row */
+        CLASSF = NORTC,         /* TIFF Class F */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum JPEGCOLORMODE
+    enum JpegColorMode
     {
-        JPEGCOLORMODE_RAW = 0x0000,  /* no conversion (default) */
-        JPEGCOLORMODE_RGB = 0x0001,  /* do auto conversion */
+        RAW = 0x0000,   /* no conversion (default) */
+        RGB = 0x0001,   /* do auto conversion */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum JPEGTABLESMODE
+    enum JpegTablesMode
     {
-        JPEGTABLESMODE_QUANT = 0x0001,  /* include quantization tbls */
-        JPEGTABLESMODE_HUFF = 0x0002,  /* include Huffman tbls */
+        QUANT = 0x0001,     /* include quantization tbls */
+        HUFF = 0x0002,      /* include Huffman tbls */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum PIXARLOGDATAFMT
+    enum PixarLogDataFmt
     {
-        PIXARLOGDATAFMT_8BIT = 0,  /* regular u_char samples */
-        PIXARLOGDATAFMT_8BITABGR = 1,  /* ABGR-order u_chars */
-        PIXARLOGDATAFMT_11BITLOG = 2,  /* 11-bit log-encoded (raw) */
-        PIXARLOGDATAFMT_12BITPICIO = 3,  /* as per PICIO (1.0==2048) */
-        PIXARLOGDATAFMT_16BIT = 4,  /* signed short samples */
-        PIXARLOGDATAFMT_FLOAT = 5,  /* IEEE float samples */
+        FMT8BIT = 0,        /* regular u_char samples */
+        FMT8BITABGR = 1,    /* ABGR-order u_chars */
+        FMT11BITLOG = 2,    /* 11-bit log-encoded (raw) */
+        FMT12BITPICIO = 3,  /* as per PICIO (1.0==2048) */
+        FMT16BIT = 4,       /* signed short samples */
+        FMTFLOAT = 5,       /* IEEE float samples */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum DCSIMAGERMODEL
+    enum DCSImagerModel
     {
-        DCSIMAGERMODEL_M3 = 0,  /* M3 chip (1280 x 1024) */
-        DCSIMAGERMODEL_M5 = 1,  /* M5 chip (1536 x 1024) */
-        DCSIMAGERMODEL_M6 = 2,  /* M6 chip (3072 x 2048) */
+        M3 = 0,     /* M3 chip (1280 x 1024) */
+        M5 = 1,     /* M5 chip (1536 x 1024) */
+        M6 = 2,     /* M6 chip (3072 x 2048) */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum DCSIMAGERFILTER
+    enum DCSImagerFilter
     {
-        DCSIMAGERFILTER_IR = 0,  /* infrared filter */
-        DCSIMAGERFILTER_MONO = 1,  /* monochrome filter */
-        DCSIMAGERFILTER_CFA = 2,  /* color filter array */
-        DCSIMAGERFILTER_OTHER = 3,  /* other filter */
+        IR = 0,     /* infrared filter */
+        MONO = 1,   /* monochrome filter */
+        CFA = 2,    /* color filter array */
+        OTHER = 3,  /* other filter */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum DCSINTERPMODE
+    enum DCSInterpMode
     {
-        DCSINTERPMODE_NORMAL = 0x0,  /* whole image, default */
-        DCSINTERPMODE_PREVIEW = 0x1,  /* preview of image (384x256) */
+        NORMAL = 0x0,   /* whole image, default */
+        PREVIEW = 0x1,  /* preview of image (384x256) */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum SGILOGDATAFMT
+    enum SGILogDataFmt
     {
-        SGILOGDATAFMT_FLOAT = 0,  /* IEEE float samples */
-        SGILOGDATAFMT_16BIT = 1,  /* 16-bit samples */
-        SGILOGDATAFMT_RAW = 2,  /* uninterpreted data */
-        SGILOGDATAFMT_8BIT = 3,  /* 8-bit RGB monitor values */
+        FMTFLOAT = 0,   /* IEEE float samples */
+        FMT16BIT = 1,   /* 16-bit samples */
+        FMTRAW = 2,     /* uninterpreted data */
+        FMT8BIT = 3,    /* 8-bit RGB monitor values */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum SGILOGENCODE
+    enum SGILogEncode
     {
-        SGILOGENCODE_NODITHER = 0,  /* do not dither encoded values*/
-        SGILOGENCODE_RANDITHER = 1,  /* randomly dither encd values */
+        NODITHER = 0,   /* do not dither encoded values*/
+        RANDITHER = 1,  /* randomly dither encd values */
     };
 
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum TIFFTAG
+    enum TiffTag
     {
-        TIFFTAG_IGNORE = 0, /* tag placeholder */
-        TIFFTAG_SUBFILETYPE = 254, /* subfile data descriptor. see SubFileType */
-        TIFFTAG_OSUBFILETYPE = 255, /* +kind of data in subfile. see SubFileDataType */
-        TIFFTAG_IMAGEWIDTH = 256, /* image width in pixels */
-        TIFFTAG_IMAGELENGTH = 257, /* image height in pixels */
-        TIFFTAG_BITSPERSAMPLE = 258, /* bits per channel (sample) */
-        TIFFTAG_COMPRESSION = 259, /* data compression technique. see TiffCompression */
-        TIFFTAG_PHOTOMETRIC = 262, /* photometric interpretation. see PhotometricInterpretation */
-        TIFFTAG_THRESHHOLDING = 263, /* +thresholding used on data. see TiffThresholding */
-        TIFFTAG_CELLWIDTH = 264, /* +dithering matrix width */
-        TIFFTAG_CELLLENGTH = 265, /* +dithering matrix height */
-        TIFFTAG_FILLORDER = 266, /* data order within a byte. see ByteFillOrder */
-        TIFFTAG_DOCUMENTNAME = 269, /* name of doc. image is from */
-        TIFFTAG_IMAGEDESCRIPTION = 270, /* info about image */
-        TIFFTAG_MAKE = 271, /* scanner manufacturer name */
-        TIFFTAG_MODEL = 272, /* scanner model name/number */
-        TIFFTAG_STRIPOFFSETS = 273, /* offsets to data strips */
-        TIFFTAG_ORIENTATION = 274, /* +image orientation. see ImageOrientation */
-        TIFFTAG_SAMPLESPERPIXEL = 277, /* samples per pixel */
-        TIFFTAG_ROWSPERSTRIP = 278, /* rows per strip of data */
-        TIFFTAG_STRIPBYTECOUNTS = 279, /* bytes counts for strips */
-        TIFFTAG_MINSAMPLEVALUE = 280, /* +minimum sample value */
-        TIFFTAG_MAXSAMPLEVALUE = 281, /* +maximum sample value */
-        TIFFTAG_XRESOLUTION = 282, /* pixels/resolution in x */
-        TIFFTAG_YRESOLUTION = 283, /* pixels/resolution in y */
-        TIFFTAG_PLANARCONFIG = 284, /* storage organization. see PlanarConfig */
-        TIFFTAG_PAGENAME = 285, /* page name image is from */
-        TIFFTAG_XPOSITION = 286, /* x page offset of image lhs */
-        TIFFTAG_YPOSITION = 287, /* y page offset of image lhs */
-        TIFFTAG_FREEOFFSETS = 288, /* +byte offset to free block */
-        TIFFTAG_FREEBYTECOUNTS = 289, /* +sizes of free blocks */
-        TIFFTAG_GRAYRESPONSEUNIT = 290, /* $gray scale curve accuracy. see GrayResponseUnit */
-        TIFFTAG_GRAYRESPONSECURVE = 291, /* $gray scale response curve */
-        TIFFTAG_GROUP3OPTIONS = 292, /* 32 flag bits */
-        TIFFTAG_T4OPTIONS = 292, /* TIFF 6.0 proper name alias. see T4Options */
-        TIFFTAG_GROUP4OPTIONS = 293, /* 32 flag bits */
-        TIFFTAG_T6OPTIONS = 293, /* TIFF 6.0 proper name. see T6Options */
-        TIFFTAG_RESOLUTIONUNIT = 296, /* units of resolutions. see TiffResolutionUnit */
-        TIFFTAG_PAGENUMBER = 297, /* page numbers of multi-page */
-        TIFFTAG_COLORRESPONSEUNIT = 300, /* $color curve accuracy. see ColorResponseUnit */
-        TIFFTAG_TRANSFERFUNCTION = 301, /* !colorimetry info */
-        TIFFTAG_SOFTWARE = 305, /* name & release */
-        TIFFTAG_DATETIME = 306, /* creation date and time */
-        TIFFTAG_ARTIST = 315, /* creator of image */
-        TIFFTAG_HOSTCOMPUTER = 316, /* machine where created */
-        TIFFTAG_PREDICTOR = 317, /* prediction scheme w/ LZW. see PredictorScheme */
-        TIFFTAG_WHITEPOINT = 318, /* image white point */
-        TIFFTAG_PRIMARYCHROMATICITIES = 319, /* !primary chromaticities */
-        TIFFTAG_COLORMAP = 320, /* RGB map for pallette image */
-        TIFFTAG_HALFTONEHINTS = 321, /* !highlight+shadow info */
-        TIFFTAG_TILEWIDTH = 322, /* !tile width in pixels */
-        TIFFTAG_TILELENGTH = 323, /* !tile height in pixels */
-        TIFFTAG_TILEOFFSETS = 324, /* !offsets to data tiles */
-        TIFFTAG_TILEBYTECOUNTS = 325, /* !byte counts for tiles */
-        TIFFTAG_BADFAXLINES = 326, /* lines w/ wrong pixel count */
-        TIFFTAG_CLEANFAXDATA = 327, /* regenerated line info. see CleanFaxData*/
-        TIFFTAG_CONSECUTIVEBADFAXLINES = 328, /* max consecutive bad lines */
-        TIFFTAG_SUBIFD = 330, /* subimage descriptors */
-        TIFFTAG_INKSET = 332, /* !inks in separated image. see InkSet */
-        TIFFTAG_INKNAMES = 333, /* !ascii names of inks */
-        TIFFTAG_NUMBEROFINKS = 334, /* !number of inks */
-        TIFFTAG_DOTRANGE = 336, /* !0% and 100% dot codes */
-        TIFFTAG_TARGETPRINTER = 337, /* !separation target */
-        TIFFTAG_EXTRASAMPLES = 338, /* !info about extra samples. see ExtraSamples */
-        TIFFTAG_SAMPLEFORMAT = 339, /* !data sample format. see SampleFormat */
-        TIFFTAG_SMINSAMPLEVALUE = 340, /* !variable MinSampleValue */
-        TIFFTAG_SMAXSAMPLEVALUE = 341, /* !variable MaxSampleValue */
-        TIFFTAG_CLIPPATH = 343, /* %ClipPath [Adobe TIFF technote 2] */
-        TIFFTAG_XCLIPPATHUNITS = 344, /* %XClipPathUnits [Adobe TIFF technote 2] */
-        TIFFTAG_YCLIPPATHUNITS = 345, /* %YClipPathUnits [Adobe TIFF technote 2] */
-        TIFFTAG_INDEXED = 346, /* %Indexed [Adobe TIFF Technote 3] */
-        TIFFTAG_JPEGTABLES = 347, /* %JPEG table stream */
-        TIFFTAG_OPIPROXY = 351, /* %OPI Proxy [Adobe TIFF technote] */
+        IGNORE = 0, /* tag placeholder */
+        SUBFILETYPE = 254, /* subfile data descriptor. see SubFileType */
+        OSUBFILETYPE = 255, /* +kind of data in subfile. see OSubFileType */
+        IMAGEWIDTH = 256, /* image width in pixels */
+        IMAGELENGTH = 257, /* image height in pixels */
+        BITSPERSAMPLE = 258, /* bits per channel (sample) */
+        COMPRESSION = 259, /* data compression technique. see Compression */
+        PHOTOMETRIC = 262, /* photometric interpretation. see Photometric */
+        THRESHHOLDING = 263, /* +thresholding used on data. see Threshold */
+        CELLWIDTH = 264, /* +dithering matrix width */
+        CELLLENGTH = 265, /* +dithering matrix height */
+        FILLORDER = 266, /* data order within a byte. see FillOrder */
+        DOCUMENTNAME = 269, /* name of doc. image is from */
+        IMAGEDESCRIPTION = 270, /* info about image */
+        MAKE = 271, /* scanner manufacturer name */
+        MODEL = 272, /* scanner model name/number */
+        STRIPOFFSETS = 273, /* offsets to data strips */
+        ORIENTATION = 274, /* +image orientation. see Orientation */
+        SAMPLESPERPIXEL = 277, /* samples per pixel */
+        ROWSPERSTRIP = 278, /* rows per strip of data */
+        STRIPBYTECOUNTS = 279, /* bytes counts for strips */
+        MINSAMPLEVALUE = 280, /* +minimum sample value */
+        MAXSAMPLEVALUE = 281, /* +maximum sample value */
+        XRESOLUTION = 282, /* pixels/resolution in x */
+        YRESOLUTION = 283, /* pixels/resolution in y */
+        PLANARCONFIG = 284, /* storage organization. see PlanarConfig */
+        PAGENAME = 285, /* page name image is from */
+        XPOSITION = 286, /* x page offset of image lhs */
+        YPOSITION = 287, /* y page offset of image lhs */
+        FREEOFFSETS = 288, /* +byte offset to free block */
+        FREEBYTECOUNTS = 289, /* +sizes of free blocks */
+        GRAYRESPONSEUNIT = 290, /* $gray scale curve accuracy. see GrayResponseUnit */
+        GRAYRESPONSECURVE = 291, /* $gray scale response curve */
+        GROUP3OPTIONS = 292, /* 32 flag bits */
+        T4OPTIONS = 292, /* TIFF 6.0 proper name alias. */
+        GROUP4OPTIONS = 293, /* 32 flag bits */
+        T6OPTIONS = 293, /* TIFF 6.0 proper name. */
+        RESOLUTIONUNIT = 296, /* units of resolutions. see ResUnit */
+        PAGENUMBER = 297, /* page numbers of multi-page */
+        COLORRESPONSEUNIT = 300, /* $color curve accuracy. see ColorResponseUnit */
+        TRANSFERFUNCTION = 301, /* !colorimetry info */
+        SOFTWARE = 305, /* name & release */
+        DATETIME = 306, /* creation date and time */
+        ARTIST = 315, /* creator of image */
+        HOSTCOMPUTER = 316, /* machine where created */
+        PREDICTOR = 317, /* prediction scheme w/ LZW. see Predictor */
+        WHITEPOINT = 318, /* image white point */
+        PRIMARYCHROMATICITIES = 319, /* !primary chromaticities */
+        COLORMAP = 320, /* RGB map for pallette image */
+        HALFTONEHINTS = 321, /* !highlight+shadow info */
+        TILEWIDTH = 322, /* !tile width in pixels */
+        TILELENGTH = 323, /* !tile height in pixels */
+        TILEOFFSETS = 324, /* !offsets to data tiles */
+        TILEBYTECOUNTS = 325, /* !byte counts for tiles */
+        BADFAXLINES = 326, /* lines w/ wrong pixel count */
+        CLEANFAXDATA = 327, /* regenerated line info. see CleanFaxData*/
+        CONSECUTIVEBADFAXLINES = 328, /* max consecutive bad lines */
+        SUBIFD = 330, /* subimage descriptors */
+        INKSET = 332, /* !inks in separated image. see InkSet */
+        INKNAMES = 333, /* !ascii names of inks */
+        NUMBEROFINKS = 334, /* !number of inks */
+        DOTRANGE = 336, /* !0% and 100% dot codes */
+        TARGETPRINTER = 337, /* !separation target */
+        EXTRASAMPLES = 338, /* !info about extra samples. see ExtraSamples */
+        SAMPLEFORMAT = 339, /* !data sample format. see SampleFormat */
+        SMINSAMPLEVALUE = 340, /* !variable MinSampleValue */
+        SMAXSAMPLEVALUE = 341, /* !variable MaxSampleValue */
+        CLIPPATH = 343, /* %ClipPath [Adobe TIFF technote 2] */
+        XCLIPPATHUNITS = 344, /* %XClipPathUnits [Adobe TIFF technote 2] */
+        YCLIPPATHUNITS = 345, /* %YClipPathUnits [Adobe TIFF technote 2] */
+        INDEXED = 346, /* %Indexed [Adobe TIFF Technote 3] */
+        JPEGTABLES = 347, /* %JPEG table stream */
+        OPIPROXY = 351, /* %OPI Proxy [Adobe TIFF technote] */
         /*
          * Tags 512-521 are obsoleted by Technical Note #2 which specifies a
          * revised JPEG-in-TIFF scheme.
          */
-        TIFFTAG_JPEGPROC = 512, /* !JPEG processing algorithm. see JpegAlgorithm */
-        TIFFTAG_JPEGIFOFFSET = 513, /* !pointer to SOI marker */
-        TIFFTAG_JPEGIFBYTECOUNT = 514, /* !JFIF stream length */
-        TIFFTAG_JPEGRESTARTINTERVAL = 515, /* !restart interval length */
-        TIFFTAG_JPEGLOSSLESSPREDICTORS = 517, /* !lossless proc predictor */
-        TIFFTAG_JPEGPOINTTRANSFORM = 518, /* !lossless point transform */
-        TIFFTAG_JPEGQTABLES = 519, /* !Q matrice offsets */
-        TIFFTAG_JPEGDCTABLES = 520, /* !DCT table offsets */
-        TIFFTAG_JPEGACTABLES = 521, /* !AC coefficient offsets */
-        TIFFTAG_YCBCRCOEFFICIENTS = 529, /* !RGB -> YCbCr transform */
-        TIFFTAG_YCBCRSUBSAMPLING = 530, /* !YCbCr subsampling factors */
-        TIFFTAG_YCBCRPOSITIONING = 531, /* !subsample positioning. see SubsamplePositioning */
-        TIFFTAG_REFERENCEBLACKWHITE = 532, /* !colorimetry info */
-        TIFFTAG_XMLPACKET = 700, /* %XML packet [Adobe XMP Specification, January 2004 */
-        TIFFTAG_OPIIMAGEID = 32781, /* %OPI ImageID [Adobe TIFF technote] */
+        JPEGPROC = 512, /* !JPEG processing algorithm. see JpegProc */
+        JPEGIFOFFSET = 513, /* !pointer to SOI marker */
+        JPEGIFBYTECOUNT = 514, /* !JFIF stream length */
+        JPEGRESTARTINTERVAL = 515, /* !restart interval length */
+        JPEGLOSSLESSPREDICTORS = 517, /* !lossless proc predictor */
+        JPEGPOINTTRANSFORM = 518, /* !lossless point transform */
+        JPEGQTABLES = 519, /* !Q matrice offsets */
+        JPEGDCTABLES = 520, /* !DCT table offsets */
+        JPEGACTABLES = 521, /* !AC coefficient offsets */
+        YCBCRCOEFFICIENTS = 529, /* !RGB -> YCbCr transform */
+        YCBCRSUBSAMPLING = 530, /* !YCbCr subsampling factors */
+        YCBCRPOSITIONING = 531, /* !subsample positioning. see YCbCrPosition */
+        REFERENCEBLACKWHITE = 532, /* !colorimetry info */
+        XMLPACKET = 700, /* %XML packet [Adobe XMP Specification, January 2004 */
+        OPIIMAGEID = 32781, /* %OPI ImageID [Adobe TIFF technote] */
         /* tags 32952-32956 are private tags registered to Island Graphics */
-        TIFFTAG_REFPTS = 32953, /* image reference points */
-        TIFFTAG_REGIONTACKPOINT = 32954, /* region-xform tack point */
-        TIFFTAG_REGIONWARPCORNERS = 32955, /* warp quadrilateral */
-        TIFFTAG_REGIONAFFINE = 32956, /* affine transformation mat */
+        REFPTS = 32953, /* image reference points */
+        REGIONTACKPOINT = 32954, /* region-xform tack point */
+        REGIONWARPCORNERS = 32955, /* warp quadrilateral */
+        REGIONAFFINE = 32956, /* affine transformation mat */
         /* tags 32995-32999 are private tags registered to SGI */
-        TIFFTAG_MATTEING = 32995, /* $use ExtraSamples */
-        TIFFTAG_DATATYPE = 32996, /* $use SampleFormat */
-        TIFFTAG_IMAGEDEPTH = 32997, /* z depth of image */
-        TIFFTAG_TILEDEPTH = 32998, /* z depth/data tile */
+        MATTEING = 32995, /* $use ExtraSamples */
+        DATATYPE = 32996, /* $use SampleFormat */
+        IMAGEDEPTH = 32997, /* z depth of image */
+        TILEDEPTH = 32998, /* z depth/data tile */
         /* tags 33300-33309 are private tags registered to Pixar */
         /*
-         * TIFFTAG_PIXAR_IMAGEFULLWIDTH and TIFFTAG_PIXAR_IMAGEFULLLENGTH
+         * PIXAR_IMAGEFULLWIDTH and PIXAR_IMAGEFULLLENGTH
          * are set when an image has been cropped out of a larger image.  
          * They reflect the size of the original uncropped image.
-         * The TIFFTAG_XPOSITION and TIFFTAG_YPOSITION can be used
+         * The XPOSITION and YPOSITION can be used
          * to determine the position of the smaller image in the larger one.
          */
-        TIFFTAG_PIXAR_IMAGEFULLWIDTH = 33300, /* full image size in x */
-        TIFFTAG_PIXAR_IMAGEFULLLENGTH = 33301, /* full image size in y */
+        PIXAR_IMAGEFULLWIDTH = 33300, /* full image size in x */
+        PIXAR_IMAGEFULLLENGTH = 33301, /* full image size in y */
         /* Tags 33302-33306 are used to identify special image modes and data
          * used by Pixar's texture formats.
          */
-        TIFFTAG_PIXAR_TEXTUREFORMAT = 33302, /* texture map format */
-        TIFFTAG_PIXAR_WRAPMODES = 33303, /* s & t wrap modes */
-        TIFFTAG_PIXAR_FOVCOT = 33304, /* cotan(fov) for env. maps */
-        TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN = 33305,
-        TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA = 33306,
+        PIXAR_TEXTUREFORMAT = 33302, /* texture map format */
+        PIXAR_WRAPMODES = 33303, /* s & t wrap modes */
+        PIXAR_FOVCOT = 33304, /* cotan(fov) for env. maps */
+        PIXAR_MATRIX_WORLDTOSCREEN = 33305,
+        PIXAR_MATRIX_WORLDTOCAMERA = 33306,
         /* tag 33405 is a private tag registered to Eastman Kodak */
-        TIFFTAG_WRITERSERIALNUMBER = 33405, /* device serial number */
+        WRITERSERIALNUMBER = 33405, /* device serial number */
         /* tag 33432 is listed in the 6.0 spec w/ unknown ownership */
-        TIFFTAG_COPYRIGHT = 33432, /* copyright string */
+        COPYRIGHT = 33432, /* copyright string */
         /* IPTC TAG from RichTIFF specifications */
-        TIFFTAG_RICHTIFFIPTC = 33723,
+        RICHTIFFIPTC = 33723,
         /* 34016-34029 are reserved for ANSI IT8 TIFF/IT <dkelly@apago.com) */
-        TIFFTAG_IT8SITE = 34016, /* site name */
-        TIFFTAG_IT8COLORSEQUENCE = 34017, /* color seq. [RGB,CMYK,etc] */
-        TIFFTAG_IT8HEADER = 34018, /* DDES Header */
-        TIFFTAG_IT8RASTERPADDING = 34019, /* raster scanline padding */
-        TIFFTAG_IT8BITSPERRUNLENGTH = 34020, /* # of bits in short run */
-        TIFFTAG_IT8BITSPEREXTENDEDRUNLENGTH = 34021, /* # of bits in long run */
-        TIFFTAG_IT8COLORTABLE = 34022, /* LW colortable */
-        TIFFTAG_IT8IMAGECOLORINDICATOR = 34023, /* BP/BL image color switch */
-        TIFFTAG_IT8BKGCOLORINDICATOR = 34024, /* BP/BL bg color switch */
-        TIFFTAG_IT8IMAGECOLORVALUE = 34025, /* BP/BL image color value */
-        TIFFTAG_IT8BKGCOLORVALUE = 34026, /* BP/BL bg color value */
-        TIFFTAG_IT8PIXELINTENSITYRANGE = 34027, /* MP pixel intensity value */
-        TIFFTAG_IT8TRANSPARENCYINDICATOR = 34028, /* HC transparency switch */
-        TIFFTAG_IT8COLORCHARACTERIZATION = 34029, /* color character. table */
-        TIFFTAG_IT8HCUSAGE = 34030, /* HC usage indicator */
-        TIFFTAG_IT8TRAPINDICATOR = 34031, /* Trapping indicator (untrapped=0, trapped=1) */
-        TIFFTAG_IT8CMYKEQUIVALENT = 34032, /* CMYK color equivalents */
+        IT8SITE = 34016, /* site name */
+        IT8COLORSEQUENCE = 34017, /* color seq. [RGB,CMYK,etc] */
+        IT8HEADER = 34018, /* DDES Header */
+        IT8RASTERPADDING = 34019, /* raster scanline padding */
+        IT8BITSPERRUNLENGTH = 34020, /* # of bits in short run */
+        IT8BITSPEREXTENDEDRUNLENGTH = 34021, /* # of bits in long run */
+        IT8COLORTABLE = 34022, /* LW colortable */
+        IT8IMAGECOLORINDICATOR = 34023, /* BP/BL image color switch */
+        IT8BKGCOLORINDICATOR = 34024, /* BP/BL bg color switch */
+        IT8IMAGECOLORVALUE = 34025, /* BP/BL image color value */
+        IT8BKGCOLORVALUE = 34026, /* BP/BL bg color value */
+        IT8PIXELINTENSITYRANGE = 34027, /* MP pixel intensity value */
+        IT8TRANSPARENCYINDICATOR = 34028, /* HC transparency switch */
+        IT8COLORCHARACTERIZATION = 34029, /* color character. table */
+        IT8HCUSAGE = 34030, /* HC usage indicator */
+        IT8TRAPINDICATOR = 34031, /* Trapping indicator (untrapped=0, trapped=1) */
+        IT8CMYKEQUIVALENT = 34032, /* CMYK color equivalents */
         /* tags 34232-34236 are private tags registered to Texas Instruments */
-        TIFFTAG_FRAMECOUNT = 34232, /* Sequence Frame Count */
+        FRAMECOUNT = 34232, /* Sequence Frame Count */
         /* tag 34377 is private tag registered to Adobe for PhotoShop */
-        TIFFTAG_PHOTOSHOP = 34377,
+        PHOTOSHOP = 34377,
         /* tags 34665, 34853 and 40965 are documented in EXIF specification */
-        TIFFTAG_EXIFIFD = 34665, /* Pointer to EXIF private directory */
+        EXIFIFD = 34665, /* Pointer to EXIF private directory */
         /* tag 34750 is a private tag registered to Adobe? */
-        TIFFTAG_ICCPROFILE = 34675, /* ICC profile data */
+        ICCPROFILE = 34675, /* ICC profile data */
         /* tag 34750 is a private tag registered to Pixel Magic */
-        TIFFTAG_JBIGOPTIONS = 34750, /* JBIG options */
-        TIFFTAG_GPSIFD = 34853, /* Pointer to GPS private directory */
+        JBIGOPTIONS = 34750, /* JBIG options */
+        GPSIFD = 34853, /* Pointer to GPS private directory */
         /* tags 34908-34914 are private tags registered to SGI */
-        TIFFTAG_FAXRECVPARAMS = 34908, /* encoded Class 2 ses. parms */
-        TIFFTAG_FAXSUBADDRESS = 34909, /* received SubAddr string */
-        TIFFTAG_FAXRECVTIME = 34910, /* receive time (secs) */
-        TIFFTAG_FAXDCS = 34911, /* encoded fax ses. params, Table 2/T.30 */
+        FAXRECVPARAMS = 34908, /* encoded Class 2 ses. parms */
+        FAXSUBADDRESS = 34909, /* received SubAddr string */
+        FAXRECVTIME = 34910, /* receive time (secs) */
+        FAXDCS = 34911, /* encoded fax ses. params, Table 2/T.30 */
         /* tags 37439-37443 are registered to SGI <gregl@sgi.com> */
-        TIFFTAG_STONITS = 37439, /* Sample value to Nits */
+        STONITS = 37439, /* Sample value to Nits */
         /* tag 34929 is a private tag registered to FedEx */
-        TIFFTAG_FEDEX_EDR = 34929, /* unknown use */
-        TIFFTAG_INTEROPERABILITYIFD = 40965, /* Pointer to Interoperability private directory */
+        FEDEX_EDR = 34929, /* unknown use */
+        INTEROPERABILITYIFD = 40965, /* Pointer to Interoperability private directory */
         /* Adobe Digital Negative (DNG) format tags */
-        TIFFTAG_DNGVERSION = 50706, /* &DNG version number */
-        TIFFTAG_DNGBACKWARDVERSION = 50707, /* &DNG compatibility version */
-        TIFFTAG_UNIQUECAMERAMODEL = 50708, /* &name for the camera model */
-        TIFFTAG_LOCALIZEDCAMERAMODEL = 50709, /* &localized camera model name */
-        TIFFTAG_CFAPLANECOLOR = 50710, /* &CFAPattern->LinearRaw space mapping */
-        TIFFTAG_CFALAYOUT = 50711, /* &spatial layout of the CFA */
-        TIFFTAG_LINEARIZATIONTABLE = 50712, /* &lookup table description */
-        TIFFTAG_BLACKLEVELREPEATDIM = 50713, /* &repeat pattern size for the BlackLevel tag */
-        TIFFTAG_BLACKLEVEL = 50714, /* &zero light encoding level */
-        TIFFTAG_BLACKLEVELDELTAH = 50715, /* &zero light encoding level differences (columns) */
-        TIFFTAG_BLACKLEVELDELTAV = 50716, /* &zero light encoding level differences (rows) */
-        TIFFTAG_WHITELEVEL = 50717, /* &fully saturated encoding level */
-        TIFFTAG_DEFAULTSCALE = 50718, /* &default scale factors */
-        TIFFTAG_DEFAULTCROPORIGIN = 50719, /* &origin of the final image area */
-        TIFFTAG_DEFAULTCROPSIZE = 50720, /* &size of the final image area */
-        TIFFTAG_COLORMATRIX1 = 50721, /* &XYZ->reference color space transformation matrix 1 */
-        TIFFTAG_COLORMATRIX2 = 50722, /* &XYZ->reference color space transformation matrix 2 */
-        TIFFTAG_CAMERACALIBRATION1 = 50723, /* &calibration matrix 1 */
-        TIFFTAG_CAMERACALIBRATION2 = 50724, /* &calibration matrix 2 */
-        TIFFTAG_REDUCTIONMATRIX1 = 50725, /* &dimensionality reduction matrix 1 */
-        TIFFTAG_REDUCTIONMATRIX2 = 50726, /* &dimensionality reduction matrix 2 */
-        TIFFTAG_ANALOGBALANCE = 50727, /* &gain applied the stored raw values*/
-        TIFFTAG_ASSHOTNEUTRAL = 50728, /* &selected white balance in linear reference space */
-        TIFFTAG_ASSHOTWHITEXY = 50729, /* &selected white balance in x-y chromaticity coordinates */
-        TIFFTAG_BASELINEEXPOSURE = 50730, /* &how much to move the zero point */
-        TIFFTAG_BASELINENOISE = 50731, /* &relative noise level */
-        TIFFTAG_BASELINESHARPNESS = 50732, /* &relative amount of sharpening */
-        TIFFTAG_BAYERGREENSPLIT = 50733, /* &how closely the values of the green pixels in the blue/green rows track the values of the green pixels in the red/green rows */
-        TIFFTAG_LINEARRESPONSELIMIT = 50734, /* &non-linear encoding range */
-        TIFFTAG_CAMERASERIALNUMBER = 50735, /* &camera's serial number */
-        TIFFTAG_LENSINFO = 50736, /* info about the lens */
-        TIFFTAG_CHROMABLURRADIUS = 50737, /* &chroma blur radius */
-        TIFFTAG_ANTIALIASSTRENGTH = 50738, /* &relative strength of the camera's anti-alias filter */
-        TIFFTAG_SHADOWSCALE = 50739, /* &used by Adobe Camera Raw */
-        TIFFTAG_DNGPRIVATEDATA = 50740, /* &manufacturer's private data */
-        TIFFTAG_MAKERNOTESAFETY = 50741, /* &whether the EXIF MakerNote tag is safe to preserve along with the rest of the EXIF data */
-        TIFFTAG_CALIBRATIONILLUMINANT1 = 50778, /* &illuminant 1 */
-        TIFFTAG_CALIBRATIONILLUMINANT2 = 50779, /* &illuminant 2 */
-        TIFFTAG_BESTQUALITYSCALE = 50780, /* &best quality multiplier */
-        TIFFTAG_RAWDATAUNIQUEID = 50781, /* &unique identifier for the raw image data */
-        TIFFTAG_ORIGINALRAWFILENAME = 50827, /* &file name of the original raw file */
-        TIFFTAG_ORIGINALRAWFILEDATA = 50828, /* &contents of the original raw file */
-        TIFFTAG_ACTIVEAREA = 50829, /* &active (non-masked) pixels of the sensor */
-        TIFFTAG_MASKEDAREAS = 50830, /* &list of coordinates of fully masked pixels */
-        TIFFTAG_ASSHOTICCPROFILE = 50831, /* &these two tags used to */
-        TIFFTAG_ASSHOTPREPROFILEMATRIX = 50832, /* map cameras's color space into ICC profile space */
-        TIFFTAG_CURRENTICCPROFILE = 50833, /* & */
-        TIFFTAG_CURRENTPREPROFILEMATRIX = 50834, /* & */
+        DNGVERSION = 50706, /* &DNG version number */
+        DNGBACKWARDVERSION = 50707, /* &DNG compatibility version */
+        UNIQUECAMERAMODEL = 50708, /* &name for the camera model */
+        LOCALIZEDCAMERAMODEL = 50709, /* &localized camera model name */
+        CFAPLANECOLOR = 50710, /* &CFAPattern->LinearRaw space mapping */
+        CFALAYOUT = 50711, /* &spatial layout of the CFA */
+        LINEARIZATIONTABLE = 50712, /* &lookup table description */
+        BLACKLEVELREPEATDIM = 50713, /* &repeat pattern size for the BlackLevel tag */
+        BLACKLEVEL = 50714, /* &zero light encoding level */
+        BLACKLEVELDELTAH = 50715, /* &zero light encoding level differences (columns) */
+        BLACKLEVELDELTAV = 50716, /* &zero light encoding level differences (rows) */
+        WHITELEVEL = 50717, /* &fully saturated encoding level */
+        DEFAULTSCALE = 50718, /* &default scale factors */
+        DEFAULTCROPORIGIN = 50719, /* &origin of the final image area */
+        DEFAULTCROPSIZE = 50720, /* &size of the final image area */
+        COLORMATRIX1 = 50721, /* &XYZ->reference color space transformation matrix 1 */
+        COLORMATRIX2 = 50722, /* &XYZ->reference color space transformation matrix 2 */
+        CAMERACALIBRATION1 = 50723, /* &calibration matrix 1 */
+        CAMERACALIBRATION2 = 50724, /* &calibration matrix 2 */
+        REDUCTIONMATRIX1 = 50725, /* &dimensionality reduction matrix 1 */
+        REDUCTIONMATRIX2 = 50726, /* &dimensionality reduction matrix 2 */
+        ANALOGBALANCE = 50727, /* &gain applied the stored raw values*/
+        ASSHOTNEUTRAL = 50728, /* &selected white balance in linear reference space */
+        ASSHOTWHITEXY = 50729, /* &selected white balance in x-y chromaticity coordinates */
+        BASELINEEXPOSURE = 50730, /* &how much to move the zero point */
+        BASELINENOISE = 50731, /* &relative noise level */
+        BASELINESHARPNESS = 50732, /* &relative amount of sharpening */
+        BAYERGREENSPLIT = 50733, /* &how closely the values of the green pixels in the blue/green rows track the values of the green pixels in the red/green rows */
+        LINEARRESPONSELIMIT = 50734, /* &non-linear encoding range */
+        CAMERASERIALNUMBER = 50735, /* &camera's serial number */
+        LENSINFO = 50736, /* info about the lens */
+        CHROMABLURRADIUS = 50737, /* &chroma blur radius */
+        ANTIALIASSTRENGTH = 50738, /* &relative strength of the camera's anti-alias filter */
+        SHADOWSCALE = 50739, /* &used by Adobe Camera Raw */
+        DNGPRIVATEDATA = 50740, /* &manufacturer's private data */
+        MAKERNOTESAFETY = 50741, /* &whether the EXIF MakerNote tag is safe to preserve along with the rest of the EXIF data */
+        CALIBRATIONILLUMINANT1 = 50778, /* &illuminant 1 */
+        CALIBRATIONILLUMINANT2 = 50779, /* &illuminant 2 */
+        BESTQUALITYSCALE = 50780, /* &best quality multiplier */
+        RAWDATAUNIQUEID = 50781, /* &unique identifier for the raw image data */
+        ORIGINALRAWFILENAME = 50827, /* &file name of the original raw file */
+        ORIGINALRAWFILEDATA = 50828, /* &contents of the original raw file */
+        ACTIVEAREA = 50829, /* &active (non-masked) pixels of the sensor */
+        MASKEDAREAS = 50830, /* &list of coordinates of fully masked pixels */
+        ASSHOTICCPROFILE = 50831, /* &these two tags used to */
+        ASSHOTPREPROFILEMATRIX = 50832, /* map cameras's color space into ICC profile space */
+        CURRENTICCPROFILE = 50833, /* & */
+        CURRENTPREPROFILEMATRIX = 50834, /* & */
         /* tag 65535 is an undefined tag used by Eastman Kodak */
-        TIFFTAG_DCSHUESHIFTVALUES = 65535, /* hue shift correction data */
+        DCSHUESHIFTVALUES = 65535, /* hue shift correction data */
 
         /*
          * The following are ``pseudo tags'' that can be used to control
@@ -589,88 +589,88 @@ namespace BitMiracle.LibTiff
          * http://www.remotesensing.org/libtiff/bugs.html with the appropriate
          * C definitions to add.
          */
-        TIFFTAG_FAXMODE = 65536, /* Group 3/4 format control. see FaxMode */
-        TIFFTAG_JPEGQUALITY = 65537, /* Compression quality level */
+        FAXMODE = 65536, /* Group 3/4 format control. see FaxMode */
+        JPEGQUALITY = 65537, /* Compression quality level */
         /* Note: quality level is on the IJG 0-100 scale.  Default value is 75 */
-        TIFFTAG_JPEGCOLORMODE = 65538, /* Auto RGB<=>YCbCr convert?. see JpegColorMode */
-        TIFFTAG_JPEGTABLESMODE = 65539, /* What to put in JPEGTables. see JpegTablesMode */
-        /* Note: default is JPEGTABLESMODE_QUANT | JPEGTABLESMODE_HUFF */
-        TIFFTAG_FAXFILLFUNC = 65540, /* G3/G4 fill function */
-        TIFFTAG_PIXARLOGDATAFMT = 65549, /* PixarLogCodec I/O data sz. see PixarLogDataFormat */
+        JPEGCOLORMODE = 65538, /* Auto RGB<=>YCbCr convert?. see JpegColorMode */
+        JPEGTABLESMODE = 65539, /* What to put in JPEGTables. see JpegTablesMode */
+        /* Note: default is JpegTablesMode.QUANT | JpegTablesMode.HUFF */
+        FAXFILLFUNC = 65540, /* G3/G4 fill function */
+        PIXARLOGDATAFMT = 65549, /* PixarLogCodec I/O data sz. see PixarLogDataFmt */
         /* 65550-65556 are allocated to Oceana Matrix <dev@oceana.com> */
-        TIFFTAG_DCSIMAGERTYPE = 65550, /* imager model & filter. see DCSImagerType */
-        TIFFTAG_DCSINTERPMODE = 65551, /* interpolation mode. see DCSInterpolationMode */
-        TIFFTAG_DCSBALANCEARRAY = 65552, /* color balance values */
-        TIFFTAG_DCSCORRECTMATRIX = 65553, /* color correction values */
-        TIFFTAG_DCSGAMMA = 65554, /* gamma value */
-        TIFFTAG_DCSTOESHOULDERPTS = 65555, /* toe & shoulder points */
-        TIFFTAG_DCSCALIBRATIONFD = 65556, /* calibration file desc */
+        DCSIMAGERTYPE = 65550, /* imager model & filter. see DCSImagerType */
+        DCSINTERPMODE = 65551, /* interpolation mode. see DCSInterpMode */
+        DCSBALANCEARRAY = 65552, /* color balance values */
+        DCSCORRECTMATRIX = 65553, /* color correction values */
+        DCSGAMMA = 65554, /* gamma value */
+        DCSTOESHOULDERPTS = 65555, /* toe & shoulder points */
+        DCSCALIBRATIONFD = 65556, /* calibration file desc */
         /* Note: quality level is on the ZLIB 1-9 scale. Default value is -1 */
-        TIFFTAG_ZIPQUALITY = 65557, /* compression quality level */
-        TIFFTAG_PIXARLOGQUALITY = 65558, /* PixarLog uses same scale */
+        ZIPQUALITY = 65557, /* compression quality level */
+        PIXARLOGQUALITY = 65558, /* PixarLog uses same scale */
         /* 65559 is allocated to Oceana Matrix <dev@oceana.com> */
-        TIFFTAG_DCSCLIPRECTANGLE = 65559, /* area of image to acquire */
-        TIFFTAG_SGILOGDATAFMT = 65560, /* SGILog user data format. see SGILogDataFormat */
-        TIFFTAG_SGILOGENCODE = 65561, /* SGILog data encoding control. see SGILogEncoding*/
+        DCSCLIPRECTANGLE = 65559, /* area of image to acquire */
+        SGILOGDATAFMT = 65560, /* SGILog user data format. see SGILogDataFormat */
+        SGILOGENCODE = 65561, /* SGILog data encoding control. see SGILogEncode */
 
         /*
          * EXIF tags
          */
-        EXIFTAG_EXPOSURETIME = 33434, /* Exposure time */
-        EXIFTAG_FNUMBER = 33437, /* F number */
-        EXIFTAG_EXPOSUREPROGRAM = 34850, /* Exposure program */
-        EXIFTAG_SPECTRALSENSITIVITY = 34852, /* Spectral sensitivity */
-        EXIFTAG_ISOSPEEDRATINGS = 34855, /* ISO speed rating */
-        EXIFTAG_OECF = 34856, /* Optoelectric conversion factor */
-        EXIFTAG_EXIFVERSION = 36864, /* Exif version */
-        EXIFTAG_DATETIMEORIGINAL = 36867, /* Date and time of original data generation */
-        EXIFTAG_DATETIMEDIGITIZED = 36868, /* Date and time of digital data generation */
-        EXIFTAG_COMPONENTSCONFIGURATION = 37121, /* Meaning of each component */
-        EXIFTAG_COMPRESSEDBITSPERPIXEL = 37122, /* Image compression mode */
-        EXIFTAG_SHUTTERSPEEDVALUE = 37377, /* Shutter speed */
-        EXIFTAG_APERTUREVALUE = 37378, /* Aperture */
-        EXIFTAG_BRIGHTNESSVALUE = 37379, /* Brightness */
-        EXIFTAG_EXPOSUREBIASVALUE = 37380, /* Exposure bias */
-        EXIFTAG_MAXAPERTUREVALUE = 37381, /* Maximum lens aperture */
-        EXIFTAG_SUBJECTDISTANCE = 37382, /* Subject distance */
-        EXIFTAG_METERINGMODE = 37383, /* Metering mode */
-        EXIFTAG_LIGHTSOURCE = 37384, /* Light source */
-        EXIFTAG_FLASH = 37385, /* Flash */
-        EXIFTAG_FOCALLENGTH = 37386, /* Lens focal length */
-        EXIFTAG_SUBJECTAREA = 37396, /* Subject area */
-        EXIFTAG_MAKERNOTE = 37500, /* Manufacturer notes */
-        EXIFTAG_USERCOMMENT = 37510, /* User comments */
-        EXIFTAG_SUBSECTIME = 37520, /* DateTime subseconds */
-        EXIFTAG_SUBSECTIMEORIGINAL = 37521, /* DateTimeOriginal subseconds */
-        EXIFTAG_SUBSECTIMEDIGITIZED = 37522, /* DateTimeDigitized subseconds */
-        EXIFTAG_FLASHPIXVERSION = 40960, /* Supported Flashpix version */
-        EXIFTAG_COLORSPACE = 40961, /* Color space information */
-        EXIFTAG_PIXELXDIMENSION = 40962, /* Valid image width */
-        EXIFTAG_PIXELYDIMENSION = 40963, /* Valid image height */
-        EXIFTAG_RELATEDSOUNDFILE = 40964, /* Related audio file */
-        EXIFTAG_FLASHENERGY = 41483, /* Flash energy */
-        EXIFTAG_SPATIALFREQUENCYRESPONSE = 41484, /* Spatial frequency response */
-        EXIFTAG_FOCALPLANEXRESOLUTION = 41486, /* Focal plane X resolution */
-        EXIFTAG_FOCALPLANEYRESOLUTION = 41487, /* Focal plane Y resolution */
-        EXIFTAG_FOCALPLANERESOLUTIONUNIT = 41488, /* Focal plane resolution unit */
-        EXIFTAG_SUBJECTLOCATION = 41492, /* Subject location */
-        EXIFTAG_EXPOSUREINDEX = 41493, /* Exposure index */
-        EXIFTAG_SENSINGMETHOD = 41495, /* Sensing method */
-        EXIFTAG_FILESOURCE = 41728, /* File source */
-        EXIFTAG_SCENETYPE = 41729, /* Scene type */
-        EXIFTAG_CFAPATTERN = 41730, /* CFA pattern */
-        EXIFTAG_CUSTOMRENDERED = 41985, /* Custom image processing */
-        EXIFTAG_EXPOSUREMODE = 41986, /* Exposure mode */
-        EXIFTAG_WHITEBALANCE = 41987, /* White balance */
-        EXIFTAG_DIGITALZOOMRATIO = 41988, /* Digital zoom ratio */
-        EXIFTAG_FOCALLENGTHIN35MMFILM = 41989, /* Focal length in 35 mm film */
-        EXIFTAG_SCENECAPTURETYPE = 41990, /* Scene capture type */
-        EXIFTAG_GAINCONTROL = 41991, /* Gain control */
-        EXIFTAG_CONTRAST = 41992, /* Contrast */
-        EXIFTAG_SATURATION = 41993, /* Saturation */
-        EXIFTAG_SHARPNESS = 41994, /* Sharpness */
-        EXIFTAG_DEVICESETTINGDESCRIPTION = 41995, /* Device settings description */
-        EXIFTAG_SUBJECTDISTANCERANGE = 41996, /* Subject distance range */
-        EXIFTAG_IMAGEUNIQUEID = 42016, /* Unique image ID */
+        EXIF_EXPOSURETIME = 33434, /* Exposure time */
+        EXIF_FNUMBER = 33437, /* F number */
+        EXIF_EXPOSUREPROGRAM = 34850, /* Exposure program */
+        EXIF_SPECTRALSENSITIVITY = 34852, /* Spectral sensitivity */
+        EXIF_ISOSPEEDRATINGS = 34855, /* ISO speed rating */
+        EXIF_OECF = 34856, /* Optoelectric conversion factor */
+        EXIF_EXIFVERSION = 36864, /* Exif version */
+        EXIF_DATETIMEORIGINAL = 36867, /* Date and time of original data generation */
+        EXIF_DATETIMEDIGITIZED = 36868, /* Date and time of digital data generation */
+        EXIF_COMPONENTSCONFIGURATION = 37121, /* Meaning of each component */
+        EXIF_COMPRESSEDBITSPERPIXEL = 37122, /* Image compression mode */
+        EXIF_SHUTTERSPEEDVALUE = 37377, /* Shutter speed */
+        EXIF_APERTUREVALUE = 37378, /* Aperture */
+        EXIF_BRIGHTNESSVALUE = 37379, /* Brightness */
+        EXIF_EXPOSUREBIASVALUE = 37380, /* Exposure bias */
+        EXIF_MAXAPERTUREVALUE = 37381, /* Maximum lens aperture */
+        EXIF_SUBJECTDISTANCE = 37382, /* Subject distance */
+        EXIF_METERINGMODE = 37383, /* Metering mode */
+        EXIF_LIGHTSOURCE = 37384, /* Light source */
+        EXIF_FLASH = 37385, /* Flash */
+        EXIF_FOCALLENGTH = 37386, /* Lens focal length */
+        EXIF_SUBJECTAREA = 37396, /* Subject area */
+        EXIF_MAKERNOTE = 37500, /* Manufacturer notes */
+        EXIF_USERCOMMENT = 37510, /* User comments */
+        EXIF_SUBSECTIME = 37520, /* DateTime subseconds */
+        EXIF_SUBSECTIMEORIGINAL = 37521, /* DateTimeOriginal subseconds */
+        EXIF_SUBSECTIMEDIGITIZED = 37522, /* DateTimeDigitized subseconds */
+        EXIF_FLASHPIXVERSION = 40960, /* Supported Flashpix version */
+        EXIF_COLORSPACE = 40961, /* Color space information */
+        EXIF_PIXELXDIMENSION = 40962, /* Valid image width */
+        EXIF_PIXELYDIMENSION = 40963, /* Valid image height */
+        EXIF_RELATEDSOUNDFILE = 40964, /* Related audio file */
+        EXIF_FLASHENERGY = 41483, /* Flash energy */
+        EXIF_SPATIALFREQUENCYRESPONSE = 41484, /* Spatial frequency response */
+        EXIF_FOCALPLANEXRESOLUTION = 41486, /* Focal plane X resolution */
+        EXIF_FOCALPLANEYRESOLUTION = 41487, /* Focal plane Y resolution */
+        EXIF_FOCALPLANERESOLUTIONUNIT = 41488, /* Focal plane resolution unit */
+        EXIF_SUBJECTLOCATION = 41492, /* Subject location */
+        EXIF_EXPOSUREINDEX = 41493, /* Exposure index */
+        EXIF_SENSINGMETHOD = 41495, /* Sensing method */
+        EXIF_FILESOURCE = 41728, /* File source */
+        EXIF_SCENETYPE = 41729, /* Scene type */
+        EXIF_CFAPATTERN = 41730, /* CFA pattern */
+        EXIF_CUSTOMRENDERED = 41985, /* Custom image processing */
+        EXIF_EXPOSUREMODE = 41986, /* Exposure mode */
+        EXIF_WHITEBALANCE = 41987, /* White balance */
+        EXIF_DIGITALZOOMRATIO = 41988, /* Digital zoom ratio */
+        EXIF_FOCALLENGTHIN35MMFILM = 41989, /* Focal length in 35 mm film */
+        EXIF_SCENECAPTURETYPE = 41990, /* Scene capture type */
+        EXIF_GAINCONTROL = 41991, /* Gain control */
+        EXIF_CONTRAST = 41992, /* Contrast */
+        EXIF_SATURATION = 41993, /* Saturation */
+        EXIF_SHARPNESS = 41994, /* Sharpness */
+        EXIF_DEVICESETTINGDESCRIPTION = 41995, /* Device settings description */
+        EXIF_SUBJECTDISTANCERANGE = 41996, /* Subject distance range */
+        EXIF_IMAGEUNIQUEID = 42016, /* Unique image ID */
     };
 }

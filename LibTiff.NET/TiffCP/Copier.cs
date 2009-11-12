@@ -23,53 +23,53 @@ namespace BitMiracle.TiffCP
     {
         struct tagToCopy
         {
-            public tagToCopy(TIFFTAG _tag, short _count, TiffDataType _type)
+            public tagToCopy(TiffTag _tag, short _count, TiffType _type)
             {
                 tag = _tag;
                 count = _count;
                 type = _type;
             }
 
-            public TIFFTAG tag;
+            public TiffTag tag;
             public short count;
-            public TiffDataType type;
+            public TiffType type;
         };
 
         static tagToCopy[] g_tags = 
         {
-            new tagToCopy(TIFFTAG.TIFFTAG_SUBFILETYPE, 1, TiffDataType.TIFF_LONG), 
-            new tagToCopy(TIFFTAG.TIFFTAG_THRESHHOLDING, 1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_DOCUMENTNAME, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_IMAGEDESCRIPTION, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_MAKE, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_MODEL, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_MINSAMPLEVALUE, 1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_MAXSAMPLEVALUE, 1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_XRESOLUTION, 1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_YRESOLUTION, 1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_PAGENAME, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_XPOSITION, 1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_YPOSITION, 1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_RESOLUTIONUNIT, 1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_SOFTWARE, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_DATETIME, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_ARTIST, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_HOSTCOMPUTER, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_WHITEPOINT, -1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_PRIMARYCHROMATICITIES, -1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_HALFTONEHINTS, 2, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_INKSET, 1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_DOTRANGE, 2, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_TARGETPRINTER, 1, TiffDataType.TIFF_ASCII), 
-            new tagToCopy(TIFFTAG.TIFFTAG_SAMPLEFORMAT, 1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS, -1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, 2, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_YCBCRPOSITIONING, 1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE, -1, TiffDataType.TIFF_RATIONAL), 
-            new tagToCopy(TIFFTAG.TIFFTAG_EXTRASAMPLES, -1, TiffDataType.TIFF_SHORT), 
-            new tagToCopy(TIFFTAG.TIFFTAG_SMINSAMPLEVALUE, 1, TiffDataType.TIFF_DOUBLE), 
-            new tagToCopy(TIFFTAG.TIFFTAG_SMAXSAMPLEVALUE, 1, TiffDataType.TIFF_DOUBLE), 
-            new tagToCopy(TIFFTAG.TIFFTAG_STONITS, 1, TiffDataType.TIFF_DOUBLE), 
+            new tagToCopy(TiffTag.SUBFILETYPE, 1, TiffType.LONG), 
+            new tagToCopy(TiffTag.THRESHHOLDING, 1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.DOCUMENTNAME, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.IMAGEDESCRIPTION, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.MAKE, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.MODEL, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.MINSAMPLEVALUE, 1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.MAXSAMPLEVALUE, 1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.XRESOLUTION, 1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.YRESOLUTION, 1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.PAGENAME, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.XPOSITION, 1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.YPOSITION, 1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.RESOLUTIONUNIT, 1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.SOFTWARE, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.DATETIME, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.ARTIST, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.HOSTCOMPUTER, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.WHITEPOINT, -1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.PRIMARYCHROMATICITIES, -1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.HALFTONEHINTS, 2, TiffType.SHORT), 
+            new tagToCopy(TiffTag.INKSET, 1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.DOTRANGE, 2, TiffType.SHORT), 
+            new tagToCopy(TiffTag.TARGETPRINTER, 1, TiffType.ASCII), 
+            new tagToCopy(TiffTag.SAMPLEFORMAT, 1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.YCBCRCOEFFICIENTS, -1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.YCBCRSUBSAMPLING, 2, TiffType.SHORT), 
+            new tagToCopy(TiffTag.YCBCRPOSITIONING, 1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.REFERENCEBLACKWHITE, -1, TiffType.RATIONAL), 
+            new tagToCopy(TiffTag.EXTRASAMPLES, -1, TiffType.SHORT), 
+            new tagToCopy(TiffTag.SMINSAMPLEVALUE, 1, TiffType.DOUBLE), 
+            new tagToCopy(TiffTag.SMAXSAMPLEVALUE, 1, TiffType.DOUBLE), 
+            new tagToCopy(TiffTag.STONITS, 1, TiffType.DOUBLE), 
         };
 
         delegate bool readFunc(Tiff inImage, byte[] buf, int imagelength, int imagewidth, short spp);
@@ -78,36 +78,36 @@ namespace BitMiracle.TiffCP
         public int m_outtiled = -1;
         public int m_tilewidth;
         public int m_tilelength;
-        public PLANARCONFIG m_config;
-        public COMPRESSION m_compression;
+        public PlanarConfig m_config;
+        public Compression m_compression;
         public short m_predictor;
-        public FILLORDER m_fillorder;
+        public FillOrder m_fillorder;
         public int m_rowsperstrip;
-        public GROUP3OPT m_g3opts;
+        public Group3Opt m_g3opts;
         public bool m_ignore = false; /* if true, ignore read errors */
-        public GROUP3OPT m_defg3opts = GROUP3OPT.GROUP3OPT_UNKNOWN;
-        public COMPRESSION m_defcompression = (COMPRESSION)(-1);
+        public Group3Opt m_defg3opts = Group3Opt.UNKNOWN;
+        public Compression m_defcompression = (Compression)(-1);
         public short m_defpredictor = -1;
         public Tiff m_bias = null;
         public int m_pageNum = 0;
 
-        ORIENTATION m_orientation;
+        Orientation m_orientation;
         int m_quality = 75; /* JPEG quality */
-        JPEGCOLORMODE m_jpegcolormode = JPEGCOLORMODE.JPEGCOLORMODE_RGB;
+        JpegColorMode m_jpegcolormode = JpegColorMode.RGB;
 
         public bool ProcessCompressOptions(string opt)
         {
             if (opt == "none")
             {
-                m_defcompression = COMPRESSION.COMPRESSION_NONE;
+                m_defcompression = Compression.NONE;
             }
             else if (opt == "packbits")
             {
-                m_defcompression = COMPRESSION.COMPRESSION_PACKBITS;
+                m_defcompression = Compression.PACKBITS;
             }
             else if (opt.StartsWith("jpeg"))
             {
-                m_defcompression = COMPRESSION.COMPRESSION_JPEG;
+                m_defcompression = Compression.JPEG;
 
                 string[] options = opt.Split(new char[] { ':' });
                 for (int i = 1; i < options.Length; i++)
@@ -115,7 +115,7 @@ namespace BitMiracle.TiffCP
                     if (char.IsDigit(options[i][0]))
                         m_quality = int.Parse(options[i], CultureInfo.InvariantCulture);
                     else if (options[i] == "r")
-                        m_jpegcolormode = JPEGCOLORMODE.JPEGCOLORMODE_RAW;
+                        m_jpegcolormode = JpegColorMode.RAW;
                     else
                         return false;
                 }
@@ -125,11 +125,11 @@ namespace BitMiracle.TiffCP
                 if (!processG3Options(opt))
                     return false;
 
-                m_defcompression = COMPRESSION.COMPRESSION_CCITTFAX3;
+                m_defcompression = Compression.CCITTFAX3;
             }
             else if (opt == "g4")
             {
-                m_defcompression = COMPRESSION.COMPRESSION_CCITTFAX4;
+                m_defcompression = Compression.CCITTFAX4;
             }
             else if (opt.StartsWith("lzw"))
             {
@@ -137,7 +137,7 @@ namespace BitMiracle.TiffCP
                 if (n != -1 && n < (opt.Length - 1))
                     m_defpredictor = short.Parse(opt.Substring(n + 1));
 
-                m_defcompression = COMPRESSION.COMPRESSION_LZW;
+                m_defcompression = Compression.LZW;
             }
             else if (opt.StartsWith("zip"))
             {
@@ -145,7 +145,7 @@ namespace BitMiracle.TiffCP
                 if (n != -1 && n < (opt.Length - 1))
                     m_defpredictor = short.Parse(opt.Substring(n + 1));
 
-                m_defcompression = COMPRESSION.COMPRESSION_ADOBE_DEFLATE;
+                m_defcompression = Compression.ADOBE_DEFLATE;
             }
             else
                 return false;
@@ -158,17 +158,17 @@ namespace BitMiracle.TiffCP
             string[] options = cp.Split(new char[] { ':' });
             if (options.Length > 1)
             {
-                if (m_defg3opts == GROUP3OPT.GROUP3OPT_UNKNOWN)
+                if (m_defg3opts == Group3Opt.UNKNOWN)
                     m_defg3opts = 0;
 
                 for (int i = 1; i < options.Length; i++)
                 {
                     if (options[i].StartsWith("1d"))
-                        m_defg3opts &= ~GROUP3OPT.GROUP3OPT_2DENCODING;
+                        m_defg3opts &= ~Group3Opt.ENCODING2D;
                     else if (options[i].StartsWith("2d"))
-                        m_defg3opts |= GROUP3OPT.GROUP3OPT_2DENCODING;
+                        m_defg3opts |= Group3Opt.ENCODING2D;
                     else if (options[i].StartsWith("fill"))
-                        m_defg3opts |= GROUP3OPT.GROUP3OPT_FILLBITS;
+                        m_defg3opts |= Group3Opt.FILLBITS;
                     else
                         return false;
                 }
@@ -180,114 +180,114 @@ namespace BitMiracle.TiffCP
         public bool Copy(Tiff inImage, Tiff outImage)
         {
             int width = 0;
-            FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+            FieldValue[] result = inImage.GetField(TiffTag.IMAGEWIDTH);
             if (result != null)
             {
                 width = result[0].ToInt();
-                outImage.SetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, width);
+                outImage.SetField(TiffTag.IMAGEWIDTH, width);
             }
 
             int length = 0;
-            result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+            result = inImage.GetField(TiffTag.IMAGELENGTH);
             if (result != null)
             {
                 length = result[0].ToInt();
-                outImage.SetField(TIFFTAG.TIFFTAG_IMAGELENGTH, length);
+                outImage.SetField(TiffTag.IMAGELENGTH, length);
             }
 
             short bitspersample = 1;
-            result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            result = inImage.GetField(TiffTag.BITSPERSAMPLE);
             if (result != null)
             {
                 bitspersample = result[0].ToShort();
-                outImage.SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, bitspersample);
+                outImage.SetField(TiffTag.BITSPERSAMPLE, bitspersample);
             }
 
             short samplesperpixel = 1;
-            result = inImage.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+            result = inImage.GetField(TiffTag.SAMPLESPERPIXEL);
             if (result != null)
             {
                 samplesperpixel = result[0].ToShort();
-                outImage.SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, samplesperpixel);
+                outImage.SetField(TiffTag.SAMPLESPERPIXEL, samplesperpixel);
             }
 
-            if (m_compression != (COMPRESSION)(-1))
-                outImage.SetField(TIFFTAG.TIFFTAG_COMPRESSION, m_compression);
+            if (m_compression != (Compression)(-1))
+                outImage.SetField(TiffTag.COMPRESSION, m_compression);
             else
             {
-                result = inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+                result = inImage.GetField(TiffTag.COMPRESSION);
                 if (result != null)
                 {
-                    m_compression = (COMPRESSION)result[0].ToInt();
-                    outImage.SetField(TIFFTAG.TIFFTAG_COMPRESSION, m_compression);
+                    m_compression = (Compression)result[0].ToInt();
+                    outImage.SetField(TiffTag.COMPRESSION, m_compression);
                 }
             }
 
-            if (m_compression == COMPRESSION.COMPRESSION_JPEG)
+            if (m_compression == Compression.JPEG)
             {
-                result = inImage.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+                result = inImage.GetField(TiffTag.COMPRESSION);
                 if (result != null)
                 {
-                    COMPRESSION input_compression = (COMPRESSION)result[0].ToInt();
-                    if (input_compression == COMPRESSION.COMPRESSION_JPEG)
-                        inImage.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RGB);
+                    Compression input_compression = (Compression)result[0].ToInt();
+                    if (input_compression == Compression.JPEG)
+                        inImage.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
                 }
 
-                result = inImage.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+                result = inImage.GetField(TiffTag.PHOTOMETRIC);
                 if (result != null)
                 {
-                    PHOTOMETRIC input_photometric = (PHOTOMETRIC)result[0].ToInt();
-                    if (input_photometric == PHOTOMETRIC.PHOTOMETRIC_RGB)
+                    Photometric input_photometric = (Photometric)result[0].ToInt();
+                    if (input_photometric == Photometric.RGB)
                     {
-                        if (m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
-                            outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_YCBCR);
+                        if (m_jpegcolormode == JpegColorMode.RGB)
+                            outImage.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR);
                         else
-                            outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_RGB);
+                            outImage.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
                     }
                     else
-                        outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, input_photometric);
+                        outImage.SetField(TiffTag.PHOTOMETRIC, input_photometric);
                 }
             }
-            else if (m_compression == COMPRESSION.COMPRESSION_SGILOG || m_compression == COMPRESSION.COMPRESSION_SGILOG24)
-                outImage.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, samplesperpixel == 1 ? PHOTOMETRIC.PHOTOMETRIC_LOGL : PHOTOMETRIC.PHOTOMETRIC_LOGLUV);
+            else if (m_compression == Compression.SGILOG || m_compression == Compression.SGILOG24)
+                outImage.SetField(TiffTag.PHOTOMETRIC, samplesperpixel == 1 ? Photometric.LOGL : Photometric.LOGLUV);
             else
-                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_PHOTOMETRIC, 1, TiffDataType.TIFF_SHORT);
+                CopyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
 
             if (m_fillorder != 0)
-                outImage.SetField(TIFFTAG.TIFFTAG_FILLORDER, m_fillorder);
+                outImage.SetField(TiffTag.FILLORDER, m_fillorder);
             else
-                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FILLORDER, 1, TiffDataType.TIFF_SHORT);
+                CopyTag(inImage, outImage, TiffTag.FILLORDER, 1, TiffType.SHORT);
 
             /*
              * Will copy `Orientation' tag from input image
              */
-            result = inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION);
-            m_orientation = (ORIENTATION)result[0].ToByte();
+            result = inImage.GetFieldDefaulted(TiffTag.ORIENTATION);
+            m_orientation = (Orientation)result[0].ToByte();
             switch (m_orientation)
             {
-                case ORIENTATION.ORIENTATION_BOTRIGHT:
-                case ORIENTATION.ORIENTATION_RIGHTBOT:
+                case Orientation.BOTRIGHT:
+                case Orientation.RIGHTBOT:
                     Tiff.Warning(inImage.FileName(), "using bottom-left orientation");
-                    m_orientation = ORIENTATION.ORIENTATION_BOTLEFT;
+                    m_orientation = Orientation.BOTLEFT;
                     break;
 
-                case ORIENTATION.ORIENTATION_LEFTBOT:
-                case ORIENTATION.ORIENTATION_BOTLEFT:
+                case Orientation.LEFTBOT:
+                case Orientation.BOTLEFT:
                     break;
 
-                case ORIENTATION.ORIENTATION_TOPRIGHT:
-                case ORIENTATION.ORIENTATION_RIGHTTOP:
+                case Orientation.TOPRIGHT:
+                case Orientation.RIGHTTOP:
                 default:
                     Tiff.Warning(inImage.FileName(), "using top-left orientation");
-                    m_orientation = ORIENTATION.ORIENTATION_TOPLEFT;
+                    m_orientation = Orientation.TOPLEFT;
                     break;
 
-                case ORIENTATION.ORIENTATION_LEFTTOP:
-                case ORIENTATION.ORIENTATION_TOPLEFT:
+                case Orientation.LEFTTOP:
+                case Orientation.TOPLEFT:
                     break;
             }
 
-            outImage.SetField(TIFFTAG.TIFFTAG_ORIENTATION, m_orientation);
+            outImage.SetField(TiffTag.ORIENTATION, m_orientation);
 
             /*
              * Choose tiles/strip for the output image according to
@@ -312,21 +312,21 @@ namespace BitMiracle.TiffCP
                  */
                 if (m_tilewidth == -1)
                 {
-                    result = inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_TILEWIDTH);
+                    result = inImage.GetFieldDefaulted(TiffTag.TILEWIDTH);
                     if (result != null)
                         m_tilewidth = result[0].ToInt();
                 }
 
                 if (m_tilelength == -1)
                 {
-                    result = inImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_TILELENGTH);
+                    result = inImage.GetFieldDefaulted(TiffTag.TILELENGTH);
                     if (result != null)
                         m_tilelength = result[0].ToInt();
                 }
 
                 outImage.DefaultTileSize(ref m_tilewidth, ref m_tilelength);
-                outImage.SetField(TIFFTAG.TIFFTAG_TILEWIDTH, m_tilewidth);
-                outImage.SetField(TIFFTAG.TIFFTAG_TILELENGTH, m_tilelength);
+                outImage.SetField(TiffTag.TILEWIDTH, m_tilewidth);
+                outImage.SetField(TiffTag.TILELENGTH, m_tilelength);
             }
             else
             {
@@ -337,7 +337,7 @@ namespace BitMiracle.TiffCP
                  */
                 if (m_rowsperstrip == 0)
                 {
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+                    result = inImage.GetField(TiffTag.ROWSPERSTRIP);
                     if (result == null)
                         m_rowsperstrip = outImage.DefaultStripSize(m_rowsperstrip);
                     else
@@ -349,87 +349,87 @@ namespace BitMiracle.TiffCP
                 else if (m_rowsperstrip == -1)
                     m_rowsperstrip = length;
 
-                outImage.SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, m_rowsperstrip);
+                outImage.SetField(TiffTag.ROWSPERSTRIP, m_rowsperstrip);
             }
 
-            if (m_config != PLANARCONFIG.PLANARCONFIG_UNKNOWN)
-                outImage.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, m_config);
+            if (m_config != PlanarConfig.UNKNOWN)
+                outImage.SetField(TiffTag.PLANARCONFIG, m_config);
             else
             {
-                result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+                result = inImage.GetField(TiffTag.PLANARCONFIG);
                 if (result != null)
                 {
-                    m_config = (PLANARCONFIG)result[0].ToShort();
-                    outImage.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, m_config);
+                    m_config = (PlanarConfig)result[0].ToShort();
+                    outImage.SetField(TiffTag.PLANARCONFIG, m_config);
                 }
             }
 
             if (samplesperpixel <= 4)
-                CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_TRANSFERFUNCTION, 4, TiffDataType.TIFF_SHORT);
+                CopyTag(inImage, outImage, TiffTag.TRANSFERFUNCTION, 4, TiffType.SHORT);
 
-            CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_COLORMAP, 4, TiffDataType.TIFF_SHORT);
+            CopyTag(inImage, outImage, TiffTag.COLORMAP, 4, TiffType.SHORT);
 
             /* SMinSampleValue & SMaxSampleValue */
             switch (m_compression)
             {
-                case COMPRESSION.COMPRESSION_JPEG:
-                    outImage.SetField(TIFFTAG.TIFFTAG_JPEGQUALITY, m_quality);
-                    outImage.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, m_jpegcolormode);
+                case Compression.JPEG:
+                    outImage.SetField(TiffTag.JPEGQUALITY, m_quality);
+                    outImage.SetField(TiffTag.JPEGCOLORMODE, m_jpegcolormode);
                     break;
-                case COMPRESSION.COMPRESSION_LZW:
-                case COMPRESSION.COMPRESSION_ADOBE_DEFLATE:
-                case COMPRESSION.COMPRESSION_DEFLATE:
+                case Compression.LZW:
+                case Compression.ADOBE_DEFLATE:
+                case Compression.DEFLATE:
                     if (m_predictor != -1)
-                        outImage.SetField(TIFFTAG.TIFFTAG_PREDICTOR, m_predictor);
+                        outImage.SetField(TiffTag.PREDICTOR, m_predictor);
                     else
                     {
-                        result = inImage.GetField(TIFFTAG.TIFFTAG_PREDICTOR);
+                        result = inImage.GetField(TiffTag.PREDICTOR);
                         if (result != null)
                         {
                             m_predictor = result[0].ToShort();
-                            outImage.SetField(TIFFTAG.TIFFTAG_PREDICTOR, m_predictor);
+                            outImage.SetField(TiffTag.PREDICTOR, m_predictor);
                         }
                     }
                     break;
-                case COMPRESSION.COMPRESSION_CCITTFAX3:
-                case COMPRESSION.COMPRESSION_CCITTFAX4:
-                    if (m_compression == COMPRESSION.COMPRESSION_CCITTFAX3)
+                case Compression.CCITTFAX3:
+                case Compression.CCITTFAX4:
+                    if (m_compression == Compression.CCITTFAX3)
                     {
-                        if (m_g3opts != GROUP3OPT.GROUP3OPT_UNKNOWN)
-                            outImage.SetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS, m_g3opts);
+                        if (m_g3opts != Group3Opt.UNKNOWN)
+                            outImage.SetField(TiffTag.GROUP3OPTIONS, m_g3opts);
                         else
                         {
-                            result = inImage.GetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS);
+                            result = inImage.GetField(TiffTag.GROUP3OPTIONS);
                             if (result != null)
                             {
-                                m_g3opts = (GROUP3OPT)result[0].ToShort();
-                                outImage.SetField(TIFFTAG.TIFFTAG_GROUP3OPTIONS, m_g3opts);
+                                m_g3opts = (Group3Opt)result[0].ToShort();
+                                outImage.SetField(TiffTag.GROUP3OPTIONS, m_g3opts);
                             }
                         }
                     }
                     else
-                        CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_GROUP4OPTIONS, 1, TiffDataType.TIFF_LONG);
+                        CopyTag(inImage, outImage, TiffTag.GROUP4OPTIONS, 1, TiffType.LONG);
 
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_BADFAXLINES, 1, TiffDataType.TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_CLEANFAXDATA, 1, TiffDataType.TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES, 1, TiffDataType.TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXRECVPARAMS, 1, TiffDataType.TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXRECVTIME, 1, TiffDataType.TIFF_LONG);
-                    CopyTag(inImage, outImage, TIFFTAG.TIFFTAG_FAXSUBADDRESS, 1, TiffDataType.TIFF_ASCII);
+                    CopyTag(inImage, outImage, TiffTag.BADFAXLINES, 1, TiffType.LONG);
+                    CopyTag(inImage, outImage, TiffTag.CLEANFAXDATA, 1, TiffType.LONG);
+                    CopyTag(inImage, outImage, TiffTag.CONSECUTIVEBADFAXLINES, 1, TiffType.LONG);
+                    CopyTag(inImage, outImage, TiffTag.FAXRECVPARAMS, 1, TiffType.LONG);
+                    CopyTag(inImage, outImage, TiffTag.FAXRECVTIME, 1, TiffType.LONG);
+                    CopyTag(inImage, outImage, TiffTag.FAXSUBADDRESS, 1, TiffType.ASCII);
                     break;
             }
 
-            result = inImage.GetField(TIFFTAG.TIFFTAG_ICCPROFILE);
+            result = inImage.GetField(TiffTag.ICCPROFILE);
             if (result != null)
-                outImage.SetField(TIFFTAG.TIFFTAG_ICCPROFILE, result[0], result[1]);
+                outImage.SetField(TiffTag.ICCPROFILE, result[0], result[1]);
 
-            result = inImage.GetField(TIFFTAG.TIFFTAG_NUMBEROFINKS);
+            result = inImage.GetField(TiffTag.NUMBEROFINKS);
             if (result != null)
             {
                 short ninks = result[0].ToShort();
-                outImage.SetField(TIFFTAG.TIFFTAG_NUMBEROFINKS, ninks);
+                outImage.SetField(TiffTag.NUMBEROFINKS, ninks);
 
-                result = inImage.GetField(TIFFTAG.TIFFTAG_INKNAMES);
+                result = inImage.GetField(TiffTag.INKNAMES);
                 if (result != null)
                 {
                     string inknames = result[0].ToString();
@@ -439,20 +439,20 @@ namespace BitMiracle.TiffCP
                     foreach (string part in parts)
                         inknameslen += part.Length + 1;
 
-                    outImage.SetField(TIFFTAG.TIFFTAG_INKNAMES, inknameslen, inknames);
+                    outImage.SetField(TiffTag.INKNAMES, inknameslen, inknames);
                 }
             }
 
-            result = inImage.GetField(TIFFTAG.TIFFTAG_PAGENUMBER);
+            result = inImage.GetField(TiffTag.PAGENUMBER);
             if (result != null)
             {
                 if (m_pageNum < 0)
                 {
                     /* only one input file */
-                    outImage.SetField(TIFFTAG.TIFFTAG_PAGENUMBER, result[0], result[1]);
+                    outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
                 }
                 else
-                    outImage.SetField(TIFFTAG.TIFFTAG_PAGENUMBER, m_pageNum++, 0);
+                    outImage.SetField(TiffTag.PAGENUMBER, m_pageNum++, 0);
             }
 
             int NTAGS = g_tags.Length;
@@ -472,8 +472,8 @@ namespace BitMiracle.TiffCP
         {
             using (TextWriter stderr = Console.Error)
             {
-                FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
-                PLANARCONFIG shortv = (PLANARCONFIG)result[0].ToShort();
+                FieldValue[] result = inImage.GetField(TiffTag.PLANARCONFIG);
+                PlanarConfig shortv = (PlanarConfig)result[0].ToShort();
 
                 if (shortv != m_config && bitspersample != 8 && samplesperpixel > 1)
                 {
@@ -481,16 +481,16 @@ namespace BitMiracle.TiffCP
                     return false;
                 }
 
-                result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+                result = inImage.GetField(TiffTag.IMAGEWIDTH);
                 int w = result[0].ToInt();
 
-                result = inImage.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+                result = inImage.GetField(TiffTag.IMAGELENGTH);
                 int l = result[0].ToInt();
 
                 bool bychunk;
                 if (!(outImage.IsTiled() || inImage.IsTiled()))
                 {
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+                    result = inImage.GetField(TiffTag.ROWSPERSTRIP);
                     int irps = result[0].ToInt();
 
                     /* if biased, force decoded copying to allow image subtraction */
@@ -508,14 +508,14 @@ namespace BitMiracle.TiffCP
                     if (outImage.IsTiled())
                     {
                         int tw;
-                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                        result = inImage.GetField(TiffTag.TILEWIDTH);
                         if (result == null)
                             tw = w;
                         else
                             tw = result[0].ToInt();
 
                         int tl;
-                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                        result = inImage.GetField(TiffTag.TILELENGTH);
                         if (result == null)
                             tl = l;
                         else
@@ -526,10 +526,10 @@ namespace BitMiracle.TiffCP
                     else
                     {
                         /* outImage's not, so inImage must be tiled */
-                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                        result = inImage.GetField(TiffTag.TILEWIDTH);
                         int tw = result[0].ToInt();
 
-                        result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                        result = inImage.GetField(TiffTag.TILELENGTH);
                         int tl = result[0].ToInt();
 
                         bychunk = (tw == w && tl == m_rowsperstrip);
@@ -541,25 +541,25 @@ namespace BitMiracle.TiffCP
                     if (outImage.IsTiled())
                     {
                         /* Tiles -> Tiles */
-                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.CONTIG)
                             return cpContigTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.SEPARATE)
                             return cpContigTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.CONTIG)
                             return cpSeparateTiles2ContigTiles(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.SEPARATE)
                             return cpSeparateTiles2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
                     }
                     else
                     {
                         /* Tiles -> Strips */
-                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.CONTIG)
                             return cpContigTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.SEPARATE)
                             return cpContigTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.CONTIG)
                             return cpSeparateTiles2ContigStrips(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.SEPARATE)
                             return cpSeparateTiles2SeparateStrips(inImage, outImage, length, width, samplesperpixel);
                     }
                 }
@@ -568,32 +568,32 @@ namespace BitMiracle.TiffCP
                     if (outImage.IsTiled())
                     {
                         /* Strips -> Tiles */
-                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.CONTIG)
                             return cpContigStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.SEPARATE)
                             return cpContigStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.CONTIG)
                             return cpSeparateStrips2ContigTiles(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.SEPARATE)
                             return cpSeparateStrips2SeparateTiles(inImage, outImage, length, width, samplesperpixel);
                     }
                     else
                     {
                         /* Strips -> Strips */
-                        if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG && !bychunk)
+                        if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.CONTIG && !bychunk)
                         {
                             if (m_bias != null)
                                 return cpBiasedContig2Contig(inImage, outImage, length, width, samplesperpixel);
 
                             return cpContig2ContigByRow(inImage, outImage, length, width, samplesperpixel);
                         }
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG && bychunk)
+                        else if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.CONTIG && bychunk)
                             return cpDecodedStrips(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_CONTIG && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.CONTIG && m_config == PlanarConfig.SEPARATE)
                             return cpContig2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.CONTIG)
                             return cpSeparate2ContigByRow(inImage, outImage, length, width, samplesperpixel);
-                        else if (shortv == PLANARCONFIG.PLANARCONFIG_SEPARATE && m_config == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                        else if (shortv == PlanarConfig.SEPARATE && m_config == PlanarConfig.SEPARATE)
                             return cpSeparate2SeparateByRow(inImage, outImage, length, width, samplesperpixel);
                     }
                 }
@@ -638,15 +638,15 @@ namespace BitMiracle.TiffCP
                 int biasSize = m_bias.ScanlineSize();
                 int bufSize = inImage.ScanlineSize();
 
-                FieldValue[] result = m_bias.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+                FieldValue[] result = m_bias.GetField(TiffTag.IMAGEWIDTH);
                 int biasWidth = result[0].ToInt();
 
-                result = m_bias.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+                result = m_bias.GetField(TiffTag.IMAGELENGTH);
                 int biasLength = result[0].ToInt();
 
                 if (biasSize == bufSize && imagelength == biasLength && imagewidth == biasWidth)
                 {
-                    result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+                    result = inImage.GetField(TiffTag.BITSPERSAMPLE);
                     short sampleBits = result[0].ToShort();
 
                     if (sampleBits == 8 || sampleBits == 16 || sampleBits == 32)
@@ -1144,10 +1144,10 @@ namespace BitMiracle.TiffCP
         {
             byte[] tilebuf = new byte[inImage.TileSize()];
 
-            FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            FieldValue[] result = inImage.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
 
-            result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            result = inImage.GetField(TiffTag.TILELENGTH);
             int tl = result[0].ToInt();
 
             int imagew = inImage.ScanlineSize();
@@ -1191,13 +1191,13 @@ namespace BitMiracle.TiffCP
         {
             byte[] tilebuf = new byte[inImage.TileSize()];
 
-            FieldValue[] result = inImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            FieldValue[] result = inImage.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
 
-            result = inImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            result = inImage.GetField(TiffTag.TILELENGTH);
             int tl = result[0].ToInt();
 
-            result = inImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            result = inImage.GetField(TiffTag.BITSPERSAMPLE);
             short bps = result[0].ToShort();
 
             Debug.Assert(bps % 8 == 0);
@@ -1250,7 +1250,7 @@ namespace BitMiracle.TiffCP
 
         static bool writeBufferToContigStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, short spp)
         {
-            FieldValue[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            FieldValue[] result = outImage.GetFieldDefaulted(TiffTag.ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
 
             int strip = 0;
@@ -1279,7 +1279,7 @@ namespace BitMiracle.TiffCP
         {
             byte[] obuf = new byte[outImage.StripSize()];
 
-            FieldValue[] result = outImage.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            FieldValue[] result = outImage.GetFieldDefaulted(TiffTag.ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
 
             int rowsize = imagewidth * spp;
@@ -1308,10 +1308,10 @@ namespace BitMiracle.TiffCP
         {
             byte[] obuf = new byte[outImage.TileSize()];
 
-            FieldValue[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            FieldValue[] result = outImage.GetField(TiffTag.TILELENGTH);
             int tl = result[0].ToInt();
 
-            result = outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            result = outImage.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
 
             int imagew = outImage.ScanlineSize();
@@ -1359,13 +1359,13 @@ namespace BitMiracle.TiffCP
         {
             byte[] obuf = new byte[outImage.TileSize()];
 
-            FieldValue[] result = outImage.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            FieldValue[] result = outImage.GetField(TiffTag.TILELENGTH);
             int tl = result[0].ToInt();
 
-            result = outImage.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            result = outImage.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
 
-            result = outImage.GetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            result = outImage.GetField(TiffTag.BITSPERSAMPLE);
             short bps = result[0].ToShort();
 
             Debug.Assert(bps % 8 == 0);
@@ -1418,12 +1418,12 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        static void CopyTag(Tiff inImage, Tiff outImage, TIFFTAG tag, short count, TiffDataType type)
+        static void CopyTag(Tiff inImage, Tiff outImage, TiffTag tag, short count, TiffType type)
         {
             FieldValue[] result = null;
             switch (type)
             {
-                case TiffDataType.TIFF_SHORT:
+                case TiffType.SHORT:
                     result = inImage.GetField(tag);
                     if (result != null)
                     {
@@ -1437,22 +1437,22 @@ namespace BitMiracle.TiffCP
                             outImage.SetField(tag, result[0], result[1]);
                     }
                     break;
-                case TiffDataType.TIFF_LONG:
+                case TiffType.LONG:
                     result = inImage.GetField(tag);
                     if (result != null)
                         outImage.SetField(tag, result[0]);
                     break;
-                case TiffDataType.TIFF_RATIONAL:
+                case TiffType.RATIONAL:
                     result = inImage.GetField(tag);
                     if (result != null)
                         outImage.SetField(tag, result[0]);
                     break;
-                case TiffDataType.TIFF_ASCII:
+                case TiffType.ASCII:
                     result = inImage.GetField(tag);
                     if (result != null)
                         outImage.SetField(tag, result[0]);
                     break;
-                case TiffDataType.TIFF_DOUBLE:
+                case TiffType.DOUBLE:
                     result = inImage.GetField(tag);
                     if (result != null)
                         outImage.SetField(tag, result[0]);

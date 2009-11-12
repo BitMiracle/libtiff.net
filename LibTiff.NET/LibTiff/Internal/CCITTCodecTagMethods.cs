@@ -19,48 +19,48 @@ namespace BitMiracle.LibTiff.Internal
 {
     class CCITTCodecTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
+        public override bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_FAXMODE:
-                    sp.m_mode = (FAXMODE)ap[0].ToShort();
+                case TiffTag.FAXMODE:
+                    sp.m_mode = (FaxMode)ap[0].ToShort();
                     return true; /* NB: pseudo tag */
-                case TIFFTAG.TIFFTAG_FAXFILLFUNC:
+                case TiffTag.FAXFILLFUNC:
                     sp.fill = ap[0].Value as CCITTCodec.FaxFillFunc;
                     return true; /* NB: pseudo tag */
-                case TIFFTAG.TIFFTAG_GROUP3OPTIONS:
+                case TiffTag.GROUP3OPTIONS:
                     /* XXX: avoid reading options if compression mismatches. */
-                    if (tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX3)
-                        sp.m_groupoptions = (GROUP3OPT)ap[0].ToShort();
+                    if (tif.m_dir.td_compression == Compression.CCITTFAX3)
+                        sp.m_groupoptions = (Group3Opt)ap[0].ToShort();
                     break;
-                case TIFFTAG.TIFFTAG_GROUP4OPTIONS:
+                case TiffTag.GROUP4OPTIONS:
                     /* XXX: avoid reading options if compression mismatches. */
-                    if (tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX4)
-                        sp.m_groupoptions = (GROUP3OPT)ap[0].ToShort();
+                    if (tif.m_dir.td_compression == Compression.CCITTFAX4)
+                        sp.m_groupoptions = (Group3Opt)ap[0].ToShort();
                     break;
-                case TIFFTAG.TIFFTAG_BADFAXLINES:
+                case TiffTag.BADFAXLINES:
                     sp.m_badfaxlines = ap[0].ToInt();
                     break;
-                case TIFFTAG.TIFFTAG_CLEANFAXDATA:
-                    sp.m_cleanfaxdata = (CLEANFAXDATA)ap[0].ToByte();
+                case TiffTag.CLEANFAXDATA:
+                    sp.m_cleanfaxdata = (CleanFaxData)ap[0].ToByte();
                     break;
-                case TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES:
+                case TiffTag.CONSECUTIVEBADFAXLINES:
                     sp.m_badfaxrun = ap[0].ToInt();
                     break;
-                case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
+                case TiffTag.FAXRECVPARAMS:
                     sp.m_recvparams = ap[0].ToInt();
                     break;
-                case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
+                case TiffTag.FAXSUBADDRESS:
                     Tiff.setString(out sp.m_subaddress, ap[0].ToString());
                     break;
-                case TIFFTAG.TIFFTAG_FAXRECVTIME:
+                case TiffTag.FAXRECVTIME:
                     sp.m_recvtime = ap[0].ToInt();
                     break;
-                case TIFFTAG.TIFFTAG_FAXDCS:
+                case TiffTag.FAXDCS:
                     Tiff.setString(out sp.m_faxdcs, ap[0].ToString());
                     break;
                 default:
@@ -77,7 +77,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
+        public override FieldValue[] vgetfield(Tiff tif, TiffTag tag)
         {
             CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
@@ -86,35 +86,35 @@ namespace BitMiracle.LibTiff.Internal
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_FAXMODE:
+                case TiffTag.FAXMODE:
                     result[0].Set(sp.m_mode);
                     break;
-                case TIFFTAG.TIFFTAG_FAXFILLFUNC:
+                case TiffTag.FAXFILLFUNC:
                     result[0].Set(sp.fill);
                     break;
-                case TIFFTAG.TIFFTAG_GROUP3OPTIONS:
-                case TIFFTAG.TIFFTAG_GROUP4OPTIONS:
+                case TiffTag.GROUP3OPTIONS:
+                case TiffTag.GROUP4OPTIONS:
                     result[0].Set(sp.m_groupoptions);
                     break;
-                case TIFFTAG.TIFFTAG_BADFAXLINES:
+                case TiffTag.BADFAXLINES:
                     result[0].Set(sp.m_badfaxlines);
                     break;
-                case TIFFTAG.TIFFTAG_CLEANFAXDATA:
+                case TiffTag.CLEANFAXDATA:
                     result[0].Set(sp.m_cleanfaxdata);
                     break;
-                case TIFFTAG.TIFFTAG_CONSECUTIVEBADFAXLINES:
+                case TiffTag.CONSECUTIVEBADFAXLINES:
                     result[0].Set(sp.m_badfaxrun);
                     break;
-                case TIFFTAG.TIFFTAG_FAXRECVPARAMS:
+                case TiffTag.FAXRECVPARAMS:
                     result[0].Set(sp.m_recvparams);
                     break;
-                case TIFFTAG.TIFFTAG_FAXSUBADDRESS:
+                case TiffTag.FAXSUBADDRESS:
                     result[0].Set(sp.m_subaddress);
                     break;
-                case TIFFTAG.TIFFTAG_FAXRECVTIME:
+                case TiffTag.FAXRECVTIME:
                     result[0].Set(sp.m_recvtime);
                     break;
-                case TIFFTAG.TIFFTAG_FAXDCS:
+                case TiffTag.FAXDCS:
                     result[0].Set(sp.m_faxdcs);
                     break;
                 default:
@@ -124,7 +124,7 @@ namespace BitMiracle.LibTiff.Internal
             return result;
         }
 
-        public override void printdir(Tiff tif, Stream fd, TiffPrintDirectoryFlags flags)
+        public override void printdir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
             CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
@@ -132,28 +132,28 @@ namespace BitMiracle.LibTiff.Internal
             if (tif.fieldSet(CCITTCodec.FIELD_OPTIONS))
             {
                 string sep = " ";
-                if (tif.m_dir.td_compression == COMPRESSION.COMPRESSION_CCITTFAX4)
+                if (tif.m_dir.td_compression == Compression.CCITTFAX4)
                 {
                     Tiff.fprintf(fd, "  Group 4 Options:");
-                    if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_UNCOMPRESSED) != 0)
+                    if ((sp.m_groupoptions & Group3Opt.UNCOMPRESSED) != 0)
                         Tiff.fprintf(fd, "{0}uncompressed data", sep);
                 }
                 else
                 {
                     Tiff.fprintf(fd, "  Group 3 Options:");
-                    if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_2DENCODING) != 0)
+                    if ((sp.m_groupoptions & Group3Opt.ENCODING2D) != 0)
                     {
                         Tiff.fprintf(fd, "{0}2-d encoding", sep);
                         sep = "+";
                     }
 
-                    if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_FILLBITS) != 0)
+                    if ((sp.m_groupoptions & Group3Opt.FILLBITS) != 0)
                     {
                         Tiff.fprintf(fd, "{0}EOL padding", sep);
                         sep = "+";
                     }
 
-                    if ((sp.m_groupoptions & GROUP3OPT.GROUP3OPT_UNCOMPRESSED) != 0)
+                    if ((sp.m_groupoptions & Group3Opt.UNCOMPRESSED) != 0)
                         Tiff.fprintf(fd, "{0}uncompressed data", sep);
                 }
 
@@ -166,13 +166,13 @@ namespace BitMiracle.LibTiff.Internal
                 
                 switch (sp.m_cleanfaxdata)
                 {
-                    case CLEANFAXDATA.CLEANFAXDATA_CLEAN:
+                    case CleanFaxData.CLEAN:
                         Tiff.fprintf(fd, " clean");
                         break;
-                    case CLEANFAXDATA.CLEANFAXDATA_REGENERATED:
+                    case CleanFaxData.REGENERATED:
                         Tiff.fprintf(fd, " receiver regenerated");
                         break;
-                    case CLEANFAXDATA.CLEANFAXDATA_UNCLEAN:
+                    case CleanFaxData.UNCLEAN:
                         Tiff.fprintf(fd, " uncorrected errors");
                         break;
                 }

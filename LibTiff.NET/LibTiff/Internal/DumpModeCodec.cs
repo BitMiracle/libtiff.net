@@ -22,7 +22,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class DumpModeCodec : TiffCodec
     {
-        public DumpModeCodec(Tiff tif, COMPRESSION scheme, string name)
+        public DumpModeCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
         {
         }

@@ -27,28 +27,28 @@ namespace BitMiracle.LibTiff
     {
         private static readonly string[] photoNames = 
         {
-            "min-is-white", /* PHOTOMETRIC_MINISWHITE */
-            "min-is-black",  /* PHOTOMETRIC_MINISBLACK */
-            "RGB color",  /* PHOTOMETRIC_RGB */
-            "palette color (RGB from colormap)",  /* PHOTOMETRIC_PALETTE */
-            "transparency mask",  /* PHOTOMETRIC_MASK */
-            "separated",  /* PHOTOMETRIC_SEPARATED */
-            "YCbCr",  /* PHOTOMETRIC_YCBCR */
+            "min-is-white",                         /* Photometric.MINISWHITE */
+            "min-is-black",                         /* Photometric.MINISBLACK */
+            "RGB color",                            /* Photometric.RGB */
+            "palette color (RGB from colormap)",    /* Photometric.PALETTE */
+            "transparency mask",                    /* Photometric.MASK */
+            "separated",                            /* Photometric.SEPARATED */
+            "YCbCr",                                /* Photometric.YCBCR */
             "7 (0x7)",
-            "CIE L*a*b*",  /* PHOTOMETRIC_CIELAB */
+            "CIE L*a*b*",                           /* Photometric.CIELAB */
         };
 
         private static readonly string[] orientNames = 
         {
             "0 (0x0)",
-            "row 0 top, col 0 lhs", /* ORIENTATION_TOPLEFT */
-            "row 0 top, col 0 rhs",  /* ORIENTATION_TOPRIGHT */
-            "row 0 bottom, col 0 rhs",  /* ORIENTATION_BOTRIGHT */
-            "row 0 bottom, col 0 lhs",  /* ORIENTATION_BOTLEFT */
-            "row 0 lhs, col 0 top",  /* ORIENTATION_LEFTTOP */
-            "row 0 rhs, col 0 top",  /* ORIENTATION_RIGHTTOP */
-            "row 0 rhs, col 0 bottom",  /* ORIENTATION_RIGHTBOT */
-            "row 0 lhs, col 0 bottom",  /* ORIENTATION_LEFTBOT */
+            "row 0 top, col 0 lhs",                 /* Orientation.TOPLEFT */
+            "row 0 top, col 0 rhs",                 /* Orientation.TOPRIGHT */
+            "row 0 bottom, col 0 rhs",              /* Orientation.BOTRIGHT */
+            "row 0 bottom, col 0 lhs",              /* Orientation.BOTLEFT */
+            "row 0 lhs, col 0 top",                 /* Orientation.LEFTTOP */
+            "row 0 rhs, col 0 top",                 /* Orientation.RIGHTTOP */
+            "row 0 rhs, col 0 bottom",              /* Orientation.RIGHTBOT */
+            "row 0 lhs, col 0 bottom",              /* Orientation.LEFTBOT */
         };
 
         private static void printField(Stream fd, TiffFieldInfo fip, int value_count, object raw_data)
@@ -57,8 +57,8 @@ namespace BitMiracle.LibTiff
 
             for (int j = 0; j < value_count; j++)
             {
-                if (fip.field_type == TiffDataType.TIFF_BYTE || 
-                    fip.field_type == TiffDataType.TIFF_SBYTE)
+                if (fip.field_type == TiffType.BYTE || 
+                    fip.field_type == TiffType.SBYTE)
                 {
                     byte[] bytes = raw_data as byte[];
                     sbyte[] sbytes = raw_data as sbyte[];
@@ -67,14 +67,14 @@ namespace BitMiracle.LibTiff
                     else if (sbytes != null)
                         fprintf(fd, "{0}", sbytes[j]);
                 }
-                else if (fip.field_type == TiffDataType.TIFF_UNDEFINED)
+                else if (fip.field_type == TiffType.UNDEFINED)
                 {
                     byte[] bytes = raw_data as byte[];
                     if (bytes != null)
                         fprintf(fd, "0x{0:x}", bytes[j]);
                 }
-                else if (fip.field_type == TiffDataType.TIFF_SHORT || 
-                    fip.field_type == TiffDataType.TIFF_SSHORT)
+                else if (fip.field_type == TiffType.SHORT || 
+                    fip.field_type == TiffType.SSHORT)
                 {
                     short[] shorts = raw_data as short[];
                     ushort[] ushorts = raw_data as ushort[];
@@ -83,8 +83,8 @@ namespace BitMiracle.LibTiff
                     else if (ushorts != null)
                         fprintf(fd, "{0}", ushorts[j]);
                 }
-                else if (fip.field_type == TiffDataType.TIFF_LONG || 
-                    fip.field_type == TiffDataType.TIFF_SLONG)
+                else if (fip.field_type == TiffType.LONG || 
+                    fip.field_type == TiffType.SLONG)
                 {
                     int[] ints = raw_data as int[];
                     uint[] uints = raw_data as uint[];
@@ -93,15 +93,15 @@ namespace BitMiracle.LibTiff
                     else if (uints != null)
                         fprintf(fd, "{0}", uints[j]);
                 }
-                else if (fip.field_type == TiffDataType.TIFF_RATIONAL ||
-                    fip.field_type == TiffDataType.TIFF_SRATIONAL ||
-                    fip.field_type == TiffDataType.TIFF_FLOAT)
+                else if (fip.field_type == TiffType.RATIONAL ||
+                    fip.field_type == TiffType.SRATIONAL ||
+                    fip.field_type == TiffType.FLOAT)
                 {
                     float[] floats = raw_data as float[];
                     if (floats != null)
                         fprintf(fd, "{0}", floats[j]);
                 }
-                else if (fip.field_type == TiffDataType.TIFF_IFD)
+                else if (fip.field_type == TiffType.IFD)
                 {
                     int[] ints = raw_data as int[];
                     uint[] uints = raw_data as uint[];
@@ -110,7 +110,7 @@ namespace BitMiracle.LibTiff
                     else if (uints != null)
                         fprintf(fd, "0x{0:x}", uints[j]);
                 }
-                else if (fip.field_type == TiffDataType.TIFF_ASCII)
+                else if (fip.field_type == TiffType.ASCII)
                 {
                     string s = raw_data as string;
                     if (s != null)
@@ -118,8 +118,8 @@ namespace BitMiracle.LibTiff
 
                     break;
                 }
-                else if (fip.field_type == TiffDataType.TIFF_DOUBLE ||
-                    fip.field_type == TiffDataType.TIFF_FLOAT)
+                else if (fip.field_type == TiffType.DOUBLE ||
+                    fip.field_type == TiffType.FLOAT)
                 {
                     float[] floats = raw_data as float[];
                     double[] doubles = raw_data as double[];
@@ -141,7 +141,7 @@ namespace BitMiracle.LibTiff
             fprintf(fd, "\n");
         }
 
-        private bool prettyPrintField(Stream fd, TIFFTAG tag, int value_count, object raw_data)
+        private bool prettyPrintField(Stream fd, TiffTag tag, int value_count, object raw_data)
         {
             FieldValue value = new FieldValue(raw_data);
             short[] sdata = value.ToShortArray();
@@ -150,13 +150,13 @@ namespace BitMiracle.LibTiff
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_INKSET:
+                case TiffTag.INKSET:
                     if (sdata != null)
                     {
                         fprintf(fd, "  Ink Set: ");
-                        switch ((INKSET)sdata[0])
+                        switch ((InkSet)sdata[0])
                         {
-                            case INKSET.INKSET_CMYK:
+                            case InkSet.CMYK:
                                 fprintf(fd, "CMYK\n");
                                 break;
 
@@ -168,7 +168,7 @@ namespace BitMiracle.LibTiff
                     }
                     return false;
 
-                case TIFFTAG.TIFFTAG_DOTRANGE:
+                case TiffTag.DOTRANGE:
                     if (sdata != null)
                     {
                         fprintf(fd, "  Dot Range: {0}-{1}\n", sdata[0], sdata[1]);
@@ -176,7 +176,7 @@ namespace BitMiracle.LibTiff
                     }
                     return false;
 
-                case TIFFTAG.TIFFTAG_WHITEPOINT:
+                case TiffTag.WHITEPOINT:
                     if (fdata != null)
                     {
                         fprintf(fd, "  White Point: {0:G}-{1:G}\n", fdata[0], fdata[1]);
@@ -184,7 +184,7 @@ namespace BitMiracle.LibTiff
                     }
                     return false;
 
-                case TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE:
+                case TiffTag.REFERENCEBLACKWHITE:
                     if (fdata != null)
                     {
                         fprintf(fd, "  Reference Black/White:\n");
@@ -194,7 +194,7 @@ namespace BitMiracle.LibTiff
                     }
                     return false;
 
-                case TIFFTAG.TIFFTAG_XMLPACKET:
+                case TiffTag.XMLPACKET:
                     string s = raw_data as string;
                     if (s != null)
                     {
@@ -205,7 +205,7 @@ namespace BitMiracle.LibTiff
                     }
                     return false;
 
-                case TIFFTAG.TIFFTAG_RICHTIFFIPTC:
+                case TiffTag.RICHTIFFIPTC:
                     /*
                      * XXX: for some weird reason RichTIFFIPTC tag
                      * defined as array of LONG values.
@@ -213,15 +213,15 @@ namespace BitMiracle.LibTiff
                     fprintf(fd, "  RichTIFFIPTC Data: <present>, {0} bytes\n", value_count * 4);
                     return true;
 
-                case TIFFTAG.TIFFTAG_PHOTOSHOP:
+                case TiffTag.PHOTOSHOP:
                     fprintf(fd, "  Photoshop Data: <present>, {0} bytes\n", value_count);
                     return true;
 
-                case TIFFTAG.TIFFTAG_ICCPROFILE:
+                case TiffTag.ICCPROFILE:
                     fprintf(fd, "  ICC Profile: <present>, {0} bytes\n", value_count);
                     return true;
 
-                case TIFFTAG.TIFFTAG_STONITS:
+                case TiffTag.STONITS:
                     if (ddata != null)
                     {
                         fprintf(fd, "  Sample to Nits conversion factor: {0:e4}\n", ddata[0]);

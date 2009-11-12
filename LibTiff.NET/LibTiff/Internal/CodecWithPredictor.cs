@@ -55,10 +55,10 @@ namespace BitMiracle.LibTiff.Internal
 
         private static TiffFieldInfo[] predictFieldInfo = 
         {
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_PREDICTOR, 1, 1, TiffDataType.TIFF_SHORT, CodecWithPredictor.FIELD_PREDICTOR, false, false, "Predictor"), 
+            new TiffFieldInfo(TiffTag.PREDICTOR, 1, 1, TiffType.SHORT, CodecWithPredictor.FIELD_PREDICTOR, false, false, "Predictor"), 
         };
 
-        private PREDICTOR predictor; /* predictor tag value */
+        private Predictor predictor; /* predictor tag value */
         private int stride; /* sample stride over data */
         private int rowsize; /* tile/strip row size */
 
@@ -71,7 +71,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private PredictorType m_predictorType; /* horizontal differencer/accumulator */
 
-        public CodecWithPredictor(Tiff tif, COMPRESSION scheme, string name)
+        public CodecWithPredictor(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
         {
             m_tagMethods = new CodecWithPredictorTagMethods();
@@ -89,7 +89,7 @@ namespace BitMiracle.LibTiff.Internal
             m_parentTagMethods = m_tif.m_tagmethods;
             m_tif.m_tagmethods = m_tagMethods;
 
-            predictor = PREDICTOR.PREDICTOR_NONE; /* default value */
+            predictor = Predictor.NONE; /* default value */
             m_predictorType = PredictorType.ptNone; /* no predictor routine */
         }
 
@@ -204,12 +204,12 @@ namespace BitMiracle.LibTiff.Internal
             return base.tif_encodetile(pp, cc, s);
         }
 
-        public PREDICTOR GetPredictorValue()
+        public Predictor GetPredictorValue()
         {
             return predictor;
         }
 
-        public void SetPredictorValue(PREDICTOR value)
+        public void SetPredictorValue(Predictor value)
         {
             predictor = value;
         }
@@ -810,7 +810,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
 
             m_passThruDecode = true;
-            if (predictor == PREDICTOR.PREDICTOR_HORIZONTAL)
+            if (predictor == Predictor.HORIZONTAL)
             {
                 switch (m_tif.m_dir.td_bitspersample)
                 {
@@ -852,7 +852,7 @@ namespace BitMiracle.LibTiff.Internal
                     }
                 }
             }
-            else if (predictor == PREDICTOR.PREDICTOR_FLOATINGPOINT)
+            else if (predictor == Predictor.FLOATINGPOINT)
             {
                 m_predictorType = PredictorType.ptFpAcc;
                 
@@ -885,7 +885,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
 
             m_passThruEncode = true;
-            if (predictor == PREDICTOR.PREDICTOR_HORIZONTAL)
+            if (predictor == Predictor.HORIZONTAL)
             {
                 switch (m_tif.m_dir.td_bitspersample)
                 {
@@ -906,7 +906,7 @@ namespace BitMiracle.LibTiff.Internal
                 */
                 m_passThruEncode = false;
             }
-            else if (predictor == PREDICTOR.PREDICTOR_FLOATINGPOINT)
+            else if (predictor == Predictor.FLOATINGPOINT)
             {
                 m_predictorType = PredictorType.ptFpDiff;
 
@@ -927,10 +927,10 @@ namespace BitMiracle.LibTiff.Internal
 
             switch (predictor) /* no differencing */
             {
-                case PREDICTOR.PREDICTOR_NONE:
+                case Predictor.NONE:
                     return true;
 
-                case PREDICTOR.PREDICTOR_HORIZONTAL:
+                case Predictor.HORIZONTAL:
                     if (td.td_bitspersample != 8 &&
                         td.td_bitspersample != 16 &&
                         td.td_bitspersample != 32)
@@ -942,8 +942,8 @@ namespace BitMiracle.LibTiff.Internal
                     }
                     break;
 
-                case PREDICTOR.PREDICTOR_FLOATINGPOINT:
-                    if (td.td_sampleformat != SAMPLEFORMAT.SAMPLEFORMAT_IEEEFP)
+                case Predictor.FLOATINGPOINT:
+                    if (td.td_sampleformat != SampleFormat.IEEEFP)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
                             "Floating point \"Predictor\" not supported with {0} data format",
@@ -958,7 +958,7 @@ namespace BitMiracle.LibTiff.Internal
                     return false;
             }
 
-            stride = (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG ? td.td_samplesperpixel : 1);
+            stride = (td.td_planarconfig == PlanarConfig.CONTIG ? td.td_samplesperpixel : 1);
             
             /*
             * Calculate the scanline/tile-width size in bytes.

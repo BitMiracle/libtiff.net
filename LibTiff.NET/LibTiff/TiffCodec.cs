@@ -28,10 +28,10 @@ namespace BitMiracle.LibTiff
     class TiffCodec
     {
         protected Tiff m_tif;
-        public COMPRESSION m_scheme;
+        public Compression m_scheme;
         public string m_name;
 
-        public TiffCodec(Tiff tif, COMPRESSION scheme, string name)
+        public TiffCodec(Tiff tif, Compression scheme, string name)
         {
             m_scheme = scheme;
             m_tif = tif;

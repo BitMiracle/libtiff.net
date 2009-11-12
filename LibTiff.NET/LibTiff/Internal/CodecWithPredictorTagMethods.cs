@@ -19,15 +19,15 @@ namespace BitMiracle.LibTiff.Internal
 {
     class CodecWithPredictorTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
+        public override bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_PREDICTOR:
-                    sp.SetPredictorValue((PREDICTOR)ap[0].ToByte());
+                case TiffTag.PREDICTOR:
+                    sp.SetPredictorValue((Predictor)ap[0].ToByte());
                     tif.setFieldBit(CodecWithPredictor.FIELD_PREDICTOR);
                     tif.m_flags |= Tiff.TIFF_DIRTYDIRECT;
                     return true;
@@ -40,14 +40,14 @@ namespace BitMiracle.LibTiff.Internal
             return base.vsetfield(tif, tag, ap);
         }
 
-        public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
+        public override FieldValue[] vgetfield(Tiff tif, TiffTag tag)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_PREDICTOR:
+                case TiffTag.PREDICTOR:
                     FieldValue[] result = new FieldValue[1];
                     result[0].Set(sp.GetPredictorValue());
                     return result;
@@ -60,7 +60,7 @@ namespace BitMiracle.LibTiff.Internal
             return base.vgetfield(tif, tag);
         }
 
-        public override void printdir(Tiff tif, Stream fd, TiffPrintDirectoryFlags flags)
+        public override void printdir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
@@ -68,16 +68,16 @@ namespace BitMiracle.LibTiff.Internal
             if (tif.fieldSet(CodecWithPredictor.FIELD_PREDICTOR))
             {
                 Tiff.fprintf(fd, "  Predictor: ");
-                PREDICTOR predictor = sp.GetPredictorValue();
+                Predictor predictor = sp.GetPredictorValue();
                 switch (predictor)
                 {
-                    case PREDICTOR.PREDICTOR_NONE:
+                    case Predictor.NONE:
                         Tiff.fprintf(fd, "none ");
                         break;
-                    case PREDICTOR.PREDICTOR_HORIZONTAL:
+                    case Predictor.HORIZONTAL:
                         Tiff.fprintf(fd, "horizontal differencing ");
                         break;
-                    case PREDICTOR.PREDICTOR_FLOATINGPOINT:
+                    case Predictor.FLOATINGPOINT:
                         Tiff.fprintf(fd, "floating point predictor ");
                         break;
                 }

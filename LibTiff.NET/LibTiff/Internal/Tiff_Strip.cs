@@ -63,11 +63,11 @@ namespace BitMiracle.LibTiff
         internal int newScanlineSize()
         {
             int scanline;
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG)
             {
-                if (m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && !IsUpSampled())
+                if (m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
                 {
-                    FieldValue[] result = GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                    FieldValue[] result = GetField(TiffTag.YCBCRSUBSAMPLING);
                     short ycbcrsubsampling0 = result[0].ToShort();
                     short ycbcrsubsampling1 = result[1].ToShort();
 
@@ -97,7 +97,7 @@ namespace BitMiracle.LibTiff
         internal int oldScanlineSize()
         {
             int scanline = multiply(m_dir.td_bitspersample, m_dir.td_imagewidth, "TIFFScanlineSize");
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG)
                 scanline = multiply(scanline, m_dir.td_samplesperpixel, "TIFFScanlineSize");
 
             return howMany8(scanline);

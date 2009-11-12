@@ -41,14 +41,14 @@ namespace BitMiracle.LibTiff
         public Tiff tif; /* image handle */
         public bool stoponerr; /* stop on read error */
         public bool isContig; /* data is packed/separate */
-        public EXTRASAMPLE alpha; /* type of alpha data present */
+        public ExtraSample alpha; /* type of alpha data present */
         public int width; /* image width */
         public int height; /* image height */
         public short bitspersample; /* image bits/sample */
         public short samplesperpixel; /* image samples/pixel */
-        public ORIENTATION orientation; /* image orientation */
-        public ORIENTATION req_orientation; /* requested orientation */
-        public PHOTOMETRIC photometric; /* image photometric interp */
+        public Orientation orientation; /* image orientation */
+        public Orientation req_orientation; /* requested orientation */
+        public Photometric photometric; /* image photometric interp */
         public short[] redcmap; /* colormap pallete */
         public short[] greencmap;
         public short[] bluecmap;
@@ -98,12 +98,12 @@ namespace BitMiracle.LibTiff
             img.redcmap = null;
             img.greencmap = null;
             img.bluecmap = null;
-            img.req_orientation = ORIENTATION.ORIENTATION_BOTLEFT; /* It is the default */
+            img.req_orientation = Orientation.BOTLEFT; /* It is the default */
 
             img.tif = tif;
             img.stoponerr = stop;
 
-            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.BITSPERSAMPLE);
             img.bitspersample = result[0].ToShort();
             switch (img.bitspersample)
             {
@@ -120,70 +120,70 @@ namespace BitMiracle.LibTiff
             }
 
             img.alpha = 0;
-            result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+            result = tif.GetFieldDefaulted(TiffTag.SAMPLESPERPIXEL);
             img.samplesperpixel = result[0].ToShort();
 
-            result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_EXTRASAMPLES);
+            result = tif.GetFieldDefaulted(TiffTag.EXTRASAMPLES);
             short extrasamples = result[0].ToShort();
             byte[] sampleinfo = result[1].ToByteArray();
 
             if (extrasamples >= 1)
             {
-                switch ((EXTRASAMPLE)sampleinfo[0])
+                switch ((ExtraSample)sampleinfo[0])
                 {
-                    case EXTRASAMPLE.EXTRASAMPLE_UNSPECIFIED:
+                    case ExtraSample.UNSPECIFIED:
                         /* Workaround for some images without */
                         if (img.samplesperpixel > 3)
                         {
                             /* correct info about alpha channel */
-                            img.alpha = EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA;
+                            img.alpha = ExtraSample.ASSOCALPHA;
                         }
                         break;
 
-                    case EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA:
+                    case ExtraSample.ASSOCALPHA:
                         /* data is pre-multiplied */
-                    case EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA:
+                    case ExtraSample.UNASSALPHA:
                         /* data is not pre-multiplied */
-                        img.alpha = (EXTRASAMPLE)sampleinfo[0];
+                        img.alpha = (ExtraSample)sampleinfo[0];
                         break;
                 }
             }
 
             if (Tiff.DEFAULT_EXTRASAMPLE_AS_ALPHA)
             {
-                result = tif.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+                result = tif.GetField(TiffTag.PHOTOMETRIC);
                 if (result == null)
-                    img.photometric = PHOTOMETRIC.PHOTOMETRIC_MINISWHITE;
+                    img.photometric = Photometric.MINISWHITE;
 
-                if (extrasamples == 0 && img.samplesperpixel == 4 && img.photometric == PHOTOMETRIC.PHOTOMETRIC_RGB)
+                if (extrasamples == 0 && img.samplesperpixel == 4 && img.photometric == Photometric.RGB)
                 {
-                    img.alpha = EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA;
+                    img.alpha = ExtraSample.ASSOCALPHA;
                     extrasamples = 1;
                 }
             }
 
             int colorchannels = img.samplesperpixel - extrasamples;
             
-            result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_COMPRESSION);
-            COMPRESSION compress = (COMPRESSION)result[0].ToInt();
+            result = tif.GetFieldDefaulted(TiffTag.COMPRESSION);
+            Compression compress = (Compression)result[0].ToInt();
 
-            result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_PLANARCONFIG);
-            PLANARCONFIG planarconfig = (PLANARCONFIG)result[0].ToShort();
+            result = tif.GetFieldDefaulted(TiffTag.PLANARCONFIG);
+            PlanarConfig planarconfig = (PlanarConfig)result[0].ToShort();
 
-            result = tif.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+            result = tif.GetField(TiffTag.PHOTOMETRIC);
             if (result == null)
             {
                 switch (colorchannels)
                 {
                     case 1:
                         if (img.isCCITTCompression())
-                            img.photometric = PHOTOMETRIC.PHOTOMETRIC_MINISWHITE;
+                            img.photometric = Photometric.MINISWHITE;
                         else
-                            img.photometric = PHOTOMETRIC.PHOTOMETRIC_MINISBLACK;
+                            img.photometric = Photometric.MINISBLACK;
                         break;
 
                     case 3:
-                        img.photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
+                        img.photometric = Photometric.RGB;
                         break;
 
                     default:
@@ -192,12 +192,12 @@ namespace BitMiracle.LibTiff
                 }
             }
             else
-                img.photometric = (PHOTOMETRIC)result[0].ToInt();
+                img.photometric = (Photometric)result[0].ToInt();
 
             switch (img.photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
-                    result = tif.GetField(TIFFTAG.TIFFTAG_COLORMAP);
+                case Photometric.PALETTE:
+                    result = tif.GetField(TiffTag.COLORMAP);
                     if (result == null)
                     {
                         emsg = string.Format("Missing required \"Colormap\" tag");
@@ -218,7 +218,7 @@ namespace BitMiracle.LibTiff
                     Array.Copy(green_orig, img.greencmap, n_color);
                     Array.Copy(blue_orig, img.bluecmap, n_color);
 
-                    if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && 
+                    if (planarconfig == PlanarConfig.CONTIG && 
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
                         emsg = string.Format(
@@ -228,9 +228,9 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
-                case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
-                    if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG && 
+                case Photometric.MINISWHITE:
+                case Photometric.MINISBLACK:
+                    if (planarconfig == PlanarConfig.CONTIG && 
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
                         emsg = string.Format(
@@ -240,22 +240,22 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case Photometric.YCBCR:
                     /* It would probably be nice to have a reality check here. */
-                    if (planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+                    if (planarconfig == PlanarConfig.CONTIG)
                     {
                         /* can rely on libjpeg to convert to RGB */
                         /* XXX should restore current state on exit */
                         switch (compress)
                         {
-                            case COMPRESSION.COMPRESSION_JPEG:
+                            case Compression.JPEG:
                                 /*
                                 * TODO: when complete tests verify complete desubsampling
-                                * and YCbCr handling, remove use of TIFFTAG_JPEGCOLORMODE in
+                                * and YCbCr handling, remove use of JPEGCOLORMODE in
                                 * favor of native handling
                                 */
-                                tif.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RGB);
-                                img.photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
+                                tif.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
+                                img.photometric = Photometric.RGB;
                                 break;
 
                             default:
@@ -272,7 +272,7 @@ namespace BitMiracle.LibTiff
                     */
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_RGB:
+                case Photometric.RGB:
                     if (colorchannels < 3)
                     {
                         emsg = string.Format("Sorry, can not handle RGB image with {0}={1}", "Color channels", colorchannels);
@@ -280,11 +280,11 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
-                    result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_INKSET);
-                    INKSET inkset = (INKSET)result[0].ToByte();
+                case Photometric.SEPARATED:
+                    result = tif.GetFieldDefaulted(TiffTag.INKSET);
+                    InkSet inkset = (InkSet)result[0].ToByte();
 
-                    if (inkset != INKSET.INKSET_CMYK)
+                    if (inkset != InkSet.CMYK)
                     {
                         emsg = string.Format("Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                         return null;
@@ -297,37 +297,37 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_LOGL:
-                    if (compress != COMPRESSION.COMPRESSION_SGILOG)
+                case Photometric.LOGL:
+                    if (compress != Compression.SGILOG)
                     {
-                        emsg = string.Format("Sorry, LogL data must have {0}={1}", "Compression", COMPRESSION.COMPRESSION_SGILOG);
+                        emsg = string.Format("Sorry, LogL data must have {0}={1}", "Compression", Compression.SGILOG);
                         return null;
                     }
 
-                    tif.SetField(TIFFTAG.TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT.SGILOGDATAFMT_8BIT);
-                    img.photometric = PHOTOMETRIC.PHOTOMETRIC_MINISBLACK; /* little white lie */
+                    tif.SetField(TiffTag.SGILOGDATAFMT, SGILogDataFmt.FMT8BIT);
+                    img.photometric = Photometric.MINISBLACK; /* little white lie */
                     img.bitspersample = 8;
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
-                    if (compress != COMPRESSION.COMPRESSION_SGILOG && compress != COMPRESSION.COMPRESSION_SGILOG24)
+                case Photometric.LOGLUV:
+                    if (compress != Compression.SGILOG && compress != Compression.SGILOG24)
                     {
-                        emsg = string.Format("Sorry, LogLuv data must have {0}={1} or {2}", "Compression", COMPRESSION.COMPRESSION_SGILOG, COMPRESSION.COMPRESSION_SGILOG24);
+                        emsg = string.Format("Sorry, LogLuv data must have {0}={1} or {2}", "Compression", Compression.SGILOG, Compression.SGILOG24);
                         return null;
                     }
 
-                    if (planarconfig != PLANARCONFIG.PLANARCONFIG_CONTIG)
+                    if (planarconfig != PlanarConfig.CONTIG)
                     {
                         emsg = string.Format("Sorry, can not handle LogLuv images with {0}={1}", "Planarconfiguration", planarconfig);
                         return null;
                     }
 
-                    tif.SetField(TIFFTAG.TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT.SGILOGDATAFMT_8BIT);
-                    img.photometric = PHOTOMETRIC.PHOTOMETRIC_RGB; /* little white lie */
+                    tif.SetField(TiffTag.SGILOGDATAFMT, SGILogDataFmt.FMT8BIT);
+                    img.photometric = Photometric.RGB; /* little white lie */
                     img.bitspersample = 8;
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
+                case Photometric.CIELAB:
                     break;
                 
                 default:
@@ -341,16 +341,16 @@ namespace BitMiracle.LibTiff
             img.ycbcr = null;
             img.cielab = null;
 
-            result = tif.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+            result = tif.GetField(TiffTag.IMAGEWIDTH);
             img.width = result[0].ToInt();
 
-            result = tif.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+            result = tif.GetField(TiffTag.IMAGELENGTH);
             img.height = result[0].ToInt();
 
-            result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION);
-            img.orientation = (ORIENTATION)result[0].ToByte();
+            result = tif.GetFieldDefaulted(TiffTag.ORIENTATION);
+            img.orientation = (Orientation)result[0].ToByte();
             
-            img.isContig = !(planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && colorchannels > 1);
+            img.isContig = !(planarconfig == PlanarConfig.SEPARATE && colorchannels > 1);
             if (img.isContig)
             {
                 if (!img.pickContigCase())
@@ -459,10 +459,10 @@ namespace BitMiracle.LibTiff
 
             byte[] buf = new byte [tif.TileSize()];
 
-            FieldValue[] result = tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            FieldValue[] result = tif.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
 
-            result = tif.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            result = tif.GetField(TiffTag.TILELENGTH);
             int th = result[0].ToInt();
 
             int flip = img.setorientation();
@@ -554,10 +554,10 @@ namespace BitMiracle.LibTiff
             int p2 = p1 + tilesize;
             int pa = (img.alpha != 0 ? (p2 + tilesize) : -1);
             
-            FieldValue[] result = tif.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+            FieldValue[] result = tif.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
 
-            result = tif.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+            result = tif.GetField(TiffTag.TILELENGTH);
             int th = result[0].ToInt();
 
             int flip = img.setorientation();
@@ -678,10 +678,10 @@ namespace BitMiracle.LibTiff
                 toskew = -(w - w);
             }
 
-            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
 
-            result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+            result = tif.GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
             short subsamplinghor = result[0].ToShort();
             short subsamplingver = result[1].ToShort();
 
@@ -764,7 +764,7 @@ namespace BitMiracle.LibTiff
                 toskew = -(w - w);
             }
 
-            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_ROWSPERSTRIP);
+            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
 
             int scanline = tif.ScanlineSize();
@@ -832,59 +832,59 @@ namespace BitMiracle.LibTiff
 
         private bool isCCITTCompression()
         {
-            FieldValue[] result = tif.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
-            COMPRESSION compress = (COMPRESSION)result[0].ToInt();
+            FieldValue[] result = tif.GetField(TiffTag.COMPRESSION);
+            Compression compress = (Compression)result[0].ToInt();
 
-            return (compress == COMPRESSION.COMPRESSION_CCITTFAX3 || 
-                compress == COMPRESSION.COMPRESSION_CCITTFAX4 || 
-                compress == COMPRESSION.COMPRESSION_CCITTRLE || 
-                compress == COMPRESSION.COMPRESSION_CCITTRLEW);
+            return (compress == Compression.CCITTFAX3 || 
+                compress == Compression.CCITTFAX4 || 
+                compress == Compression.CCITTRLE || 
+                compress == Compression.CCITTRLEW);
         }
 
         private int setorientation()
         {
             switch (orientation)
             {
-                case ORIENTATION.ORIENTATION_TOPLEFT:
-                case ORIENTATION.ORIENTATION_LEFTTOP:
-                    if (req_orientation == ORIENTATION.ORIENTATION_TOPRIGHT || req_orientation == ORIENTATION.ORIENTATION_RIGHTTOP)
+                case Orientation.TOPLEFT:
+                case Orientation.LEFTTOP:
+                    if (req_orientation == Orientation.TOPRIGHT || req_orientation == Orientation.RIGHTTOP)
                         return FLIP_HORIZONTALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_BOTRIGHT || req_orientation == ORIENTATION.ORIENTATION_RIGHTBOT)
+                    else if (req_orientation == Orientation.BOTRIGHT || req_orientation == Orientation.RIGHTBOT)
                         return FLIP_HORIZONTALLY | FLIP_VERTICALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_BOTLEFT || req_orientation == ORIENTATION.ORIENTATION_LEFTBOT)
+                    else if (req_orientation == Orientation.BOTLEFT || req_orientation == Orientation.LEFTBOT)
                         return FLIP_VERTICALLY;
 
                     return 0;
 
-                case ORIENTATION.ORIENTATION_TOPRIGHT:
-                case ORIENTATION.ORIENTATION_RIGHTTOP:
-                    if (req_orientation == ORIENTATION.ORIENTATION_TOPLEFT || req_orientation == ORIENTATION.ORIENTATION_LEFTTOP)
+                case Orientation.TOPRIGHT:
+                case Orientation.RIGHTTOP:
+                    if (req_orientation == Orientation.TOPLEFT || req_orientation == Orientation.LEFTTOP)
                         return FLIP_HORIZONTALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_BOTRIGHT || req_orientation == ORIENTATION.ORIENTATION_RIGHTBOT)
+                    else if (req_orientation == Orientation.BOTRIGHT || req_orientation == Orientation.RIGHTBOT)
                         return FLIP_VERTICALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_BOTLEFT || req_orientation == ORIENTATION.ORIENTATION_LEFTBOT)
+                    else if (req_orientation == Orientation.BOTLEFT || req_orientation == Orientation.LEFTBOT)
                         return FLIP_HORIZONTALLY | FLIP_VERTICALLY;
 
                     return 0;
 
-                case ORIENTATION.ORIENTATION_BOTRIGHT:
-                case ORIENTATION.ORIENTATION_RIGHTBOT:
-                    if (req_orientation == ORIENTATION.ORIENTATION_TOPLEFT || req_orientation == ORIENTATION.ORIENTATION_LEFTTOP)
+                case Orientation.BOTRIGHT:
+                case Orientation.RIGHTBOT:
+                    if (req_orientation == Orientation.TOPLEFT || req_orientation == Orientation.LEFTTOP)
                         return FLIP_HORIZONTALLY | FLIP_VERTICALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_TOPRIGHT || req_orientation == ORIENTATION.ORIENTATION_RIGHTTOP)
+                    else if (req_orientation == Orientation.TOPRIGHT || req_orientation == Orientation.RIGHTTOP)
                         return FLIP_VERTICALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_BOTLEFT || req_orientation == ORIENTATION.ORIENTATION_LEFTBOT)
+                    else if (req_orientation == Orientation.BOTLEFT || req_orientation == Orientation.LEFTBOT)
                         return FLIP_HORIZONTALLY;
 
                     return 0;
 
-                case ORIENTATION.ORIENTATION_BOTLEFT:
-                case ORIENTATION.ORIENTATION_LEFTBOT:
-                    if (req_orientation == ORIENTATION.ORIENTATION_TOPLEFT || req_orientation == ORIENTATION.ORIENTATION_LEFTTOP)
+                case Orientation.BOTLEFT:
+                case Orientation.LEFTBOT:
+                    if (req_orientation == Orientation.TOPLEFT || req_orientation == Orientation.LEFTTOP)
                         return FLIP_VERTICALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_TOPRIGHT || req_orientation == ORIENTATION.ORIENTATION_RIGHTTOP)
+                    else if (req_orientation == Orientation.TOPRIGHT || req_orientation == Orientation.RIGHTTOP)
                         return FLIP_HORIZONTALLY | FLIP_VERTICALLY;
-                    else if (req_orientation == ORIENTATION.ORIENTATION_BOTRIGHT || req_orientation == ORIENTATION.ORIENTATION_RIGHTBOT)
+                    else if (req_orientation == Orientation.BOTRIGHT || req_orientation == Orientation.RIGHTBOT)
                         return FLIP_HORIZONTALLY;
 
                     return 0;
@@ -903,22 +903,22 @@ namespace BitMiracle.LibTiff
 
             switch (photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_RGB:
+                case Photometric.RGB:
                     switch (bitspersample)
                     {
                         case 8:
-                            if (alpha == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA)
+                            if (alpha == ExtraSample.ASSOCALPHA)
                                 contig = putRGBAAcontig8bittile;
-                            else if (alpha == EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
+                            else if (alpha == ExtraSample.UNASSALPHA)
                                 contig = putRGBUAcontig8bittile;
                             else
                                 contig = putRGBcontig8bittile;
                             break;
 
                         case 16:
-                            if (alpha == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA)
+                            if (alpha == ExtraSample.ASSOCALPHA)
                                 contig = putRGBAAcontig16bittile;
-                            else if (alpha == EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
+                            else if (alpha == ExtraSample.UNASSALPHA)
                                 contig = putRGBUAcontig16bittile;
                             else
                                 contig = putRGBcontig16bittile;
@@ -926,7 +926,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
+                case Photometric.SEPARATED:
                     if (buildMap())
                     {
                         if (bitspersample == 8)
@@ -939,7 +939,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
+                case Photometric.PALETTE:
                     if (buildMap())
                     {
                         switch (bitspersample)
@@ -960,8 +960,8 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
-                case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
+                case Photometric.MINISWHITE:
+                case Photometric.MINISBLACK:
                     if (buildMap())
                     {
                         switch (bitspersample)
@@ -985,7 +985,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case Photometric.YCBCR:
                     if (bitspersample == 8)
                     {
                         if (initYCbCrConversion())
@@ -999,7 +999,7 @@ namespace BitMiracle.LibTiff
                             * Joris: added support for the [1,2] case, nonetheless, to accommodate
                             * some OJPEG files
                             */
-                            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
                             short SubsamplingHor = result[0].ToShort();
                             short SubsamplingVer = result[1].ToShort();
 
@@ -1031,7 +1031,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
+                case Photometric.CIELAB:
                     if (buildMap())
                     {
                         if (bitspersample == 8)
@@ -1056,22 +1056,22 @@ namespace BitMiracle.LibTiff
 
             switch (photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_RGB:
+                case Photometric.RGB:
                     switch (bitspersample)
                     {
                         case 8:
-                            if (alpha == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA)
+                            if (alpha == ExtraSample.ASSOCALPHA)
                                 separate = putRGBAAseparate8bittile;
-                            else if (alpha == EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
+                            else if (alpha == ExtraSample.UNASSALPHA)
                                 separate = putRGBUAseparate8bittile;
                             else
                                 separate = putRGBseparate8bittile;
                             break;
 
                         case 16:
-                            if (alpha == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA)
+                            if (alpha == ExtraSample.ASSOCALPHA)
                                 separate = putRGBAAseparate16bittile;
-                            else if (alpha == EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
+                            else if (alpha == ExtraSample.UNASSALPHA)
                                 separate = putRGBUAseparate16bittile;
                             else
                                 separate = putRGBseparate16bittile;
@@ -1079,12 +1079,12 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case Photometric.YCBCR:
                     if ((bitspersample == 8) && (samplesperpixel == 3))
                     {
                         if (initYCbCrConversion())
                         {
-                            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
                             short hs = result[0].ToShort();
                             short vs = result[0].ToShort();
 
@@ -2026,10 +2026,10 @@ namespace BitMiracle.LibTiff
             if (ycbcr == null)
                 ycbcr = new TiffYCbCrToRGB();
 
-            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_YCBCRCOEFFICIENTS);
+            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.YCBCRCOEFFICIENTS);
             float[] luma = result[0].ToFloatArray();
 
-            result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE);
+            result = tif.GetFieldDefaulted(TiffTag.REFERENCEBLACKWHITE);
             float[] refBlackWhite = result[0].ToFloatArray();
 
             ycbcr.Init(luma, refBlackWhite);
@@ -2041,7 +2041,7 @@ namespace BitMiracle.LibTiff
             if (cielab == null)
                 cielab = new TiffCIELabToRGB();
 
-            FieldValue[] result = tif.GetFieldDefaulted(TIFFTAG.TIFFTAG_WHITEPOINT);
+            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.WHITEPOINT);
             float[] whitePoint = result[0].ToFloatArray();
 
             float[] refWhite = new float[3];
@@ -2061,22 +2061,22 @@ namespace BitMiracle.LibTiff
         {
             switch (photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_RGB:
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
-                case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
+                case Photometric.RGB:
+                case Photometric.YCBCR:
+                case Photometric.SEPARATED:
                     if (bitspersample == 8)
                         break;
                     if (!setupMap())
                         return false;
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
-                case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
+                case Photometric.MINISBLACK:
+                case Photometric.MINISWHITE:
                     if (!setupMap())
                         return false;
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
+                case Photometric.PALETTE:
                     /*
                     * Convert 16-bit colormap to 8-bit (unless it looks
                     * like an old-style 8-bit colormap).
@@ -2112,7 +2112,7 @@ namespace BitMiracle.LibTiff
 
             Map = new byte [range + 1];
 
-            if (photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
+            if (photometric == Photometric.MINISWHITE)
             {
                 for (int x = 0; x <= range; x++)
                     Map[x] = (byte)(((range - x) * 255) / range);
@@ -2123,7 +2123,7 @@ namespace BitMiracle.LibTiff
                     Map[x] = (byte)((x * 255) / range);
             }
             
-            if (bitspersample <= 16 && (photometric == PHOTOMETRIC.PHOTOMETRIC_MINISBLACK || photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE))
+            if (bitspersample <= 16 && (photometric == Photometric.MINISBLACK || photometric == Photometric.MINISWHITE))
             {
                 /*
                 * Use photometric mapping table to construct

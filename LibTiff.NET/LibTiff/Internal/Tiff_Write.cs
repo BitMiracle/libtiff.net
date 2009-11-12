@@ -130,7 +130,7 @@ namespace BitMiracle.LibTiff
         */
         private bool growStrips(int delta, string module)
         {
-            Debug.Assert(m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG);
+            Debug.Assert(m_dir.td_planarconfig == PlanarConfig.CONTIG);
             int[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             int[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             m_dir.td_stripoffset = new_stripoffset;

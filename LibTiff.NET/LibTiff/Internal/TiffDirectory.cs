@@ -29,14 +29,14 @@ namespace BitMiracle.LibTiff.Internal
         public int td_tilewidth;
         public int td_tilelength;
         public int td_tiledepth;
-        public FILETYPE td_subfiletype;
+        public FileType td_subfiletype;
         public short td_bitspersample;
-        public SAMPLEFORMAT td_sampleformat;
-        public COMPRESSION td_compression;
-        public PHOTOMETRIC td_photometric;
-        public THRESHHOLD td_threshholding;
-        public FILLORDER td_fillorder;
-        public ORIENTATION td_orientation;
+        public SampleFormat td_sampleformat;
+        public Compression td_compression;
+        public Photometric td_photometric;
+        public Threshold td_threshholding;
+        public FillOrder td_fillorder;
+        public Orientation td_orientation;
         public short td_samplesperpixel;
         public int td_rowsperstrip;
         public short td_minsamplevalue;
@@ -45,15 +45,15 @@ namespace BitMiracle.LibTiff.Internal
         public double td_smaxsamplevalue;
         public float td_xresolution;
         public float td_yresolution;
-        public RESUNIT td_resolutionunit;
-        public PLANARCONFIG td_planarconfig;
+        public ResUnit td_resolutionunit;
+        public PlanarConfig td_planarconfig;
         public float td_xposition;
         public float td_yposition;
         public short[] td_pagenumber = new short[2];
         public short[][] td_colormap = { null, null, null };
         public short[] td_halftonehints = new short[2];
         public short td_extrasamples;
-        public EXTRASAMPLE[] td_sampleinfo;
+        public ExtraSample[] td_sampleinfo;
         public int td_stripsperimage;
         public int td_nstrips; /* size of offset & bytecount arrays */
         public int[] td_stripoffset;
@@ -63,7 +63,7 @@ namespace BitMiracle.LibTiff.Internal
         public int[] td_subifd;
         /* YCbCr parameters */
         public short[] td_ycbcrsubsampling = new short[2];
-        public YCBCRPOSITION td_ycbcrpositioning;
+        public YCbCrPosition td_ycbcrpositioning;
         /* Colorimetry parameters */
         public short[][] td_transferfunction = { null, null, null };
         /* CMYK parameters */
@@ -105,22 +105,22 @@ namespace BitMiracle.LibTiff.Internal
             td_customValueCount = 0;
             td_customValues = null;
 
-            td_fillorder = FILLORDER.FILLORDER_MSB2LSB;
+            td_fillorder = FillOrder.MSB2LSB;
             td_bitspersample = 1;
-            td_threshholding = THRESHHOLD.THRESHHOLD_BILEVEL;
-            td_orientation = ORIENTATION.ORIENTATION_TOPLEFT;
+            td_threshholding = Threshold.BILEVEL;
+            td_orientation = Orientation.TOPLEFT;
             td_samplesperpixel = 1;
             td_rowsperstrip = -1;
             td_tilewidth = 0;
             td_tilelength = 0;
             td_tiledepth = 1;
             td_stripbytecountsorted = 1; /* Our own arrays always sorted. */
-            td_resolutionunit = RESUNIT.RESUNIT_INCH;
-            td_sampleformat = SAMPLEFORMAT.SAMPLEFORMAT_UINT;
+            td_resolutionunit = ResUnit.INCH;
+            td_sampleformat = SampleFormat.UINT;
             td_imagedepth = 1;
             td_ycbcrsubsampling[0] = 2;
             td_ycbcrsubsampling[1] = 2;
-            td_ycbcrpositioning = YCBCRPOSITION.YCBCRPOSITION_CENTERED;
+            td_ycbcrpositioning = YCbCrPosition.CENTERED;
         }
     }
 }

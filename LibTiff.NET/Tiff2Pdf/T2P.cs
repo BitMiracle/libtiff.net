@@ -83,19 +83,19 @@ namespace BitMiracle.Tiff2Pdf
         private T2P_PAGE[] m_tiff_pages;
         private T2P_TILES[] m_tiff_tiles;
         private short m_tiff_pagecount;
-        private COMPRESSION m_tiff_compression;
-        private PHOTOMETRIC m_tiff_photometric;
-        private FILLORDER m_tiff_fillorder;
+        private Compression m_tiff_compression;
+        private Photometric m_tiff_photometric;
+        private FillOrder m_tiff_fillorder;
         private short m_tiff_bitspersample;
         private short m_tiff_samplesperpixel;
-        private PLANARCONFIG m_tiff_planar;
+        private PlanarConfig m_tiff_planar;
         private int m_tiff_width;
         private int m_tiff_length;
         private float m_tiff_xres;
         private float m_tiff_yres;
-        private ORIENTATION m_tiff_orientation;
+        private Orientation m_tiff_orientation;
         private int m_tiff_datasize;
-        private RESUNIT m_tiff_resunit;
+        private ResUnit m_tiff_resunit;
         
         private float m_pdf_xres;
         private float m_pdf_yres;
@@ -426,7 +426,7 @@ namespace BitMiracle.Tiff2Pdf
                     return;
                 }
 
-                result = input.GetField(TIFFTAG.TIFFTAG_PAGENUMBER);
+                result = input.GetField(TiffTag.PAGENUMBER);
                 if (result != null)
                 {
                     short pagen = result[0].ToShort();
@@ -439,20 +439,20 @@ namespace BitMiracle.Tiff2Pdf
                 }
                 else
                 {
-                    result = input.GetField(TIFFTAG.TIFFTAG_SUBFILETYPE);
+                    result = input.GetField(TiffTag.SUBFILETYPE);
                     if (result != null)
                     {
                         subfiletype = result[0].ToInt();
-                        if ((((FILETYPE)subfiletype & FILETYPE.FILETYPE_PAGE) == 0) && (subfiletype != 0))
+                        if ((((FileType)subfiletype & FileType.PAGE) == 0) && (subfiletype != 0))
                             continue;
                     }
                     else
                     {
-                        result = input.GetField(TIFFTAG.TIFFTAG_OSUBFILETYPE);
+                        result = input.GetField(TiffTag.OSUBFILETYPE);
                         if (result != null)
                         {
                             subfiletype = result[0].ToInt();
-                            if (((OFILETYPE)subfiletype != OFILETYPE.OFILETYPE_IMAGE) && ((OFILETYPE)subfiletype != OFILETYPE.OFILETYPE_PAGE) && (subfiletype != 0))
+                            if (((OFileType)subfiletype != OFileType.IMAGE) && ((OFileType)subfiletype != OFileType.PAGE) && (subfiletype != 0))
                                 continue;
                         }
                     }
@@ -476,18 +476,18 @@ namespace BitMiracle.Tiff2Pdf
                 m_pdf_xrefcount += 5;
                 input.SetDirectory(m_tiff_pages[i].page_directory);
 
-                result = input.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
-                if ((result != null && ((PHOTOMETRIC)result[0].ToInt() == PHOTOMETRIC.PHOTOMETRIC_PALETTE)) || input.GetField(TIFFTAG.TIFFTAG_INDEXED) != null)
+                result = input.GetField(TiffTag.PHOTOMETRIC);
+                if ((result != null && ((Photometric)result[0].ToInt() == Photometric.PALETTE)) || input.GetField(TiffTag.INDEXED) != null)
                 {
                     m_tiff_pages[i].page_extra++;
                     m_pdf_xrefcount++;
                 }
 
-                result = input.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+                result = input.GetField(TiffTag.COMPRESSION);
                 if (result != null)
                 {
-                    COMPRESSION xuint16 = (COMPRESSION)result[0].ToInt();
-                    if ((xuint16 == COMPRESSION.COMPRESSION_DEFLATE || xuint16 == COMPRESSION.COMPRESSION_ADOBE_DEFLATE) 
+                    Compression xuint16 = (Compression)result[0].ToInt();
+                    if ((xuint16 == Compression.DEFLATE || xuint16 == Compression.ADOBE_DEFLATE) 
                         && ((m_tiff_pages[i].page_tilecount != 0) || input.NumberOfStrips() == 1) 
                         && !m_pdf_nopassthrough)
                     {
@@ -496,7 +496,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
                 }
 
-                result = input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION);
+                result = input.GetField(TiffTag.TRANSFERFUNCTION);
                 if (result != null)
                 {
                     m_tiff_transferfunction[0] = result[0].GetBytes();
@@ -524,7 +524,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_transferfunctioncount = 0;
                 }
 
-                result = input.GetField(TIFFTAG.TIFFTAG_ICCPROFILE);
+                result = input.GetField(TiffTag.ICCPROFILE);
                 if (result != null)
                 {
                     m_tiff_iccprofilelength = result[0].ToInt();
@@ -538,10 +538,10 @@ namespace BitMiracle.Tiff2Pdf
 
                 m_tiff_tiles[i].tiles_tilecount = m_tiff_pages[i].page_tilecount;
 
-                result = input.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
-                if (result != null && ((PLANARCONFIG)result[0].ToShort() == PLANARCONFIG.PLANARCONFIG_SEPARATE))
+                result = input.GetField(TiffTag.PLANARCONFIG);
+                if (result != null && ((PlanarConfig)result[0].ToShort() == PlanarConfig.SEPARATE))
                 {
-                    result = input.GetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+                    result = input.GetField(TiffTag.SAMPLESPERPIXEL);
                     int xuint16 = result[0].ToInt();
                     m_tiff_tiles[i].tiles_tilecount /= xuint16;
                 }
@@ -549,10 +549,10 @@ namespace BitMiracle.Tiff2Pdf
                 if (m_tiff_tiles[i].tiles_tilecount > 0)
                 {
                     m_pdf_xrefcount += (m_tiff_tiles[i].tiles_tilecount - 1) * 2;
-                    result = input.GetField(TIFFTAG.TIFFTAG_TILEWIDTH);
+                    result = input.GetField(TiffTag.TILEWIDTH);
                     m_tiff_tiles[i].tiles_tilewidth = result[0].ToInt();
 
-                    input.GetField(TIFFTAG.TIFFTAG_TILELENGTH);
+                    input.GetField(TiffTag.TILELENGTH);
                     m_tiff_tiles[i].tiles_tilelength = result[0].ToInt();
 
                     m_tiff_tiles[i].tiles_tiles = new T2P_TILE [m_tiff_tiles[i].tiles_tilecount];
@@ -581,7 +581,7 @@ namespace BitMiracle.Tiff2Pdf
 
             input.SetDirectory(m_tiff_pages[m_pdf_page].page_directory);
 
-            FieldValue[] result = input.GetField(TIFFTAG.TIFFTAG_IMAGEWIDTH);
+            FieldValue[] result = input.GetField(TiffTag.IMAGEWIDTH);
             m_tiff_width = result[0].ToInt();
             if (m_tiff_width == 0)
             {
@@ -590,7 +590,7 @@ namespace BitMiracle.Tiff2Pdf
                 return;
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_IMAGELENGTH);
+            result = input.GetField(TiffTag.IMAGELENGTH);
             m_tiff_length = result[0].ToInt();
             if (m_tiff_length == 0)
             {
@@ -600,7 +600,7 @@ namespace BitMiracle.Tiff2Pdf
                 return;
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_COMPRESSION);
+            result = input.GetField(TiffTag.COMPRESSION);
             if (result == null)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
@@ -609,7 +609,7 @@ namespace BitMiracle.Tiff2Pdf
                 return;
             }
             else
-                m_tiff_compression = (COMPRESSION)result[0].ToInt();
+                m_tiff_compression = (Compression)result[0].ToInt();
 
             if (!input.IsCodecConfigured(m_tiff_compression))
             {
@@ -621,7 +621,7 @@ namespace BitMiracle.Tiff2Pdf
 
             }
 
-            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_BITSPERSAMPLE);
+            result = input.GetFieldDefaulted(TiffTag.BITSPERSAMPLE);
             m_tiff_bitspersample = result[0].ToShort();
 
             switch (m_tiff_bitspersample)
@@ -644,7 +644,7 @@ namespace BitMiracle.Tiff2Pdf
                     return;
             }
 
-            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL);
+            result = input.GetFieldDefaulted(TiffTag.SAMPLESPERPIXEL);
             m_tiff_samplesperpixel = result[0].ToShort();
             if (m_tiff_samplesperpixel > 4)
             {
@@ -661,15 +661,15 @@ namespace BitMiracle.Tiff2Pdf
                 m_tiff_samplesperpixel = 1;
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_SAMPLEFORMAT);
+            result = input.GetField(TiffTag.SAMPLEFORMAT);
             if (result != null)
             {
-                SAMPLEFORMAT f = (SAMPLEFORMAT)result[0].ToByte();
+                SampleFormat f = (SampleFormat)result[0].ToByte();
                 switch (f)
                 {
                     case 0:
-                    case SAMPLEFORMAT.SAMPLEFORMAT_UINT:
-                    case SAMPLEFORMAT.SAMPLEFORMAT_VOID:
+                    case SampleFormat.UINT:
+                    case SampleFormat.VOID:
                         break;
 
                     default:
@@ -680,10 +680,10 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_FILLORDER);
-            m_tiff_fillorder = (FILLORDER)result[0].ToByte();
+            result = input.GetFieldDefaulted(TiffTag.FILLORDER);
+            m_tiff_fillorder = (FillOrder)result[0].ToByte();
 
-            result = input.GetField(TIFFTAG.TIFFTAG_PHOTOMETRIC);
+            result = input.GetField(TiffTag.PHOTOMETRIC);
             if (result == null)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
@@ -692,7 +692,7 @@ namespace BitMiracle.Tiff2Pdf
                 return;
             }
             else
-                m_tiff_photometric = (PHOTOMETRIC)result[0].ToInt();
+                m_tiff_photometric = (Photometric)result[0].ToInt();
 
             short[] r;
             short[] g;
@@ -703,32 +703,32 @@ namespace BitMiracle.Tiff2Pdf
 
             switch (m_tiff_photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_MINISWHITE:
-                case PHOTOMETRIC.PHOTOMETRIC_MINISBLACK:
+                case Photometric.MINISWHITE:
+                case Photometric.MINISBLACK:
                     if (m_tiff_bitspersample == 1)
                     {
                         m_pdf_colorspace = t2p_cs_t.T2P_CS_BILEVEL;
-                        if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
+                        if (m_tiff_photometric == Photometric.MINISWHITE)
                             m_pdf_switchdecode ^= true;
                     }
                     else
                     {
                         m_pdf_colorspace = t2p_cs_t.T2P_CS_GRAY;
-                        if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_MINISWHITE)
+                        if (m_tiff_photometric == Photometric.MINISWHITE)
                             m_pdf_switchdecode ^= true;
                     }
                     break;
                
-                case PHOTOMETRIC.PHOTOMETRIC_RGB:
-                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
-                    photometric_palette = (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_PALETTE);
+                case Photometric.RGB:
+                case Photometric.PALETTE:
+                    photometric_palette = (m_tiff_photometric == Photometric.PALETTE);
                     if (!photometric_palette)
                     {
                         m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
                         if (m_tiff_samplesperpixel == 3)
                             break;
 
-                        result = input.GetField(TIFFTAG.TIFFTAG_INDEXED);
+                        result = input.GetField(TiffTag.INDEXED);
                         if (result != null)
                         {
                             if (result[0].ToInt() == 1)
@@ -744,17 +744,17 @@ namespace BitMiracle.Tiff2Pdf
                             {
                                 m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
 
-                                result = input.GetField(TIFFTAG.TIFFTAG_EXTRASAMPLES);
+                                result = input.GetField(TiffTag.EXTRASAMPLES);
                                 if (result != null && result[0].ToInt() == 1)
                                 {
                                     byte[] xuint16p = result[1].ToByteArray();
-                                    if ((EXTRASAMPLE)xuint16p[0] == EXTRASAMPLE.EXTRASAMPLE_ASSOCALPHA)
+                                    if ((ExtraSample)xuint16p[0] == ExtraSample.ASSOCALPHA)
                                     {
                                         m_pdf_sample = t2p_sample_t.T2P_SAMPLE_RGBAA_TO_RGB;
                                         break;
                                     }
 
-                                    if ((EXTRASAMPLE)xuint16p[0] == EXTRASAMPLE.EXTRASAMPLE_UNASSALPHA)
+                                    if ((ExtraSample)xuint16p[0] == ExtraSample.UNASSALPHA)
                                     {
                                         m_pdf_sample = t2p_sample_t.T2P_SAMPLE_RGBA_TO_RGB;
                                         break;
@@ -804,7 +804,7 @@ namespace BitMiracle.Tiff2Pdf
                         m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_RGB | t2p_cs_t.T2P_CS_PALETTE);
                         m_pdf_palettesize = 0x0001 << m_tiff_bitspersample;
 
-                        result = input.GetField(TIFFTAG.TIFFTAG_COLORMAP);
+                        result = input.GetField(TiffTag.COLORMAP);
                         if (result == null)
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
@@ -831,9 +831,9 @@ namespace BitMiracle.Tiff2Pdf
                     }
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_SEPARATED:
+                case Photometric.SEPARATED:
                     photometric_palette_cmyk = false;
-                    result = input.GetField(TIFFTAG.TIFFTAG_INDEXED);
+                    result = input.GetField(TiffTag.INDEXED);
                     if (result != null)
                     {
                         if (result[0].ToInt() == 1)
@@ -842,10 +842,10 @@ namespace BitMiracle.Tiff2Pdf
 
                     if (!photometric_palette_cmyk)
                     {
-                        result = input.GetField(TIFFTAG.TIFFTAG_INKSET);
+                        result = input.GetField(TiffTag.INKSET);
                         if (result != null)
                         {
-                            if ((INKSET)result[0].ToByte() != INKSET.INKSET_CMYK)
+                            if ((InkSet)result[0].ToByte() != InkSet.CMYK)
                             {
                                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                     "No support for {0} because its inkset is not CMYK", input.FileName());
@@ -881,7 +881,7 @@ namespace BitMiracle.Tiff2Pdf
                         m_pdf_colorspace = (t2p_cs_t)(t2p_cs_t.T2P_CS_CMYK | t2p_cs_t.T2P_CS_PALETTE);
                         m_pdf_palettesize = 0x0001 << m_tiff_bitspersample;
                         
-                        result = input.GetField(TIFFTAG.TIFFTAG_COLORMAP);
+                        result = input.GetField(TiffTag.COLORMAP);
                         if (result == null)
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
@@ -910,12 +910,12 @@ namespace BitMiracle.Tiff2Pdf
                     }
                     break;
                 
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case Photometric.YCBCR:
                     m_pdf_colorspace = t2p_cs_t.T2P_CS_RGB;
                     if (m_tiff_samplesperpixel == 1)
                     {
                         m_pdf_colorspace = t2p_cs_t.T2P_CS_GRAY;
-                        m_tiff_photometric = PHOTOMETRIC.PHOTOMETRIC_MINISBLACK;
+                        m_tiff_photometric = Photometric.MINISBLACK;
                         break;
                     }
 
@@ -925,7 +925,7 @@ namespace BitMiracle.Tiff2Pdf
 
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_CIELAB:
+                case Photometric.CIELAB:
                     m_pdf_labrange[0] = -127;
                     m_pdf_labrange[1] = 127;
                     m_pdf_labrange[2] = -127;
@@ -934,7 +934,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_ICCLAB:
+                case Photometric.ICCLAB:
                     m_pdf_labrange[0] = 0;
                     m_pdf_labrange[1] = 255;
                     m_pdf_labrange[2] = 0;
@@ -942,7 +942,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_ITULAB:
+                case Photometric.ITULAB:
                     m_pdf_labrange[0] = -85;
                     m_pdf_labrange[1] = 85;
                     m_pdf_labrange[2] = -75;
@@ -951,8 +951,8 @@ namespace BitMiracle.Tiff2Pdf
                     m_pdf_colorspace = t2p_cs_t.T2P_CS_LAB;
                     break;
 
-                case PHOTOMETRIC.PHOTOMETRIC_LOGL:
-                case PHOTOMETRIC.PHOTOMETRIC_LOGLUV:
+                case Photometric.LOGL:
+                case Photometric.LOGLUV:
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for {0} with photometric interpretation LogL/LogLuv", input.FileName());
                     m_error = true;
@@ -965,22 +965,22 @@ namespace BitMiracle.Tiff2Pdf
                     return;
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_PLANARCONFIG);
+            result = input.GetField(TiffTag.PLANARCONFIG);
             if (result != null)
             {
-                m_tiff_planar = (PLANARCONFIG)result[0].ToShort();
+                m_tiff_planar = (PlanarConfig)result[0].ToShort();
                 switch (m_tiff_planar)
                 {
                     case 0:
                         Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Image {0} has planar configuration 0, assuming 1", input.FileName());
-                        m_tiff_planar = PLANARCONFIG.PLANARCONFIG_CONTIG;
+                        m_tiff_planar = PlanarConfig.CONTIG;
                         break;
 
-                    case PLANARCONFIG.PLANARCONFIG_CONTIG:
+                    case PlanarConfig.CONTIG:
                         break;
                     
-                    case PLANARCONFIG.PLANARCONFIG_SEPARATE:
+                    case PlanarConfig.SEPARATE:
                         m_pdf_sample = t2p_sample_t.T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG;
                         if (m_tiff_bitspersample != 8)
                         {
@@ -1001,10 +1001,10 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_ORIENTATION);
-            m_tiff_orientation = (ORIENTATION)result[0].ToByte();
+            result = input.GetFieldDefaulted(TiffTag.ORIENTATION);
+            m_tiff_orientation = (Orientation)result[0].ToByte();
 
-            if (m_tiff_orientation > ORIENTATION.ORIENTATION_LEFTBOT)
+            if (m_tiff_orientation > Orientation.LEFTBOT)
             {
                 Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE,
                     "Image {0} has orientation {1}, assuming 0", 
@@ -1012,26 +1012,26 @@ namespace BitMiracle.Tiff2Pdf
                 m_tiff_orientation = 0;
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_XRESOLUTION);
+            result = input.GetField(TiffTag.XRESOLUTION);
             if (result == null)
                 m_tiff_xres = 0.0f;
             else
                 m_tiff_xres = result[0].ToFloat();
 
-            result = input.GetField(TIFFTAG.TIFFTAG_YRESOLUTION);
+            result = input.GetField(TiffTag.YRESOLUTION);
             if (result == null)
                 m_tiff_yres = 0.0f;
             else
                 m_tiff_yres = result[0].ToFloat();
 
-            result = input.GetFieldDefaulted(TIFFTAG.TIFFTAG_RESOLUTIONUNIT);
-            m_tiff_resunit = (RESUNIT)result[0].ToByte();
-            if (m_tiff_resunit == RESUNIT.RESUNIT_CENTIMETER)
+            result = input.GetFieldDefaulted(TiffTag.RESOLUTIONUNIT);
+            m_tiff_resunit = (ResUnit)result[0].ToByte();
+            if (m_tiff_resunit == ResUnit.CENTIMETER)
             {
                 m_tiff_xres *= 2.54F;
                 m_tiff_yres *= 2.54F;
             }
-            else if (m_tiff_resunit != RESUNIT.RESUNIT_INCH && m_pdf_centimeters)
+            else if (m_tiff_resunit != ResUnit.INCH && m_pdf_centimeters)
             {
                 m_tiff_xres *= 2.54F;
                 m_tiff_yres *= 2.54F;
@@ -1042,7 +1042,7 @@ namespace BitMiracle.Tiff2Pdf
             m_pdf_transcode = t2p_transcode_t.T2P_TRANSCODE_ENCODE;
             if (!m_pdf_nopassthrough)
             {
-                if (m_tiff_compression == COMPRESSION.COMPRESSION_CCITTFAX4)
+                if (m_tiff_compression == Compression.CCITTFAX4)
                 {
                     if (input.IsTiled() || (input.NumberOfStrips() == 1))
                     {
@@ -1051,7 +1051,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
                 }
 
-                if (m_tiff_compression == COMPRESSION.COMPRESSION_ADOBE_DEFLATE || m_tiff_compression == COMPRESSION.COMPRESSION_DEFLATE)
+                if (m_tiff_compression == Compression.ADOBE_DEFLATE || m_tiff_compression == Compression.DEFLATE)
                 {
                     if (input.IsTiled() || (input.NumberOfStrips() == 1))
                     {
@@ -1060,7 +1060,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
                 }
 
-                if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
+                if (m_tiff_compression == Compression.JPEG)
                 {
                     m_pdf_transcode = t2p_transcode_t.T2P_TRANSCODE_RAW;
                     m_pdf_compression = t2p_compress_t.T2P_COMPRESS_JPEG;
@@ -1080,9 +1080,9 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
+            if (m_tiff_compression == Compression.JPEG)
             {
-                if (m_tiff_planar == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+                if (m_tiff_planar == PlanarConfig.SEPARATE)
                 {
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for {0} with JPEG compression and separated planar configuration",
@@ -1097,16 +1097,16 @@ namespace BitMiracle.Tiff2Pdf
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CMYK) != 0)
                 {
                     m_tiff_samplesperpixel = 4;
-                    m_tiff_photometric = PHOTOMETRIC.PHOTOMETRIC_SEPARATED;
+                    m_tiff_photometric = Photometric.SEPARATED;
                 }
                 else
                 {
                     m_tiff_samplesperpixel = 3;
-                    m_tiff_photometric = PHOTOMETRIC.PHOTOMETRIC_RGB;
+                    m_tiff_photometric = Photometric.RGB;
                 }
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_TRANSFERFUNCTION);
+            result = input.GetField(TiffTag.TRANSFERFUNCTION);
             if (result != null)
             {
                 m_tiff_transferfunction[0] = result[0].GetBytes();
@@ -1123,7 +1123,7 @@ namespace BitMiracle.Tiff2Pdf
                 m_tiff_transferfunctioncount = 0;
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_WHITEPOINT);
+            result = input.GetField(TiffTag.WHITEPOINT);
             if (result != null)
             {
                 float[] xfloatp = result[0].ToFloatArray();
@@ -1137,7 +1137,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace | t2p_cs_t.T2P_CS_CALRGB);
             }
             
-            result = input.GetField(TIFFTAG.TIFFTAG_PRIMARYCHROMATICITIES);
+            result = input.GetField(TiffTag.PRIMARYCHROMATICITIES);
             if (result != null)
             {
                 float[] xfloatp = result[0].ToFloatArray();
@@ -1154,7 +1154,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_LAB) != 0)
             {
-                result = input.GetField(TIFFTAG.TIFFTAG_WHITEPOINT);
+                result = input.GetField(TiffTag.WHITEPOINT);
                 if (result != null)
                 {
                     float[] xfloatp = result[0].ToFloatArray();
@@ -1168,7 +1168,7 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            result = input.GetField(TIFFTAG.TIFFTAG_ICCPROFILE);
+            result = input.GetField(TiffTag.ICCPROFILE);
             if (result != null)
             {
                 m_tiff_iccprofilelength = result[0].ToInt();
@@ -1196,7 +1196,7 @@ namespace BitMiracle.Tiff2Pdf
                 FieldValue[] result = null;
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4)
                 {
-                    result = input.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
+                    result = input.GetField(TiffTag.STRIPBYTECOUNTS);
                     int[] sbc = result[0].ToIntArray();
                     m_tiff_datasize = sbc[0];
                     return;
@@ -1204,15 +1204,15 @@ namespace BitMiracle.Tiff2Pdf
 
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_ZIP)
                 {
-                    result = input.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
+                    result = input.GetField(TiffTag.STRIPBYTECOUNTS);
                     int[] sbc = result[0].ToIntArray();
                     m_tiff_datasize = sbc[0];
                     return;
                 }
                 
-                if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
+                if (m_tiff_compression == Compression.JPEG)
                 {
-                    result = input.GetField(TIFFTAG.TIFFTAG_JPEGTABLES);
+                    result = input.GetField(TiffTag.JPEGTABLES);
                     if (result != null)
                     {
                         int count = result[0].ToInt();
@@ -1229,11 +1229,11 @@ namespace BitMiracle.Tiff2Pdf
 
                     int stripcount = input.NumberOfStrips();
                     int[] sbc = null;
-                    result = input.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
+                    result = input.GetField(TiffTag.STRIPBYTECOUNTS);
                     if (result == null)
                     {
                         Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
-                            "Input file {0} missing field: TIFFTAG_STRIPBYTECOUNTS",
+                            "Input file {0} missing field: STRIPBYTECOUNTS",
                             input.FileName());
                         m_error = true;
                         return;
@@ -1252,7 +1252,7 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             m_tiff_datasize = input.ScanlineSize() * m_tiff_length;
-            if (m_tiff_planar == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_tiff_planar == PlanarConfig.SEPARATE)
                 m_tiff_datasize *= m_tiff_samplesperpixel;
         }
         
@@ -1275,12 +1275,12 @@ namespace BitMiracle.Tiff2Pdf
                 }
                 else
                 {
-                    FieldValue[] result = input.GetField(TIFFTAG.TIFFTAG_TILEBYTECOUNTS);
+                    FieldValue[] result = input.GetField(TiffTag.TILEBYTECOUNTS);
                     int[] tbc = result[0].ToIntArray();
                     m_tiff_datasize = tbc[tile];
-                    if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
+                    if (m_tiff_compression == Compression.JPEG)
                     {
-                        result = input.GetField(TIFFTAG.TIFFTAG_JPEGTABLES);
+                        result = input.GetField(TiffTag.JPEGTABLES);
                         if (result != null)
                         {
                             int count = result[0].ToInt();
@@ -1296,7 +1296,7 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             m_tiff_datasize = input.TileSize();
-            if (m_tiff_planar == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_tiff_planar == PlanarConfig.SEPARATE)
                 m_tiff_datasize *= m_tiff_samplesperpixel;
         }
         
@@ -1319,7 +1319,7 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     buffer = new byte [m_tiff_datasize];
                     input.ReadRawStrip(0, buffer, 0, m_tiff_datasize);
-                    if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
+                    if (m_tiff_fillorder == FillOrder.LSB2MSB)
                     {
                         /*
                         * make sure is lsb-to-msb
@@ -1336,17 +1336,17 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     buffer = new byte [m_tiff_datasize];
                     input.ReadRawStrip(0, buffer, 0, m_tiff_datasize);
-                    if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
+                    if (m_tiff_fillorder == FillOrder.LSB2MSB)
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
 
                     writeToFile(buffer, m_tiff_datasize);
                     return m_tiff_datasize;
                 }
                 
-                if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
+                if (m_tiff_compression == Compression.JPEG)
                 {
                     buffer = new byte [m_tiff_datasize];
-                    result = input.GetField(TIFFTAG.TIFFTAG_JPEGTABLES);
+                    result = input.GetField(TiffTag.JPEGTABLES);
                     if (result != null)
                     {
                         int count = result[0].ToInt();
@@ -1359,7 +1359,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
 
                     stripcount = input.NumberOfStrips();
-                    result = input.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
+                    result = input.GetField(TiffTag.STRIPBYTECOUNTS);
                     int[] sbc = result[0].ToIntArray();
                     for (int i = 0; i < stripcount; i++)
                     {
@@ -1485,7 +1485,7 @@ namespace BitMiracle.Tiff2Pdf
                         buffer = samplebuffer;
 
                         int[] buffer32 = Tiff.ByteArrayToInts(buffer, 0, m_tiff_width * m_tiff_length * 4);
-                        if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, ORIENTATION.ORIENTATION_TOPLEFT, false))
+                        if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, Orientation.TOPLEFT, false))
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Can't use ReadRGBAImageOriented to extract RGB image from {0}",
@@ -1505,46 +1505,46 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             disable(m_output);
-            m_output.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, m_tiff_photometric);
-            m_output.SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, m_tiff_bitspersample);
-            m_output.SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, m_tiff_samplesperpixel);
-            m_output.SetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, m_tiff_width);
-            m_output.SetField(TIFFTAG.TIFFTAG_IMAGELENGTH, m_tiff_length);
-            m_output.SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, m_tiff_length);
-            m_output.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, PLANARCONFIG.PLANARCONFIG_CONTIG);
-            m_output.SetField(TIFFTAG.TIFFTAG_FILLORDER, FILLORDER.FILLORDER_MSB2LSB);
+            m_output.SetField(TiffTag.PHOTOMETRIC, m_tiff_photometric);
+            m_output.SetField(TiffTag.BITSPERSAMPLE, m_tiff_bitspersample);
+            m_output.SetField(TiffTag.SAMPLESPERPIXEL, m_tiff_samplesperpixel);
+            m_output.SetField(TiffTag.IMAGEWIDTH, m_tiff_width);
+            m_output.SetField(TiffTag.IMAGELENGTH, m_tiff_length);
+            m_output.SetField(TiffTag.ROWSPERSTRIP, m_tiff_length);
+            m_output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+            m_output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
 
             switch (m_pdf_compression)
             {
                 case t2p_compress_t.T2P_COMPRESS_NONE:
-                    m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_NONE);
+                    m_output.SetField(TiffTag.COMPRESSION, Compression.NONE);
                     break;
                 
                 case t2p_compress_t.T2P_COMPRESS_G4:
-                    m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_CCITTFAX4);
+                    m_output.SetField(TiffTag.COMPRESSION, Compression.CCITTFAX4);
                     break;
                 
                 case t2p_compress_t.T2P_COMPRESS_JPEG:
-                    if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+                    if (m_tiff_photometric == Photometric.YCBCR)
                     {
-                        result = input.GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                        result = input.GetField(TiffTag.YCBCRSUBSAMPLING);
                         if (result != null)
                         {
                             short hor = result[0].ToShort();
                             short ver = result[1].ToShort();
                             if (hor != 0 && ver != 0)
-                                m_output.SetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, hor, ver);
+                                m_output.SetField(TiffTag.YCBCRSUBSAMPLING, hor, ver);
                         }
 
-                        result = input.GetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE);
+                        result = input.GetField(TiffTag.REFERENCEBLACKWHITE);
                         if (result != null)
                         {
                             float[] xfloatp = result[0].ToFloatArray();
-                            m_output.SetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE, xfloatp);
+                            m_output.SetField(TiffTag.REFERENCEBLACKWHITE, xfloatp);
                         }
                     }
 
-                    if (!m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_JPEG))
+                    if (!m_output.SetField(TiffTag.COMPRESSION, Compression.JPEG))
                     {
                         Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Unable to use JPEG compression for input {0} and output {1}",
@@ -1553,30 +1553,30 @@ namespace BitMiracle.Tiff2Pdf
                         return 0;
                     }
 
-                    m_output.SetField(TIFFTAG.TIFFTAG_JPEGTABLESMODE, 0);
+                    m_output.SetField(TiffTag.JPEGTABLESMODE, 0);
 
                     if ((m_pdf_colorspace & (t2p_cs_t.T2P_CS_RGB | t2p_cs_t.T2P_CS_LAB)) != 0)
                     {
-                        m_output.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_YCBCR);
+                        m_output.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR);
 
-                        if (m_tiff_photometric != PHOTOMETRIC.PHOTOMETRIC_YCBCR)
-                            m_output.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RGB);
+                        if (m_tiff_photometric != Photometric.YCBCR)
+                            m_output.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
                         else
-                            m_output.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RAW);
+                            m_output.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RAW);
                     }
 
                     if (m_pdf_defaultcompressionquality != 0)
-                        m_output.SetField(TIFFTAG.TIFFTAG_JPEGQUALITY, m_pdf_defaultcompressionquality);
+                        m_output.SetField(TiffTag.JPEGQUALITY, m_pdf_defaultcompressionquality);
 
                     break;
                 
                 case t2p_compress_t.T2P_COMPRESS_ZIP:
-                    m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_DEFLATE);
+                    m_output.SetField(TiffTag.COMPRESSION, Compression.DEFLATE);
                     if (m_pdf_defaultcompressionquality % 100 != 0)
-                        m_output.SetField(TIFFTAG.TIFFTAG_PREDICTOR, m_pdf_defaultcompressionquality % 100);
+                        m_output.SetField(TiffTag.PREDICTOR, m_pdf_defaultcompressionquality % 100);
                     
                     if (m_pdf_defaultcompressionquality / 100 != 0)
-                        m_output.SetField(TIFFTAG.TIFFTAG_ZIPQUALITY, (m_pdf_defaultcompressionquality / 100));
+                        m_output.SetField(TiffTag.ZIPQUALITY, (m_pdf_defaultcompressionquality / 100));
 
                     break;
                 
@@ -1587,7 +1587,7 @@ namespace BitMiracle.Tiff2Pdf
             enable(m_output);
             m_outputwritten = 0;
 
-            if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_JPEG && m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+            if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_JPEG && m_tiff_photometric == Photometric.YCBCR)
                 bufferoffset = m_output.WriteEncodedStrip(0, buffer, stripsize * stripcount);
             else
                 bufferoffset = m_output.WriteEncodedStrip(0, buffer, m_tiff_datasize);
@@ -1626,7 +1626,7 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     buffer = new byte [m_tiff_datasize];
                     input.ReadRawTile(tile, buffer, 0, m_tiff_datasize);
-                    if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
+                    if (m_tiff_fillorder == FillOrder.LSB2MSB)
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
 
                     writeToFile(buffer, m_tiff_datasize);
@@ -1637,18 +1637,18 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     buffer = new byte [m_tiff_datasize];
                     input.ReadRawTile(tile, buffer, 0, m_tiff_datasize);
-                    if (m_tiff_fillorder == FILLORDER.FILLORDER_LSB2MSB)
+                    if (m_tiff_fillorder == FillOrder.LSB2MSB)
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
 
                     writeToFile(buffer, m_tiff_datasize);
                     return m_tiff_datasize;
                 }
                 
-                if (m_tiff_compression == COMPRESSION.COMPRESSION_JPEG)
+                if (m_tiff_compression == Compression.JPEG)
                 {
                     byte[] table_end = new byte[2];
                     buffer = new byte [m_tiff_datasize];
-                    result = input.GetField(TIFFTAG.TIFFTAG_JPEGTABLES);
+                    result = input.GetField(TiffTag.JPEGTABLES);
                     if (result != null)
                     {
                         int count = result[0].ToInt();
@@ -1756,83 +1756,83 @@ namespace BitMiracle.Tiff2Pdf
                 tile_collapse_left(buffer, input.TileRowSize(), m_tiff_tiles[m_pdf_page].tiles_tilewidth, m_tiff_tiles[m_pdf_page].tiles_edgetilewidth, m_tiff_tiles[m_pdf_page].tiles_tilelength);
 
             disable(m_output);
-            m_output.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, m_tiff_photometric);
-            m_output.SetField(TIFFTAG.TIFFTAG_BITSPERSAMPLE, m_tiff_bitspersample);
-            m_output.SetField(TIFFTAG.TIFFTAG_SAMPLESPERPIXEL, m_tiff_samplesperpixel);
+            m_output.SetField(TiffTag.PHOTOMETRIC, m_tiff_photometric);
+            m_output.SetField(TiffTag.BITSPERSAMPLE, m_tiff_bitspersample);
+            m_output.SetField(TiffTag.SAMPLESPERPIXEL, m_tiff_samplesperpixel);
 
             if (!tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile))
-                m_output.SetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, m_tiff_tiles[m_pdf_page].tiles_tilewidth);
+                m_output.SetField(TiffTag.IMAGEWIDTH, m_tiff_tiles[m_pdf_page].tiles_tilewidth);
             else
-                m_output.SetField(TIFFTAG.TIFFTAG_IMAGEWIDTH, m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
+                m_output.SetField(TiffTag.IMAGEWIDTH, m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
 
             if (!tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile))
             {
-                m_output.SetField(TIFFTAG.TIFFTAG_IMAGELENGTH, m_tiff_tiles[m_pdf_page].tiles_tilelength);
-                m_output.SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                m_output.SetField(TiffTag.IMAGELENGTH, m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                m_output.SetField(TiffTag.ROWSPERSTRIP, m_tiff_tiles[m_pdf_page].tiles_tilelength);
             }
             else
             {
-                m_output.SetField(TIFFTAG.TIFFTAG_IMAGELENGTH, m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
-                m_output.SetField(TIFFTAG.TIFFTAG_ROWSPERSTRIP, m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
+                m_output.SetField(TiffTag.IMAGELENGTH, m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
+                m_output.SetField(TiffTag.ROWSPERSTRIP, m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
             }
 
-            m_output.SetField(TIFFTAG.TIFFTAG_PLANARCONFIG, PLANARCONFIG.PLANARCONFIG_CONTIG);
-            m_output.SetField(TIFFTAG.TIFFTAG_FILLORDER, FILLORDER.FILLORDER_MSB2LSB);
+            m_output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+            m_output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
 
             switch (m_pdf_compression)
             {
                 case t2p_compress_t.T2P_COMPRESS_NONE:
-                    m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_NONE);
+                    m_output.SetField(TiffTag.COMPRESSION, Compression.NONE);
                     break;
 
                 case t2p_compress_t.T2P_COMPRESS_G4:
-                    m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_CCITTFAX4);
+                    m_output.SetField(TiffTag.COMPRESSION, Compression.CCITTFAX4);
                     break;
                 
                 case t2p_compress_t.T2P_COMPRESS_JPEG:
-                    if (m_tiff_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+                    if (m_tiff_photometric == Photometric.YCBCR)
                     {
-                        result = input.GetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING);
+                        result = input.GetField(TiffTag.YCBCRSUBSAMPLING);
                         if (result != null)
                         {
                             short hor = result[0].ToShort();
                             short ver = result[1].ToShort();
                             if (hor != 0 && ver != 0)
-                                m_output.SetField(TIFFTAG.TIFFTAG_YCBCRSUBSAMPLING, hor, ver);
+                                m_output.SetField(TiffTag.YCBCRSUBSAMPLING, hor, ver);
                         }
 
-                        result = input.GetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE);
+                        result = input.GetField(TiffTag.REFERENCEBLACKWHITE);
                         if (result != null)
                         {
                             float[] xfloatp = result[0].ToFloatArray();
-                            m_output.SetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE, xfloatp);
+                            m_output.SetField(TiffTag.REFERENCEBLACKWHITE, xfloatp);
                         }
                     }
                     
-                    m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_JPEG);
-                    m_output.SetField(TIFFTAG.TIFFTAG_JPEGTABLESMODE, 0); /* JPEGTABLESMODE_NONE */
+                    m_output.SetField(TiffTag.COMPRESSION, Compression.JPEG);
+                    m_output.SetField(TiffTag.JPEGTABLESMODE, 0); /* JpegTablesMode.NONE */
 
                     if ((m_pdf_colorspace & (t2p_cs_t.T2P_CS_RGB | t2p_cs_t.T2P_CS_LAB)) != 0)
                     {
-                        m_output.SetField(TIFFTAG.TIFFTAG_PHOTOMETRIC, PHOTOMETRIC.PHOTOMETRIC_YCBCR);
-                        if (m_tiff_photometric != PHOTOMETRIC.PHOTOMETRIC_YCBCR)
-                            m_output.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RGB);
+                        m_output.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR);
+                        if (m_tiff_photometric != Photometric.YCBCR)
+                            m_output.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
                         else
-                            m_output.SetField(TIFFTAG.TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE.JPEGCOLORMODE_RAW);
+                            m_output.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RAW);
                     }
 
                     if (m_pdf_defaultcompressionquality != 0)
-                        m_output.SetField(TIFFTAG.TIFFTAG_JPEGQUALITY, m_pdf_defaultcompressionquality);
+                        m_output.SetField(TiffTag.JPEGQUALITY, m_pdf_defaultcompressionquality);
 
                     break;
 
                 case t2p_compress_t.T2P_COMPRESS_ZIP:
-                    m_output.SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_DEFLATE);
+                    m_output.SetField(TiffTag.COMPRESSION, Compression.DEFLATE);
                     if (m_pdf_defaultcompressionquality % 100 != 0)
-                        m_output.SetField(TIFFTAG.TIFFTAG_PREDICTOR, m_pdf_defaultcompressionquality % 100);
+                        m_output.SetField(TiffTag.PREDICTOR, m_pdf_defaultcompressionquality % 100);
 
                     if (m_pdf_defaultcompressionquality / 100 != 0)
-                        m_output.SetField(TIFFTAG.TIFFTAG_ZIPQUALITY, (m_pdf_defaultcompressionquality / 100));
+                        m_output.SetField(TiffTag.ZIPQUALITY, (m_pdf_defaultcompressionquality / 100));
 
                     break;
 
@@ -1989,7 +1989,7 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                result = input.GetField(TIFFTAG.TIFFTAG_SOFTWARE);
+                result = input.GetField(TiffTag.SOFTWARE);
                 if (result != null)
                 {
                     byte[] info = result[0].ToByteArray();
@@ -2024,7 +2024,7 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                result = input.GetField(TIFFTAG.TIFFTAG_ARTIST);
+                result = input.GetField(TiffTag.ARTIST);
                 if (result != null)
                 {
                     byte[] info = result[0].ToByteArray();
@@ -2041,7 +2041,7 @@ namespace BitMiracle.Tiff2Pdf
                 }
                 else
                 {
-                    result = input.GetField(TIFFTAG.TIFFTAG_COPYRIGHT);
+                    result = input.GetField(TiffTag.COPYRIGHT);
                     if (result != null)
                     {
                         byte[] info = result[0].ToByteArray();
@@ -2077,7 +2077,7 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                result = input.GetField(TIFFTAG.TIFFTAG_DOCUMENTNAME);
+                result = input.GetField(TiffTag.DOCUMENTNAME);
                 if (result != null)
                 {
                     byte[] info = result[0].ToByteArray();
@@ -2112,7 +2112,7 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                result = input.GetField(TIFFTAG.TIFFTAG_IMAGEDESCRIPTION);
+                result = input.GetField(TiffTag.IMAGEDESCRIPTION);
                 if (result != null)
                 {
                     byte[] info = result[0].ToByteArray();
@@ -2190,7 +2190,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private void pdf_tifftime(Tiff input)
         {
-            FieldValue[] result = input.GetField(TIFFTAG.TIFFTAG_DATETIME);
+            FieldValue[] result = input.GetField(TiffTag.DATETIME);
             if (result != null && (result[0].ToString()).Length >= 19)
             {
                 string datetime = result[0].ToString();
@@ -2274,7 +2274,7 @@ namespace BitMiracle.Tiff2Pdf
             if (m_pdf_yres == 0.0)
                 m_pdf_yres = m_pdf_defaultyres;
 
-            if ((m_tiff_resunit != RESUNIT.RESUNIT_CENTIMETER && m_tiff_resunit != RESUNIT.RESUNIT_INCH) &&
+            if ((m_tiff_resunit != ResUnit.CENTIMETER && m_tiff_resunit != ResUnit.INCH) &&
                 (m_tiff_xres < Tiff2PdfConstants.PS_UNIT_SIZE && m_tiff_yres < Tiff2PdfConstants.PS_UNIT_SIZE))
             {
                 // apply special processing for case when resolution 
@@ -2316,7 +2316,7 @@ namespace BitMiracle.Tiff2Pdf
                 m_pdf_imagebox.y2 += (m_pdf_pagelength - m_pdf_imagelength) / 2.0F;
             }
 
-            if (m_tiff_orientation > ORIENTATION.ORIENTATION_BOTLEFT)
+            if (m_tiff_orientation > Orientation.BOTLEFT)
             {
                 float f = m_pdf_mediabox.x2;
                 m_pdf_mediabox.x2 = m_pdf_mediabox.y2;
@@ -2379,7 +2379,7 @@ namespace BitMiracle.Tiff2Pdf
                 boxp.y2 = m_pdf_imagebox.y2 - ((float)(m_pdf_imagelength * i2 * tilelength) / (float)m_tiff_length);
             }
 
-            if (m_tiff_orientation == 0 || m_tiff_orientation == ORIENTATION.ORIENTATION_TOPLEFT)
+            if (m_tiff_orientation == 0 || m_tiff_orientation == Orientation.TOPLEFT)
             {
                 for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
                     compose_pdf_page_orient(tiles[i].tile_box, 0);
@@ -2395,35 +2395,35 @@ namespace BitMiracle.Tiff2Pdf
                 boxp.y1 -= m_pdf_imagebox.y1;
                 boxp.y2 -= m_pdf_imagebox.y1;
 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_TOPRIGHT || 
-                    m_tiff_orientation == ORIENTATION.ORIENTATION_BOTRIGHT)
+                if (m_tiff_orientation == Orientation.TOPRIGHT || 
+                    m_tiff_orientation == Orientation.BOTRIGHT)
                 {
                     boxp.x1 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x1;
                     boxp.x2 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x2;
                 }
                 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_BOTRIGHT || 
-                    m_tiff_orientation == ORIENTATION.ORIENTATION_BOTLEFT)
+                if (m_tiff_orientation == Orientation.BOTRIGHT || 
+                    m_tiff_orientation == Orientation.BOTLEFT)
                 {
                     boxp.y1 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y1;
                     boxp.y2 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y2;
                 }
                 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTBOT || 
-                    m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTTOP)
+                if (m_tiff_orientation == Orientation.LEFTBOT || 
+                    m_tiff_orientation == Orientation.LEFTTOP)
                 {
                     boxp.y1 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y1;
                     boxp.y2 = m_pdf_imagebox.y2 - m_pdf_imagebox.y1 - boxp.y2;
                 }
                 
-                if (m_tiff_orientation == ORIENTATION.ORIENTATION_LEFTTOP || 
-                    m_tiff_orientation == ORIENTATION.ORIENTATION_RIGHTTOP)
+                if (m_tiff_orientation == Orientation.LEFTTOP || 
+                    m_tiff_orientation == Orientation.RIGHTTOP)
                 {
                     boxp.x1 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x1;
                     boxp.x2 = m_pdf_imagebox.x2 - m_pdf_imagebox.x1 - boxp.x2;
                 }
                 
-                if (m_tiff_orientation > ORIENTATION.ORIENTATION_BOTLEFT)
+                if (m_tiff_orientation > Orientation.BOTLEFT)
                 {
                     float f = boxp.x1;
                     boxp.x1 = boxp.y1;
@@ -2907,7 +2907,7 @@ namespace BitMiracle.Tiff2Pdf
                 case t2p_compress_t.T2P_COMPRESS_JPEG:
                     written += writeToFile("/DCTDecode ");
 
-                    if (m_tiff_photometric != PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+                    if (m_tiff_photometric != Photometric.YCBCR)
                     {
                         written += writeToFile("/DecodeParms ");
                         written += writeToFile("<< /ColorTransform 0 >>\n");
@@ -3266,7 +3266,7 @@ namespace BitMiracle.Tiff2Pdf
             return written;
         }
         
-        private static void compose_pdf_page_orient(T2P_BOX boxp, ORIENTATION orientation)
+        private static void compose_pdf_page_orient(T2P_BOX boxp, Orientation orientation)
         {
             if (boxp.x1 > boxp.x2)
             {
@@ -3296,27 +3296,27 @@ namespace BitMiracle.Tiff2Pdf
             switch (orientation)
             {
                 case 0:
-                case ORIENTATION.ORIENTATION_TOPLEFT:
+                case Orientation.TOPLEFT:
                     break;
 
-                case ORIENTATION.ORIENTATION_TOPRIGHT:
+                case Orientation.TOPRIGHT:
                     boxp.mat[0] = 0.0F - m1[0];
                     boxp.mat[6] += m1[0];
                     break;
 
-                case ORIENTATION.ORIENTATION_BOTRIGHT:
+                case Orientation.BOTRIGHT:
                     boxp.mat[0] = 0.0F - m1[0];
                     boxp.mat[4] = 0.0F - m1[4];
                     boxp.mat[6] += m1[0];
                     boxp.mat[7] += m1[4];
                     break;
 
-                case ORIENTATION.ORIENTATION_BOTLEFT:
+                case Orientation.BOTLEFT:
                     boxp.mat[4] = 0.0F - m1[4];
                     boxp.mat[7] += m1[4];
                     break;
 
-                case ORIENTATION.ORIENTATION_LEFTTOP:
+                case Orientation.LEFTTOP:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = 0.0F - m1[0];
                     boxp.mat[3] = 0.0F - m1[4];
@@ -3325,7 +3325,7 @@ namespace BitMiracle.Tiff2Pdf
                     boxp.mat[7] += m1[0];
                     break;
 
-                case ORIENTATION.ORIENTATION_RIGHTTOP:
+                case Orientation.RIGHTTOP:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = 0.0F - m1[0];
                     boxp.mat[3] = m1[4];
@@ -3333,14 +3333,14 @@ namespace BitMiracle.Tiff2Pdf
                     boxp.mat[7] += m1[0];
                     break;
 
-                case ORIENTATION.ORIENTATION_RIGHTBOT:
+                case Orientation.RIGHTBOT:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = m1[0];
                     boxp.mat[3] = m1[4];
                     boxp.mat[4] = 0.0F;
                     break;
 
-                case ORIENTATION.ORIENTATION_LEFTBOT:
+                case Orientation.LEFTBOT:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = m1[0];
                     boxp.mat[3] = 0.0F - m1[4];
@@ -3350,7 +3350,7 @@ namespace BitMiracle.Tiff2Pdf
             }
         }
 
-        private static void compose_pdf_page_orient_flip(T2P_BOX boxp, ORIENTATION orientation)
+        private static void compose_pdf_page_orient_flip(T2P_BOX boxp, Orientation orientation)
         {
             if (boxp.x1 > boxp.x2)
             {
@@ -3379,7 +3379,7 @@ namespace BitMiracle.Tiff2Pdf
 
             switch (orientation)
             {
-                case ORIENTATION.ORIENTATION_LEFTTOP:
+                case Orientation.LEFTTOP:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = 0.0F - m1[4];
                     boxp.mat[3] = 0.0F - m1[0];
@@ -3388,7 +3388,7 @@ namespace BitMiracle.Tiff2Pdf
                     boxp.mat[7] += m1[4];
                     break;
 
-                case ORIENTATION.ORIENTATION_RIGHTTOP:
+                case Orientation.RIGHTTOP:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = 0.0F - m1[4];
                     boxp.mat[3] = m1[0];
@@ -3396,14 +3396,14 @@ namespace BitMiracle.Tiff2Pdf
                     boxp.mat[7] += m1[4];
                     break;
 
-                case ORIENTATION.ORIENTATION_RIGHTBOT:
+                case Orientation.RIGHTBOT:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = m1[4];
                     boxp.mat[3] = m1[0];
                     boxp.mat[4] = 0.0F;
                     break;
 
-                case ORIENTATION.ORIENTATION_LEFTBOT:
+                case Orientation.LEFTBOT:
                     boxp.mat[0] = 0.0F;
                     boxp.mat[1] = m1[4];
                     boxp.mat[3] = 0.0F - m1[0];

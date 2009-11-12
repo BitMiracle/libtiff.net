@@ -28,7 +28,7 @@ namespace BitMiracle.LibTiff
 #endif
     partial class Tiff
     {
-        private int insertData(TiffDataType type, int v)
+        private int insertData(TiffType type, int v)
         {
             if (m_header.tiff_magic == TIFF_BIGENDIAN)
                 return ((v & m_typemask[(int)type]) << m_typeshift[(int)type]);
@@ -46,7 +46,7 @@ namespace BitMiracle.LibTiff
             return ((fields[f / 32] & BITn(f)) != 0);
         }
 
-        private bool writeRational(TiffDataType type, TIFFTAG tag, ref TiffDirEntry dir, float v)
+        private bool writeRational(TiffType type, TiffTag tag, ref TiffDirEntry dir, float v)
         {
             dir.tdir_tag = tag;
             dir.tdir_type = type;
@@ -60,7 +60,7 @@ namespace BitMiracle.LibTiff
             return true;
         }
 
-        private bool writeRationalPair(TiffDirEntry[] entries, int dirOffset, TiffDataType type, TIFFTAG tag1, float v1, TIFFTAG tag2, float v2)
+        private bool writeRationalPair(TiffDirEntry[] entries, int dirOffset, TiffType type, TiffTag tag1, float v1, TiffTag tag2, float v2)
         {
             if (!writeRational(type, tag1, ref entries[dirOffset], v1))
                 return false;
@@ -200,7 +200,7 @@ namespace BitMiracle.LibTiff
                 /*
                  * Handle other fields.
                  */
-                TIFFTAG tag = FIELD.FIELD_IGNORE;
+                TiffTag tag = FIELD.FIELD_IGNORE;
                 switch (fip.field_bit)
                 {
                     case FIELD.FIELD_STRIPOFFSETS:
@@ -210,12 +210,12 @@ namespace BitMiracle.LibTiff
                          * the appropriate field descriptor (so that tags
                          * are written in sorted order).
                          */
-                        tag = IsTiled() ? TIFFTAG.TIFFTAG_TILEOFFSETS : TIFFTAG.TIFFTAG_STRIPOFFSETS;
+                        tag = IsTiled() ? TiffTag.TILEOFFSETS : TiffTag.STRIPOFFSETS;
                         if (tag != fip.field_tag)
                             continue;
 
                         data[dir].tdir_tag = tag;
-                        data[dir].tdir_type = TiffDataType.TIFF_LONG;
+                        data[dir].tdir_type = TiffType.LONG;
                         data[dir].tdir_count = m_dir.td_nstrips;
                         if (!writeLongArray(ref data[dir], m_dir.td_stripoffset))
                             return false;
@@ -228,47 +228,47 @@ namespace BitMiracle.LibTiff
                          * the appropriate field descriptor (so that tags
                          * are written in sorted order).
                          */
-                        tag = IsTiled() ? TIFFTAG.TIFFTAG_TILEBYTECOUNTS: TIFFTAG.TIFFTAG_STRIPBYTECOUNTS;
+                        tag = IsTiled() ? TiffTag.TILEBYTECOUNTS: TiffTag.STRIPBYTECOUNTS;
                         if (tag != fip.field_tag)
                             continue;
 
                         data[dir].tdir_tag = tag;
-                        data[dir].tdir_type = TiffDataType.TIFF_LONG;
+                        data[dir].tdir_type = TiffType.LONG;
                         data[dir].tdir_count = m_dir.td_nstrips;
                         if (!writeLongArray(ref data[dir], m_dir.td_stripbytecount))
                             return false;
 
                         break;
                     case FIELD.FIELD_ROWSPERSTRIP:
-                        setupShortLong(TIFFTAG.TIFFTAG_ROWSPERSTRIP, ref data[dir], m_dir.td_rowsperstrip);
+                        setupShortLong(TiffTag.ROWSPERSTRIP, ref data[dir], m_dir.td_rowsperstrip);
                         break;
                     case FIELD.FIELD_COLORMAP:
-                        if (!writeShortTable(TIFFTAG.TIFFTAG_COLORMAP, ref data[dir], 3, m_dir.td_colormap))
+                        if (!writeShortTable(TiffTag.COLORMAP, ref data[dir], 3, m_dir.td_colormap))
                             return false;
 
                         break;
                     case FIELD.FIELD_IMAGEDIMENSIONS:
-                        setupShortLong(TIFFTAG.TIFFTAG_IMAGEWIDTH, ref data[dir++], m_dir.td_imagewidth);
-                        setupShortLong(TIFFTAG.TIFFTAG_IMAGELENGTH, ref data[dir], m_dir.td_imagelength);
+                        setupShortLong(TiffTag.IMAGEWIDTH, ref data[dir++], m_dir.td_imagewidth);
+                        setupShortLong(TiffTag.IMAGELENGTH, ref data[dir], m_dir.td_imagelength);
                         break;
                     case FIELD.FIELD_TILEDIMENSIONS:
-                        setupShortLong(TIFFTAG.TIFFTAG_TILEWIDTH, ref data[dir++], m_dir.td_tilewidth);
-                        setupShortLong(TIFFTAG.TIFFTAG_TILELENGTH, ref data[dir], m_dir.td_tilelength);
+                        setupShortLong(TiffTag.TILEWIDTH, ref data[dir++], m_dir.td_tilewidth);
+                        setupShortLong(TiffTag.TILELENGTH, ref data[dir], m_dir.td_tilelength);
                         break;
                     case FIELD.FIELD_COMPRESSION:
-                        setupShort(TIFFTAG.TIFFTAG_COMPRESSION, ref data[dir], (short)m_dir.td_compression);
+                        setupShort(TiffTag.COMPRESSION, ref data[dir], (short)m_dir.td_compression);
                         break;
                     case FIELD.FIELD_PHOTOMETRIC:
-                        setupShort(TIFFTAG.TIFFTAG_PHOTOMETRIC, ref data[dir], (short)m_dir.td_photometric);
+                        setupShort(TiffTag.PHOTOMETRIC, ref data[dir], (short)m_dir.td_photometric);
                         break;
                     case FIELD.FIELD_POSITION:
-                        if (!writeRationalPair(data, dir, TiffDataType.TIFF_RATIONAL, TIFFTAG.TIFFTAG_XPOSITION, m_dir.td_xposition, TIFFTAG.TIFFTAG_YPOSITION, m_dir.td_yposition))
+                        if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XPOSITION, m_dir.td_xposition, TiffTag.YPOSITION, m_dir.td_yposition))
                             return false;
 
                         dir++;
                         break;
                     case FIELD.FIELD_RESOLUTION:
-                        if (!writeRationalPair(data, dir, TiffDataType.TIFF_RATIONAL, TIFFTAG.TIFFTAG_XRESOLUTION, m_dir.td_xresolution, TIFFTAG.TIFFTAG_YRESOLUTION, m_dir.td_yresolution))
+                        if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XRESOLUTION, m_dir.td_xresolution, TiffTag.YRESOLUTION, m_dir.td_yresolution))
                             return false;
 
                         dir++;
@@ -310,7 +310,7 @@ namespace BitMiracle.LibTiff
                          * for backward compatibility.
                          */
                         data[dir].tdir_tag = fip.field_tag;
-                        data[dir].tdir_type = TiffDataType.TIFF_LONG;
+                        data[dir].tdir_type = TiffType.LONG;
                         data[dir].tdir_count = m_dir.td_nsubifd;
                         if (!writeLongArray(ref data[dir], m_dir.td_subifd))
                             return false;
@@ -338,7 +338,7 @@ namespace BitMiracle.LibTiff
                         break;
                     default:
                         /* XXX: Should be fixed and removed. */
-                        if (fip.field_tag == TIFFTAG.TIFFTAG_DOTRANGE)
+                        if (fip.field_tag == TiffTag.DOTRANGE)
                         {
                             if (!setupShortPair(fip.field_tag, ref data[dir]))
                                 return false;
@@ -376,11 +376,11 @@ namespace BitMiracle.LibTiff
                 {
                     short temp = (short)data[dir].tdir_tag;
                     SwabShort(ref temp);
-                    data[dir].tdir_tag = (TIFFTAG)temp;
+                    data[dir].tdir_tag = (TiffTag)temp;
 
                     temp = (short)data[dir].tdir_type;
                     SwabShort(ref temp);
-                    data[dir].tdir_type = (TiffDataType)temp;
+                    data[dir].tdir_type = (TiffType)temp;
 
                     SwabLong(ref data[dir].tdir_count);
                     SwabLong(ref data[dir].tdir_offset);
@@ -438,8 +438,8 @@ namespace BitMiracle.LibTiff
 
             switch (fip.field_type)
             {
-                case TiffDataType.TIFF_SHORT:
-                case TiffDataType.TIFF_SSHORT:
+                case TiffType.SHORT:
+                case TiffType.SSHORT:
                     if (fip.field_passcount)
                     {
                         short[] wp;
@@ -481,9 +481,9 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TiffDataType.TIFF_LONG:
-                case TiffDataType.TIFF_SLONG:
-                case TiffDataType.TIFF_IFD:
+                case TiffType.LONG:
+                case TiffType.SLONG:
+                case TiffType.IFD:
                     if (fip.field_passcount)
                     {
                         int[] lp;
@@ -525,8 +525,8 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TiffDataType.TIFF_RATIONAL:
-                case TiffDataType.TIFF_SRATIONAL:
+                case TiffType.RATIONAL:
+                case TiffType.SRATIONAL:
                     if (fip.field_passcount)
                     {
                         float[] fp;
@@ -569,7 +569,7 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TiffDataType.TIFF_FLOAT:
+                case TiffType.FLOAT:
                     if (fip.field_passcount)
                     {
                         float[] fp;
@@ -612,7 +612,7 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TiffDataType.TIFF_DOUBLE:
+                case TiffType.DOUBLE:
                     if (fip.field_passcount)
                     {
                         double[] dp;
@@ -655,7 +655,7 @@ namespace BitMiracle.LibTiff
                         }
                     }
                     break;
-                case TiffDataType.TIFF_ASCII:
+                case TiffType.ASCII:
                     {
                         FieldValue[] result = GetField(fip.field_tag);
 
@@ -676,8 +676,8 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case TiffDataType.TIFF_BYTE:
-                case TiffDataType.TIFF_SBYTE:
+                case TiffType.BYTE:
+                case TiffType.SBYTE:
                     if (fip.field_passcount)
                     {
                         byte[] cp;
@@ -721,7 +721,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case TiffDataType.TIFF_UNDEFINED:
+                case TiffType.UNDEFINED:
                     {
                         byte[] cp;
                         int wc2;
@@ -750,7 +750,7 @@ namespace BitMiracle.LibTiff
                     }
                     break;
 
-                case TiffDataType.TIFF_NOTYPE:
+                case TiffType.NOTYPE:
                     break;
             }
 
@@ -761,31 +761,31 @@ namespace BitMiracle.LibTiff
         * Setup a directory entry with either a SHORT
         * or LONG type according to the value.
         */
-        private void setupShortLong(TIFFTAG tag, ref TiffDirEntry dir, int v)
+        private void setupShortLong(TiffTag tag, ref TiffDirEntry dir, int v)
         {
             dir.tdir_tag = tag;
             dir.tdir_count = 1;
             if (v > 0xffffL)
             {
-                dir.tdir_type = TiffDataType.TIFF_LONG;
+                dir.tdir_type = TiffType.LONG;
                 dir.tdir_offset = v;
             }
             else
             {
-                dir.tdir_type = TiffDataType.TIFF_SHORT;
-                dir.tdir_offset = insertData(TiffDataType.TIFF_SHORT, v);
+                dir.tdir_type = TiffType.SHORT;
+                dir.tdir_offset = insertData(TiffType.SHORT, v);
             }
         }
 
         /*
         * Setup a SHORT directory entry
         */
-        private void setupShort(TIFFTAG tag, ref TiffDirEntry dir, short v)
+        private void setupShort(TiffTag tag, ref TiffDirEntry dir, short v)
         {
             dir.tdir_tag = tag;
             dir.tdir_count = 1;
-            dir.tdir_type = TiffDataType.TIFF_SHORT;
-            dir.tdir_offset = insertData(TiffDataType.TIFF_SHORT, v);
+            dir.tdir_type = TiffType.SHORT;
+            dir.tdir_offset = insertData(TiffType.SHORT, v);
         }
 
         /*
@@ -794,7 +794,7 @@ namespace BitMiracle.LibTiff
         * (potentially) write the associated indirect
         * values.
         */
-        private bool writePerSampleShorts(TIFFTAG tag, ref TiffDirEntry dir)
+        private bool writePerSampleShorts(TiffTag tag, ref TiffDirEntry dir)
         {
             short[] w = new short [m_dir.td_samplesperpixel];
 
@@ -805,7 +805,7 @@ namespace BitMiracle.LibTiff
                 w[i] = v;
 
             dir.tdir_tag = tag;
-            dir.tdir_type = TiffDataType.TIFF_SHORT;
+            dir.tdir_type = TiffType.SHORT;
             dir.tdir_count = m_dir.td_samplesperpixel;
             bool status = writeShortArray(ref dir, w);
             return status;
@@ -816,7 +816,7 @@ namespace BitMiracle.LibTiff
         * values and (potentially) write the associated indirect values.  The source
         * data from GetField() for the specified tag must be returned as double.
         */
-        private bool writePerSampleAnys(TiffDataType type, TIFFTAG tag, ref TiffDirEntry dir)
+        private bool writePerSampleAnys(TiffType type, TiffTag tag, ref TiffDirEntry dir)
         {
             double[] w = new double [m_dir.td_samplesperpixel];
 
@@ -834,7 +834,7 @@ namespace BitMiracle.LibTiff
         * Setup a pair of shorts that are returned by
         * value, rather than as a reference to an array.
         */
-        private bool setupShortPair(TIFFTAG tag, ref TiffDirEntry dir)
+        private bool setupShortPair(TiffTag tag, ref TiffDirEntry dir)
         {
             short[] v = new short[2];
             FieldValue[] result = GetField(tag);
@@ -842,7 +842,7 @@ namespace BitMiracle.LibTiff
             v[1] = result[1].ToShort();
 
             dir.tdir_tag = tag;
-            dir.tdir_type = TiffDataType.TIFF_SHORT;
+            dir.tdir_type = TiffType.SHORT;
             dir.tdir_count = 2;
             return writeShortArray(ref dir, v);
         }
@@ -852,10 +852,10 @@ namespace BitMiracle.LibTiff
         * where M is known to be 2**bitspersample, and write
         * the associated indirect data.
         */
-        private bool writeShortTable(TIFFTAG tag, ref TiffDirEntry dir, int n, short[][] table)
+        private bool writeShortTable(TiffTag tag, ref TiffDirEntry dir, int n, short[][] table)
         {
             dir.tdir_tag = tag;
-            dir.tdir_type = TiffDataType.TIFF_SHORT;
+            dir.tdir_type = TiffType.SHORT;
             /* XXX -- yech, fool writeData */
             dir.tdir_count = 1 << m_dir.td_bitspersample;
             int off = m_dataoff;
@@ -963,7 +963,7 @@ namespace BitMiracle.LibTiff
                 float fv = v[i];
                 if (fv < 0)
                 {
-                    if (dir.tdir_type == TiffDataType.TIFF_RATIONAL)
+                    if (dir.tdir_type == TiffType.RATIONAL)
                     {
                         WarningExt(this, m_clientdata, m_name,
                             "\"{0}\": Information lost writing value ({1:G}) as (unsigned) RATIONAL",
@@ -1020,7 +1020,7 @@ namespace BitMiracle.LibTiff
         * type in a temporary buffer and then handed off to the appropriate array
         * writer.
         */
-        private bool writeAnyArray(TiffDataType type, TIFFTAG tag, ref TiffDirEntry dir, int n, double[] v)
+        private bool writeAnyArray(TiffType type, TiffTag tag, ref TiffDirEntry dir, int n, double[] v)
         {
             dir.tdir_tag = tag;
             dir.tdir_type = type;
@@ -1029,8 +1029,8 @@ namespace BitMiracle.LibTiff
             bool failed = false;
             switch (type)
             {
-                case TiffDataType.TIFF_BYTE:
-                case TiffDataType.TIFF_SBYTE:
+                case TiffType.BYTE:
+                case TiffType.SBYTE:
                     {
                         byte[] bp = new byte [n];
                         for (int i = 0; i < n; i++)
@@ -1040,8 +1040,8 @@ namespace BitMiracle.LibTiff
                             failed = true;
                     }
                     break;
-                case TiffDataType.TIFF_SHORT:
-                case TiffDataType.TIFF_SSHORT:
+                case TiffType.SHORT:
+                case TiffType.SSHORT:
                     {
                         short[] bp = new short [n];
                         for (int i = 0; i < n; i++)
@@ -1051,8 +1051,8 @@ namespace BitMiracle.LibTiff
                             failed = true;
                     }
                     break;
-                case TiffDataType.TIFF_LONG:
-                case TiffDataType.TIFF_SLONG:
+                case TiffType.LONG:
+                case TiffType.SLONG:
                     {
                         int[] bp = new int [n];
                         for (int i = 0; i < n; i++)
@@ -1062,7 +1062,7 @@ namespace BitMiracle.LibTiff
                             failed = true;
                     }
                     break;
-                case TiffDataType.TIFF_FLOAT:
+                case TiffType.FLOAT:
                     {
                         float[] bp = new float [n];
                         for (int i = 0; i < n; i++)
@@ -1072,18 +1072,18 @@ namespace BitMiracle.LibTiff
                             failed = true;
                     }
                     break;
-                case TiffDataType.TIFF_DOUBLE:
+                case TiffType.DOUBLE:
                     if (!writeDoubleArray(ref dir, v))
                         failed = true;
                         
                     break;
 
                 default:
-                    /* TIFF_NOTYPE */
-                    /* TIFF_ASCII */
-                    /* TIFF_UNDEFINED */
-                    /* TIFF_RATIONAL */
-                    /* TIFF_SRATIONAL */
+                    /* NOTYPE */
+                    /* ASCII */
+                    /* UNDEFINED */
+                    /* RATIONAL */
+                    /* SRATIONAL */
                     failed = true;
                     break;
             }
@@ -1118,13 +1118,13 @@ namespace BitMiracle.LibTiff
                     ncols = 3;
             }
             
-            return writeShortTable(TIFFTAG.TIFFTAG_TRANSFERFUNCTION, ref dir, ncols, m_dir.td_transferfunction);
+            return writeShortTable(TiffTag.TRANSFERFUNCTION, ref dir, ncols, m_dir.td_transferfunction);
         }
 
         private bool writeInkNames(ref TiffDirEntry dir)
         {
-            dir.tdir_tag = TIFFTAG.TIFFTAG_INKNAMES;
-            dir.tdir_type = TiffDataType.TIFF_ASCII;
+            dir.tdir_tag = TiffTag.INKNAMES;
+            dir.tdir_type = TiffType.ASCII;
             byte[] bytes = Latin1Encoding.GetBytes(m_dir.td_inknames);
             dir.tdir_count = bytes.Length;
             return writeByteArray(ref dir, bytes);

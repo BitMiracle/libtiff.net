@@ -28,7 +28,7 @@ namespace BitMiracle.LibTiff.Internal
             if (ta.field_tag != tb.field_tag)
                 return ((int)ta.field_tag - (int)tb.field_tag);
 
-            return (ta.field_type == TiffDataType.TIFF_ANY) ? 0 : ((int)tb.field_type - (int)ta.field_type);
+            return (ta.field_type == TiffType.ANY) ? 0 : ((int)tb.field_type - (int)ta.field_type);
         }
     }
 }

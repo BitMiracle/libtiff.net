@@ -48,8 +48,8 @@ namespace BitMiracle.LibTiff.Internal
         internal byte[] m_jpegtables; /* JPEGTables tag value, or null */
         internal int m_jpegtables_length; /* number of bytes in same */
         internal int m_jpegquality; /* Compression quality level */
-        internal JPEGCOLORMODE m_jpegcolormode; /* Auto RGB<=>YCbCr convert? */
-        internal JPEGTABLESMODE m_jpegtablesmode; /* What to put in JPEGTables */
+        internal JpegColorMode m_jpegcolormode; /* Auto RGB<=>YCbCr convert? */
+        internal JpegTablesMode m_jpegtablesmode; /* What to put in JPEGTables */
 
         internal bool m_ycbcrsampling_fetched;
 
@@ -60,15 +60,15 @@ namespace BitMiracle.LibTiff.Internal
 
         private static TiffFieldInfo[] jpegFieldInfo = 
         {
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_JPEGTABLES, -3, -3, TiffDataType.TIFF_UNDEFINED, FIELD_JPEGTABLES, false, true, "JPEGTables"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_JPEGQUALITY, 0, 0, TiffDataType.TIFF_ANY, FIELD.FIELD_PSEUDO, true, false, ""), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_JPEGCOLORMODE, 0, 0, TiffDataType.TIFF_ANY, FIELD.FIELD_PSEUDO, false, false, ""), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_JPEGTABLESMODE, 0, 0, TiffDataType.TIFF_ANY, FIELD.FIELD_PSEUDO, false, false, ""), 
+            new TiffFieldInfo(TiffTag.JPEGTABLES, -3, -3, TiffType.UNDEFINED, FIELD_JPEGTABLES, false, true, "JPEGTables"), 
+            new TiffFieldInfo(TiffTag.JPEGQUALITY, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, true, false, ""), 
+            new TiffFieldInfo(TiffTag.JPEGCOLORMODE, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, ""), 
+            new TiffFieldInfo(TiffTag.JPEGTABLESMODE, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, ""), 
             /* Specific for JPEG in faxes */
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXRECVPARAMS, 1, 1, TiffDataType.TIFF_LONG, FIELD_RECVPARAMS, true, false, "FaxRecvParams"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXSUBADDRESS, -1, -1, TiffDataType.TIFF_ASCII, FIELD_SUBADDRESS, true, false, "FaxSubAddress"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXRECVTIME, 1, 1, TiffDataType.TIFF_LONG, FIELD_RECVTIME, true, false, "FaxRecvTime"), 
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_FAXDCS, -1, -1, TiffDataType.TIFF_ASCII, FIELD_FAXDCS, true, false, "FaxDcs"), 
+            new TiffFieldInfo(TiffTag.FAXRECVPARAMS, 1, 1, TiffType.LONG, FIELD_RECVPARAMS, true, false, "FaxRecvParams"), 
+            new TiffFieldInfo(TiffTag.FAXSUBADDRESS, -1, -1, TiffType.ASCII, FIELD_SUBADDRESS, true, false, "FaxSubAddress"), 
+            new TiffFieldInfo(TiffTag.FAXRECVTIME, 1, 1, TiffType.LONG, FIELD_RECVTIME, true, false, "FaxRecvTime"), 
+            new TiffFieldInfo(TiffTag.FAXDCS, -1, -1, TiffType.ASCII, FIELD_FAXDCS, true, false, "FaxDcs"), 
         };
 
         private bool m_rawDecode;
@@ -80,7 +80,7 @@ namespace BitMiracle.LibTiff.Internal
         private bool m_cinfo_initialized;
 
         internal jpeg_error_mgr m_err; /* libjpeg error manager */
-        private PHOTOMETRIC m_photometric; /* copy of PhotometricInterpretation */
+        private Photometric m_photometric; /* copy of PhotometricInterpretation */
         
         private int m_bytesperline; /* decompressed bytes per scanline */
         /* pointers to intermediate buffers when processing downsampled data */
@@ -88,7 +88,7 @@ namespace BitMiracle.LibTiff.Internal
         private int m_scancount; /* number of "scanlines" accumulated */
         private int m_samplesperclump;
 
-        public JpegCodec(Tiff tif, COMPRESSION scheme, string name)
+        public JpegCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
         {
             m_tagMethods = new JpegCodecTagMethods();
@@ -96,7 +96,7 @@ namespace BitMiracle.LibTiff.Internal
 
         public override bool Init()
         {
-            Debug.Assert(m_scheme == COMPRESSION.COMPRESSION_JPEG);
+            Debug.Assert(m_scheme == Compression.JPEG);
 
             /*
             * Merge codec-specific tag information and override parent get/set
@@ -125,8 +125,8 @@ namespace BitMiracle.LibTiff.Internal
             m_jpegtables = null;
             m_jpegtables_length = 0;
             m_jpegquality = 75; /* Default IJG quality */
-            m_jpegcolormode = JPEGCOLORMODE.JPEGCOLORMODE_RAW;
-            m_jpegtablesmode = JPEGTABLESMODE.JPEGTABLESMODE_QUANT | JPEGTABLESMODE.JPEGTABLESMODE_HUFF;
+            m_jpegcolormode = JpegColorMode.RAW;
+            m_jpegtablesmode = JpegTablesMode.QUANT | JpegTablesMode.HUFF;
 
             m_recvparams = 0;
             m_subaddress = null;
@@ -155,7 +155,7 @@ namespace BitMiracle.LibTiff.Internal
             }
 
             /*
-             * Mark the TIFFTAG_YCBCRSAMPLES as present even if it is not
+             * Mark the YCBCRSAMPLES as present even if it is not
              * see: JPEGFixupTestSubsampling().
              */
             m_tif.setFieldBit(FIELD.FIELD_YCBCRSUBSAMPLING);
@@ -304,7 +304,7 @@ namespace BitMiracle.LibTiff.Internal
              * the state in decompressor mode if we have tile data, even if we
              * are not in read-only file access mode. 
              */
-            FieldValue[] result = m_tif.GetField(TIFFTAG.TIFFTAG_TILEBYTECOUNTS);
+            FieldValue[] result = m_tif.GetField(TiffTag.TILEBYTECOUNTS);
             if (m_tif.IsTiled() && result != null)
             {
                 byte_counts = result[0].ToIntArray();
@@ -312,7 +312,7 @@ namespace BitMiracle.LibTiff.Internal
                     data_is_empty = byte_counts[0] == 0;
             }
 
-            result = m_tif.GetField(TIFFTAG.TIFFTAG_STRIPBYTECOUNTS);
+            result = m_tif.GetField(TiffTag.STRIPBYTECOUNTS);
             if (!m_tif.IsTiled() && result != null)
             {
                 byte_counts = result[0].ToIntArray();
@@ -362,9 +362,9 @@ namespace BitMiracle.LibTiff.Internal
             * data.
             */
             m_tif.m_flags &= ~Tiff.TIFF_UPSAMPLED;
-            if (m_tif.m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (m_tif.m_dir.td_planarconfig == PlanarConfig.CONTIG)
             {
-                if (m_tif.m_dir.td_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
+                if (m_tif.m_dir.td_photometric == Photometric.YCBCR && m_jpegcolormode == JpegColorMode.RGB)
                     m_tif.m_flags |= Tiff.TIFF_UPSAMPLED;
             }
 
@@ -403,7 +403,7 @@ namespace BitMiracle.LibTiff.Internal
                     segment_height = m_tif.m_dir.td_rowsperstrip;
                 m_bytesperline = m_tif.oldScanlineSize();
             }
-            if (m_tif.m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && s > 0)
+            if (m_tif.m_dir.td_planarconfig == PlanarConfig.SEPARATE && s > 0)
             {
                 /* for PC 2, scale down the strip/tile size
                  * to match a downsampled component
@@ -422,12 +422,12 @@ namespace BitMiracle.LibTiff.Internal
             m_compression.Image_height = segment_height;
             downsampled_input = false;
             
-            if (m_tif.m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (m_tif.m_dir.td_planarconfig == PlanarConfig.CONTIG)
             {
                 m_compression.Input_components = m_tif.m_dir.td_samplesperpixel;
-                if (m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+                if (m_photometric == Photometric.YCBCR)
                 {
-                    if (m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
+                    if (m_jpegcolormode == JpegColorMode.RGB)
                     {
                         m_compression.In_color_space = J_COLOR_SPACE.JCS_RGB;
                     }
@@ -465,7 +465,7 @@ namespace BitMiracle.LibTiff.Internal
 
                 m_compression.m_comp_info[0].component_id = s;
                 /* jpeg_set_colorspace() set sampling factors to 1 */
-                if (m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR && s > 0)
+                if (m_photometric == Photometric.YCBCR && s > 0)
                 {
                     m_compression.m_comp_info[0].quant_tbl_no = 1;
                     m_compression.m_comp_info[0].dc_tbl_no = 1;
@@ -478,7 +478,7 @@ namespace BitMiracle.LibTiff.Internal
             m_compression.Write_Adobe_marker = false;
             
             /* set up table handling correctly */
-            if ((m_jpegtablesmode &JPEGTABLESMODE.JPEGTABLESMODE_QUANT) == 0)
+            if ((m_jpegtablesmode &JpegTablesMode.QUANT) == 0)
             {
                 if (!TIFFjpeg_set_quality(m_jpegquality, false))
                     return false;
@@ -487,7 +487,7 @@ namespace BitMiracle.LibTiff.Internal
                 unsuppress_quant_table(1);
             }
 
-            if ((m_jpegtablesmode & JPEGTABLESMODE.JPEGTABLESMODE_HUFF) != 0)
+            if ((m_jpegtablesmode & JpegTablesMode.HUFF) != 0)
                 m_compression.Optimize_coding = false;
             else
                 m_compression.Optimize_coding = true;
@@ -542,7 +542,7 @@ namespace BitMiracle.LibTiff.Internal
             m_photometric = m_tif.m_dir.td_photometric;
             switch (m_photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case Photometric.YCBCR:
                     m_h_sampling = m_tif.m_dir.td_ycbcrsubsampling[0];
                     m_v_sampling = m_tif.m_dir.td_ycbcrsubsampling[1];
                     /*
@@ -550,7 +550,7 @@ namespace BitMiracle.LibTiff.Internal
                      * default value is inappropriate for YCbCr.  Fill in the
                      * proper value if application didn't set it.
                      */
-                    FieldValue[] result = m_tif.GetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE);
+                    FieldValue[] result = m_tif.GetField(TiffTag.REFERENCEBLACKWHITE);
                     if (result == null)
                     {
                         float[] refbw = new float [6];
@@ -561,13 +561,13 @@ namespace BitMiracle.LibTiff.Internal
                         refbw[3] = refbw[1];
                         refbw[4] = refbw[2];
                         refbw[5] = refbw[1];
-                        m_tif.SetField(TIFFTAG.TIFFTAG_REFERENCEBLACKWHITE, refbw);
+                        m_tif.SetField(TiffTag.REFERENCEBLACKWHITE, refbw);
                     }
                     break;
 
                 /* disallowed by Tech Note */
-                case PHOTOMETRIC.PHOTOMETRIC_PALETTE:
-                case PHOTOMETRIC.PHOTOMETRIC_MASK:
+                case Photometric.PALETTE:
+                case Photometric.MASK:
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
                         "PhotometricInterpretation {0} not allowed for JPEG", m_photometric);
                     return false;
@@ -622,7 +622,7 @@ namespace BitMiracle.LibTiff.Internal
             }
 
             /* Create a JPEGTables field if appropriate */
-            if ((m_jpegtablesmode & (JPEGTABLESMODE.JPEGTABLESMODE_QUANT | JPEGTABLESMODE.JPEGTABLESMODE_HUFF)) != 0)
+            if ((m_jpegtablesmode & (JpegTablesMode.QUANT | JpegTablesMode.HUFF)) != 0)
             {
                 if (!prepare_JPEGTables())
                     return false;
@@ -734,7 +734,7 @@ namespace BitMiracle.LibTiff.Internal
                 m_bytesperline = m_tif.oldScanlineSize();
             }
             
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && s > 0)
+            if (td.td_planarconfig == PlanarConfig.SEPARATE && s > 0)
             {
                 /*
                  * For PC 2, scale down the expected strip/tile size
@@ -765,7 +765,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
             }
 
-            if (m_decompression.Num_components != (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG ? td.td_samplesperpixel : 1))
+            if (m_decompression.Num_components != (td.td_planarconfig == PlanarConfig.CONTIG ? td.td_samplesperpixel : 1))
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG component count");
                 return false;
@@ -777,7 +777,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
             }
 
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (td.td_planarconfig == PlanarConfig.CONTIG)
             {
                 /* Component 0 should have expected sampling factors */
                 if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling ||
@@ -810,7 +810,7 @@ namespace BitMiracle.LibTiff.Internal
                      * try to deduce Intergraph files by the presense
                      * of the tag 33918.
                      */
-                    if (m_tif.FindFieldInfo((TIFFTAG)33918, TiffDataType.TIFF_ANY) == null)
+                    if (m_tif.FindFieldInfo((TiffTag)33918, TiffType.ANY) == null)
                     {
                         Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                             "Decompressor will try reading with sampling {0},{1}.",
@@ -845,9 +845,9 @@ namespace BitMiracle.LibTiff.Internal
             }
 
             downsampled_output = false;
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
-                m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR &&
-                m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
+            if (td.td_planarconfig == PlanarConfig.CONTIG &&
+                m_photometric == Photometric.YCBCR &&
+                m_jpegcolormode == JpegColorMode.RGB)
             {
                 /* Convert YCbCr to RGB */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
@@ -858,7 +858,7 @@ namespace BitMiracle.LibTiff.Internal
                 /* Suppress colorspace handling */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
                 m_decompression.Out_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
-                if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
+                if (td.td_planarconfig == PlanarConfig.CONTIG &&
                     (m_h_sampling != 1 || m_v_sampling != 1))
                 {
                     downsampled_output = true;
@@ -908,17 +908,17 @@ namespace BitMiracle.LibTiff.Internal
             if (!TIFFjpeg_suppress_tables(true))
                 return false;
 
-            if ((m_jpegtablesmode & JPEGTABLESMODE.JPEGTABLESMODE_QUANT) != 0)
+            if ((m_jpegtablesmode & JpegTablesMode.QUANT) != 0)
             {
                 unsuppress_quant_table(0);
-                if (m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+                if (m_photometric == Photometric.YCBCR)
                     unsuppress_quant_table(1);
             }
 
-            if ((m_jpegtablesmode & JPEGTABLESMODE.JPEGTABLESMODE_HUFF) != 0)
+            if ((m_jpegtablesmode & JpegTablesMode.HUFF) != 0)
             {
                 unsuppress_huff_table(0);
-                if (m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR)
+                if (m_photometric == Photometric.YCBCR)
                     unsuppress_huff_table(1);
             }
 
@@ -956,7 +956,7 @@ namespace BitMiracle.LibTiff.Internal
             m_photometric = td.td_photometric;
             switch (m_photometric)
             {
-                case PHOTOMETRIC.PHOTOMETRIC_YCBCR:
+                case Photometric.YCBCR:
                     m_h_sampling = td.td_ycbcrsubsampling[0];
                     m_v_sampling = td.td_ycbcrsubsampling[1];
                     break;
@@ -1016,7 +1016,7 @@ namespace BitMiracle.LibTiff.Internal
                 m_bytesperline = m_tif.oldScanlineSize();
             }
             
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE && s > 0)
+            if (td.td_planarconfig == PlanarConfig.SEPARATE && s > 0)
             {
                 /*
                  * For PC 2, scale down the expected strip/tile size
@@ -1050,7 +1050,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
             }
 
-            if (m_decompression.Num_components != (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG ? td.td_samplesperpixel : 1))
+            if (m_decompression.Num_components != (td.td_planarconfig == PlanarConfig.CONTIG ? td.td_samplesperpixel : 1))
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG component count");
                 return false;
@@ -1062,7 +1062,7 @@ namespace BitMiracle.LibTiff.Internal
                 return false;
             }
 
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG)
+            if (td.td_planarconfig == PlanarConfig.CONTIG)
             {
                 /* Component 0 should have expected sampling factors */
                 if (m_decompression.m_comp_info[0].h_samp_factor != m_h_sampling ||
@@ -1096,7 +1096,7 @@ namespace BitMiracle.LibTiff.Internal
                      * try to deduce Intergraph files by the presense
                      * of the tag 33918.
                      */
-                    if (m_tif.FindFieldInfo((TIFFTAG)33918, TiffDataType.TIFF_ANY) == null)
+                    if (m_tif.FindFieldInfo((TiffTag)33918, TiffType.ANY) == null)
                     {
                         Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                             "Decompressor will try reading with sampling {0},{1}.",
@@ -1131,9 +1131,9 @@ namespace BitMiracle.LibTiff.Internal
             }
 
             downsampled_output = false;
-            if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
-                m_photometric == PHOTOMETRIC.PHOTOMETRIC_YCBCR &&
-                m_jpegcolormode == JPEGCOLORMODE.JPEGCOLORMODE_RGB)
+            if (td.td_planarconfig == PlanarConfig.CONTIG &&
+                m_photometric == Photometric.YCBCR &&
+                m_jpegcolormode == JpegColorMode.RGB)
             {
                 /* Convert YCbCr to RGB */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
@@ -1144,7 +1144,7 @@ namespace BitMiracle.LibTiff.Internal
                 /* Suppress colorspace handling */
                 m_decompression.Jpeg_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
                 m_decompression.Out_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
-                if (td.td_planarconfig == PLANARCONFIG.PLANARCONFIG_CONTIG &&
+                if (td.td_planarconfig == PlanarConfig.CONTIG &&
                     (m_h_sampling != 1 || m_v_sampling != 1))
                 {
                     downsampled_output = true;

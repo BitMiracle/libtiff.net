@@ -113,9 +113,9 @@ namespace BitMiracle.LibTiff
             for (int i = 0; i < dircount; i++)
             {
                 TiffDirEntry entry = new TiffDirEntry();
-                entry.tdir_tag = (TIFFTAG)readShort(bytes, pos);
+                entry.tdir_tag = (TiffTag)readShort(bytes, pos);
                 pos += sizeof(short);
-                entry.tdir_type = (TiffDataType)readShort(bytes, pos);
+                entry.tdir_type = (TiffType)readShort(bytes, pos);
                 pos += sizeof(short);
                 entry.tdir_count = readInt(bytes, pos);
                 pos += sizeof(int);
@@ -157,7 +157,7 @@ namespace BitMiracle.LibTiff
             }
 
             int strip;
-            if (m_dir.td_planarconfig == PLANARCONFIG.PLANARCONFIG_SEPARATE)
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
             {
                 if (sample >= m_dir.td_samplesperpixel)
                 {

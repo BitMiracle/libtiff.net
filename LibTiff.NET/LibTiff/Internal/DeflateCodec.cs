@@ -48,12 +48,12 @@ namespace BitMiracle.LibTiff.Internal
 
         private static TiffFieldInfo[] zipFieldInfo = 
         {
-            new TiffFieldInfo(TIFFTAG.TIFFTAG_ZIPQUALITY, 0, 0, TiffDataType.TIFF_ANY, FIELD.FIELD_PSEUDO, true, false, ""), 
+            new TiffFieldInfo(TiffTag.ZIPQUALITY, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, true, false, ""), 
         };
 
         private TiffTagMethods m_tagMethods;
 
-        public DeflateCodec(Tiff tif, COMPRESSION scheme, string name)
+        public DeflateCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
         {
             m_tagMethods = new DeflateCodecTagMethods();
@@ -61,8 +61,8 @@ namespace BitMiracle.LibTiff.Internal
 
         public override bool Init()
         {
-            Debug.Assert((m_scheme == COMPRESSION.COMPRESSION_DEFLATE) || 
-                (m_scheme == COMPRESSION.COMPRESSION_ADOBE_DEFLATE));
+            Debug.Assert((m_scheme == Compression.DEFLATE) || 
+                (m_scheme == Compression.ADOBE_DEFLATE));
 
             /*
             * Merge codec-specific tag information and

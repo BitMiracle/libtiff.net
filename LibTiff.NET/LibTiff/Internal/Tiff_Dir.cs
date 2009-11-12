@@ -29,12 +29,12 @@ namespace BitMiracle.LibTiff
     partial class Tiff
     {
         /* is tag value normal or pseudo */
-        internal static bool isPseudoTag(TIFFTAG t)
+        internal static bool isPseudoTag(TiffTag t)
         {
             return ((int)t > 0xffff);
         }
 
-        private bool isFillOrder(FILLORDER o)
+        private bool isFillOrder(FillOrder o)
         {
             return ((m_flags & (int)o) != 0);
         }
@@ -53,9 +53,9 @@ namespace BitMiracle.LibTiff
         * has commenced, unless its value has no effect
         * on the format of the data that is written.
         */
-        private bool okToChangeTag(TIFFTAG tag)
+        private bool okToChangeTag(TiffTag tag)
         {
-            TiffFieldInfo fip = FindFieldInfo(tag, TiffDataType.TIFF_ANY);
+            TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
             if (fip == null)
             {
                 /* unknown tag */
@@ -64,7 +64,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            if (tag != TIFFTAG.TIFFTAG_IMAGELENGTH && (m_flags & TIFF_BEENWRITING) != 0 && !fip.field_oktochange)
+            if (tag != TiffTag.IMAGELENGTH && (m_flags & TIFF_BEENWRITING) != 0 && !fip.field_oktochange)
             {
                 /*
                  * Consult info table to see if tag can be changed
@@ -102,7 +102,7 @@ namespace BitMiracle.LibTiff
             if (m_extender != null)
                 m_extender(this);
             
-            SetField(TIFFTAG.TIFFTAG_COMPRESSION, COMPRESSION.COMPRESSION_NONE);
+            SetField(TiffTag.COMPRESSION, Compression.NONE);
             
             /*
              * NB: The directory is marked dirty as a result of setting

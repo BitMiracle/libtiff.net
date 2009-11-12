@@ -121,14 +121,14 @@ namespace BitMiracle.LibTiff.Internal
         private int m_enc_rawlimit; /* bound on tif_rawdata buffer */
         private hash_t[] m_enc_hashtab; /* kept separate for small machines */
 
-        public LZWCodec(Tiff tif, COMPRESSION scheme, string name)
+        public LZWCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
         {
         }
 
         public override bool Init()
         {
-            Debug.Assert(m_scheme == COMPRESSION.COMPRESSION_LZW);
+            Debug.Assert(m_scheme == Compression.LZW);
 
             m_dec_codetab = null;
             m_oldStyleCodeFound = false;

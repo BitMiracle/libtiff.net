@@ -20,7 +20,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class DeflateCodecTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TIFFTAG tag, FieldValue[] ap)
+        public override bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             DeflateCodec sp = tif.m_currentCodec as DeflateCodec;
             Debug.Assert(sp != null);
@@ -29,7 +29,7 @@ namespace BitMiracle.LibTiff.Internal
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_ZIPQUALITY:
+                case TiffTag.ZIPQUALITY:
                     sp.m_zipquality = ap[0].ToInt();
                     if ((sp.m_state & DeflateCodec.ZSTATE_INIT_ENCODE) != 0)
                     {
@@ -47,14 +47,14 @@ namespace BitMiracle.LibTiff.Internal
             return base.vsetfield(tif, tag, ap);
         }
 
-        public override FieldValue[] vgetfield(Tiff tif, TIFFTAG tag)
+        public override FieldValue[] vgetfield(Tiff tif, TiffTag tag)
         {
             DeflateCodec sp = tif.m_currentCodec as DeflateCodec;
             Debug.Assert(sp != null);
 
             switch (tag)
             {
-                case TIFFTAG.TIFFTAG_ZIPQUALITY:
+                case TiffTag.ZIPQUALITY:
                     FieldValue[] result = new FieldValue[1];
                     result[0].Set(sp.m_zipquality);
                     return result;
