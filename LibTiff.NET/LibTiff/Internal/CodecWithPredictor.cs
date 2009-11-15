@@ -102,12 +102,12 @@ namespace BitMiracle.LibTiff.Internal
         // WARNING: do not override this methods!
         //          please override their equivalents listed below
 
-        public override bool tif_setupdecode()
+        public override bool SetupDecode()
         {
             return PredictorSetupDecode();
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, short s)
+        public override bool DecodeRow(byte[] pp, int cc, short s)
         {
             if (!m_passThruDecode)
                 return PredictorDecodeRow(pp, cc, s);
@@ -115,7 +115,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_decoderow(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, short s)
+        public override bool DecodeStrip(byte[] pp, int cc, short s)
         {
             if (!m_passThruDecode)
                 return PredictorDecodeTile(pp, cc, s);
@@ -123,7 +123,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_decodestrip(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, short s)
+        public override bool DecodeTile(byte[] pp, int cc, short s)
         {
             if (!m_passThruDecode)
                 return PredictorDecodeTile(pp, cc, s);
@@ -131,12 +131,12 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_decodetile(pp, cc, s);
         }
 
-        public override bool tif_setupencode()
+        public override bool SetupEncode()
         {
             return PredictorSetupEncode();
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, short s)
+        public override bool EncodeRow(byte[] pp, int cc, short s)
         {
             if (!m_passThruEncode)
                 return PredictorEncodeRow(pp, cc, s);
@@ -144,7 +144,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_encoderow(pp, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, short s)
+        public override bool EncodeStrip(byte[] pp, int cc, short s)
         {
             if (!m_passThruEncode)
                 return PredictorEncodeTile(pp, cc, s);
@@ -152,7 +152,7 @@ namespace BitMiracle.LibTiff.Internal
             return predictor_encodestrip(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, short s)
+        public override bool EncodeTile(byte[] pp, int cc, short s)
         {
             if (!m_passThruEncode)
                 return PredictorEncodeTile(pp, cc, s);
@@ -166,42 +166,42 @@ namespace BitMiracle.LibTiff.Internal
 
         public virtual bool predictor_setupdecode()
         {
-            return base.tif_setupdecode();
+            return base.SetupDecode();
         }
 
         public virtual bool predictor_decoderow(byte[] pp, int cc, short s)
         {
-            return base.tif_decoderow(pp, cc, s);
+            return base.DecodeRow(pp, cc, s);
         }
 
         public virtual bool predictor_decodestrip(byte[] pp, int cc, short s)
         {
-            return base.tif_decodestrip(pp, cc, s);
+            return base.DecodeStrip(pp, cc, s);
         }
 
         public virtual bool predictor_decodetile(byte[] pp, int cc, short s)
         {
-            return base.tif_decodetile(pp, cc, s);
+            return base.DecodeTile(pp, cc, s);
         }
 
         public virtual bool predictor_setupencode()
         {
-            return base.tif_setupencode();
+            return base.SetupEncode();
         }
 
         public virtual bool predictor_encoderow(byte[] pp, int cc, short s)
         {
-            return base.tif_encoderow(pp, cc, s);
+            return base.EncodeRow(pp, cc, s);
         }
 
         public virtual bool predictor_encodestrip(byte[] pp, int cc, short s)
         {
-            return base.tif_encodestrip(pp, cc, s);
+            return base.EncodeStrip(pp, cc, s);
         }
 
         public virtual bool predictor_encodetile(byte[] pp, int cc, short s)
         {
-            return base.tif_encodetile(pp, cc, s);
+            return base.EncodeTile(pp, cc, s);
         }
 
         public Predictor GetPredictorValue()

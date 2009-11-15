@@ -245,13 +245,13 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_setupdecode()
+        public override bool SetupDecode()
         {
             // same for all types
             return setupState();
         }
 
-        public override bool tif_predecode(short s)
+        public override bool PreDecode(short s)
         {
             m_bit = 0; /* force initial read */
             m_data = 0;
@@ -276,7 +276,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, short s)
+        public override bool DecodeRow(byte[] pp, int cc, short s)
         {
             switch (m_decoder)
             {
@@ -293,23 +293,23 @@ namespace BitMiracle.LibTiff.Internal
             return false;
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, short s)
+        public override bool DecodeStrip(byte[] pp, int cc, short s)
         {
-            return tif_decoderow(pp, cc, s);
+            return DecodeRow(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, short s)
+        public override bool DecodeTile(byte[] pp, int cc, short s)
         {
-            return tif_decoderow(pp, cc, s);
+            return DecodeRow(pp, cc, s);
         }
 
-        public override bool tif_setupencode()
+        public override bool SetupEncode()
         {
             // same for all types
             return setupState();
         }
 
-        public override bool tif_preencode(short s)
+        public override bool PreEncode(short s)
         {
             m_bit = 8;
             m_data = 0;
@@ -355,7 +355,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_postencode()
+        public override bool PostEncode()
         {
             if (m_encodingFax4)
                 return Fax4PostEncode();
@@ -363,7 +363,7 @@ namespace BitMiracle.LibTiff.Internal
             return Fax3PostEncode();
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, short s)
+        public override bool EncodeRow(byte[] pp, int cc, short s)
         {
             if (m_encodingFax4)
                 return Fax4Encode(pp, cc);
@@ -371,17 +371,17 @@ namespace BitMiracle.LibTiff.Internal
             return Fax3Encode(pp, cc);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, short s)
+        public override bool EncodeStrip(byte[] pp, int cc, short s)
         {
-            return tif_encoderow(pp, cc, s);
+            return EncodeRow(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, short s)
+        public override bool EncodeTile(byte[] pp, int cc, short s)
         {
-            return tif_encoderow(pp, cc, s);
+            return EncodeRow(pp, cc, s);
         }
 
-        public override void tif_close()
+        public override void Close()
         {
             if ((m_mode & FaxMode.NORTC) == 0)
             {
@@ -405,7 +405,7 @@ namespace BitMiracle.LibTiff.Internal
             }
         }
 
-        public override void tif_cleanup()
+        public override void Cleanup()
         {
             m_tif.m_tagmethods = m_tagMethods;
         }

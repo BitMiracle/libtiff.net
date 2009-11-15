@@ -294,7 +294,7 @@ namespace BitMiracle.LibTiff
                 Flush();
             }
 
-            m_currentCodec.tif_cleanup();
+            m_currentCodec.Cleanup();
             FreeDirectory();
 
             m_clientinfo = null;

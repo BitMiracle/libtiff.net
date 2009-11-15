@@ -91,22 +91,22 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_predecode(short s)
+        public override bool PreDecode(short s)
         {
             return ZIPPreDecode(s);
         }
 
-        public override bool tif_preencode(short s)
+        public override bool PreEncode(short s)
         {
             return ZIPPreEncode(s);
         }
 
-        public override bool tif_postencode()
+        public override bool PostEncode()
         {
             return ZIPPostEncode();
         }
 
-        public override void tif_cleanup()
+        public override void Cleanup()
         {
             ZIPCleanup();
         }
@@ -293,7 +293,7 @@ namespace BitMiracle.LibTiff.Internal
         private bool ZIPPreDecode(short s)
         {
             if ((m_state & ZSTATE_INIT_DECODE) == 0)
-                tif_setupdecode();
+                SetupDecode();
 
             m_stream.next_in = m_tif.m_rawdata;
             m_stream.next_in_index = 0;
@@ -307,7 +307,7 @@ namespace BitMiracle.LibTiff.Internal
         private bool ZIPPreEncode(short s)
         {
             if (m_state != ZSTATE_INIT_ENCODE)
-                tif_setupencode();
+                SetupEncode();
 
             m_stream.next_out = m_tif.m_rawdata;
             m_stream.next_out_index = 0;

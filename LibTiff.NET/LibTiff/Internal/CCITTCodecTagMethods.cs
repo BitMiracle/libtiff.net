@@ -19,7 +19,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class CCITTCodecTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
+        public override bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
@@ -64,7 +64,7 @@ namespace BitMiracle.LibTiff.Internal
                     Tiff.setString(out sp.m_faxdcs, ap[0].ToString());
                     break;
                 default:
-                    return base.vsetfield(tif, tag, ap);
+                    return base.SetField(tif, tag, ap);
             }
 
             TiffFieldInfo fip = tif.FieldWithTag(tag);
@@ -77,7 +77,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override FieldValue[] vgetfield(Tiff tif, TiffTag tag)
+        public override FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
             CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);
@@ -118,13 +118,13 @@ namespace BitMiracle.LibTiff.Internal
                     result[0].Set(sp.m_faxdcs);
                     break;
                 default:
-                    return base.vgetfield(tif, tag);
+                    return base.GetField(tif, tag);
             }
 
             return result;
         }
 
-        public override void printdir(Tiff tif, Stream fd, TiffPrintFlags flags)
+        public override void PrintDir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
             CCITTCodec sp = tif.m_currentCodec as CCITTCodec;
             Debug.Assert(sp != null);

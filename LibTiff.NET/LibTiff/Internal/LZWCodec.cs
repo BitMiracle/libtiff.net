@@ -153,22 +153,22 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_predecode(short s)
+        public override bool PreDecode(short s)
         {
             return LZWPreDecode(s);
         }
 
-        public override bool tif_preencode(short s)
+        public override bool PreEncode(short s)
         {
             return LZWPreEncode(s);
         }
 
-        public override bool tif_postencode()
+        public override bool PostEncode()
         {
             return LZWPostEncode();
         }
 
-        public override void tif_cleanup()
+        public override void Cleanup()
         {
             LZWCleanup();
         }
@@ -258,7 +258,7 @@ namespace BitMiracle.LibTiff.Internal
         private bool LZWPreDecode(short s)
         {
             if (m_dec_codetab == null)
-                tif_setupdecode();
+                SetupDecode();
 
             /*
              * Check for old bit-reversed codes.
@@ -275,7 +275,7 @@ namespace BitMiracle.LibTiff.Internal
                      * re-setup the predictor logic since we
                      * switched the basic decoder methods...
                      */
-                    tif_setupdecode();
+                    SetupDecode();
                     m_oldStyleCodeFound = true;
                 }
 
@@ -742,7 +742,7 @@ namespace BitMiracle.LibTiff.Internal
         private bool LZWPreEncode(short s)
         {
             if (m_enc_hashtab == null)
-                tif_setupencode();
+                SetupEncode();
 
             m_nbits = BITS_MIN;
             m_maxcode = CODE_MIN;

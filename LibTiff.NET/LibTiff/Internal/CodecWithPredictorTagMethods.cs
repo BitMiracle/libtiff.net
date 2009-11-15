@@ -19,7 +19,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class CodecWithPredictorTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
+        public override bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
@@ -35,12 +35,12 @@ namespace BitMiracle.LibTiff.Internal
 
             TiffTagMethods childMethods = sp.GetChildTagMethods();
             if (childMethods != null)
-                return childMethods.vsetfield(tif, tag, ap);
+                return childMethods.SetField(tif, tag, ap);
 
-            return base.vsetfield(tif, tag, ap);
+            return base.SetField(tif, tag, ap);
         }
 
-        public override FieldValue[] vgetfield(Tiff tif, TiffTag tag)
+        public override FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
@@ -55,12 +55,12 @@ namespace BitMiracle.LibTiff.Internal
 
             TiffTagMethods childMethods = sp.GetChildTagMethods();
             if (childMethods != null)
-                return childMethods.vgetfield(tif, tag);
+                return childMethods.GetField(tif, tag);
 
-            return base.vgetfield(tif, tag);
+            return base.GetField(tif, tag);
         }
 
-        public override void printdir(Tiff tif, Stream fd, TiffPrintFlags flags)
+        public override void PrintDir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
             CodecWithPredictor sp = tif.m_currentCodec as CodecWithPredictor;
             Debug.Assert(sp != null);
@@ -87,9 +87,9 @@ namespace BitMiracle.LibTiff.Internal
 
             TiffTagMethods childMethods = sp.GetChildTagMethods();
             if (childMethods != null)
-                childMethods.printdir(tif, fd, flags);
+                childMethods.PrintDir(tif, fd, flags);
             else
-                base.printdir(tif, fd, flags);
+                base.PrintDir(tif, fd, flags);
         }
     }
 }

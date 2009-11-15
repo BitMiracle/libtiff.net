@@ -789,7 +789,7 @@ namespace BitMiracle.LibTiff
             if ((m_flags & TIFF_POSTENCODE) != 0)
             {
                 m_flags &= ~TIFF_POSTENCODE;
-                if (!m_currentCodec.tif_postencode())
+                if (!m_currentCodec.PostEncode())
                     return false;
             }
 
@@ -804,7 +804,7 @@ namespace BitMiracle.LibTiff
         {
             TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
             if (fip != null && (isPseudoTag(tag) || fieldSet(fip.field_bit)))
-                return m_tagmethods.vgetfield(this, tag);
+                return m_tagmethods.GetField(this, tag);
             
             return null;
         }
@@ -1033,7 +1033,7 @@ namespace BitMiracle.LibTiff
             /*
              * Cleanup any previous compression state.
              */
-            m_currentCodec.tif_cleanup();
+            m_currentCodec.Cleanup();
             m_curdir++;
             TiffDirEntry[] dir;
             short dircount = fetchDirectory(m_nextdiroff, out dir, out m_nextdiroff);
@@ -1270,7 +1270,8 @@ namespace BitMiracle.LibTiff
                     if (dpIndex != -1 && dir[dpIndex].tdir_count == 1) 
                     {
                         m_dir.td_planarconfig = PlanarConfig.CONTIG;
-                        WarningExt(this, m_clientdata, "ReadDirectory", "Planarconfig tag value assumed incorrect, assuming data is contig instead of chunky");
+                        WarningExt(this, m_clientdata, "ReadDirectory",
+                            "Planarconfig tag value assumed incorrect, assuming data is contig instead of chunky");
                     }
                 }
             }
@@ -1384,11 +1385,9 @@ namespace BitMiracle.LibTiff
                         break;
                     case TiffTag.SMINSAMPLEVALUE:
                     case TiffTag.SMAXSAMPLEVALUE:
-                        {
-                            double dv;
-                            if (!fetchPerSampleAnys(dir[i], out dv) || !SetField(dir[i].tdir_tag, dv))
-                                return false;
-                        }
+                        double dv;
+                        if (!fetchPerSampleAnys(dir[i], out dv) || !SetField(dir[i].tdir_tag, dv))
+                            return false;
                         break;
                     case TiffTag.STRIPOFFSETS:
                     case TiffTag.TILEOFFSETS:
@@ -1451,21 +1450,20 @@ namespace BitMiracle.LibTiff
                         break;
                         /* BEGIN REV 4.0 COMPATIBILITY */
                     case TiffTag.OSUBFILETYPE:
+                        FileType ft = 0;
+                        switch ((OFileType)extractData(dir[i]))
                         {
-                            FileType v = 0;
-                            switch ((OFileType)extractData(dir[i]))
-                            {
-                                case OFileType.REDUCEDIMAGE:
-                                    v = FileType.REDUCEDIMAGE;
-                                    break;
-                                case OFileType.PAGE:
-                                    v = FileType.PAGE;
-                                    break;
-                            }
-
-                            if (v != 0)
-                                SetField(TiffTag.SUBFILETYPE, v);
+                            case OFileType.REDUCEDIMAGE:
+                                ft = FileType.REDUCEDIMAGE;
+                                break;
+                            case OFileType.PAGE:
+                                ft = FileType.PAGE;
+                                break;
                         }
+
+                        if (ft != 0)
+                            SetField(TiffTag.SUBFILETYPE, ft);
+
                         break;
                         /* END REV 4.0 COMPATIBILITY */
                     default:
@@ -2126,7 +2124,7 @@ namespace BitMiracle.LibTiff
         */
         public int DefaultStripSize(int request)
         {
-            return m_currentCodec.tif_defstripsize(request);
+            return m_currentCodec.DefStripSize(request);
         }
 
         /*
@@ -2137,7 +2135,7 @@ namespace BitMiracle.LibTiff
         */
         public void DefaultTileSize(ref int tw, ref int th)
         {
-            m_currentCodec.tif_deftilesize(ref tw, ref th);
+            m_currentCodec.DefTileSize(ref tw, ref th);
         }
         
         /*
@@ -2590,7 +2588,7 @@ namespace BitMiracle.LibTiff
              * means that the caller can only append to the directory
              * chain.
              */
-            m_currentCodec.tif_cleanup();
+            m_currentCodec.Cleanup();
             if ((m_flags & TIFF_MYBUFFER) != 0 && m_rawdata != null)
             {
                 m_rawdata = null;
@@ -2618,7 +2616,7 @@ namespace BitMiracle.LibTiff
         public bool SetField(TiffTag tag, params object[] ap)
         {
             if (okToChangeTag(tag))
-                return m_tagmethods.vsetfield(this, tag, FieldValue.FromParams(ap));
+                return m_tagmethods.SetField(this, tag, FieldValue.FromParams(ap));
             
             return false;
         }
@@ -3151,7 +3149,7 @@ namespace BitMiracle.LibTiff
                     printField(fd, fip, value_count, raw_data);
             }
 
-            m_tagmethods.printdir(this, fd, flags);
+            m_tagmethods.PrintDir(this, fd, flags);
 
             if ((flags & TiffPrintFlags.STRIPS) != 0 && fieldSet(FIELD.FIELD_STRIPOFFSETS))
             {
@@ -3177,7 +3175,7 @@ namespace BitMiracle.LibTiff
                 /*
                  * Decompress desired row into user buffer.
                  */
-                e = m_currentCodec.tif_decoderow(buf, m_scanlinesize, sample);
+                e = m_currentCodec.DecodeRow(buf, m_scanlinesize, sample);
 
                 /* we are now poised at the beginning of the next row */
                 m_row = row + 1;
@@ -3273,7 +3271,7 @@ namespace BitMiracle.LibTiff
                 m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
                 if ((m_flags & TIFF_CODERSETUP) == 0)
                 {
-                    if (!m_currentCodec.tif_setupencode())
+                    if (!m_currentCodec.SetupEncode())
                         return false;
 
                     m_flags |= TIFF_CODERSETUP;
@@ -3291,7 +3289,7 @@ namespace BitMiracle.LibTiff
                     m_curoff = 0;
                 }
 
-                if (!m_currentCodec.tif_preencode(sample))
+                if (!m_currentCodec.PreEncode(sample))
                     return false;
 
                 m_flags |= TIFF_POSTENCODE;
@@ -3317,7 +3315,7 @@ namespace BitMiracle.LibTiff
                 /*
                  * Seek forward to the desired row.
                  */
-                if (!m_currentCodec.tif_seek(row - m_row))
+                if (!m_currentCodec.Seek(row - m_row))
                     return false;
 
                 m_row = row;
@@ -3326,7 +3324,7 @@ namespace BitMiracle.LibTiff
             /* swab if needed - note that source buffer will be altered */
             postDecode(buf, m_scanlinesize);
 
-            bool status = m_currentCodec.tif_encoderow(buf, m_scanlinesize, sample);
+            bool status = m_currentCodec.EncodeRow(buf, m_scanlinesize, sample);
 
             /* we are now poised at the beginning of the next row */
             m_row = row + 1;
@@ -3609,23 +3607,21 @@ namespace BitMiracle.LibTiff
                     }
                     break;
                 case Photometric.SEPARATED:
+                    result = GetFieldDefaulted(TiffTag.INKSET);
+                    InkSet inkset = (InkSet)result[0].ToByte();
+                    if (inkset != InkSet.CMYK)
                     {
-                        result = GetFieldDefaulted(TiffTag.INKSET);
-                        InkSet inkset = (InkSet)result[0].ToByte();
-                        if (inkset != InkSet.CMYK)
-                        {
-                            emsg = string.Format(
-                                "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
-                            return false;
-                        }
-                        if (m_dir.td_samplesperpixel < 4)
-                        {
-                            emsg = string.Format("Sorry, can not handle separated image with {0}={1}",
-                                "Samples/pixel", m_dir.td_samplesperpixel);
-                            return false;
-                        }
-                        break;
+                        emsg = string.Format(
+                            "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
+                        return false;
                     }
+                    if (m_dir.td_samplesperpixel < 4)
+                    {
+                        emsg = string.Format("Sorry, can not handle separated image with {0}={1}",
+                            "Samples/pixel", m_dir.td_samplesperpixel);
+                        return false;
+                    }
+                    break;
                 case Photometric.LOGL:
                     if (m_dir.td_compression != Compression.SGILOG)
                     {
@@ -3871,7 +3867,7 @@ namespace BitMiracle.LibTiff
             byte[] tempBuf = new byte [size];
             Array.Copy(buf, offset, tempBuf, 0, size);
 
-            if (fillTile(tile) && m_currentCodec.tif_decodetile(tempBuf, size, (short)(tile / m_dir.td_stripsperimage)))
+            if (fillTile(tile) && m_currentCodec.DecodeTile(tempBuf, size, (short)(tile / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
                 Array.Copy(tempBuf, 0, buf, offset, size);
@@ -4001,7 +3997,7 @@ namespace BitMiracle.LibTiff
             byte[] tempBuf = new byte[size];
             Array.Copy(buf, offset, tempBuf, 0, size);
 
-            if (fillStrip(strip) && m_currentCodec.tif_decodestrip(tempBuf, size, (short)(strip / m_dir.td_stripsperimage)))
+            if (fillStrip(strip) && m_currentCodec.DecodeStrip(tempBuf, size, (short)(strip / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, size);
                 Array.Copy(tempBuf, 0, buf, offset, size);
@@ -4093,7 +4089,7 @@ namespace BitMiracle.LibTiff
             m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
             if ((m_flags & TIFF_CODERSETUP) == 0)
             {
-                if (!m_currentCodec.tif_setupencode())
+                if (!m_currentCodec.SetupEncode())
                     return -1;
 
                 m_flags |= TIFF_CODERSETUP;
@@ -4110,16 +4106,16 @@ namespace BitMiracle.LibTiff
 
             m_flags &= ~TIFF_POSTENCODE;
             short sample = (short)(strip / m_dir.td_stripsperimage);
-            if (!m_currentCodec.tif_preencode(sample))
+            if (!m_currentCodec.PreEncode(sample))
                 return -1;
 
             /* swab if needed - note that source buffer will be altered */
             postDecode(data, cc);
 
-            if (!m_currentCodec.tif_encodestrip(data, cc, sample))
+            if (!m_currentCodec.EncodeStrip(data, cc, sample))
                 return 0;
 
-            if (!m_currentCodec.tif_postencode())
+            if (!m_currentCodec.PostEncode())
                 return -1;
 
             if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
@@ -4231,7 +4227,7 @@ namespace BitMiracle.LibTiff
 
             if ((m_flags & TIFF_CODERSETUP) == 0)
             {
-                if (!m_currentCodec.tif_setupencode())
+                if (!m_currentCodec.SetupEncode())
                     return -1;
 
                 m_flags |= TIFF_CODERSETUP;
@@ -4239,7 +4235,7 @@ namespace BitMiracle.LibTiff
 
             m_flags &= ~TIFF_POSTENCODE;
             short sample = (short)(tile / m_dir.td_stripsperimage);
-            if (!m_currentCodec.tif_preencode(sample))
+            if (!m_currentCodec.PreEncode(sample))
                 return -1;
 
             /*
@@ -4253,10 +4249,10 @@ namespace BitMiracle.LibTiff
             /* swab if needed - note that source buffer will be altered */
             postDecode(data, cc);
 
-            if (!m_currentCodec.tif_encodetile(data, cc, sample))
+            if (!m_currentCodec.EncodeTile(data, cc, sample))
                 return 0;
 
-            if (!m_currentCodec.tif_postencode())
+            if (!m_currentCodec.PostEncode())
                 return -1;
 
             if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)

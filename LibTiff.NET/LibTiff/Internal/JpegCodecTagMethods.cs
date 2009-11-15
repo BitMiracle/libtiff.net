@@ -19,7 +19,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class JpegCodecTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
+        public override bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             JpegCodec sp = tif.m_currentCodec as JpegCodec;
             Debug.Assert(sp != null);
@@ -50,7 +50,7 @@ namespace BitMiracle.LibTiff.Internal
                     return true; /* pseudo tag */
 
                 case TiffTag.PHOTOMETRIC:
-                    bool ret_value = base.vsetfield(tif, tag, ap);
+                    bool ret_value = base.SetField(tif, tag, ap);
                     sp.JPEGResetUpsampled();
                     return ret_value;
 
@@ -62,7 +62,7 @@ namespace BitMiracle.LibTiff.Internal
                     /* mark the fact that we have a real ycbcrsubsampling! */
                     sp.m_ycbcrsampling_fetched = true;
                     /* should we be recomputing upsampling info here? */
-                    return base.vsetfield(tif, tag, ap);
+                    return base.SetField(tif, tag, ap);
                 
                 case TiffTag.FAXRECVPARAMS:
                     sp.m_recvparams = ap[0].ToInt();
@@ -81,7 +81,7 @@ namespace BitMiracle.LibTiff.Internal
                     break;
                 
                 default:
-                    return base.vsetfield(tif, tag, ap);
+                    return base.SetField(tif, tag, ap);
             }
 
             TiffFieldInfo fip = tif.FieldWithTag(tag);
@@ -94,7 +94,7 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override FieldValue[] vgetfield(Tiff tif, TiffTag tag)
+        public override FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
             JpegCodec sp = tif.m_currentCodec as JpegCodec;
             Debug.Assert(sp != null);
@@ -126,7 +126,7 @@ namespace BitMiracle.LibTiff.Internal
 
                 case TiffTag.YCBCRSUBSAMPLING:
                     JPEGFixupTestSubsampling(tif);
-                    return base.vgetfield(tif, tag);
+                    return base.GetField(tif, tag);
 
                 case TiffTag.FAXRECVPARAMS:
                     result = new FieldValue[1];
@@ -149,13 +149,13 @@ namespace BitMiracle.LibTiff.Internal
                     break;
 
                 default:
-                    return base.vgetfield(tif, tag);
+                    return base.GetField(tif, tag);
             }
 
             return result;
         }
 
-        public override void printdir(Tiff tif, Stream fd, TiffPrintFlags flags)
+        public override void PrintDir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
             JpegCodec sp = tif.m_currentCodec as JpegCodec;
             Debug.Assert(sp != null);

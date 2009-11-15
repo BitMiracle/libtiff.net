@@ -196,7 +196,7 @@ namespace BitMiracle.LibTiff
                 /*
                  * Seek forward to the desired row.
                  */
-                if (!m_currentCodec.tif_seek(row - m_row))
+                if (!m_currentCodec.Seek(row - m_row))
                     return false;
 
                 m_row = row;
@@ -259,7 +259,7 @@ namespace BitMiracle.LibTiff
         {
             if ((m_flags & TIFF_CODERSETUP) == 0)
             {
-                if (!m_currentCodec.tif_setupdecode())
+                if (!m_currentCodec.SetupDecode())
                     return false;
 
                 m_flags |= TIFF_CODERSETUP;
@@ -274,7 +274,7 @@ namespace BitMiracle.LibTiff
             else
                 m_rawcc = m_dir.td_stripbytecount[strip];
 
-            return m_currentCodec.tif_predecode((short)(strip / m_dir.td_stripsperimage));
+            return m_currentCodec.PreDecode((short)(strip / m_dir.td_stripsperimage));
         }
 
         /*
@@ -285,7 +285,7 @@ namespace BitMiracle.LibTiff
         {
             if ((m_flags & TIFF_CODERSETUP) == 0)
             {
-                if (!m_currentCodec.tif_setupdecode())
+                if (!m_currentCodec.SetupDecode())
                     return false;
 
                 m_flags |= TIFF_CODERSETUP;
@@ -300,7 +300,7 @@ namespace BitMiracle.LibTiff
             else
                 m_rawcc = m_dir.td_stripbytecount[tile];
 
-            return m_currentCodec.tif_predecode((short)(tile / m_dir.td_stripsperimage));
+            return m_currentCodec.PreDecode((short)(tile / m_dir.td_stripsperimage));
         }
 
         private bool checkRead(int tiles)

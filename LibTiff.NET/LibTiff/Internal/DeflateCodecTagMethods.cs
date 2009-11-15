@@ -20,7 +20,7 @@ namespace BitMiracle.LibTiff.Internal
 {
     class DeflateCodecTagMethods : TiffTagMethods
     {
-        public override bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
+        public override bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             DeflateCodec sp = tif.m_currentCodec as DeflateCodec;
             Debug.Assert(sp != null);
@@ -44,10 +44,10 @@ namespace BitMiracle.LibTiff.Internal
                     return true;
             }
 
-            return base.vsetfield(tif, tag, ap);
+            return base.SetField(tif, tag, ap);
         }
 
-        public override FieldValue[] vgetfield(Tiff tif, TiffTag tag)
+        public override FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
             DeflateCodec sp = tif.m_currentCodec as DeflateCodec;
             Debug.Assert(sp != null);
@@ -60,7 +60,7 @@ namespace BitMiracle.LibTiff.Internal
                     return result;
             }
 
-            return base.vgetfield(tif, tag);
+            return base.GetField(tif, tag);
         }
     }
 }

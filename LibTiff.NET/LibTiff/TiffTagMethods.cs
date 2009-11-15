@@ -32,7 +32,7 @@ namespace BitMiracle.LibTiff
         private const short DATATYPE_IEEEFP = 3;    /* !IEEE floating point data */
 
         /* tag set routine */
-        public virtual bool vsetfield(Tiff tif, TiffTag tag, FieldValue[] ap)
+        public virtual bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             const string module = "vsetfield";
 
@@ -95,7 +95,7 @@ namespace BitMiracle.LibTiff
                         if (td.td_compression == comp)
                             break;
 
-                        tif.m_currentCodec.tif_cleanup();
+                        tif.m_currentCodec.Cleanup();
                         tif.m_flags &= ~Tiff.TIFF_CODERSETUP;
                     }
                     /*
@@ -557,7 +557,7 @@ namespace BitMiracle.LibTiff
         }
 
         /* tag get routine */
-        public virtual FieldValue[] vgetfield(Tiff tif, TiffTag tag)
+        public virtual FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
             TiffDirectory td = tif.m_dir;
             FieldValue[] result = null;
@@ -862,7 +862,7 @@ namespace BitMiracle.LibTiff
         }
 
         /* directory print routine */
-        public virtual void printdir(Tiff tif, Stream fd, TiffPrintFlags flags)
+        public virtual void PrintDir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
         }
 

@@ -57,31 +57,31 @@ namespace BitMiracle.LibTiff
         // decode part
 
         /* called once before predecode */
-        public virtual bool tif_setupdecode()
+        public virtual bool SetupDecode()
         {
             return true;
         }
 
         /* pre-row/strip/tile decoding */
-        public virtual bool tif_predecode(short s)
+        public virtual bool PreDecode(short s)
         {
             return true;
         }
 
         /* scanline decoding routine */
-        public virtual bool tif_decoderow(byte[] pp, int cc, short s)
+        public virtual bool DecodeRow(byte[] pp, int cc, short s)
         {
             return noDecode("scanline");
         }
 
         /* strip decoding routine */
-        public virtual bool tif_decodestrip(byte[] pp, int cc, short s)
+        public virtual bool DecodeStrip(byte[] pp, int cc, short s)
         {
             return noDecode("strip");
         }
 
         /* tile decoding routine */
-        public virtual bool tif_decodetile(byte[] pp, int cc, short s)
+        public virtual bool DecodeTile(byte[] pp, int cc, short s)
         {
             return noDecode("tile");
         }
@@ -89,62 +89,63 @@ namespace BitMiracle.LibTiff
         // encode part
 
         /* called once before preencode */
-        public virtual bool tif_setupencode()
+        public virtual bool SetupEncode()
         {
             return true;
         }
 
         /* pre-row/strip/tile encoding */
-        public virtual bool tif_preencode(short s)
+        public virtual bool PreEncode(short s)
         {
             return true;
         }
 
         /* post-row/strip/tile encoding */
-        public virtual bool tif_postencode()
+        public virtual bool PostEncode()
         {
             return true;
         }
 
         /* scanline encoding routine */
-        public virtual bool tif_encoderow(byte[] pp, int cc, short s)
+        public virtual bool EncodeRow(byte[] pp, int cc, short s)
         {
             return noEncode("scanline");
         }
 
         /* strip encoding routine */
-        public virtual bool tif_encodestrip(byte[] pp, int cc, short s)
+        public virtual bool EncodeStrip(byte[] pp, int cc, short s)
         {
             return noEncode("strip");
         }
 
         /* tile encoding routine */
-        public virtual bool tif_encodetile(byte[] pp, int cc, short s)
+        public virtual bool EncodeTile(byte[] pp, int cc, short s)
         {
             return noEncode("tile");
         }
 
         /* cleanup-on-close routine */
-        public virtual void tif_close()
+        public virtual void Close()
         {
         }
 
         /* position within a strip routine
          * Seek forwards nrows in the current strip.
          */
-        public virtual bool tif_seek(int off)
+        public virtual bool Seek(int off)
         {
-            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Compression algorithm does not support random access");
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                "Compression algorithm does not support random access");
             return false;
         }
 
         /* cleanup state routine */
-        public virtual void tif_cleanup()
+        public virtual void Cleanup()
         {
         }
 
         /* calculate/constrain strip size */
-        public virtual int tif_defstripsize(int s)
+        public virtual int DefStripSize(int s)
         {
             if (s < 1)
             {
@@ -166,7 +167,7 @@ namespace BitMiracle.LibTiff
         }
 
         /* calculate/constrain tile size */
-        public virtual void tif_deftilesize(ref int tw, ref int th)
+        public virtual void DefTileSize(ref int tw, ref int th)
         {
             if (tw < 1)
                 tw = 256;

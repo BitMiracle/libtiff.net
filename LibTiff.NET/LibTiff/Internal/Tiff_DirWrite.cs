@@ -92,14 +92,14 @@ namespace BitMiracle.LibTiff
                 if ((m_flags & TIFF_POSTENCODE) != 0)
                 {
                     m_flags &= ~TIFF_POSTENCODE;
-                    if (!m_currentCodec.tif_postencode())
+                    if (!m_currentCodec.PostEncode())
                     {
                         ErrorExt(this, m_clientdata, m_name, "Error post-encoding before directory write");
                         return false;
                     }
                 }
 
-                m_currentCodec.tif_close(); /* shutdown encoder */
+                m_currentCodec.Close(); /* shutdown encoder */
                 
                 /*
                  * Flush any data that might have been written
@@ -414,7 +414,7 @@ namespace BitMiracle.LibTiff
             {
                 FreeDirectory();
                 m_flags &= ~TIFF_DIRTYDIRECT;
-                m_currentCodec.tif_cleanup();
+                m_currentCodec.Cleanup();
 
                 /*
                  * Reset directory-related state for subsequent

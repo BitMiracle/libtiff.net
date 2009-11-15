@@ -172,17 +172,17 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_setupdecode()
+        public override bool SetupDecode()
         {
             return JPEGSetupDecode();
         }
 
-        public override bool tif_predecode(short s)
+        public override bool PreDecode(short s)
         {
             return JPEGPreDecode(s);
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, short s)
+        public override bool DecodeRow(byte[] pp, int cc, short s)
         {
             if (m_rawDecode)
                 return JPEGDecodeRaw(pp, cc, s);
@@ -190,7 +190,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGDecode(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, short s)
+        public override bool DecodeStrip(byte[] pp, int cc, short s)
         {
             if (m_rawDecode)
                 return JPEGDecodeRaw(pp, cc, s);
@@ -198,7 +198,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGDecode(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, short s)
+        public override bool DecodeTile(byte[] pp, int cc, short s)
         {
             if (m_rawDecode)
                 return JPEGDecodeRaw(pp, cc, s);
@@ -206,22 +206,22 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGDecode(pp, cc, s);
         }
 
-        public override bool tif_setupencode()
+        public override bool SetupEncode()
         {
             return JPEGSetupEncode();
         }
 
-        public override bool tif_preencode(short s)
+        public override bool PreEncode(short s)
         {
             return JPEGPreEncode(s);
         }
 
-        public override bool tif_postencode()
+        public override bool PostEncode()
         {
             return JPEGPostEncode();
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, short s)
+        public override bool EncodeRow(byte[] pp, int cc, short s)
         {
             if (m_rawEncode)
                 return JPEGEncodeRaw(pp, cc, s);
@@ -229,7 +229,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGEncode(pp, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, short s)
+        public override bool EncodeStrip(byte[] pp, int cc, short s)
         {
             if (m_rawEncode)
                 return JPEGEncodeRaw(pp, cc, s);
@@ -237,7 +237,7 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGEncode(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, short s)
+        public override bool EncodeTile(byte[] pp, int cc, short s)
         {
             if (m_rawEncode)
                 return JPEGEncodeRaw(pp, cc, s);
@@ -245,17 +245,17 @@ namespace BitMiracle.LibTiff.Internal
             return JPEGEncode(pp, cc, s);
         }
 
-        public override void tif_cleanup()
+        public override void Cleanup()
         {
             JPEGCleanup();
         }
 
-        public override int tif_defstripsize(int s)
+        public override int DefStripSize(int s)
         {
             return JPEGDefaultStripSize(s);
         }
 
-        public override void tif_deftilesize(ref int tw, ref int th)
+        public override void DefTileSize(ref int tw, ref int th)
         {
             JPEGDefaultTileSize(ref tw, ref th);
         }
@@ -1401,7 +1401,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private int JPEGDefaultStripSize(int s)
         {
-            base.tif_defstripsize(s);
+            base.DefStripSize(s);
             if (s < m_tif.m_dir.td_imagelength)
                 s = Tiff.roundUp(s, m_tif.m_dir.td_ycbcrsubsampling[1] * JpegConstants.DCTSIZE);
 
@@ -1410,7 +1410,7 @@ namespace BitMiracle.LibTiff.Internal
 
         private void JPEGDefaultTileSize(ref int tw, ref int th)
         {
-            base.tif_deftilesize(ref tw, ref th);
+            base.DefTileSize(ref tw, ref th);
             tw = Tiff.roundUp(tw, m_tif.m_dir.td_ycbcrsubsampling[0] * JpegConstants.DCTSIZE);
             th = Tiff.roundUp(th, m_tif.m_dir.td_ycbcrsubsampling[1] * JpegConstants.DCTSIZE);
         }

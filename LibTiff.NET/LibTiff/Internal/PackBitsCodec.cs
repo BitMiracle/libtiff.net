@@ -51,37 +51,37 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, short s)
+        public override bool DecodeRow(byte[] pp, int cc, short s)
         {
             return PackBitsDecode(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, short s)
+        public override bool DecodeStrip(byte[] pp, int cc, short s)
         {
             return PackBitsDecode(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, short s)
+        public override bool DecodeTile(byte[] pp, int cc, short s)
         {
             return PackBitsDecode(pp, cc, s);
         }
 
-        public override bool tif_preencode(short s)
+        public override bool PreEncode(short s)
         {
             return PackBitsPreEncode(s);
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, short s)
+        public override bool EncodeRow(byte[] pp, int cc, short s)
         {
             return PackBitsEncode(pp, 0, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, short s)
+        public override bool EncodeStrip(byte[] pp, int cc, short s)
         {
             return PackBitsEncodeChunk(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, short s)
+        public override bool EncodeTile(byte[] pp, int cc, short s)
         {
             return PackBitsEncodeChunk(pp, cc, s);
         }

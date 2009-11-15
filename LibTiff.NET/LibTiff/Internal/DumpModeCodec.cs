@@ -42,37 +42,37 @@ namespace BitMiracle.LibTiff.Internal
             return true;
         }
 
-        public override bool tif_decoderow(byte[] pp, int cc, short s)
+        public override bool DecodeRow(byte[] pp, int cc, short s)
         {
             return DumpModeDecode(pp, cc, s);
         }
 
-        public override bool tif_decodestrip(byte[] pp, int cc, short s)
+        public override bool DecodeStrip(byte[] pp, int cc, short s)
         {
             return DumpModeDecode(pp, cc, s);
         }
 
-        public override bool tif_decodetile(byte[] pp, int cc, short s)
+        public override bool DecodeTile(byte[] pp, int cc, short s)
         {
             return DumpModeDecode(pp, cc, s);
         }
 
-        public override bool tif_encoderow(byte[] pp, int cc, short s)
+        public override bool EncodeRow(byte[] pp, int cc, short s)
         {
             return DumpModeEncode(pp, cc, s);
         }
 
-        public override bool tif_encodestrip(byte[] pp, int cc, short s)
+        public override bool EncodeStrip(byte[] pp, int cc, short s)
         {
             return DumpModeEncode(pp, cc, s);
         }
 
-        public override bool tif_encodetile(byte[] pp, int cc, short s)
+        public override bool EncodeTile(byte[] pp, int cc, short s)
         {
             return DumpModeEncode(pp, cc, s);
         }
 
-        public override bool tif_seek(int off)
+        public override bool Seek(int off)
         {
             m_tif.m_rawcp += off * m_tif.m_scanlinesize;
             m_tif.m_rawcc -= off * m_tif.m_scanlinesize;
