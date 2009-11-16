@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{310BCEF5-3549-48F7-8827-444B6A23D3EF}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Tiff2Pdf2</RootNamespace>
+    <AssemblyName>Tiff2Pdf2</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Array.cs" />
+    <Compile Include="BinaryObject.cs" />
+    <Compile Include="BooleanObject.cs" />
+    <Compile Include="CompressionType.cs" />
+    <Compile Include="Dictionary.cs" />
+    <Compile Include="DictionaryOwner.cs" />
+    <Compile Include="DictionaryStream.cs" />
+    <Compile Include="DocumentCatalog.cs" />
+    <Compile Include="DocumentInfo.cs" />
+    <Compile Include="Field.cs" />
+    <Compile Include="FileWriterStream.cs" />
+    <Compile Include="Filter.cs" />
+    <Compile Include="IDictionaryOwner.cs" />
+    <Compile Include="IObjectOwner.cs" />
+    <Compile Include="IObjectRegistrator.cs" />
+    <Compile Include="Limit.cs" />
+    <Compile Include="MemoryStream.cs" />
+    <Compile Include="MyErrorHandler.cs" />
+    <Compile Include="MyStream.cs" />
+    <Compile Include="NameObject.cs" />
+    <Compile Include="NumberObject.cs" />
+    <Compile Include="Object.cs" />
+    <Compile Include="PageCollection.cs" />
+    <Compile Include="PDFDocument.cs" />
+    <Compile Include="PdfException.cs" />
+    <Compile Include="PdfExceptionType.cs" />
+    <Compile Include="PDFPage.cs" />
+    <Compile Include="PDFUtils.cs" />
+    <Compile Include="PDFVersion.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawString.cs" />
+    <Compile Include="RealObject.cs" />
+    <Compile Include="Rect.cs" />
+    <Compile Include="Stream.cs" />
+    <Compile Include="StringObject.cs" />
+    <Compile Include="StringUtils.cs" />
+    <Compile Include="T2P.cs" />
+    <Compile Include="Types.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="XRefTable.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LibTiff\LibTiff.csproj">
+      <Project>{281EF657-40C0-432D-8AC4-E9ADDFD792B2}</Project>
+      <Name>LibTiff</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

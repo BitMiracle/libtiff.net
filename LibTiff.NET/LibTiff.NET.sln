@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Pdf", "Tiff2Pdf\Tiff2P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Pdf2", "Tiff2Pdf2\Tiff2Pdf2.csproj", "{310BCEF5-3549-48F7-8827-444B6A23D3EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{310BCEF5-3549-48F7-8827-444B6A23D3EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{310BCEF5-3549-48F7-8827-444B6A23D3EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{310BCEF5-3549-48F7-8827-444B6A23D3EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{310BCEF5-3549-48F7-8827-444B6A23D3EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
