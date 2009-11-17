@@ -143,6 +143,7 @@ namespace BitMiracle.Tiff2Pdf
 
         private Tiff m_output;
         private PDFDocumentImpl m_pdf = null;
+        private DictionaryStream[] m_imageParts = null;
 
         internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
 
@@ -294,7 +295,7 @@ namespace BitMiracle.Tiff2Pdf
                         m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
                         written += write_pdf_obj_start(m_pdf_xrefcount);
                         written += write_pdf_stream_dict_start();
-                        written += write_pdf_xobject_stream_dict(i2 + 1);
+                        fillPartDict(m_imageParts[i2], i2 + 1);
                         written += write_pdf_stream_dict_end();
                         written += write_pdf_stream_start();
                         int streamlen = written;
@@ -318,7 +319,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
                     written += write_pdf_obj_start(m_pdf_xrefcount);
                     written += write_pdf_stream_dict_start();
-                    written += write_pdf_xobject_stream_dict(0);
+                    fillPartDict(m_imageParts[0], 0);
                     written += write_pdf_stream_dict_end();
                     written += write_pdf_stream_start();
                     int streamlen = written;
@@ -2513,17 +2514,16 @@ namespace BitMiracle.Tiff2Pdf
             m_pdf_colorspace = m_pdf_colorspace | t2p_cs_t.T2P_CS_ICCBASED;
         }
 
-        /*
-        This function writes a PDF Image XObject Decode array to output.
-        */
-        private int write_pdf_xobject_decode()
+        private PDFArray getImageDecodeArray()
         {
-            int written = writeToFile("/Decode [ ");
+            PDFArray decodeArray = new PDFArray();
             for (int i = 0; i < m_tiff_samplesperpixel; i++)
-                written += writeToFile("1 0 ");
+            {
+                decodeArray.AddNumber(1);
+                decodeArray.AddNumber(0);
+            }
          
-            written += writeToFile("]\n");
-            return written;
+            return decodeArray;
         }
         
         /*
@@ -2597,166 +2597,116 @@ namespace BitMiracle.Tiff2Pdf
             return written;
         }
         
-        /*
-        This function writes a PDF Image XObject stream dictionary to output. 
-        */
-        private int write_pdf_xobject_stream_dict(int tile)
+        private void fillPartDict(DictionaryStream imageObj, int tile)
         {
-            int written = write_pdf_stream_dict(0, m_pdf_xrefcount + 1);
-            written += writeToFile("/Type /XObject \n/Subtype /Image \n/Name /Im");
+            imageObj.AddName("Type", "XObject");
+            imageObj.AddName("Subtype", "Image");
 
-            string buffer = string.Format("{0}", m_pdf_page + 1);
-            written += writeToFile(buffer);
-            if (tile != 0)
-            {
-                written += writeToFile("_");
-                buffer = string.Format("{0}", tile);
-                written += writeToFile(buffer);
-            }
+            string buffer = null;
+            if (tile == 0)
+                buffer = string.Format("Im{0}", m_pdf_page + 1);
+            else
+                buffer = string.Format("Im{0}_{1}", m_pdf_page + 1, tile);
+            imageObj.AddName("Name", buffer);
 
-            written += writeToFile("\n/Width ");
             if (tile == 0)
             {
-                buffer = string.Format("{0}", m_tiff_width);
+                imageObj.AddNumber("Width", m_tiff_width);
             }
             else
             {
                 if (tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile - 1))
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
+                    imageObj.AddNumber("Width", m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
                 else
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilewidth);
+                    imageObj.AddNumber("Width", m_tiff_tiles[m_pdf_page].tiles_tilewidth);
             }
 
-            written += writeToFile(buffer);
-            written += writeToFile("\n/Height ");
             if (tile == 0)
             {
-                buffer = string.Format("{0}", m_tiff_length);
+                imageObj.AddNumber("Height", m_tiff_length);
             }
             else
             {
                 if (tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile - 1))
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
+                    imageObj.AddNumber("Height", m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
                 else
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                    imageObj.AddNumber("Height", m_tiff_tiles[m_pdf_page].tiles_tilelength);
             }
 
-            written += writeToFile(buffer);
-            written += writeToFile("\n/BitsPerComponent ");
-            buffer = string.Format("{0}", m_tiff_bitspersample);
-            written += writeToFile(buffer);
-            written += writeToFile("\n/ColorSpace ");
-            //written += getColorSpaceObject();
+            imageObj.AddNumber("BitsPerComponent", m_tiff_bitspersample);
+            imageObj.Add("ColorSpace", getColorSpaceObject());
 
             if (m_pdf_image_interpolate)
-                written += writeToFile("\n/Interpolate true");
-            
-            if (m_pdf_switchdecode && !(m_pdf_colorspace == t2p_cs_t.T2P_CS_BILEVEL && m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4))
-                written += write_pdf_xobject_decode();
+                imageObj.AddBoolean("Interpolate", true);
 
-            written += write_pdf_xobject_stream_filter(tile);
-            return written;
+            if (m_pdf_switchdecode &&
+                !(m_pdf_colorspace == t2p_cs_t.T2P_CS_BILEVEL &&
+                m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4))
+            {
+                imageObj.Add("Decode", getImageDecodeArray());
+            }
+
+            addPartStreamFilter(imageObj, tile);
         }
         
-        /*
-        This function writes a PDF Image XObject stream filter name and parameters to 
-        output.
-        */
-        private int write_pdf_xobject_stream_filter(int tile)
+        private void addPartStreamFilter(DictionaryStream imageObj, int tile)
         {
             if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_NONE)
-                return 0;
+                return;
          
-            int written = writeToFile("/Filter ");
-            string buffer = null;
+            PDFDictionary decodeParams = new PDFDictionary();
 
             switch (m_pdf_compression)
             {
                 case t2p_compress_t.T2P_COMPRESS_G4:
-                    written += writeToFile("/CCITTFaxDecode ");
-                    written += writeToFile("/DecodeParms ");
-                    written += writeToFile("<< /K -1 ");
+                    imageObj.AddName("Filter", "CCITTFaxDecode");
+                    imageObj.Add("DecodeParms", decodeParams);
+
+                    decodeParams.AddNumber("K", -1);
                     
                     if (tile == 0)
                     {
-                        written += writeToFile("/Columns ");
-                        buffer = string.Format("{0}", m_tiff_width);
-                        written += writeToFile(buffer);
-                        written += writeToFile(" /Rows ");
-                        buffer = string.Format("{0}", m_tiff_length);
-                        written += writeToFile(buffer);
+                        decodeParams.AddNumber("Columns", m_tiff_width);
+                        decodeParams.AddNumber("Rows", m_tiff_length);
                     }
                     else
                     {
                         if (!tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile - 1))
-                        {
-                            written += writeToFile("/Columns ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilewidth);
-                            written += writeToFile(buffer);
-                        }
+                            decodeParams.AddNumber("Columns", m_tiff_tiles[m_pdf_page].tiles_tilewidth);
                         else
-                        {
-                            written += writeToFile("/Columns ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
-                            written += writeToFile(buffer);
-                        }
+                            decodeParams.AddNumber("Columns", m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
 
                         if (!tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile - 1))
-                        {
-                            written += writeToFile(" /Rows ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilelength);
-                            written += writeToFile(buffer);
-                        }
+                            decodeParams.AddNumber("Rows", m_tiff_tiles[m_pdf_page].tiles_tilelength);
                         else
-                        {
-                            written += writeToFile(" /Rows ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
-                            written += writeToFile(buffer);
-                        }
+                            decodeParams.AddNumber("Rows", m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
                     }
 
                     if (!m_pdf_switchdecode)
-                        written += writeToFile(" /BlackIs1 true ");
-
-                    written += writeToFile(">>\n");
+                        decodeParams.AddBoolean("BlackIs1", true);
                     break;
                 
                 case t2p_compress_t.T2P_COMPRESS_JPEG:
-                    written += writeToFile("/DCTDecode ");
-
+                    imageObj.AddName("Filter", "DCTDecode");
                     if (m_tiff_photometric != Photometric.YCBCR)
                     {
-                        written += writeToFile("/DecodeParms ");
-                        written += writeToFile("<< /ColorTransform 0 >>\n");
+                        imageObj.Add("DecodeParms", decodeParams);
+                        decodeParams.AddNumber("ColorTransform", 0);
                     }
                     break;
 
                 case t2p_compress_t.T2P_COMPRESS_ZIP:
-                    written += writeToFile("/FlateDecode ");
+                    imageObj.AddName("Filter", "FlateDecode");
                     if ((m_pdf_defaultcompressionquality % 100) != 0)
                     {
-                        written += writeToFile("/DecodeParms ");
-                        written += writeToFile("<< /Predictor ");
-                        buffer = string.Format("{0}", m_pdf_defaultcompressionquality % 100);
-                        written += writeToFile(buffer);
-                        written += writeToFile(" /Columns ");
-                        buffer = string.Format("{0}", m_tiff_width);
-                        written += writeToFile(buffer);
-                        written += writeToFile(" /Colors ");
-                        buffer = string.Format("{0}", m_tiff_samplesperpixel);
-                        written += writeToFile(buffer);
-                        written += writeToFile(" /BitsPerComponent ");
-                        buffer = string.Format("{0}", m_tiff_bitspersample);
-                        written += writeToFile(buffer);
-                        written += writeToFile(">>\n");
+                        imageObj.Add("DecodeParms", decodeParams);
+                        decodeParams.AddNumber("Predictor", m_pdf_defaultcompressionquality % 100);
+                        decodeParams.AddNumber("Columns", m_tiff_width);
+                        decodeParams.AddNumber("Colors", m_tiff_samplesperpixel);
+                        decodeParams.AddNumber("BitsPerComponent", m_tiff_bitspersample);
                     }
                     break;
-
-                default:
-                    break;
             }
-
-            return written;
         }
         
         private void addPageContent(PDFPage page)
@@ -3336,18 +3286,23 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_tiff_tiles[m_pdf_page].tiles_tilecount != 0)
             {
+                m_imageParts = new DictionaryStream[m_tiff_tiles[m_pdf_page].tiles_tilecount];
+
                 for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
                 {
                     string imageName = string.Format("Im{0}_{1}", m_pdf_page + 1, i + 1);
-                    DictionaryStream imageStream = new DictionaryStream();
-                    xobjectDict.Add(imageName, imageStream);
+                    DictionaryStream tile = new DictionaryStream();
+                    xobjectDict.Add(imageName, tile);
+                    m_imageParts[i] = tile;
                 }
             }
             else
             {
+                m_imageParts = new DictionaryStream[1];
                 string imageName = string.Format("Im{0}", m_pdf_page + 1);
-                DictionaryStream imageStream = new DictionaryStream();
-                xobjectDict.Add(imageName, imageStream);
+                DictionaryStream image = new DictionaryStream();
+                xobjectDict.Add(imageName, image);
+                m_imageParts[0] = image;
             }
 
             if (m_tiff_transferfunctioncount != 0)
