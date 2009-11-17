@@ -2501,7 +2501,8 @@ namespace BitMiracle.Tiff2Pdf
                 Y_W = 1.0F;
                 buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
                 written += writeToFile(buffer);
-                
+
+                written += writeToFile("/BlackPoint ");
                 X_W = 0.3457F; /* 0.3127F; */ /* D50, commented D65 */
                 Y_W = 0.3585F; /* 0.3290F; */
                 Z_W = 1.0F - (X_W + Y_W);
