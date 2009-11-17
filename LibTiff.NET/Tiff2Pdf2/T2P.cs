@@ -111,6 +111,7 @@ namespace BitMiracle.Tiff2Pdf
         private int m_pdf_catalog;
         private int m_pdf_info;
         private int m_pdf_palettecs;
+        private DictionaryStream m_paletteObject = null;
         
         private int m_pdf_startxref;
         private byte[] m_pdf_fileid;
@@ -135,6 +136,8 @@ namespace BitMiracle.Tiff2Pdf
         
         private short m_tiff_transferfunctioncount;
         private int m_pdf_icccs;
+        private DictionaryStream m_iccObject = null;
+
         private int m_tiff_iccprofilelength;
         private byte[] m_tiff_iccprofile;
 
@@ -264,59 +267,24 @@ namespace BitMiracle.Tiff2Pdf
                 fillPageProperties(page);
                 addPageContent(page);
 
-                if (m_tiff_transferfunctioncount != 0)
-                {
-                    m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
-                    written += write_pdf_obj_start(m_pdf_xrefcount);
-                    written += write_pdf_transfer();
-                    written += write_pdf_obj_end();
-                    
-                    for (short i = 0; i < m_tiff_transferfunctioncount; i++)
-                    {
-                        m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
-                        written += write_pdf_obj_start(m_pdf_xrefcount);
-                        written += write_pdf_stream_dict_start();
-                        written += write_pdf_transfer_dict();
-                        written += write_pdf_stream_dict_end();
-                        written += write_pdf_stream_start();
-                        int streamlen = written;
-                        written += write_pdf_transfer_stream(i);
-                        streamlen = written - streamlen;
-                        written += write_pdf_stream_end();
-                        written += write_pdf_obj_end();
-                    }
-                }
-
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_PALETTE) != 0)
                 {
-                    m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
+                    m_paletteObject = new DictionaryStream();
                     m_pdf_palettecs = m_pdf_xrefcount;
-                    written += write_pdf_obj_start(m_pdf_xrefcount);
-                    written += write_pdf_stream_dict_start();
-                    written += write_pdf_stream_dict(m_pdf_palettesize, 0);
-                    written += write_pdf_stream_dict_end();
-                    written += write_pdf_stream_start();
-                    int streamlen = written;
-                    written += write_pdf_xobject_palettecs_stream();
-                    streamlen = written - streamlen;
-                    written += write_pdf_stream_end();
-                    written += write_pdf_obj_end();
+
+                    PDFStream paletteStream = m_paletteObject.GetStream();
+                    paletteStream.Write(m_pdf_palette, m_pdf_palettesize);
                 }
 
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_ICCBASED) != 0)
                 {
-                    m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
                     m_pdf_icccs = m_pdf_xrefcount;
-                    written += write_pdf_obj_start(m_pdf_xrefcount);
-                    written += write_pdf_stream_dict_start();
-                    written += write_pdf_xobject_icccs_dict();
-                    written += write_pdf_stream_dict_end();
-                    written += write_pdf_stream_start();
-                    int streamlen = written;
-                    written += write_pdf_xobject_icccs_stream();
-                    streamlen = written - streamlen;
-                    written += write_pdf_stream_end();
-                    written += write_pdf_obj_end();
+
+                    m_iccObject = new DictionaryStream();
+                    addICCProperties(m_iccObject);
+
+                    PDFStream iccStream = m_iccObject.GetStream();
+                    iccStream.Write(m_tiff_iccprofile, m_tiff_iccprofilelength);
                 }
 
                 if (m_tiff_tiles[m_pdf_page].tiles_tilecount != 0)
@@ -2278,147 +2246,169 @@ namespace BitMiracle.Tiff2Pdf
             }
         }
         
-        /*
-        * 	This function writes a PDF Image XObject Colorspace name to output.
-        */
-        private int write_pdf_xobject_cs()
+        private PDFObject getColorSpaceObject()
         {
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_ICCBASED) != 0)
-                return write_pdf_xobject_icccs();
-
-            int written = 0;
-            string buffer = null;
+                return getICCObject();
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_PALETTE) != 0)
             {
-                written += writeToFile("[ /Indexed ");
-                m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace ^ t2p_cs_t.T2P_CS_PALETTE);
-                written += write_pdf_xobject_cs();
-                m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace | t2p_cs_t.T2P_CS_PALETTE);
-                buffer = string.Format("{0}", (0x0001 << m_tiff_bitspersample) - 1);
-                written += writeToFile(buffer);
-                written += writeToFile(" ");
-                buffer = string.Format("{0}", m_pdf_palettecs);
-                written += writeToFile(buffer);
-                written += writeToFile(" 0 R ]\n");
-                return written;
+                PDFArray paletteArray = new PDFArray();
+                paletteArray.AddName("Indexed");
+                
+                m_pdf_colorspace = m_pdf_colorspace ^ t2p_cs_t.T2P_CS_PALETTE;
+                paletteArray.Add(getColorSpaceObject());
+                m_pdf_colorspace = m_pdf_colorspace | t2p_cs_t.T2P_CS_PALETTE;
+
+                paletteArray.Add(m_paletteObject);
+                return paletteArray;
             }
 
+            PDFArray csArray = new PDFArray();
+
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_BILEVEL) != 0)
-                written += writeToFile("/DeviceGray \n");
+                csArray.AddName("DeviceGray");
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_GRAY) != 0)
             {
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALGRAY) != 0)
-                    written += write_pdf_xobject_calcs();
+                    csArray.Add(getCalibratedColorSpace());
                 else
-                    written += writeToFile("/DeviceGray \n");
+                    csArray.AddName("DeviceGray");
             }
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_RGB) != 0)
             {
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALRGB) != 0)
-                    written += write_pdf_xobject_calcs();
+                    csArray.Add(getCalibratedColorSpace());
                 else
-                    written += writeToFile("/DeviceRGB \n");
+                    csArray.AddName("DeviceRGB");
             }
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CMYK) != 0)
-                written += writeToFile("/DeviceCMYK \n");
+                csArray.AddName("DeviceCMYK");
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_LAB) != 0)
             {
-                written += writeToFile("[/Lab << \n");
-                written += writeToFile("/WhitePoint ");
-                
+                PDFArray labArray = new PDFArray();
+                labArray.AddName("Lab");
+
+                PDFDictionary labDict = new PDFDictionary();
+
                 float X_W = m_tiff_whitechromaticities[0];
                 float Y_W = m_tiff_whitechromaticities[1];
                 float Z_W = 1.0F - (X_W + Y_W);
                 X_W /= Y_W;
                 Z_W /= Y_W;
                 Y_W = 1.0F;
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
-                written += writeToFile(buffer);
-                
+
+                PDFArray wpArray = new PDFArray();
+                wpArray.AddReal(X_W);
+                wpArray.AddReal(Y_W);
+                wpArray.AddReal(Z_W);
+                labDict.Add("WhitePoint", wpArray);
+
                 X_W = 0.3457F; /* 0.3127F; */ /* D50, commented D65 */
                 Y_W = 0.3585F; /* 0.3290F; */
                 Z_W = 1.0F - (X_W + Y_W);
                 X_W /= Y_W;
                 Z_W /= Y_W;
                 Y_W = 1.0F;
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
-                written += writeToFile(buffer);
-                written += writeToFile("/Range ");
-                buffer = string.Format("[{0} {1} {2} {3}] \n", m_pdf_labrange[0], m_pdf_labrange[1], m_pdf_labrange[2], m_pdf_labrange[3]);
-                written += writeToFile(buffer);
-                written += writeToFile(">>] \n");
+
+                PDFArray bpArray = new PDFArray();
+                bpArray.AddReal(X_W);
+                bpArray.AddReal(Y_W);
+                bpArray.AddReal(Z_W);
+                labDict.Add("BlackPoint", wpArray);
+
+                PDFArray range = new PDFArray();
+                range.AddNumber(m_pdf_labrange[0]);
+                range.AddNumber(m_pdf_labrange[1]);
+                range.AddNumber(m_pdf_labrange[2]);
+                range.AddNumber(m_pdf_labrange[3]);
+                labDict.Add("Range", range);
+
+                labArray.Add(labDict);
+                csArray.Add(labArray);
             }
 
-            return written;
+            if (csArray.GetItemCount() == 1)
+                return csArray.GetItem(0);
+
+            return csArray;
         }
         
-        private int write_pdf_transfer()
+        private void fillTransferDict(PDFDictionary transDict)
         {
-            string buffer = null;
-            int written = writeToFile("<< /Type /ExtGState \n/TR ");
+            transDict.AddName("Type", "ExtGState");
 
+            DictionaryStream[] functions = new DictionaryStream[3];
             if (m_tiff_transferfunctioncount == 1)
             {
-                buffer = string.Format("{0}", m_pdf_xrefcount + 1);
-                written += writeToFile(buffer);
-                written += writeToFile(" 0 R ");
+                functions[0] = new DictionaryStream();
+                transDict.Add("TR", functions[0]);
             }
             else
             {
-                written += writeToFile("[ ");
-                buffer = string.Format("{0}", m_pdf_xrefcount + 1);
-                written += writeToFile(buffer);
-                written += writeToFile(" 0 R ");
-                buffer = string.Format("{0}", m_pdf_xrefcount + 2);
-                written += writeToFile(buffer);
-                written += writeToFile(" 0 R ");
-                buffer = string.Format("{0}", m_pdf_xrefcount + 3);
-                written += writeToFile(buffer);
-                written += writeToFile(" 0 R ");
-                written += writeToFile("/Identity ] ");
+                PDFArray functionArray = new PDFArray();
+                transDict.Add("TR", functionArray);
+
+                functions[0] = new DictionaryStream();
+                functionArray.Add(functions[0]);
+
+                functions[1] = new DictionaryStream();
+                functionArray.Add(functions[1]);
+
+                functions[2] = new DictionaryStream();
+                functionArray.Add(functions[2]);
+
+                functionArray.AddName("Identity");
             }
 
-            written += writeToFile(" >> \n");
-            return written;
+            for (short i = 0; i < m_tiff_transferfunctioncount; i++)
+            {
+                DictionaryStream function = functions[i];
+                fillTransferFunction(function);
+
+                PDFStream funcstream = function.GetStream();
+                funcstream.Write(m_tiff_transferfunction[i], 1 << (m_tiff_bitspersample + 1));
+            }
         }
 
-        private int write_pdf_transfer_dict()
+        private void fillTransferFunction(DictionaryStream function)
         {
-            int written = writeToFile("/FunctionType 0 \n");
-            written += writeToFile("/Domain [0.0 1.0] \n");
-            written += writeToFile("/Range [0.0 1.0] \n");
+            function.AddNumber("FunctionType", 0);
 
-            string buffer = string.Format("/Size [{0}] \n", (1 << m_tiff_bitspersample));
-            written += writeToFile(buffer);
-            written += writeToFile("/BitsPerSample 16 \n");
-            written += write_pdf_stream_dict(1 << (m_tiff_bitspersample + 1), 0);
+            PDFArray domain = new PDFArray();
+            domain.MakeDirect();
+            domain.AddReal(0);
+            domain.AddReal(1);
+            function.Add("Domain", domain);
 
-            return written;
+            PDFArray range = new PDFArray();
+            range.MakeDirect();
+            range.AddReal(0);
+            range.AddReal(1);
+            function.Add("Range", domain);
+
+            PDFArray size = new PDFArray();
+            size.MakeDirect();
+            size.AddNumber(1 << m_tiff_bitspersample);
+            function.Add("Size", size);
+
+            function.AddNumber("BitsPerSample", 16);
         }
 
-        private int write_pdf_transfer_stream(short i)
+        private PDFArray getCalibratedColorSpace()
         {
-            return write_pdf_stream(m_tiff_transferfunction[i], (1 << (m_tiff_bitspersample + 1)));
-        }
-        
-        /*
-        This function writes a PDF Image XObject Colorspace array to output.
-        */
-        private int write_pdf_xobject_calcs()
-        {
-            int written = writeToFile("[");
+            PDFArray csArray = new PDFArray();
 
             float X_W = 0.0f;
             float Y_W = 0.0f;
             float Z_W = 0.0f;    
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALGRAY) != 0)
             {
-                written += writeToFile("/CalGray ");
+                csArray.AddName("CalGray");
                 X_W = m_tiff_whitechromaticities[0];
                 Y_W = m_tiff_whitechromaticities[1];
                 Z_W = 1.0F - (X_W + Y_W);
@@ -2438,7 +2428,7 @@ namespace BitMiracle.Tiff2Pdf
             float Z_B = 0.0f;
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALRGB) != 0)
             {
-                written += writeToFile("/CalRGB ");
+                csArray.AddName("CalRGB");
                 float x_w = m_tiff_whitechromaticities[0];
                 float y_w = m_tiff_whitechromaticities[1];
                 float x_r = m_tiff_primarychromaticities[0];
@@ -2470,70 +2460,59 @@ namespace BitMiracle.Tiff2Pdf
                 Y_W = 1.0f;
             }
 
-            written += writeToFile("<< \n");
-            
-            string buffer = null;
+            PDFDictionary csDict = new PDFDictionary();
+
+            PDFArray wpArray = new PDFArray();
+            wpArray.AddReal(X_W);
+            wpArray.AddReal(Y_W);
+            wpArray.AddReal(Z_W);
+            csDict.Add("WhitePoint", wpArray);
+
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALGRAY) != 0)
-            {
-                written += writeToFile("/WhitePoint ");
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
-                written += writeToFile(buffer);
-                written += writeToFile("/Gamma 2.2 \n");
-            }
+                csDict.AddReal("Gamma", 2.2f);
 
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALRGB) != 0)
             {
-                written += writeToFile("/WhitePoint ");
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
-                written += writeToFile(buffer);
-                written += writeToFile("/Matrix ");
-                
-                buffer = string.Format(CultureInfo.InvariantCulture,
-                    "[{0:N4} {1:N4} {2:N4} {3:N4} {4:N4} {5:N4} {6:N4} {7:N4} {8:N4}] \n",
-                    X_R, Y_R, Z_R, X_G, Y_G, Z_G, X_B, Y_B, Z_B);
-                written += writeToFile(buffer);
+                PDFArray matrix = new PDFArray();
+                matrix.AddReal(X_R);
+                matrix.AddReal(Y_R);
+                matrix.AddReal(Z_R);
+                matrix.AddReal(X_G);
+                matrix.AddReal(Y_G);
+                matrix.AddReal(Z_G);
+                matrix.AddReal(X_B);
+                matrix.AddReal(Y_B);
+                matrix.AddReal(Z_B);
+                csDict.Add("Matrix", matrix);
 
-                written += writeToFile("/Gamma [2.2 2.2 2.2] \n");
+                PDFArray gamma = new PDFArray();
+                gamma.AddReal(2.2f);
+                gamma.AddReal(2.2f);
+                gamma.AddReal(2.2f);
+                csDict.Add("Gamma", gamma);
             }
 
-            written += writeToFile(">>] \n");
-            return written;
+            csArray.Add(csDict);
+            return csArray;
         }
         
-        /*
-        This function writes a PDF Image XObject Colorspace array to output.
-        */
-        private int write_pdf_xobject_icccs()
+        private PDFArray getICCObject()
         {
-            int written = writeToFile("[/ICCBased ");
-
-            string buffer = string.Format("{0}", m_pdf_icccs);
-            written += writeToFile(buffer);
-            written += writeToFile(" 0 R] \n");
-
-            return written;
+            PDFArray iccArray = new PDFArray();
+            iccArray.AddName("ICCBased");
+            iccArray.Add(new DictionaryStream());
+            return iccArray;
         }
         
-        private int write_pdf_xobject_icccs_dict()
+        private void addICCProperties(DictionaryStream iccDict)
         {
-            int written = writeToFile("/N ");
+            iccDict.AddNumber("N", m_tiff_samplesperpixel);
 
-            string buffer = string.Format("{0} \n", m_tiff_samplesperpixel);
-            written += writeToFile(buffer);
-            written += writeToFile("/Alternate ");
-            m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace ^ t2p_cs_t.T2P_CS_ICCBASED);
-            written += write_pdf_xobject_cs();
-            m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace | t2p_cs_t.T2P_CS_ICCBASED);
-            written += write_pdf_stream_dict(m_tiff_iccprofilelength, 0);
-
-            return written;
+            m_pdf_colorspace = m_pdf_colorspace ^ t2p_cs_t.T2P_CS_ICCBASED;
+            iccDict.Add("Alternate", getColorSpaceObject());
+            m_pdf_colorspace = m_pdf_colorspace | t2p_cs_t.T2P_CS_ICCBASED;
         }
 
-        private int write_pdf_xobject_icccs_stream()
-        {
-            return write_pdf_stream(m_tiff_iccprofile, m_tiff_iccprofilelength);
-        }
-        
         /*
         This function writes a PDF Image XObject Decode array to output.
         */
@@ -2667,7 +2646,7 @@ namespace BitMiracle.Tiff2Pdf
             buffer = string.Format("{0}", m_tiff_bitspersample);
             written += writeToFile(buffer);
             written += writeToFile("\n/ColorSpace ");
-            written += write_pdf_xobject_cs();
+            //written += getColorSpaceObject();
 
             if (m_pdf_image_interpolate)
                 written += writeToFile("\n/Interpolate true");
@@ -3378,6 +3357,7 @@ namespace BitMiracle.Tiff2Pdf
 
                 PDFDictionary extGStateObj = new PDFDictionary();
                 extGStateDict.Add("GS1", extGStateObj);
+                fillTransferDict(extGStateObj);                
             }
 
             PDFArray procSetArray = new PDFArray();
