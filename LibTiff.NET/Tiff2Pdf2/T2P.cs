@@ -108,13 +108,8 @@ namespace BitMiracle.Tiff2Pdf
         private float m_pdf_imagelength;
         private T2P_BOX m_pdf_mediabox = new T2P_BOX();
         private T2P_BOX m_pdf_imagebox = new T2P_BOX();
-        private int m_pdf_catalog;
-        private int m_pdf_info;
         private int m_pdf_palettecs;
         private DictionaryStream m_paletteObject = null;
-        
-        private int m_pdf_startxref;
-        private byte[] m_pdf_fileid;
         
         private t2p_cs_t m_pdf_colorspace;
         
@@ -252,8 +247,6 @@ namespace BitMiracle.Tiff2Pdf
             m_pdf_xrefoffsets = new int [m_pdf_xrefcount];
             m_output = output;
             m_pdf_xrefcount = 0;
-            m_pdf_catalog = 1;
-            m_pdf_info = 2;
 
             fillPdfInfo(input);
 
@@ -292,57 +285,26 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     for (int i2 = 0; i2 < m_tiff_tiles[m_pdf_page].tiles_tilecount; i2++)
                     {
-                        m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
-                        written += write_pdf_obj_start(m_pdf_xrefcount);
-                        written += write_pdf_stream_dict_start();
                         fillPartDict(m_imageParts[i2], i2 + 1);
-                        written += write_pdf_stream_dict_end();
-                        written += write_pdf_stream_start();
-                        int streamlen = written;
                         read_tiff_size_tile(input, i2);
-                        written += readwrite_pdf_image_tile(input, i2);
+                        readwrite_pdf_image_tile(input, i2);
                         write_advance_directory();
                         if (m_error)
                             return 0;
-
-                        streamlen = written - streamlen;
-                        written += write_pdf_stream_end();
-                        written += write_pdf_obj_end();
-                        m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
-                        written += write_pdf_obj_start(m_pdf_xrefcount);
-                        written += write_pdf_stream_length(streamlen);
-                        written += write_pdf_obj_end();
                     }
                 }
                 else
                 {
-                    m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
-                    written += write_pdf_obj_start(m_pdf_xrefcount);
-                    written += write_pdf_stream_dict_start();
                     fillPartDict(m_imageParts[0], 0);
-                    written += write_pdf_stream_dict_end();
-                    written += write_pdf_stream_start();
-                    int streamlen = written;
                     read_tiff_size(input);
-                    written += readwrite_pdf_image(input);
+                    readwrite_pdf_image(input);
                     write_advance_directory();
-                    
                     if (m_error)
                         return 0;
-
-                    streamlen = written - streamlen;
-                    written += write_pdf_stream_end();
-                    written += write_pdf_obj_end();
-                    m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
-                    written += write_pdf_obj_start(m_pdf_xrefcount);
-                    written += write_pdf_stream_length(streamlen);
-                    written += write_pdf_obj_end();
                 }
             }
 
-            m_pdf_startxref = written;
-            written += write_pdf_xreftable();
-            written += write_pdf_trailer();
+            setFileIDs();
             disable(output);
             m_pdf.Save("c:\\downloads\\test.pdf");
             return written;
@@ -1336,7 +1298,8 @@ namespace BitMiracle.Tiff2Pdf
                     for (int i = 0; i < stripcount; i++)
                     {
                         int striplength = input.ReadRawStrip(i, stripbuffer, 0, -1);
-                        if (!process_jpeg_strip(stripbuffer, striplength, buffer, ref bufferoffset, i, m_tiff_length))
+                        if (!process_jpeg_strip(stripbuffer, striplength, 
+                            buffer, ref bufferoffset, i, m_tiff_length))
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Can't process JPEG data in input file {0}", input.FileName());
@@ -1375,8 +1338,6 @@ namespace BitMiracle.Tiff2Pdf
             else
             {
                 byte[] samplebuffer = null;
-                bool dataready = false;
-
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG) != 0)
                 {
                     int sepstripsize = input.StripSize();
@@ -1392,7 +1353,9 @@ namespace BitMiracle.Tiff2Pdf
                         int samplebufferoffset = 0;
                         for (int j = 0; j < m_tiff_samplesperpixel; j++)
                         {
-                            int read = input.ReadEncodedStrip(i + j * stripcount, samplebuffer, samplebufferoffset, sepstripsize);
+                            int read = input.ReadEncodedStrip(i + j * stripcount,
+                                samplebuffer, samplebufferoffset, sepstripsize);
+
                             if (read == -1)
                             {
                                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
@@ -1404,14 +1367,13 @@ namespace BitMiracle.Tiff2Pdf
                             samplebufferoffset += read;
                         }
 
-                        sample_planar_separate_to_contig(buffer, bufferoffset, samplebuffer, samplebufferoffset);
+                        sample_planar_separate_to_contig(buffer, bufferoffset,
+                            samplebuffer, samplebufferoffset);
+
                         bufferoffset += samplebufferoffset;
                     }
-
-                    dataready = true;
                 }
-
-                if (!dataready)
+                else
                 {
                     buffer = new byte [m_tiff_datasize];
                     stripsize = input.StripSize();
@@ -1432,7 +1394,9 @@ namespace BitMiracle.Tiff2Pdf
 
                     if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_REALIZE_PALETTE) != 0)
                     {
-                        samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_datasize * m_tiff_samplesperpixel);
+                        samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize,
+                            m_tiff_datasize * m_tiff_samplesperpixel);
+
                         buffer = samplebuffer;
                         m_tiff_datasize *= m_tiff_samplesperpixel;
                         sample_realize_palette(buffer);
@@ -1450,7 +1414,8 @@ namespace BitMiracle.Tiff2Pdf
                         buffer = samplebuffer;
 
                         int[] buffer32 = Tiff.ByteArrayToInts(buffer, 0, m_tiff_width * m_tiff_length * 4);
-                        if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, Orientation.TOPLEFT, false))
+                        if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length,
+                            buffer32, Orientation.TOPLEFT, false))
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Can't use ReadRGBAImageOriented to extract RGB image from {0}",
@@ -1581,38 +1546,38 @@ namespace BitMiracle.Tiff2Pdf
             edge |= tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile);
             edge |= tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile);
 
-            byte[] buffer = null;
-            int bufferoffset = 0;
             FieldValue[] result = null;
 
-            if ((m_pdf_transcode == t2p_transcode_t.T2P_TRANSCODE_RAW) && (!edge || (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_JPEG)))
+            if (m_pdf_transcode == t2p_transcode_t.T2P_TRANSCODE_RAW && 
+                (!edge || m_pdf_compression == t2p_compress_t.T2P_COMPRESS_JPEG))
             {
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4)
                 {
-                    buffer = new byte [m_tiff_datasize];
-                    input.ReadRawTile(tile, buffer, 0, m_tiff_datasize);
+                    byte[] g4buffer = new byte[m_tiff_datasize];
+                    input.ReadRawTile(tile, g4buffer, 0, m_tiff_datasize);
                     if (m_tiff_fillorder == FillOrder.LSB2MSB)
-                        Tiff.ReverseBits(buffer, m_tiff_datasize);
+                        Tiff.ReverseBits(g4buffer, m_tiff_datasize);
 
-                    writeToFile(buffer, m_tiff_datasize);
+                    writeToFile(g4buffer, m_tiff_datasize);
                     return m_tiff_datasize;
                 }
                 
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_ZIP)
                 {
-                    buffer = new byte [m_tiff_datasize];
-                    input.ReadRawTile(tile, buffer, 0, m_tiff_datasize);
+                    byte[] zipBuffer = new byte[m_tiff_datasize];
+                    input.ReadRawTile(tile, zipBuffer, 0, m_tiff_datasize);
                     if (m_tiff_fillorder == FillOrder.LSB2MSB)
-                        Tiff.ReverseBits(buffer, m_tiff_datasize);
+                        Tiff.ReverseBits(zipBuffer, m_tiff_datasize);
 
-                    writeToFile(buffer, m_tiff_datasize);
+                    writeToFile(zipBuffer, m_tiff_datasize);
                     return m_tiff_datasize;
                 }
                 
                 if (m_tiff_compression == Compression.JPEG)
                 {
                     byte[] table_end = new byte[2];
-                    buffer = new byte [m_tiff_datasize];
+                    byte[] jpegBuffer = new byte[m_tiff_datasize];
+                    int jpegBufferOffset = 0;
                     result = input.GetField(TiffTag.JPEGTABLES);
                     if (result != null)
                     {
@@ -1620,30 +1585,29 @@ namespace BitMiracle.Tiff2Pdf
                         byte[] jpt = result[1].ToByteArray();
                         if (count > 0)
                         {
-                            Array.Copy(jpt, buffer, count);
-                            bufferoffset += count - 2;
-                            table_end[0] = buffer[bufferoffset - 2];
-                            table_end[1] = buffer[bufferoffset - 1];
-                        }
+                            Array.Copy(jpt, jpegBuffer, count);
+                            jpegBufferOffset += count - 2;
+                            table_end[0] = jpegBuffer[jpegBufferOffset - 2];
+                            table_end[1] = jpegBuffer[jpegBufferOffset - 1];
 
-                        if (count > 0)
-                        {
-                            int xuint32 = bufferoffset;
-                            bufferoffset += input.ReadRawTile(tile, buffer, bufferoffset - 2, -1);
-                            buffer[xuint32 - 2] = table_end[0];
-                            buffer[xuint32 - 1] = table_end[1];
+                            int xuint32 = jpegBufferOffset;
+                            jpegBufferOffset += input.ReadRawTile(tile, jpegBuffer, jpegBufferOffset - 2, -1);
+                            jpegBuffer[xuint32 - 2] = table_end[0];
+                            jpegBuffer[xuint32 - 1] = table_end[1];
                         }
                         else
                         {
-                            bufferoffset += input.ReadRawTile(tile, buffer, bufferoffset, -1);
+                            jpegBufferOffset += input.ReadRawTile(tile, jpegBuffer, jpegBufferOffset, -1);
                         }
                     }
 
-                    writeToFile(buffer, bufferoffset);
-                    return bufferoffset;
+                    writeToFile(jpegBuffer, jpegBufferOffset);
+                    return jpegBufferOffset;
                 }
             }
 
+            byte[] buffer = null;
+            int bufferoffset = 0;
             if (m_pdf_sample == t2p_sample_t.T2P_SAMPLE_NOTHING)
             {
                 buffer = new byte [m_tiff_datasize];
@@ -1668,7 +1632,9 @@ namespace BitMiracle.Tiff2Pdf
                     int samplebufferoffset = 0;
                     for (short i = 0; i < m_tiff_samplesperpixel; i++)
                     {
-                        int read = input.ReadEncodedTile(tile + i * tilecount, samplebuffer, samplebufferoffset, septilesize);
+                        int read = input.ReadEncodedTile(tile + i * tilecount, 
+                            samplebuffer, samplebufferoffset, septilesize);
+
                         if (read == -1)
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
@@ -1684,8 +1650,7 @@ namespace BitMiracle.Tiff2Pdf
                     sample_planar_separate_to_contig(buffer, bufferoffset, samplebuffer, samplebufferoffset);
                     bufferoffset += samplebufferoffset;
                 }
-
-                if (buffer == null)
+                else
                 {
                     buffer = new byte [m_tiff_datasize];
                     int read = input.ReadEncodedTile(tile, buffer, bufferoffset, m_tiff_datasize);
@@ -1700,10 +1665,16 @@ namespace BitMiracle.Tiff2Pdf
                 }
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_RGBA_TO_RGB) != 0)
-                    m_tiff_datasize = sample_rgba_to_rgb(buffer, m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                {
+                    m_tiff_datasize = sample_rgba_to_rgb(buffer,
+                        m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                }
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_RGBAA_TO_RGB) != 0)
-                    m_tiff_datasize = sample_rgbaa_to_rgb(buffer, m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                {
+                    m_tiff_datasize = sample_rgbaa_to_rgb(buffer,
+                        m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                }
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_YCBCR_TO_RGB) != 0)
                 {
@@ -1714,11 +1685,19 @@ namespace BitMiracle.Tiff2Pdf
                 }
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED) != 0)
-                    m_tiff_datasize = sample_lab_signed_to_unsigned(buffer, m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                {
+                    m_tiff_datasize = sample_lab_signed_to_unsigned(buffer,
+                        m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                }
             }
 
             if (tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile))
-                tile_collapse_left(buffer, input.TileRowSize(), m_tiff_tiles[m_pdf_page].tiles_tilewidth, m_tiff_tiles[m_pdf_page].tiles_edgetilewidth, m_tiff_tiles[m_pdf_page].tiles_tilelength);
+            {
+                tile_collapse_left(buffer, input.TileRowSize(),
+                    m_tiff_tiles[m_pdf_page].tiles_tilewidth,
+                    m_tiff_tiles[m_pdf_page].tiles_edgetilewidth,
+                    m_tiff_tiles[m_pdf_page].tiles_tilelength);
+            }
 
             disable(m_output);
             m_output.SetField(TiffTag.PHOTOMETRIC, m_tiff_photometric);
@@ -1775,7 +1754,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
                     
                     m_output.SetField(TiffTag.COMPRESSION, Compression.JPEG);
-                    m_output.SetField(TiffTag.JPEGTABLESMODE, 0); /* JpegTablesMode.NONE */
+                    m_output.SetField(TiffTag.JPEGTABLESMODE, JpegTablesMode.NONE);
 
                     if ((m_pdf_colorspace & (t2p_cs_t.T2P_CS_RGB | t2p_cs_t.T2P_CS_LAB)) != 0)
                     {
@@ -2526,75 +2505,23 @@ namespace BitMiracle.Tiff2Pdf
             return decodeArray;
         }
         
-        /*
-        This function writes a PDF xref table to output.
-        */
-        private int write_pdf_xreftable()
+        private void setFileIDs()
         {
-            int written = writeToFile("xref\n0 ");
-    
-            string buffer = string.Format("{0}", m_pdf_xrefcount + 1);
-            written += writeToFile(buffer);
-            written += writeToFile(" \n0000000000 65535 f \n");
-            for (int i = 0; i < m_pdf_xrefcount; i++)
-            {
-                buffer = string.Format("{0:D10} 00000 n \n", m_pdf_xrefoffsets[i]);
-                written += writeToFile(buffer);
-            }
-
-            return written;
-        }
-        
-        /*
-        * This function writes a PDF trailer to output.
-        */
-        private int write_pdf_trailer()
-        {
-            m_pdf_fileid = new byte [33];
+            byte[] pdfFileId = new byte[16];
 
             if (m_testFriendly)
             {
                 string fileidbuf = "2900000023480000FF180000FF670000";
                 for (int i = 0; i < 16; i++)
-                {
-                    m_pdf_fileid[2 * i] = (byte)(fileidbuf[2 * i]);
-                    m_pdf_fileid[2 * i + 1] = (byte)(fileidbuf[2 * i + 1]);
-                }
+                    pdfFileId[i] = Convert.ToByte(fileidbuf.Substring(2 * i, 2), 16);
             }
             else
             {
                 Random rnd = new Random(DateTime.Now.Millisecond);
-                byte[] temp = new byte[16];
-                rnd.NextBytes(temp);
-
-                for (int i = 0; i < 16; i++)
-                {
-                    string s = string.Format("{0:X2}", temp[i]);
-                    m_pdf_fileid[i * 2] = (byte)s[0];
-                    m_pdf_fileid[i * 2 + 1] = (byte)s[1];
-                }
+                rnd.NextBytes(pdfFileId);
             }
 
-            int written = writeToFile("trailer\n<<\n/Size ");
-
-            string buffer = string.Format("{0}", m_pdf_xrefcount + 1);
-            written += writeToFile(buffer);
-            written += writeToFile("\n/Root ");
-            buffer = string.Format("{0}", m_pdf_catalog);
-            written += writeToFile(buffer);
-            written += writeToFile(" 0 R \n/Info ");
-            buffer = string.Format("{0}", m_pdf_info);
-            written += writeToFile(buffer);
-            written += writeToFile(" 0 R \n/ID[<");
-            written += writeToFile(m_pdf_fileid, 32);
-            written += writeToFile("><");
-            written += writeToFile(m_pdf_fileid, 32);
-            written += writeToFile(">]\n>>\nstartxref\n");
-            buffer = string.Format("{0}", m_pdf_startxref);
-            written += writeToFile(buffer);
-            written += writeToFile("\n%%EOF\n");
-
-            return written;
+            m_pdf.SetTrailerID(pdfFileId);
         }
         
         private void fillPartDict(DictionaryStream imageObj, int tile)
@@ -2742,14 +2669,6 @@ namespace BitMiracle.Tiff2Pdf
             }
         }
         
-        /*
-        This function writes a palette stream for an indexed color space to output.
-        */
-        private int write_pdf_xobject_palettecs_stream()
-        {
-            return write_pdf_stream(m_pdf_palette, m_pdf_palettesize);
-        }
-
         /*
         * This functions returns a non-zero value when the tile is on the right edge
         * and does not have full imaged tile width.
@@ -2975,61 +2894,6 @@ namespace BitMiracle.Tiff2Pdf
             return string.Format(@"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);
         }
 
-        /*
-        This function writes a PDF string object to output.
-        */
-        private int write_pdf_string(byte[] pdfstr)
-        {
-            int written = writeToFile("(");
-            int len = strlen(pdfstr);
-            for (int i = 0; i < len; i++)
-            {
-                if ((pdfstr[i] & 0x80) != 0 || (pdfstr[i] == 127) || (pdfstr[i] < 32))
-                {
-                    string buffer = string.Format("{0}", encodeOctalString(pdfstr[i]));
-                    written += writeToFile(buffer);
-                }
-                else
-                {
-                    switch (pdfstr[i])
-                    {
-                        case 0x08:
-                            written += writeToFile("\\b");
-                            break;
-                        case 0x09:
-                            written += writeToFile("\\t");
-                            break;
-                        case 0x0A:
-                            written += writeToFile("\\n");
-                            break;
-                        case 0x0C:
-                            written += writeToFile("\\f");
-                            break;
-                        case 0x0D:
-                            written += writeToFile("\\r");
-                            break;
-                        case 0x28:
-                            written += writeToFile("\\(");
-                            break;
-                        case 0x29:
-                            written += writeToFile("\\)");
-                            break;
-                        case 0x5C:
-                            written += writeToFile("\\\\");
-                            break;
-                        default:
-                            byte[] b = new byte[1];
-                            b[0] = pdfstr[i];
-                            written += writeToFile(b, 1);
-                            break;
-                    }
-                }
-            }
-
-            written += writeToFile(")");
-            return written;
-        }
-        
         private static void compose_pdf_page_orient(T2P_BOX boxp, Orientation orientation)
         {
             if (boxp.x1 > boxp.x2)
@@ -3177,96 +3041,6 @@ namespace BitMiracle.Tiff2Pdf
             }
         }
 
-        /*
-        This function writes a buffer of data to output.
-        */
-        private int write_pdf_stream(byte[] buffer, int len)
-        {
-            return writeToFile(buffer, len);
-        }
-        
-        /*
-        This functions writes the beginning of a PDF stream to output.
-        */
-        private int write_pdf_stream_start()
-        {
-            return writeToFile("stream\n");
-        }
-
-        /*
-        This function writes the end of a PDF stream to output. 
-        */
-        private int write_pdf_stream_end()
-        {
-            return writeToFile("\nendstream\n");
-        }
-        
-        /*
-        This function writes a stream dictionary for a PDF stream to output.
-        */
-        private int write_pdf_stream_dict(int len, int number)
-        {
-            int written = writeToFile("/Length ");
-            if (len != 0)
-            {
-                written += write_pdf_stream_length(len);
-            }
-            else
-            {
-                string buffer = string.Format("{0}", number);
-                written += writeToFile(buffer);
-                written += writeToFile(" 0 R \n");
-            }
-
-            return written;
-        }
-
-        /*
-        This functions writes the beginning of a PDF stream dictionary to output.
-        */
-        private int write_pdf_stream_dict_start()
-        {
-            return writeToFile("<< \n");
-        }
-        
-        /*
-        This function writes the end of a PDF stream dictionary to output. 
-        */
-        private int write_pdf_stream_dict_end()
-        {
-            return writeToFile(" >>\n");
-        }
-        
-        /*
-        This function writes a number to output.
-        */
-        private int write_pdf_stream_length(int len)
-        {
-            string buffer = string.Format("{0}", len);
-            int written = writeToFile(buffer);
-            written += writeToFile("\n");
-            return written;
-        }
-
-        /*
-        This function writes the beginning of a PDF object to output.
-        */
-        private int write_pdf_obj_start(int number)
-        {
-            string buffer = string.Format("{0}", number);
-            int written = writeToFile(buffer);
-            written += writeToFile(" 0 obj\n");
-            return written;
-        }
-
-        /*
-        This function writes the end of a PDF object to output.
-        */
-        private int write_pdf_obj_end()
-        {
-            return writeToFile("endobj\n");
-        }
-        
         private void fillPageProperties(PDFPage page)
         {
             PDFArray mediaBox = new PDFArray();
@@ -3345,12 +3119,6 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             return -1;
-        }
-
-        private int writeToFile(string data)
-        {
-            byte[] bytes = Latin1Encoding.GetBytes(data);
-            return writeToFile(bytes, bytes.Length);
         }
     }
 }

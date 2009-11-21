@@ -94,6 +94,11 @@ namespace BitMiracle.Docotic.PDFLib
 	        }
         }
 
+        public void SetTrailerID(byte[] pID)
+        {
+            m_xref.SetTrailerID(pID);
+        }
+
 	    private static void removeFile(string fileName)
         {
             try

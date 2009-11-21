@@ -289,6 +289,7 @@ namespace BitMiracle.LibTiff
 #endif
     enum JpegTablesMode
     {
+        NONE = 0,
         QUANT = 0x0001,     /* include quantization tbls */
         HUFF = 0x0002,      /* include Huffman tbls */
     };
