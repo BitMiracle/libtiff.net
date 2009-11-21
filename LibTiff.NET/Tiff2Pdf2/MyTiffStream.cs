@@ -18,7 +18,7 @@ using BitMiracle.LibTiff;
 
 namespace BitMiracle.Tiff2Pdf
 {
-    class MyStream : TiffStream
+    class MyTiffStream : TiffStream
     {
         public override int Read(object fd, byte[] buf, int offset, int size)
         {
@@ -27,25 +27,22 @@ namespace BitMiracle.Tiff2Pdf
 
         public override void Write(object fd, byte[] buf, int size)
         {
-            T2P t2p = fd as T2P;
-            if (t2p == null)
+            Converter c = fd as Converter;
+            if (c == null)
                 throw new ArgumentException();
 
-            if (!t2p.m_outputdisable && t2p.m_outputfile != null)
-            {
-                t2p.m_outputfile.Write(buf, 0, size);
-                t2p.m_outputwritten += size;
-            }
+            if (!c.m_outputdisable && c.m_outputfile != null)
+                c.m_outputfile.Write(buf, 0, size);
         }
 
         public override long Seek(object fd, long off, SeekOrigin whence)
         {
-            T2P t2p = fd as T2P;
-            if (t2p == null)
+            Converter c = fd as Converter;
+            if (c == null)
                 throw new ArgumentException();
 
-            if (!t2p.m_outputdisable && t2p.m_outputfile != null)
-                return t2p.m_outputfile.Seek(off, whence);
+            if (!c.m_outputdisable && c.m_outputfile != null)
+                return c.m_outputfile.Seek(off, whence);
 
             return off;
         }

@@ -42,13 +42,15 @@ namespace BitMiracle.Tiff2Pdf
     }
 
     /// <summary>
-    /// This is the context of a function to generate PDF from a TIFF.
+    /// Converts given TIFF to PDF.
     /// </summary>
-    class T2P
+    class Converter
     {
-        public bool m_testFriendly = false;
-        public bool m_error;
+        private static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
 
+        private bool m_testFriendly = false;
+        private bool m_error;
+        
         public t2p_compress_t m_pdf_defaultcompression;
         public short m_pdf_defaultcompressionquality;
 
@@ -67,20 +69,19 @@ namespace BitMiracle.Tiff2Pdf
         public float m_pdf_defaultpagewidth;
         public float m_pdf_defaultpagelength;
 
-        public byte[] m_pdf_datetime;
-        public byte[] m_pdf_creator;
-        public byte[] m_pdf_author;
-        public byte[] m_pdf_title;
-        public byte[] m_pdf_subject;
-        public byte[] m_pdf_keywords;
+        public string m_pdf_datetime = null;
+        public string m_pdf_creator = null;
+        public string m_pdf_author = null;
+        public string m_pdf_title = null;
+        public string m_pdf_subject = null;
+        public string m_pdf_keywords = null;
 
         /* fields for custom read/write procedures */
         public Stream m_outputfile;
         public bool m_outputdisable;
-        public int m_outputwritten;
 
         public MyErrorHandler m_errorHandler;
-        public MyStream m_stream;
+        public MyTiffStream m_stream;
 
         private T2P_PAGE[] m_tiff_pages;
         private T2P_TILES[] m_tiff_tiles;
@@ -108,7 +109,6 @@ namespace BitMiracle.Tiff2Pdf
         private float m_pdf_imagelength;
         private T2P_BOX m_pdf_mediabox = new T2P_BOX();
         private T2P_BOX m_pdf_imagebox = new T2P_BOX();
-        private int m_pdf_palettecs;
         private DictionaryStream m_paletteObject = null;
         
         private t2p_cs_t m_pdf_colorspace;
@@ -122,15 +122,12 @@ namespace BitMiracle.Tiff2Pdf
         
         private t2p_transcode_t m_pdf_transcode;
         private t2p_sample_t m_pdf_sample;
-        private int[] m_pdf_xrefoffsets;
-        private int m_pdf_xrefcount;
         private short m_pdf_page;
         private float[] m_tiff_whitechromaticities = new float[2];
         private float[] m_tiff_primarychromaticities = new float[6];
         private byte[][] m_tiff_transferfunction = new byte[3][];
         
         private short m_tiff_transferfunctioncount;
-        private int m_pdf_icccs;
         private DictionaryStream m_iccObject = null;
 
         private int m_tiff_iccprofilelength;
@@ -139,20 +136,17 @@ namespace BitMiracle.Tiff2Pdf
         private Tiff m_output;
         private PDFDocumentImpl m_pdf = null;
         private DictionaryStream[] m_imageParts = null;
-
-        internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
-
-        public T2P()
+       
+        public Converter()
         {
             m_errorHandler = new MyErrorHandler();
             Tiff.SetErrorHandler(m_errorHandler);
 
-            m_stream = new MyStream();
+            m_stream = new MyTiffStream();
             m_pdf_defaultxres = 300.0f;
             m_pdf_defaultyres = 300.0f;
             m_pdf_defaultpagewidth = 612.0f;
             m_pdf_defaultpagelength = 792.0f;
-            m_pdf_xrefcount = 3; /* Catalog, Info, Pages */
 
             m_pdf = new PDFDocumentImpl();
             m_pdf.MajorVersion = 1;
@@ -165,38 +159,16 @@ namespace BitMiracle.Tiff2Pdf
                 m_pdf.Catalog.GetDictionary().Add("ViewerPreferences", dict);
             }
         }
-        
-        /*
-        This function validates the values of a T2P context struct pointer
-        before calling write_pdf with it.
-        */
-        public void validate()
-        {
-            if (m_pdf_defaultcompression == t2p_compress_t.T2P_COMPRESS_JPEG)
-            {
-                if (m_pdf_defaultcompressionquality > 100 || m_pdf_defaultcompressionquality < 1)
-                    m_pdf_defaultcompressionquality = 0;
-            }
-            
-            if (m_pdf_defaultcompression == t2p_compress_t.T2P_COMPRESS_ZIP)
-            {
-                int m = m_pdf_defaultcompressionquality % 100;
-                if (m_pdf_defaultcompressionquality / 100 > 9 || (m > 1 && m < 10) || m > 15)
-                    m_pdf_defaultcompressionquality = 0;
 
-                if (m_pdf_defaultcompressionquality % 100 != 0)
-                {
-                    m_pdf_defaultcompressionquality /= 100;
-                    m_pdf_defaultcompressionquality *= 100;
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
-                        "PNG Group predictor differencing not implemented, assuming compression quality {0}",
-                        m_pdf_defaultcompressionquality);
-                }
-                
-                m_pdf_defaultcompressionquality %= 100;
-                if (m_pdf.MinorVersion < 2)
-                    m_pdf.MinorVersion = 2;
-            }
+        public bool TestFriendly
+        {
+            get { return m_testFriendly; }
+            set { m_testFriendly = value; }
+        }
+
+        public bool Error
+        {
+            get { return m_error; }
         }
 
         /*
@@ -238,15 +210,58 @@ namespace BitMiracle.Tiff2Pdf
         After this function completes, delete t2p, TIFFClose on input, 
         and TIFFClose on output.
         */
-        public int write_pdf(Tiff input, Tiff output)
+        public void WritePdf(Tiff input, string outputFileName)
         {
+            m_outputdisable = false;
+
+            if (outputFileName != null)
+            {
+                try
+                {
+                    m_outputfile = File.Open(outputFileName, FileMode.Create, FileAccess.Write);
+                }
+                catch (Exception e)
+                {
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        "Can't open output file {0} for writing. {1}",
+                        outputFileName, e.Message);
+
+                    m_error = true;
+                    return;
+                }
+            }
+            else
+            {
+                outputFileName = "-";
+                m_outputfile = Console.OpenStandardOutput();
+            }
+
+            using (Tiff output = Tiff.ClientOpen(outputFileName, "w", this, m_stream))
+            {
+                if (output == null)
+                {
+                    m_outputfile.Dispose();
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize output descriptor");
+                    m_error = true;
+                    return;
+                }
+
+                m_stream.Seek(this, 0, SeekOrigin.Begin);
+                m_output = output;
+
+                constructPdfFrom(input);
+            }
+
+            m_outputfile.Dispose();
+        }
+
+        private int constructPdfFrom(Tiff input)
+        {
+            validateDefaults();
+
             read_tiff_init(input);
             if (m_error)
                 return 0;
-
-            m_pdf_xrefoffsets = new int [m_pdf_xrefcount];
-            m_output = output;
-            m_pdf_xrefcount = 0;
 
             fillPdfInfo(input);
 
@@ -264,7 +279,6 @@ namespace BitMiracle.Tiff2Pdf
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_PALETTE) != 0)
                 {
                     m_paletteObject = new DictionaryStream();
-                    m_pdf_palettecs = m_pdf_xrefcount;
 
                     PDFStream paletteStream = m_paletteObject.GetStream();
                     paletteStream.Write(m_pdf_palette, m_pdf_palettesize);
@@ -272,8 +286,6 @@ namespace BitMiracle.Tiff2Pdf
 
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_ICCBASED) != 0)
                 {
-                    m_pdf_icccs = m_pdf_xrefcount;
-
                     m_iccObject = new DictionaryStream();
                     addICCProperties(m_iccObject);
 
@@ -305,9 +317,38 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             setFileIDs();
-            disable(output);
+            disable(m_output);
             m_pdf.Save("c:\\downloads\\test.pdf");
             return written;
+        }
+
+        private void validateDefaults()
+        {
+            if (m_pdf_defaultcompression == t2p_compress_t.T2P_COMPRESS_JPEG)
+            {
+                if (m_pdf_defaultcompressionquality > 100 || m_pdf_defaultcompressionquality < 1)
+                    m_pdf_defaultcompressionquality = 0;
+            }
+
+            if (m_pdf_defaultcompression == t2p_compress_t.T2P_COMPRESS_ZIP)
+            {
+                int m = m_pdf_defaultcompressionquality % 100;
+                if (m_pdf_defaultcompressionquality / 100 > 9 || (m > 1 && m < 10) || m > 15)
+                    m_pdf_defaultcompressionquality = 0;
+
+                if (m_pdf_defaultcompressionquality % 100 != 0)
+                {
+                    m_pdf_defaultcompressionquality /= 100;
+                    m_pdf_defaultcompressionquality *= 100;
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        "PNG Group predictor differencing not implemented, assuming compression quality {0}",
+                        m_pdf_defaultcompressionquality);
+                }
+
+                m_pdf_defaultcompressionquality %= 100;
+                if (m_pdf.MinorVersion < 2)
+                    m_pdf.MinorVersion = 2;
+            }
         }
 
         /*
@@ -384,7 +425,6 @@ namespace BitMiracle.Tiff2Pdf
 
             for (short i = 0; i < m_tiff_pagecount; i++)
             {
-                m_pdf_xrefcount += 5;
                 input.SetDirectory(m_tiff_pages[i].page_directory);
 
                 result = input.GetField(TiffTag.PHOTOMETRIC);
@@ -392,7 +432,6 @@ namespace BitMiracle.Tiff2Pdf
                     input.GetField(TiffTag.INDEXED) != null)
                 {
                     m_tiff_pages[i].page_extra++;
-                    m_pdf_xrefcount++;
                 }
 
                 result = input.GetField(TiffTag.COMPRESSION);
@@ -419,13 +458,11 @@ namespace BitMiracle.Tiff2Pdf
                     {
                         m_tiff_transferfunctioncount = 3;
                         m_tiff_pages[i].page_extra += 4;
-                        m_pdf_xrefcount += 4;
                     }
                     else
                     {
                         m_tiff_transferfunctioncount = 1;
                         m_tiff_pages[i].page_extra += 2;
-                        m_pdf_xrefcount += 2;
                     }
 
                     if (m_pdf.MinorVersion < 2)
@@ -443,7 +480,6 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_iccprofile = result[1].ToByteArray();
 
                     m_tiff_pages[i].page_extra++;
-                    m_pdf_xrefcount++;
                     if (m_pdf.MinorVersion < 3)
                         m_pdf.MinorVersion = 3;
                 }
@@ -460,7 +496,6 @@ namespace BitMiracle.Tiff2Pdf
                 
                 if (m_tiff_tiles[i].tiles_tilecount > 0)
                 {
-                    m_pdf_xrefcount += (m_tiff_tiles[i].tiles_tilecount - 1) * 2;
                     result = input.GetField(TiffTag.TILEWIDTH);
                     m_tiff_tiles[i].tiles_tilewidth = result[0].ToInt();
 
@@ -1232,7 +1267,7 @@ namespace BitMiracle.Tiff2Pdf
         the data to the output PDF XObject image dictionary stream.  It returns the amount written 
         or zero on error.
         */
-        private int readwrite_pdf_image(Tiff input)
+        private void readwrite_pdf_image(Tiff input)
         {
             byte[] buffer = null;
             int bufferoffset = 0;
@@ -1256,7 +1291,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
                     
                     writeToFile(buffer, m_tiff_datasize);
-                    return m_tiff_datasize;
+                    return;
                 }
 
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_ZIP)
@@ -1267,7 +1302,7 @@ namespace BitMiracle.Tiff2Pdf
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
 
                     writeToFile(buffer, m_tiff_datasize);
-                    return m_tiff_datasize;
+                    return;
                 }
                 
                 if (m_tiff_compression == Compression.JPEG)
@@ -1304,14 +1339,14 @@ namespace BitMiracle.Tiff2Pdf
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Can't process JPEG data in input file {0}", input.FileName());
                             m_error = true;
-                            return 0;
+                            return;
                         }
                     }
 
                     buffer[bufferoffset++] = 0xff;
                     buffer[bufferoffset++] = 0xd9;
                     writeToFile(buffer, bufferoffset);
-                    return bufferoffset;
+                    return;
                 }
             }
 
@@ -1329,7 +1364,7 @@ namespace BitMiracle.Tiff2Pdf
                         Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Error on decoding strip {0} of {1}", i, input.FileName());
                         m_error = true;
-                        return 0;
+                        return;
                     }
 
                     bufferoffset += read;
@@ -1362,7 +1397,7 @@ namespace BitMiracle.Tiff2Pdf
                                     "Error on decoding strip {0} of {1}", 
                                     i + j * stripcount, input.FileName());
                                 m_error = true;
-                                return 0;
+                                return;
                             }
                             samplebufferoffset += read;
                         }
@@ -1386,7 +1421,7 @@ namespace BitMiracle.Tiff2Pdf
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Error on decoding strip {0} of {1}", i, input.FileName());
                             m_error = true;
-                            return 0;
+                            return;
                         }
 
                         bufferoffset += read;
@@ -1421,7 +1456,7 @@ namespace BitMiracle.Tiff2Pdf
                                 "Can't use ReadRGBAImageOriented to extract RGB image from {0}",
                                 input.FileName());
                             m_error = true;
-                            return 0;
+                            return;
                         }
 
                         Tiff.IntsToByteArray(buffer32, 0, m_tiff_width * m_tiff_length, buffer, 0);
@@ -1480,7 +1515,7 @@ namespace BitMiracle.Tiff2Pdf
                             "Unable to use JPEG compression for input {0} and output {1}",
                             input.FileName(), m_output.FileName());
                         m_error = true;
-                        return 0;
+                        return;
                     }
 
                     m_output.SetField(TiffTag.JPEGTABLESMODE, 0);
@@ -1515,7 +1550,6 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             enable(m_output);
-            m_outputwritten = 0;
 
             if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_JPEG && m_tiff_photometric == Photometric.YCBCR)
                 bufferoffset = m_output.WriteEncodedStrip(0, buffer, stripsize * stripcount);
@@ -1529,10 +1563,8 @@ namespace BitMiracle.Tiff2Pdf
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                     "Error writing encoded strip to output PDF {0}", m_output.FileName());
                 m_error = true;
-                return 0;
+                return;
             }
-
-            return m_outputwritten;
         }
 
         /*
@@ -1540,7 +1572,7 @@ namespace BitMiracle.Tiff2Pdf
         * tile and writes the data to the output PDF XObject image dictionary stream
         * for the tile.  It returns the amount written or zero on error.
         */
-        private int readwrite_pdf_image_tile(Tiff input, int tile)
+        private void readwrite_pdf_image_tile(Tiff input, int tile)
         {
             bool edge = false;
             edge |= tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile);
@@ -1559,7 +1591,7 @@ namespace BitMiracle.Tiff2Pdf
                         Tiff.ReverseBits(g4buffer, m_tiff_datasize);
 
                     writeToFile(g4buffer, m_tiff_datasize);
-                    return m_tiff_datasize;
+                    return;
                 }
                 
                 if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_ZIP)
@@ -1570,7 +1602,7 @@ namespace BitMiracle.Tiff2Pdf
                         Tiff.ReverseBits(zipBuffer, m_tiff_datasize);
 
                     writeToFile(zipBuffer, m_tiff_datasize);
-                    return m_tiff_datasize;
+                    return;
                 }
                 
                 if (m_tiff_compression == Compression.JPEG)
@@ -1602,7 +1634,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
 
                     writeToFile(jpegBuffer, jpegBufferOffset);
-                    return jpegBufferOffset;
+                    return;
                 }
             }
 
@@ -1617,7 +1649,7 @@ namespace BitMiracle.Tiff2Pdf
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "Error on decoding tile {0} of {1}", tile, input.FileName());
                     m_error = true;
-                    return 0;
+                    return;
                 }
             }
             else
@@ -1641,7 +1673,7 @@ namespace BitMiracle.Tiff2Pdf
                                 "Error on decoding tile {0} of {1}", 
                                 tile + i * tilecount, input.FileName());
                             m_error = true;
-                            return 0;
+                            return;
                         }
 
                         samplebufferoffset += read;
@@ -1660,7 +1692,7 @@ namespace BitMiracle.Tiff2Pdf
                             "Error on decoding tile {0} of {1}",
                             tile, input.FileName());
                         m_error = true;
-                        return 0;
+                        return;
                     }
                 }
 
@@ -1681,7 +1713,7 @@ namespace BitMiracle.Tiff2Pdf
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for YCbCr to RGB in tile for {0}", input.FileName());
                     m_error = true;
-                    return 0;
+                    return;
                 }
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED) != 0)
@@ -1785,19 +1817,14 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             enable(m_output);
-            m_outputwritten = 0;
             bufferoffset = m_output.WriteEncodedStrip(0, buffer, m_output.StripSize());
-            buffer = null;
-
             if (bufferoffset == -1)
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                     "Error writing encoded tile to output PDF {0}", m_output.FileName());
                 m_error = true;
-                return 0;
+                return;
             }
-
-            return m_outputwritten;
         }
         
         /*
@@ -1851,14 +1878,14 @@ namespace BitMiracle.Tiff2Pdf
         private void fillPdfInfo(Tiff input)
         {
             if (m_pdf_datetime == null)
-                pdf_tifftime(input);
+                fillPdfDateTime(input);
 
             PDFDictionary dict = m_pdf.Info.GetDictionary();
 
-            if (strlen(m_pdf_datetime) > 0)
+            if (m_pdf_datetime.Length > 0)
             {
-                dict.AddString("CreationDate", Latin1Encoding.GetString(m_pdf_datetime));
-                dict.AddString("ModDate", Latin1Encoding.GetString(m_pdf_datetime));
+                dict.AddString("CreationDate", m_pdf_datetime);
+                dict.AddString("ModDate", m_pdf_datetime);
             }
 
             if (!m_testFriendly)
@@ -1870,8 +1897,8 @@ namespace BitMiracle.Tiff2Pdf
             string creator = null;
             if (m_pdf_creator != null)
             {
-                if (strlen(m_pdf_creator) > 0)
-                    creator = Latin1Encoding.GetString(m_pdf_creator);
+                if (m_pdf_creator.Length > 0)
+                    creator = m_pdf_creator;
             }
             else
             {
@@ -1891,8 +1918,8 @@ namespace BitMiracle.Tiff2Pdf
             string author  = null;
             if (m_pdf_author != null)
             {
-                if (strlen(m_pdf_author) > 0)
-                    author = Latin1Encoding.GetString(m_pdf_author);
+                if (m_pdf_author.Length > 0)
+                    author = m_pdf_author;
             }
             else
             {
@@ -1920,8 +1947,8 @@ namespace BitMiracle.Tiff2Pdf
             string title = null;
             if (m_pdf_title != null)
             {
-                if (strlen(m_pdf_title) > 0)
-                    title = Latin1Encoding.GetString(m_pdf_title);
+                if (m_pdf_title.Length > 0)
+                    title = m_pdf_title;
             }
             else
             {
@@ -1941,8 +1968,8 @@ namespace BitMiracle.Tiff2Pdf
             string subject = null;
             if (m_pdf_subject != null)
             {
-                if (strlen(m_pdf_subject) > 0)
-                    subject = Latin1Encoding.GetString(m_pdf_subject);
+                if (m_pdf_subject.Length > 0)
+                    subject = m_pdf_subject;
             }
             else
             {
@@ -1961,9 +1988,9 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_pdf_keywords != null)
             {
-                if (strlen(m_pdf_keywords) > 0)
+                if (m_pdf_keywords.Length > 0)
                 {
-                    string keywords = Latin1Encoding.GetString(m_pdf_keywords);
+                    string keywords = m_pdf_keywords;
                     if (keywords.Length > 511)
                         keywords = keywords.Substring(0, 511);
 
@@ -1984,60 +2011,49 @@ namespace BitMiracle.Tiff2Pdf
         }
 
         /*
-        * This function fills a string of a T2P struct with the current time as a PDF
-        * date string, it is called by pdf_tifftime.
-        */
-        private void pdf_currenttime()
-        {
-            DateTime dt;
-
-            if (m_testFriendly)
-            {
-                int timenow = 1247603070; // 15-07-2009 XXXX
-                dt = new DateTime(1970, 1, 1).AddSeconds(timenow).ToLocalTime();
-            }
-            else
-                dt = DateTime.Now.ToLocalTime();
-
-            string s = string.Format("D:{0:0000}{1:00}{2:00}{3:00}{4:00}{5:00}", 
-                dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256, 
-                dt.Minute % 256, dt.Second % 256);
-
-            m_pdf_datetime = Latin1Encoding.GetBytes(s);
-        }
-        
-        /*
-        * This function fills a string of a T2P struct with the date and time of a
+        * This function fills m_pdf_datetime with the date and time of a
         * TIFF file if it exists or the current time as a PDF date string.
         */
-        private void pdf_tifftime(Tiff input)
+        private void fillPdfDateTime(Tiff input)
         {
             FieldValue[] result = input.GetField(TiffTag.DATETIME);
             if (result != null && (result[0].ToString()).Length >= 19)
             {
-                string datetime = result[0].ToString();
+                StringBuilder sb = new StringBuilder();
+                sb.Append("D:");
 
-                m_pdf_datetime = new byte[16];
-                m_pdf_datetime[0] = (byte)'D';
-                m_pdf_datetime[1] = (byte)':';
-                m_pdf_datetime[2] = (byte)datetime[0];
-                m_pdf_datetime[3] = (byte)datetime[1];
-                m_pdf_datetime[4] = (byte)datetime[2];
-                m_pdf_datetime[5] = (byte)datetime[3];
-                m_pdf_datetime[6] = (byte)datetime[5];
-                m_pdf_datetime[7] = (byte)datetime[6];
-                m_pdf_datetime[8] = (byte)datetime[8];
-                m_pdf_datetime[9] = (byte)datetime[9];
-                m_pdf_datetime[10] = (byte)datetime[11];
-                m_pdf_datetime[11] = (byte)datetime[12];
-                m_pdf_datetime[12] = (byte)datetime[14];
-                m_pdf_datetime[13] = (byte)datetime[15];
-                m_pdf_datetime[14] = (byte)datetime[17];
-                m_pdf_datetime[15] = (byte)datetime[18];
+                string datetime = result[0].ToString();
+                sb.Append(datetime[0]);
+                sb.Append(datetime[1]);
+                sb.Append(datetime[2]);
+                sb.Append(datetime[3]);
+                sb.Append(datetime[5]);
+                sb.Append(datetime[6]);
+                sb.Append(datetime[8]);
+                sb.Append(datetime[9]);
+                sb.Append(datetime[11]);
+                sb.Append(datetime[12]);
+                sb.Append(datetime[14]);
+                sb.Append(datetime[15]);
+                sb.Append(datetime[17]);
+                sb.Append(datetime[18]);
+                m_pdf_datetime = sb.ToString();
             }
             else
             {
-                pdf_currenttime();
+                DateTime dt;
+
+                if (m_testFriendly)
+                {
+                    int timenow = 1247603070; // 15-07-2009 XXXX
+                    dt = new DateTime(1970, 1, 1).AddSeconds(timenow).ToLocalTime();
+                }
+                else
+                    dt = DateTime.Now.ToLocalTime();
+
+                m_pdf_datetime = string.Format("D:{0:0000}{1:00}{2:00}{3:00}{4:00}{5:00}",
+                    dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256,
+                    dt.Minute % 256, dt.Second % 256);
             }
         }
 
@@ -2858,7 +2874,7 @@ namespace BitMiracle.Tiff2Pdf
         
         private static void disable(Tiff tif)
         {
-            T2P t2p = tif.Clientdata() as T2P;
+            Converter t2p = tif.Clientdata() as Converter;
             if (t2p == null)
                 throw new ArgumentException();
 
@@ -2867,7 +2883,7 @@ namespace BitMiracle.Tiff2Pdf
 
         private static void enable(Tiff tif)
         {
-            T2P t2p = tif.Clientdata() as T2P;
+            Converter t2p = tif.Clientdata() as Converter;
             if (t2p == null)
                 throw new ArgumentException();
 
@@ -3105,20 +3121,12 @@ namespace BitMiracle.Tiff2Pdf
             }
         }
 
-        private int writeToFile(byte[] data, int size)
+        private void writeToFile(byte[] data, int size)
         {
             if (data == null || size == 0)
-                return 0;
+                return;
 
-            TiffStream stream = m_output.GetStream();
-            if (stream != null)
-            {
-                object client = m_output.Clientdata();
-                stream.Write(client, data, size);
-                return size;
-            }
-
-            return -1;
+            m_stream.Write(this, data, size);
         }
     }
 }

@@ -188,8 +188,8 @@ namespace BitMiracle.Tiff2Pdf
         */
         public static void Main(string[] args)
         {
-            T2P t2p = new T2P();
-            t2p.m_testFriendly = g_testFriendly;
+            Converter c = new Converter();
+            c.TestFriendly = g_testFriendly;
 
             string outfilename = null;
 
@@ -205,8 +205,6 @@ namespace BitMiracle.Tiff2Pdf
                     optarg = args[argn + 1];
 
                 arg = arg.Substring(1);
-                byte[] bytes = null;
-
                 switch (arg[0])
                 {
                     case 'o':
@@ -214,111 +212,120 @@ namespace BitMiracle.Tiff2Pdf
                         break;
 
                     case 'j':
-                        t2p.m_pdf_defaultcompression = t2p_compress_t.T2P_COMPRESS_JPEG;
+                        c.m_pdf_defaultcompression = t2p_compress_t.T2P_COMPRESS_JPEG;
                         break;
 
                     case 'z':
-                        t2p.m_pdf_defaultcompression = t2p_compress_t.T2P_COMPRESS_ZIP;
+                        c.m_pdf_defaultcompression = t2p_compress_t.T2P_COMPRESS_ZIP;
                         break;
 
                     case 'q':
-                        t2p.m_pdf_defaultcompressionquality = short.Parse(optarg, CultureInfo.InvariantCulture);
+                        c.m_pdf_defaultcompressionquality = short.Parse(optarg, CultureInfo.InvariantCulture);
                         break;
 
                     case 'n':
-                        t2p.m_decompressImages = true;
+                        c.m_decompressImages = true;
                         break;
 
                     case 'd':
-                        t2p.m_pdf_defaultcompression = t2p_compress_t.T2P_COMPRESS_NONE;
+                        c.m_pdf_defaultcompression = t2p_compress_t.T2P_COMPRESS_NONE;
                         break;
 
                     case 'u':
                         if (optarg[0] == 'm')
-                            t2p.m_pdf_centimeters = true;
+                            c.m_pdf_centimeters = true;
                         break;
 
                     case 'x':
-                        t2p.m_pdf_defaultxres = float.Parse(optarg, CultureInfo.InvariantCulture) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        float xres = float.Parse(optarg, CultureInfo.InvariantCulture);
+                        if (c.m_pdf_centimeters)
+                            xres /= 2.54F;
+
+                        c.m_pdf_defaultxres = xres;
                         break;
 
                     case 'y':
-                        t2p.m_pdf_defaultyres = float.Parse(optarg, CultureInfo.InvariantCulture) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        float yres = float.Parse(optarg, CultureInfo.InvariantCulture);
+                        if (c.m_pdf_centimeters)
+                            yres /= 2.54F;
+
+                        c.m_pdf_defaultyres = yres;
                         break;
 
                     case 'w':
-                        t2p.m_pdf_overridepagesize = true;
-                        t2p.m_pdf_defaultpagewidth = (float.Parse(optarg, CultureInfo.InvariantCulture) * Tiff2PdfConstants.PS_UNIT_SIZE) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        float width = float.Parse(optarg, CultureInfo.InvariantCulture);
+                        width *= Tiff2PdfConstants.PS_UNIT_SIZE;
+                        if (c.m_pdf_centimeters)
+                            width /= 2.54F;
+
+                        c.m_pdf_overridepagesize = true;
+                        c.m_pdf_defaultpagewidth = width;
                         break;
 
                     case 'l':
-                        t2p.m_pdf_overridepagesize = true;
-                        t2p.m_pdf_defaultpagelength = (float.Parse(optarg, CultureInfo.InvariantCulture) * Tiff2PdfConstants.PS_UNIT_SIZE) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        float length = float.Parse(optarg, CultureInfo.InvariantCulture);
+                        length *= Tiff2PdfConstants.PS_UNIT_SIZE;
+                        if (c.m_pdf_centimeters)
+                            length /= 2.54F;
+
+                        c.m_pdf_overridepagesize = true;
+                        c.m_pdf_defaultpagelength = length;
                         break;
 
                     case 'r':
                         if (optarg[0] == 'o')
-                            t2p.m_pdf_overrideres = true;
+                            c.m_pdf_overrideres = true;
                         break;
 
                     case 'p':
-                        if (tiff2pdf_match_paper_size(out t2p.m_pdf_defaultpagewidth, out t2p.m_pdf_defaultpagelength, optarg))
-                            t2p.m_pdf_overridepagesize = true;
+                        if (findPaperSizeByName(out c.m_pdf_defaultpagewidth, out c.m_pdf_defaultpagelength, optarg))
+                            c.m_pdf_overridepagesize = true;
                         else
                             Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Unknown paper size {0}, ignoring option", optarg);
                         break;
 
                     case 'i':
-                        t2p.m_pdf_colorspace_invert = true;
+                        c.m_pdf_colorspace_invert = true;
                         break;
 
                     case 'f':
-                        t2p.m_pdf_fitwindow = true;
+                        c.m_pdf_fitwindow = true;
                         break;
 
                     case 'e':
-                        t2p.m_pdf_datetime = new byte[17];
                         if (optarg.Length == 0)
-                        {
-                            t2p.m_pdf_datetime[0] = 0;
-                        }
+                            c.m_pdf_datetime = optarg;
                         else
-                        {
-                            t2p.m_pdf_datetime[0] = (byte)'D';
-                            t2p.m_pdf_datetime[1] = (byte)':';
-
-                            bytes = T2P.Latin1Encoding.GetBytes(optarg);
-                            Array.Copy(bytes, 0, t2p.m_pdf_datetime, 2, Math.Min(bytes.Length, 14));
-                        }
+                            c.m_pdf_datetime = "D:" + optarg;
                         break;
 
                     case 'c':
-                        t2p.m_pdf_creator = T2P.Latin1Encoding.GetBytes(optarg);
+                        c.m_pdf_creator = optarg;
                         break;
 
                     case 'a':
-                        t2p.m_pdf_author = T2P.Latin1Encoding.GetBytes(optarg);
+                        c.m_pdf_author = optarg;
                         break;
 
                     case 't':
-                        t2p.m_pdf_title = T2P.Latin1Encoding.GetBytes(optarg);
+                        c.m_pdf_title = optarg;
                         break;
 
                     case 's':
-                        t2p.m_pdf_subject = T2P.Latin1Encoding.GetBytes(optarg);
+                        c.m_pdf_subject = optarg;
                         break;
 
                     case 'k':
-                        t2p.m_pdf_keywords = T2P.Latin1Encoding.GetBytes(optarg);
+                        c.m_pdf_keywords = optarg;
                         break;
 
                     case 'b':
-                        t2p.m_pdf_image_interpolate = true;
+                        c.m_pdf_image_interpolate = true;
                         break;
 
                     case 'h':
                     case '?':
-                        tiff2pdf_usage();
+                        printUsage();
                         return;
                 }
             }
@@ -334,7 +341,7 @@ namespace BitMiracle.Tiff2Pdf
             else
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No input file specified");
-                tiff2pdf_usage();
+                printUsage();
                 return;
             }
 
@@ -342,74 +349,29 @@ namespace BitMiracle.Tiff2Pdf
             {
                 if (input == null)
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open input file {0} for reading", args[argn - 1]);
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        "Can't open input file {0} for reading", args[argn - 1]);
                     return;
                 }
 
                 if ((args.Length - 1) > argn)
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for multiple input files");
-                    tiff2pdf_usage();
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        "No support for multiple input files");
+                    printUsage();
                     return;
                 }
 
-                /*
-                * Output
-                */
-                t2p.m_outputdisable = false;
-                if (outfilename != null)
+                c.WritePdf(input, outfilename);
+                if (c.Error)
                 {
-                    try
-                    {
-                        t2p.m_outputfile = File.Open(outfilename, FileMode.Create, FileAccess.Write);
-                    }
-                    catch (Exception e)
-                    {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't open output file {0} for writing. {1}", outfilename, e.Message);
-                        return;
-                    }
+                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        "An error occurred creating output PDF file");
                 }
-                else
-                {
-                    outfilename = "-";
-                    t2p.m_outputfile = Console.OpenStandardOutput();
-                }
-
-                using (Tiff output = Tiff.ClientOpen(outfilename, "w", t2p, t2p.m_stream))
-                {
-                    if (output == null)
-                    {
-                        t2p.m_outputfile.Dispose();
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize output descriptor");
-                        return;
-                    }
-
-                    /*
-                    * Validate
-                    */
-                    t2p.validate();
-
-                    object client = output.Clientdata();
-                    TiffStream stream = output.GetStream();
-                    stream.Seek(client, 0, SeekOrigin.Begin);
-
-                    /*
-                    * Write
-                    */
-                    t2p.write_pdf(input, output);
-                    if (t2p.m_error)
-                    {
-                        t2p.m_outputfile.Dispose();
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "An error occurred creating output PDF file");
-                        return;
-                    }
-                }
-
-                t2p.m_outputfile.Dispose();
             }
         }
 
-        static void tiff2pdf_usage()
+        static void printUsage()
         {
             string[] lines = 
             {
@@ -449,11 +411,8 @@ namespace BitMiracle.Tiff2Pdf
             }
         }
 
-        static bool tiff2pdf_match_paper_size(out float width, out float length, string papersize)
+        static bool findPaperSizeByName(out float width, out float length, string papersize)
         {
-            width = 0;
-            length = 0;
-
             string papersizeUpper = papersize.ToUpper();
             for (int i = 0; sizes[i] != null; i++)
             {
@@ -465,6 +424,8 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
+            width = 0;
+            length = 0;
             return false;
         }
     }

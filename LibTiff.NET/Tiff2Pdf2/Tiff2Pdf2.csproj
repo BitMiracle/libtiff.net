@@ -54,7 +54,7 @@
     <Compile Include="Limit.cs" />
     <Compile Include="MemoryStream.cs" />
     <Compile Include="MyErrorHandler.cs" />
-    <Compile Include="MyStream.cs" />
+    <Compile Include="MyTiffStream.cs" />
     <Compile Include="NameObject.cs" />
     <Compile Include="NumberObject.cs" />
     <Compile Include="Object.cs" />
@@ -73,7 +73,7 @@
     <Compile Include="Stream.cs" />
     <Compile Include="StringObject.cs" />
     <Compile Include="StringUtils.cs" />
-    <Compile Include="T2P.cs" />
+    <Compile Include="Converter.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="XRefTable.cs" />
