@@ -43,20 +43,12 @@ namespace BitMiracle.Tiff2Pdf2
 
         public override void Write(object fd, byte[] buf, int size)
         {
-            Converter c = fd as Converter;
-            if (c == null)
-                throw new ArgumentException();
-
             if (!m_disabled && m_stream != null)
                 m_stream.Write(buf, size);
         }
 
         public override long Seek(object fd, long off, SeekOrigin whence)
         {
-            Converter c = fd as Converter;
-            if (c == null)
-                throw new ArgumentException();
-
             if (!m_disabled && m_stream != null)
                 m_stream.Seek((int)off, whence);
 
