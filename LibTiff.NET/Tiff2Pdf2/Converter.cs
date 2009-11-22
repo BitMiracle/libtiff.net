@@ -68,7 +68,6 @@ namespace BitMiracle.Tiff2Pdf
         public string m_pdf_subject = null;
         public string m_pdf_keywords = null;
 
-        
         private static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
 
         private bool m_testFriendly = false;
