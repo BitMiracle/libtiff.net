@@ -15,11 +15,27 @@ using System.Text;
 using System.IO;
 
 using BitMiracle.LibTiff;
+using BitMiracle.Docotic.PDFLib;
 
 namespace BitMiracle.Tiff2Pdf
 {
     class MyTiffStream : TiffStream
     {
+        private bool m_disabled = false;
+        private PDFStream m_stream = null;
+        
+        public bool Disabled
+        {
+            get { return m_disabled; }
+            set { m_disabled = value; }
+        }
+
+        public PDFStream OutputStream
+        {
+            get { return m_stream; }
+            set { m_stream = value; }
+        }
+
         public override int Read(object fd, byte[] buf, int offset, int size)
         {
             return -1;
@@ -31,8 +47,8 @@ namespace BitMiracle.Tiff2Pdf
             if (c == null)
                 throw new ArgumentException();
 
-            if (!c.m_outputdisable && c.m_outputfile != null)
-                c.m_outputfile.Write(buf, 0, size);
+            if (!m_disabled && m_stream != null)
+                m_stream.Write(buf, size);
         }
 
         public override long Seek(object fd, long off, SeekOrigin whence)
@@ -41,8 +57,8 @@ namespace BitMiracle.Tiff2Pdf
             if (c == null)
                 throw new ArgumentException();
 
-            if (!c.m_outputdisable && c.m_outputfile != null)
-                return c.m_outputfile.Seek(off, whence);
+            if (!m_disabled && m_stream != null)
+                m_stream.Seek((int)off, whence);
 
             return off;
         }

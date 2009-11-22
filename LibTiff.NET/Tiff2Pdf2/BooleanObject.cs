@@ -25,6 +25,14 @@ namespace BitMiracle.Docotic.PDFLib
             return new BooleanObject(this);
         }
 
+        public override string ToString()
+        {
+            if (m_value)
+                return "true";
+
+            return "false";
+        }
+
         public override PDFObject.Type GetPDFType()
         {
             return PDFObject.Type.PDFBoolean;

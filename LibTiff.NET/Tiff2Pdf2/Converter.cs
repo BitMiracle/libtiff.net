@@ -76,12 +76,9 @@ namespace BitMiracle.Tiff2Pdf
         public string m_pdf_subject = null;
         public string m_pdf_keywords = null;
 
-        /* fields for custom read/write procedures */
-        public Stream m_outputfile;
-        public bool m_outputdisable;
-
         public MyErrorHandler m_errorHandler;
-        public MyTiffStream m_stream;
+        public MyTiffStream m_tiffStream;
+        public Stream m_pdfStream;
 
         private T2P_PAGE[] m_tiff_pages;
         private T2P_TILES[] m_tiff_tiles;
@@ -142,7 +139,7 @@ namespace BitMiracle.Tiff2Pdf
             m_errorHandler = new MyErrorHandler();
             Tiff.SetErrorHandler(m_errorHandler);
 
-            m_stream = new MyTiffStream();
+            m_tiffStream = new MyTiffStream();
             m_pdf_defaultxres = 300.0f;
             m_pdf_defaultyres = 300.0f;
             m_pdf_defaultpagewidth = 612.0f;
@@ -172,53 +169,15 @@ namespace BitMiracle.Tiff2Pdf
         }
 
         /*
-
         This function writes a PDF to a file given a pointer to a TIFF.
-
-        The idea with using a Tiff as output for a PDF file is that the file 
-        can be created with ClientOpen for memory-mapped use within the TIFF 
-        library, and WriteEncodedStrip can be used to write compressed data to 
-        the output.  The output is not actually a TIFF file, it is a PDF file.  
-
-        This function uses only writeToFile and WriteEncodedStrip to write to 
-        the output TIFF file.  When libtiff would otherwise be writing data to the 
-        output file, the write procedure of the TIFF structure is replaced with an 
-        empty implementation.
-
-        The first argument to the function is an initialized and validated T2P 
-        context struct pointer.
-
-        The second argument to the function is the Tiff that is the input that has 
-        been opened for reading and no other functions have been called upon it.
-
-        The third argument to the function is the Tiff that is the output that has 
-        been opened for writing.  It has to be opened so that it hasn't written any 
-        data to the output.  If the output is seekable then it's OK to seek to the 
-        beginning of the file.  The function only writes to the output PDF and does 
-        not seek.  See the example usage in the main() function.
-
-        Tiff output = Open("output.pdf", "w");
-        assert(output != null);
-
-        if(output.tif_seekproc != null){
-        t2pSeekFile(output, (toff_t) 0, SEEK_SET);
-        }
-
-        This function returns the file size of the output PDF file.  On error it 
-        returns zero and the t2p.m_error variable is set to true.
-
-        After this function completes, delete t2p, TIFFClose on input, 
-        and TIFFClose on output.
         */
         public void WritePdf(Tiff input, string outputFileName)
         {
-            m_outputdisable = false;
-
             if (outputFileName != null)
             {
                 try
                 {
-                    m_outputfile = File.Open(outputFileName, FileMode.Create, FileAccess.Write);
+                    m_pdfStream = File.Open(outputFileName, FileMode.Create, FileAccess.Write);
                 }
                 catch (Exception e)
                 {
@@ -233,44 +192,44 @@ namespace BitMiracle.Tiff2Pdf
             else
             {
                 outputFileName = "-";
-                m_outputfile = Console.OpenStandardOutput();
+                m_pdfStream = Console.OpenStandardOutput();
             }
 
-            using (Tiff output = Tiff.ClientOpen(outputFileName, "w", this, m_stream))
+            using (Tiff output = Tiff.ClientOpen(outputFileName, "w", this, m_tiffStream))
             {
                 if (output == null)
                 {
-                    m_outputfile.Dispose();
+                    m_pdfStream.Dispose();
                     Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize output descriptor");
                     m_error = true;
                     return;
                 }
 
-                m_stream.Seek(this, 0, SeekOrigin.Begin);
-                m_output = output;
+                m_tiffStream.Disabled = false;
+                m_tiffStream.Seek(this, 0, SeekOrigin.Begin);
 
+                m_output = output;
                 constructPdfFrom(input);
             }
 
-            m_outputfile.Dispose();
+            m_pdfStream.Dispose();
         }
 
-        private int constructPdfFrom(Tiff input)
+        private void constructPdfFrom(Tiff input)
         {
             validateDefaults();
 
             read_tiff_init(input);
             if (m_error)
-                return 0;
+                return;
 
             fillPdfInfo(input);
 
-            int written = 0;
             for (m_pdf_page = 0; m_pdf_page < m_tiff_pagecount; m_pdf_page++)
             {
                 read_tiff_data(input);
                 if (m_error)
-                    return 0;
+                    return;
 
                 PDFPage page = m_pdf.AddPage();
                 fillPageProperties(page);
@@ -299,27 +258,31 @@ namespace BitMiracle.Tiff2Pdf
                     {
                         fillPartDict(m_imageParts[i2], i2 + 1);
                         read_tiff_size_tile(input, i2);
+
+                        m_tiffStream.OutputStream = m_imageParts[i2].GetStream();
                         readwrite_pdf_image_tile(input, i2);
                         write_advance_directory();
+                        m_tiffStream.OutputStream = null;
                         if (m_error)
-                            return 0;
+                            return;
                     }
                 }
                 else
                 {
                     fillPartDict(m_imageParts[0], 0);
                     read_tiff_size(input);
+                    m_tiffStream.OutputStream = m_imageParts[0].GetStream();
                     readwrite_pdf_image(input);
                     write_advance_directory();
+                    m_tiffStream.OutputStream = null;
                     if (m_error)
-                        return 0;
+                        return;
                 }
             }
 
             setFileIDs();
-            disable(m_output);
+            m_tiffStream.Disabled = true;
             m_pdf.Save("c:\\downloads\\test.pdf");
-            return written;
         }
 
         private void validateDefaults()
@@ -1289,8 +1252,8 @@ namespace BitMiracle.Tiff2Pdf
                         */
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
                     }
-                    
-                    writeToFile(buffer, m_tiff_datasize);
+
+                    m_tiffStream.Write(this, buffer, m_tiff_datasize);
                     return;
                 }
 
@@ -1301,7 +1264,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (m_tiff_fillorder == FillOrder.LSB2MSB)
                         Tiff.ReverseBits(buffer, m_tiff_datasize);
 
-                    writeToFile(buffer, m_tiff_datasize);
+                    m_tiffStream.Write(this, buffer, m_tiff_datasize);
                     return;
                 }
                 
@@ -1345,7 +1308,7 @@ namespace BitMiracle.Tiff2Pdf
 
                     buffer[bufferoffset++] = 0xff;
                     buffer[bufferoffset++] = 0xd9;
-                    writeToFile(buffer, bufferoffset);
+                    m_tiffStream.Write(this, buffer, bufferoffset);
                     return;
                 }
             }
@@ -1469,7 +1432,7 @@ namespace BitMiracle.Tiff2Pdf
                 }
             }
 
-            disable(m_output);
+            m_tiffStream.Disabled = true;
             m_output.SetField(TiffTag.PHOTOMETRIC, m_tiff_photometric);
             m_output.SetField(TiffTag.BITSPERSAMPLE, m_tiff_bitspersample);
             m_output.SetField(TiffTag.SAMPLESPERPIXEL, m_tiff_samplesperpixel);
@@ -1549,7 +1512,7 @@ namespace BitMiracle.Tiff2Pdf
                     break;
             }
 
-            enable(m_output);
+            m_tiffStream.Disabled = false;
 
             if (m_pdf_compression == t2p_compress_t.T2P_COMPRESS_JPEG && m_tiff_photometric == Photometric.YCBCR)
                 bufferoffset = m_output.WriteEncodedStrip(0, buffer, stripsize * stripcount);
@@ -1590,7 +1553,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (m_tiff_fillorder == FillOrder.LSB2MSB)
                         Tiff.ReverseBits(g4buffer, m_tiff_datasize);
 
-                    writeToFile(g4buffer, m_tiff_datasize);
+                    m_tiffStream.Write(this, g4buffer, m_tiff_datasize);
                     return;
                 }
                 
@@ -1601,7 +1564,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (m_tiff_fillorder == FillOrder.LSB2MSB)
                         Tiff.ReverseBits(zipBuffer, m_tiff_datasize);
 
-                    writeToFile(zipBuffer, m_tiff_datasize);
+                    m_tiffStream.Write(this, zipBuffer, m_tiff_datasize);
                     return;
                 }
                 
@@ -1633,7 +1596,7 @@ namespace BitMiracle.Tiff2Pdf
                         }
                     }
 
-                    writeToFile(jpegBuffer, jpegBufferOffset);
+                    m_tiffStream.Write(this, jpegBuffer, jpegBufferOffset);
                     return;
                 }
             }
@@ -1731,7 +1694,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_tiles[m_pdf_page].tiles_tilelength);
             }
 
-            disable(m_output);
+            m_tiffStream.Disabled = true;
             m_output.SetField(TiffTag.PHOTOMETRIC, m_tiff_photometric);
             m_output.SetField(TiffTag.BITSPERSAMPLE, m_tiff_bitspersample);
             m_output.SetField(TiffTag.SAMPLESPERPIXEL, m_tiff_samplesperpixel);
@@ -1816,7 +1779,7 @@ namespace BitMiracle.Tiff2Pdf
                     break;
             }
 
-            enable(m_output);
+            m_tiffStream.Disabled = false;
             bufferoffset = m_output.WriteEncodedStrip(0, buffer, m_output.StripSize());
             if (bufferoffset == -1)
             {
@@ -1834,7 +1797,8 @@ namespace BitMiracle.Tiff2Pdf
         */
         private void write_advance_directory()
         {
-            disable(m_output);
+            m_tiffStream.Disabled = true;
+
             if (!m_output.WriteDirectory())
             {
                 Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
@@ -1844,7 +1808,7 @@ namespace BitMiracle.Tiff2Pdf
                 return;
             }
 
-            enable(m_output);
+            m_tiffStream.Disabled = false;
         }
 
         private void sample_planar_separate_to_contig(byte[] buffer, int bufferOffset, byte[] samplebuffer, int samplebuffersize)
@@ -2870,25 +2834,7 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             return (samplecount * 3);
-        }
-        
-        private static void disable(Tiff tif)
-        {
-            Converter t2p = tif.Clientdata() as Converter;
-            if (t2p == null)
-                throw new ArgumentException();
-
-            t2p.m_outputdisable = true;
-        }
-
-        private static void enable(Tiff tif)
-        {
-            Converter t2p = tif.Clientdata() as Converter;
-            if (t2p == null)
-                throw new ArgumentException();
-
-            t2p.m_outputdisable = false;
-        }
+        }       
 
         /*
         This functions converts a tilewidth x tilelength buffer of samples into an edgetilewidth x 
@@ -3083,6 +3029,8 @@ namespace BitMiracle.Tiff2Pdf
                     string imageName = string.Format("Im{0}_{1}", m_pdf_page + 1, i + 1);
                     DictionaryStream tile = new DictionaryStream();
                     xobjectDict.Add(imageName, tile);
+                    tile.AlreadyEncoded = true;
+                    tile.MakeIndirect();
                     m_imageParts[i] = tile;
                 }
             }
@@ -3092,6 +3040,8 @@ namespace BitMiracle.Tiff2Pdf
                 string imageName = string.Format("Im{0}", m_pdf_page + 1);
                 DictionaryStream image = new DictionaryStream();
                 xobjectDict.Add(imageName, image);
+                image.AlreadyEncoded = true;
+                image.MakeIndirect();
                 m_imageParts[0] = image;
             }
 
@@ -3119,14 +3069,6 @@ namespace BitMiracle.Tiff2Pdf
                 if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_PALETTE) != 0)
                     procSetArray.AddName("ImageI");
             }
-        }
-
-        private void writeToFile(byte[] data, int size)
-        {
-            if (data == null || size == 0)
-                return;
-
-            m_stream.Write(this, data, size);
         }
     }
 }
