@@ -39,14 +39,12 @@
     <Compile Include="Array.cs" />
     <Compile Include="BinaryObject.cs" />
     <Compile Include="BooleanObject.cs" />
-    <Compile Include="CompressionType.cs" />
     <Compile Include="Dictionary.cs" />
     <Compile Include="DictionaryOwner.cs" />
     <Compile Include="DictionaryStream.cs" />
     <Compile Include="DocumentCatalog.cs" />
     <Compile Include="DocumentInfo.cs" />
     <Compile Include="Field.cs" />
-    <Compile Include="FileWriterStream.cs" />
     <Compile Include="Filter.cs" />
     <Compile Include="IDictionaryOwner.cs" />
     <Compile Include="IObjectOwner.cs" />
@@ -64,10 +62,8 @@
     <Compile Include="PdfExceptionType.cs" />
     <Compile Include="PDFPage.cs" />
     <Compile Include="PDFUtils.cs" />
-    <Compile Include="PDFVersion.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawString.cs" />
     <Compile Include="RealObject.cs" />
     <Compile Include="Rect.cs" />
     <Compile Include="Stream.cs" />
@@ -75,7 +71,6 @@
     <Compile Include="StringUtils.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="Types.cs" />
-    <Compile Include="Utils.cs" />
     <Compile Include="XRefTable.cs" />
   </ItemGroup>
   <ItemGroup>

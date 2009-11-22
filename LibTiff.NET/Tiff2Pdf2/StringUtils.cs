@@ -252,69 +252,6 @@ namespace BitMiracle.Docotic.PDFLib
             return fontName.Substring(plusPosition + 1);
         }
 
-        public static int FindSubstring(byte[] pData, int dataLength, string substring)
-        {
-            return FindSubstring(pData, 0, dataLength, substring);
-        }
-
-        public static int FindSubstring(byte[] pData, int offset, int dataLength, string substring)
-        {
-            byte[] substringBytes = Encoding.Default.GetBytes(substring);
-
-            int substringLength = substringBytes.Length;
-            if (offset + substringLength > dataLength)
-                return -1;
-
-            if ((offset + substringLength) == dataLength)
-            {
-                if (CUtils.memcmp(pData, offset, substringBytes, substringLength) == 0)
-                    return 0;
-
-                return -1;
-            }
-
-            int posFound = -1;
-            for (int i = offset; i < dataLength - substringLength; i++)
-            {
-                if (CUtils.memcmp(pData, i, substringBytes, substringLength) == 0)
-                {
-                    posFound = i;
-                    break;
-                }
-            }
-
-            return posFound;
-        }
-    
-        public static int FindLastSubstring(byte[] pData, int offset, int dataLength, string substring)
-        {
-            byte[] substringBytes = Encoding.Default.GetBytes(substring);
-
-            int substringLength = substringBytes.Length;
-            if (substringLength > (dataLength - offset))
-                return -1;
-
-            if (substringLength == (dataLength - offset))
-            {
-                if (CUtils.memcmp(pData, offset, substringBytes, substringLength) == 0)
-                    return 0;
-
-                return -1;
-            }
-
-            int posFound = -1;
-            for (int i = dataLength - substringLength; i >= offset; i--)
-            {
-                if (CUtils.memcmp(pData, i, substringBytes, substringLength) == 0)
-                {
-                    posFound = i;
-                    break;
-                }
-            }
-
-            return posFound;
-        }
-
         public static int getNumSpaces(string str)
         {
             return getNumSpaces(Encoding.Default.GetBytes(str));

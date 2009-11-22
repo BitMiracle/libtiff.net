@@ -115,13 +115,6 @@ namespace BitMiracle.Docotic.PDFLib
             Add(key, new StringObject(value));
         }
 
-        //public void AddString(string key, string  value);
-
-        public void AddRawString(string key, string value)
-        {
-            Add(key, new RawString(value));
-        }
-
         public void AddNumber(string key, uint value)
         {
             AddNumber(key, (int)value);

@@ -63,58 +63,9 @@ namespace BitMiracle.Docotic.PDFLib
             pdfStream.Write(stream);
         }
 
-        public bool Save(string fileName)
-        {
-	        if (fileName.Length == 0)
-		        return false;
-
-            removeFile(fileName);
-
-            string temporaryFile = Path.GetTempFileName();
-	        if (temporaryFile.Length == 0)
-		        return false;
-
-            FileWriterStream stream = new FileWriterStream(temporaryFile);
-	        if (stream == null)
-		        return false;
-
-	        try
-	        {
-		        saveDocumentToStream(stream);
-                stream.Close();
-
-                try
-                {
-                    File.Copy(temporaryFile, fileName);
-                    removeFile(temporaryFile);
-                }
-                catch (System.Exception)
-                {
-                    return false;
-                }
-                
-                return true;
-	        }
-	        catch (PdfException)
-	        {
-		        return false;
-	        }
-        }
-
         public void SetTrailerID(byte[] pID)
         {
             m_xref.SetTrailerID(pID);
-        }
-
-	    private static void removeFile(string fileName)
-        {
-            try
-            {
-                File.Delete(fileName);
-            }
-            catch (System.Exception)
-            {
-            }
         }
 
         public virtual void Register(PDFObject obj)

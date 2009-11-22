@@ -169,19 +169,6 @@ namespace BitMiracle.Docotic.PDFLib
             return m_streamSize;
         }
 
-        public int FindSubstring(string strForSearch, int startPos)
-        {
-            return FindSubstring(strForSearch, startPos, Size());
-        }
-
-        public int FindSubstring(string strForSearch, int startPos, int endPos)
-        {
-            if (startPos >= Size() || endPos > Size())
-                throw new PdfException(PdfExceptionType.InvalidParameter);
-
-            return StringUtils.FindSubstring(m_pBuffer, startPos, Math.Min(m_pBuffer.Length, endPos + 1), strForSearch);
-        }
-
         private void initialize(byte[] buffer, int size)
         {
             if (buffer != null && size == 0)
