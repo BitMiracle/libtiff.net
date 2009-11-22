@@ -56,6 +56,13 @@ namespace BitMiracle.Docotic.PDFLib
             return m_xref.Catalog.AddPage();
         }
 
+        public void Save(Stream stream)
+        {
+            MemoryStream pdfStream = new MemoryStream();
+            saveDocumentToStream(pdfStream);
+            pdfStream.Write(stream);
+        }
+
         public bool Save(string fileName)
         {
 	        if (fileName.Length == 0)

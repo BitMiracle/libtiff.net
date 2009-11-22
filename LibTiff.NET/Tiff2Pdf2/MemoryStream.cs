@@ -111,6 +111,11 @@ namespace BitMiracle.Docotic.PDFLib
             return Encoding.Default.GetString(buffer);
         }
 
+        public void Write(Stream stream)
+        {
+            stream.Write(m_pBuffer, 0, m_pBuffer.Length);
+        }
+
         public override int Write(byte[] ptr, int size)
         {
             if (ptr == null)

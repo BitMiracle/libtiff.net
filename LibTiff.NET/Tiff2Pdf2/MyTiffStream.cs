@@ -23,7 +23,7 @@ namespace BitMiracle.Tiff2Pdf
     {
         private bool m_disabled = false;
         private PDFStream m_stream = null;
-        
+
         public bool Disabled
         {
             get { return m_disabled; }
