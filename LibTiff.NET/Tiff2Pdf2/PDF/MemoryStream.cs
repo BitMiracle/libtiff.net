@@ -113,7 +113,7 @@ namespace BitMiracle.Docotic.PDFLib
 
         public void Write(Stream stream)
         {
-            stream.Write(m_pBuffer, 0, m_pBuffer.Length);
+            stream.Write(m_pBuffer, 0, m_streamSize);
         }
 
         public override int Write(byte[] ptr, int size)
@@ -147,6 +147,10 @@ namespace BitMiracle.Docotic.PDFLib
 
 	            case SeekOrigin.Current:
                     newPos = m_Position + pos;
+                    break;
+
+                case SeekOrigin.End:
+                    newPos = m_Position - pos;
                     break;
 	        }
 

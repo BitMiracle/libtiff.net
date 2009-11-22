@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.Tiff2Pdf
+namespace BitMiracle.Tiff2Pdf2
 {
     class Tiff2PdfConstants
     {

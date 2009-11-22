@@ -16,7 +16,7 @@ using System.IO;
 
 using BitMiracle.LibTiff;
 
-namespace BitMiracle.Tiff2Pdf
+namespace BitMiracle.Tiff2Pdf2
 {
     class MyErrorHandler : TiffErrorHandler
     {

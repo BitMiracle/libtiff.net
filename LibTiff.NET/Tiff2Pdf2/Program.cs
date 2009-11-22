@@ -24,7 +24,7 @@ using System.Globalization;
 
 using BitMiracle.LibTiff;
 
-namespace BitMiracle.Tiff2Pdf
+namespace BitMiracle.Tiff2Pdf2
 {
     public class Program
     {

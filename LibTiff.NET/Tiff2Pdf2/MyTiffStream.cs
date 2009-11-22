@@ -17,7 +17,7 @@ using System.IO;
 using BitMiracle.LibTiff;
 using BitMiracle.Docotic.PDFLib;
 
-namespace BitMiracle.Tiff2Pdf
+namespace BitMiracle.Tiff2Pdf2
 {
     class MyTiffStream : TiffStream
     {
