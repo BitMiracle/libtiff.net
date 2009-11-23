@@ -35,22 +35,22 @@ namespace BitMiracle.Docotic.PDFLib
             dst.Write(buffer, this.Size());
         }
 
-        public void WriteToStream(PDFStream dst, Filter filter)
-        {
-            if (dst == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+        //public void WriteToStream(PDFStream dst, Filter filter)
+        //{
+        //    if (dst == null)
+        //        throw new PdfException(PdfExceptionType.InvalidParameter);
 
-            int byteSize = Size();
-            if (byteSize == 0)
-                return;
+        //    int byteSize = Size();
+        //    if (byteSize == 0)
+        //        return;
 
-            Seek(0, SeekOrigin.Begin);
+        //    Seek(0, SeekOrigin.Begin);
 
-            byte[] data = new byte [byteSize];
-            Array.Clear(data, 0, byteSize);
-            byteSize = Read(data, byteSize);
-            dst.Write(data, byteSize);
-        }
+        //    byte[] data = new byte [byteSize];
+        //    Array.Clear(data, 0, byteSize);
+        //    byteSize = Read(data, byteSize);
+        //    dst.Write(data, byteSize);
+        //}
         
         public void WriteChar(char value)
         {
@@ -82,12 +82,12 @@ namespace BitMiracle.Docotic.PDFLib
 
         public void WriteReal(float value)
         {
-            WriteStr(StringUtils.FloatToString(value, 5, true));
+            WriteStr(FloatToString(value, 5, true));
         }
 
         public void WriteEscapeName(string value)
         {
-            string escapeName = StringUtils.ToEscapeName(value);
+            string escapeName = ToEscapeName(value);
             Write(Encoding.Default.GetBytes(escapeName), escapeName.Length);
         }
 
@@ -113,7 +113,7 @@ namespace BitMiracle.Docotic.PDFLib
             for (int i = 0; i < bytes.Length; i++)
             {
                 byte c = bytes[i];
-                if (PDFUtils.NeedsToBeEscaped(c))
+                if (NeedsToBeEscaped(c))
                 {
                     sb.Append('\\');
 
@@ -149,7 +149,7 @@ namespace BitMiracle.Docotic.PDFLib
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < count; i++)
             {
-                sb.Append(StringUtils.FloatToString(reals[i], 5, true));
+                sb.Append(FloatToString(reals[i], 5, true));
                 sb.Append(' ');
             }
 
@@ -259,6 +259,93 @@ namespace BitMiracle.Docotic.PDFLib
             Seek(oldPosFirst, SeekOrigin.Begin);
 
             return res;
+        }
+
+        private static string FloatToString(float real)
+        {
+            return FloatToString(real, 3, false);
+        }
+
+        private static string FloatToString(float real, int afterDotCount, bool agressiveZeroRemoval)
+        {
+            // add 0.000005 to compensate rounding error of float values
+            string s = (real + 0.000005).ToString("F" + afterDotCount.ToString(), CultureInfo.InvariantCulture);
+
+            // remove excessive zeros an end
+            int dotPos = s.LastIndexOf('.');
+            int excessiveZeros = 0;
+            if (dotPos != -1)
+            {
+                if (agressiveZeroRemoval)
+                {
+                    // start count zeros from digit before last digit
+                    // it means we'll remove any 5th digit after decimal dot if 
+                    // 4th digit after decimal dot is zero
+                    // "x.00001" -> "x", but
+                    // "x.00011" -> "x.00011"
+                    for (int i = s.Length - 2; i > dotPos; i--)
+                    {
+                        if (s[i] != '0')
+                            break;
+
+                        excessiveZeros++;
+                    }
+
+                    if (excessiveZeros > 0)
+                    {
+                        // take into account the 5th digit
+                        excessiveZeros++;
+                    }
+                }
+                else
+                {
+                    for (int i = s.Length - 1; i > dotPos; i--)
+                    {
+                        if (s[i] != '0')
+                            break;
+
+                        excessiveZeros++;
+                    }
+                }
+
+                int removeCharCount = excessiveZeros;
+                if ((s.Length - excessiveZeros - 1) == dotPos)
+                {
+                    // we removed all digits after dot,
+                    // remove dot too
+                    removeCharCount++;
+                }
+
+                return s.Substring(0, s.Length - removeCharCount);
+            }
+
+            return s;
+        }
+
+        private static string ToEscapeName(string value)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append('/');
+
+            byte[] bytes = Encoding.Default.GetBytes(value);
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                byte c = bytes[i];
+                if (NeedsToBeEscaped(c) || (c == 32))
+                {
+                    sb.Append('#');
+                    sb.Append(c.ToString("X2"));
+                }
+                else
+                    sb.Append(Encoding.Default.GetChars(new byte[] { c }));
+            }
+
+            return sb.ToString();
+        }
+
+        private static bool NeedsToBeEscaped(byte c)
+        {
+            return (c < 32 || c == (byte)'\\' || c == (byte)'(' || c == (byte)')');
         }
     }
 }

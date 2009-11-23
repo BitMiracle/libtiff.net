@@ -66,7 +66,7 @@ namespace BitMiracle.Docotic.PDFLib
                 throw new PdfException(PdfExceptionType.InvalidParameter);
             }
 
-            if (m_items.Count >= Limit.LIMIT_MAX_PDFDICT_ELEMENT)
+            if (m_items.Count >= 65535)
             {
                 obj = null;
                 throw new PdfException(PdfExceptionType.DictionaryLengthExceeded);

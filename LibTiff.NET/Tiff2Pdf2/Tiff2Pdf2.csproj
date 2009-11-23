@@ -44,12 +44,9 @@
     <Compile Include="PDF\DictionaryStream.cs" />
     <Compile Include="PDF\DocumentCatalog.cs" />
     <Compile Include="PDF\DocumentInfo.cs" />
-    <Compile Include="PDF\Field.cs" />
-    <Compile Include="PDF\Filter.cs" />
     <Compile Include="PDF\IDictionaryOwner.cs" />
     <Compile Include="PDF\IObjectOwner.cs" />
     <Compile Include="PDF\IObjectRegistrator.cs" />
-    <Compile Include="PDF\Limit.cs" />
     <Compile Include="PDF\MemoryStream.cs" />
     <Compile Include="MyErrorHandler.cs" />
     <Compile Include="MyTiffStream.cs" />
@@ -61,14 +58,12 @@
     <Compile Include="PDF\PdfException.cs" />
     <Compile Include="PDF\PdfExceptionType.cs" />
     <Compile Include="PDF\PDFPage.cs" />
-    <Compile Include="PDF\PDFUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PDF\RealObject.cs" />
     <Compile Include="PDF\Rect.cs" />
     <Compile Include="PDF\Stream.cs" />
     <Compile Include="PDF\StringObject.cs" />
-    <Compile Include="PDF\StringUtils.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="PDF\XRefTable.cs" />

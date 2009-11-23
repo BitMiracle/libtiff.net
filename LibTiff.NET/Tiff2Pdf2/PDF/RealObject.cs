@@ -31,7 +31,7 @@ namespace BitMiracle.Docotic.PDFLib
 
         public override string ToString()
         {
-            return StringUtils.FloatToString(m_value);
+            return m_value.ToString();
         }
 
         public override PDFObject.Type GetPDFType()
@@ -41,10 +41,10 @@ namespace BitMiracle.Docotic.PDFLib
 
         public void SetValue(float value)
         {
-            if (value > Limit.LIMIT_MAX_PDFREAL)
+            if (value > 32767)
                 throw new PdfException(PdfExceptionType.RealValueIsOutOfRange);
 
-            if (value < Limit.LIMIT_MIN_PDFREAL)
+            if (value < -32767)
                 throw new PdfException(PdfExceptionType.RealValueIsOutOfRange);
 
             m_value = value;

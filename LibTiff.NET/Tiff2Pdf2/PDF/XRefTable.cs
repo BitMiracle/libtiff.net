@@ -55,7 +55,7 @@ namespace BitMiracle.Docotic.PDFLib
             if (obj == null)
                 throw new PdfException(PdfExceptionType.InvalidParameter);
 
-            if (m_entries.Count >= Limit.LIMIT_MAX_XREF_ELEMENT)
+            if (m_entries.Count >= 8388607)
                 throw new PdfException(PdfExceptionType.XrefLengthExceeded);
 
             Entry entry = new Entry(0, 0, true);

@@ -43,10 +43,13 @@ namespace BitMiracle.Docotic.PDFLib
             if (value == null || value.Length == 0)
                 throw new PdfException(PdfExceptionType.InvalidParameter);
 
-            if (value.Length > Limit.LIMIT_MAX_PDFNAME_LEN)
+            if (value.Length > 127)
                 throw new PdfException(PdfExceptionType.NameIsTooLong);
 
-            PDFUtils.PdfStrCpy(ref m_value, value, Limit.LIMIT_MAX_PDFNAME_LEN);
+            if (value != null)
+                m_value = value.Substring(0, Math.Min(value.Length, 127));
+            else
+                m_value = null;
         }
 
         public string GetValue()

@@ -74,7 +74,7 @@ namespace BitMiracle.Docotic.PDFLib
             if (obj == null)
                 throw new PdfException(PdfExceptionType.InvalidObject);
 
-            if (m_items.Count >= Limit.LIMIT_MAX_PDFARRAY)
+            if (m_items.Count >= 81910)
                 throw new PdfException(PdfExceptionType.ArrayLengthExceeded);
 
             m_items.Add(obj);
@@ -94,7 +94,7 @@ namespace BitMiracle.Docotic.PDFLib
 	        if (position >= GetItemCount() && position != 0)
 		        throw new PdfException(PdfExceptionType.InvalidParameter);
 
-            if (m_items.Count >= Limit.LIMIT_MAX_PDFARRAY)
+            if (m_items.Count >= 81910)
                 throw new PdfException(PdfExceptionType.ArrayLengthExceeded);
 
             m_items.Insert(position, obj);

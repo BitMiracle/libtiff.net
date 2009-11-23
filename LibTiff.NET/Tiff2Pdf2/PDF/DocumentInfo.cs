@@ -15,67 +15,67 @@ namespace BitMiracle.Docotic.PDFLib
 
         public string GetAuthor()
         {
-            return getField(Field.Author);
+            return getField("Author");
         }
 
         public void SetAuthor(string author)
         {
-            setField(Field.Author, author);
+            setField("Author", author);
         }
 
         public string GetCreator()
         {
-            return getField(Field.Creator);
+            return getField("Creator");
         }
 
         public void SetCreator(string creator)
         {
-            setField(Field.Creator, creator);
+            setField("Creator", creator);
         }
 
         public string GetKeywords()
         {
-            return getField(Field.Keywords);
+            return getField("Keywords");
         }
 
         public void SetKeywords(string keywords)
         {
-            setField(Field.Keywords, keywords);
+            setField("Keywords", keywords);
         }
 
         public string GetProducer()
         {
-            return getField(Field.Producer);
+            return getField("Producer");
         }
 
         public void SetProducer(string producer)
         {
-            setField(Field.Producer, producer);
+            setField("Producer", producer);
         }
 
         public string GetSubject()
         {
-            return getField(Field.Subject);
+            return getField("Subject");
         }
 
         public void SetSubject(string subject)
         {
-            setField(Field.Subject, subject);
+            setField("Subject", subject);
         }
 
         public string GetTitle()
         {
-            return getField(Field.Title);
+            return getField("Title");
         }
 
         public void SetTitle(string title)
         {
-            setField(Field.Title, title);
+            setField("Title", title);
         }
 
         public string GetCreationDateAsString()
         {
-            return getField(Field.CreationDate);
+            return getField("CreationDate");
         }
         
         public DateTime GetCreationDate()

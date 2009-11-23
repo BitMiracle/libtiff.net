@@ -107,7 +107,7 @@ namespace BitMiracle.Docotic.PDFLib
 
         private void setValue(string value, int length)
         {
-            if (length > Limit.LIMIT_MAX_PDFSTRING_LEN)
+            if (length > 65535)
                 throw new PdfException(PdfExceptionType.StringIsTooLong);
 
             m_length = length;
@@ -153,21 +153,52 @@ namespace BitMiracle.Docotic.PDFLib
 
         private void writeValue(PDFStream stream)
         {
-            if (!StringUtils.IsANSI(GetValue()))
+            if (!IsANSI(GetValue()))
             {
                 writeUnicodeString(stream);
                 return;
             }
 
-            if (!StringUtils.IsASCII(GetValue()))
+            if (!IsASCII(GetValue()))
             {
                 stream.WriteChar('<');
-                byte[] bytes = StringUtils.truncateToBytes(m_value);
+                byte[] bytes = truncateToBytes(m_value);
                 stream.WriteBinary(bytes, bytes.Length);
                 stream.WriteChar('>');
             }
             else
                 stream.WriteEscapeText(m_value);
         }
+
+        private static bool IsANSI(string text)
+        {
+            return allCodesLessEqualThan(255, text);
+        }
+
+        private static bool IsASCII(string text)
+        {
+            return allCodesLessEqualThan(127, text);
+        }
+
+        private static byte[] truncateToBytes(string text)
+        {
+            byte[] bytes = new byte[text.Length];
+
+            for (int i = 0; i < text.Length; ++i)
+                bytes[i] = (byte)((int)text[i] & 0x00FF);
+
+            return bytes;
+        }
+
+        private static bool allCodesLessEqualThan(int code, string text)
+        {
+            foreach (char c in text)
+            {
+                if ((int)c > code)
+                    return false;
+            }
+
+            return true;
+        }       
     }
 }
