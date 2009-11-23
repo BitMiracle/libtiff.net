@@ -341,5 +341,11 @@ namespace UnitTests.Tiff2Pdf
         {
             performTest("ycbcr-cat.tif");
         }
+
+        [Test]
+        public void test_multipage()
+        {
+            performTest("multipage.tif");
+        }
     }
 }
