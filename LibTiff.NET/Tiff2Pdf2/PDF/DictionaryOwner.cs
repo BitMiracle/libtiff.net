@@ -18,7 +18,7 @@ namespace BitMiracle.Docotic.PDFLib
         protected DictionaryOwner(IObjectRegistrator registrator)
         {
             if (registrator == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
 	        m_dictionary = new PDFDictionary();
 	        registrator.Register(m_dictionary);

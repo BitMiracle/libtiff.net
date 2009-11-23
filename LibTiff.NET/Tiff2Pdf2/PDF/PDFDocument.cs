@@ -10,17 +10,21 @@ namespace BitMiracle.Docotic.PDFLib
     class PDFDocumentImpl : IObjectRegistrator
     {
 	    private	XRefTable m_xref;
+        private PageCollection m_rootPages;
+
         private int m_majorVersion = 1;
         private int m_minorVersion = 1;
         
         public PDFDocumentImpl()
         {
-            m_xref = new XRefTable(this);
+            m_xref = new XRefTable();
 
             // ensure Catalog and Info created and added to xref
-            DocumentCatalog c = m_xref.Catalog;
-            DocumentInfo i = m_xref.Info;
-            c.AddPages(this);
+            PDFDictionary c = m_xref.Catalog;
+            PDFDictionary i = m_xref.Info;
+
+            m_rootPages = new PageCollection(this);
+            c.Add("Pages", m_rootPages.GetDictionary());
         }
 
         public int MajorVersion
@@ -35,7 +39,7 @@ namespace BitMiracle.Docotic.PDFLib
             set { m_minorVersion = value; }
         }
 
-        public DocumentCatalog Catalog
+        public PDFDictionary Catalog
         {
             get
             {
@@ -43,7 +47,7 @@ namespace BitMiracle.Docotic.PDFLib
             }
         }
 
-        public DocumentInfo Info
+        public PDFDictionary Info
         {
             get
             {
@@ -53,7 +57,7 @@ namespace BitMiracle.Docotic.PDFLib
 
         public PDFPage AddPage()
         {
-            return m_xref.Catalog.AddPage();
+            return m_rootPages.AddKid();
         }
 
         public void Save(Stream stream)

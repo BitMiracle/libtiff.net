@@ -15,8 +15,6 @@ namespace BitMiracle.Docotic.PDFLib
 	        Add("Length", new NumberObject(0));
 
 	        m_stream = new MemoryStream();
-	        if (m_stream == null)
-		        throw new PdfException(PdfExceptionType.MemoryAllocationFailed);
         }
 
 	    public override PDFObject.Type GetPDFType()
@@ -48,7 +46,7 @@ namespace BitMiracle.Docotic.PDFLib
 
 	        NumberObject length = GetItem("Length") as NumberObject;
 	        if (length == null)
-		        throw new PdfException(PdfExceptionType.WrongDictionary);
+                throw new PdfException(PdfException.InvalidObject);
 	        length.SetValue((int)streamLength);
 
 	        base.Write(stream);

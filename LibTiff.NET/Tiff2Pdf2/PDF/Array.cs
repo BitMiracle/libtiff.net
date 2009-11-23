@@ -72,10 +72,7 @@ namespace BitMiracle.Docotic.PDFLib
 		        return this;
 
             if (obj == null)
-                throw new PdfException(PdfExceptionType.InvalidObject);
-
-            if (m_items.Count >= 81910)
-                throw new PdfException(PdfExceptionType.ArrayLengthExceeded);
+                throw new PdfException(PdfException.InvalidObject);
 
             m_items.Add(obj);
 	        PDFObject.IncRef(obj);
@@ -89,13 +86,10 @@ namespace BitMiracle.Docotic.PDFLib
 		        return;
 
 	        if (obj == null)
-		        throw new PdfException(PdfExceptionType.InvalidObject);
+		        throw new PdfException(PdfException.InvalidObject);
 
 	        if (position >= GetItemCount() && position != 0)
-		        throw new PdfException(PdfExceptionType.InvalidParameter);
-
-            if (m_items.Count >= 81910)
-                throw new PdfException(PdfExceptionType.ArrayLengthExceeded);
+		        throw new PdfException(PdfException.InvalidParameter);
 
             m_items.Insert(position, obj);
 	        PDFObject.IncRef(obj);
@@ -130,7 +124,7 @@ namespace BitMiracle.Docotic.PDFLib
         public PDFObject GetItem(int index)
         {
             if (index < 0 || index >= m_items.Count)
-                throw new PdfException(PdfExceptionType.InvalidIndex);
+                throw new PdfException(PdfException.InvalidParameter);
 
             return m_items[index];
         }
@@ -143,7 +137,7 @@ namespace BitMiracle.Docotic.PDFLib
             else if (item.GetPDFType() == PDFObject.Type.PDFReal)
                 return (int)((RealObject)item).GetValue();
                 
-            throw new PdfException(PdfExceptionType.InvalidObject);
+            throw new PdfException(PdfException.InvalidObject);
         }
 
         public float GetFloat(int index)
@@ -154,30 +148,12 @@ namespace BitMiracle.Docotic.PDFLib
             else if (item.GetPDFType() == PDFObject.Type.PDFReal)
                 return ((RealObject)item).GetValue();
 
-            throw new PdfException(PdfExceptionType.InvalidObject);
+            throw new PdfException(PdfException.InvalidObject);
         }
 
         public int GetItemCount()
         {
             return m_items.Count;
-        }
-
-        public PDFRect ToRect()
-        {
-            if (m_items.Count != 4)
-                throw new PdfException(PdfExceptionType.WrongArray);
-
-            // Typically, the array takes the form [ llx lly urx ury ]
-            // specifying the lower-left x, lower-left y, upper-right x, and 
-            // upper-right y coordinates of the rectangle, in that order.
-            // i.e [left, bottom, right, top]
-
-            float left = GetFloat(0);
-            float top = GetFloat(3);
-            float right = GetFloat(2);
-            float bottom = GetFloat(1);
-
-            return new PDFRect(left, top, right, bottom);
         }
 
         public void RemoveAt(int index)

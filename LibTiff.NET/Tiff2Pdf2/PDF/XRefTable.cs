@@ -22,29 +22,23 @@ namespace BitMiracle.Docotic.PDFLib
             }
         };
 
-        private const int HPDF_MAX_GENERATION_NUM = 65535;
+        private const int maxGeneration = 65535;
         private const string entryWriteFormat = "{0:0000000000} {1:00000} {2}\r\n";
-
-        private IObjectRegistrator m_owner;
 
         private Dictionary<int, Entry> m_entries = new Dictionary<int,Entry>();
 
         private PDFDictionary m_trailer;
-        private DocumentCatalog m_catalog;
-        private DocumentInfo m_info;
+        private PDFDictionary m_catalog;
+        private PDFDictionary m_info;
 
-        public XRefTable(IObjectRegistrator owner)
+        public XRefTable()
         {
-            if (owner == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
-
             m_trailer = null;
             m_catalog = null;
             m_info = null;
-            m_owner = owner;
 
             // add first entry which is free entry and whose generation number is 0
-            Entry new_entry = new Entry(0, HPDF_MAX_GENERATION_NUM, false);
+            Entry new_entry = new Entry(0, maxGeneration, false);
             m_entries[0] = new_entry;
 
             m_trailer = new PDFDictionary();
@@ -53,10 +47,7 @@ namespace BitMiracle.Docotic.PDFLib
         public virtual void Register(PDFObject obj)
         {
             if (obj == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
-
-            if (m_entries.Count >= 8388607)
-                throw new PdfException(PdfExceptionType.XrefLengthExceeded);
+                throw new PdfException(PdfException.InvalidParameter);
 
             Entry entry = new Entry(0, 0, true);
             entry.m_object = obj;
@@ -68,22 +59,22 @@ namespace BitMiracle.Docotic.PDFLib
         public virtual void UnRegister(PDFObject obj)
         {
             if (obj == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
             Entry entry = getEntryAt(obj.GetID());
             if (entry == null)
             {
                 if (obj.IsIndirect())
-                    throw new PdfException(PdfExceptionType.InvalidObject);
+                    throw new PdfException(PdfException.InvalidObject);
 
-                throw new PdfException(PdfExceptionType.NotAttached);
+                throw new PdfException(PdfException.NotAttached);
             }
 
             entry.m_object.MakeDirect();
 	        PDFObject.DecRef(ref entry.m_object);
             entry.m_object = null;
 
-            entry.m_generation = HPDF_MAX_GENERATION_NUM;
+            entry.m_generation = maxGeneration;
             entry.m_inUse = false;
             entry.m_offset = 0;
         }
@@ -110,28 +101,32 @@ namespace BitMiracle.Docotic.PDFLib
             m_trailer.Add("ID", idArray);
         }
 
-        public DocumentCatalog Catalog
+        public PDFDictionary Catalog
         {
             get
             {
                 if (m_catalog == null)
                 {
-                    m_catalog = new DocumentCatalog(m_owner);
-                    m_trailer.Add("Root", m_catalog.GetDictionary());
+                    m_catalog = new PDFDictionary();
+                    m_catalog.AddName("Type", "Catalog");
+
+                    Register(m_catalog);
+                    m_trailer.Add("Root", m_catalog);
                 }
 
                 return m_catalog;
             }
         }
 
-        public DocumentInfo Info
+        public PDFDictionary Info
         {
             get
             {
                 if (m_info == null)
                 {
-                    m_info = new DocumentInfo(this);
-                    m_trailer.Add("Info", m_info.GetDictionary());
+                    m_info = new PDFDictionary();
+                    Register(m_info);
+                    m_trailer.Add("Info", m_info);
                 }
 
                 return m_info;
@@ -156,9 +151,6 @@ namespace BitMiracle.Docotic.PDFLib
             foreach (KeyValuePair<int, Entry> kvp in m_entries)
             {
                 Entry entry = kvp.Value;
-                if (entry == null)
-                    throw new PdfException(PdfExceptionType.WrongXref);
-
                 PDFObject obj = (PDFObject)entry.m_object;
                 if (obj != null)
                     obj.Clear();
@@ -264,9 +256,6 @@ namespace BitMiracle.Docotic.PDFLib
             foreach (KeyValuePair<int, Entry> kvp in m_entries)
             {
                 Entry entry = kvp.Value;
-                if (entry == null)
-                    throw new PdfException(PdfExceptionType.WrongXref);
-
                 if (entry.m_inUse == false)
                     continue;
 
@@ -291,9 +280,6 @@ namespace BitMiracle.Docotic.PDFLib
             for (int i = 0; i < GetEntryCount(); i++)
             {
                 Entry entry = getEntryAt(i);
-                if (entry == null)
-                    throw new PdfException(PdfExceptionType.WrongXref);
-
                 if (entry.m_inUse == false)
                     continue;
 
@@ -321,7 +307,7 @@ namespace BitMiracle.Docotic.PDFLib
 
                 string str;
                 if (!entry.m_inUse)
-                    str = string.Format(entryWriteFormat, 0, HPDF_MAX_GENERATION_NUM, 'f');
+                    str = string.Format(entryWriteFormat, 0, maxGeneration, 'f');
                 else
                     str = string.Format(entryWriteFormat, entry.m_offset, entry.m_generation, 'n');
 

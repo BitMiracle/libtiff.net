@@ -27,16 +27,16 @@ namespace BitMiracle.Docotic.PDFLib
         public void AddKid(PDFPage kid, int insertPosition)
         {
             if (insertPosition >= GetCount() && insertPosition != (int)-1)
-		        throw new PdfException(PdfExceptionType.InvalidIndex);
+		        throw new PdfException(PdfException.InvalidParameter);
 
             if (kid.GetDictionary().GetItem("Parent") != null)
-                throw new PdfException(PdfExceptionType.CannotSetParent);
+                throw new PdfException(PdfException.InvalidParameter);
 
             kid.GetDictionary().Add("Parent", m_dictionary);
 
             PDFArray kids = getKids();
             if (kids == null)
-                throw new PdfException(PdfExceptionType.InvalidItem);
+                throw new PdfException(PdfException.InvalidObject);
 
 	        if (insertPosition != -1)
 	        {
@@ -53,9 +53,6 @@ namespace BitMiracle.Docotic.PDFLib
         public PDFPage AddKid()
         {
             PDFPage page = new PDFPage(m_owner);
-            if (page == null)
-                throw new PdfException(PdfExceptionType.MemoryAllocationFailed);
-
             AddKid(page);
             return page;
         }
@@ -81,7 +78,7 @@ namespace BitMiracle.Docotic.PDFLib
         {
             PDFArray kids = getKids();
             if (kids == null)
-                throw new PdfException(PdfExceptionType.InvalidItem);
+                throw new PdfException(PdfException.InvalidObject);
 
             NumberObject count = getCount();
             if (count != null)
@@ -89,9 +86,6 @@ namespace BitMiracle.Docotic.PDFLib
             else
             {
                 count = new NumberObject((int)GetCount());
-                if (count == null)
-                    throw new PdfException(PdfExceptionType.MemoryAllocationFailed);
-
                 m_dictionary.Add("Count", count);
             }
         }
@@ -104,11 +98,7 @@ namespace BitMiracle.Docotic.PDFLib
         protected static NumberObject getCount(PDFDictionary dict)
         {
             PDFObject item = dict.GetItem("Count");
-            NumberObject count = item as NumberObject;
-            if (count == null)
-                throw new PdfException(PdfExceptionType.WrongPages);
-
-            return count;
+            return item as NumberObject;
         }
 
         protected PDFArray getKids()
@@ -119,11 +109,7 @@ namespace BitMiracle.Docotic.PDFLib
         protected static PDFArray getKids(PDFDictionary dict)
         {
             PDFObject item = dict.GetItem("Kids");
-            PDFArray kids = item as PDFArray;
-            if (kids == null)
-                throw new PdfException(PdfExceptionType.WrongPages);
-
-            return kids;
+            return item as PDFArray;
         }
 
         private bool correctIndex(int pageIndex)

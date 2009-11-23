@@ -16,7 +16,7 @@ namespace BitMiracle.Docotic.PDFLib
         public NameObject(NameObject nameObj)
         {
             if (nameObj == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
             SetValue(nameObj.m_value);
         }
@@ -41,10 +41,7 @@ namespace BitMiracle.Docotic.PDFLib
         public void SetValue(string value)
         {
             if (value == null || value.Length == 0)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
-
-            if (value.Length > 127)
-                throw new PdfException(PdfExceptionType.NameIsTooLong);
+                throw new PdfException(PdfException.InvalidParameter);
 
             if (value != null)
                 m_value = value.Substring(0, Math.Min(value.Length, 127));

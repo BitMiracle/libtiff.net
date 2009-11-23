@@ -32,9 +32,6 @@ namespace BitMiracle.Docotic.PDFLib
 
         public void SetValue(byte[] value)
         {
-            if (value.Length > 65535)
-                throw new PdfException(PdfExceptionType.BinaryIsTooLong);
-
             Clear(false);
 
             m_value = new byte [value.Length];

@@ -58,18 +58,12 @@ namespace BitMiracle.Docotic.PDFLib
         public void Add(string key, PDFObject obj)
         {
             if (obj == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
             if (key == null || key.Length == 0)
             {
                 obj = null;
-                throw new PdfException(PdfExceptionType.InvalidParameter);
-            }
-
-            if (m_items.Count >= 65535)
-            {
-                obj = null;
-                throw new PdfException(PdfExceptionType.DictionaryLengthExceeded);
+                throw new PdfException(PdfException.InvalidParameter);
             }
 
 	        if (GetItem(key) != obj)
@@ -173,7 +167,7 @@ namespace BitMiracle.Docotic.PDFLib
 
             /* the key is not inheritable */
             if (requestedKeyIsValid != true)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
             // if resources of the object is 0, search resources of parent pages
             PDFObject obj = GetItem(key);
@@ -192,7 +186,7 @@ namespace BitMiracle.Docotic.PDFLib
         {
             PDFObject item = GetItem(key);
             if (item == null)
-                throw new PdfException(PdfExceptionType.WrongDictionary);
+                throw new PdfException(PdfException.InvalidObject);
 
             return item;
         }

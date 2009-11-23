@@ -27,7 +27,7 @@ namespace BitMiracle.Docotic.PDFLib
         public StringObject(string rawData, char openBracket)
         {
             if (openBracket != '(' && openBracket != '<')
-		        throw new PdfException(PdfExceptionType.InvalidParameter);
+		        throw new PdfException(PdfException.InvalidParameter);
 
 	        initialize();
 	        m_rawData = rawData;
@@ -107,9 +107,6 @@ namespace BitMiracle.Docotic.PDFLib
 
         private void setValue(string value, int length)
         {
-            if (length > 65535)
-                throw new PdfException(PdfExceptionType.StringIsTooLong);
-
             m_length = length;
             m_value = value.Clone() as string;
         }

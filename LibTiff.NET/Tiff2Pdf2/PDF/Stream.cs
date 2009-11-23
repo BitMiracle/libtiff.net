@@ -141,10 +141,10 @@ namespace BitMiracle.Docotic.PDFLib
         public void Write(float[] reals, int count, string text)
         {
             if (reals == null)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
             if (count < 1)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < count; i++)

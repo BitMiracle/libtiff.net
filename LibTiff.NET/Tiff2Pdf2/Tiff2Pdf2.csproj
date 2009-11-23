@@ -42,8 +42,6 @@
     <Compile Include="PDF\Dictionary.cs" />
     <Compile Include="PDF\DictionaryOwner.cs" />
     <Compile Include="PDF\DictionaryStream.cs" />
-    <Compile Include="PDF\DocumentCatalog.cs" />
-    <Compile Include="PDF\DocumentInfo.cs" />
     <Compile Include="PDF\IDictionaryOwner.cs" />
     <Compile Include="PDF\IObjectOwner.cs" />
     <Compile Include="PDF\IObjectRegistrator.cs" />
@@ -56,7 +54,6 @@
     <Compile Include="PDF\PageCollection.cs" />
     <Compile Include="PDF\PDFDocument.cs" />
     <Compile Include="PDF\PdfException.cs" />
-    <Compile Include="PDF\PdfExceptionType.cs" />
     <Compile Include="PDF\PDFPage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -41,12 +41,6 @@ namespace BitMiracle.Docotic.PDFLib
 
         public void SetValue(float value)
         {
-            if (value > 32767)
-                throw new PdfException(PdfExceptionType.RealValueIsOutOfRange);
-
-            if (value < -32767)
-                throw new PdfException(PdfExceptionType.RealValueIsOutOfRange);
-
             m_value = value;
         }
 

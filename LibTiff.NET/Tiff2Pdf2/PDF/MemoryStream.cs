@@ -28,29 +28,6 @@ namespace BitMiracle.Docotic.PDFLib
             initialize(buffer, size);
         }
 
-        public MemoryStream(string fileName)
-        {
-            if (fileName.Length == 0)
-                throw new PdfException(PdfExceptionType.FileIOError);
-
-            byte[] buffer = null;
-            int length = 0;
-
-            try
-            {
-                buffer = File.ReadAllBytes(fileName);
-                length = buffer.Length;
-            }
-            catch (System.Exception)
-            {
-            }
-            
-            if (buffer == null || length == 0)
-                throw new PdfException(PdfExceptionType.FileIOError);
-
-            initialize(buffer, length);
-        }
-
         public MemoryStream(MemoryStream stream)
         {
             clear();
@@ -176,7 +153,7 @@ namespace BitMiracle.Docotic.PDFLib
         private void initialize(byte[] buffer, int size)
         {
             if (buffer != null && size == 0)
-                throw new PdfException(PdfExceptionType.InvalidParameter);
+                throw new PdfException(PdfException.InvalidParameter);
 
             m_Position = 0;
 

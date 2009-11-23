@@ -146,7 +146,7 @@ namespace BitMiracle.Tiff2Pdf2
             {
                 PDFDictionary dict = new PDFDictionary();
                 dict.Add("FitWindow", new BooleanObject(true));
-                m_pdf.Catalog.GetDictionary().Add("ViewerPreferences", dict);
+                m_pdf.Catalog.Add("ViewerPreferences", dict);
             }
         }
 
@@ -1842,7 +1842,7 @@ namespace BitMiracle.Tiff2Pdf2
             if (m_pdf_datetime == null)
                 fillPdfDateTime();
 
-            PDFDictionary dict = m_pdf.Info.GetDictionary();
+            PDFDictionary dict = m_pdf.Info;
 
             if (m_pdf_datetime.Length > 0)
             {
@@ -1959,17 +1959,6 @@ namespace BitMiracle.Tiff2Pdf2
                     dict.AddString("Keywords", keywords);
                 }
             }
-        }
-
-        private int strlen(byte[] buffer)
-        {
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                if (buffer[i] == 0)
-                    return (i + 1);
-            }
-
-            return buffer.Length;
         }
 
         /*

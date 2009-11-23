@@ -30,7 +30,7 @@ namespace BitMiracle.Docotic.PDFLib
         public PDFPage(IObjectRegistrator owner) 
         {
             if (owner == null)
-		        throw new PdfException(PdfExceptionType.InvalidParameter);
+		        throw new PdfException(PdfException.InvalidParameter);
 
 	        m_dictionary = new PDFDictionary();
 	        owner.Register(m_dictionary);
@@ -61,7 +61,7 @@ namespace BitMiracle.Docotic.PDFLib
             if (m_dictionary.IsIndirect())
                 owner.Register(m_pageContents);
             else
-                throw new PdfException(PdfExceptionType.WrongDictionary);
+                throw new PdfException(PdfException.InvalidObject);
 
             m_dictionary.Add(contentsKey, m_pageContents);
         }
