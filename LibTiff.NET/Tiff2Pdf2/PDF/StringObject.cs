@@ -7,49 +7,10 @@ namespace BitMiracle.Docotic.PDFLib
     class StringObject : PDFObject
     {
         private string m_value = null;
-	    private int m_length;
-
-	    private string m_rawData;
-	    private char m_openBracket;
 
         public StringObject(string value)
         {
-            initialize();
-            setValue(value, value.Length);
-        }
-
-        public StringObject(StringObject str)
-        {
-            initialize();
-            set(str);
-        }
-
-        public StringObject(string rawData, char openBracket)
-        {
-            if (openBracket != '(' && openBracket != '<')
-		        throw new PdfException(PdfException.InvalidParameter);
-
-	        initialize();
-	        m_rawData = rawData;
-	        m_openBracket = openBracket;
-        }
-
-        public StringObject(byte[] bytes, int length)
-        {
-            initialize();
-
-            m_value = Encoding.Default.GetString(bytes);
-	        m_length = m_value.Length;
-        }
-
-        public static StringObject Create(string value)
-        {
-            return new StringObject(value);
-        }
-
-        public override PDFObject Clone()
-        {
-            return new StringObject(this);
+            m_value = value.Clone() as string;
         }
 
         public override string ToString()
@@ -62,71 +23,28 @@ namespace BitMiracle.Docotic.PDFLib
             return PDFObject.Type.PDFString;
         }
 
-        public string GetValue()
-        {
-            return m_value;
-        }
-
-	    public byte[] GetBytes()
-        {
-            return Encoding.Default.GetBytes(m_value);
-        }
-
         public override void Write(PDFStream stream)
         {
-	        if (needWriteRawData())
-		        writeRawData(stream);
-	        else
-		        writeValue(stream);
+            if (!IsANSI(m_value))
+            {
+                writeUnicodeString(stream);
+                return;
+            }
+
+            if (!IsASCII(m_value))
+            {
+                stream.WriteChar('<');
+                byte[] bytes = truncateToBytes(m_value);
+                stream.WriteBinary(bytes, bytes.Length);
+                stream.WriteChar('>');
+            }
+            else
+                stream.WriteEscapeText(m_value);
         }
 
         protected override void clearImpl()
         {
             m_value = null;
-	        m_length = 0;
-
-	        m_rawData = "";
-	        m_openBracket = '\0';
-        }
-
-        private void initialize()
-        {
-            m_value = null;
-	        m_length = 0;
-
-	        m_rawData = "";
-	        m_openBracket = '\0';
-        }
-
-	    private void set(StringObject obj)
-        {
-            setValue(obj.m_value, obj.m_length);
-	        m_rawData = obj.m_rawData;
-	        m_openBracket = obj.m_openBracket;
-        }
-
-        private void setValue(string value, int length)
-        {
-            m_length = length;
-            m_value = value.Clone() as string;
-        }
-
-	    private bool needWriteRawData()
-        {
-            return m_openBracket != '\0';
-        }
-
-	    private void writeRawData(PDFStream stream)
-        {
-            char closeBracket;
-	        if (m_openBracket == '<')
-		        closeBracket = '>';
-	        else
-		        closeBracket = ')';
-
-	        stream.WriteChar(m_openBracket);
-	        stream.WriteStr(m_rawData);
-	        stream.WriteChar(closeBracket);
         }
 
         private void writeUnicodeString(PDFStream stream)
@@ -146,25 +64,6 @@ namespace BitMiracle.Docotic.PDFLib
             stream.WriteBinary(bytes, bytes.Length);
 
             stream.WriteChar('>');
-        }
-
-        private void writeValue(PDFStream stream)
-        {
-            if (!IsANSI(GetValue()))
-            {
-                writeUnicodeString(stream);
-                return;
-            }
-
-            if (!IsASCII(GetValue()))
-            {
-                stream.WriteChar('<');
-                byte[] bytes = truncateToBytes(m_value);
-                stream.WriteBinary(bytes, bytes.Length);
-                stream.WriteChar('>');
-            }
-            else
-                stream.WriteEscapeText(m_value);
         }
 
         private static bool IsANSI(string text)

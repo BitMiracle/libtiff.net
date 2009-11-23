@@ -35,23 +35,6 @@ namespace BitMiracle.Docotic.PDFLib
             dst.Write(buffer, this.Size());
         }
 
-        //public void WriteToStream(PDFStream dst, Filter filter)
-        //{
-        //    if (dst == null)
-        //        throw new PdfException(PdfExceptionType.InvalidParameter);
-
-        //    int byteSize = Size();
-        //    if (byteSize == 0)
-        //        return;
-
-        //    Seek(0, SeekOrigin.Begin);
-
-        //    byte[] data = new byte [byteSize];
-        //    Array.Clear(data, 0, byteSize);
-        //    byteSize = Read(data, byteSize);
-        //    dst.Write(data, byteSize);
-        //}
-        
         public void WriteChar(char value)
         {
             byte[] bytes = { (byte)value };
@@ -62,12 +45,6 @@ namespace BitMiracle.Docotic.PDFLib
         {
             byte[] bytes = Encoding.Default.GetBytes(value);
             Write(bytes, bytes.Length);
-        }
-
-        public void WriteUChar(byte value)
-        {
-            byte[] bytes = { value };
-            Write(bytes, 1);
         }
 
         public void WriteInt(int value)

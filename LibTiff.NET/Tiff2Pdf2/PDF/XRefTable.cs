@@ -8,10 +8,10 @@ namespace BitMiracle.Docotic.PDFLib
     {
         internal class Entry
         {
-            public PDFObject m_object;       //!< object corresponding to entry
-            public int m_offset;        //!< offset (in bytes) from the beginning of PDF file to the beginning of object pointed to by this cross-reference entry
-            public int m_generation;    //!< "generation number" of the entry
-            public bool m_inUse;           //!< true if this entry is in use; false if entry marked as obsolete
+            public PDFObject m_object;
+            public int m_offset;
+            public int m_generation;
+            public bool m_inUse;
 
             public Entry(int offset, int generation, bool inUse)
             {
@@ -37,10 +37,7 @@ namespace BitMiracle.Docotic.PDFLib
             m_catalog = null;
             m_info = null;
 
-            // add first entry which is free entry and whose generation number is 0
-            Entry new_entry = new Entry(0, maxGeneration, false);
-            m_entries[0] = new_entry;
-
+            m_entries[0] = new Entry(0, maxGeneration, false);
             m_trailer = new PDFDictionary();
         }
 
@@ -79,7 +76,7 @@ namespace BitMiracle.Docotic.PDFLib
             entry.m_offset = 0;
         }
 
-        public int GetEntryCount()
+        private int GetEntryCount()
         {
             return m_entries.Count;
         }
@@ -92,7 +89,7 @@ namespace BitMiracle.Docotic.PDFLib
             setTrailerIDs(pID, pID);
         }
 
-        public void SetTrailerIDs(BinaryObject original, BinaryObject updated)
+        private void SetTrailerIDs(BinaryObject original, BinaryObject updated)
         {
             PDFArray idArray = new PDFArray();
             idArray.Add(original);
@@ -342,19 +339,6 @@ namespace BitMiracle.Docotic.PDFLib
             SetTrailerIDs(strOriginal, strUpdated);
         }
 
-        private byte[] getTrailerIDString(int no)
-        {
-            PDFArray idArray = (PDFArray)m_trailer.GetItem("ID");
-            if (idArray == null)
-                return null;
-
-            BinaryObject str = (BinaryObject)idArray.GetItem(no);
-            if (str != null)
-                return str.GetValue();
-
-            return null;
-        }
-        
         private void markRegistered(PDFObject obj, int no)
         {
             if (obj == null)
@@ -363,18 +347,6 @@ namespace BitMiracle.Docotic.PDFLib
 	        obj.MakeIndirect();
 	        obj.m_id = no;
 	        PDFObject.IncRef(obj);
-        }
-
-        private Entry getEntryBy(PDFObject obj)
-        {
-            foreach (KeyValuePair<int, Entry> kvp in m_entries)
-            {
-                Entry entry = kvp.Value;
-                if (entry.m_object == obj)
-                    return entry;
-            }
-
-            return null;
         }
     }
 }

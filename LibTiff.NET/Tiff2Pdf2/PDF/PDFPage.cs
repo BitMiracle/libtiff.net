@@ -37,33 +37,20 @@ namespace BitMiracle.Docotic.PDFLib
 	        m_dictionary.SetOwner(this);
 	        PDFObject.IncRef(m_dictionary);
 
-            initialize(owner);
-            initializeDictionary();
-        }
-
-        private void initialize(IObjectRegistrator owner)
-        {
             m_pageContents = null;
             if (m_dictionary.GetItem(contentsKey) == null)
-                createPageContents(owner);
-        }
+            {
+                m_pageContents = new DictionaryStream();
 
-        private void initializeDictionary()
-        {
-            /* add required elements */
+                if (m_dictionary.IsIndirect())
+                    owner.Register(m_pageContents);
+                else
+                    throw new PdfException(PdfException.InvalidObject);
+
+                m_dictionary.Add(contentsKey, m_pageContents);
+            }
+
             GetDictionary().AddName("Type", "Page");
-        }
-
-        private void createPageContents(IObjectRegistrator owner)
-        {
-            m_pageContents = new DictionaryStream();
-
-            if (m_dictionary.IsIndirect())
-                owner.Register(m_pageContents);
-            else
-                throw new PdfException(PdfException.InvalidObject);
-
-            m_dictionary.Add(contentsKey, m_pageContents);
         }
     }
 }
