@@ -41,8 +41,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Tiff2Pdf\Chaotic.cs" />
-    <Compile Include="Tiff2Pdf\ChaoticBase.cs" />
-    <Compile Include="Tiff2Pdf\SampleBase.cs" />
     <Compile Include="Tiff2Pdf\Tester.cs" />
     <Compile Include="Tiff2Pdf\Sample.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -64,10 +62,6 @@
     <ProjectReference Include="..\LibTiff\LibTiff.csproj">
       <Project>{281EF657-40C0-432D-8AC4-E9ADDFD792B2}</Project>
       <Name>LibTiff</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tiff2Pdf2\Tiff2Pdf2.csproj">
-      <Project>{310BCEF5-3549-48F7-8827-444B6A23D3EF}</Project>
-      <Name>Tiff2Pdf2</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tiff2Pdf\Tiff2Pdf.csproj">
       <Project>{39B5DBF6-6A8E-483C-B62D-B29F13DB54CC}</Project>

@@ -25,7 +25,7 @@ namespace UnitTests.Tiff2Pdf
 		    get { return m_testcase; }
 	    }
 
-        public void Run(bool useV2, string[] args, string sourceFile, string targetFile)
+        public void Run(string[] args, string sourceFile, string targetFile)
         {
             // console programs' Main are static, so lock concurrent access to 
             // a test code. we use a private field to lock upon 
@@ -43,20 +43,10 @@ namespace UnitTests.Tiff2Pdf
 
                 File.Delete(targetFile);
 
-                if (useV2)
-                {
-                    BitMiracle.Tiff2Pdf2.Program.g_testFriendly = true;
-                    BitMiracle.Tiff2Pdf2.Program.Main(completeArgs.ToArray());
-                }
-                else
-                {
-                    BitMiracle.Tiff2Pdf.Program.g_testFriendly = true;
-                    BitMiracle.Tiff2Pdf.Program.Main(completeArgs.ToArray());
-                }
+                BitMiracle.Tiff2Pdf.Program.g_testFriendly = true;
+                BitMiracle.Tiff2Pdf.Program.Main(completeArgs.ToArray());
 
                 string sampleFile = targetFile.Replace(@"\pdf\", @"\sample_pdf\");
-                if (useV2)
-                    sampleFile = targetFile.Replace(@"\pdf2\", @"\sample_pdf2\");
 
                 Assert.IsTrue(File.Exists(targetFile));
                 Assert.IsTrue(Utils.FilesAreEqual(sampleFile, targetFile));
