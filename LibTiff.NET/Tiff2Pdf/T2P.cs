@@ -81,7 +81,6 @@ namespace BitMiracle.Tiff2Pdf
         public MyStream m_stream;
 
         private T2P_PAGE[] m_tiff_pages;
-        private T2P_TILES[] m_tiff_tiles;
         private short m_tiff_pagecount;
         private Compression m_tiff_compression;
         private Photometric m_tiff_photometric;
@@ -340,9 +339,9 @@ namespace BitMiracle.Tiff2Pdf
                     written += write_pdf_obj_end();
                 }
 
-                if (m_tiff_tiles[m_pdf_page].tiles_tilecount != 0)
+                if (m_tiff_pages[m_pdf_page].page_tilecount != 0)
                 {
-                    for (int i2 = 0; i2 < m_tiff_tiles[m_pdf_page].tiles_tilecount; i2++)
+                    for (int i2 = 0; i2 < m_tiff_pages[m_pdf_page].page_tilecount; i2++)
                     {
                         m_pdf_xrefoffsets[m_pdf_xrefcount++] = written;
                         written += write_pdf_obj_start(m_pdf_xrefcount);
@@ -412,7 +411,6 @@ namespace BitMiracle.Tiff2Pdf
             for (int p = 0; p < directorycount; p++)
                 m_tiff_pages[p] = new T2P_PAGE();
 
-            m_tiff_tiles = new T2P_TILES [directorycount];
             FieldValue[] result = null;
 
             for (short i = 0; i < directorycount; i++)
@@ -536,28 +534,28 @@ namespace BitMiracle.Tiff2Pdf
                         m_pdf_minorversion = 3;
                 }
 
-                m_tiff_tiles[i].tiles_tilecount = m_tiff_pages[i].page_tilecount;
+                //m_tiff_tiles[i].tiles_tilecount = m_tiff_pages[i].page_tilecount;
 
                 result = input.GetField(TiffTag.PLANARCONFIG);
                 if (result != null && ((PlanarConfig)result[0].ToShort() == PlanarConfig.SEPARATE))
                 {
                     result = input.GetField(TiffTag.SAMPLESPERPIXEL);
                     int xuint16 = result[0].ToInt();
-                    m_tiff_tiles[i].tiles_tilecount /= xuint16;
+                    m_tiff_pages[i].page_tilecount /= xuint16;
                 }
-                
-                if (m_tiff_tiles[i].tiles_tilecount > 0)
+
+                if (m_tiff_pages[i].page_tilecount > 0)
                 {
-                    m_pdf_xrefcount += (m_tiff_tiles[i].tiles_tilecount - 1) * 2;
+                    m_pdf_xrefcount += (m_tiff_pages[i].page_tilecount - 1) * 2;
                     result = input.GetField(TiffTag.TILEWIDTH);
-                    m_tiff_tiles[i].tiles_tilewidth = result[0].ToInt();
+                    m_tiff_pages[i].tiles_tilewidth = result[0].ToInt();
 
                     input.GetField(TiffTag.TILELENGTH);
-                    m_tiff_tiles[i].tiles_tilelength = result[0].ToInt();
+                    m_tiff_pages[i].tiles_tilelength = result[0].ToInt();
 
-                    m_tiff_tiles[i].tiles_tiles = new T2P_TILE [m_tiff_tiles[i].tiles_tilecount];
-                    for (int idx = 0; idx < m_tiff_tiles[i].tiles_tilecount; idx++)
-                        m_tiff_tiles[i].tiles_tiles[idx] = new T2P_TILE();
+                    m_tiff_pages[i].tiles_tiles = new T2P_TILE[m_tiff_pages[i].page_tilecount];
+                    for (int idx = 0; idx < m_tiff_pages[i].page_tilecount; idx++)
+                        m_tiff_pages[i].tiles_tiles[idx] = new T2P_TILE();
                 }
             }
         }
@@ -1263,8 +1261,8 @@ namespace BitMiracle.Tiff2Pdf
         private void read_tiff_size_tile(Tiff input, int tile)
         {
             bool edge = false;
-            edge |= tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile);
-            edge |= tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile);
+            edge |= tile_is_right_edge(m_tiff_pages[m_pdf_page], tile);
+            edge |= tile_is_bottom_edge(m_tiff_pages[m_pdf_page], tile);
 
             if (m_pdf_transcode == t2p_transcode_t.T2P_TRANSCODE_RAW)
             {
@@ -1613,8 +1611,8 @@ namespace BitMiracle.Tiff2Pdf
         private int readwrite_pdf_image_tile(Tiff input, int tile)
         {
             bool edge = false;
-            edge |= tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile);
-            edge |= tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile);
+            edge |= tile_is_right_edge(m_tiff_pages[m_pdf_page], tile);
+            edge |= tile_is_bottom_edge(m_tiff_pages[m_pdf_page], tile);
 
             byte[] buffer = null;
             int bufferoffset = 0;
@@ -1735,10 +1733,10 @@ namespace BitMiracle.Tiff2Pdf
                 }
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_RGBA_TO_RGB) != 0)
-                    m_tiff_datasize = sample_rgba_to_rgb(buffer, m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                    m_tiff_datasize = sample_rgba_to_rgb(buffer, m_tiff_pages[m_pdf_page].tiles_tilewidth * m_tiff_pages[m_pdf_page].tiles_tilelength);
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_RGBAA_TO_RGB) != 0)
-                    m_tiff_datasize = sample_rgbaa_to_rgb(buffer, m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                    m_tiff_datasize = sample_rgbaa_to_rgb(buffer, m_tiff_pages[m_pdf_page].tiles_tilewidth * m_tiff_pages[m_pdf_page].tiles_tilelength);
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_YCBCR_TO_RGB) != 0)
                 {
@@ -1749,31 +1747,31 @@ namespace BitMiracle.Tiff2Pdf
                 }
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED) != 0)
-                    m_tiff_datasize = sample_lab_signed_to_unsigned(buffer, m_tiff_tiles[m_pdf_page].tiles_tilewidth * m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                    m_tiff_datasize = sample_lab_signed_to_unsigned(buffer, m_tiff_pages[m_pdf_page].tiles_tilewidth * m_tiff_pages[m_pdf_page].tiles_tilelength);
             }
 
-            if (tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile))
-                tile_collapse_left(buffer, input.TileRowSize(), m_tiff_tiles[m_pdf_page].tiles_tilewidth, m_tiff_tiles[m_pdf_page].tiles_edgetilewidth, m_tiff_tiles[m_pdf_page].tiles_tilelength);
+            if (tile_is_right_edge(m_tiff_pages[m_pdf_page], tile))
+                tile_collapse_left(buffer, input.TileRowSize(), m_tiff_pages[m_pdf_page].tiles_tilewidth, m_tiff_pages[m_pdf_page].tiles_edgetilewidth, m_tiff_pages[m_pdf_page].tiles_tilelength);
 
             disable(m_output);
             m_output.SetField(TiffTag.PHOTOMETRIC, m_tiff_photometric);
             m_output.SetField(TiffTag.BITSPERSAMPLE, m_tiff_bitspersample);
             m_output.SetField(TiffTag.SAMPLESPERPIXEL, m_tiff_samplesperpixel);
 
-            if (!tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile))
-                m_output.SetField(TiffTag.IMAGEWIDTH, m_tiff_tiles[m_pdf_page].tiles_tilewidth);
+            if (!tile_is_right_edge(m_tiff_pages[m_pdf_page], tile))
+                m_output.SetField(TiffTag.IMAGEWIDTH, m_tiff_pages[m_pdf_page].tiles_tilewidth);
             else
-                m_output.SetField(TiffTag.IMAGEWIDTH, m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
+                m_output.SetField(TiffTag.IMAGEWIDTH, m_tiff_pages[m_pdf_page].tiles_edgetilewidth);
 
-            if (!tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile))
+            if (!tile_is_bottom_edge(m_tiff_pages[m_pdf_page], tile))
             {
-                m_output.SetField(TiffTag.IMAGELENGTH, m_tiff_tiles[m_pdf_page].tiles_tilelength);
-                m_output.SetField(TiffTag.ROWSPERSTRIP, m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                m_output.SetField(TiffTag.IMAGELENGTH, m_tiff_pages[m_pdf_page].tiles_tilelength);
+                m_output.SetField(TiffTag.ROWSPERSTRIP, m_tiff_pages[m_pdf_page].tiles_tilelength);
             }
             else
             {
-                m_output.SetField(TiffTag.IMAGELENGTH, m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
-                m_output.SetField(TiffTag.ROWSPERSTRIP, m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
+                m_output.SetField(TiffTag.IMAGELENGTH, m_tiff_pages[m_pdf_page].tiles_edgetilelength);
+                m_output.SetField(TiffTag.ROWSPERSTRIP, m_tiff_pages[m_pdf_page].tiles_edgetilelength);
             }
 
             m_output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
@@ -2324,7 +2322,7 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             T2P_TILE[] tiles = null;
-            int istiled = ((m_tiff_tiles[m_pdf_page]).tiles_tilecount == 0) ? 0 : 1;
+            int istiled = ((m_tiff_pages[m_pdf_page]).page_tilecount == 0) ? 0 : 1;
             if (istiled == 0)
             {
                 compose_pdf_page_orient(m_pdf_imagebox, m_tiff_orientation);
@@ -2332,15 +2330,15 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                int tilewidth = m_tiff_tiles[m_pdf_page].tiles_tilewidth;
-                int tilelength = m_tiff_tiles[m_pdf_page].tiles_tilelength;
+                int tilewidth = m_tiff_pages[m_pdf_page].tiles_tilewidth;
+                int tilelength = m_tiff_pages[m_pdf_page].tiles_tilelength;
                 int tilecountx = (m_tiff_width + tilewidth - 1) / tilewidth;
-                m_tiff_tiles[m_pdf_page].tiles_tilecountx = tilecountx;
+                m_tiff_pages[m_pdf_page].tiles_tilecountx = tilecountx;
                 int tilecounty = (m_tiff_length + tilelength - 1) / tilelength;
-                m_tiff_tiles[m_pdf_page].tiles_tilecounty = tilecounty;
-                m_tiff_tiles[m_pdf_page].tiles_edgetilewidth = m_tiff_width % tilewidth;
-                m_tiff_tiles[m_pdf_page].tiles_edgetilelength = m_tiff_length % tilelength;
-                tiles = m_tiff_tiles[m_pdf_page].tiles_tiles;
+                m_tiff_pages[m_pdf_page].tiles_tilecounty = tilecounty;
+                m_tiff_pages[m_pdf_page].tiles_edgetilewidth = m_tiff_width % tilewidth;
+                m_tiff_pages[m_pdf_page].tiles_edgetilelength = m_tiff_length % tilelength;
+                tiles = m_tiff_pages[m_pdf_page].tiles_tiles;
                 
                 int i = 0;
                 int i2 = 0;
@@ -2381,13 +2379,13 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_tiff_orientation == 0 || m_tiff_orientation == Orientation.TOPLEFT)
             {
-                for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+                for (int i = 0; i < m_tiff_pages[m_pdf_page].page_tilecount; i++)
                     compose_pdf_page_orient(tiles[i].tile_box, 0);
 
                 return;
             }
 
-            for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+            for (int i = 0; i < m_tiff_pages[m_pdf_page].page_tilecount; i++)
             {
                 T2P_BOX boxp = tiles[i].tile_box;
                 boxp.x1 -= m_pdf_imagebox.x1;
@@ -2805,10 +2803,10 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                if (tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile - 1))
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
+                if (tile_is_right_edge(m_tiff_pages[m_pdf_page], tile - 1))
+                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilewidth);
                 else
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilewidth);
+                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilewidth);
             }
 
             written += writeToFile(buffer);
@@ -2819,10 +2817,10 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                if (tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile - 1))
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
+                if (tile_is_bottom_edge(m_tiff_pages[m_pdf_page], tile - 1))
+                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilelength);
                 else
-                    buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilelength);
             }
 
             written += writeToFile(buffer);
@@ -2872,29 +2870,29 @@ namespace BitMiracle.Tiff2Pdf
                     }
                     else
                     {
-                        if (!tile_is_right_edge(m_tiff_tiles[m_pdf_page], tile - 1))
+                        if (!tile_is_right_edge(m_tiff_pages[m_pdf_page], tile - 1))
                         {
                             written += writeToFile("/Columns ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilewidth);
+                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilewidth);
                             written += writeToFile(buffer);
                         }
                         else
                         {
                             written += writeToFile("/Columns ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilewidth);
+                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilewidth);
                             written += writeToFile(buffer);
                         }
 
-                        if (!tile_is_bottom_edge(m_tiff_tiles[m_pdf_page], tile - 1))
+                        if (!tile_is_bottom_edge(m_tiff_pages[m_pdf_page], tile - 1))
                         {
                             written += writeToFile(" /Rows ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_tilelength);
+                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilelength);
                             written += writeToFile(buffer);
                         }
                         else
                         {
                             written += writeToFile(" /Rows ");
-                            buffer = string.Format("{0}", m_tiff_tiles[m_pdf_page].tiles_edgetilelength);
+                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilelength);
                             written += writeToFile(buffer);
                         }
                     }
@@ -2950,11 +2948,11 @@ namespace BitMiracle.Tiff2Pdf
         {
             string buffer = null;
             int written = 0;
-            if (m_tiff_tiles[m_pdf_page].tiles_tilecount > 0)
+            if (m_tiff_pages[m_pdf_page].page_tilecount > 0)
             {
-                for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+                for (int i = 0; i < m_tiff_pages[m_pdf_page].page_tilecount; i++)
                 {
-                    T2P_BOX box = m_tiff_tiles[m_pdf_page].tiles_tiles[i].tile_box;
+                    T2P_BOX box = m_tiff_pages[m_pdf_page].tiles_tiles[i].tile_box;
                     buffer = string.Format(CultureInfo.InvariantCulture, 
                         "q {0} {1:N4} {2:N4} {3:N4} {4:N4} {5:N4} {6:N4} cm /Im{7}_{8} Do Q\n", 
                         m_tiff_transferfunctioncount != 0 ? "/GS1 gs " : "", box.mat[0], box.mat[1], 
@@ -2991,7 +2989,7 @@ namespace BitMiracle.Tiff2Pdf
         * This functions returns a non-zero value when the tile is on the right edge
         * and does not have full imaged tile width.
         */
-        private static bool tile_is_right_edge(T2P_TILES tiles, int tile)
+        private static bool tile_is_right_edge(T2P_PAGE tiles, int tile)
         {
             if (((tile + 1) % tiles.tiles_tilecountx == 0) && (tiles.tiles_edgetilewidth != 0))
                 return true;
@@ -3003,9 +3001,9 @@ namespace BitMiracle.Tiff2Pdf
         * This functions returns a non-zero value when the tile is on the bottom edge
         * and does not have full imaged tile length.
         */
-        private static bool tile_is_bottom_edge(T2P_TILES tiles, int tile)
+        private static bool tile_is_bottom_edge(T2P_PAGE tiles, int tile)
         {
-            if (((tile + 1) > (tiles.tiles_tilecount - tiles.tiles_tilecountx)) && (tiles.tiles_edgetilelength != 0))
+            if (((tile + 1) > (tiles.page_tilecount - tiles.tiles_tilecountx)) && (tiles.tiles_edgetilelength != 0))
                 return true;
 
             return false;
@@ -3533,10 +3531,10 @@ namespace BitMiracle.Tiff2Pdf
             written += writeToFile(" 0 R \n");
             written += writeToFile("/Resources << \n");
 
-            if (m_tiff_tiles[m_pdf_page].tiles_tilecount != 0)
+            if (m_tiff_pages[m_pdf_page].page_tilecount != 0)
             {
                 written += writeToFile("/XObject <<\n");
-                for (int i = 0; i < m_tiff_tiles[m_pdf_page].tiles_tilecount; i++)
+                for (int i = 0; i < m_tiff_pages[m_pdf_page].page_tilecount; i++)
                 {
                     written += writeToFile("/Im");
                     buffer = string.Format("{0}", m_pdf_page + 1);

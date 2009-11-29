@@ -28,6 +28,15 @@ namespace BitMiracle.Tiff2Pdf
         public int page_number;
         public int page_tilecount;
         public int page_extra;
+
+        // information about the tiles
+        public int tiles_tilewidth;
+        public int tiles_tilelength;
+        public int tiles_tilecountx;
+        public int tiles_tilecounty;
+        public int tiles_edgetilewidth;
+        public int tiles_edgetilelength;
+        public T2P_TILE[] tiles_tiles;
     };
 
     /* This struct defines a PDF rectangle's coordinates. */
@@ -44,19 +53,6 @@ namespace BitMiracle.Tiff2Pdf
     class T2P_TILE
     {
         public T2P_BOX tile_box = new T2P_BOX();
-    };
-
-    /* This struct defines information about the tiles on a PDF page. */
-    struct T2P_TILES
-    {
-        public int tiles_tilecount;
-        public int tiles_tilewidth;
-        public int tiles_tilelength;
-        public int tiles_tilecountx;
-        public int tiles_tilecounty;
-        public int tiles_edgetilewidth;
-        public int tiles_edgetilelength;
-        public T2P_TILE[] tiles_tiles;
     };
 
     /* This type is of PDF color spaces. */
