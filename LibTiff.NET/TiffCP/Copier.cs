@@ -251,12 +251,12 @@ namespace BitMiracle.TiffCP
             else if (m_compression == Compression.SGILOG || m_compression == Compression.SGILOG24)
                 outImage.SetField(TiffTag.PHOTOMETRIC, samplesperpixel == 1 ? Photometric.LOGL : Photometric.LOGLUV);
             else
-                CopyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
+                copyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
 
             if (m_fillorder != 0)
                 outImage.SetField(TiffTag.FILLORDER, m_fillorder);
             else
-                CopyTag(inImage, outImage, TiffTag.FILLORDER, 1, TiffType.SHORT);
+                copyTag(inImage, outImage, TiffTag.FILLORDER, 1, TiffType.SHORT);
 
             /*
              * Will copy `Orientation' tag from input image
@@ -365,9 +365,9 @@ namespace BitMiracle.TiffCP
             }
 
             if (samplesperpixel <= 4)
-                CopyTag(inImage, outImage, TiffTag.TRANSFERFUNCTION, 4, TiffType.SHORT);
+                copyTag(inImage, outImage, TiffTag.TRANSFERFUNCTION, 4, TiffType.SHORT);
 
-            CopyTag(inImage, outImage, TiffTag.COLORMAP, 4, TiffType.SHORT);
+            copyTag(inImage, outImage, TiffTag.COLORMAP, 4, TiffType.SHORT);
 
             /* SMinSampleValue & SMaxSampleValue */
             switch (m_compression)
@@ -408,14 +408,14 @@ namespace BitMiracle.TiffCP
                         }
                     }
                     else
-                        CopyTag(inImage, outImage, TiffTag.GROUP4OPTIONS, 1, TiffType.LONG);
+                        copyTag(inImage, outImage, TiffTag.GROUP4OPTIONS, 1, TiffType.LONG);
 
-                    CopyTag(inImage, outImage, TiffTag.BADFAXLINES, 1, TiffType.LONG);
-                    CopyTag(inImage, outImage, TiffTag.CLEANFAXDATA, 1, TiffType.LONG);
-                    CopyTag(inImage, outImage, TiffTag.CONSECUTIVEBADFAXLINES, 1, TiffType.LONG);
-                    CopyTag(inImage, outImage, TiffTag.FAXRECVPARAMS, 1, TiffType.LONG);
-                    CopyTag(inImage, outImage, TiffTag.FAXRECVTIME, 1, TiffType.LONG);
-                    CopyTag(inImage, outImage, TiffTag.FAXSUBADDRESS, 1, TiffType.ASCII);
+                    copyTag(inImage, outImage, TiffTag.BADFAXLINES, 1, TiffType.LONG);
+                    copyTag(inImage, outImage, TiffTag.CLEANFAXDATA, 1, TiffType.LONG);
+                    copyTag(inImage, outImage, TiffTag.CONSECUTIVEBADFAXLINES, 1, TiffType.LONG);
+                    copyTag(inImage, outImage, TiffTag.FAXRECVPARAMS, 1, TiffType.LONG);
+                    copyTag(inImage, outImage, TiffTag.FAXRECVTIME, 1, TiffType.LONG);
+                    copyTag(inImage, outImage, TiffTag.FAXSUBADDRESS, 1, TiffType.ASCII);
                     break;
             }
 
@@ -459,7 +459,7 @@ namespace BitMiracle.TiffCP
             for (int i = 0; i < NTAGS; i++)
             {
                 tagToCopy p = g_tags[i];
-                CopyTag(inImage, outImage, p.tag, p.count, p.type);
+                copyTag(inImage, outImage, p.tag, p.count, p.type);
             }
 
             return pickFuncAndCopy(inImage, outImage, bitspersample, samplesperpixel, length, width);
@@ -1418,7 +1418,7 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        static void CopyTag(Tiff inImage, Tiff outImage, TiffTag tag, short count, TiffType type)
+        private static void copyTag(Tiff inImage, Tiff outImage, TiffTag tag, short count, TiffType type)
         {
             FieldValue[] result = null;
             switch (type)
