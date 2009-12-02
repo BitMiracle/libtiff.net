@@ -69,7 +69,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             char[] huffsize = new char[257];
             for (int l = 1; l <= 16; l++)
             {
-                int i = htbl.bits[l];
+                int i = htbl.Bits[l];
                 if (i < 0 || p + i> 256)    /* protect against table overrun */
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
@@ -120,7 +120,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (p = 0; p < lastp; p++)
             {
-                int i = htbl.huffval[p];
+                int i = htbl.Huffval[p];
                 if (i < 0 || i> maxsymbol || dtbl.ehufsi[i] != 0)
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
@@ -277,7 +277,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             bits[i]--;
 
             /* Return final symbol counts (only for lengths 0..16) */
-            Array.Copy(bits, htbl.bits, htbl.bits.Length);
+            Array.Copy(bits, htbl.Bits, htbl.Bits.Length);
 
             /* Return a list of the symbols sorted by code length */
             /* It's not real clear to me why we don't need to consider the codelength
@@ -290,14 +290,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 {
                     if (codesize[j] == i)
                     {
-                        htbl.huffval[p] = (byte) j;
+                        htbl.Huffval[p] = (byte) j;
                         p++;
                     }
                 }
             }
 
             /* Set sent_table false so updated table will be written to JPEG file. */
-            htbl.sent_table = false;
+            htbl.Sent_table = false;
         }
     }
 }

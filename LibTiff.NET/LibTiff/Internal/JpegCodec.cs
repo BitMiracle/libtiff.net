@@ -1714,11 +1714,11 @@ namespace BitMiracle.LibTiff.Internal
             JHUFF_TBL htbl = m_compression.Dc_huff_tbl_ptrs[tblno];
 
             if (htbl != null)
-                htbl.sent_table = false;
+                htbl.Sent_table = false;
 
             htbl = m_compression.Ac_huff_tbl_ptrs[tblno];
             if (htbl != null)
-                htbl.sent_table = false;
+                htbl.Sent_table = false;
         }
 
         private void TIFFjpeg_data_dest()

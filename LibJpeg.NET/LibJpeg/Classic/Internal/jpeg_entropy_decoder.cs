@@ -131,7 +131,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             char[] huffsize = new char[257];
             for (int l = 1; l <= 16; l++)
             {
-                int i = htbl.bits[l];
+                int i = htbl.Bits[l];
                 if (i < 0 || p + i> 256)    /* protect against table overrun */
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
@@ -170,13 +170,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             p = 0;
             for (int l = 1; l <= 16; l++)
             {
-                if (htbl.bits[l] != 0)
+                if (htbl.Bits[l] != 0)
                 {
                     /* valoffset[l] = huffval[] index of 1st symbol of code length l,
                     * minus the minimum code of length l
                     */
                     dtbl.valoffset[l] = p - huffcode[p];
-                    p += htbl.bits[l];
+                    p += htbl.Bits[l];
                     dtbl.maxcode[l] = huffcode[p - 1]; /* maximum code of length l */
                 }
                 else
@@ -198,7 +198,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             p = 0;
             for (int l = 1; l <= JpegConstants.HUFF_LOOKAHEAD; l++)
             {
-                for (int i = 1; i <= htbl.bits[l]; i++, p++)
+                for (int i = 1; i <= htbl.Bits[l]; i++, p++)
                 {
                     /* l = current code's length, p = its index in huffcode[] & huffval[]. */
                     /* Generate left-justified code followed by all possible bit sequences */
@@ -206,7 +206,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     for (int ctr = 1 << (JpegConstants.HUFF_LOOKAHEAD - l); ctr > 0; ctr--)
                     {
                         dtbl.look_nbits[lookbits] = l;
-                        dtbl.look_sym[lookbits] = htbl.huffval[p];
+                        dtbl.look_sym[lookbits] = htbl.Huffval[p];
                         lookbits++;
                     }
                 }
@@ -222,7 +222,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 for (int i = 0; i < numsymbols; i++)
                 {
-                    int sym = htbl.huffval[i];
+                    int sym = htbl.Huffval[i];
                     if (sym < 0 || sym> 15)
                         m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
                 }
@@ -467,7 +467,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 return 0;
             }
 
-            return htbl.pub.huffval[code + htbl.valoffset[l]];
+            return htbl.pub.Huffval[code + htbl.valoffset[l]];
         }
     }
 }

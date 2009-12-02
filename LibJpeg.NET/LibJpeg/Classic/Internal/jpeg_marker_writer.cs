@@ -377,24 +377,24 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (htbl == null)
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, index);
 
-            if (!htbl.sent_table)
+            if (!htbl.Sent_table)
             {
                 emit_marker(JPEG_MARKER.DHT);
 
                 int length = 0;
                 for (int i = 1; i <= 16; i++)
-                    length += htbl.bits[i];
+                    length += htbl.Bits[i];
 
                 emit_2bytes(length + 2 + 1 + 16);
                 emit_byte(index);
 
                 for (int i = 1; i <= 16; i++)
-                    emit_byte(htbl.bits[i]);
+                    emit_byte(htbl.Bits[i]);
 
                 for (int i = 0; i < length; i++)
-                    emit_byte(htbl.huffval[i]);
+                    emit_byte(htbl.Huffval[i]);
 
-                htbl.sent_table = true;
+                htbl.Sent_table = true;
             }
         }
         

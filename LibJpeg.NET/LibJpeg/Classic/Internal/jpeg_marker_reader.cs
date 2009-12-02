@@ -1046,8 +1046,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 if (index < 0 || index >= JpegConstants.NUM_HUFF_TBLS)
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_DHT_INDEX, index);
 
-                Array.Copy(bits, htblptr.bits, htblptr.bits.Length);
-                Array.Copy(huffval, htblptr.huffval, htblptr.huffval.Length);
+                Array.Copy(bits, htblptr.Bits, htblptr.Bits.Length);
+                Array.Copy(huffval, htblptr.Huffval, htblptr.Huffval.Length);
             }
 
             if (length != 0)

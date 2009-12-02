@@ -458,10 +458,10 @@ namespace BitMiracle.LibJpeg.Classic
             for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
             {
                 if (m_dc_huff_tbl_ptrs[i] != null)
-                    m_dc_huff_tbl_ptrs[i].sent_table = suppress;
+                    m_dc_huff_tbl_ptrs[i].Sent_table = suppress;
 
                 if (m_ac_huff_tbl_ptrs[i] != null)
-                    m_ac_huff_tbl_ptrs[i].sent_table = suppress;
+                    m_ac_huff_tbl_ptrs[i].Sent_table = suppress;
             }
         }
 
@@ -1549,7 +1549,7 @@ namespace BitMiracle.LibJpeg.Classic
                 htblptr = new JHUFF_TBL();
 
             /* Copy the number-of-symbols-of-each-code-length counts */
-            Array.Copy(bits, htblptr.bits,htblptr.bits.Length);
+            Array.Copy(bits, htblptr.Bits,htblptr.Bits.Length);
 
             /* Validate the counts.  We do this here mainly so we can copy the right
             * number of symbols from the val[] array, without risking marching off
@@ -1562,10 +1562,10 @@ namespace BitMiracle.LibJpeg.Classic
             if (nsymbols < 1 || nsymbols> 256)
                 ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
-            Array.Copy(val, htblptr.huffval, nsymbols);
+            Array.Copy(val, htblptr.Huffval, nsymbols);
 
             /* Initialize sent_table false so table will be written to JPEG file. */
-            htblptr.sent_table = false;
+            htblptr.Sent_table = false;
         }
 
         /// <summary>
