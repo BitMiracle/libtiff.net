@@ -24,12 +24,12 @@ namespace BitMiracle.LibJpeg.Classic
         /* length k bits; bits[0] is unused */
         private readonly byte[] m_huffval = new byte[256];     /* The symbols, in order of incr code length */
         
-        private bool sent_table;        /* true when table has been output */
+        private bool m_sent_table;        /* true when table has been output */
 
 
         internal JHUFF_TBL()
         {
-            sent_table = false;
+            m_sent_table = false;
         }
 
         internal byte[] Bits
@@ -49,8 +49,8 @@ namespace BitMiracle.LibJpeg.Classic
          */
         public bool Sent_table
         {
-            get { return sent_table; }
-            set { sent_table = value; }
+            get { return m_sent_table; }
+            set { m_sent_table = value; }
         }
     }
 }

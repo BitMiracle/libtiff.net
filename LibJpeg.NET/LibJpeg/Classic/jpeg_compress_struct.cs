@@ -452,7 +452,7 @@ namespace BitMiracle.LibJpeg.Classic
             for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
             {
                 if (m_quant_tbl_ptrs[i] != null)
-                    m_quant_tbl_ptrs[i].sent_table = suppress;
+                    m_quant_tbl_ptrs[i].Sent_table = suppress;
             }
 
             for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
@@ -854,7 +854,7 @@ namespace BitMiracle.LibJpeg.Classic
             }
 
             /* Initialize sent_table false so table will be written to JPEG file. */
-            m_quant_tbl_ptrs[which_tbl].sent_table = false;
+            m_quant_tbl_ptrs[which_tbl].Sent_table = false;
         }
 
         /// <summary>

@@ -1706,7 +1706,7 @@ namespace BitMiracle.LibTiff.Internal
         {
             JQUANT_TBL qtbl = m_compression.Quant_tbl_ptrs[tblno];
             if (qtbl != null)
-                qtbl.sent_table = false;
+                qtbl.Sent_table = false;
         }
 
         private void unsuppress_huff_table(int tblno)

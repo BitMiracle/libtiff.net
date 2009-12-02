@@ -1161,7 +1161,7 @@ namespace BitMiracle.LibJpeg.Classic
                         dstinfo.m_quant_tbl_ptrs[tblno] = new JQUANT_TBL();
 
                     Array.Copy(m_quant_tbl_ptrs[tblno].quantval, dstinfo.m_quant_tbl_ptrs[tblno].quantval, dstinfo.m_quant_tbl_ptrs[tblno].quantval.Length);
-                    dstinfo.m_quant_tbl_ptrs[tblno].sent_table = false;
+                    dstinfo.m_quant_tbl_ptrs[tblno].Sent_table = false;
                 }
             }
             

@@ -416,7 +416,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     prec = 1;
             }
 
-            if (!qtbl.sent_table)
+            if (!qtbl.Sent_table)
             {
                 emit_marker(JPEG_MARKER.DQT);
 
@@ -435,7 +435,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     emit_byte(qval & 0xFF);
                 }
 
-                qtbl.sent_table = true;
+                qtbl.Sent_table = true;
             }
 
             return prec;
