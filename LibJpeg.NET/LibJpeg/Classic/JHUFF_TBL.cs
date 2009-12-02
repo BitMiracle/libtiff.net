@@ -27,17 +27,17 @@ namespace BitMiracle.LibJpeg.Classic
         private bool sent_table;        /* true when table has been output */
 
 
-        public JHUFF_TBL()
+        internal JHUFF_TBL()
         {
             sent_table = false;
         }
 
-        public byte[] Bits
+        internal byte[] Bits
         {
             get { return m_bits; }
         }
 
-        public byte[] Huffval
+        internal byte[] Huffval
         {
             get { return m_huffval; }
         }
