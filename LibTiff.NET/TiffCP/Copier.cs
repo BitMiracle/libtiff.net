@@ -491,10 +491,15 @@ namespace BitMiracle.TiffCP
                 if (!(outImage.IsTiled() || inImage.IsTiled()))
                 {
                     result = inImage.GetField(TiffTag.ROWSPERSTRIP);
-                    int irps = result[0].ToInt();
+                    if (result != null)
+                    {
+                        int irps = result[0].ToInt();
 
-                    /* if biased, force decoded copying to allow image subtraction */
-                    bychunk = (m_bias == null) && (m_rowsperstrip == irps);
+                        /* if biased, force decoded copying to allow image subtraction */
+                        bychunk = (m_bias == null) && (m_rowsperstrip == irps);
+                    }
+                    else
+                        bychunk = false;
                 }
                 else
                 {
