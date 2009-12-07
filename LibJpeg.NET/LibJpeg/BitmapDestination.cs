@@ -182,7 +182,7 @@ namespace BitMiracle.LibJpeg
             int infoHeaderSize = infoHeader.Length;
             int paletteSize = cmap_entries * 4;
             int offsetToPixels = fileHeaderSize + infoHeaderSize + paletteSize; /* Header and colormap */
-            int fileSize = offsetToPixels + (int)m_rowWidth * (int)m_parameters.Height;
+            int fileSize = offsetToPixels + m_rowWidth * m_parameters.Height;
 
             byte[] fileHeader = createBitmapFileHeader(offsetToPixels, fileSize);
 

@@ -62,11 +62,11 @@ namespace BitMiracle.LibJpeg
             if (bitCount > maxBitsInStorage)
                 throw new ArgumentOutOfRangeException("bitCount");
 
-            for (int i = 0; i < (int)bitCount; ++i)
+            for (int i = 0; i < bitCount; ++i)
             {
                 byte bit = (byte)((bitStorage << (maxBitsInStorage - (bitCount - i))) >> (maxBitsInStorage - 1));
                 if (!writeBit(bit))
-                    return (int)i;
+                    return i;
             }
 
             return bitCount;
