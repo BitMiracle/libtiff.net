@@ -14,7 +14,7 @@ using System.Diagnostics;
 
 namespace BitMiracle.LibTiff.Internal
 {
-    public class TagCompare : IComparer
+    internal class TagCompare : IComparer
     {
         int IComparer.Compare(object x, object y)
         {
