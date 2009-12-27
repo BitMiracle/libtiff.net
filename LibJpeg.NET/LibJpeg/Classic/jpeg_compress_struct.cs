@@ -108,7 +108,7 @@ namespace BitMiracle.LibJpeg.Classic
         internal J_COLOR_SPACE m_jpeg_color_space; /* colorspace of JPEG image */
 
         /* comp_info[i] describes component that appears i'th in SOF */
-        public jpeg_component_info[] m_comp_info;
+        private jpeg_component_info[] m_comp_info;
 
         /* ptrs to coefficient quantization tables, or null if not defined */
         internal JQUANT_TBL[] m_quant_tbl_ptrs = new JQUANT_TBL[JpegConstants.NUM_QUANT_TBLS];
@@ -385,6 +385,11 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_max_v_samp_factor; }
         }
 
+        public jpeg_component_info[] Component_info
+        {
+            get { return m_comp_info; }
+        }
+
         /* ptrs to coefficient quantization tables, or null if not defined */
         public JQUANT_TBL[] Quant_tbl_ptrs
         {
@@ -616,7 +621,9 @@ namespace BitMiracle.LibJpeg.Classic
             * multiple images at same param settings.
             */
             if (m_comp_info == null)
-                m_comp_info = new jpeg_component_info[JpegConstants.MAX_COMPONENTS];
+            {
+                m_comp_info = jpeg_component_info.createArrayOfComponents(JpegConstants.MAX_COMPONENTS);
+            }
 
             /* Initialize everything not dependent on the color space */
 

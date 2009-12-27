@@ -164,7 +164,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                int qtblno = m_cinfo.m_comp_info[ci].quant_tbl_no;
+                int qtblno = m_cinfo.Component_info[ci].quant_tbl_no;
 
                 /* Make sure specified quantization table is present */
                 if (qtblno < 0 || qtblno >= JpegConstants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)

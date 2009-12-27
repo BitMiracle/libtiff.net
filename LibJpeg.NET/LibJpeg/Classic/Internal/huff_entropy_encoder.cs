@@ -77,8 +77,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                int dctbl = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no;
-                int actbl = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no;
+                int dctbl = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no;
+                int actbl = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no;
                 if (m_gather_statistics)
                 {
                     /* Check for invalid table indexes */
@@ -162,8 +162,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 int ci = m_cinfo.m_MCU_membership[blkn];
                 if (!encode_one_block(state, MCU_data[blkn][0].data, state.last_dc_val[ci],
-                    m_dc_derived_tbls[m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no],
-                    m_ac_derived_tbls[m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no]))
+                    m_dc_derived_tbls[m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no],
+                    m_ac_derived_tbls[m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no]))
                 {
                     return false;
                 }
@@ -234,8 +234,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 int ci = m_cinfo.m_MCU_membership[blkn];
                 htest_one_block(MCU_data[blkn][0].data, m_saved.last_dc_val[ci],
-                    m_dc_count_ptrs[m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no],
-                    m_ac_count_ptrs[m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no]);
+                    m_dc_count_ptrs[m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no],
+                    m_ac_count_ptrs[m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no]);
                 m_saved.last_dc_val[ci] = MCU_data[blkn][0][0];
             }
 
@@ -255,7 +255,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                int dctbl = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no;
+                int dctbl = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no;
                 if (!did_dc[dctbl])
                 {
                     if (m_cinfo.m_dc_huff_tbl_ptrs[dctbl] == null)
@@ -265,7 +265,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     did_dc[dctbl] = true;
                 }
 
-                int actbl = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no;
+                int actbl = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].ac_tbl_no;
                 if (!did_ac[actbl])
                 {
                     if (m_cinfo.m_ac_huff_tbl_ptrs[actbl] == null)

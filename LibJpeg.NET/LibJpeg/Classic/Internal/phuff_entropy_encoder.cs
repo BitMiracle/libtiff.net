@@ -123,7 +123,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              */
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                jpeg_component_info componentInfo = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
 
                 /* Initialize DC predictions to 0 */
                 m_last_dc_val[ci] = 0;
@@ -257,7 +257,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
                 /* Count/emit the Huffman-coded symbol for the number of bits */
-                emit_symbol(m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no, nbits);
+                emit_symbol(m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no, nbits);
 
                 /* Emit that number of bits of the value, if positive, */
                 /* or the complement of its magnitude, if negative. */
@@ -581,7 +581,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             bool is_DC_band = (m_cinfo.m_Ss == 0);
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                jpeg_component_info componentInfo = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
                 int tbl = componentInfo.ac_tbl_no;
 
                 if (is_DC_band)

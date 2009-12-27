@@ -61,8 +61,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_whole_image[ci] = jpeg_common_struct.CreateBlocksArray(
-                        JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor),
-                        JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
+                        JpegUtils.jround_up(cinfo.Component_info[ci].width_in_blocks, cinfo.Component_info[ci].h_samp_factor),
+                        JpegUtils.jround_up(cinfo.Component_info[ci].height_in_blocks, cinfo.Component_info[ci].v_samp_factor));
                     m_whole_image[ci].ErrorProcessor = cinfo;
                 }
             }
@@ -164,7 +164,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int blkn = 0;
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                        jpeg_component_info componentInfo = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
                         int blockcnt = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
                         int xpos = MCU_col_num * componentInfo.MCU_sample_width;
                         int ypos = yoffset * JpegConstants.DCTSIZE;
@@ -249,7 +249,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.Component_info[ci];
 
                 /* Align the virtual buffer for this component. */
                 JBLOCK[][] buffer = m_whole_image[ci].Access(m_iMCU_row_num * componentInfo.v_samp_factor,
@@ -347,7 +347,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             JBLOCK[][][] buffer = new JBLOCK[JpegConstants.MAX_COMPS_IN_SCAN][][];
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                jpeg_component_info componentInfo = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
                 buffer[ci] = m_whole_image[componentInfo.component_index].Access(
                     m_iMCU_row_num * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
             }
@@ -361,7 +361,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                        jpeg_component_info componentInfo = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
                         int start_col = MCU_col_num * componentInfo.MCU_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
@@ -412,9 +412,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             else
             {
                 if (m_iMCU_row_num < (m_cinfo.m_total_iMCU_rows - 1))
-                    m_MCU_rows_per_iMCU_row = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]].v_samp_factor;
+                    m_MCU_rows_per_iMCU_row = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[0]].v_samp_factor;
                 else
-                    m_MCU_rows_per_iMCU_row = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]].last_row_height;
+                    m_MCU_rows_per_iMCU_row = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[0]].last_row_height;
             }
 
             m_mcu_ctr = 0;

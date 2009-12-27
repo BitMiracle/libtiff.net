@@ -1174,16 +1174,16 @@ namespace BitMiracle.LibJpeg.Classic
 
             for (int ci = 0; ci < dstinfo.m_num_components; ci++)
             {
-                dstinfo.m_comp_info[ci].component_id = m_comp_info[ci].component_id;
-                dstinfo.m_comp_info[ci].h_samp_factor = m_comp_info[ci].h_samp_factor;
-                dstinfo.m_comp_info[ci].v_samp_factor = m_comp_info[ci].v_samp_factor;
-                dstinfo.m_comp_info[ci].quant_tbl_no = m_comp_info[ci].quant_tbl_no;
+                dstinfo.Component_info[ci].component_id = m_comp_info[ci].component_id;
+                dstinfo.Component_info[ci].h_samp_factor = m_comp_info[ci].h_samp_factor;
+                dstinfo.Component_info[ci].v_samp_factor = m_comp_info[ci].v_samp_factor;
+                dstinfo.Component_info[ci].quant_tbl_no = m_comp_info[ci].quant_tbl_no;
 
                 /* Make sure saved quantization table for component matches the qtable
                 * slot.  If not, the input file re-used this qtable slot.
                 * IJG encoder currently cannot duplicate this.
                 */
-                int tblno = dstinfo.m_comp_info[ci].quant_tbl_no;
+                int tblno = dstinfo.Component_info[ci].quant_tbl_no;
                 if (tblno < 0 || tblno >= JpegConstants.NUM_QUANT_TBLS || m_quant_tbl_ptrs[tblno] == null)
                     ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
 

@@ -445,8 +445,8 @@ namespace BitMiracle.LibTiff.Internal
                      * Set Y sampling factors;
                      * we assume jpeg_set_colorspace() set the rest to 1
                      */
-                    m_compression.m_comp_info[0].h_samp_factor = m_h_sampling;
-                    m_compression.m_comp_info[0].v_samp_factor = m_v_sampling;
+                    m_compression.Component_info[0].h_samp_factor = m_h_sampling;
+                    m_compression.Component_info[0].v_samp_factor = m_v_sampling;
                 }
                 else
                 {
@@ -463,13 +463,13 @@ namespace BitMiracle.LibTiff.Internal
                 if (!TIFFjpeg_set_colorspace(J_COLOR_SPACE.JCS_UNKNOWN))
                     return false;
 
-                m_compression.m_comp_info[0].component_id = s;
+                m_compression.Component_info[0].component_id = s;
                 /* jpeg_set_colorspace() set sampling factors to 1 */
                 if (m_photometric == Photometric.YCBCR && s > 0)
                 {
-                    m_compression.m_comp_info[0].quant_tbl_no = 1;
-                    m_compression.m_comp_info[0].dc_tbl_no = 1;
-                    m_compression.m_comp_info[0].ac_tbl_no = 1;
+                    m_compression.Component_info[0].quant_tbl_no = 1;
+                    m_compression.Component_info[0].dc_tbl_no = 1;
+                    m_compression.Component_info[0].ac_tbl_no = 1;
                 }
             }
 
@@ -512,7 +512,7 @@ namespace BitMiracle.LibTiff.Internal
             /* Allocate downsampled-data buffers if needed */
             if (downsampled_input)
             {
-                if (!alloc_downsampled_buffers(m_compression.m_comp_info, m_compression.Num_components))
+                if (!alloc_downsampled_buffers(m_compression.Component_info, m_compression.Num_components))
                     return false;
             }
 
@@ -658,8 +658,8 @@ namespace BitMiracle.LibTiff.Internal
                  */
                 for (int ci = 0; ci < m_compression.Num_components; ci++)
                 {
-                    int vsamp = m_compression.m_comp_info[ci].v_samp_factor;
-                    int row_width = m_compression.m_comp_info[ci].width_in_blocks * JpegConstants.DCTSIZE * sizeof(byte);
+                    int vsamp = m_compression.Component_info[ci].v_samp_factor;
+                    int row_width = m_compression.Component_info[ci].width_in_blocks * JpegConstants.DCTSIZE * sizeof(byte);
                     for (int ypos = m_scancount * vsamp; ypos < JpegConstants.DCTSIZE * vsamp; ypos++)
                     {
                         Array.Copy(m_ds_buffer[ci][ypos - 1], m_ds_buffer[ci][ypos], row_width);
@@ -1322,7 +1322,7 @@ namespace BitMiracle.LibTiff.Internal
                 Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "fractional scanline discarded");
 
             /* Cb,Cr both have sampling factors 1, so this is correct */
-            int clumps_per_line = m_compression.m_comp_info[1].Downsampled_width;
+            int clumps_per_line = m_compression.Component_info[1].Downsampled_width;
 
             int bufOffset = 0;
             while (nrows > 0)
@@ -1334,7 +1334,7 @@ namespace BitMiracle.LibTiff.Internal
                 int clumpoffset = 0; /* first sample in clump */
                 for (int ci = 0; ci < m_compression.Num_components; ci++)
                 {
-                    jpeg_component_info compptr = m_compression.m_comp_info[ci];
+                    jpeg_component_info compptr = m_compression.Component_info[ci];
                     int hsamp = compptr.h_samp_factor;
                     int vsamp = compptr.v_samp_factor;
                     int padding = compptr.width_in_blocks * JpegConstants.DCTSIZE - clumps_per_line * hsamp;

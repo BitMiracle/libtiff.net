@@ -857,7 +857,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (m_cinfo.m_comp_info == null)
             {
                 /* do only once, even if suspend */
-                m_cinfo.m_comp_info = new jpeg_component_info[m_cinfo.m_num_components];
+                m_cinfo.m_comp_info = jpeg_component_info.createArrayOfComponents(m_cinfo.m_num_components);
             }
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)

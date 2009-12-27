@@ -70,7 +70,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              */
             int prec = 0;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
-                prec += emit_dqt(m_cinfo.m_comp_info[ci].quant_tbl_no);
+                prec += emit_dqt(m_cinfo.Component_info[ci].quant_tbl_no);
 
             /* now prec is nonzero iff there are any 16-bit quant tables. */
 
@@ -87,7 +87,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 is_baseline = true;
                 for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                 {
-                    if (m_cinfo.m_comp_info[ci].dc_tbl_no > 1 || m_cinfo.m_comp_info[ci].ac_tbl_no > 1)
+                    if (m_cinfo.Component_info[ci].dc_tbl_no > 1 || m_cinfo.Component_info[ci].ac_tbl_no > 1)
                         is_baseline = false;
                 }
 
@@ -120,8 +120,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              */
             for (int i = 0; i < m_cinfo.m_comps_in_scan; i++)
             {
-                int ac_tbl_no = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[i]].ac_tbl_no;
-                int dc_tbl_no = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[i]].dc_tbl_no;
+                int ac_tbl_no = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[i]].ac_tbl_no;
+                int dc_tbl_no = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[i]].dc_tbl_no;
                 if (m_cinfo.m_progressive_mode)
                 {
                     /* Progressive mode: only DC or only AC tables are used in one scan */
@@ -239,10 +239,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int i = 0; i < m_cinfo.m_comps_in_scan; i++)
             {
                 int componentIndex = m_cinfo.m_cur_comp_info[i];
-                emit_byte(m_cinfo.m_comp_info[componentIndex].component_id);
+                emit_byte(m_cinfo.Component_info[componentIndex].component_id);
 
-                int td = m_cinfo.m_comp_info[componentIndex].dc_tbl_no;
-                int ta = m_cinfo.m_comp_info[componentIndex].ac_tbl_no;
+                int td = m_cinfo.Component_info[componentIndex].dc_tbl_no;
+                int ta = m_cinfo.Component_info[componentIndex].ac_tbl_no;
                 if (m_cinfo.m_progressive_mode)
                 {
                     /* Progressive mode: only DC or only AC tables are used in one scan;
@@ -296,7 +296,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.Component_info[ci];
                 emit_byte(componentInfo.component_id);
                 emit_byte((componentInfo.h_samp_factor << 4) + componentInfo.v_samp_factor);
                 emit_byte(componentInfo.quant_tbl_no);
