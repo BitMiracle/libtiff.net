@@ -39,10 +39,12 @@ namespace BitMiracle.LibJpeg
 
             m_bytes = row;
 
-            BitStream bitStream = new BitStream(row);
-            m_samples = new Sample[sampleCount];
-            for (int i = 0; i < sampleCount; ++i)
-                m_samples[i] = new Sample(bitStream, bitsPerComponent, componentsPerSample);
+            using (BitStream bitStream = new BitStream(row))
+            {
+                m_samples = new Sample[sampleCount];
+                for (int i = 0; i < sampleCount; ++i)
+                    m_samples[i] = new Sample(bitStream, bitsPerComponent, componentsPerSample);
+            }
         }
 
         /// <summary>Creates row from an array of components.</summary>
@@ -74,16 +76,18 @@ namespace BitMiracle.LibJpeg
                 m_samples[i] = new Sample(components, bitsPerComponent);
             }
 
-            BitStream bits = new BitStream();
-            for (int i = 0; i < sampleCount; ++i)
+            using (BitStream bits = new BitStream())
             {
-                for (int j = 0; j < componentsPerSample; ++j)
-                    bits.Write(sampleComponents[i * componentsPerSample + j], bitsPerComponent);
-            }
+                for (int i = 0; i < sampleCount; ++i)
+                {
+                    for (int j = 0; j < componentsPerSample; ++j)
+                        bits.Write(sampleComponents[i * componentsPerSample + j], bitsPerComponent);
+                }
 
-            m_bytes = new byte[bits.UnderlyingStream.Length];
-            bits.UnderlyingStream.Seek(0, System.IO.SeekOrigin.Begin);
-            bits.UnderlyingStream.Read(m_bytes, 0, (int)bits.UnderlyingStream.Length);
+                m_bytes = new byte[bits.UnderlyingStream.Length];
+                bits.UnderlyingStream.Seek(0, System.IO.SeekOrigin.Begin);
+                bits.UnderlyingStream.Read(m_bytes, 0, (int)bits.UnderlyingStream.Length);
+            }
         }
 
         /// <summary>The number of samples in row.</summary>

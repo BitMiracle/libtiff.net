@@ -5,8 +5,10 @@ using System.Text;
 
 namespace BitMiracle.LibJpeg
 {
-    class BitStream
+    class BitStream : IDisposable
     {
+        private bool m_alreadyDisposed = false;
+
         private const int bitsInByte = 8;
         private Stream m_stream;
         private int m_positionInByte;
@@ -30,6 +32,25 @@ namespace BitMiracle.LibJpeg
             m_positionInByte = 0;
 
             m_size = bitsAllocated();
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!m_alreadyDisposed)
+            {
+                if (disposing)
+                {
+                    m_stream.Dispose();
+                }
+
+                m_alreadyDisposed = true;
+            }
         }
 
         public int Size()
