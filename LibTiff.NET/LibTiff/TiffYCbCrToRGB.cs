@@ -25,16 +25,16 @@ namespace BitMiracle.LibTiff
 #endif
     class TiffYCbCrToRGB
     {
-        public const int clamptabOffset = 256;
+        private const int clamptabOffset = 256;
         private const int SHIFT = 16;
         private const int ONE_HALF = 1 << (SHIFT - 1);
 
-        public byte[] clamptab; /* range clamping table */
-        public int[] Cr_r_tab;
-        public int[] Cb_b_tab;
-        public int[] Cr_g_tab;
-        public int[] Cb_g_tab;
-        public int[] Y_tab;
+        private byte[] clamptab; /* range clamping table */
+        private int[] Cr_r_tab;
+        private int[] Cb_b_tab;
+        private int[] Cr_g_tab;
+        private int[] Cb_g_tab;
+        private int[] Y_tab;
 
         public TiffYCbCrToRGB()
         {

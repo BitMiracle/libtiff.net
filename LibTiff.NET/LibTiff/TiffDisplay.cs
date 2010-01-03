@@ -24,19 +24,19 @@ namespace BitMiracle.LibTiff
     class TiffDisplay
     {
         /* XYZ -> luminance matrix */
-        public float[][] d_mat;
-        public float d_YCR; /* Light o/p for reference white */
-        public float d_YCG;
-        public float d_YCB;
-        public int d_Vrwr; /* Pixel values for ref. white */
-        public int d_Vrwg;
-        public int d_Vrwb;
-        public float d_Y0R; /* Residual light for black pixel */
-        public float d_Y0G;
-        public float d_Y0B;
-        public float d_gammaR; /* Gamma values for the three guns */
-        public float d_gammaG;
-        public float d_gammaB;
+        internal float[][] d_mat;
+        internal float d_YCR; /* Light o/p for reference white */
+        internal float d_YCG;
+        internal float d_YCB;
+        internal int d_Vrwr; /* Pixel values for ref. white */
+        internal int d_Vrwg;
+        internal int d_Vrwb;
+        internal float d_Y0R; /* Residual light for black pixel */
+        internal float d_Y0G;
+        internal float d_Y0B;
+        internal float d_gammaR; /* Gamma values for the three guns */
+        internal float d_gammaG;
+        internal float d_gammaB;
 
         public TiffDisplay()
         {

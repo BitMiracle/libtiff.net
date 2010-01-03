@@ -29,21 +29,21 @@ namespace BitMiracle.LibTiff
         public const int CIELABTORGB_TABLE_RANGE = 1500;
 
         /* CIE Lab 1976->RGB support */
-        public int range; /* Size of conversion table */
-        
-        public float rstep;
-        public float gstep;
-        public float bstep;
-        
-        public float X0;
-        public float Y0;
-        public float Z0; /* Reference white point */
-        
-        public TiffDisplay display;
-        
-        public float[] Yr2r = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yr to r */
-        public float[] Yg2g = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yg to g */
-        public float[] Yb2b = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yb to b */
+        private int range; /* Size of conversion table */
+
+        private float rstep;
+        private float gstep;
+        private float bstep;
+
+        private float X0;
+        private float Y0;
+        private float Z0; /* Reference white point */
+
+        private TiffDisplay display;
+
+        private float[] Yr2r = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yr to r */
+        private float[] Yg2g = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yg to g */
+        private float[] Yb2b = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yb to b */
 
         /* 
         * Allocate conversion state structures and make look_up tables for

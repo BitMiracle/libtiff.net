@@ -74,17 +74,17 @@ namespace BitMiracle.LibTiff
 
         public delegate void TiffExtendProc(Tiff tif);
 
-        public const int TIFF_VERSION = 42;
-        public const int TIFF_BIGTIFF_VERSION = 43;
+        private const int TIFF_VERSION = 42;
+        private const int TIFF_BIGTIFF_VERSION = 43;
 
-        public const short TIFF_BIGENDIAN = 0x4d4d;
-        public const short TIFF_LITTLEENDIAN = 0x4949;
-        public const short MDI_LITTLEENDIAN = 0x5045;
+        internal const short TIFF_BIGENDIAN = 0x4d4d;
+        private const short TIFF_LITTLEENDIAN = 0x4949;
+        private const short MDI_LITTLEENDIAN = 0x5045;
 
         /* reference white */
-        public const float D50_X0 = 96.4250F;
-        public const float D50_Y0 = 100.0F;
-        public const float D50_Z0 = 82.4680F;
+        private const float D50_X0 = 96.4250F;
+        private const float D50_Y0 = 100.0F;
+        private const float D50_Z0 = 82.4680F;
 
         internal const short TIFF_VARIABLE = -1; /* marker for variable length tags */
         internal const short TIFF_SPP = -2; /* marker for SamplesPerPixel tags */
