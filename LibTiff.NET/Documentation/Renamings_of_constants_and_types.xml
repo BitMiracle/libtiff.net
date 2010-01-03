@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>Renamings of constants and types</title>
+    <breadcumbs>
+      <link file="Differences.xml">
+        <text>Differences between LibTiff-3.9.2 and LibTiff.Net</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="true">
+      <text>CLEANFAXDATA_* -&gt; CleanFaxData.*</text> <br /><text>COLORRESPONSEUNIT_* -&gt; ColorResponseUnit.CRU*</text> <br /><text>COMPRESSION_* -&gt; Compression.*</text> <br /><text>DCSIMAGERFILTER_* -&gt; DCSImagerFilter.*</text> <br /><text>DCSIMAGERMODEL_* -&gt; DCSImagerModel.*</text> <br /><text>DCSINTERPMODE_* -&gt; DCSInterpMode.*</text> <br /><text>EXIFTAG_* -&gt; TiffTag.EXIF_*</text> <br /><text>EXTRASAMPLE_* -&gt; ExtraSample.*</text> <br /><text>FAXMODE_* -&gt; FaxMode.*</text> <br /><text>FILETYPE_* -&gt; FileType.*</text> <br /><text>FILLORDER_* -&gt; FillOrder.*</text> <br /><text>GRAYRESPONSEUNIT_* -&gt; GrayResponseUnit.GRU*</text> <br /><text>GROUP3OPT_* -&gt; Group3Opt.* (note, that GROUP3OPT_2DENCODING -&gt; Group3Opt.ENCODING2D)</text> <br /><text>INKSET_* -&gt; InkSet.*</text> <br /><text>JPEGCOLORMODE_* -&gt; JpegColorMode.*</text> <br /><text>JPEGPROC_* -&gt; JpegProc.*</text> <br /><text>JPEGTABLESMODE_* -&gt; JpegTablesMode.*</text> <br /><text>OFILETYPE_* -&gt; OFileType.*</text> <br /><text>ORIENTATION_* -&gt; Orientation.*</text> <br /><text>PHOTOMETRIC_* -&gt; Photometric.*</text> <br /><text>PIXARLOGDATAFMT_* -&gt; PixarLogDataFmt.FMT*</text> <br /><text>PLANARCONFIG_* -&gt; PlanarConfig.*</text> <br /><text>PREDICTOR_* -&gt; Predictor.*</text> <br /><text>RESUNIT_* -&gt; ResUnit.*</text> <br /><text>SAMPLEFORMAT_* -&gt; SampleFormat.*</text> <br /><text>SGILOGDATAFMT_* -&gt; SGILogDataFmt.FMT*</text> <br /><text>SGILOGENCODE_* -&gt; SGILogEncode.*</text> <br /><text>THRESHHOLD_* -&gt; Threshold.**</text> <br /><text>TIFFPRINT_* -&gt; TiffPrintFlags.*</text> <br /><text>TIFFTAG_* -&gt; TiffTag.*</text> <br /><text>YCBCRPOSITION_* -&gt; YCbCrPosition.*</text> <br /><br /><text>TIFFDataType.TIFF_* -&gt; TiffType.*</text> <br /><text>TIFFDirEntry -&gt; TiffDirEntry</text> <br /><text>TIFFDisplay -&gt; TiffDisplay</text> <br /><text>TIFFFieldInfo -&gt; TiffFieldInfo</text> <br /><text>TIFFHeader -&gt; TiffHeader</text> <br /><text>TIFFTagValue -&gt; TiffTagValue</text> </descriptionarticle>
+  </file>
+</xml>

@@ -1,17 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <xml>
-	<file>
-		<title>PrintDirectory</title>
-		<descriptionArticle only="false" />
-		<signature>
-			<function>
-				
-				<return type="Void" file="Void.xml" />
-				<name>PrintDirectory</name>
-				<parameters>
-					<parameter name="fd" type="Stream" file="Stream.xml" />
-					</parameters>
-				</function>
-		</signature>
-	</file>
+  <file>
+    <title>PrintDirectory</title>
+    <breadcumbs>
+      <link file="BitMiracle_LibTiff_Classic.xml">
+        <text>BitMiracle.LibTiff.Classic namespace</text>
+      </link>
+      <text> :: </text>
+      <link file="Tiff.xml">
+        <text>Tiff</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="false" />
+    <signature>
+      <function>
+        <name>PrintDirectory</name>
+        <return type="void" />
+        <parameters>
+          <parameter name="fd" type="Stream" file="Stream.xml" />
+        </parameters>
+      </function>
+    </signature>
+  </file>
 </xml>

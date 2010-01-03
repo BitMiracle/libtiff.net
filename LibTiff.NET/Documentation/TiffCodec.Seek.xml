@@ -1,17 +1,26 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <xml>
-	<file>
-		<title>Seek</title>
-		<descriptionArticle only="false" />
-		<signature>
-			<function>
-				<mod2>virtual</mod2>
-				<return type="Boolean" />
-				<name>Seek</name>
-				<parameters>
-					<parameter name="off" type="Int32" />
-					</parameters>
-				</function>
-		</signature>
-	</file>
+  <file>
+    <title>Seek</title>
+    <breadcumbs>
+      <link file="BitMiracle_LibTiff_Classic.xml">
+        <text>BitMiracle.LibTiff.Classic namespace</text>
+      </link>
+      <text> :: </text>
+      <link file="TiffCodec.xml">
+        <text>TiffCodec</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="false" />
+    <signature>
+      <function>
+        <mod2>virtual</mod2>
+        <name>Seek</name>
+        <return type="Boolean" />
+        <parameters>
+          <parameter name="off" type="Int32" />
+        </parameters>
+      </function>
+    </signature>
+  </file>
 </xml>

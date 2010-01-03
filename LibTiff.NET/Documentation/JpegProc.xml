@@ -2,6 +2,11 @@
 <xml>
   <file>
     <title>JpegProc</title>
+    <breadcumbs>
+      <link file="BitMiracle_LibTiff_Classic.xml">
+        <text>BitMiracle.LibTiff.Classic namespace</text>
+      </link>
+    </breadcumbs>
     <descriptionarticle only="false" />
     <signature>
       <enum>

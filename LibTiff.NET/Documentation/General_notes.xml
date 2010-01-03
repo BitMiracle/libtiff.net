@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>General notes</title>
+    <breadcumbs>
+      <link file="Differences.xml">
+        <text>Differences between LibTiff-3.9.2 and LibTiff.Net</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="true">
+      <text>TIFF struct changed it's name to </text> <link file="Tiff.xml"><text>Tiff</text> </link><text> and became full-featured class.</text> <br /><br /><text>In LibTiff most functions were accepting pointer to a TIFF struct as first parameter.</text> <br /><text>LibTiff.Net does not need it because these functions are now methods of </text> <link file="Tiff.xml"><text>Tiff</text> </link><text> class.</text> <br /><br /><text>TIFFCodec struct changed it's name to </text> <link file="TiffCodec.xml"><text>TiffCodec</text> </link><text> and became full-featured class with virtual</text> <br /><text>methods suitable for overloading.</text> <br /><br /><text>TIFFTagMethods struct changed it's name to </text> <link file="TiffTagMethods.xml"><text>TiffTagMethods</text> </link><text> and became full-featured class</text> <br /><text>with virtual methods suitable for overloading.</text> <br /><br /><text>TIFFRegisterCODEC function changed it's name and signature. It is now known as </text> <link file="Tiff.RegisterCodec.xml"><text>RegisterCodec</text> </link><br /><text>and gets an instance of class derived from </text> <link file="TiffCodec.xml"><text>TiffCodec</text> </link><text>.</text> <br /><br /><text>Custom error handling strategy changed. Now you should provide implementation of a class</text> <br /><text>derived from </text> <link file="TiffErrorHandler.xml"><text>TiffErrorHandler</text> </link><text> and pass it as parameter to </text> <link file="Tiff.SetErrorHandler.xml"><text>SetErrorHandler</text> </link><text> method.</text> <br /><br /><text>Custom file/stream handling strategy changed. Now you should provide implementation of a</text> <br /><text>class derived from </text> <link file="TiffStream.xml"><text>TiffStream</text> </link><text> and pass it as parameter to </text> <link file="Tiff.ClientOpen.xml"><text>ClientOpen</text> </link><text> method.</text> </descriptionarticle>
+  </file>
+</xml>
