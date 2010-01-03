@@ -27,7 +27,7 @@ using System.Diagnostics;
 
 using BitMiracle.LibJpeg.Classic;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     class JpegCodec : TiffCodec
     {        

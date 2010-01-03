@@ -16,10 +16,10 @@ using System.IO;
 using System.Diagnostics;
 using System.Collections;
 
-using BitMiracle.LibTiff.Internal;
+using BitMiracle.LibTiff.Classic.Internal;
 using System.Reflection;
 
-namespace BitMiracle.LibTiff
+namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Tag Image File Format (TIFF)

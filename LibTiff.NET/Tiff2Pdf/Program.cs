@@ -22,7 +22,7 @@ using System.Text;
 using System.IO;
 using System.Globalization;
 
-using BitMiracle.LibTiff;
+using BitMiracle.LibTiff.Classic;
 
 namespace BitMiracle.Tiff2Pdf
 {

@@ -35,7 +35,7 @@ using System.Diagnostics;
 
 using ComponentAce.Compression.Libs.zlib;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     class DeflateCodec : CodecWithPredictor
     {

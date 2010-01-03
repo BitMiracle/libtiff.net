@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibTiff
+namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Holds a value of Tiff tag.

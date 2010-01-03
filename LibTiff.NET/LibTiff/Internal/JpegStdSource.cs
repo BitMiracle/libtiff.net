@@ -15,7 +15,7 @@ using System.Text;
 
 using BitMiracle.LibJpeg.Classic;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// JPEG library source data manager.

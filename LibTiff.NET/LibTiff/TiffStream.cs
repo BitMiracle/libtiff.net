@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace BitMiracle.LibTiff
+namespace BitMiracle.LibTiff.Classic
 {
 #if EXPOSE_LIBTIFF
     public

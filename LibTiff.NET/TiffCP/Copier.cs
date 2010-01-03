@@ -12,7 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using BitMiracle.LibTiff;
+using BitMiracle.LibTiff.Classic;
 using System.Globalization;
 using System.IO;
 using System.Diagnostics;

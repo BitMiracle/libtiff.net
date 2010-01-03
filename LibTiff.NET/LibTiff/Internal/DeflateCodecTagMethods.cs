@@ -16,7 +16,7 @@ using System.Text;
 using ComponentAce.Compression.Libs.zlib;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     class DeflateCodecTagMethods : TiffTagMethods
     {

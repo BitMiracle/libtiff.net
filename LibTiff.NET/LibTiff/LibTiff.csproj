@@ -8,7 +8,7 @@
     <ProjectGuid>{281EF657-40C0-432D-8AC4-E9ADDFD792B2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BitMiracle.LibTiff</RootNamespace>
+    <RootNamespace>BitMiracle.LibTiff.Classic</RootNamespace>
     <AssemblyName>BitMiracle.LibTiff.NET</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

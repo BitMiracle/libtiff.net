@@ -6,11 +6,11 @@ using System;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BitMiracle.LibTiff.NET")]
+[assembly: AssemblyTitle("BitMiracle.LibTiff.Classic.NET")]
 [assembly: AssemblyDescription(".NET version of LibTiff library made by Bit Miracle")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bit Miracle")]
-[assembly: AssemblyProduct("BitMiracle.LibTiff.NET")]
+[assembly: AssemblyProduct("BitMiracle.LibTiff.Classic.NET")]
 [assembly: AssemblyCopyright("Copyright (C) 2008-2009, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

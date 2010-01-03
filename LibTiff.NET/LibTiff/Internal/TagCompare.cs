@@ -12,7 +12,7 @@
 using System.Collections;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     internal class TagCompare : IComparer
     {

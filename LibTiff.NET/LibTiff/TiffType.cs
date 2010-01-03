@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibTiff
+namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Tag data type information.

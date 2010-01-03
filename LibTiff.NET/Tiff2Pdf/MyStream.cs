@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-using BitMiracle.LibTiff;
+using BitMiracle.LibTiff.Classic;
 
 namespace BitMiracle.Tiff2Pdf
 {

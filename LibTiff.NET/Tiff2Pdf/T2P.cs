@@ -15,7 +15,7 @@ using System.Text;
 using System.IO;
 using System.Collections;
 
-using BitMiracle.LibTiff;
+using BitMiracle.LibTiff.Classic;
 using System.Globalization;
 using System.Diagnostics;
 

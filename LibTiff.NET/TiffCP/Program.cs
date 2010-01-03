@@ -32,7 +32,7 @@ using System.IO;
 using System.Globalization;
 using System.Diagnostics;
 
-using BitMiracle.LibTiff;
+using BitMiracle.LibTiff.Classic;
 
 namespace BitMiracle.TiffCP
 {

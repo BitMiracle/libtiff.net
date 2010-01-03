@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     partial class CCITTCodec : TiffCodec
     {

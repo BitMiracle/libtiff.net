@@ -19,7 +19,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// Codecs that want to support the Predictor tag should inherit from 

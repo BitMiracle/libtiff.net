@@ -15,7 +15,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Internal
+namespace BitMiracle.LibTiff.Classic.Internal
 {
     class JpegCodecTagMethods : TiffTagMethods
     {
