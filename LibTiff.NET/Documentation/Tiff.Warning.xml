@@ -1,20 +1,29 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <xml>
-	<file>
-		<title>Warning</title>
-		<descriptionArticle only="false" />
-		<signature>
-			<function>
-				<mod2>static</mod2>
-				<return type="Void" file="Void.xml" />
-				<name>Warning</name>
-				<parameters>
-					<parameter name="tif" type="Tiff" file="Tiff.xml" />
-					<parameter name="module" type="String" file="String.xml" />
-					<parameter name="fmt" type="String" file="String.xml" />
-					<parameter name="ap" type="Object[]" file="Object[].xml" />
-					</parameters>
-				</function>
-		</signature>
-	</file>
+  <file>
+    <title>Warning</title>
+    <breadcumbs>
+      <link file="BitMiracle_LibTiff_Classic.xml">
+        <text>BitMiracle.LibTiff.Classic namespace</text>
+      </link>
+      <text> :: </text>
+      <link file="Tiff.xml">
+        <text>Tiff</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="false" />
+    <signature>
+      <function>
+        <mod2>static</mod2>
+        <name>Warning</name>
+        <return type="Void" />
+        <parameters>
+          <parameter name="tif" type="Tiff" file="Tiff.xml" />
+          <parameter name="module" type="String" file="String.xml" />
+          <parameter name="fmt" type="String" file="String.xml" />
+          <parameter name="ap" type="Object[]" file="Object[].xml" />
+        </parameters>
+      </function>
+    </signature>
+  </file>
 </xml>

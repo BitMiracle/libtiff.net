@@ -21,6 +21,14 @@
     <ref>TiffTagMethods.GetField.xml</ref>
     <ref>TiffTagMethods.SetField.xml</ref>
     <ref>Tiff.Dispose.xml</ref>
+    <ref>Tiff.Error.xml</ref>
+    <ref>Tiff.Error1.xml</ref>
+    <ref>Tiff.ErrorExt.xml</ref>
+    <ref>Tiff.ErrorExt1.xml</ref>
+    <ref>Tiff.Warning1.xml</ref>
+    <ref>Tiff.WarningExt.xml</ref>
+    <ref>Tiff.Warning.xml</ref>
+    <ref>Tiff.SwabArrayOfShort.xml</ref>
     <node title="Tiff" file="Tiff.xml" iconindex="6">
       <ref>Tiff.ByteArrayToInts.xml</ref>
       <ref>Tiff.ClientOpen.xml</ref>
@@ -36,8 +44,18 @@
       <ref>TiffTagMethods.GetField.xml</ref>
       <ref>TiffTagMethods.SetField.xml</ref>
       <ref>Tiff.Dispose.xml</ref>
+      <ref>Renamings_of_functions.xml</ref>
+      <ref>Tiff.Error.xml</ref>
+      <ref>Tiff.Error1.xml</ref>
+      <ref>Tiff.ErrorExt.xml</ref>
+      <ref>Tiff.ErrorExt1.xml</ref>
+      <ref>Tiff.Warning1.xml</ref>
+      <ref>Tiff.WarningExt.xml</ref>
+      <ref>Tiff.Warning.xml</ref>
+      <ref>Tiff.SwabArrayOfShort.xml</ref>
       <node title="TiffExtendProc" file="Tiff.TiffExtendProc.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="AssemblyVersion" file="Tiff.AssemblyVersion.xml" iconindex="27">
         <ref>Tiff.xml</ref>
@@ -59,18 +77,23 @@
       </node>
       <node title="DataWidth" file="Tiff.DataWidth.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="Error" file="Tiff.Error.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="Error" file="Tiff.Error1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ErrorExt" file="Tiff.ErrorExt.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ErrorExt" file="Tiff.ErrorExt1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetA" file="Tiff.GetA.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -82,6 +105,7 @@
       </node>
       <node title="GetBitRevTable" file="Tiff.GetBitRevTable.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetG" file="Tiff.GetG.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -93,12 +117,14 @@
       </node>
       <node title="GetVersion" file="Tiff.GetVersion.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="IntsToByteArray" file="Tiff.IntsToByteArray.xml" iconindex="23">
         <ref>Tiff.xml</ref>
       </node>
       <node title="Open" file="Tiff.Open.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="Realloc" file="Tiff.Realloc.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -109,49 +135,63 @@
       </node>
       <node title="ReverseBits" file="Tiff.ReverseBits.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetErrorHandler" file="Tiff.SetErrorHandler.xml" iconindex="23">
         <ref>Tiff.xml</ref>
         <ref>General_notes.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetTagExtender" file="Tiff.SetTagExtender.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ShortsToByteArray" file="Tiff.ShortsToByteArray.xml" iconindex="23">
         <ref>Tiff.xml</ref>
       </node>
       <node title="SwabArrayOfDouble" file="Tiff.SwabArrayOfDouble.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SwabArrayOfLong" file="Tiff.SwabArrayOfLong.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SwabArrayOfShort" file="Tiff.SwabArrayOfShort.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SwabArrayOfTriples" file="Tiff.SwabArrayOfTriples.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SwabDouble" file="Tiff.SwabDouble.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SwabLong" file="Tiff.SwabLong.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SwabShort" file="Tiff.SwabShort.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="Warning" file="Tiff.Warning.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="Warning" file="Tiff.Warning1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WarningExt" file="Tiff.WarningExt.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WarningExt" file="Tiff.WarningExt1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="CheckpointDirectory" file="Tiff.CheckpointDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -167,33 +207,43 @@
       </node>
       <node title="ComputeStrip" file="Tiff.ComputeStrip.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ComputeTile" file="Tiff.ComputeTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="CreateDirectory" file="Tiff.CreateDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="CurrentDirectory" file="Tiff.CurrentDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="CurrentDirOffset" file="Tiff.CurrentDirOffset.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="CurrentRow" file="Tiff.CurrentRow.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="CurrentStrip" file="Tiff.CurrentStrip.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="CurrentTile" file="Tiff.CurrentTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="DefaultStripSize" file="Tiff.DefaultStripSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="DefaultTileSize" file="Tiff.DefaultTileSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="Dispose" file="Tiff.Dispose.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -201,36 +251,47 @@
       </node>
       <node title="FieldWithName" file="Tiff.FieldWithName.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="FieldWithTag" file="Tiff.FieldWithTag.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="FileName" file="Tiff.FileName.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="FindCodec" file="Tiff.FindCodec.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="FindFieldInfo" file="Tiff.FindFieldInfo.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="FindFieldInfoByName" file="Tiff.FindFieldInfoByName.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="Flush" file="Tiff.Flush.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="FlushData" file="Tiff.FlushData.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="FreeDirectory" file="Tiff.FreeDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetClientInfo" file="Tiff.GetClientInfo.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetConfiguredCodecs" file="Tiff.GetConfiguredCodecs.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetField" file="Tiff.GetField.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -238,18 +299,23 @@
       </node>
       <node title="GetFieldDefaulted" file="Tiff.GetFieldDefaulted.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetMode" file="Tiff.GetMode.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetStream" file="Tiff.GetStream.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetTagListCount" file="Tiff.GetTagListCount.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetTagListEntry" file="Tiff.GetTagListEntry.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="GetTagMethods" file="Tiff.GetTagMethods.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -257,36 +323,47 @@
       </node>
       <node title="IsBigEndian" file="Tiff.IsBigEndian.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="IsByteSwapped" file="Tiff.IsByteSwapped.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="IsCodecConfigured" file="Tiff.IsCodecConfigured.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="IsMSB2LSB" file="Tiff.IsMSB2LSB.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="IsTiled" file="Tiff.IsTiled.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="IsUpSampled" file="Tiff.IsUpSampled.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="LastDirectory" file="Tiff.LastDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="MergeFieldInfo" file="Tiff.MergeFieldInfo.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="NumberOfDirectories" file="Tiff.NumberOfDirectories.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="NumberOfStrips" file="Tiff.NumberOfStrips.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="NumberOfTiles" file="Tiff.NumberOfTiles.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="PrintDirectory" file="Tiff.PrintDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -297,42 +374,54 @@
       </node>
       <node title="RasterScanlineSize" file="Tiff.RasterScanlineSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="RawStripSize" file="Tiff.RawStripSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadBufferSetup" file="Tiff.ReadBufferSetup.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadCustomDirectory" file="Tiff.ReadCustomDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadDirectory" file="Tiff.ReadDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadEncodedStrip" file="Tiff.ReadEncodedStrip.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadEncodedTile" file="Tiff.ReadEncodedTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadEXIFDirectory" file="Tiff.ReadEXIFDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadRawStrip" file="Tiff.ReadRawStrip.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadRawTile" file="Tiff.ReadRawTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadRGBAImage" file="Tiff.ReadRGBAImage.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadRGBAImage" file="Tiff.ReadRGBAImage1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
       </node>
       <node title="ReadRGBAImageOriented" file="Tiff.ReadRGBAImageOriented.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadRGBAImageOriented" file="Tiff.ReadRGBAImageOriented1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -342,40 +431,51 @@
       </node>
       <node title="ReadRGBAStrip" file="Tiff.ReadRGBAStrip.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadRGBATile" file="Tiff.ReadRGBATile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadScanline" file="Tiff.ReadScanline.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ReadScanline" file="Tiff.ReadScanline1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
       </node>
       <node title="ReadTile" file="Tiff.ReadTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="RegisterCodec" file="Tiff.RegisterCodec.xml" iconindex="23">
         <ref>Tiff.xml</ref>
         <ref>General_notes.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="RewriteDirectory" file="Tiff.RewriteDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="RGBAImageOK" file="Tiff.RGBAImageOK.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="ScanlineSize" file="Tiff.ScanlineSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetClientdata" file="Tiff.SetClientdata.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetClientInfo" file="Tiff.SetClientInfo.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetDirectory" file="Tiff.SetDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetField" file="Tiff.SetField.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -383,12 +483,15 @@
       </node>
       <node title="SetFileName" file="Tiff.SetFileName.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetMode" file="Tiff.SetMode.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetSubDirectory" file="Tiff.SetSubDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetTagMethods" file="Tiff.SetTagMethods.xml" iconindex="23">
         <ref>Tiff.xml</ref>
@@ -396,63 +499,82 @@
       </node>
       <node title="SetupStrips" file="Tiff.SetupStrips.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="SetWriteOffset" file="Tiff.SetWriteOffset.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="StripSize" file="Tiff.StripSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="TileRowSize" file="Tiff.TileRowSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="TileSize" file="Tiff.TileSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="UnlinkDirectory" file="Tiff.UnlinkDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="UnRegisterCodec" file="Tiff.UnRegisterCodec.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="VStripSize" file="Tiff.VStripSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="VTileSize" file="Tiff.VTileSize.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteBufferSetup" file="Tiff.WriteBufferSetup.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteCheck" file="Tiff.WriteCheck.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteCustomDirectory" file="Tiff.WriteCustomDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteDirectory" file="Tiff.WriteDirectory.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteEncodedStrip" file="Tiff.WriteEncodedStrip.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteEncodedTile" file="Tiff.WriteEncodedTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteRawStrip" file="Tiff.WriteRawStrip.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteRawTile" file="Tiff.WriteRawTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteScanline" file="Tiff.WriteScanline.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
       <node title="WriteScanline" file="Tiff.WriteScanline1.xml" iconindex="23">
         <ref>Tiff.xml</ref>
       </node>
       <node title="WriteTile" file="Tiff.WriteTile.xml" iconindex="23">
         <ref>Tiff.xml</ref>
+        <ref>Renamings_of_functions.xml</ref>
       </node>
     </node>
     <node title="TiffCodec" file="TiffCodec.xml" iconindex="6">
@@ -547,6 +669,7 @@
     <node title="TiffErrorHandler" file="TiffErrorHandler.xml" iconindex="6">
       <ref>TiffErrorHandler.ctor.xml</ref>
       <ref>General_notes.xml</ref>
+      <ref>Renamings_of_functions.xml</ref>
       <node title="TiffErrorHandler constructor" file="TiffErrorHandler.ctor.xml" iconindex="23">
         <ref>TiffErrorHandler.xml</ref>
       </node>
