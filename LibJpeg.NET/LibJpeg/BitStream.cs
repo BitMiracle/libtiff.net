@@ -46,9 +46,11 @@ namespace BitMiracle.LibJpeg
             {
                 if (disposing)
                 {
-                    m_stream.Dispose();
+                    if (m_stream != null)
+                        m_stream.Dispose();
                 }
 
+                m_stream = null;
                 m_alreadyDisposed = true;
             }
         }
