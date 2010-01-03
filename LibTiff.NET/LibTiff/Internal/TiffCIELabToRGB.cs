@@ -19,11 +19,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibTiff
+namespace BitMiracle.LibTiff.Internal
 {
-#if EXPOSE_LIBTIFF
-    public
-#endif
     class TiffCIELabToRGB
     {
         public const int CIELABTORGB_TABLE_RANGE = 1500;

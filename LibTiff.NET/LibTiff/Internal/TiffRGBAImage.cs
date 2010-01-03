@@ -13,14 +13,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibTiff
+namespace BitMiracle.LibTiff.Internal
 {
     /// <summary>
     /// RGBA-style image support.
     /// </summary>
-#if EXPOSE_LIBTIFF
-    public
-#endif
     class TiffRGBAImage
     {
         /*
