@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>IsCodecConfigured</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Boolean" />
+				<name>IsCodecConfigured</name>
+				<parameters>
+					<parameter name="scheme" type="Compression" file="Compression.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>GetTagListEntry</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Int32" />
+				<name>GetTagListEntry</name>
+				<parameters>
+					<parameter name="tag_index" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

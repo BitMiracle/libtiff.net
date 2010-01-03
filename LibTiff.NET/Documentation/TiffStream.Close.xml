@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>Close</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>virtual</mod2>
+				<return type="Void" file="Void.xml" />
+				<name>Close</name>
+				<parameters>
+					<parameter name="fd" type="Object" file="Object.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

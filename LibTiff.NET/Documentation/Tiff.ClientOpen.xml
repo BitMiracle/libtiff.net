@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>ClientOpen</title>
+    <breadcumbs>
+      <link file="Tiff.xml">
+        <text>Tiff</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="false" />
+    <signature>
+      <function>
+        <mod2>static</mod2>
+        <name>ClientOpen</name>
+        <return type="Tiff" file="Tiff.xml" />
+        <parameters>
+          <parameter name="name" type="String" file="String.xml" />
+          <parameter name="mode" type="String" file="String.xml" />
+          <parameter name="clientdata" type="Object" file="Object.xml" />
+          <parameter name="stream" type="TiffStream" file="TiffStream.xml" />
+        </parameters>
+      </function>
+    </signature>
+  </file>
+</xml>

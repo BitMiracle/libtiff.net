@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ToFloatArray</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Single[]" file="Single[].xml" />
+				<name>ToFloatArray</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

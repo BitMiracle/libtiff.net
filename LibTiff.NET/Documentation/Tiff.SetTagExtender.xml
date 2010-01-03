@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>SetTagExtender</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>static</mod2>
+				<return type="Tiff.TiffExtendProc" file="Tiff.TiffExtendProc.xml" />
+				<name>SetTagExtender</name>
+				<parameters>
+					<parameter name="proc" type="Tiff.TiffExtendProc" file="Tiff.TiffExtendProc.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

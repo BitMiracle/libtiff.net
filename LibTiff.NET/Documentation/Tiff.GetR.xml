@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>GetR</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>static</mod2>
+				<return type="Int32" />
+				<name>GetR</name>
+				<parameters>
+					<parameter name="abgr" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

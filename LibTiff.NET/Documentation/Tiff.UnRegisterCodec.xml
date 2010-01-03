@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>UnRegisterCodec</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Void" file="Void.xml" />
+				<name>UnRegisterCodec</name>
+				<parameters>
+					<parameter name="c" type="TiffCodec" file="TiffCodec.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

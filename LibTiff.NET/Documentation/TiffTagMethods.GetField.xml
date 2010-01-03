@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>GetField</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>virtual</mod2>
+				<return type="FieldValue[]" file="FieldValue[].xml" />
+				<name>GetField</name>
+				<parameters>
+					<parameter name="tif" type="Tiff" file="Tiff.xml" />
+					<parameter name="tag" type="TiffTag" file="TiffTag.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

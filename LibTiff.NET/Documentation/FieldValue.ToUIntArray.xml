@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ToUIntArray</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="UInt32[]" file="UInt32[].xml" />
+				<name>ToUIntArray</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

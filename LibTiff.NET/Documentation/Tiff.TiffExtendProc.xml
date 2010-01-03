@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>TiffExtendProc</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod1>delegate</mod1>
+				<return type="Void" file="Void.xml" />
+				<name>TiffExtendProc</name>
+				<parameters>
+					<parameter name="tif" type="Tiff" file="Tiff.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

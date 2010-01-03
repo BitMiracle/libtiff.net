@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>PrintDir</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>virtual</mod2>
+				<return type="Void" file="Void.xml" />
+				<name>PrintDir</name>
+				<parameters>
+					<parameter name="tif" type="Tiff" file="Tiff.xml" />
+					<parameter name="fd" type="Stream" file="Stream.xml" />
+					<parameter name="flags" type="TiffPrintFlags" file="TiffPrintFlags.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

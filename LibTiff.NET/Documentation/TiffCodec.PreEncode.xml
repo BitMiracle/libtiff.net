@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>PreEncode</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>virtual</mod2>
+				<return type="Boolean" />
+				<name>PreEncode</name>
+				<parameters>
+					<parameter name="s" type="Int16" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

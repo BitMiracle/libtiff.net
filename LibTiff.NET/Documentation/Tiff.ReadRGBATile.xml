@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ReadRGBATile</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Boolean" />
+				<name>ReadRGBATile</name>
+				<parameters>
+					<parameter name="col" type="Int32" />
+					<parameter name="row" type="Int32" />
+					<parameter name="raster" type="Int32[]" file="Int32[].xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

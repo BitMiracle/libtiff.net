@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>FieldWithTag</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="TiffFieldInfo" file="TiffFieldInfo.xml" />
+				<name>FieldWithTag</name>
+				<parameters>
+					<parameter name="tag" type="TiffTag" file="TiffTag.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

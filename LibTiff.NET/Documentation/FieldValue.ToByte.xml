@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ToByte</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Byte" />
+				<name>ToByte</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

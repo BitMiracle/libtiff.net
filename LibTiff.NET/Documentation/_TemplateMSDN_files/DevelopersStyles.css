@@ -1,0 +1,245 @@
+body.xsl_file, td.xsl_file, th.xsl_file, td.xsl_file_lt, td.xsl_file_hl
+{
+  font-size: 93%
+}
+a.xsl_file:link, a.xsl_file:visited, a.xsl_file:hover, a.xsl_file:active
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+}
+
+td.xsl_file_hl
+{
+  background-color: #eeeeee
+}
+body.xsl_file, td.xsl_file, th.xsl_file, td.xsl_file_lt, td.xsl_file_hl
+{
+  margin: 2px;
+  font-family: Verdana;
+  /*font-size: 13px;*/
+}
+td.xsl_file_lt, td.xsl_file_hl
+{
+  text-align: left;
+  vertical-align: middle;
+}
+td.xsl_file_rt
+{
+  text-align: right;
+  vertical-align: top;
+  font-family: Verdana;
+  /*font-size: 13px;*/
+}
+.xsl_file_fl
+{
+  float: left;
+}
+.xsl_file_clcp
+{
+  float: right;
+  font-weight: normal;
+}
+th.xsl_file
+{
+  background-color: #eeeeee;/*#EFEFF7;*/
+}
+h4.xsl_file
+{
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-family: Verdana;
+  /*font-size: 16px;*/
+  font-weight: bold;
+  color: #2b5885;/*#003399;*/
+}
+h5.xsl_file
+{
+  font-family: Verdana;
+  font-size: 90%;
+}
+.xsl_file_spanLink
+{
+  font-family: Verdana;
+  cursor: pointer;
+}
+.xsl_file_title
+{
+  font-family: Verdana;
+  /*font-size: 16px;*/
+  font-size: 120%;
+  font-weight: bold;
+  margin-top: 2px;
+}
+.xsl_file_breadcumbs
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  font-size: 80%;
+  font-weight: normal;
+}
+pre.xsl_file
+{
+  font-family: Courier New;
+  /*font-size: 14px;*/
+  font-size: 90%;
+  background-color: #eeeeee;/*#F0F0F9;*/
+  margin: 5px 0px 10px 0px;
+}
+pre.xsl_file_codesnip
+{
+  font-family: Verdana;
+  color: #003399;/*#0000cc;*/
+  background-color: #eeeeee;/*#F0F0F9;*/
+}
+.xsl_file_code
+{
+  font-family: Verdana;
+  font-size: 80%;
+}
+p.xsl_file, blockquote.xsl_file
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+}
+.xsl_file_margin15
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  margin-left: 15px;
+  margin-right: 15px;
+}
+.xsl_file_sigContainer
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  background-color: #eeeeee;/*#cccccc;*/
+  border-style: solid;
+  border-width: 1px;
+  border-color: #999999;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+.xsl_file_excepType
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  float: left;
+  width: 150px;
+  background-color: #eeeeee;/*#EFEFF7;*/
+  border: 1px solid #ffffff;
+}
+.xsl_file_excepCond
+{
+  background-color: #eeeeee;/*#EFEFF7;*/
+  border: 1px solid #ffffff;
+}
+.xsl_file_excepTypeLine
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  float: left;
+  width: 150px;
+  border: 1px solid #ffffff;
+  border-bottom-style: solid;
+  border-bottom-color: #cccccc;/*#EFEFF7;*/
+  border-bottom-width: 1px;
+}
+.xsl_file_excepCondLine
+{
+  border: 1px solid #ffffff;
+  border-bottom-style: solid;
+  border-bottom-color: #cccccc;/*#EFEFF7;*/
+  border-bottom-width: 1px;
+}
+.xsl_file_sampLang
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  font-size: 90%;
+  font-weight: bold;
+  color: #2b5885;/*#003399;/*#280066;*/
+  background-color: #eeeeee;/*#EFEFF7;*/
+  border-bottom-style: solid;
+  border-bottom-color: #cccccc;/*#C8CDDE;*/
+  border-bottom-width: 1px;
+  height: 16px;
+}
+.xsl_file_container, .xsl_file_codesnip
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  margin-left: 15px;
+  margin-right: 15px;
+}
+.xsl_file_header, .xsl_file_header1
+{
+  font-family: Verdana;
+  color: #2b5885;/*#003399;*/
+  background-color: #DDDDDD;/*#F0F0F9; /*#D4DFFF;*/
+}
+.xsl_file_tdheader
+{
+  font-family: Verdana;
+  color: #2b5885;/*#280066;*/
+  background-color: #efeff7;
+  font-weight: bold;
+}
+.xsl_file_margLeft
+{
+  margin-left: 20px;
+}
+.xsl_file_tdheader, .xsl_file_header, .xsl_file_pre, .xsl_file_th
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  border-bottom-style: solid;
+  border-bottom-color: #C8CDDE;
+  border-bottom-width: 1px;
+}
+.xsl_file_test
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+}
+.xsl_file_footer
+{
+  font-family: Verdana;
+  /*font-size: 13px;*/
+  color: #000000;
+  background-color: #FFFFFF;
+  border-top-style: solid;
+  border-top-color: #2b5885;/*#D4DFFF;*/
+  border-top-width: 1px;
+}
+
+#xsl_file_spColexpAll
+{
+  margin-left: 5px;
+  font-family: Verdana;
+  /*font-size: 13px;*/
+}
+.notshown
+{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width:0;
+  heigth:0;
+  display:none;
+}
+table.xsl_file_tbl
+{
+  border: 1px #bbbbbb solid;
+  border-collapse: collapse;
+  padding: 1px;
+}
+td.xsl_file_tdbb
+{
+  padding: 2px;
+  border-bottom: 1px #cccccc solid;
+}
+td.xsl_file_tdbr
+{
+  padding: 2px;
+  border-right: 1px #cccccc solid;
+}

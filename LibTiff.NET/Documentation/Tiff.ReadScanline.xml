@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ReadScanline</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Boolean" />
+				<name>ReadScanline</name>
+				<parameters>
+					<parameter name="buf" type="Byte[]" file="Byte[].xml" />
+					<parameter name="row" type="Int32" />
+					<parameter name="sample" type="Int16" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

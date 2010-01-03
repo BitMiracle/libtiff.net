@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>GetTagMethods</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="TiffTagMethods" file="TiffTagMethods.xml" />
+				<name>GetTagMethods</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

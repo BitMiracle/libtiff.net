@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ToString</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="String" file="String.xml" />
+				<name>ToString</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

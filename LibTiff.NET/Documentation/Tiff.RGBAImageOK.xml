@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>RGBAImageOK</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Boolean" />
+				<name>RGBAImageOK</name>
+				<parameters>
+					<parameter name="emsg" type="String&amp;" file="String&amp;.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

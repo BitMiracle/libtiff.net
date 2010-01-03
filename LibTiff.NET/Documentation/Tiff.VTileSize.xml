@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>VTileSize</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Int32" />
+				<name>VTileSize</name>
+				<parameters>
+					<parameter name="nrows" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

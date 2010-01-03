@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ByteArrayToShorts</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>static</mod2>
+				<return type="Int16[]" file="Int16[].xml" />
+				<name>ByteArrayToShorts</name>
+				<parameters>
+					<parameter name="b" type="Byte[]" file="Byte[].xml" />
+					<parameter name="byteStartOffset" type="Int32" />
+					<parameter name="byteCount" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

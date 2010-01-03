@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>IntsToByteArray</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>static</mod2>
+				<return type="Void" file="Void.xml" />
+				<name>IntsToByteArray</name>
+				<parameters>
+					<parameter name="integers" type="Int32[]" file="Int32[].xml" />
+					<parameter name="intStartOffset" type="Int32" />
+					<parameter name="intCount" type="Int32" />
+					<parameter name="bytes" type="Byte[]" file="Byte[].xml" />
+					<parameter name="byteStartOffset" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>SetField</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Boolean" />
+				<name>SetField</name>
+				<parameters>
+					<parameter name="tag" type="TiffTag" file="TiffTag.xml" />
+					<parameter name="ap" type="Object[]" file="Object[].xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ComputeTile</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Int32" />
+				<name>ComputeTile</name>
+				<parameters>
+					<parameter name="x" type="Int32" />
+					<parameter name="y" type="Int32" />
+					<parameter name="z" type="Int32" />
+					<parameter name="s" type="Int16" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

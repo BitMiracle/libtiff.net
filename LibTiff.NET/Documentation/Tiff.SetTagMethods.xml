@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>SetTagMethods</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="TiffTagMethods" file="TiffTagMethods.xml" />
+				<name>SetTagMethods</name>
+				<parameters>
+					<parameter name="tagMethods" type="TiffTagMethods" file="TiffTagMethods.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

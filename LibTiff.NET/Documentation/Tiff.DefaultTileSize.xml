@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>DefaultTileSize</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Void" file="Void.xml" />
+				<name>DefaultTileSize</name>
+				<parameters>
+					<parameter name="tw" type="Int32&amp;" file="Int32&amp;.xml" />
+					<parameter name="th" type="Int32&amp;" file="Int32&amp;.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

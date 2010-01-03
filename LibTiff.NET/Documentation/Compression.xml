@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>Compression</title>
+    <descriptionarticle only="false" />
+    <signature>
+      <enum>
+        <name>Compression</name>
+      </enum>
+    </signature>
+    <remarks>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Name</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Description</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Value</text> </b>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>NONE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>1</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>CCITTRLE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>2</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>CCITTFAX3</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>3</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>CCITT_T4</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>3</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>CCITTFAX4</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>4</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>CCITT_T6</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>4</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>LZW</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>5</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>OJPEG</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>6</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>JPEG</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>7</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>NEXT</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32766</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>CCITTRLEW</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32771</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>PACKBITS</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32773</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>THUNDERSCAN</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32809</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>IT8CTPAD</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32895</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>IT8LW</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32896</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>IT8MP</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32897</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>IT8BL</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32898</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>PIXARFILM</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32908</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>PIXARLOG</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32909</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>DEFLATE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32946</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>ADOBE_DEFLATE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>8</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>DCS</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>32947</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>JBIG</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>34661</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>SGILOG</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>34676</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>SGILOG24</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>34677</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>JP2000</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>34712</text> </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </remarks>
+  </file>
+</xml>

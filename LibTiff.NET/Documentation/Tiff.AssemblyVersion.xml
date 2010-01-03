@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>AssemblyVersion</title>
+    <breadcumbs>
+      <link file="Tiff.xml">
+        <text>Tiff</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="false" />
+    <signature>
+      <property access="read">
+        <mod2>static</mod2>
+        <name>AssemblyVersion</name>
+        <return type="Tiff" file="Tiff.xml" />
+      </property>
+    </signature>
+  </file>
+</xml>

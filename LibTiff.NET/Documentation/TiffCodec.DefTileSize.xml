@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>DefTileSize</title>
+    <breadcumbs>
+      <link file="TiffCodec.xml">
+        <text>TiffCodec</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="false" />
+    <signature>
+      <function>
+        <mod2>virtual</mod2>
+        <name>DefTileSize</name>
+        <return type="void" />
+        <parameters>
+          <parameter name="tw" type="Int32&amp;" file="Int32&amp;.xml" />
+          <parameter name="th" type="Int32&amp;" file="Int32&amp;.xml" />
+        </parameters>
+      </function>
+    </signature>
+  </file>
+</xml>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>SetClientdata</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Object" file="Object.xml" />
+				<name>SetClientdata</name>
+				<parameters>
+					<parameter name="newvalue" type="Object" file="Object.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

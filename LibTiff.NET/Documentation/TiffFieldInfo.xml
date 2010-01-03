@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>TiffFieldInfo</title>
+    <descriptionarticle only="false" />
+    <signature>
+      <class>
+        <name>TiffFieldInfo</name>
+      </class>
+    </signature>
+    <remarks>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Member</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Description</text> </b>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.ctor.xml">
+                  <text>TiffFieldInfo</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_bit.xml">
+                  <text>Field_bit</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_name.xml">
+                  <text>Field_name</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_okto_change.xml">
+                  <text>Field_okto_change</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_pass_count.xml">
+                  <text>Field_pass_count</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_read_count.xml">
+                  <text>Field_read_count</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_tag.xml">
+                  <text>Field_tag</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_type.xml">
+                  <text>Field_type</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\27.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.Field_write_count.xml">
+                  <text>Field_write_count</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffFieldInfo.ToString.xml">
+                  <text>ToString</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </remarks>
+  </file>
+</xml>

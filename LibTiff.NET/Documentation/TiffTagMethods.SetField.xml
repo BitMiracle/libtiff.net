@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>SetField</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>virtual</mod2>
+				<return type="Boolean" />
+				<name>SetField</name>
+				<parameters>
+					<parameter name="tif" type="Tiff" file="Tiff.xml" />
+					<parameter name="tag" type="TiffTag" file="TiffTag.xml" />
+					<parameter name="ap" type="FieldValue[]" file="FieldValue[].xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

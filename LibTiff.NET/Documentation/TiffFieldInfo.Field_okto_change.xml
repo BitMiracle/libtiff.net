@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>Field_okto_change</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<property access="read">
+				
+				<name>Field_okto_change</name>
+				<return type="Boolean" />
+				</property>
+		</signature>
+	</file>
+</xml>

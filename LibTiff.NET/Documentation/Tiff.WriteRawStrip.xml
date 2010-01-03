@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>WriteRawStrip</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Int32" />
+				<name>WriteRawStrip</name>
+				<parameters>
+					<parameter name="strip" type="Int32" />
+					<parameter name="data" type="Byte[]" file="Byte[].xml" />
+					<parameter name="cc" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>OFileType</title>
+    <descriptionarticle only="false" />
+    <signature>
+      <enum>
+        <name>OFileType</name>
+      </enum>
+    </signature>
+    <remarks>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Name</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Description</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Value</text> </b>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>IMAGE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>1</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>REDUCEDIMAGE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>2</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>PAGE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>3</text> </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </remarks>
+  </file>
+</xml>

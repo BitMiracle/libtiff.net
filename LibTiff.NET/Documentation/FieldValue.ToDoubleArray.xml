@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ToDoubleArray</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Double[]" file="Double[].xml" />
+				<name>ToDoubleArray</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

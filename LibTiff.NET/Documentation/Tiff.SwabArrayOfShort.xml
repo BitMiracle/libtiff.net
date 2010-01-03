@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>SwabArrayOfShort</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>static</mod2>
+				<return type="Void" file="Void.xml" />
+				<name>SwabArrayOfShort</name>
+				<parameters>
+					<parameter name="wp" type="Int16[]" file="Int16[].xml" />
+					<parameter name="n" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

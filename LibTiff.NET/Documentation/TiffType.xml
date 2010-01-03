@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>TiffType</title>
+    <descriptionarticle only="false" />
+    <signature>
+      <enum>
+        <name>TiffType</name>
+      </enum>
+    </signature>
+    <remarks>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Name</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Description</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Value</text> </b>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>NOTYPE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>0</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>ANY</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>0</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>BYTE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>1</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>ASCII</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>2</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>SHORT</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>3</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>LONG</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>4</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>RATIONAL</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>5</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>SBYTE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>6</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>UNDEFINED</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>7</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>SSHORT</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>8</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>SLONG</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>9</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>SRATIONAL</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>10</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>FLOAT</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>11</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>DOUBLE</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>12</text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p align="justify">
+                <text>IFD</text> </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <text>13</text> </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </remarks>
+  </file>
+</xml>

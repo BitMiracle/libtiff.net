@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ErrorExt</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>static</mod2>
+				<return type="Void" file="Void.xml" />
+				<name>ErrorExt</name>
+				<parameters>
+					<parameter name="tif" type="Tiff" file="Tiff.xml" />
+					<parameter name="fd" type="Object" file="Object.xml" />
+					<parameter name="module" type="String" file="String.xml" />
+					<parameter name="fmt" type="String" file="String.xml" />
+					<parameter name="ap" type="Object[]" file="Object[].xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

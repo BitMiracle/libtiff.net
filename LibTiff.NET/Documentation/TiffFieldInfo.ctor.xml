@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>.ctor</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<name>TiffFieldInfo</name>
+				<parameters>
+					<parameter name="fieldTag" type="TiffTag" file="TiffTag.xml" />
+					<parameter name="fieldReadCount" type="Int16" />
+					<parameter name="fieldWriteCount" type="Int16" />
+					<parameter name="fieldType" type="TiffType" file="TiffType.xml" />
+					<parameter name="fieldBit" type="Int16" />
+					<parameter name="fieldOkToChange" type="Boolean" />
+					<parameter name="fieldPassCount" type="Boolean" />
+					<parameter name="fieldName" type="String" file="String.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

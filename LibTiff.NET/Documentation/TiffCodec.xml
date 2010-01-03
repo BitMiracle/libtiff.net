@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>TiffCodec</title>
+    <descriptionarticle only="false" />
+    <signature>
+      <class>
+        <name>TiffCodec</name>
+      </class>
+    </signature>
+    <remarks>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Member</text> </b>
+              </p>
+            </td>
+            <td>
+              <p align="center">
+                <b>
+                  <text>Description</text> </b>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.ctor.xml">
+                  <text>TiffCodec</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.CanDecode.xml">
+                  <text>CanDecode</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.CanEncode.xml">
+                  <text>CanEncode</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.Cleanup.xml">
+                  <text>Cleanup</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.Close.xml">
+                  <text>Close</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.DecodeRow.xml">
+                  <text>DecodeRow</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.DecodeStrip.xml">
+                  <text>DecodeStrip</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.DecodeTile.xml">
+                  <text>DecodeTile</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.DefStripSize.xml">
+                  <text>DefStripSize</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.DefTileSize.xml">
+                  <text>DefTileSize</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.EncodeRow.xml">
+                  <text>EncodeRow</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.EncodeStrip.xml">
+                  <text>EncodeStrip</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.EncodeTile.xml">
+                  <text>EncodeTile</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.Init.xml">
+                  <text>Init</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.PostEncode.xml">
+                  <text>PostEncode</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.PreDecode.xml">
+                  <text>PreDecode</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.PreEncode.xml">
+                  <text>PreEncode</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.Seek.xml">
+                  <text>Seek</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.SetupDecode.xml">
+                  <text>SetupDecode</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <img alt="" src="_TemplateMSDN_files\icons\23.png" />
+            </td>
+            <td>
+              <p align="justify">
+                <link file="TiffCodec.SetupEncode.xml">
+                  <text>SetupEncode</text> </link>
+              </p>
+            </td>
+            <td>
+              <p align="justify">
+                <text> </text> </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </remarks>
+  </file>
+</xml>

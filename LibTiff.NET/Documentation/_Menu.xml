@@ -1,0 +1,648 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<menu>
+  <node title="Tiff" file="Tiff.xml" iconindex="6">
+    <ref>Tiff.ByteArrayToInts.xml</ref>
+    <ref>Tiff.ClientOpen.xml</ref>
+    <ref>Tiff.Compare.xml</ref>
+    <ref>Tiff.Open.xml</ref>
+    <ref>Tiff.ShortsToByteArray.xml</ref>
+    <ref>Tiff.AssemblyVersion.xml</ref>
+    <node title="TiffExtendProc" file="Tiff.TiffExtendProc.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="AssemblyVersion" file="Tiff.AssemblyVersion.xml" iconindex="27">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ByteArrayToInts" file="Tiff.ByteArrayToInts.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ByteArrayToShorts" file="Tiff.ByteArrayToShorts.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ClientOpen" file="Tiff.ClientOpen.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Compare" file="Tiff.Compare.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="DataWidth" file="Tiff.DataWidth.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Error" file="Tiff.Error.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Error" file="Tiff.Error1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ErrorExt" file="Tiff.ErrorExt.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ErrorExt" file="Tiff.ErrorExt1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetA" file="Tiff.GetA.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetB" file="Tiff.GetB.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetBitRevTable" file="Tiff.GetBitRevTable.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetG" file="Tiff.GetG.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetR" file="Tiff.GetR.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetVersion" file="Tiff.GetVersion.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="IntsToByteArray" file="Tiff.IntsToByteArray.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Open" file="Tiff.Open.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Realloc" file="Tiff.Realloc.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Realloc" file="Tiff.Realloc1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReverseBits" file="Tiff.ReverseBits.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetErrorHandler" file="Tiff.SetErrorHandler.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetTagExtender" file="Tiff.SetTagExtender.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ShortsToByteArray" file="Tiff.ShortsToByteArray.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SwabArrayOfDouble" file="Tiff.SwabArrayOfDouble.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SwabArrayOfLong" file="Tiff.SwabArrayOfLong.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SwabArrayOfShort" file="Tiff.SwabArrayOfShort.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SwabArrayOfTriples" file="Tiff.SwabArrayOfTriples.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SwabDouble" file="Tiff.SwabDouble.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SwabLong" file="Tiff.SwabLong.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SwabShort" file="Tiff.SwabShort.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Warning" file="Tiff.Warning.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Warning" file="Tiff.Warning1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WarningExt" file="Tiff.WarningExt.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WarningExt" file="Tiff.WarningExt1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CheckpointDirectory" file="Tiff.CheckpointDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CheckTile" file="Tiff.CheckTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Clientdata" file="Tiff.Clientdata.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ComputeStrip" file="Tiff.ComputeStrip.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ComputeTile" file="Tiff.ComputeTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CreateDirectory" file="Tiff.CreateDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CurrentDirectory" file="Tiff.CurrentDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CurrentDirOffset" file="Tiff.CurrentDirOffset.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CurrentRow" file="Tiff.CurrentRow.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CurrentStrip" file="Tiff.CurrentStrip.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="CurrentTile" file="Tiff.CurrentTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="DefaultStripSize" file="Tiff.DefaultStripSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="DefaultTileSize" file="Tiff.DefaultTileSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Dispose" file="Tiff.Dispose.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FieldWithName" file="Tiff.FieldWithName.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FieldWithTag" file="Tiff.FieldWithTag.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FileName" file="Tiff.FileName.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FindCodec" file="Tiff.FindCodec.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FindFieldInfo" file="Tiff.FindFieldInfo.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FindFieldInfoByName" file="Tiff.FindFieldInfoByName.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="Flush" file="Tiff.Flush.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FlushData" file="Tiff.FlushData.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="FreeDirectory" file="Tiff.FreeDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetClientInfo" file="Tiff.GetClientInfo.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetConfiguredCodecs" file="Tiff.GetConfiguredCodecs.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetField" file="Tiff.GetField.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetFieldDefaulted" file="Tiff.GetFieldDefaulted.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetMode" file="Tiff.GetMode.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetStream" file="Tiff.GetStream.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetTagListCount" file="Tiff.GetTagListCount.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetTagListEntry" file="Tiff.GetTagListEntry.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="GetTagMethods" file="Tiff.GetTagMethods.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="IsBigEndian" file="Tiff.IsBigEndian.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="IsByteSwapped" file="Tiff.IsByteSwapped.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="IsCodecConfigured" file="Tiff.IsCodecConfigured.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="IsMSB2LSB" file="Tiff.IsMSB2LSB.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="IsTiled" file="Tiff.IsTiled.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="IsUpSampled" file="Tiff.IsUpSampled.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="LastDirectory" file="Tiff.LastDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="MergeFieldInfo" file="Tiff.MergeFieldInfo.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="NumberOfDirectories" file="Tiff.NumberOfDirectories.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="NumberOfStrips" file="Tiff.NumberOfStrips.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="NumberOfTiles" file="Tiff.NumberOfTiles.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="PrintDirectory" file="Tiff.PrintDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="PrintDirectory" file="Tiff.PrintDirectory1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="RasterScanlineSize" file="Tiff.RasterScanlineSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="RawStripSize" file="Tiff.RawStripSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadBufferSetup" file="Tiff.ReadBufferSetup.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadCustomDirectory" file="Tiff.ReadCustomDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadDirectory" file="Tiff.ReadDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadEncodedStrip" file="Tiff.ReadEncodedStrip.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadEncodedTile" file="Tiff.ReadEncodedTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadEXIFDirectory" file="Tiff.ReadEXIFDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRawStrip" file="Tiff.ReadRawStrip.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRawTile" file="Tiff.ReadRawTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRGBAImage" file="Tiff.ReadRGBAImage.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRGBAImage" file="Tiff.ReadRGBAImage1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRGBAImageOriented" file="Tiff.ReadRGBAImageOriented.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRGBAImageOriented" file="Tiff.ReadRGBAImageOriented1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRGBAImageOriented" file="Tiff.ReadRGBAImageOriented2.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRGBAStrip" file="Tiff.ReadRGBAStrip.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadRGBATile" file="Tiff.ReadRGBATile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadScanline" file="Tiff.ReadScanline.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadScanline" file="Tiff.ReadScanline1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ReadTile" file="Tiff.ReadTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="RegisterCodec" file="Tiff.RegisterCodec.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="RewriteDirectory" file="Tiff.RewriteDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="RGBAImageOK" file="Tiff.RGBAImageOK.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="ScanlineSize" file="Tiff.ScanlineSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetClientdata" file="Tiff.SetClientdata.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetClientInfo" file="Tiff.SetClientInfo.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetDirectory" file="Tiff.SetDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetField" file="Tiff.SetField.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetFileName" file="Tiff.SetFileName.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetMode" file="Tiff.SetMode.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetSubDirectory" file="Tiff.SetSubDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetTagMethods" file="Tiff.SetTagMethods.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetupStrips" file="Tiff.SetupStrips.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="SetWriteOffset" file="Tiff.SetWriteOffset.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="StripSize" file="Tiff.StripSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="TileRowSize" file="Tiff.TileRowSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="TileSize" file="Tiff.TileSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="UnlinkDirectory" file="Tiff.UnlinkDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="UnRegisterCodec" file="Tiff.UnRegisterCodec.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="VStripSize" file="Tiff.VStripSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="VTileSize" file="Tiff.VTileSize.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteBufferSetup" file="Tiff.WriteBufferSetup.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteCheck" file="Tiff.WriteCheck.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteCustomDirectory" file="Tiff.WriteCustomDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteDirectory" file="Tiff.WriteDirectory.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteEncodedStrip" file="Tiff.WriteEncodedStrip.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteEncodedTile" file="Tiff.WriteEncodedTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteRawStrip" file="Tiff.WriteRawStrip.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteRawTile" file="Tiff.WriteRawTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteScanline" file="Tiff.WriteScanline.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteScanline" file="Tiff.WriteScanline1.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+    <node title="WriteTile" file="Tiff.WriteTile.xml" iconindex="23">
+      <ref>Tiff.xml</ref>
+    </node>
+  </node>
+  <node title="TiffCodec" file="TiffCodec.xml" iconindex="6">
+    <ref>TiffCodec.EncodeTile.xml</ref>
+    <ref>TiffCodec.DefTileSize.xml</ref>
+    <ref>TiffCodec.DecodeTile.xml</ref>
+    <ref>TiffCodec.CanDecode.xml</ref>
+    <ref>TiffCodec.CanEncode.xml</ref>
+    <ref>TiffCodec.DecodeStrip.xml</ref>
+    <ref>TiffCodec.DefStripSize.xml</ref>
+    <node title="TiffCodec constructor" file="TiffCodec.ctor.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="CanDecode" file="TiffCodec.CanDecode.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="CanEncode" file="TiffCodec.CanEncode.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="Cleanup" file="TiffCodec.Cleanup.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="Close" file="TiffCodec.Close.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="DecodeRow" file="TiffCodec.DecodeRow.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="DecodeStrip" file="TiffCodec.DecodeStrip.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="DecodeTile" file="TiffCodec.DecodeTile.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="DefStripSize" file="TiffCodec.DefStripSize.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="DefTileSize" file="TiffCodec.DefTileSize.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="EncodeRow" file="TiffCodec.EncodeRow.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="EncodeStrip" file="TiffCodec.EncodeStrip.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="EncodeTile" file="TiffCodec.EncodeTile.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="Init" file="TiffCodec.Init.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="PostEncode" file="TiffCodec.PostEncode.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="PreDecode" file="TiffCodec.PreDecode.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="PreEncode" file="TiffCodec.PreEncode.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="Seek" file="TiffCodec.Seek.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="SetupDecode" file="TiffCodec.SetupDecode.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+    <node title="SetupEncode" file="TiffCodec.SetupEncode.xml" iconindex="23">
+      <ref>TiffCodec.xml</ref>
+    </node>
+  </node>
+  <node title="TiffErrorHandler" file="TiffErrorHandler.xml" iconindex="6">
+    <ref>TiffErrorHandler.ctor.xml</ref>
+    <node title="TiffErrorHandler constructor" file="TiffErrorHandler.ctor.xml" iconindex="23">
+      <ref>TiffErrorHandler.xml</ref>
+    </node>
+    <node title="ErrorHandler" file="TiffErrorHandler.ErrorHandler.xml" iconindex="23">
+      <ref>TiffErrorHandler.xml</ref>
+    </node>
+    <node title="ErrorHandlerExt" file="TiffErrorHandler.ErrorHandlerExt.xml" iconindex="23">
+      <ref>TiffErrorHandler.xml</ref>
+    </node>
+    <node title="WarningHandler" file="TiffErrorHandler.WarningHandler.xml" iconindex="23">
+      <ref>TiffErrorHandler.xml</ref>
+    </node>
+    <node title="WarningHandlerExt" file="TiffErrorHandler.WarningHandlerExt.xml" iconindex="23">
+      <ref>TiffErrorHandler.xml</ref>
+    </node>
+  </node>
+  <node title="TiffFieldInfo" file="TiffFieldInfo.xml" iconindex="6">
+    <node title="TiffFieldInfo constructor" file="TiffFieldInfo.ctor.xml" iconindex="23">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_bit" file="TiffFieldInfo.Field_bit.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_name" file="TiffFieldInfo.Field_name.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_okto_change" file="TiffFieldInfo.Field_okto_change.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_pass_count" file="TiffFieldInfo.Field_pass_count.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_read_count" file="TiffFieldInfo.Field_read_count.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_tag" file="TiffFieldInfo.Field_tag.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_type" file="TiffFieldInfo.Field_type.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="Field_write_count" file="TiffFieldInfo.Field_write_count.xml" iconindex="27">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+    <node title="ToString" file="TiffFieldInfo.ToString.xml" iconindex="23">
+      <ref>TiffFieldInfo.xml</ref>
+    </node>
+  </node>
+  <node title="TiffStream" file="TiffStream.xml" iconindex="6">
+    <ref>Tiff.ClientOpen.xml</ref>
+    <node title="TiffStream constructor" file="TiffStream.ctor.xml" iconindex="23">
+      <ref>TiffStream.xml</ref>
+    </node>
+    <node title="Close" file="TiffStream.Close.xml" iconindex="23">
+      <ref>TiffStream.xml</ref>
+    </node>
+    <node title="Read" file="TiffStream.Read.xml" iconindex="23">
+      <ref>TiffStream.xml</ref>
+    </node>
+    <node title="Seek" file="TiffStream.Seek.xml" iconindex="23">
+      <ref>TiffStream.xml</ref>
+    </node>
+    <node title="Size" file="TiffStream.Size.xml" iconindex="23">
+      <ref>TiffStream.xml</ref>
+    </node>
+    <node title="Write" file="TiffStream.Write.xml" iconindex="23">
+      <ref>TiffStream.xml</ref>
+    </node>
+  </node>
+  <node title="TiffTagMethods" file="TiffTagMethods.xml" iconindex="6">
+    <node title="TiffTagMethods constructor" file="TiffTagMethods.ctor.xml" iconindex="23">
+      <ref>TiffTagMethods.xml</ref>
+    </node>
+    <node title="GetField" file="TiffTagMethods.GetField.xml" iconindex="23">
+      <ref>TiffTagMethods.xml</ref>
+    </node>
+    <node title="PrintDir" file="TiffTagMethods.PrintDir.xml" iconindex="23">
+      <ref>TiffTagMethods.xml</ref>
+    </node>
+    <node title="SetField" file="TiffTagMethods.SetField.xml" iconindex="23">
+      <ref>TiffTagMethods.xml</ref>
+    </node>
+  </node>
+  <node title="FieldValue" file="FieldValue.xml" iconindex="18">
+    <node title="Value" file="FieldValue.Value.xml" iconindex="27">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="GetBytes" file="FieldValue.GetBytes.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToByte" file="FieldValue.ToByte.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToByteArray" file="FieldValue.ToByteArray.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToDouble" file="FieldValue.ToDouble.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToDoubleArray" file="FieldValue.ToDoubleArray.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToFloat" file="FieldValue.ToFloat.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToFloatArray" file="FieldValue.ToFloatArray.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToInt" file="FieldValue.ToInt.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToIntArray" file="FieldValue.ToIntArray.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToShort" file="FieldValue.ToShort.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToShortArray" file="FieldValue.ToShortArray.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToString" file="FieldValue.ToString.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToUInt" file="FieldValue.ToUInt.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToUIntArray" file="FieldValue.ToUIntArray.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToUShort" file="FieldValue.ToUShort.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+    <node title="ToUShortArray" file="FieldValue.ToUShortArray.xml" iconindex="23">
+      <ref>FieldValue.xml</ref>
+    </node>
+  </node>
+  <node title="CleanFaxData" file="CleanFaxData.xml" iconindex="10" />
+  <node title="ColorResponseUnit" file="ColorResponseUnit.xml" iconindex="10" />
+  <node title="Compression" file="Compression.xml" iconindex="10" />
+  <node title="DCSImagerFilter" file="DCSImagerFilter.xml" iconindex="10" />
+  <node title="DCSImagerModel" file="DCSImagerModel.xml" iconindex="10" />
+  <node title="DCSInterpMode" file="DCSInterpMode.xml" iconindex="10" />
+  <node title="ExtraSample" file="ExtraSample.xml" iconindex="10" />
+  <node title="FaxMode" file="FaxMode.xml" iconindex="10" />
+  <node title="FileType" file="FileType.xml" iconindex="10" />
+  <node title="FillOrder" file="FillOrder.xml" iconindex="10" />
+  <node title="GrayResponseUnit" file="GrayResponseUnit.xml" iconindex="10" />
+  <node title="Group3Opt" file="Group3Opt.xml" iconindex="10" />
+  <node title="InkSet" file="InkSet.xml" iconindex="10" />
+  <node title="JpegColorMode" file="JpegColorMode.xml" iconindex="10" />
+  <node title="JpegProc" file="JpegProc.xml" iconindex="10" />
+  <node title="JpegTablesMode" file="JpegTablesMode.xml" iconindex="10" />
+  <node title="OFileType" file="OFileType.xml" iconindex="10" />
+  <node title="Orientation" file="Orientation.xml" iconindex="10" />
+  <node title="Photometric" file="Photometric.xml" iconindex="10" />
+  <node title="PixarLogDataFmt" file="PixarLogDataFmt.xml" iconindex="10" />
+  <node title="PlanarConfig" file="PlanarConfig.xml" iconindex="10" />
+  <node title="Predictor" file="Predictor.xml" iconindex="10" />
+  <node title="ResUnit" file="ResUnit.xml" iconindex="10" />
+  <node title="SampleFormat" file="SampleFormat.xml" iconindex="10" />
+  <node title="SGILogDataFmt" file="SGILogDataFmt.xml" iconindex="10" />
+  <node title="SGILogEncode" file="SGILogEncode.xml" iconindex="10" />
+  <node title="Threshold" file="Threshold.xml" iconindex="10" />
+  <node title="TiffPrintFlags" file="TiffPrintFlags.xml" iconindex="10" />
+  <node title="TiffTag" file="TiffTag.xml" iconindex="10" />
+  <node title="TiffType" file="TiffType.xml" iconindex="10" />
+  <node title="YCbCrPosition" file="YCbCrPosition.xml" iconindex="10" />
+</menu>

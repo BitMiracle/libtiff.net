@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>SetErrorHandler</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>static</mod2>
+				<return type="TiffErrorHandler" file="TiffErrorHandler.xml" />
+				<name>SetErrorHandler</name>
+				<parameters>
+					<parameter name="errorHandler" type="TiffErrorHandler" file="TiffErrorHandler.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

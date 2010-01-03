@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>WriteCustomDirectory</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Boolean" />
+				<name>WriteCustomDirectory</name>
+				<parameters>
+					<parameter name="pdiroff" type="Int32&amp;" file="Int32&amp;.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

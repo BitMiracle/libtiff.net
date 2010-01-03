@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>Seek</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				<mod2>virtual</mod2>
+				<return type="Boolean" />
+				<name>Seek</name>
+				<parameters>
+					<parameter name="off" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

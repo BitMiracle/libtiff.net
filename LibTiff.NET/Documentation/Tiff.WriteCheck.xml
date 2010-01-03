@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>WriteCheck</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Boolean" />
+				<name>WriteCheck</name>
+				<parameters>
+					<parameter name="tiles" type="Int32" />
+					<parameter name="module" type="String" file="String.xml" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <mod1s>
+    <mod1>public</mod1>
+    <mod1>protected</mod1>
+    <mod1>private</mod1>
+    <mod1>internal</mod1>
+  </mod1s>
+  <mod2s>
+    <mod2>delegate</mod2>
+    <mod2>override</mod2>
+    <mod2>static</mod2>
+    <mod2>virtual</mod2>
+  </mod2s>
+  <langs>
+    <lang>C#</lang>
+    <lang>C++</lang>
+    <lang>VB</lang>
+    <lang>VB.NET</lang>
+  </langs>
+  <types>
+    <type>bool</type>
+    <type>float</type>
+    <type>int</type>
+    <type>long</type>
+    <type>string</type>
+    <type>void</type>
+  </types>
+</xml>

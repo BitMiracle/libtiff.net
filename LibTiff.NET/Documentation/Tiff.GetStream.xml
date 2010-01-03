@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>GetStream</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="TiffStream" file="TiffStream.xml" />
+				<name>GetStream</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

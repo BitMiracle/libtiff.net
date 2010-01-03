@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ComputeStrip</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Int32" />
+				<name>ComputeStrip</name>
+				<parameters>
+					<parameter name="row" type="Int32" />
+					<parameter name="sample" type="Int16" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

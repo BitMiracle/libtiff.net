@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>WriteBufferSetup</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Void" file="Void.xml" />
+				<name>WriteBufferSetup</name>
+				<parameters>
+					<parameter name="bp" type="Byte[]" file="Byte[].xml" />
+					<parameter name="size" type="Int32" />
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

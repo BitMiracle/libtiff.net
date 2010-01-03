@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<file>
+		<title>ToShort</title>
+		<descriptionArticle only="false" />
+		<signature>
+			<function>
+				
+				<return type="Int16" />
+				<name>ToShort</name>
+				<parameters>
+					</parameters>
+				</function>
+		</signature>
+	</file>
+</xml>

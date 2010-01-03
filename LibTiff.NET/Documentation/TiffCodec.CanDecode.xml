@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <file>
+    <title>CanDecode</title>
+    <breadcumbs>
+      <link file="TiffCodec.xml">
+        <text>TiffCodec</text>
+      </link>
+    </breadcumbs>
+    <descriptionarticle only="false" />
+    <signature>
+      <function>
+        <mod2>virtual</mod2>
+        <name>CanDecode</name>
+        <return type="Boolean" />
+      </function>
+    </signature>
+  </file>
+</xml>
