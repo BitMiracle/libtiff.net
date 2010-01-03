@@ -20,14 +20,14 @@ namespace BitMiracle.LibTiff
 #endif
     class TiffFieldInfo
     {
-        internal TiffTag field_tag; /* field's tag */
-        internal short field_readcount; /* read count/TIFF_VARIABLE/TIFF_SPP */
-        internal short field_writecount; /* write count/TIFF_VARIABLE */
-        internal TiffType field_type; /* type of associated data */
-        internal short field_bit; /* bit in fieldsset bit vector */
-        internal bool field_oktochange; /* if true, can change while writing */
-        internal bool field_passcount; /* if true, pass dir count on set */
-        internal string field_name; /* ASCII name */
+        private TiffTag field_tag;
+        private short field_readcount;
+        private short field_writecount;
+        private TiffType field_type;
+        private short field_bit;
+        private bool field_oktochange;
+        private bool field_passcount;
+        private string field_name;
 
         public TiffFieldInfo(TiffTag fieldTag, short fieldReadCount, short fieldWriteCount, TiffType fieldType,
             short fieldBit, bool fieldOkToChange, bool fieldPassCount, string fieldName)
@@ -45,6 +45,74 @@ namespace BitMiracle.LibTiff
         public override string ToString()
         {
             return field_tag.ToString();
+        }
+
+        /// <summary>
+        /// Field's tag.
+        /// </summary>
+        public TiffTag Field_tag
+        {
+            get { return field_tag; }
+        }
+
+        /// <summary>
+        /// Read count/TIFF_VARIABLE/TIFF_SPP
+        /// </summary>
+        public short Field_read_count
+        {
+            get { return field_readcount; }
+        }
+
+        /// <summary>
+        /// Write count/TIFF_VARIABLE
+        /// </summary>
+        public short Field_write_count
+        {
+            get { return field_writecount; }
+        }
+
+        /// <summary>
+        /// Type of associated data.
+        /// </summary>
+        public TiffType Field_type
+        {
+            get { return field_type; }
+        }
+
+
+        /// <summary>
+        /// Bit in fields set bit vector
+        /// </summary>
+        public short Field_bit
+        {
+            get { return field_bit; }
+        }
+
+
+        /// <summary>
+        /// If true, can change while writing
+        /// </summary>
+        public bool Field_okto_change
+        {
+            get { return field_oktochange; }
+        }
+
+
+        /// <summary>
+        /// If true, pass dir count on set
+        /// </summary>
+        public bool Field_pass_count
+        {
+            get { return field_passcount; }
+        }
+
+        /// <summary>
+        /// ASCII name
+        /// </summary>
+        public string Field_name
+        {
+            get { return field_name; }
+            set { field_name = value; }
         }
     }
 }

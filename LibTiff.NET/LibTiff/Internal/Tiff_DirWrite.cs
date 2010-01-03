@@ -184,7 +184,7 @@ namespace BitMiracle.LibTiff
                  * is set or not.  For normal fields, we just use the
                  * fieldSet test. 
                  */
-                if (fip.field_bit == FIELD.FIELD_CUSTOM)
+                if (fip.Field_bit == FIELD.FIELD_CUSTOM)
                 {
                     bool is_set = false;
                     for (int ci = 0; ci < m_dir.td_customValueCount; ci++)
@@ -193,7 +193,7 @@ namespace BitMiracle.LibTiff
                     if (!is_set)
                         continue;
                 }
-                else if (!fieldSet(fields, fip.field_bit))
+                else if (!fieldSet(fields, fip.Field_bit))
                     continue;
 
 
@@ -201,7 +201,7 @@ namespace BitMiracle.LibTiff
                  * Handle other fields.
                  */
                 TiffTag tag = FIELD.FIELD_IGNORE;
-                switch (fip.field_bit)
+                switch (fip.Field_bit)
                 {
                     case FIELD.FIELD_STRIPOFFSETS:
                         /*
@@ -211,7 +211,7 @@ namespace BitMiracle.LibTiff
                          * are written in sorted order).
                          */
                         tag = IsTiled() ? TiffTag.TILEOFFSETS : TiffTag.STRIPOFFSETS;
-                        if (tag != fip.field_tag)
+                        if (tag != fip.Field_tag)
                             continue;
 
                         data[dir].tdir_tag = tag;
@@ -229,7 +229,7 @@ namespace BitMiracle.LibTiff
                          * are written in sorted order).
                          */
                         tag = IsTiled() ? TiffTag.TILEBYTECOUNTS: TiffTag.STRIPBYTECOUNTS;
-                        if (tag != fip.field_tag)
+                        if (tag != fip.Field_tag)
                             continue;
 
                         data[dir].tdir_tag = tag;
@@ -277,20 +277,20 @@ namespace BitMiracle.LibTiff
                     case FIELD.FIELD_MINSAMPLEVALUE:
                     case FIELD.FIELD_MAXSAMPLEVALUE:
                     case FIELD.FIELD_SAMPLEFORMAT:
-                        if (!writePerSampleShorts(fip.field_tag, ref data[dir]))
+                        if (!writePerSampleShorts(fip.Field_tag, ref data[dir]))
                             return false;
 
                         break;
                     case FIELD.FIELD_SMINSAMPLEVALUE:
                     case FIELD.FIELD_SMAXSAMPLEVALUE:
-                        if (!writePerSampleAnys(sampleToTagType(), fip.field_tag, ref data[dir]))
+                        if (!writePerSampleAnys(sampleToTagType(), fip.Field_tag, ref data[dir]))
                             return false;
 
                         break;
                     case FIELD.FIELD_PAGENUMBER:
                     case FIELD.FIELD_HALFTONEHINTS:
                     case FIELD.FIELD_YCBCRSUBSAMPLING:
-                        if (!setupShortPair(fip.field_tag, ref data[dir]))
+                        if (!setupShortPair(fip.Field_tag, ref data[dir]))
                             return false;
 
                         break;
@@ -309,7 +309,7 @@ namespace BitMiracle.LibTiff
                          * XXX: Always write this field using LONG type
                          * for backward compatibility.
                          */
-                        data[dir].tdir_tag = fip.field_tag;
+                        data[dir].tdir_tag = fip.Field_tag;
                         data[dir].tdir_type = TiffType.LONG;
                         data[dir].tdir_count = m_dir.td_nsubifd;
                         if (!writeLongArray(ref data[dir], m_dir.td_subifd))
@@ -338,9 +338,9 @@ namespace BitMiracle.LibTiff
                         break;
                     default:
                         /* XXX: Should be fixed and removed. */
-                        if (fip.field_tag == TiffTag.DOTRANGE)
+                        if (fip.Field_tag == TiffTag.DOTRANGE)
                         {
-                            if (!setupShortPair(fip.field_tag, ref data[dir]))
+                            if (!setupShortPair(fip.Field_tag, ref data[dir]))
                                 return false;
                         }
                         else if (!writeNormalTag(ref data[dir], fip))
@@ -351,8 +351,8 @@ namespace BitMiracle.LibTiff
 
                 dir++;
 
-                if (fip.field_bit != FIELD.FIELD_CUSTOM)
-                    resetFieldBit(fields, fip.field_bit);
+                if (fip.Field_bit != FIELD.FIELD_CUSTOM)
+                    resetFieldBit(fields, fip.Field_bit);
             }
 
             /*
@@ -431,22 +431,22 @@ namespace BitMiracle.LibTiff
         */
         private bool writeNormalTag(ref TiffDirEntry dir, TiffFieldInfo fip)
         {
-            short wc = fip.field_writecount;
-            dir.tdir_tag = fip.field_tag;
-            dir.tdir_type = fip.field_type;
+            short wc = fip.Field_write_count;
+            dir.tdir_tag = fip.Field_tag;
+            dir.tdir_type = fip.Field_type;
             dir.tdir_count = wc;
 
-            switch (fip.field_type)
+            switch (fip.Field_type)
             {
                 case TiffType.SHORT:
                 case TiffType.SSHORT:
-                    if (fip.field_passcount)
+                    if (fip.Field_pass_count)
                     {
                         short[] wp;
                         int wc2;
                         if (wc == TIFF_VARIABLE2)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc2 = result[0].ToInt();
                             wp = result[1].ToShortArray();
 
@@ -455,7 +455,7 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             /* Assume TIFF_VARIABLE */
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc = result[0].ToShort();
                             wp = result[1].ToShortArray();
                             dir.tdir_count = wc;
@@ -468,13 +468,13 @@ namespace BitMiracle.LibTiff
                     {
                         if (wc == 1)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             short sv = result[0].ToShort();
                             dir.tdir_offset = insertData(dir.tdir_type, sv);
                         }
                         else
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             short[] wp = result[0].ToShortArray();
                             if (!writeShortArray(ref dir, wp))
                                 return false;
@@ -484,13 +484,13 @@ namespace BitMiracle.LibTiff
                 case TiffType.LONG:
                 case TiffType.SLONG:
                 case TiffType.IFD:
-                    if (fip.field_passcount)
+                    if (fip.Field_pass_count)
                     {
                         int[] lp;
                         int wc2;
                         if (wc == TIFF_VARIABLE2)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc2 = result[0].ToInt();
                             lp = result[1].ToIntArray();
                             dir.tdir_count = wc2;
@@ -498,7 +498,7 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             /* Assume TIFF_VARIABLE */
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc = result[0].ToShort();
                             lp = result[1].ToIntArray();
                             dir.tdir_count = wc;
@@ -512,13 +512,13 @@ namespace BitMiracle.LibTiff
                         if (wc == 1)
                         {
                             /* XXX handle LONG.SHORT conversion */
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             dir.tdir_offset = result[0].ToInt();
                         }
                         else
                         {
                             int[] lp;
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             lp = result[0].ToIntArray();
                             if (!writeLongArray(ref dir, lp))
                                 return false;
@@ -527,13 +527,13 @@ namespace BitMiracle.LibTiff
                     break;
                 case TiffType.RATIONAL:
                 case TiffType.SRATIONAL:
-                    if (fip.field_passcount)
+                    if (fip.Field_pass_count)
                     {
                         float[] fp;
                         int wc2;
                         if (wc == TIFF_VARIABLE2)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc2 = result[0].ToInt();
                             fp = result[1].ToFloatArray();
                             dir.tdir_count = wc2;
@@ -541,7 +541,7 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             /* Assume TIFF_VARIABLE */
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc = result[0].ToShort();
                             fp = result[1].ToFloatArray();
                             dir.tdir_count = wc;
@@ -555,14 +555,14 @@ namespace BitMiracle.LibTiff
                         if (wc == 1)
                         {
                             float[] fv = new float[1];
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             fv[0] = result[0].ToFloat();
                             if (!writeRationalArray(ref dir, fv))
                                 return false;
                         }
                         else
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             float[] fp = result[0].ToFloatArray();
                             if (!writeRationalArray(ref dir, fp))
                                 return false;
@@ -570,13 +570,13 @@ namespace BitMiracle.LibTiff
                     }
                     break;
                 case TiffType.FLOAT:
-                    if (fip.field_passcount)
+                    if (fip.Field_pass_count)
                     {
                         float[] fp;
                         int wc2;
                         if (wc == TIFF_VARIABLE2)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc2 = result[0].ToInt();
                             fp = result[1].ToFloatArray();
                             dir.tdir_count = wc2;
@@ -584,7 +584,7 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             /* Assume TIFF_VARIABLE */
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc = result[0].ToShort();
                             fp = result[1].ToFloatArray();
                             dir.tdir_count = wc;
@@ -598,14 +598,14 @@ namespace BitMiracle.LibTiff
                         if (wc == 1)
                         {
                             float[] fv = new float[1];
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             fv[0] = result[0].ToFloat();
                             if (!writeFloatArray(ref dir, fv))
                                 return false;
                         }
                         else
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             float[] fp = result[0].ToFloatArray();
                             if (!writeFloatArray(ref dir, fp))
                                 return false;
@@ -613,13 +613,13 @@ namespace BitMiracle.LibTiff
                     }
                     break;
                 case TiffType.DOUBLE:
-                    if (fip.field_passcount)
+                    if (fip.Field_pass_count)
                     {
                         double[] dp;
                         int wc2;
                         if (wc == TIFF_VARIABLE2)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc2 = result[0].ToInt();
                             dp = result[1].ToDoubleArray();
                             dir.tdir_count = wc2;
@@ -627,7 +627,7 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             /* Assume TIFF_VARIABLE */
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc = result[0].ToShort();
                             dp = result[1].ToDoubleArray();
                             dir.tdir_count = wc;
@@ -641,14 +641,14 @@ namespace BitMiracle.LibTiff
                         if (wc == 1)
                         {
                             double[] dv = new double[1];
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             dv[0] = result[0].ToDouble();
                             if (!writeDoubleArray(ref dir, dv))
                                 return false;
                         }
                         else
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             double[] dp = result[0].ToDoubleArray();
                             if (!writeDoubleArray(ref dir, dp))
                                 return false;
@@ -657,10 +657,10 @@ namespace BitMiracle.LibTiff
                     break;
                 case TiffType.ASCII:
                     {
-                        FieldValue[] result = GetField(fip.field_tag);
+                        FieldValue[] result = GetField(fip.Field_tag);
 
                         string cp;
-                        if (fip.field_passcount)
+                        if (fip.Field_pass_count)
                             cp = result[1].ToString();
                         else
                             cp = result[0].ToString();
@@ -678,13 +678,13 @@ namespace BitMiracle.LibTiff
 
                 case TiffType.BYTE:
                 case TiffType.SBYTE:
-                    if (fip.field_passcount)
+                    if (fip.Field_pass_count)
                     {
                         byte[] cp;
                         int wc2;
                         if (wc == TIFF_VARIABLE2)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc2 = result[0].ToInt();
                             cp = result[1].ToByteArray();
                             dir.tdir_count = wc2;
@@ -692,7 +692,7 @@ namespace BitMiracle.LibTiff
                         else
                         {
                             /* Assume TIFF_VARIABLE */
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc = result[0].ToShort();
                             cp = result[1].ToByteArray();
                             dir.tdir_count = wc;
@@ -706,14 +706,14 @@ namespace BitMiracle.LibTiff
                         if (wc == 1)
                         {
                             byte[] cv = new byte[1];
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             cv[0] = result[0].ToByte();
                             if (!writeByteArray(ref dir, cv))
                                 return false;
                         }
                         else
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             byte[] cp = result[0].ToByteArray();
                             if (!writeByteArray(ref dir, cp))
                                 return false;
@@ -727,21 +727,21 @@ namespace BitMiracle.LibTiff
                         int wc2;
                         if (wc == TIFF_VARIABLE)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc = result[0].ToShort();
                             cp = result[1].ToByteArray();
                             dir.tdir_count = wc;
                         }
                         else if (wc == TIFF_VARIABLE2)
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             wc2 = result[0].ToInt();
                             cp = result[1].ToByteArray();
                             dir.tdir_count = wc2;
                         }
                         else
                         {
-                            FieldValue[] result = GetField(fip.field_tag);
+                            FieldValue[] result = GetField(fip.Field_tag);
                             cp = result[0].ToByteArray();
                         }
 
@@ -967,7 +967,7 @@ namespace BitMiracle.LibTiff
                     {
                         WarningExt(this, m_clientdata, m_name,
                             "\"{0}\": Information lost writing value ({1:G}) as (unsigned) RATIONAL",
-                            FieldWithTag(dir.tdir_tag).field_name, fv);
+                            FieldWithTag(dir.tdir_tag).Field_name, fv);
                         fv = 0;
                     }
                     else
@@ -1145,7 +1145,7 @@ namespace BitMiracle.LibTiff
 
             ErrorExt(this, m_clientdata, m_name,
                 "Error writing data for field \"{0}\"",
-                FieldWithTag(dir.tdir_tag).field_name);
+                FieldWithTag(dir.tdir_tag).Field_name);
             return false;
         }
 

@@ -307,9 +307,9 @@ namespace BitMiracle.LibTiff
             {
                 TiffFieldInfo fip = m_fieldinfo[i];
                 fprintf(fd, "field[{0,2:D}] {1,5:D}, {2,2:D}, {3,2:D}, {4}, {5,2:D}, {6,5}, {7,5}, {8}\n",
-                    i, fip.field_tag, fip.field_readcount, fip.field_writecount,
-                    fip.field_type, fip.field_bit, fip.field_oktochange ? "TRUE" : "FALSE",
-                    fip.field_passcount ? "TRUE" : "FALSE", fip.field_name);
+                    i, fip.Field_tag, fip.Field_read_count, fip.Field_write_count,
+                    fip.Field_type, fip.Field_bit, fip.Field_okto_change ? "TRUE" : "FALSE",
+                    fip.Field_pass_count ? "TRUE" : "FALSE", fip.Field_name);
             }
         }
 
@@ -355,7 +355,7 @@ namespace BitMiracle.LibTiff
             /* note that this name is a special sign to Close() and
              * setupFieldInfo() to free the field
              */
-            fld.field_name = string.Format("Tag {0}", tag);
+            fld.Field_name = string.Format("Tag {0}", tag);
             return fld;
         }
         

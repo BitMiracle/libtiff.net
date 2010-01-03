@@ -25,10 +25,10 @@ namespace BitMiracle.LibTiff.Internal
             Debug.Assert(tb != null);
 
             /* NB: be careful of return values for 16-bit platforms */
-            if (ta.field_tag != tb.field_tag)
-                return ((int)ta.field_tag - (int)tb.field_tag);
+            if (ta.Field_tag != tb.Field_tag)
+                return ((int)ta.Field_tag - (int)tb.Field_tag);
 
-            return (ta.field_type == TiffType.ANY) ? 0 : ((int)tb.field_type - (int)ta.field_type);
+            return (ta.Field_type == TiffType.ANY) ? 0 : ((int)tb.Field_type - (int)ta.Field_type);
         }
     }
 }

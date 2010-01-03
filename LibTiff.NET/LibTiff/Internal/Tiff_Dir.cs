@@ -64,7 +64,7 @@ namespace BitMiracle.LibTiff
                 return false;
             }
 
-            if (tag != TiffTag.IMAGELENGTH && (m_flags & TIFF_BEENWRITING) != 0 && !fip.field_oktochange)
+            if (tag != TiffTag.IMAGELENGTH && (m_flags & TIFF_BEENWRITING) != 0 && !fip.Field_okto_change)
             {
                 /*
                  * Consult info table to see if tag can be changed
@@ -73,7 +73,7 @@ namespace BitMiracle.LibTiff
                  * compression and/or format of the data.
                  */
                 ErrorExt(this, m_clientdata, "SetField", "{0}: Cannot modify tag \"{1}\" while writing",
-                    m_name, fip.field_name);
+                    m_name, fip.Field_name);
                 return false;
             }
 

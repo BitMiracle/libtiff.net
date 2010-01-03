@@ -385,12 +385,12 @@ namespace BitMiracle.LibTiff
                     * compression schemes and codec-specific tags are blindly copied.
                     */
                     TiffFieldInfo fip = tif.FindFieldInfo(tag, TiffType.ANY);
-                    if (fip == null || fip.field_bit != FIELD.FIELD_CUSTOM)
+                    if (fip == null || fip.Field_bit != FIELD.FIELD_CUSTOM)
                     {
                         Tiff.ErrorExt(tif, tif.m_clientdata, module,
                             "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
                             tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
-                            fip != null ? fip.field_name : "Unknown");
+                            fip != null ? fip.Field_name : "Unknown");
                         status = false;
                         break;
                     }
@@ -401,7 +401,7 @@ namespace BitMiracle.LibTiff
                     int tvIndex = -1;
                     for (int iCustom = 0; iCustom < td.td_customValueCount; iCustom++)
                     {
-                        if (td.td_customValues[iCustom].info.field_tag == tag)
+                        if (td.td_customValues[iCustom].info.Field_tag == tag)
                         {
                             td.td_customValues[iCustom].value = null;
                             break;
@@ -426,33 +426,33 @@ namespace BitMiracle.LibTiff
                     /*
                     * Set custom value ... save a copy of the custom tag value.
                     */
-                    int tv_size = Tiff.dataSize(fip.field_type);
+                    int tv_size = Tiff.dataSize(fip.Field_type);
                     if (tv_size == 0)
                     {
                         status = false;
                         Tiff.ErrorExt(tif, tif.m_clientdata, module,
                             "{0}: Bad field type {1} for \"{2}\"",
-                            tif.m_name, fip.field_type, fip.field_name);
+                            tif.m_name, fip.Field_type, fip.Field_name);
                         end = true;
                         break;
                     }
 
                     int paramIndex = 0;
-                    if (fip.field_passcount)
+                    if (fip.Field_pass_count)
                     {
-                        if (fip.field_writecount == Tiff.TIFF_VARIABLE2)
+                        if (fip.Field_write_count == Tiff.TIFF_VARIABLE2)
                             td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
                         else
                             td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
                     }
-                    else if (fip.field_writecount == Tiff.TIFF_VARIABLE || fip.field_writecount == Tiff.TIFF_VARIABLE2)
+                    else if (fip.Field_write_count == Tiff.TIFF_VARIABLE || fip.Field_write_count == Tiff.TIFF_VARIABLE2)
                         td.td_customValues[tvIndex].count = 1;
-                    else if (fip.field_writecount == Tiff.TIFF_SPP)
+                    else if (fip.Field_write_count == Tiff.TIFF_SPP)
                         td.td_customValues[tvIndex].count = td.td_samplesperpixel;
                     else
-                        td.td_customValues[tvIndex].count = fip.field_writecount;
+                        td.td_customValues[tvIndex].count = fip.Field_write_count;
 
-                    if (fip.field_type == TiffType.ASCII)
+                    if (fip.Field_type == TiffType.ASCII)
                     {
                         string ascii;
                         Tiff.setString(out ascii, ap[paramIndex++].ToString());
@@ -461,13 +461,13 @@ namespace BitMiracle.LibTiff
                     else
                     {
                         td.td_customValues[tvIndex].value = new byte[tv_size * td.td_customValues[tvIndex].count];
-                        if ((fip.field_passcount || fip.field_writecount == Tiff.TIFF_VARIABLE ||
-                            fip.field_writecount == Tiff.TIFF_VARIABLE2 ||
-                            fip.field_writecount == Tiff.TIFF_SPP || td.td_customValues[tvIndex].count > 1) &&
-                            fip.field_tag != TiffTag.PAGENUMBER &&
-                            fip.field_tag != TiffTag.HALFTONEHINTS &&
-                            fip.field_tag != TiffTag.YCBCRSUBSAMPLING &&
-                            fip.field_tag != TiffTag.DOTRANGE)
+                        if ((fip.Field_pass_count || fip.Field_write_count == Tiff.TIFF_VARIABLE ||
+                            fip.Field_write_count == Tiff.TIFF_VARIABLE2 ||
+                            fip.Field_write_count == Tiff.TIFF_SPP || td.td_customValues[tvIndex].count > 1) &&
+                            fip.Field_tag != TiffTag.PAGENUMBER &&
+                            fip.Field_tag != TiffTag.HALFTONEHINTS &&
+                            fip.Field_tag != TiffTag.YCBCRSUBSAMPLING &&
+                            fip.Field_tag != TiffTag.DOTRANGE)
                         {
                             byte[] apBytes = ap[paramIndex++].GetBytes();
                             Array.Copy(apBytes, td.td_customValues[tvIndex].value, apBytes.Length);
@@ -487,7 +487,7 @@ namespace BitMiracle.LibTiff
                             int valPos = 0;
                             for (int i = 0; i < td.td_customValues[tvIndex].count; i++, valPos += tv_size)
                             {
-                                switch (fip.field_type)
+                                switch (fip.Field_type)
                                 {
                                     case TiffType.BYTE:
                                     case TiffType.UNDEFINED:
@@ -532,7 +532,7 @@ namespace BitMiracle.LibTiff
             {
                 if (status)
                 {
-                    tif.setFieldBit(tif.FieldWithTag(tag).field_bit);
+                    tif.setFieldBit(tif.FieldWithTag(tag).Field_bit);
                     tif.m_flags |= Tiff.TIFF_DIRTYDIRECT;
                 }
             }
@@ -541,7 +541,7 @@ namespace BitMiracle.LibTiff
             {
                 Tiff.ErrorExt(tif, tif.m_clientdata, module,
                     "{0}: Bad value {1} for \"{2}\" tag",
-                    tif.m_name, v, tif.FieldWithTag(tag).field_name);
+                    tif.m_name, v, tif.FieldWithTag(tag).Field_name);
                 return false;
             }
 
@@ -549,7 +549,7 @@ namespace BitMiracle.LibTiff
             {
                 Tiff.ErrorExt(tif, tif.m_clientdata, module,
                     "{0}: Bad value {1} for \"{2}\" tag",
-                    tif.m_name, v32, tif.FieldWithTag(tag).field_name);
+                    tif.m_name, v32, tif.FieldWithTag(tag).Field_name);
                 return false;
             }
 
@@ -761,12 +761,12 @@ namespace BitMiracle.LibTiff
                     * for the image's codec then we'll arrive here.
                     */
                     TiffFieldInfo fip = tif.FindFieldInfo(tag, TiffType.ANY);
-                    if (fip == null || fip.field_bit != FIELD.FIELD_CUSTOM)
+                    if (fip == null || fip.Field_bit != FIELD.FIELD_CUSTOM)
                     {
                         Tiff.ErrorExt(tif, tif.m_clientdata, "_TIFFVGetField",
                             "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
                             tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
-                            fip != null ? fip.field_name : "Unknown");
+                            fip != null ? fip.Field_name : "Unknown");
                         result = null;
                         break;
                     }
@@ -778,14 +778,14 @@ namespace BitMiracle.LibTiff
                     for (int i = 0; i < td.td_customValueCount; i++)
                     {
                         TiffTagValue tv = td.td_customValues[i];
-                        if (tv.info.field_tag != tag)
+                        if (tv.info.Field_tag != tag)
                             continue;
 
-                        if (fip.field_passcount)
+                        if (fip.Field_pass_count)
                         {
                             result = new FieldValue[2];
 
-                            if (fip.field_readcount == Tiff.TIFF_VARIABLE2)
+                            if (fip.Field_read_count == Tiff.TIFF_VARIABLE2)
                                 result[0].Set(tv.count);
                             else
                             {
@@ -797,16 +797,16 @@ namespace BitMiracle.LibTiff
                         }
                         else
                         {
-                            if ((fip.field_type == TiffType.ASCII || fip.field_readcount == Tiff.TIFF_VARIABLE ||
-                                fip.field_readcount == Tiff.TIFF_VARIABLE2 || fip.field_readcount == Tiff.TIFF_SPP || 
-                                tv.count > 1) && fip.field_tag != TiffTag.PAGENUMBER && 
-                                fip.field_tag != TiffTag.HALFTONEHINTS && 
-                                fip.field_tag != TiffTag.YCBCRSUBSAMPLING && 
-                                fip.field_tag != TiffTag.DOTRANGE)
+                            if ((fip.Field_type == TiffType.ASCII || fip.Field_read_count == Tiff.TIFF_VARIABLE ||
+                                fip.Field_read_count == Tiff.TIFF_VARIABLE2 || fip.Field_read_count == Tiff.TIFF_SPP || 
+                                tv.count > 1) && fip.Field_tag != TiffTag.PAGENUMBER && 
+                                fip.Field_tag != TiffTag.HALFTONEHINTS && 
+                                fip.Field_tag != TiffTag.YCBCRSUBSAMPLING && 
+                                fip.Field_tag != TiffTag.DOTRANGE)
                             {
                                 result = new FieldValue[1];
                                 byte[] value = tv.value;
-                                if (fip.field_type == TiffType.ASCII && tv.value.Length > 0 && tv.value[tv.value.Length - 1] == 0)
+                                if (fip.Field_type == TiffType.ASCII && tv.value.Length > 0 && tv.value[tv.value.Length - 1] == 0)
                                 {
                                     // cut unwanted zero at the end
                                     value = new byte[Math.Max(tv.value.Length - 1, 0)];
@@ -820,9 +820,9 @@ namespace BitMiracle.LibTiff
                                 result = new FieldValue[tv.count];
                                 byte[] val = tv.value;
                                 int valPos = 0;
-                                for (int j = 0; j < tv.count; j++, valPos += Tiff.dataSize(tv.info.field_type))
+                                for (int j = 0; j < tv.count; j++, valPos += Tiff.dataSize(tv.info.Field_type))
                                 {
-                                    switch (fip.field_type)
+                                    switch (fip.Field_type)
                                     {
                                         case TiffType.BYTE:
                                         case TiffType.UNDEFINED:

@@ -53,12 +53,12 @@ namespace BitMiracle.LibTiff
 
         private static void printField(Stream fd, TiffFieldInfo fip, int value_count, object raw_data)
         {
-            fprintf(fd, "  {0}: ", fip.field_name);
+            fprintf(fd, "  {0}: ", fip.Field_name);
 
             for (int j = 0; j < value_count; j++)
             {
-                if (fip.field_type == TiffType.BYTE || 
-                    fip.field_type == TiffType.SBYTE)
+                if (fip.Field_type == TiffType.BYTE || 
+                    fip.Field_type == TiffType.SBYTE)
                 {
                     byte[] bytes = raw_data as byte[];
                     sbyte[] sbytes = raw_data as sbyte[];
@@ -67,14 +67,14 @@ namespace BitMiracle.LibTiff
                     else if (sbytes != null)
                         fprintf(fd, "{0}", sbytes[j]);
                 }
-                else if (fip.field_type == TiffType.UNDEFINED)
+                else if (fip.Field_type == TiffType.UNDEFINED)
                 {
                     byte[] bytes = raw_data as byte[];
                     if (bytes != null)
                         fprintf(fd, "0x{0:x}", bytes[j]);
                 }
-                else if (fip.field_type == TiffType.SHORT || 
-                    fip.field_type == TiffType.SSHORT)
+                else if (fip.Field_type == TiffType.SHORT || 
+                    fip.Field_type == TiffType.SSHORT)
                 {
                     short[] shorts = raw_data as short[];
                     ushort[] ushorts = raw_data as ushort[];
@@ -83,8 +83,8 @@ namespace BitMiracle.LibTiff
                     else if (ushorts != null)
                         fprintf(fd, "{0}", ushorts[j]);
                 }
-                else if (fip.field_type == TiffType.LONG || 
-                    fip.field_type == TiffType.SLONG)
+                else if (fip.Field_type == TiffType.LONG || 
+                    fip.Field_type == TiffType.SLONG)
                 {
                     int[] ints = raw_data as int[];
                     uint[] uints = raw_data as uint[];
@@ -93,15 +93,15 @@ namespace BitMiracle.LibTiff
                     else if (uints != null)
                         fprintf(fd, "{0}", uints[j]);
                 }
-                else if (fip.field_type == TiffType.RATIONAL ||
-                    fip.field_type == TiffType.SRATIONAL ||
-                    fip.field_type == TiffType.FLOAT)
+                else if (fip.Field_type == TiffType.RATIONAL ||
+                    fip.Field_type == TiffType.SRATIONAL ||
+                    fip.Field_type == TiffType.FLOAT)
                 {
                     float[] floats = raw_data as float[];
                     if (floats != null)
                         fprintf(fd, "{0}", floats[j]);
                 }
-                else if (fip.field_type == TiffType.IFD)
+                else if (fip.Field_type == TiffType.IFD)
                 {
                     int[] ints = raw_data as int[];
                     uint[] uints = raw_data as uint[];
@@ -110,7 +110,7 @@ namespace BitMiracle.LibTiff
                     else if (uints != null)
                         fprintf(fd, "0x{0:x}", uints[j]);
                 }
-                else if (fip.field_type == TiffType.ASCII)
+                else if (fip.Field_type == TiffType.ASCII)
                 {
                     string s = raw_data as string;
                     if (s != null)
@@ -118,8 +118,8 @@ namespace BitMiracle.LibTiff
 
                     break;
                 }
-                else if (fip.field_type == TiffType.DOUBLE ||
-                    fip.field_type == TiffType.FLOAT)
+                else if (fip.Field_type == TiffType.DOUBLE ||
+                    fip.Field_type == TiffType.FLOAT)
                 {
                     float[] floats = raw_data as float[];
                     double[] doubles = raw_data as double[];

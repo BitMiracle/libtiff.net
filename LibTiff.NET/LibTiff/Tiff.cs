@@ -598,7 +598,7 @@ namespace BitMiracle.LibTiff
             if (tag_index < 0 || tag_index >= m_dir.td_customValueCount)
                 return -1;
             else
-                return (int)m_dir.td_customValues[tag_index].info.field_tag;
+                return (int)m_dir.td_customValues[tag_index].info.Field_tag;
         }
 
         public void MergeFieldInfo(TiffFieldInfo[] info, int n)
@@ -612,7 +612,7 @@ namespace BitMiracle.LibTiff
 
             for (int i = 0; i < n; i++)
             {
-                TiffFieldInfo fip = FindFieldInfo(info[i].field_tag, info[i].field_type);
+                TiffFieldInfo fip = FindFieldInfo(info[i].Field_tag, info[i].Field_type);
 
                 /* only add definitions that aren't already present */
                 if (fip == null)
@@ -629,7 +629,7 @@ namespace BitMiracle.LibTiff
 
         public TiffFieldInfo FindFieldInfo(TiffTag tag, TiffType dt)
         {
-            if (m_foundfield != null && m_foundfield.field_tag == tag && (dt == TiffType.ANY || dt == m_foundfield.field_type))
+            if (m_foundfield != null && m_foundfield.Field_tag == tag && (dt == TiffType.ANY || dt == m_foundfield.Field_type))
                 return m_foundfield;
 
             /* If we are invoked with no field information, then just return. */
@@ -640,7 +640,7 @@ namespace BitMiracle.LibTiff
 
             foreach (TiffFieldInfo info in m_fieldinfo)
             {
-                if (info != null && info.field_tag == tag && (dt == TiffType.ANY || dt == info.field_type))
+                if (info != null && info.Field_tag == tag && (dt == TiffType.ANY || dt == info.Field_type))
                 {
                     m_foundfield = info;
                     break;
@@ -652,7 +652,7 @@ namespace BitMiracle.LibTiff
 
         public TiffFieldInfo FindFieldInfoByName(string field_name, TiffType dt)
         {
-            if (m_foundfield != null && m_foundfield.field_name == field_name && (dt == TiffType.ANY || dt == m_foundfield.field_type))
+            if (m_foundfield != null && m_foundfield.Field_name == field_name && (dt == TiffType.ANY || dt == m_foundfield.Field_type))
                 return m_foundfield;
 
             /* If we are invoked with no field information, then just return. */
@@ -663,7 +663,7 @@ namespace BitMiracle.LibTiff
 
             foreach (TiffFieldInfo info in m_fieldinfo)
             {
-                if (info != null && info.field_name == field_name && (dt == TiffType.ANY || dt == info.field_type))
+                if (info != null && info.Field_name == field_name && (dt == TiffType.ANY || dt == info.Field_type))
                 {
                     m_foundfield = info;
                     break;
@@ -803,7 +803,7 @@ namespace BitMiracle.LibTiff
         public FieldValue[] GetField(TiffTag tag)
         {
             TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
-            if (fip != null && (isPseudoTag(tag) || fieldSet(fip.field_bit)))
+            if (fip != null && (isPseudoTag(tag) || fieldSet(fip.Field_bit)))
                 return m_tagmethods.GetField(this, tag);
             
             return null;
@@ -1124,7 +1124,7 @@ namespace BitMiracle.LibTiff
                  * directory tags (violating the spec).  Handle
                  * it here, but be obnoxious (maybe they'll fix it?).
                  */
-                if (dir[i].tdir_tag < m_fieldinfo[fix].field_tag)
+                if (dir[i].tdir_tag < m_fieldinfo[fix].Field_tag)
                 {
                     if (!diroutoforderwarning)
                     {
@@ -1135,10 +1135,10 @@ namespace BitMiracle.LibTiff
                     fix = 0; /* O(n^2) */
                 }
 
-                while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                while (fix < m_nfields && m_fieldinfo[fix].Field_tag < dir[i].tdir_tag)
                     fix++;
 
-                if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
+                if (fix >= m_nfields || m_fieldinfo[fix].Field_tag != dir[i].tdir_tag)
                 {
                     WarningExt(this, m_clientdata, module,
                         "{0}: unknown field with tag {1} (0x{2:x}) encountered",
@@ -1149,14 +1149,14 @@ namespace BitMiracle.LibTiff
                     MergeFieldInfo(arr, 1);
 
                     fix = 0;
-                    while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                    while (fix < m_nfields && m_fieldinfo[fix].Field_tag < dir[i].tdir_tag)
                         fix++;
                 }
 
                 /*
                  * null out old tags that we ignore.
                  */
-                if (m_fieldinfo[fix].field_bit == FIELD.FIELD_IGNORE)
+                if (m_fieldinfo[fix].Field_bit == FIELD.FIELD_IGNORE)
                 {
                     dir[i].tdir_tag = TiffTag.IGNORE;
                     continue;
@@ -1166,18 +1166,18 @@ namespace BitMiracle.LibTiff
                  * Check data type.
                  */
                 TiffFieldInfo fip = m_fieldinfo[fix];
-                while (dir[i].tdir_type != fip.field_type && fix < m_nfields)
+                while (dir[i].tdir_type != fip.Field_type && fix < m_nfields)
                 {
-                    if (fip.field_type == TiffType.ANY)
+                    if (fip.Field_type == TiffType.ANY)
                     {
                         /* wildcard */
                         break;
                     }
 
                     fip = m_fieldinfo[++fix];
-                    if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
+                    if (fix >= m_nfields || fip.Field_tag != dir[i].tdir_tag)
                     {
-                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Field_name);
                         dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
@@ -1186,10 +1186,10 @@ namespace BitMiracle.LibTiff
                 /*
                  * Check count if known in advance.
                  */
-                if (fip.field_readcount != TIFF_VARIABLE && fip.field_readcount != TIFF_VARIABLE2)
+                if (fip.Field_read_count != TIFF_VARIABLE && fip.Field_read_count != TIFF_VARIABLE2)
                 {
-                    int expected = fip.field_readcount;
-                    if (fip.field_readcount == TIFF_SPP)
+                    int expected = fip.Field_read_count;
+                    if (fip.Field_read_count == TIFF_SPP)
                         expected = m_dir.td_samplesperpixel;
 
                     if (!checkDirCount(dir[i], expected))
@@ -1235,7 +1235,7 @@ namespace BitMiracle.LibTiff
                     case TiffTag.STRIPBYTECOUNTS:
                     case TiffTag.TILEOFFSETS:
                     case TiffTag.TILEBYTECOUNTS:
-                        setFieldBit(fip.field_bit);
+                        setFieldBit(fip.Field_bit);
                         break;
                     case TiffTag.IMAGEWIDTH:
                     case TiffTag.IMAGELENGTH:
@@ -1559,7 +1559,7 @@ namespace BitMiracle.LibTiff
                         return false;
                     }
 
-                    WarningExt(this, m_clientdata, module, "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
@@ -1571,7 +1571,7 @@ namespace BitMiracle.LibTiff
                      * and handle the simple case of estimating the size of a one
                      * strip image.
                      */
-                    WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
@@ -1582,7 +1582,7 @@ namespace BitMiracle.LibTiff
                      * wrong values (it can be equal to StripOffset array, for
                      * example). Catch this case here.
                      */
-                    WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).field_name);
+                    WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Field_name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
@@ -1708,10 +1708,10 @@ namespace BitMiracle.LibTiff
                 if (fix >= m_nfields || dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
 
-                while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                while (fix < m_nfields && m_fieldinfo[fix].Field_tag < dir[i].tdir_tag)
                     fix++;
 
-                if (fix >= m_nfields || m_fieldinfo[fix].field_tag != dir[i].tdir_tag)
+                if (fix >= m_nfields || m_fieldinfo[fix].Field_tag != dir[i].tdir_tag)
                 {
                     WarningExt(this, m_clientdata, module,
                         "{0}: unknown field with tag {1} (0x{2:x}) encountered",
@@ -1722,14 +1722,14 @@ namespace BitMiracle.LibTiff
                     MergeFieldInfo(arr, 1);
 
                     fix = 0;
-                    while (fix < m_nfields && m_fieldinfo[fix].field_tag < dir[i].tdir_tag)
+                    while (fix < m_nfields && m_fieldinfo[fix].Field_tag < dir[i].tdir_tag)
                         fix++;
                 }
 
                 /*
                  * null out old tags that we ignore.
                  */
-                if (m_fieldinfo[fix].field_bit == FIELD.FIELD_IGNORE)
+                if (m_fieldinfo[fix].Field_bit == FIELD.FIELD_IGNORE)
                 {
                     dir[i].tdir_tag = TiffTag.IGNORE;
                     continue;
@@ -1739,18 +1739,18 @@ namespace BitMiracle.LibTiff
                  * Check data type.
                  */
                 TiffFieldInfo fip = m_fieldinfo[fix];
-                while (dir[i].tdir_type != fip.field_type && fix < m_nfields)
+                while (dir[i].tdir_type != fip.Field_type && fix < m_nfields)
                 {
-                    if (fip.field_type == TiffType.ANY)
+                    if (fip.Field_type == TiffType.ANY)
                     {
                         /* wildcard */
                         break;
                     }
 
                     fip = m_fieldinfo[++fix];
-                    if (fix >= m_nfields || fip.field_tag != dir[i].tdir_tag)
+                    if (fix >= m_nfields || fip.Field_tag != dir[i].tdir_tag)
                     {
-                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].field_name);
+                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Field_name);
                         dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
@@ -1759,10 +1759,10 @@ namespace BitMiracle.LibTiff
                 /*
                  * Check count if known in advance.
                  */
-                if (fip.field_readcount != TIFF_VARIABLE && fip.field_readcount != TIFF_VARIABLE2)
+                if (fip.Field_read_count != TIFF_VARIABLE && fip.Field_read_count != TIFF_VARIABLE2)
                 {
-                    int expected = fip.field_readcount;
-                    if (fip.field_readcount == TIFF_SPP)
+                    int expected = fip.Field_read_count;
+                    if (fip.Field_read_count == TIFF_SPP)
                         expected = m_dir.td_samplesperpixel;
 
                     if (!checkDirCount(dir[i], expected))
@@ -1839,7 +1839,7 @@ namespace BitMiracle.LibTiff
                 * is set or not.  For normal fields, we just use the
                 * FieldSet test.
                 */
-                if (fip.field_bit == FIELD.FIELD_CUSTOM)
+                if (fip.Field_bit == FIELD.FIELD_CUSTOM)
                 {
                     bool is_set = false;
                     for (int ci = 0; ci < m_dir.td_customValueCount; ci++)
@@ -1848,11 +1848,11 @@ namespace BitMiracle.LibTiff
                     if (!is_set)
                         continue;
                 }
-                else if (!fieldSet(fields, fip.field_bit))
+                else if (!fieldSet(fields, fip.Field_bit))
                     continue;
 
-                if (fip.field_bit != FIELD.FIELD_CUSTOM)
-                    resetFieldBit(fields, fip.field_bit);
+                if (fip.Field_bit != FIELD.FIELD_CUSTOM)
+                    resetFieldBit(fields, fip.Field_bit);
             }
 
             /*
@@ -3079,7 +3079,7 @@ namespace BitMiracle.LibTiff
 
                 byte[] raw_data = null;
                 int value_count;
-                if (fip.field_passcount)
+                if (fip.Field_pass_count)
                 {
                     FieldValue[] result = GetField(tag);
                     if (result == null)
@@ -3090,14 +3090,14 @@ namespace BitMiracle.LibTiff
                 }
                 else
                 {
-                    if (fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2)
+                    if (fip.Field_read_count == TIFF_VARIABLE || fip.Field_read_count == TIFF_VARIABLE2)
                         value_count = 1;
-                    else if (fip.field_readcount == TIFF_SPP)
+                    else if (fip.Field_read_count == TIFF_SPP)
                         value_count = m_dir.td_samplesperpixel;
                     else
-                        value_count = fip.field_readcount;
+                        value_count = fip.Field_read_count;
 
-                    if ((fip.field_type == TiffType.ASCII || fip.field_readcount == TIFF_VARIABLE || fip.field_readcount == TIFF_VARIABLE2 || fip.field_readcount == TIFF_SPP || value_count > 1) && fip.field_tag != TiffTag.PAGENUMBER && fip.field_tag != TiffTag.HALFTONEHINTS && fip.field_tag != TiffTag.YCBCRSUBSAMPLING && fip.field_tag != TiffTag.DOTRANGE)
+                    if ((fip.Field_type == TiffType.ASCII || fip.Field_read_count == TIFF_VARIABLE || fip.Field_read_count == TIFF_VARIABLE2 || fip.Field_read_count == TIFF_SPP || value_count > 1) && fip.Field_tag != TiffTag.PAGENUMBER && fip.Field_tag != TiffTag.HALFTONEHINTS && fip.Field_tag != TiffTag.YCBCRSUBSAMPLING && fip.Field_tag != TiffTag.DOTRANGE)
                     {
                         FieldValue[] result = GetField(tag);
                         if (result == null)
@@ -3105,9 +3105,9 @@ namespace BitMiracle.LibTiff
 
                         raw_data = result[0].ToByteArray();
                     }
-                    else if (fip.field_tag != TiffTag.PAGENUMBER && fip.field_tag != TiffTag.HALFTONEHINTS && fip.field_tag != TiffTag.YCBCRSUBSAMPLING && fip.field_tag != TiffTag.DOTRANGE)
+                    else if (fip.Field_tag != TiffTag.PAGENUMBER && fip.Field_tag != TiffTag.HALFTONEHINTS && fip.Field_tag != TiffTag.YCBCRSUBSAMPLING && fip.Field_tag != TiffTag.DOTRANGE)
                     {
-                        raw_data = new byte [dataSize(fip.field_type) * value_count];
+                        raw_data = new byte [dataSize(fip.Field_type) * value_count];
 
                         FieldValue[] result = GetField(tag);
                         if (result == null)
@@ -3123,7 +3123,7 @@ namespace BitMiracle.LibTiff
                          * HALFTONEHINTS,
                          * YCBCRSUBSAMPLING and
                          * DOTRANGE tags in tif_dir.c. */
-                        raw_data = new byte [dataSize(fip.field_type) * value_count];
+                        raw_data = new byte [dataSize(fip.Field_type) * value_count];
 
                         FieldValue[] result = GetField(tag);
                         if (result == null)
@@ -3133,7 +3133,7 @@ namespace BitMiracle.LibTiff
                         byte[] second = result[1].ToByteArray();
 
                         Array.Copy(first, raw_data, first.Length);
-                        Array.Copy(second, 0, raw_data, dataSize(fip.field_type), second.Length);
+                        Array.Copy(second, 0, raw_data, dataSize(fip.Field_type), second.Length);
                     }
                 }
 

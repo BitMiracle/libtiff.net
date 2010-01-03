@@ -139,7 +139,7 @@ namespace BitMiracle.LibTiff
         private int fetchFailed(TiffDirEntry dir)
         {
             ErrorExt(this, m_clientdata, m_name,
-                "Error fetching data for field \"{0}\"", FieldWithTag(dir.tdir_tag).field_name);
+                "Error fetching data for field \"{0}\"", FieldWithTag(dir.tdir_tag).Field_name);
             return 0;
         }
 
@@ -284,14 +284,14 @@ namespace BitMiracle.LibTiff
             {
                 WarningExt(this, m_clientdata, m_name,
                     "incorrect count for field \"{0}\" ({1}, expecting {2}); tag ignored",
-                    FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
+                    FieldWithTag(dir.tdir_tag).Field_name, dir.tdir_count, count);
                 return false;
             }
             else if (count < dir.tdir_count)
             {
                 WarningExt(this, m_clientdata, m_name,
                     "incorrect count for field \"{0}\" ({1}, expecting {2}); tag trimmed",
-                    FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count, count);
+                    FieldWithTag(dir.tdir_tag).Field_name, dir.tdir_count, count);
                 return true;
             }
 
@@ -385,7 +385,7 @@ namespace BitMiracle.LibTiff
             {
                 ErrorExt(this, m_clientdata, m_name,
                     "{0}: Rational with zero denominator (num = {1})",
-                    FieldWithTag(dir.tdir_tag).field_name, num);
+                    FieldWithTag(dir.tdir_tag).Field_name, num);
                 rv = float.NaN;
                 return false;
             }
@@ -533,7 +533,7 @@ namespace BitMiracle.LibTiff
             {
                 WarningExt(this, m_clientdata, m_name,
                     "unexpected count for field \"{0}\", {1}, expected 2; ignored",
-                    FieldWithTag(dir.tdir_tag).field_name, dir.tdir_count);
+                    FieldWithTag(dir.tdir_tag).Field_name, dir.tdir_count);
                 return false;
             }
 
@@ -749,7 +749,7 @@ namespace BitMiracle.LibTiff
                     /* UNDEFINED */
                     ErrorExt(this, m_clientdata, m_name,
                         "cannot read TIFF_ANY type {0} for field \"{1}\"",
-                        dir.tdir_type, FieldWithTag(dir.tdir_tag).field_name);
+                        dir.tdir_type, FieldWithTag(dir.tdir_tag).Field_name);
                     return false;
             }
 
@@ -774,7 +774,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchByteArray(dir, bytes);
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, dir.tdir_count, bytes);
                             else
                                 ok = SetField(dir.tdir_tag, bytes);
@@ -787,7 +787,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchShortArray(dir, shorts);
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, dir.tdir_count, shorts);
                             else
                                 ok = SetField(dir.tdir_tag, shorts);
@@ -800,7 +800,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchLongArray(dir, ints);
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, dir.tdir_count, ints);
                             else
                                 ok = SetField(dir.tdir_tag, ints);
@@ -813,7 +813,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchRationalArray(dir, rs);
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, dir.tdir_count, rs);
                             else
                                 ok = SetField(dir.tdir_tag, rs);
@@ -825,7 +825,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchFloatArray(dir, fs);
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, dir.tdir_count, fs);
                             else
                                 ok = SetField(dir.tdir_tag, fs);
@@ -837,7 +837,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchDoubleArray(dir, ds);
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, dir.tdir_count, ds);
                             else
                                 ok = SetField(dir.tdir_tag, ds);
@@ -855,7 +855,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchString(dir, out cp) != 0;
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, dir.tdir_count, cp);
                             else
                                 ok = SetField(dir.tdir_tag, cp);
@@ -883,11 +883,11 @@ namespace BitMiracle.LibTiff
                          *     for the tag and that that entry is for the
                          *     widest potential data type the tag may have.
                          */
-                        TiffType type = fip.field_type;
+                        TiffType type = fip.Field_type;
                         if (type != TiffType.LONG && type != TiffType.SLONG)
                         {
                             short v = (short)extractData(dir);
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                             {
                                 short[] a = new short[1];
                                 a[0] = v;
@@ -900,7 +900,7 @@ namespace BitMiracle.LibTiff
                         }
 
                         v32 = extractData(dir);
-                        if (fip.field_passcount)
+                        if (fip.Field_pass_count)
                         {
                             int[] a = new int[1];
                             a[0] = v32;
@@ -914,7 +914,7 @@ namespace BitMiracle.LibTiff
                     case TiffType.LONG:
                     case TiffType.SLONG:
                         v32 = extractData(dir);
-                        if (fip.field_passcount)
+                        if (fip.Field_pass_count)
                         {
                             int[] a = new int[1];
                             a[0] = v32;
@@ -929,7 +929,7 @@ namespace BitMiracle.LibTiff
                     case TiffType.SRATIONAL:
                     case TiffType.FLOAT:
                         float f = (dir.tdir_type == TiffType.FLOAT ? fetchFloat(dir): fetchRational(dir));
-                        if (fip.field_passcount)
+                        if (fip.Field_pass_count)
                         {
                             float[] a = new float[1];
                             a[0] = f;
@@ -945,7 +945,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchDoubleArray(dir, ds);
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, 1, ds);
                             else
                                 ok = SetField(dir.tdir_tag, ds[0]);
@@ -959,7 +959,7 @@ namespace BitMiracle.LibTiff
                         ok = fetchString(dir, out c) != 0;
                         if (ok)
                         {
-                            if (fip.field_passcount)
+                            if (fip.Field_pass_count)
                                 ok = SetField(dir.tdir_tag, 1, c);
                             else
                                 ok = SetField(dir.tdir_tag, c);
@@ -998,7 +998,7 @@ namespace BitMiracle.LibTiff
                         {
                             ErrorExt(this, m_clientdata, m_name,
                                 "Cannot handle different per-sample values for field \"{0}\"",
-                                FieldWithTag(dir.tdir_tag).field_name);
+                                FieldWithTag(dir.tdir_tag).Field_name);
                             failed = true;
                             break;
                         }
@@ -1042,7 +1042,7 @@ namespace BitMiracle.LibTiff
                         {
                             ErrorExt(this, m_clientdata, m_name,
                                 "Cannot handle different per-sample values for field \"{0}\"",
-                                FieldWithTag(dir.tdir_tag).field_name);
+                                FieldWithTag(dir.tdir_tag).Field_name);
                             failed = true;
                             break;
                         }
@@ -1085,7 +1085,7 @@ namespace BitMiracle.LibTiff
                         {
                             ErrorExt(this, m_clientdata, m_name,
                                 "Cannot handle different per-sample values for field \"{0}\"",
-                                FieldWithTag(dir.tdir_tag).field_name);
+                                FieldWithTag(dir.tdir_tag).Field_name);
                             failed = true;
                             break;
                         }

@@ -69,7 +69,7 @@ namespace BitMiracle.LibTiff.Internal
 
             TiffFieldInfo fip = tif.FieldWithTag(tag);
             if (fip != null)
-                tif.setFieldBit(fip.field_bit);
+                tif.setFieldBit(fip.Field_bit);
             else
                 return false;
 

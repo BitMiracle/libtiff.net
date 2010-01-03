@@ -29,7 +29,7 @@ namespace BitMiracle.LibTiff
     {
         protected Tiff m_tif;
         protected internal Compression m_scheme;
-        internal string m_name;
+        protected internal string m_name;
 
         public TiffCodec(Tiff tif, Compression scheme, string name)
         {
