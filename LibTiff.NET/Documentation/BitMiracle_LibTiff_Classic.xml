@@ -2,6 +2,449 @@
 <xml>
   <file>
     <title>BitMiracle.LibTiff.Classic namespace</title>
-    <descriptionarticle only="true" />
+    <descriptionarticle only="true">
+      <p>
+        <text>The .NET port of original libtiff.</text> </p>
+      <p>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <text> </text> </td>
+              <td>
+                <p align="center">
+                  <b>
+                    <text>Type</text> </b>
+                </p>
+              </td>
+              <td>
+                <p align="center">
+                  <b>
+                    <text>Description</text> </b>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\6.png" />
+              </td>
+              <td>
+                <link file="Tiff.xml">
+                  <text>Tiff</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\6.png" />
+              </td>
+              <td>
+                <link file="TiffCodec.xml">
+                  <text>TiffCodec</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\6.png" />
+              </td>
+              <td>
+                <link file="TiffErrorHandler.xml">
+                  <text>TiffErrorHandler</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\6.png" />
+              </td>
+              <td>
+                <link file="TiffFieldInfo.xml">
+                  <text>TiffFieldInfo</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\6.png" />
+              </td>
+              <td>
+                <link file="TiffStream.xml">
+                  <text>TiffStream</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\6.png" />
+              </td>
+              <td>
+                <link file="TiffTagMethods.xml">
+                  <text>TiffTagMethods</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\18.png" />
+              </td>
+              <td>
+                <link file="FieldValue.xml">
+                  <text>FieldValue</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img alt="" src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="CleanFaxData.xml">
+                  <text>CleanFaxData</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="ColorResponseUnit.xml">
+                  <text>ColorResponseUnit</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="Compression.xml">
+                  <text>Compression</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="DCSImagerFilter.xml">
+                  <text>DCSImagerFilter</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="DCSImagerModel.xml">
+                  <text>DCSImagerModel</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="DCSInterpMode.xml">
+                  <text>DCSInterpMode</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="ExtraSample.xml">
+                  <text>ExtraSample</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="FaxMode.xml">
+                  <text>FaxMode</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="FileType.xml">
+                  <text>FileType</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="FillOrder.xml">
+                  <text>FillOrder</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="GrayResponseUnit.xml">
+                  <text>GrayResponseUnit</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="Group3Opt.xml">
+                  <text>Group3Opt</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="InkSet.xml">
+                  <text>InkSet</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="JpegColorMode.xml">
+                  <text>JpegColorMode</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="JpegProc.xml">
+                  <text>JpegProc</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="JpegTablesMode.xml">
+                  <text>JpegTablesMode</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="OFileType.xml">
+                  <text>OFileType</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="Orientation.xml">
+                  <text>Orientation</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="Photometric.xml">
+                  <text>Photometric</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="PixarLogDataFmt.xml">
+                  <text>PixarLogDataFmt</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="PlanarConfig.xml">
+                  <text>PlanarConfig</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="Predictor.xml">
+                  <text>Predictor</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="ResUnit.xml">
+                  <text>ResUnit</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="SampleFormat.xml">
+                  <text>SampleFormat</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="SGILogDataFmt.xml">
+                  <text>SGILogDataFmt</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="SGILogEncode.xml">
+                  <text>SGILogEncode</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="Threshold.xml">
+                  <text>Threshold</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="TiffPrintFlags.xml">
+                  <text>TiffPrintFlags</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="TiffTag.xml">
+                  <text>TiffTag</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="TiffType.xml">
+                  <text>TiffType</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+            <tr>
+              <td>
+                <img src="_TemplateMSDN_files\icons\10.png" />
+              </td>
+              <td>
+                <link file="YCbCrPosition.xml">
+                  <text>YCbCrPosition</text> </link>
+              </td>
+              <td>
+                <text> </text> </td>
+            </tr>
+          </tbody>
+        </table>
+      </p>
+    </descriptionarticle>
   </file>
 </xml>

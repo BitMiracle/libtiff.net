@@ -54,6 +54,7 @@
       <ref>Tiff.WarningExt.xml</ref>
       <ref>Tiff.Warning.xml</ref>
       <ref>Tiff.SwabArrayOfShort.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
       <node title="TiffExtendProc" file="Tiff.TiffExtendProc.xml" iconindex="23">
         <ref>Tiff.xml</ref>
         <ref>Renamings_of_functions.xml</ref>
@@ -590,6 +591,7 @@
       <ref>TiffCodec.Cleanup.xml</ref>
       <ref>TiffCodec.Close.xml</ref>
       <ref>TiffCodec.Seek.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
       <node title="TiffCodec constructor" file="TiffCodec.ctor.xml" iconindex="23">
         <ref>TiffCodec.xml</ref>
       </node>
@@ -671,6 +673,7 @@
       <ref>TiffErrorHandler.ctor.xml</ref>
       <ref>General_notes.xml</ref>
       <ref>Renamings_of_functions.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
       <node title="TiffErrorHandler constructor" file="TiffErrorHandler.ctor.xml" iconindex="23">
         <ref>TiffErrorHandler.xml</ref>
       </node>
@@ -689,6 +692,7 @@
     </node>
     <node title="TiffFieldInfo" file="TiffFieldInfo.xml" iconindex="6">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
       <node title="TiffFieldInfo constructor" file="TiffFieldInfo.ctor.xml" iconindex="23">
         <ref>TiffFieldInfo.xml</ref>
       </node>
@@ -723,6 +727,7 @@
     <node title="TiffStream" file="TiffStream.xml" iconindex="6">
       <ref>Tiff.ClientOpen.xml</ref>
       <ref>General_notes.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
       <node title="TiffStream constructor" file="TiffStream.ctor.xml" iconindex="23">
         <ref>TiffStream.xml</ref>
       </node>
@@ -747,6 +752,7 @@
       <ref>TiffTagMethods.PrintDir.xml</ref>
       <ref>TiffTagMethods.GetField.xml</ref>
       <ref>TiffTagMethods.SetField.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
       <node title="TiffTagMethods constructor" file="TiffTagMethods.ctor.xml" iconindex="23">
         <ref>TiffTagMethods.xml</ref>
       </node>
@@ -764,6 +770,7 @@
       </node>
     </node>
     <node title="FieldValue" file="FieldValue.xml" iconindex="18">
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
       <node title="Value" file="FieldValue.Value.xml" iconindex="27">
         <ref>FieldValue.xml</ref>
       </node>
@@ -818,100 +825,131 @@
     </node>
     <node title="CleanFaxData" file="CleanFaxData.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="ColorResponseUnit" file="ColorResponseUnit.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="Compression" file="Compression.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="DCSImagerFilter" file="DCSImagerFilter.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="DCSImagerModel" file="DCSImagerModel.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="DCSInterpMode" file="DCSInterpMode.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="ExtraSample" file="ExtraSample.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="FaxMode" file="FaxMode.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="FileType" file="FileType.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="FillOrder" file="FillOrder.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="GrayResponseUnit" file="GrayResponseUnit.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="Group3Opt" file="Group3Opt.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="InkSet" file="InkSet.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="JpegColorMode" file="JpegColorMode.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="JpegProc" file="JpegProc.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="JpegTablesMode" file="JpegTablesMode.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="OFileType" file="OFileType.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="Orientation" file="Orientation.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="Photometric" file="Photometric.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="PixarLogDataFmt" file="PixarLogDataFmt.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="PlanarConfig" file="PlanarConfig.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="Predictor" file="Predictor.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="ResUnit" file="ResUnit.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="SampleFormat" file="SampleFormat.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="SGILogDataFmt" file="SGILogDataFmt.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="SGILogEncode" file="SGILogEncode.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="Threshold" file="Threshold.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="TiffPrintFlags" file="TiffPrintFlags.xml" iconindex="10">
       <ref>TiffTagMethods.PrintDir.xml</ref>
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="TiffTag" file="TiffTag.xml" iconindex="10">
       <ref>Tiff.SetField.xml</ref>
       <ref>TiffTagMethods.GetField.xml</ref>
       <ref>TiffTagMethods.SetField.xml</ref>
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="TiffType" file="TiffType.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
     <node title="YCbCrPosition" file="YCbCrPosition.xml" iconindex="10">
       <ref>Renamings_of_constants_and_types.xml</ref>
+      <ref>BitMiracle_LibTiff_Classic.xml</ref>
     </node>
   </node>
   <node title="Differences between LibTiff-3.9.2 and LibTiff.Net" file="Differences.xml" iconindex="0">
