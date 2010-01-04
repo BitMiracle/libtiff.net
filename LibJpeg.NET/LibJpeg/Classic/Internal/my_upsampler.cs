@@ -89,13 +89,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             */
             for (int ci = 0; ci < cinfo.m_num_components; ci++)
             {
-                jpeg_component_info componentInfo = cinfo.m_comp_info[ci];
+                jpeg_component_info componentInfo = cinfo.Comp_info[ci];
 
                 /* Compute size of an "input group" after IDCT scaling.  This many samples
                 * are to be converted to max_h_samp_factor * max_v_samp_factor pixels.
                 */
-                int h_in_group = (componentInfo.h_samp_factor * componentInfo.DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
-                int v_in_group = (componentInfo.v_samp_factor * componentInfo.DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
+                int h_in_group = (componentInfo.H_samp_factor * componentInfo.DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
+                int v_in_group = (componentInfo.V_samp_factor * componentInfo.DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
                 int h_out_group = cinfo.m_max_h_samp_factor;
                 int v_out_group = cinfo.m_max_v_samp_factor;
 
@@ -232,13 +232,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     fullsize_upsample(ref input_data);
                     break;
                 case ComponentUpsampler.h2v1_fancy_upsampler:
-                    h2v1_fancy_upsample(m_cinfo.m_comp_info[m_currentComponent].downsampled_width, ref input_data);
+                    h2v1_fancy_upsample(m_cinfo.Comp_info[m_currentComponent].downsampled_width, ref input_data);
                     break;
                 case ComponentUpsampler.h2v1_upsampler:
                     h2v1_upsample(ref input_data);
                     break;
                 case ComponentUpsampler.h2v2_fancy_upsampler:
-                    h2v2_fancy_upsample(m_cinfo.m_comp_info[m_currentComponent].downsampled_width, ref input_data);
+                    h2v2_fancy_upsample(m_cinfo.Comp_info[m_currentComponent].downsampled_width, ref input_data);
                     break;
                 case ComponentUpsampler.h2v2_upsampler:
                     h2v2_upsample(ref input_data);

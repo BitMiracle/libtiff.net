@@ -87,9 +87,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
-                int dctbl = componentInfo.dc_tbl_no;
-                int actbl = componentInfo.ac_tbl_no;
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
+                int dctbl = componentInfo.Dc_tbl_no;
+                int actbl = componentInfo.Ac_tbl_no;
 
                 /* Compute derived values for Huffman tables */
                 /* We may do this more than once for a table, but it's not expensive */
@@ -104,11 +104,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int blkn = 0; blkn < m_cinfo.m_blocks_in_MCU; blkn++)
             {
                 int ci = m_cinfo.m_MCU_membership[blkn];
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
 
                 /* Precalculate which table to use for each block */
-                m_dc_cur_tbls[blkn] = m_dc_derived_tbls[componentInfo.dc_tbl_no];
-                m_ac_cur_tbls[blkn] = m_ac_derived_tbls[componentInfo.ac_tbl_no];
+                m_dc_cur_tbls[blkn] = m_dc_derived_tbls[componentInfo.Dc_tbl_no];
+                m_ac_cur_tbls[blkn] = m_ac_derived_tbls[componentInfo.Ac_tbl_no];
 
                 /* Decide whether we really care about the coefficient values */
                 if (componentInfo.component_needed)

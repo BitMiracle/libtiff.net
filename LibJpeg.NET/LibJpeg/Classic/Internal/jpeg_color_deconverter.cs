@@ -93,7 +93,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         m_converter = ColorConverter.grayscale_converter;
                         /* For color->grayscale conversion, only the Y (0) component is needed */
                         for (int ci = 1; ci < cinfo.m_num_components; ci++)
-                            cinfo.m_comp_info[ci].component_needed = false;
+                            cinfo.Comp_info[ci].component_needed = false;
                     }
                     else
                         cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);

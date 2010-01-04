@@ -140,7 +140,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              */
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                int cindex = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].component_index;
+                int cindex = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]].Component_index;
                 if (!is_DC_band && m_cinfo.m_coef_bits[cindex][0] < 0) /* AC without prior DC scan */
                     m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_BOGUS_PROGRESSION, cindex, 0);
 
@@ -175,7 +175,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
                 /* Make sure requested tables are present, and compute derived tables.
                  * We may build same derived table more than once, but it's not expensive.
                  */
@@ -184,15 +184,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     if (m_cinfo.m_Ah == 0)
                     {
                         /* DC refinement needs no table */
-                        jpeg_make_d_derived_tbl(true, componentInfo.dc_tbl_no, ref m_derived_tbls[componentInfo.dc_tbl_no]);
+                        jpeg_make_d_derived_tbl(true, componentInfo.Dc_tbl_no, ref m_derived_tbls[componentInfo.Dc_tbl_no]);
                     }
                 }
                 else
                 {
-                    jpeg_make_d_derived_tbl(false, componentInfo.ac_tbl_no, ref m_derived_tbls[componentInfo.ac_tbl_no]);
+                    jpeg_make_d_derived_tbl(false, componentInfo.Ac_tbl_no, ref m_derived_tbls[componentInfo.Ac_tbl_no]);
 
                     /* remember the single active table */
-                    m_ac_derived_tbl = m_derived_tbls[componentInfo.ac_tbl_no];
+                    m_ac_derived_tbl = m_derived_tbls[componentInfo.Ac_tbl_no];
                 }
 
                 /* Initialize DC predictions to 0 */
@@ -284,7 +284,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     int s;
-                    if (!HUFF_DECODE(out s, ref br_state, m_derived_tbls[m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no], ref get_buffer, ref bits_left))
+                    if (!HUFF_DECODE(out s, ref br_state, m_derived_tbls[m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]].Dc_tbl_no], ref get_buffer, ref bits_left))
                         return false;
 
                     if (s != 0)

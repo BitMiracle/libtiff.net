@@ -95,8 +95,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
                 jpeg_component_info componentInfo = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
-                buffer[ci] = m_whole_image[componentInfo.component_index].Access(
-                    m_iMCU_row_num * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
+                buffer[ci] = m_whole_image[componentInfo.Component_index].Access(
+                    m_iMCU_row_num * componentInfo.V_samp_factor, componentInfo.V_samp_factor);
             }
 
             /* Loop to process one whole iMCU row */
@@ -188,7 +188,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             else
             {
                 if (m_iMCU_row_num < (m_cinfo.m_total_iMCU_rows - 1))
-                    m_MCU_rows_per_iMCU_row = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[0]].v_samp_factor;
+                    m_MCU_rows_per_iMCU_row = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[0]].V_samp_factor;
                 else
                     m_MCU_rows_per_iMCU_row = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[0]].last_row_height;
             }

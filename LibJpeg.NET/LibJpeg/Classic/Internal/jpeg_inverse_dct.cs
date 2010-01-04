@@ -206,7 +206,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[ci];
 
                 InverseMethod im = InverseMethod.Unknown;
                 int method = 0;

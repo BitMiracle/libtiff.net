@@ -205,14 +205,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                if (m_cinfo.m_comp_info[ci].h_samp_factor <= 0 || m_cinfo.m_comp_info[ci].h_samp_factor > JpegConstants.MAX_SAMP_FACTOR ||
-                    m_cinfo.m_comp_info[ci].v_samp_factor <= 0 || m_cinfo.m_comp_info[ci].v_samp_factor > JpegConstants.MAX_SAMP_FACTOR)
+                if (m_cinfo.Comp_info[ci].H_samp_factor <= 0 || m_cinfo.Comp_info[ci].H_samp_factor > JpegConstants.MAX_SAMP_FACTOR ||
+                    m_cinfo.Comp_info[ci].V_samp_factor <= 0 || m_cinfo.Comp_info[ci].V_samp_factor > JpegConstants.MAX_SAMP_FACTOR)
                 {
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_SAMPLING);
                 }
 
-                m_cinfo.m_max_h_samp_factor = Math.Max(m_cinfo.m_max_h_samp_factor, m_cinfo.m_comp_info[ci].h_samp_factor);
-                m_cinfo.m_max_v_samp_factor = Math.Max(m_cinfo.m_max_v_samp_factor, m_cinfo.m_comp_info[ci].v_samp_factor);
+                m_cinfo.m_max_h_samp_factor = Math.Max(m_cinfo.m_max_h_samp_factor, m_cinfo.Comp_info[ci].H_samp_factor);
+                m_cinfo.m_max_v_samp_factor = Math.Max(m_cinfo.m_max_v_samp_factor, m_cinfo.Comp_info[ci].V_samp_factor);
             }
 
             /* We initialize DCT_scaled_size and min_DCT_scaled_size to DCTSIZE.
@@ -224,15 +224,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Compute dimensions of components */
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                m_cinfo.m_comp_info[ci].DCT_scaled_size = JpegConstants.DCTSIZE;
+                m_cinfo.Comp_info[ci].DCT_scaled_size = JpegConstants.DCTSIZE;
                 
                 /* Size in DCT blocks */
-                m_cinfo.m_comp_info[ci].width_in_blocks = JpegUtils.jdiv_round_up(
-                    m_cinfo.m_image_width * m_cinfo.m_comp_info[ci].h_samp_factor,
+                m_cinfo.Comp_info[ci].Width_in_blocks = JpegUtils.jdiv_round_up(
+                    m_cinfo.m_image_width * m_cinfo.Comp_info[ci].H_samp_factor,
                     m_cinfo.m_max_h_samp_factor * JpegConstants.DCTSIZE);
 
-                m_cinfo.m_comp_info[ci].height_in_blocks = JpegUtils.jdiv_round_up(
-                    m_cinfo.m_image_height * m_cinfo.m_comp_info[ci].v_samp_factor,
+                m_cinfo.Comp_info[ci].height_in_blocks = JpegUtils.jdiv_round_up(
+                    m_cinfo.m_image_height * m_cinfo.Comp_info[ci].V_samp_factor,
                     m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE);
 
                 /* downsampled_width and downsampled_height will also be overridden by
@@ -240,19 +240,19 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                  * doesn't use these values, but the calling application might.
                  */
                 /* Size in samples */
-                m_cinfo.m_comp_info[ci].downsampled_width = JpegUtils.jdiv_round_up(
-                    m_cinfo.m_image_width * m_cinfo.m_comp_info[ci].h_samp_factor,
+                m_cinfo.Comp_info[ci].downsampled_width = JpegUtils.jdiv_round_up(
+                    m_cinfo.m_image_width * m_cinfo.Comp_info[ci].H_samp_factor,
                     m_cinfo.m_max_h_samp_factor);
 
-                m_cinfo.m_comp_info[ci].downsampled_height = JpegUtils.jdiv_round_up(
-                    m_cinfo.m_image_height * m_cinfo.m_comp_info[ci].v_samp_factor,
+                m_cinfo.Comp_info[ci].downsampled_height = JpegUtils.jdiv_round_up(
+                    m_cinfo.m_image_height * m_cinfo.Comp_info[ci].V_samp_factor,
                     m_cinfo.m_max_v_samp_factor);
 
                 /* Mark component needed, until color conversion says otherwise */
-                m_cinfo.m_comp_info[ci].component_needed = true;
+                m_cinfo.Comp_info[ci].component_needed = true;
                 
                 /* Mark no quantization table yet saved for component */
-                m_cinfo.m_comp_info[ci].quant_table = null;
+                m_cinfo.Comp_info[ci].quant_table = null;
             }
 
             /* Compute number of fully interleaved MCU rows. */
@@ -290,14 +290,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
                 
                 /* No work if we already saved Q-table for this component */
                 if (componentInfo.quant_table != null)
                     continue;
                 
                 /* Make sure specified quantization table is present */
-                int qtblno = componentInfo.quant_tbl_no;
+                int qtblno = componentInfo.Quant_tbl_no;
                 if (qtblno < 0 || qtblno >= JpegConstants.NUM_QUANT_TBLS || m_cinfo.m_quant_tbl_ptrs[qtblno] == null)
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
                 
@@ -306,7 +306,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 Array.Copy(m_cinfo.m_quant_tbl_ptrs[qtblno].quantval, qtbl.quantval, qtbl.quantval.Length);
                 qtbl.Sent_table = m_cinfo.m_quant_tbl_ptrs[qtblno].Sent_table;
                 componentInfo.quant_table = qtbl;
-                m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;
+                m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;
             }
         }
 
@@ -319,10 +319,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (m_cinfo.m_comps_in_scan == 1)
             {
                 /* Noninterleaved (single-component) scan */
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[0]];
 
                 /* Overall image size in MCUs */
-                m_cinfo.m_MCUs_per_row = componentInfo.width_in_blocks;
+                m_cinfo.m_MCUs_per_row = componentInfo.Width_in_blocks;
                 m_cinfo.m_MCU_rows_in_scan = componentInfo.height_in_blocks;
 
                 /* For noninterleaved scan, always one block per MCU */
@@ -335,11 +335,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* For noninterleaved scans, it is convenient to define last_row_height
                  * as the number of block rows present in the last iMCU row.
                  */
-                int tmp = componentInfo.height_in_blocks % componentInfo.v_samp_factor;
+                int tmp = componentInfo.height_in_blocks % componentInfo.V_samp_factor;
                 if (tmp == 0)
-                    tmp = componentInfo.v_samp_factor;
+                    tmp = componentInfo.V_samp_factor;
                 componentInfo.last_row_height = tmp;
-                m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]] = componentInfo;
+                m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[0]] = componentInfo;
 
                 /* Prepare array describing MCU composition */
                 m_cinfo.m_blocks_in_MCU = 1;
@@ -362,16 +362,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                 {
-                    jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                    jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
 
                     /* Sampling factors give # of blocks of component in each MCU */
-                    componentInfo.MCU_width = componentInfo.h_samp_factor;
-                    componentInfo.MCU_height = componentInfo.v_samp_factor;
+                    componentInfo.MCU_width = componentInfo.H_samp_factor;
+                    componentInfo.MCU_height = componentInfo.V_samp_factor;
                     componentInfo.MCU_blocks = componentInfo.MCU_width * componentInfo.MCU_height;
                     componentInfo.MCU_sample_width = componentInfo.MCU_width * componentInfo.DCT_scaled_size;
                     
                     /* Figure number of non-dummy blocks in last MCU column & row */
-                    int tmp = componentInfo.width_in_blocks % componentInfo.MCU_width;
+                    int tmp = componentInfo.Width_in_blocks % componentInfo.MCU_width;
                     if (tmp == 0)
                         tmp = componentInfo.MCU_width;
                     componentInfo.last_col_width = tmp;
@@ -386,7 +386,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     if (m_cinfo.m_blocks_in_MCU + mcublks > JpegConstants.D_MAX_BLOCKS_IN_MCU)
                         m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_MCU_SIZE);
 
-                    m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;
+                    m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;
 
                     while (mcublks-- > 0)
                         m_cinfo.m_MCU_membership[m_cinfo.m_blocks_in_MCU++] = ci;

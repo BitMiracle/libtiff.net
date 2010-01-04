@@ -94,9 +94,9 @@ namespace BitMiracle.LibJpeg.Classic
          */
 
         internal int m_data_precision;     /* bits of precision in image data */
-	
-        public jpeg_component_info[] m_comp_info;
-        /* comp_info[i] describes component that appears i'th in SOF */
+
+        /* m_comp_info[i] describes component that appears i'th in SOF */
+        private jpeg_component_info[] m_comp_info;
 
         internal bool m_progressive_mode;  /* true if SOFn specifies progressive mode */
 
@@ -188,6 +188,17 @@ namespace BitMiracle.LibJpeg.Classic
         internal jpeg_upsampler m_upsample;
         internal jpeg_color_deconverter m_cconvert;
         internal jpeg_color_quantizer m_cquantize;
+
+        public jpeg_decompress_struct()
+        {
+            initialize();
+        }
+
+        public jpeg_decompress_struct(jpeg_error_mgr errorManager)
+            : base(errorManager)
+        {
+            initialize();
+        }
 
         public LibJpeg.Classic.jpeg_source_mgr Src
         {
@@ -511,14 +522,13 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_unread_marker; }
         }
 
-        public jpeg_decompress_struct()
+        /// <summary>
+        /// Comp_info[i] describes component that appears i'th in SOF
+        /// </summary>
+        public jpeg_component_info[] Comp_info
         {
-            initialize();
-        }
-
-        public jpeg_decompress_struct(jpeg_error_mgr errorManager) : base(errorManager)
-        {
-            initialize();
+            get { return m_comp_info; }
+            internal set { m_comp_info = value; }
         }
 
         /// <summary>
@@ -991,8 +1001,8 @@ namespace BitMiracle.LibJpeg.Classic
             {
                 int ssize = m_min_DCT_scaled_size;
                 while (ssize < JpegConstants.DCTSIZE && 
-                    (m_comp_info[ci].h_samp_factor * ssize * 2 <= m_max_h_samp_factor * m_min_DCT_scaled_size) &&
-                    (m_comp_info[ci].v_samp_factor * ssize * 2 <= m_max_v_samp_factor * m_min_DCT_scaled_size))
+                    (m_comp_info[ci].H_samp_factor * ssize * 2 <= m_max_h_samp_factor * m_min_DCT_scaled_size) &&
+                    (m_comp_info[ci].V_samp_factor * ssize * 2 <= m_max_v_samp_factor * m_min_DCT_scaled_size))
                 {
                     ssize = ssize * 2;
                 }
@@ -1007,11 +1017,11 @@ namespace BitMiracle.LibJpeg.Classic
             {
                 /* Size in samples, after IDCT scaling */
                 m_comp_info[ci].downsampled_width = JpegUtils.jdiv_round_up(
-                    m_image_width * m_comp_info[ci].h_samp_factor * m_comp_info[ci].DCT_scaled_size,
+                    m_image_width * m_comp_info[ci].H_samp_factor * m_comp_info[ci].DCT_scaled_size,
                     m_max_h_samp_factor * JpegConstants.DCTSIZE);
 
                 m_comp_info[ci].downsampled_height = JpegUtils.jdiv_round_up(
-                    m_image_height * m_comp_info[ci].v_samp_factor * m_comp_info[ci].DCT_scaled_size,
+                    m_image_height * m_comp_info[ci].V_samp_factor * m_comp_info[ci].DCT_scaled_size,
                     m_max_v_samp_factor * JpegConstants.DCTSIZE);
             }
 
@@ -1174,16 +1184,16 @@ namespace BitMiracle.LibJpeg.Classic
 
             for (int ci = 0; ci < dstinfo.m_num_components; ci++)
             {
-                dstinfo.Component_info[ci].component_id = m_comp_info[ci].component_id;
-                dstinfo.Component_info[ci].h_samp_factor = m_comp_info[ci].h_samp_factor;
-                dstinfo.Component_info[ci].v_samp_factor = m_comp_info[ci].v_samp_factor;
-                dstinfo.Component_info[ci].quant_tbl_no = m_comp_info[ci].quant_tbl_no;
+                dstinfo.Component_info[ci].Component_id = m_comp_info[ci].Component_id;
+                dstinfo.Component_info[ci].H_samp_factor = m_comp_info[ci].H_samp_factor;
+                dstinfo.Component_info[ci].V_samp_factor = m_comp_info[ci].V_samp_factor;
+                dstinfo.Component_info[ci].Quant_tbl_no = m_comp_info[ci].Quant_tbl_no;
 
                 /* Make sure saved quantization table for component matches the qtable
                 * slot.  If not, the input file re-used this qtable slot.
                 * IJG encoder currently cannot duplicate this.
                 */
-                int tblno = dstinfo.Component_info[ci].quant_tbl_no;
+                int tblno = dstinfo.Component_info[ci].Quant_tbl_no;
                 if (tblno < 0 || tblno >= JpegConstants.NUM_QUANT_TBLS || m_quant_tbl_ptrs[tblno] == null)
                     ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, tblno);
 
@@ -1275,9 +1285,9 @@ namespace BitMiracle.LibJpeg.Classic
             }
 
             /* and it only handles 2h1v or 2h2v sampling ratios */
-            if (m_comp_info[0].h_samp_factor != 2 || m_comp_info[1].h_samp_factor != 1 ||
-                m_comp_info[2].h_samp_factor != 1 || m_comp_info[0].v_samp_factor > 2 ||
-                m_comp_info[1].v_samp_factor != 1 || m_comp_info[2].v_samp_factor != 1)
+            if (m_comp_info[0].H_samp_factor != 2 || m_comp_info[1].H_samp_factor != 1 ||
+                m_comp_info[2].H_samp_factor != 1 || m_comp_info[0].V_samp_factor > 2 ||
+                m_comp_info[1].V_samp_factor != 1 || m_comp_info[2].V_samp_factor != 1)
             {
                 return false;
             }
@@ -1468,9 +1478,9 @@ namespace BitMiracle.LibJpeg.Classic
                     else
                     {
                         /* Saw no special markers, try to guess from the component IDs */
-                        int cid0 = m_comp_info[0].component_id;
-                        int cid1 = m_comp_info[1].component_id;
-                        int cid2 = m_comp_info[2].component_id;
+                        int cid0 = m_comp_info[0].Component_id;
+                        int cid1 = m_comp_info[1].Component_id;
+                        int cid2 = m_comp_info[2].Component_id;
 
                         if (cid0 == 1 && cid1 == 2 && cid2 == 3)
                         {

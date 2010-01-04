@@ -23,17 +23,19 @@ namespace BitMiracle.LibJpeg.Classic
         /* These values are fixed over the whole image. */
         /* For compression, they must be supplied by parameter setup; */
         /* for decompression, they are read from the SOF marker. */
-        public int component_id = 0;       /* identifier for this component (0..255) */
-        public int component_index = 0;        /* its index in SOF or cinfo.comp_info[] */
-        public int h_samp_factor = 0;      /* horizontal sampling factor (1..4) */
-        public int v_samp_factor = 0;      /* vertical sampling factor (1..4) */
-        public int quant_tbl_no = 0;       /* quantization table selector (0..3) */
+
+        private int component_id = 0;
+        private int component_index = 0;
+        private int h_samp_factor = 0;
+        private int v_samp_factor = 0;
+        private int quant_tbl_no = 0;
+
         /* These values may vary between scans. */
         /* For compression, they must be supplied by parameter setup; */
         /* for decompression, they are read from the SOS marker. */
         /* The decompressor output side may not use these variables. */
-        public int dc_tbl_no = 0;      /* DC entropy table selector (0..3) */
-        public int ac_tbl_no = 0;      /* AC entropy table selector (0..3) */
+        private int dc_tbl_no = 0;
+        private int ac_tbl_no = 0;
 
         /* Remaining fields should be treated as private by applications. */
 
@@ -42,7 +44,7 @@ namespace BitMiracle.LibJpeg.Classic
          * Any dummy blocks added to complete an MCU are not counted; therefore
          * these values do not depend on whether a scan is interleaved or not.
          */
-        public int width_in_blocks = 0;
+        private int width_in_blocks = 0;
         internal int height_in_blocks = 0;
         /* Size of a DCT block in samples.  Always DCTSIZE for compression.
          * For decompression this is the size of the output from one DCT block,
@@ -107,6 +109,75 @@ namespace BitMiracle.LibJpeg.Classic
             last_col_width = ci.last_col_width;
             last_row_height = ci.last_row_height;
             quant_table = ci.quant_table;
+        }
+
+        /// <summary>
+        /// Identifier for this component (0..255)
+        /// </summary>
+        public int Component_id
+        {
+            get { return component_id; }
+            set { component_id = value; }
+        }
+
+        /// <summary>
+        /// Its index in SOF or cinfo.comp_info[]
+        /// </summary>
+        public int Component_index
+        {
+            get { return component_index; }
+            set { component_index = value; }
+        }
+
+        /// <summary>
+        /// Horizontal sampling factor (1..4)
+        /// </summary>
+        public int H_samp_factor
+        {
+            get { return h_samp_factor; }
+            set { h_samp_factor = value; }
+        }
+
+        /// <summary>
+        /// Vertical sampling factor (1..4)
+        /// </summary>
+        public int V_samp_factor
+        {
+            get { return v_samp_factor; }
+            set { v_samp_factor = value; }
+        }
+
+        /// <summary>
+        /// Quantization table selector (0..3)
+        /// </summary>
+        public int Quant_tbl_no
+        {
+            get { return quant_tbl_no; }
+            set { quant_tbl_no = value; }
+        }
+
+        /// <summary>
+        /// DC entropy table selector (0..3)
+        /// </summary>
+        public int Dc_tbl_no
+        {
+            get { return dc_tbl_no; }
+            set { dc_tbl_no = value; }
+        }
+
+        /// <summary>
+        /// AC entropy table selector (0..3)
+        /// </summary>
+        public int Ac_tbl_no
+        {
+            get { return ac_tbl_no; }
+            set { ac_tbl_no = value; }
+        }
+
+        public int Width_in_blocks
+        {
+            get { return width_in_blocks; }
+            set { width_in_blocks = value; }
         }
 
         public int Downsampled_width

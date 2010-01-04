@@ -166,10 +166,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (cinfo.m_comp_info[ci].v_samp_factor * cinfo.m_comp_info[ci].DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
+                int rgroup = (cinfo.Comp_info[ci].V_samp_factor * cinfo.Comp_info[ci].DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
 
                 m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(
-                    cinfo.m_comp_info[ci].width_in_blocks * cinfo.m_comp_info[ci].DCT_scaled_size, 
+                    cinfo.Comp_info[ci].Width_in_blocks * cinfo.Comp_info[ci].DCT_scaled_size, 
                     rgroup * ngroups);
             }
         }
@@ -397,7 +397,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
 
                 /* Get space for pointer lists --- M+4 row groups in each list.
                  */
@@ -420,7 +420,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
 
                 int[] ind0 = m_funnyIndices[0][ci];
                 int[] ind1 = m_funnyIndices[1][ci];
@@ -459,7 +459,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
 
                 int[] ind0 = m_funnyIndices[0][ci];
                 int[] ind1 = m_funnyIndices[1][ci];
@@ -485,11 +485,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* Count sample rows in one iMCU row and in one row group */
-                int iMCUheight = m_cinfo.m_comp_info[ci].v_samp_factor * m_cinfo.m_comp_info[ci].DCT_scaled_size;
+                int iMCUheight = m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size;
                 int rgroup = iMCUheight / m_cinfo.m_min_DCT_scaled_size;
 
                 /* Count nondummy sample rows remaining for this component */
-                int rows_left = m_cinfo.m_comp_info[ci].downsampled_height % iMCUheight;
+                int rows_left = m_cinfo.Comp_info[ci].downsampled_height % iMCUheight;
                 if (rows_left == 0)
                     rows_left = iMCUheight;
 

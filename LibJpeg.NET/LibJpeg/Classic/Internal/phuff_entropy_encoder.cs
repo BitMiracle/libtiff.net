@@ -135,12 +135,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     if (m_cinfo.m_Ah != 0) /* DC refinement needs no table */
                         continue;
 
-                    tbl = componentInfo.dc_tbl_no;
+                    tbl = componentInfo.Dc_tbl_no;
                 }
                 else
                 {
-                    m_ac_tbl_no = componentInfo.ac_tbl_no;
-                    tbl = componentInfo.ac_tbl_no;
+                    m_ac_tbl_no = componentInfo.Ac_tbl_no;
+                    tbl = componentInfo.Ac_tbl_no;
                 }
 
                 if (m_gather_statistics)
@@ -257,7 +257,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCT_COEF);
 
                 /* Count/emit the Huffman-coded symbol for the number of bits */
-                emit_symbol(m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].dc_tbl_no, nbits);
+                emit_symbol(m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]].Dc_tbl_no, nbits);
 
                 /* Emit that number of bits of the value, if positive, */
                 /* or the complement of its magnitude, if negative. */
@@ -582,14 +582,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
                 jpeg_component_info componentInfo = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
-                int tbl = componentInfo.ac_tbl_no;
+                int tbl = componentInfo.Ac_tbl_no;
 
                 if (is_DC_band)
                 {
                     if (m_cinfo.m_Ah != 0) /* DC refinement needs no table */
                         continue;
 
-                    tbl = componentInfo.dc_tbl_no;
+                    tbl = componentInfo.Dc_tbl_no;
                 }
                 
                 if (!did[tbl])

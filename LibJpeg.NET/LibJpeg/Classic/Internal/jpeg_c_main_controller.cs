@@ -45,8 +45,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < cinfo.m_num_components; ci++)
             {
                 m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(
-                    cinfo.Component_info[ci].width_in_blocks * JpegConstants.DCTSIZE,
-                    cinfo.Component_info[ci].v_samp_factor * JpegConstants.DCTSIZE);
+                    cinfo.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE,
+                    cinfo.Component_info[ci].V_samp_factor * JpegConstants.DCTSIZE);
             }
         }
 

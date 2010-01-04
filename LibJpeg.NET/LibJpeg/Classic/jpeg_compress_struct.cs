@@ -1337,36 +1337,36 @@ namespace BitMiracle.LibJpeg.Classic
             m_max_v_samp_factor = 1;
             for (int ci = 0; ci < m_num_components; ci++)
             {
-                if (m_comp_info[ci].h_samp_factor <= 0 || m_comp_info[ci].h_samp_factor > JpegConstants.MAX_SAMP_FACTOR ||
-                    m_comp_info[ci].v_samp_factor <= 0 || m_comp_info[ci].v_samp_factor > JpegConstants.MAX_SAMP_FACTOR)
+                if (m_comp_info[ci].H_samp_factor <= 0 || m_comp_info[ci].H_samp_factor > JpegConstants.MAX_SAMP_FACTOR ||
+                    m_comp_info[ci].V_samp_factor <= 0 || m_comp_info[ci].V_samp_factor > JpegConstants.MAX_SAMP_FACTOR)
                 {
                     ERREXIT(J_MESSAGE_CODE.JERR_BAD_SAMPLING);
                 }
 
-                m_max_h_samp_factor = Math.Max(m_max_h_samp_factor, m_comp_info[ci].h_samp_factor);
-                m_max_v_samp_factor = Math.Max(m_max_v_samp_factor, m_comp_info[ci].v_samp_factor);
+                m_max_h_samp_factor = Math.Max(m_max_h_samp_factor, m_comp_info[ci].H_samp_factor);
+                m_max_v_samp_factor = Math.Max(m_max_v_samp_factor, m_comp_info[ci].V_samp_factor);
             }
 
             /* Compute dimensions of components */
             for (int ci = 0; ci < m_num_components; ci++)
             {
                 /* Fill in the correct component_index value; don't rely on application */
-                m_comp_info[ci].component_index = ci;
+                m_comp_info[ci].Component_index = ci;
 
                 /* For compression, we never do DCT scaling. */
                 m_comp_info[ci].DCT_scaled_size = JpegConstants.DCTSIZE;
 
                 /* Size in DCT blocks */
-                m_comp_info[ci].width_in_blocks = JpegUtils.jdiv_round_up(
-                    m_image_width * m_comp_info[ci].h_samp_factor, m_max_h_samp_factor * JpegConstants.DCTSIZE);
+                m_comp_info[ci].Width_in_blocks = JpegUtils.jdiv_round_up(
+                    m_image_width * m_comp_info[ci].H_samp_factor, m_max_h_samp_factor * JpegConstants.DCTSIZE);
                 m_comp_info[ci].height_in_blocks = JpegUtils.jdiv_round_up(
-                    m_image_height * m_comp_info[ci].v_samp_factor, m_max_v_samp_factor * JpegConstants.DCTSIZE);
+                    m_image_height * m_comp_info[ci].V_samp_factor, m_max_v_samp_factor * JpegConstants.DCTSIZE);
 
                 /* Size in samples */
                 m_comp_info[ci].downsampled_width = JpegUtils.jdiv_round_up(
-                    m_image_width * m_comp_info[ci].h_samp_factor, m_max_h_samp_factor);
+                    m_image_width * m_comp_info[ci].H_samp_factor, m_max_h_samp_factor);
                 m_comp_info[ci].downsampled_height = JpegUtils.jdiv_round_up(
-                    m_image_height * m_comp_info[ci].v_samp_factor, m_max_v_samp_factor);
+                    m_image_height * m_comp_info[ci].V_samp_factor, m_max_v_samp_factor);
 
                 /* Mark component needed (this flag isn't actually used for compression) */
                 m_comp_info[ci].component_needed = true;
@@ -1633,12 +1633,12 @@ namespace BitMiracle.LibJpeg.Classic
 
         private void jpeg_set_colorspace_SET_COMP(int index, int id, int hsamp, int vsamp, int quant, int dctbl, int actbl)
         {
-            m_comp_info[index].component_id = id;
-            m_comp_info[index].h_samp_factor = hsamp;
-            m_comp_info[index].v_samp_factor = vsamp;
-            m_comp_info[index].quant_tbl_no = quant;
-            m_comp_info[index].dc_tbl_no = dctbl;
-            m_comp_info[index].ac_tbl_no = actbl;
+            m_comp_info[index].Component_id = id;
+            m_comp_info[index].H_samp_factor = hsamp;
+            m_comp_info[index].V_samp_factor = vsamp;
+            m_comp_info[index].Quant_tbl_no = quant;
+            m_comp_info[index].Dc_tbl_no = dctbl;
+            m_comp_info[index].Ac_tbl_no = actbl;
         }
     }
 }

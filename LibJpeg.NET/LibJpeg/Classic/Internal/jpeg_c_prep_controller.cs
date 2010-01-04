@@ -76,7 +76,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_color_buf[ci] = jpeg_compress_struct.AllocJpegSamples(
-                        (cinfo.Component_info[ci].width_in_blocks * JpegConstants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.Component_info[ci].h_samp_factor,
+                        (cinfo.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.Component_info[ci].H_samp_factor,
                         cinfo.m_max_v_samp_factor);
                 }
             }
@@ -121,7 +121,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int rgroup_height = m_cinfo.m_max_v_samp_factor;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                int samplesPerRow = (m_cinfo.Component_info[ci].width_in_blocks * JpegConstants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.Component_info[ci].h_samp_factor;
+                int samplesPerRow = (m_cinfo.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.Component_info[ci].H_samp_factor;
 
                 byte[][] fake_buffer = new byte[5 * rgroup_height][];
                 for (int i = 0; i < 5 * rgroup_height; i++)
@@ -194,9 +194,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.Component_info[ci];
-                        expand_bottom_edge(output_buf[ci], componentInfo.width_in_blocks * JpegConstants.DCTSIZE,
-                            out_row_group_ctr * componentInfo.v_samp_factor,
-                            out_row_groups_avail * componentInfo.v_samp_factor);
+                        expand_bottom_edge(output_buf[ci], componentInfo.Width_in_blocks * JpegConstants.DCTSIZE,
+                            out_row_group_ctr * componentInfo.V_samp_factor,
+                            out_row_groups_avail * componentInfo.V_samp_factor);
                     }
 
                     out_row_group_ctr = out_row_groups_avail;

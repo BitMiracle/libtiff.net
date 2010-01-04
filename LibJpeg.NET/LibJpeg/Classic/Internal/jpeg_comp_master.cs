@@ -288,7 +288,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int compIndex = m_cinfo.m_cur_comp_info[0];
 
                 /* Overall image size in MCUs */
-                m_cinfo.m_MCUs_per_row = m_cinfo.Component_info[compIndex].width_in_blocks;
+                m_cinfo.m_MCUs_per_row = m_cinfo.Component_info[compIndex].Width_in_blocks;
                 m_cinfo.m_MCU_rows_in_scan = m_cinfo.Component_info[compIndex].height_in_blocks;
 
                 /* For noninterleaved scan, always one block per MCU */
@@ -301,9 +301,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* For noninterleaved scans, it is convenient to define last_row_height
                 * as the number of block rows present in the last iMCU row.
                 */
-                int tmp = m_cinfo.Component_info[compIndex].height_in_blocks % m_cinfo.Component_info[compIndex].v_samp_factor;
+                int tmp = m_cinfo.Component_info[compIndex].height_in_blocks % m_cinfo.Component_info[compIndex].V_samp_factor;
                 if (tmp == 0)
-                    tmp = m_cinfo.Component_info[compIndex].v_samp_factor;
+                    tmp = m_cinfo.Component_info[compIndex].V_samp_factor;
                 m_cinfo.Component_info[compIndex].last_row_height = tmp;
 
                 /* Prepare array describing MCU composition */
@@ -330,13 +330,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int compIndex = m_cinfo.m_cur_comp_info[ci];
 
                     /* Sampling factors give # of blocks of component in each MCU */
-                    m_cinfo.Component_info[compIndex].MCU_width = m_cinfo.Component_info[compIndex].h_samp_factor;
-                    m_cinfo.Component_info[compIndex].MCU_height = m_cinfo.Component_info[compIndex].v_samp_factor;
+                    m_cinfo.Component_info[compIndex].MCU_width = m_cinfo.Component_info[compIndex].H_samp_factor;
+                    m_cinfo.Component_info[compIndex].MCU_height = m_cinfo.Component_info[compIndex].V_samp_factor;
                     m_cinfo.Component_info[compIndex].MCU_blocks = m_cinfo.Component_info[compIndex].MCU_width * m_cinfo.Component_info[compIndex].MCU_height;
                     m_cinfo.Component_info[compIndex].MCU_sample_width = m_cinfo.Component_info[compIndex].MCU_width * JpegConstants.DCTSIZE;
                     
                     /* Figure number of non-dummy blocks in last MCU column & row */
-                    int tmp = m_cinfo.Component_info[compIndex].width_in_blocks % m_cinfo.Component_info[compIndex].MCU_width;
+                    int tmp = m_cinfo.Component_info[compIndex].Width_in_blocks % m_cinfo.Component_info[compIndex].MCU_width;
                     if (tmp == 0)
                         tmp = m_cinfo.Component_info[compIndex].MCU_width;
                     m_cinfo.Component_info[compIndex].last_col_width = tmp;

@@ -83,7 +83,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public void reset_marker_reader()
         {
-            m_cinfo.m_comp_info = null;        /* until allocated by get_sof */
+            m_cinfo.Comp_info = null;        /* until allocated by get_sof */
             m_cinfo.m_input_scan_number = 0;       /* no SOS seen yet */
             m_cinfo.m_unread_marker = 0;       /* no pending marker */
             m_saw_SOI = false;        /* set internal state too */
@@ -854,30 +854,38 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (length != (m_cinfo.m_num_components * 3))
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
 
-            if (m_cinfo.m_comp_info == null)
+            if (m_cinfo.Comp_info == null)
             {
                 /* do only once, even if suspend */
-                m_cinfo.m_comp_info = jpeg_component_info.createArrayOfComponents(m_cinfo.m_num_components);
+                m_cinfo.Comp_info = jpeg_component_info.createArrayOfComponents(m_cinfo.m_num_components);
             }
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                m_cinfo.m_comp_info[ci].component_index = ci;
-                if (!m_cinfo.m_src.GetByte(out m_cinfo.m_comp_info[ci].component_id))
+                m_cinfo.Comp_info[ci].Component_index = ci;
+
+                int component_id;
+                if (!m_cinfo.m_src.GetByte(out component_id))
                     return false;
+
+                m_cinfo.Comp_info[ci].Component_id = component_id;
 
                 int c;
                 if (!m_cinfo.m_src.GetByte(out c))
                     return false;
 
-                m_cinfo.m_comp_info[ci].h_samp_factor = (c >> 4) & 15;
-                m_cinfo.m_comp_info[ci].v_samp_factor = (c) & 15;
-                if (!m_cinfo.m_src.GetByte(out m_cinfo.m_comp_info[ci].quant_tbl_no))
+                m_cinfo.Comp_info[ci].H_samp_factor = (c >> 4) & 15;
+                m_cinfo.Comp_info[ci].V_samp_factor = (c) & 15;
+
+                int quant_tbl_no;
+                if (!m_cinfo.m_src.GetByte(out quant_tbl_no))
                     return false;
 
-                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF_COMPONENT, m_cinfo.m_comp_info[ci].component_id,
-                    m_cinfo.m_comp_info[ci].h_samp_factor, m_cinfo.m_comp_info[ci].v_samp_factor,
-                    m_cinfo.m_comp_info[ci].quant_tbl_no);
+                m_cinfo.Comp_info[ci].Quant_tbl_no = quant_tbl_no;
+
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF_COMPONENT, m_cinfo.Comp_info[ci].Component_id,
+                    m_cinfo.Comp_info[ci].H_samp_factor, m_cinfo.Comp_info[ci].V_samp_factor,
+                    m_cinfo.Comp_info[ci].Quant_tbl_no);
             }
 
             m_cinfo.m_marker.m_saw_SOF = true;
@@ -924,7 +932,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int foundIndex = -1;
                 for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                 {
-                    if (cc == m_cinfo.m_comp_info[ci].component_id)
+                    if (cc == m_cinfo.Comp_info[ci].Component_id)
                     {
                         foundIndex = ci;
                         idFound = true;
@@ -936,11 +944,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, cc);
 
                 m_cinfo.m_cur_comp_info[i] = foundIndex;
-                m_cinfo.m_comp_info[foundIndex].dc_tbl_no = (c >> 4) & 15;
-                m_cinfo.m_comp_info[foundIndex].ac_tbl_no = (c) & 15;
+                m_cinfo.Comp_info[foundIndex].Dc_tbl_no = (c >> 4) & 15;
+                m_cinfo.Comp_info[foundIndex].Ac_tbl_no = (c) & 15;
 
                 m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOS_COMPONENT, cc,
-                    m_cinfo.m_comp_info[foundIndex].dc_tbl_no, m_cinfo.m_comp_info[foundIndex].ac_tbl_no);
+                    m_cinfo.Comp_info[foundIndex].Dc_tbl_no, m_cinfo.Comp_info[foundIndex].Ac_tbl_no);
             }
 
             /* Collect the additional scan parameters Ss, Se, Ah/Al. */

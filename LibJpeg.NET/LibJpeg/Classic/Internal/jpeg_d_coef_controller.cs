@@ -96,8 +96,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_whole_image[ci] = jpeg_common_struct.CreateBlocksArray(
-                        JpegUtils.jround_up(cinfo.m_comp_info[ci].width_in_blocks, cinfo.m_comp_info[ci].h_samp_factor), 
-                        JpegUtils.jround_up(cinfo.m_comp_info[ci].height_in_blocks, cinfo.m_comp_info[ci].v_samp_factor));
+                        JpegUtils.jround_up(cinfo.Comp_info[ci].Width_in_blocks, cinfo.Comp_info[ci].H_samp_factor), 
+                        JpegUtils.jround_up(cinfo.Comp_info[ci].height_in_blocks, cinfo.Comp_info[ci].V_samp_factor));
                     m_whole_image[ci].ErrorProcessor = cinfo;
                 }
 
@@ -148,10 +148,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Align the virtual buffers for the components used in this scan. */
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
                 
-                buffer[ci] = m_whole_image[componentInfo.component_index].Access(
-                    m_cinfo.m_input_iMCU_row * componentInfo.v_samp_factor, componentInfo.v_samp_factor);
+                buffer[ci] = m_whole_image[componentInfo.Component_index].Access(
+                    m_cinfo.m_input_iMCU_row * componentInfo.V_samp_factor, componentInfo.V_samp_factor);
 
                 /* Note: entropy decoder expects buffer to be zeroed,
                  * but this is handled automatically by the memory manager
@@ -168,7 +168,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                        jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
                         int start_col = MCU_col_num * componentInfo.MCU_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
@@ -287,7 +287,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int blkn = 0;           /* index of current DCT block within MCU */
                     for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                     {
-                        jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[ci]];
+                        jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
 
                         /* Don't bother to IDCT an uninteresting component. */
                         if (!componentInfo.component_needed)
@@ -306,8 +306,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                                 int output_col = start_col;
                                 for (int xindex = 0; xindex < useful_width; xindex++)
                                 {
-                                    m_cinfo.m_idct.inverse(componentInfo.component_index,
-                                        m_MCU_buffer[blkn + xindex].data, output_buf[componentInfo.component_index],
+                                    m_cinfo.m_idct.inverse(componentInfo.Component_index,
+                                        m_MCU_buffer[blkn + xindex].data, output_buf[componentInfo.Component_index],
                                         outputIndex, output_col);
 
                                     output_col += componentInfo.DCT_scaled_size;
@@ -361,26 +361,26 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* OK, output from the virtual arrays. */
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[ci];
 
                 /* Don't bother to IDCT an uninteresting component. */
                 if (!componentInfo.component_needed)
                     continue;
 
                 /* Align the virtual buffer for this component. */
-                JBLOCK[][] buffer = m_whole_image[ci].Access(m_cinfo.m_output_iMCU_row * componentInfo.v_samp_factor,
-                    componentInfo.v_samp_factor);
+                JBLOCK[][] buffer = m_whole_image[ci].Access(m_cinfo.m_output_iMCU_row * componentInfo.V_samp_factor,
+                    componentInfo.V_samp_factor);
 
                 /* Count non-dummy DCT block rows in this iMCU row. */
                 int block_rows;
                 if (m_cinfo.m_output_iMCU_row < last_iMCU_row)
-                    block_rows = componentInfo.v_samp_factor;
+                    block_rows = componentInfo.V_samp_factor;
                 else
                 {
                     /* NB: can't use last_row_height here; it is input-side-dependent! */
-                    block_rows = componentInfo.height_in_blocks % componentInfo.v_samp_factor;
+                    block_rows = componentInfo.height_in_blocks % componentInfo.V_samp_factor;
                     if (block_rows == 0)
-                        block_rows = componentInfo.v_samp_factor;
+                        block_rows = componentInfo.V_samp_factor;
                 }
 
                 /* Loop over all DCT blocks to be processed. */
@@ -388,9 +388,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 for (int block_row = 0; block_row < block_rows; block_row++)
                 {
                     int output_col = 0;
-                    for (int block_num = 0; block_num < componentInfo.width_in_blocks; block_num++)
+                    for (int block_num = 0; block_num < componentInfo.Width_in_blocks; block_num++)
                     {
-                        m_cinfo.m_idct.inverse(componentInfo.component_index,
+                        m_cinfo.m_idct.inverse(componentInfo.Component_index,
                             buffer[block_row][block_num].data, output_buf[ci], rowIndex, output_col);
 
                         output_col += componentInfo.DCT_scaled_size;
@@ -436,7 +436,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* OK, output from the virtual arrays. */
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[ci];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[ci];
 
                 /* Don't bother to IDCT an uninteresting component. */
                 if (!componentInfo.component_needed)
@@ -448,16 +448,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* Count non-dummy DCT block rows in this iMCU row. */
                 if (m_cinfo.m_output_iMCU_row < last_iMCU_row)
                 {
-                    block_rows = componentInfo.v_samp_factor;
+                    block_rows = componentInfo.V_samp_factor;
                     access_rows = block_rows * 2; /* this and next iMCU row */
                     last_row = false;
                 }
                 else
                 {
                     /* NB: can't use last_row_height here; it is input-side-dependent! */
-                    block_rows = componentInfo.height_in_blocks % componentInfo.v_samp_factor;
+                    block_rows = componentInfo.height_in_blocks % componentInfo.V_samp_factor;
                     if (block_rows == 0)
-                        block_rows = componentInfo.v_samp_factor;
+                        block_rows = componentInfo.V_samp_factor;
                     access_rows = block_rows; /* this iMCU row only */
                     last_row = true;
                 }
@@ -468,9 +468,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int bufferRowOffset = 0;
                 if (m_cinfo.m_output_iMCU_row > 0)
                 {
-                    access_rows += componentInfo.v_samp_factor; /* prior iMCU row too */
-                    buffer = m_whole_image[ci].Access((m_cinfo.m_output_iMCU_row - 1) * componentInfo.v_samp_factor, access_rows);
-                    bufferRowOffset = componentInfo.v_samp_factor; /* point to current iMCU row */
+                    access_rows += componentInfo.V_samp_factor; /* prior iMCU row too */
+                    buffer = m_whole_image[ci].Access((m_cinfo.m_output_iMCU_row - 1) * componentInfo.V_samp_factor, access_rows);
+                    bufferRowOffset = componentInfo.V_samp_factor; /* point to current iMCU row */
                     first_row = false;
                 }
                 else
@@ -522,7 +522,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int DC9 = DC7;
 
                     int output_col = 0;
-                    int last_block_column = componentInfo.width_in_blocks - 1;
+                    int last_block_column = componentInfo.Width_in_blocks - 1;
                     for (int block_num = 0; block_num <= last_block_column; block_num++)
                     {
                         /* Fetch current DCT block into workspace so we can modify it. */
@@ -652,7 +652,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         }
 
                         /* OK, do the IDCT */
-                        m_cinfo.m_idct.inverse(componentInfo.component_index, workspace.data, output_buf[outputIndex], 0, output_col);
+                        m_cinfo.m_idct.inverse(componentInfo.Component_index, workspace.data, output_buf[outputIndex], 0, output_col);
                         
                         /* Advance for next column */
                         DC1 = DC2; 
@@ -703,7 +703,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* All components' quantization values must already be latched. */
-                JQUANT_TBL qtable = m_cinfo.m_comp_info[ci].quant_table;
+                JQUANT_TBL qtable = m_cinfo.Comp_info[ci].quant_table;
                 if (qtable == null)
                     return false;
 
@@ -748,10 +748,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             }
             else
             {
-                jpeg_component_info componentInfo = m_cinfo.m_comp_info[m_cinfo.m_cur_comp_info[0]];
+                jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[0]];
 
                 if (m_cinfo.m_input_iMCU_row < (m_cinfo.m_total_iMCU_rows - 1))
-                    m_MCU_rows_per_iMCU_row = componentInfo.v_samp_factor;
+                    m_MCU_rows_per_iMCU_row = componentInfo.V_samp_factor;
                 else
                     m_MCU_rows_per_iMCU_row = componentInfo.last_row_height;
             }

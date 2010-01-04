@@ -89,8 +89,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 jpeg_component_info componentInfo = cinfo.Component_info[ci];
 
-                if (componentInfo.h_samp_factor == cinfo.m_max_h_samp_factor &&
-                    componentInfo.v_samp_factor == cinfo.m_max_v_samp_factor)
+                if (componentInfo.H_samp_factor == cinfo.m_max_h_samp_factor &&
+                    componentInfo.V_samp_factor == cinfo.m_max_v_samp_factor)
                 {
                     if (cinfo.m_smoothing_factor != 0)
                     {
@@ -102,14 +102,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         m_downSamplers[ci] = downSampleMethod.fullsize_downsampler;
                     }
                 }
-                else if (componentInfo.h_samp_factor * 2 == cinfo.m_max_h_samp_factor &&
-                         componentInfo.v_samp_factor == cinfo.m_max_v_samp_factor)
+                else if (componentInfo.H_samp_factor * 2 == cinfo.m_max_h_samp_factor &&
+                         componentInfo.V_samp_factor == cinfo.m_max_v_samp_factor)
                 {
                     smoothok = false;
                     m_downSamplers[ci] = downSampleMethod.h2v1_downsampler;
                 }
-                else if (componentInfo.h_samp_factor * 2 == cinfo.m_max_h_samp_factor &&
-                         componentInfo.v_samp_factor * 2 == cinfo.m_max_v_samp_factor)
+                else if (componentInfo.H_samp_factor * 2 == cinfo.m_max_h_samp_factor &&
+                         componentInfo.V_samp_factor * 2 == cinfo.m_max_v_samp_factor)
                 {
                     if (cinfo.m_smoothing_factor != 0)
                     {
@@ -121,8 +121,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         m_downSamplers[ci] = downSampleMethod.h2v2_downsampler;
                     }
                 }
-                else if ((cinfo.m_max_h_samp_factor % componentInfo.h_samp_factor) == 0 &&
-                         (cinfo.m_max_v_samp_factor % componentInfo.v_samp_factor) == 0)
+                else if ((cinfo.m_max_h_samp_factor % componentInfo.H_samp_factor) == 0 &&
+                         (cinfo.m_max_v_samp_factor % componentInfo.V_samp_factor) == 0)
                 {
                     smoothok = false;
                     m_downSamplers[ci] = downSampleMethod.int_downsampler;
@@ -144,7 +144,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                int outIndex = out_row_group_index * m_cinfo.Component_info[ci].v_samp_factor;
+                int outIndex = out_row_group_index * m_cinfo.Component_info[ci].V_samp_factor;
                 switch (m_downSamplers[ci])
                 {
                     case downSampleMethod.fullsize_smooth_downsampler:
@@ -191,15 +191,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            int output_cols = m_cinfo.Component_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
-            int h_expand = m_cinfo.m_max_h_samp_factor / m_cinfo.Component_info[componentIndex].h_samp_factor;
+            int output_cols = m_cinfo.Component_info[componentIndex].Width_in_blocks * JpegConstants.DCTSIZE;
+            int h_expand = m_cinfo.m_max_h_samp_factor / m_cinfo.Component_info[componentIndex].H_samp_factor;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * h_expand);
 
-            int v_expand = m_cinfo.m_max_v_samp_factor / m_cinfo.Component_info[componentIndex].v_samp_factor;
+            int v_expand = m_cinfo.m_max_v_samp_factor / m_cinfo.Component_info[componentIndex].V_samp_factor;
             int numpix = h_expand * v_expand;
             int numpix2 = numpix / 2;
             int inrow = 0;
-            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].v_samp_factor; outrow++)
+            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].V_samp_factor; outrow++)
             {
                 for (int outcol = 0, outcol_h = 0; outcol < output_cols; outcol++, outcol_h += h_expand)
                 {
@@ -228,7 +228,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             JpegUtils.jcopy_sample_rows(input_data, startInputRow, output_data, startOutRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width);
 
             /* Edge-expand */
-            expand_right_edge(output_data, startOutRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, m_cinfo.Component_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE);
+            expand_right_edge(output_data, startOutRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, m_cinfo.Component_info[componentIndex].Width_in_blocks * JpegConstants.DCTSIZE);
         }
 
         /// <summary>
@@ -248,10 +248,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            int output_cols = m_cinfo.Component_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.Component_info[componentIndex].Width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * 2);
 
-            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].v_samp_factor; outrow++)
+            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].V_samp_factor; outrow++)
             {
                 /* bias = 0,1,0,1,... for successive samples */
                 int bias = 0;
@@ -279,11 +279,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            int output_cols = m_cinfo.Component_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.Component_info[componentIndex].Width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow, m_cinfo.m_max_v_samp_factor, m_cinfo.m_image_width, output_cols * 2);
 
             int inrow = 0;
-            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].v_samp_factor; outrow++)
+            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].V_samp_factor; outrow++)
             {
                 /* bias = 1,2,1,2,... for successive samples */
                 int bias = 1;
@@ -315,7 +315,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            int output_cols = m_cinfo.Component_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.Component_info[componentIndex].Width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow - 1, m_cinfo.m_max_v_samp_factor + 2, m_cinfo.m_image_width, output_cols * 2);
 
             /* We don't bother to form the individual "smoothed" input pixel values;
@@ -334,7 +334,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int memberscale = 16384 - m_cinfo.m_smoothing_factor * 80; /* scaled (1-5*SF)/4 */
             int neighscale = m_cinfo.m_smoothing_factor * 16; /* scaled SF/4 */
 
-            for (int inrow = 0, outrow = 0; outrow < m_cinfo.Component_info[componentIndex].v_samp_factor; outrow++)
+            for (int inrow = 0, outrow = 0; outrow < m_cinfo.Component_info[componentIndex].V_samp_factor; outrow++)
             {
                 int outIndex = 0;
                 int inIndex0 = 0;
@@ -451,7 +451,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * by the standard loop.  Special-casing padded output would be more
              * efficient.
              */
-            int output_cols = m_cinfo.Component_info[componentIndex].width_in_blocks * JpegConstants.DCTSIZE;
+            int output_cols = m_cinfo.Component_info[componentIndex].Width_in_blocks * JpegConstants.DCTSIZE;
             expand_right_edge(input_data, startInputRow - 1, m_cinfo.m_max_v_samp_factor + 2, m_cinfo.m_image_width, output_cols);
 
             /* Each of the eight neighbor pixels contributes a fraction SF to the
@@ -463,7 +463,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int memberscale = 65536 - m_cinfo.m_smoothing_factor * 512; /* scaled 1-8*SF */
             int neighscale = m_cinfo.m_smoothing_factor * 64; /* scaled SF */
 
-            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].v_samp_factor; outrow++)
+            for (int outrow = 0; outrow < m_cinfo.Component_info[componentIndex].V_samp_factor; outrow++)
             {
                 int outIndex = 0;
                 int inIndex = 0;
