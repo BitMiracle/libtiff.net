@@ -13,7 +13,7 @@ namespace BitMiracle.LibJpeg
         /* Target file spec; filled in by djpeg.c after object is created. */
         private Stream m_output;
 
-        private byte[,] m_pixels;
+        private byte[][] m_pixels;
 
         private int m_rowWidth;       /* physical width of one row in the BMP file */
 
@@ -52,7 +52,9 @@ namespace BitMiracle.LibJpeg
             while (m_rowWidth % 4 != 0)
                 m_rowWidth++;
 
-            m_pixels = new byte[m_rowWidth, m_parameters.Height];
+            m_pixels = new byte[m_rowWidth][];
+            for (int i = 0; i < m_rowWidth; i++)
+                m_pixels[i] = new byte[m_parameters.Height];
 
             m_currentRow = 0;
         }
@@ -97,7 +99,7 @@ namespace BitMiracle.LibJpeg
         private void putGrayRow(byte[] row)
         {
             for (int i = 0; i < m_parameters.Height; ++i)
-                m_pixels[i, m_currentRow] = row[i];
+                m_pixels[i][m_currentRow] = row[i];
         }
 
         /// <summary>
@@ -114,9 +116,9 @@ namespace BitMiracle.LibJpeg
                 byte red = row[firstComponent];
                 byte green = row[firstComponent + 1];
                 byte blue = row[firstComponent + 2];
-                m_pixels[firstComponent, m_currentRow] = blue;
-                m_pixels[firstComponent + 1, m_currentRow] = green;
-                m_pixels[firstComponent + 2, m_currentRow] = red;
+                m_pixels[firstComponent][m_currentRow] = blue;
+                m_pixels[firstComponent + 1][m_currentRow] = green;
+                m_pixels[firstComponent + 2][m_currentRow] = red;
             }
         }
 
@@ -131,10 +133,10 @@ namespace BitMiracle.LibJpeg
             for (int i = 0; i < m_parameters.Width; ++i)
             {
                 int firstComponent = i * 4;
-                m_pixels[firstComponent, m_currentRow] = row[firstComponent + 2];
-                m_pixels[firstComponent + 1, m_currentRow] = row[firstComponent + 1];
-                m_pixels[firstComponent + 2, m_currentRow] = row[firstComponent + 0];
-                m_pixels[firstComponent + 3, m_currentRow] = row[firstComponent + 3];
+                m_pixels[firstComponent][m_currentRow] = row[firstComponent + 2];
+                m_pixels[firstComponent + 1][m_currentRow] = row[firstComponent + 1];
+                m_pixels[firstComponent + 2][m_currentRow] = row[firstComponent + 0];
+                m_pixels[firstComponent + 3][m_currentRow] = row[firstComponent + 3];
             }
         }
 
@@ -303,7 +305,7 @@ namespace BitMiracle.LibJpeg
         {
             for (int row = m_parameters.Height - 1; row >= 0; --row)
                 for (int col = 0; col < m_rowWidth; ++col)
-                    m_output.WriteByte(m_pixels[col, row]);
+                    m_output.WriteByte(m_pixels[col][row]);
         }
 
 
