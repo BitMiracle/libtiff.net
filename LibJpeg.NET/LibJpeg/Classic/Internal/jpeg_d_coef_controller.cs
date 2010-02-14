@@ -84,8 +84,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public jpeg_d_coef_controller(jpeg_decompress_struct cinfo, bool need_full_buffer)
         {
             m_cinfo = cinfo;
-            m_coef_bits_latch = null;
-            m_coef_bits_savedOffset = 0;
 
             /* Create the coefficient buffer. */
             if (need_full_buffer)

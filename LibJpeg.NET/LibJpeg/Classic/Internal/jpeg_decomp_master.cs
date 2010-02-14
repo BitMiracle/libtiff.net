@@ -41,7 +41,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public jpeg_decomp_master(jpeg_decompress_struct cinfo)
         {
             m_cinfo = cinfo;
-            m_is_dummy_pass = false;
             master_selection();
         }
 

@@ -37,19 +37,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public TiffDisplay()
         {
-            d_mat = null;
-            d_YCR = 0;
-            d_YCG = 0;
-            d_YCB = 0;
-            d_Vrwr = 0;
-            d_Vrwg = 0;
-            d_Vrwb = 0;
-            d_Y0R = 0;
-            d_Y0G = 0;
-            d_Y0B = 0;
-            d_gammaR = 0;
-            d_gammaG = 0;
-            d_gammaB = 0;
         }
 
         public TiffDisplay(float[] mat0, float[] mat1, float[] mat2,

@@ -203,9 +203,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             m_cinfo = cinfo;
 
-            m_fserrors = null; /* flag optional arrays not allocated */
-            m_error_limiter = null;
-
             /* Make sure jdmaster didn't give me a case I can't handle */
             if (cinfo.m_out_color_components != 3)
                 cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
@@ -237,8 +234,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_sv_colormap = jpeg_common_struct.AllocJpegSamples(desired_local, 3);
                 m_desired = desired_local;
             }
-            else
-                m_sv_colormap = null;
 
             /* Only F-S dithering or no dithering is supported. */
             /* If user asks for ordered dither, give him F-S. */

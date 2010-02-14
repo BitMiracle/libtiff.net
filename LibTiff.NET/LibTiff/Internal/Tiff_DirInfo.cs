@@ -282,13 +282,13 @@ namespace BitMiracle.LibTiff.Classic
             new TiffFieldInfo(TiffTag.EXIF_IMAGEUNIQUEID, 33, 33, TiffType.ASCII, FIELD.FIELD_CUSTOM, true, false, "ImageUniqueID")
         };
 
-        private TiffFieldInfo[] getFieldInfo(out int size)
+        private static TiffFieldInfo[] getFieldInfo(out int size)
         {
             size = tiffFieldInfo.Length;
             return tiffFieldInfo;
         }
 
-        private TiffFieldInfo[] getExifFieldInfo(out int size)
+        private static TiffFieldInfo[] getExifFieldInfo(out int size)
         {
             size = exifFieldInfo.Length;
             return exifFieldInfo;
@@ -298,19 +298,6 @@ namespace BitMiracle.LibTiff.Classic
         {
             m_nfields = 0;
             MergeFieldInfo(info, n);
-        }
-
-        private void printFieldInfo(Stream fd)
-        {
-            fprintf(fd, "{0}: \n", m_name);
-            for (int i = 0; i < m_nfields; i++)
-            {
-                TiffFieldInfo fip = m_fieldinfo[i];
-                fprintf(fd, "field[{0,2:D}] {1,5:D}, {2,2:D}, {3,2:D}, {4}, {5,2:D}, {6,5}, {7,5}, {8}\n",
-                    i, fip.Field_tag, fip.Field_read_count, fip.Field_write_count,
-                    fip.Field_type, fip.Field_bit, fip.Field_okto_change ? "TRUE" : "FALSE",
-                    fip.Field_pass_count ? "TRUE" : "FALSE", fip.Field_name);
-            }
         }
 
         /*
@@ -335,20 +322,7 @@ namespace BitMiracle.LibTiff.Classic
             return TiffType.UNDEFINED;
         }
 
-        private TiffFieldInfo findOrRegisterFieldInfo(TiffTag tag, TiffType dt)
-        {
-            TiffFieldInfo fld = FindFieldInfo(tag, dt);
-            if (fld == null)
-            {
-                fld = createAnonFieldInfo(tag, dt);
-                TiffFieldInfo[] array = { fld };
-                MergeFieldInfo(array, 1);
-            }
-
-            return fld;
-        }
-
-        private TiffFieldInfo createAnonFieldInfo(TiffTag tag, TiffType field_type)
+        private static TiffFieldInfo createAnonFieldInfo(TiffTag tag, TiffType field_type)
         {
             TiffFieldInfo fld = new TiffFieldInfo(tag, TIFF_VARIABLE2, TIFF_VARIABLE2, field_type, FIELD.FIELD_CUSTOM, true, true, null);
 

@@ -261,7 +261,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// This is a no-op version used for "uninteresting" components.
         /// These components will not be referenced by color conversion.
         /// </summary>
-        private void noop_upsample()
+        private static void noop_upsample()
         {
             // do nothing
         }

@@ -11,19 +11,19 @@ namespace BitMiracle.LibJpeg
         private Colorspace m_outColorspace = Colorspace.Unknown;
         private int m_scaleNumerator = 1;
         private int m_scaleDenominator = 1;
-        private bool m_bufferedImage = false;
-        private bool m_rawDataOut = false;
+        private bool m_bufferedImage;
+        private bool m_rawDataOut;
         private DCTMethod m_dctMethod = (DCTMethod)JpegConstants.JDCT_DEFAULT;
         private DitherMode m_ditherMode = DitherMode.FloydSteinberg;
         private bool m_doFancyUpsampling = true;
         private bool m_doBlockSmoothing = true;
-        private bool m_quantizeColors = false;
+        private bool m_quantizeColors;
         private bool m_twoPassQuantize = true;
         private int m_desiredNumberOfColors = 256;
-        private bool m_enableOnePassQuantizer = false;
-        private bool m_enableExternalQuant = false;
-        private bool m_enableTwoPassQuantizer = false;
-        private int m_traceLevel = 0;
+        private bool m_enableOnePassQuantizer;
+        private bool m_enableExternalQuant;
+        private bool m_enableTwoPassQuantizer;
+        private int m_traceLevel;
 
         public int TraceLevel
         {

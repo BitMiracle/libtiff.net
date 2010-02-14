@@ -63,7 +63,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             * but simply discard COM and all other APPn.
             */
             m_process_COM = skip_variable;
-            m_length_limit_COM = 0;
 
             for (int i = 0; i < 16; i++)
             {

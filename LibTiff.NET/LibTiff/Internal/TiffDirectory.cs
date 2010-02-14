@@ -75,35 +75,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public TiffDirectory()
         {
-            td_imagewidth = 0;
-            td_imagelength = 0;
             td_subfiletype = 0;
             td_compression = 0;
             td_photometric = 0;
-            td_minsamplevalue = 0;
-            td_maxsamplevalue = 0;
-            td_sminsamplevalue = 0;
-            td_smaxsamplevalue = 0;
-            td_xresolution = 0;
-            td_yresolution = 0;
             td_planarconfig = 0;
-            td_xposition = 0;
-            td_yposition = 0;
-
-            td_extrasamples = 0;
-            td_sampleinfo = null;
-            td_stripsperimage = 0;
-            td_nstrips = 0;
-            td_stripoffset = null;
-            td_stripbytecount = null;
-            td_nsubifd = 0;
-            td_subifd = null;
-
-            td_inknameslen = 0;
-            td_inknames = null;
-
-            td_customValueCount = 0;
-            td_customValues = null;
 
             td_fillorder = FillOrder.MSB2LSB;
             td_bitspersample = 1;
@@ -111,8 +86,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             td_orientation = Orientation.TOPLEFT;
             td_samplesperpixel = 1;
             td_rowsperstrip = -1;
-            td_tilewidth = 0;
-            td_tilelength = 0;
             td_tiledepth = 1;
             td_stripbytecountsorted = 1; /* Our own arrays always sorted. */
             td_resolutionunit = ResUnit.INCH;

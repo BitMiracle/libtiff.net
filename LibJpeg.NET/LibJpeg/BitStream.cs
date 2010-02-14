@@ -7,7 +7,7 @@ namespace BitMiracle.LibJpeg
 {
     class BitStream : IDisposable
     {
-        private bool m_alreadyDisposed = false;
+        private bool m_alreadyDisposed;
 
         private const int bitsInByte = 8;
         private Stream m_stream;
@@ -18,9 +18,6 @@ namespace BitMiracle.LibJpeg
         public BitStream()
         {
             m_stream = new MemoryStream();
-            m_positionInByte = 0;
-
-            m_size = 0;
         }
 
         public BitStream(byte[] buffer)
@@ -29,8 +26,6 @@ namespace BitMiracle.LibJpeg
                 throw new ArgumentNullException("buffer");
 
             m_stream = new MemoryStream(buffer);
-            m_positionInByte = 0;
-
             m_size = bitsAllocated();
         }
 

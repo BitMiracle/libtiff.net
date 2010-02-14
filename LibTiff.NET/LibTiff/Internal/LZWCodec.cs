@@ -171,6 +171,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public override void Cleanup()
         {
             LZWCleanup();
+            m_tif.m_mode = m_rw_mode;
         }
 
         // CodecWithPredictor overrides

@@ -12,8 +12,8 @@ namespace BitMiracle.LibJpeg
     class CompressionParameters
     {
         private int m_quality = 75;
-        private int m_smoothingFactor = 0;
-        private bool m_simpleProgressive = false;
+        private int m_smoothingFactor;
+        private bool m_simpleProgressive;
 
         public CompressionParameters()
         {

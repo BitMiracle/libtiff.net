@@ -95,7 +95,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             bits_left = bitstate.bits_left;
         }
 
-        protected void BITREAD_SAVE_STATE(ref bitread_perm_state bitstate, int get_buffer, int bits_left)
+        protected static void BITREAD_SAVE_STATE(ref bitread_perm_state bitstate, int get_buffer, int bits_left)
         {
             bitstate.get_buffer = get_buffer;
             bitstate.bits_left = bits_left;

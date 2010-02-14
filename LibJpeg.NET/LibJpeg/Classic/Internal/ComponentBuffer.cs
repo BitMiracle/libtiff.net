@@ -27,8 +27,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
         public ComponentBuffer()
         {
-            m_buffer = null;
-            m_funnyIndices = null;
         }
 
         public ComponentBuffer(byte[][] buf, int[] funnyIndices, int funnyOffset)

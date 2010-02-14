@@ -134,8 +134,8 @@ namespace BitMiracle.LibTiff.Classic
         private static TiffErrorHandler m_errorHandler;
         private TiffErrorHandler m_defaultErrorHandler;
 
-        private bool m_disposed = false;
-        private Stream m_fileStream = null;
+        private bool m_disposed;
+        private Stream m_fileStream;
  
         /*
         * Client Tag extension support (from Niles Ritter).
@@ -146,56 +146,11 @@ namespace BitMiracle.LibTiff.Classic
 
         private Tiff()
         {
-            m_name = null;
-            m_mode = 0;
-            m_flags = 0;
-
-            m_diroff = 0;
-            m_nextdiroff = 0;
-            m_dirlist = null;
-            m_dirlistsize = 0;
-
-            m_dirnumber = 0;
-            m_dir = null;
-            m_typeshift = null;
-            m_typemask = null;
-            m_row = 0;
-            m_curdir = 0;
-            m_curstrip = 0;
-            m_curoff = 0;
-            m_dataoff = 0;
-
-            m_nsubifd = 0;
-            m_subifdoff = 0;
-
-            m_col = 0;
-            m_curtile = 0;
-            m_tilesize = 0;
-
-            m_decodestatus = false;
-
-            m_currentCodec = null;
-
-            m_scanlinesize = 0;
-            m_rawdata = null;
-            m_rawdatasize = 0;
-            m_rawcp = 0;
-            m_rawcc = 0;
-
-            m_stream = null;
-
             m_clientdata = 0;
 
             m_postDecodeMethod = PostDecodeMethodType.pdmNone;
 
-            m_fieldinfo = null;
-            m_nfields = 0;
-            m_foundfield = null;
-            m_tagmethods = null;
-            m_clientinfo = null;
 
-            m_builtInCodecs = null;
-            m_registeredCodecs = null;
             setupBuiltInCodecs();
 
             m_defaultTagMethods = new TiffTagMethods();
@@ -282,22 +237,6 @@ namespace BitMiracle.LibTiff.Classic
 
             m_currentCodec = c;
             return c.Init();
-        }
-
-        private void cleanUp()
-        {
-            if (m_mode != O_RDONLY)
-            {
-                /*
-                * Flush buffered data and directory (if dirty).
-                */
-                Flush();
-            }
-
-            m_currentCodec.Cleanup();
-            FreeDirectory();
-
-            m_clientinfo = null;
         }
 
         /* post decoding routine */  

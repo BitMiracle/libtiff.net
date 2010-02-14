@@ -204,7 +204,7 @@ namespace BitMiracle.LibJpeg
         {
             get
             {
-                return m_densityY;
+                return m_densityX;
             }
             internal set
             {

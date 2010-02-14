@@ -731,7 +731,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Return largest input value that should map to j'th output value
         /// Must have largest(j=0) >= 0, and largest(j=maxj) >= MAXJSAMPLE
         /// </summary>
-        private int largest_input_value(int j, int maxj)
+        private static int largest_input_value(int j, int maxj)
         {
             /* Breakpoints are halfway between values returned by output_value */
             return (int)(((2 * j + 1) * JpegConstants.MAXJSAMPLE + maxj) / (2 * maxj));
@@ -741,7 +741,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Return j'th output value, where j will range from 0 to maxj
         /// The output values must fall in 0..MAXJSAMPLE in increasing order
         /// </summary>
-        private int output_value(int j, int maxj)
+        private static int output_value(int j, int maxj)
         {
             /* We always provide values 0 and MAXJSAMPLE for each component;
              * any additional values are equally spaced between these limits.
@@ -823,7 +823,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Create an ordered-dither array for a component having ncolors
         /// distinct output values.
         /// </summary>
-        private int[][] make_odither_array(int ncolors)
+        private static int[][] make_odither_array(int ncolors)
         {
             int[][] odither = new int[ODITHER_SIZE][];
             for (int i = 0; i < ODITHER_SIZE; i++)

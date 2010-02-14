@@ -83,8 +83,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             else
             {
                 m_use_2v_upsample = false;
-                /* No spare row needed */
-                m_spare_row = null;
             }
 
             build_ycc_rgb_table();

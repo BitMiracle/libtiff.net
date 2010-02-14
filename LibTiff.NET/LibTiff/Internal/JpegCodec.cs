@@ -1668,7 +1668,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        private byte[][] TIFFjpeg_alloc_sarray(int samplesperrow, int numrows)
+        private static byte[][] TIFFjpeg_alloc_sarray(int samplesperrow, int numrows)
         {
             byte[][] result = new byte [numrows][];
             for (int i = 0; i < numrows; i++)

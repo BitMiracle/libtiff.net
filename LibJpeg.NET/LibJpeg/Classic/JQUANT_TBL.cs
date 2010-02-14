@@ -33,7 +33,6 @@ namespace BitMiracle.LibJpeg.Classic
 
         internal JQUANT_TBL()
         {
-            m_sent_table = false;
         }
 
         public bool Sent_table

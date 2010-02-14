@@ -381,16 +381,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         protected TiffRGBAImage()
         {
-            tif = null;
-            redcmap = null;
-            greencmap = null;
-            bluecmap = null;
-
-            Map = null;
-            BWmap = null;
-            PALmap = null;
-            ycbcr = null;
-            cielab = null;
         }
 
         private static int PACK(int r, int g, int b)
@@ -679,7 +669,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             int rowsperstrip = result[0].ToInt();
 
             result = tif.GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
-            short subsamplinghor = result[0].ToShort();
             short subsamplingver = result[1].ToShort();
 
             int scanline = tif.newScanlineSize();

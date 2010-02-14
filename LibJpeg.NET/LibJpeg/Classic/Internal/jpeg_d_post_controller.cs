@@ -61,9 +61,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             m_cinfo = cinfo;
 
-            m_whole_image = null;   /* flag for no virtual arrays */
-            m_buffer = null;        /* flag for no strip buffer */
-
             /* Create the quantization buffer, if needed */
             if (cinfo.m_quantize_colors)
             {

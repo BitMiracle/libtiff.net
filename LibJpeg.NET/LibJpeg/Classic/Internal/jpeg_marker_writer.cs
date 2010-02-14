@@ -28,9 +28,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public jpeg_marker_writer(jpeg_compress_struct cinfo)
         {
             m_cinfo = cinfo;
-
-            /* Initialize private state */
-            m_last_restart_interval = 0;
         }
 
         /// <summary>

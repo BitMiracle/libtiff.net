@@ -30,7 +30,7 @@ namespace BitMiracle.LibJpeg.Classic
     {
         // The message ID code and any parameters are saved in fields below. 
         internal int m_msg_code;
-        internal object[] m_msg_parm = null;
+        internal object[] m_msg_parm;
 
         internal int m_trace_level;
         internal int m_num_warnings;
@@ -58,14 +58,6 @@ namespace BitMiracle.LibJpeg.Classic
 
         public jpeg_error_mgr()
         {
-            // default = no tracing
-            m_trace_level = 0;
-
-            // no warnings emitted yet
-            m_num_warnings = 0;
-
-            // may be useful as a flag for "no error"
-            m_msg_code = 0;
         }
 
         /// <summary>

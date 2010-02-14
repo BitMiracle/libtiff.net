@@ -706,7 +706,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// <summary>
         /// MCU decoding for AC successive approximation refinement scan.
         /// </summary>
-        private void undo_decode_mcu_AC_refine(JBLOCK[] block, int[] newnz_pos, int num_newnz)
+        private static void undo_decode_mcu_AC_refine(JBLOCK[] block, int[] newnz_pos, int num_newnz)
         {
             /* Re-zero any output coefficients that we made newly nonzero */
             while (num_newnz > 0)

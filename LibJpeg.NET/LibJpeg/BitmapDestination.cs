@@ -15,11 +15,9 @@ namespace BitMiracle.LibJpeg
 
         private byte[,] m_pixels;
 
-        private bool m_putGrayRows = false;
+        private int m_rowWidth;       /* physical width of one row in the BMP file */
 
-        private int m_rowWidth = 0;       /* physical width of one row in the BMP file */
-
-        private int m_currentRow = 0;  /* next row# to write to virtual array */
+        private int m_currentRow;  /* next row# to write to virtual array */
         private LoadedImageAttributes m_parameters;
 
         public BitmapDestination(Stream output)
@@ -49,11 +47,6 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         public void BeginWrite()
         {
-            if (m_parameters.Colorspace == Colorspace.Grayscale)
-                m_putGrayRows = true;
-            else
-                m_putGrayRows = m_parameters.QuantizeColors;
-
             //Determine width of rows in the BMP file (padded to 4-byte boundary).
             m_rowWidth = m_parameters.Width * m_parameters.Components;
             while (m_rowWidth % 4 != 0)

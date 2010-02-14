@@ -38,13 +38,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             m_cinfo = cinfo;
 
-            m_consumeData = false;
-
             /* Initialize state: can't use reset_input_controller since we don't
             * want to try to reset other modules yet.
             */
-            m_has_multiple_scans = false; /* "unknown" would be better */
-            m_eoi_reached = false;
             m_inheaders = true;
         }
 

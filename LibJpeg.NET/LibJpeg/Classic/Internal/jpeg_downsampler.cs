@@ -528,7 +528,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Expand a component horizontally from width input_cols to width output_cols,
         /// by duplicating the rightmost samples.
         /// </summary>
-        private void expand_right_edge(byte[][] image_data, int startInputRow, int num_rows, int input_cols, int output_cols)
+        private static void expand_right_edge(byte[][] image_data, int startInputRow, int num_rows, int input_cols, int output_cols)
         {
             int numcols = output_cols - input_cols;
             if (numcols > 0)

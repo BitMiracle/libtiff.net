@@ -59,7 +59,7 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        internal int readInt(byte[] b, int byteStartOffset)
+        internal static int readInt(byte[] b, int byteStartOffset)
         {
             int value = b[byteStartOffset++] & 0xFF;
             value += (b[byteStartOffset++] & 0xFF) << 8;
@@ -68,7 +68,7 @@ namespace BitMiracle.LibTiff.Classic
             return value;
         }
 
-        internal void writeInt(int value, byte[] b, int byteStartOffset)
+        internal static void writeInt(int value, byte[] b, int byteStartOffset)
         {
             b[byteStartOffset++] = (byte)value;
             b[byteStartOffset++] = (byte)(value >> 8);
@@ -76,7 +76,7 @@ namespace BitMiracle.LibTiff.Classic
             b[byteStartOffset++] = (byte)(value >> 24);
         }
 
-        internal short readShort(byte[] b, int byteStartOffset)
+        internal static short readShort(byte[] b, int byteStartOffset)
         {
             short value = (short)(b[byteStartOffset] & 0xFF);
             value += (short)((b[byteStartOffset + 1] & 0xFF) << 8);

@@ -205,7 +205,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         *
         * Frank Warmerdam, July 2002
         */
-        private void JPEGFixupTestSubsampling(Tiff tif)
+        private static void JPEGFixupTestSubsampling(Tiff tif)
         {
             if (Tiff.CHECK_JPEG_YCBCR_SUBSAMPLING)
             {

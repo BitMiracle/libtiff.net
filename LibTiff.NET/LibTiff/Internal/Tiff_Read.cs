@@ -50,11 +50,6 @@ namespace BitMiracle.LibTiff.Classic
             return (int)m_stream.Seek(m_clientdata, off, whence);
         }
 
-        private void closeFile()
-        {
-            m_stream.Close(m_clientdata);
-        }
-
         private int getFileSize()
         {
             return (int)m_stream.Size(m_clientdata);
@@ -107,7 +102,7 @@ namespace BitMiracle.LibTiff.Classic
             return res;
         }
 
-        private void readDirEntry(TiffDirEntry[] dir, short dircount, byte[] bytes, int offset)
+        private static void readDirEntry(TiffDirEntry[] dir, short dircount, byte[] bytes, int offset)
         {
             int pos = offset;
             for (int i = 0; i < dircount; i++)

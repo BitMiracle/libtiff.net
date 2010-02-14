@@ -26,7 +26,6 @@ namespace BitMiracle.LibJpeg
         {
             get
             {
-                SampleRow firstRow = m_samples[0];
                 return m_samples[0].Length;
             }
         }

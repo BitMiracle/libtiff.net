@@ -24,18 +24,18 @@ namespace BitMiracle.LibJpeg.Classic
         /* For compression, they must be supplied by parameter setup; */
         /* for decompression, they are read from the SOF marker. */
 
-        private int component_id = 0;
-        private int component_index = 0;
-        private int h_samp_factor = 0;
-        private int v_samp_factor = 0;
-        private int quant_tbl_no = 0;
+        private int component_id;
+        private int component_index;
+        private int h_samp_factor;
+        private int v_samp_factor;
+        private int quant_tbl_no;
 
         /* These values may vary between scans. */
         /* For compression, they must be supplied by parameter setup; */
         /* for decompression, they are read from the SOS marker. */
         /* The decompressor output side may not use these variables. */
-        private int dc_tbl_no = 0;
-        private int ac_tbl_no = 0;
+        private int dc_tbl_no;
+        private int ac_tbl_no;
 
         /* Remaining fields should be treated as private by applications. */
 
@@ -44,24 +44,24 @@ namespace BitMiracle.LibJpeg.Classic
          * Any dummy blocks added to complete an MCU are not counted; therefore
          * these values do not depend on whether a scan is interleaved or not.
          */
-        private int width_in_blocks = 0;
-        internal int height_in_blocks = 0;
+        private int width_in_blocks;
+        internal int height_in_blocks;
         /* Size of a DCT block in samples.  Always DCTSIZE for compression.
          * For decompression this is the size of the output from one DCT block,
          * reflecting any scaling we choose to apply during the IDCT step.
          * Values of 1,2,4,8 are likely to be supported.  Note that different
          * components may receive different IDCT scalings.
          */
-        internal int DCT_scaled_size = 0;
+        internal int DCT_scaled_size;
         /* The downsampled dimensions are the component's actual, unpadded number
          * of samples at the main buffer (preprocessing/compression interface), thus
          * downsampled_width = ceil(image_width * Hi/Hmax)
          * and similarly for height.  For decompression, IDCT scaling is included, so
          * downsampled_width = ceil(image_width * Hi/Hmax * DCT_scaled_size/DCTSIZE)
          */
-        internal int downsampled_width = 0;    /* actual width in samples */
+        internal int downsampled_width;    /* actual width in samples */
 	
-        internal int downsampled_height = 0; /* actual height in samples */
+        internal int downsampled_height; /* actual height in samples */
         /* This flag is used only for decompression.  In cases where some of the
          * components will be ignored (eg grayscale output from YCbCr image),
          * we can skip most computations for the unused components.
@@ -70,18 +70,18 @@ namespace BitMiracle.LibJpeg.Classic
 
         /* These values are computed before starting a scan of the component. */
         /* The decompressor output side may not use these variables. */
-        internal int MCU_width = 0;      /* number of blocks per MCU, horizontally */
-        internal int MCU_height = 0;     /* number of blocks per MCU, vertically */
-        internal int MCU_blocks = 0;     /* MCU_width * MCU_height */
-        internal int MCU_sample_width = 0;       /* MCU width in samples, MCU_width*DCT_scaled_size */
-        internal int last_col_width = 0;     /* # of non-dummy blocks across in last MCU */
-        internal int last_row_height = 0;        /* # of non-dummy blocks down in last MCU */
+        internal int MCU_width;      /* number of blocks per MCU, horizontally */
+        internal int MCU_height;     /* number of blocks per MCU, vertically */
+        internal int MCU_blocks;     /* MCU_width * MCU_height */
+        internal int MCU_sample_width;       /* MCU width in samples, MCU_width*DCT_scaled_size */
+        internal int last_col_width;     /* # of non-dummy blocks across in last MCU */
+        internal int last_row_height;        /* # of non-dummy blocks down in last MCU */
 
         /* Saved quantization table for component; null if none yet saved.
          * See jpeg_input_controller comments about the need for this information.
          * This field is currently used only for decompression.
          */
-        internal JQUANT_TBL quant_table = null;
+        internal JQUANT_TBL quant_table;
 
         internal jpeg_component_info()
         {

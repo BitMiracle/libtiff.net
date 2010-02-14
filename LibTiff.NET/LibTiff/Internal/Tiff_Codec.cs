@@ -54,11 +54,5 @@ namespace BitMiracle.LibTiff.Classic
             m_builtInCodecs[i++] = new TiffCodec(this, Compression.SGILOG24, "SGILog24");
             m_builtInCodecs[i++] = null;
         }
-
-        private void freeCodecs()
-        {
-            m_builtInCodecs = null;
-            m_registeredCodecs = null;
-        }
     }
 }

@@ -1821,7 +1821,6 @@ namespace BitMiracle.LibTiff.Classic
                 m_dataoff++;
 
             seekFile(m_dataoff, SeekOrigin.Begin);
-            TiffDirEntry[] dir = data;
             
             /*
             * Setup external form of directory
@@ -3404,7 +3403,7 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            bool ok = false;
+            bool ok;
             string emsg;
             if (RGBAImageOK(out emsg))
             {
@@ -3419,6 +3418,7 @@ namespace BitMiracle.LibTiff.Classic
                         rows_to_read = img.height - row;
 
                     ok = img.Get(raster, 0, img.width, rows_to_read);
+                    return ok;
                 }
 
                 return true;

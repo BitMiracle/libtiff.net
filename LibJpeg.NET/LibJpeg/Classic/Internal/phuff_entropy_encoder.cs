@@ -82,8 +82,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_derived_tbls[i] = null;
                 m_count_ptrs[i] = null;
             }
-
-            m_bit_buffer = null; /* needed only in AC refinement scan */
         }
 
         // Initialize for a Huffman-compressed scan using progressive JPEG.

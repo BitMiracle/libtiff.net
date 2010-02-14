@@ -29,7 +29,6 @@ namespace BitMiracle.LibJpeg.Classic
 
         internal JHUFF_TBL()
         {
-            m_sent_table = false;
         }
 
         internal byte[] Bits

@@ -29,7 +29,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private int m_cur_iMCU_row;    /* number of current iMCU row */
         private int m_rowgroup_ctr;    /* counts row groups received in iMCU row */
         private bool m_suspended;     /* remember if we suspended output */
-        private J_BUF_MODE m_pass_mode;       /* current operating mode */
 
         /* If using just a strip buffer, this points to the entire set of buffers
         * (we allocate one for each component).  In the full-image case, this
@@ -60,7 +59,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             m_cur_iMCU_row = 0; /* initialize counters */
             m_rowgroup_ctr = 0;
             m_suspended = false;
-            m_pass_mode = pass_mode;    /* save mode for use by process_data */
 
             if (pass_mode != J_BUF_MODE.JBUF_PASS_THRU)
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_BUFFER_MODE);

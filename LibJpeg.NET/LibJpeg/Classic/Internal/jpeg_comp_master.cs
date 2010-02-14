@@ -40,7 +40,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public jpeg_comp_master(jpeg_compress_struct cinfo, bool transcode_only)
         {
             m_cinfo = cinfo;
-            m_is_last_pass = false;
 
             if (transcode_only)
             {
@@ -55,9 +54,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* for normal compression, first pass is always this type: */
                 m_pass_type = c_pass_type.main_pass;
             }
-
-            m_scan_number = 0;
-            m_pass_number = 0;
 
             if (cinfo.m_optimize_coding)
                 m_total_passes = cinfo.m_num_scans * 2;

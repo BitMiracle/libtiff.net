@@ -407,7 +407,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public override void Cleanup()
         {
-            m_tif.m_tagmethods = m_tagMethods;
+            m_tif.m_tagmethods = m_parentTagMethods;
         }
 
         private bool is2DEncoding()
