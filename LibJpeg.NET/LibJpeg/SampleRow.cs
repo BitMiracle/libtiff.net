@@ -56,7 +56,7 @@ namespace BitMiracle.LibJpeg
         internal SampleRow(short[] sampleComponents, byte bitsPerComponent, byte componentsPerSample)
         {
             if (sampleComponents == null)
-                throw new ArgumentNullException("row");
+                throw new ArgumentNullException("sampleComponents");
 
             if (sampleComponents.Length == 0)
                 throw new ArgumentException("row is empty");

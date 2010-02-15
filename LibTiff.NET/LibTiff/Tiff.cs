@@ -3246,7 +3246,7 @@ namespace BitMiracle.LibTiff.Classic
              * the imagelength be set properly before the first write (so that the
              * strips array will be fully allocated above).
              */
-            if (strip >= m_dir.td_nstrips && !growStrips(1, module))
+            if (strip >= m_dir.td_nstrips && !growStrips(1))
                 return false;
 
             if (strip != m_curstrip)
@@ -4072,7 +4072,7 @@ namespace BitMiracle.LibTiff.Classic
                     return -1;
                 }
 
-                if (!growStrips(1, module))
+                if (!growStrips(1))
                     return -1;
 
                 m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
@@ -4166,7 +4166,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (strip >= m_dir.td_stripsperimage)
                     m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
 
-                if (!growStrips(1, module))
+                if (!growStrips(1))
                     return -1;
             }
 

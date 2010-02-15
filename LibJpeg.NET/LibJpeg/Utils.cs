@@ -10,7 +10,7 @@ namespace BitMiracle.LibJpeg
         public static MemoryStream CopyStream(Stream stream)
         {
             if (stream == null)
-                throw new ArgumentNullException("imageData");
+                throw new ArgumentNullException("stream");
 
             long positionBefore = stream.Position;
             stream.Seek(0, SeekOrigin.Begin);

@@ -128,7 +128,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * Grow the strip data structures by delta strips.
         */
-        private bool growStrips(int delta, string module)
+        private bool growStrips(int delta)
         {
             Debug.Assert(m_dir.td_planarconfig == PlanarConfig.CONTIG);
             int[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);

@@ -75,7 +75,6 @@ namespace BitMiracle.LibJpeg.Classic
             output_message();
 
             string buffer = format_message();
-
             throw new Exception(buffer);
         }
 

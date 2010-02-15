@@ -25,7 +25,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Stream s = fd as Stream;
             if (s == null)
-                throw new ArgumentException();
+                throw new ArgumentException("Can't get stream to read from");
 
             return s.Read(buf, offset, size);
         }
@@ -34,7 +34,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Stream s = fd as Stream;
             if (s == null)
-                throw new ArgumentException();
+                throw new ArgumentException("Can't get stream to write to");
             
             s.Write(buf, 0, size);
         }
@@ -47,7 +47,7 @@ namespace BitMiracle.LibTiff.Classic
 
             Stream s = fd as Stream;
             if (s == null)
-                throw new ArgumentException();
+                throw new ArgumentException("Can't get stream to seek in");
 
             return s.Seek(off, whence);
         }
@@ -56,7 +56,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Stream s = fd as Stream;
             if (s == null)
-                throw new ArgumentException();
+                throw new ArgumentException("Can't get stream to close");
 
             s.Close();
         }
@@ -65,7 +65,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Stream s = fd as Stream;
             if (s == null)
-                throw new ArgumentException();
+                throw new ArgumentException("Can't get stream to retrieve size from");
 
             return s.Length;
         }
