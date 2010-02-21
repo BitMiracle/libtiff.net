@@ -77,16 +77,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public override bool empty_output_buffer()
         {
-            try
-            {
-                m_outfile.Write(m_buffer, 0, m_buffer.Length);
-            }
-            catch (Exception e)
-            {
-                m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
-            }
-
+            writeBuffer(m_buffer.Length);
             initInternalBuffer(m_buffer, 0);
             return true;
         }
@@ -105,19 +96,32 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             /* Write any data remaining in the buffer */
             if (datacount > 0)
-            {
-                try
-                {
-                    m_outfile.Write(m_buffer, 0, datacount);
-                }
-                catch (Exception e)
-                {
-                    m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
-                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
-                }
-            }
+                writeBuffer(datacount);
 
             m_outfile.Flush();
+        }
+
+        private void writeBuffer(int dataCount)
+        {
+            try
+            {
+                m_outfile.Write(m_buffer, 0, dataCount);
+            }
+            catch (IOException e)
+            {
+                m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+            }
+            catch (NotSupportedException e)
+            {
+                m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+            }
+            catch (ObjectDisposedException e)
+            {
+                m_cinfo.TRACEMS(0, J_MESSAGE_CODE.JERR_FILE_WRITE, e.Message);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FILE_WRITE);
+            }
         }
     }
 }
