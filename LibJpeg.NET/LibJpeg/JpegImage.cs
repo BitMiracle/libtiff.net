@@ -16,9 +16,14 @@ namespace BitMiracle.LibJpeg
 #if EXPOSE_LIBJPEG
     public
 #endif
- class JpegImage
+    class JpegImage : IDisposable
     {
-        private List<SampleRow> m_rows = new List<SampleRow>();         //!< Description of image pixels (samples)
+        private bool m_alreadyDisposed;
+
+        /// <summary>
+        /// Description of image pixels (samples)
+        /// </summary>
+        private List<SampleRow> m_rows = new List<SampleRow>();
 
         private int m_width;
         private int m_height;
@@ -30,12 +35,25 @@ namespace BitMiracle.LibJpeg
         // Instead direct access to these field you should use corresponding properties (compressedData, decompressedData, bitmap)
         // Such agreement allows to load required data (e.g. compress image) only by request.
 
-        private MemoryStream m_compressedData;                          //!< Bytes of jpeg image. Refreshed when m_compressionParameters changed.
-        private CompressionParameters m_compressionParameters;          //!< Current compression parameters corresponding with compressed data.
+        /// <summary>
+        /// Bytes of jpeg image. Refreshed when m_compressionParameters changed.
+        /// </summary>
+        private MemoryStream m_compressedData;
 
-        private MemoryStream m_decompressedData;                        //!< Bytes of decompressed image (bitmap)
+        /// <summary>
+        /// Current compression parameters corresponding with compressed data.
+        /// </summary>
+        private CompressionParameters m_compressionParameters;
 
-        private Bitmap m_bitmap;                                        //!< .NET bitmap associated with this image
+        /// <summary>
+        /// Bytes of decompressed image (bitmap)
+        /// </summary>
+        private MemoryStream m_decompressedData;
+
+        /// <summary>
+        /// .NET bitmap associated with this image
+        /// </summary>
+        private Bitmap m_bitmap;
 
         /// <summary>
         /// Creates JpegImage from .NET bitmap
@@ -99,6 +117,40 @@ namespace BitMiracle.LibJpeg
         public static JpegImage FromBitmap(Bitmap bitmap)
         {
             return new JpegImage(bitmap);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!m_alreadyDisposed)
+            {
+                if (disposing)
+                {
+                    // dispose managed resources
+                    if (m_compressedData != null)
+                        m_compressedData.Dispose();
+
+                    if (m_decompressedData != null)
+                        m_decompressedData.Dispose();
+
+                    if (m_bitmap != null)
+                        m_bitmap.Dispose();
+
+                }
+
+                // free native resources
+                m_compressionParameters = null;
+                m_compressedData = null;
+                m_decompressedData = null;
+                m_bitmap = null;
+                m_rows = null;
+                m_alreadyDisposed = true;
+            }
         }
 
         /// <summary>
@@ -219,7 +271,7 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         public Bitmap ToBitmap()
         {
-            return bitmap;
+            return bitmap.Clone() as Bitmap;
         }
 
         private MemoryStream compressedData
