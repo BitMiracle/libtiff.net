@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Globalization;
 
 using BitMiracle.LibTiff.Classic.Internal;
 
@@ -329,7 +330,7 @@ namespace BitMiracle.LibTiff.Classic
             /* note that this name is a special sign to Close() and
              * setupFieldInfo() to free the field
              */
-            fld.Field_name = string.Format("Tag {0}", tag);
+            fld.Field_name = string.Format(CultureInfo.InvariantCulture, "Tag {0}", tag);
             return fld;
         }
         

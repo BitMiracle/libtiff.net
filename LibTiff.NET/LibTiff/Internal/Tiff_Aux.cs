@@ -96,7 +96,7 @@ namespace BitMiracle.LibTiff.Classic
             int x = value;
 
             //return octal encoding \ddd of the character value. 
-            return string.Format(@"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);
+            return string.Format(CultureInfo.InvariantCulture, @"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);
         }
     }
 }

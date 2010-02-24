@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace BitMiracle.LibJpeg.Classic
 {
@@ -143,7 +144,7 @@ namespace BitMiracle.LibJpeg.Classic
             }
 
             /* Format the message into the passed buffer */
-            return string.Format(msgtext, m_msg_parm);
+            return string.Format(CultureInfo.CurrentCulture, msgtext, m_msg_parm);
         }
 
         /// <summary>

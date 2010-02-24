@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace BitMiracle.LibTiff.Classic.Internal
 {
@@ -36,7 +37,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public new string ToString()
         {
-            return tdir_tag.ToString() + ", " + tdir_type.ToString() + " " + tdir_offset.ToString();
+            return tdir_tag.ToString() + ", " + tdir_type.ToString() + " " +
+                tdir_offset.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

@@ -132,7 +132,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to byte array.
         /// If value is byte[] then it retrieved unaltered.
         /// If value is short[], ushort[], int[], uint[], float[] or double[] then
-        /// each element of source array gets converted to byte[] and added to
+        /// each element of source array gets converted to byte and added to
         /// resulting array.
         /// If value is string then it gets converted to byte[] using Latin1 
         /// encoding encoder.

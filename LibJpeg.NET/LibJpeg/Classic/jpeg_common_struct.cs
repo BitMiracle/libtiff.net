@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
+using System.Globalization;
 
 namespace BitMiracle.LibJpeg.Classic
 {
@@ -103,10 +104,11 @@ namespace BitMiracle.LibJpeg.Classic
             get
             {
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
-                string versionString = version.Major.ToString() + "." + version.Minor.ToString();
+                string versionString = version.Major.ToString(CultureInfo.InvariantCulture) +
+                    "." + version.Minor.ToString(CultureInfo.InvariantCulture);
 
-                versionString += "." + version.Build.ToString();
-                versionString += "." + version.Revision.ToString();
+                versionString += "." + version.Build.ToString(CultureInfo.InvariantCulture);
+                versionString += "." + version.Revision.ToString(CultureInfo.InvariantCulture);
 
                 return versionString;
             }

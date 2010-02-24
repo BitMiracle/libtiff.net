@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace BitMiracle.LibTiff.Classic.Internal
 {
@@ -112,7 +113,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     break;
                 
                 default:
-                    emsg = string.Format("Sorry, can not handle images with {0}-bit samples", img.bitspersample);
+                    emsg = string.Format(CultureInfo.InvariantCulture,
+                        "Sorry, can not handle images with {0}-bit samples", img.bitspersample);
                     return null;
             }
 
@@ -184,7 +186,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
 
                     default:
-                        emsg = string.Format("Missing needed {0} tag", photoTag);
+                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", photoTag);
                         return null;
                 }
             }
@@ -197,7 +199,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     result = tif.GetField(TiffTag.COLORMAP);
                     if (result == null)
                     {
-                        emsg = string.Format("Missing required \"Colormap\" tag");
+                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing required \"Colormap\" tag");
                         return null;
                     }
 
@@ -218,7 +220,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     if (planarconfig == PlanarConfig.CONTIG && 
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
-                        emsg = string.Format(
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
                             photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                         return null;
@@ -230,7 +232,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     if (planarconfig == PlanarConfig.CONTIG && 
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
-                        emsg = string.Format(
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
                             photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                         return null;
@@ -272,7 +274,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case Photometric.RGB:
                     if (colorchannels < 3)
                     {
-                        emsg = string.Format("Sorry, can not handle RGB image with {0}={1}", "Color channels", colorchannels);
+                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                            "Sorry, can not handle RGB image with {0}={1}", "Color channels", colorchannels);
                         return null;
                     }
                     break;
@@ -283,13 +286,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     if (inkset != InkSet.CMYK)
                     {
-                        emsg = string.Format("Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
+                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                            "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                         return null;
                     }
 
                     if (img.samplesperpixel < 4)
                     {
-                        emsg = string.Format("Sorry, can not handle separated image with {0}={1}", "Samples/pixel", img.samplesperpixel);
+                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                            "Sorry, can not handle separated image with {0}={1}", "Samples/pixel", img.samplesperpixel);
                         return null;
                     }
                     break;
@@ -297,7 +302,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case Photometric.LOGL:
                     if (compress != Compression.SGILOG)
                     {
-                        emsg = string.Format("Sorry, LogL data must have {0}={1}", "Compression", Compression.SGILOG);
+                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                            "Sorry, LogL data must have {0}={1}", "Compression", Compression.SGILOG);
                         return null;
                     }
 
@@ -309,13 +315,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case Photometric.LOGLUV:
                     if (compress != Compression.SGILOG && compress != Compression.SGILOG24)
                     {
-                        emsg = string.Format("Sorry, LogLuv data must have {0}={1} or {2}", "Compression", Compression.SGILOG, Compression.SGILOG24);
+                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                            "Sorry, LogLuv data must have {0}={1} or {2}", "Compression", Compression.SGILOG, Compression.SGILOG24);
                         return null;
                     }
 
                     if (planarconfig != PlanarConfig.CONTIG)
                     {
-                        emsg = string.Format("Sorry, can not handle LogLuv images with {0}={1}", "Planarconfiguration", planarconfig);
+                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                            "Sorry, can not handle LogLuv images with {0}={1}", "Planarconfiguration", planarconfig);
                         return null;
                     }
 
@@ -328,7 +336,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     break;
                 
                 default:
-                    emsg = string.Format("Sorry, can not handle image with {0}={1}", photoTag, img.photometric);
+                    emsg = string.Format(CultureInfo.InvariantCulture, 
+                        "Sorry, can not handle image with {0}={1}", photoTag, img.photometric);
                     return null;
             }
 

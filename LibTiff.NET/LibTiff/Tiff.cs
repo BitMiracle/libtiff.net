@@ -15,9 +15,10 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Collections;
+using System.Reflection;
+using System.Globalization;
 
 using BitMiracle.LibTiff.Classic.Internal;
-using System.Reflection;
 
 namespace BitMiracle.LibTiff.Classic
 {
@@ -94,7 +95,7 @@ namespace BitMiracle.LibTiff.Classic
 
         public static string GetVersion()
         {
-            return string.Format(TIFFLIB_VERSION_STR, AssemblyVersion);
+            return string.Format(CultureInfo.InvariantCulture, TIFFLIB_VERSION_STR, AssemblyVersion);
         }
 
         public static string AssemblyVersion
@@ -102,10 +103,11 @@ namespace BitMiracle.LibTiff.Classic
             get
             {
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
-                string versionString = version.Major.ToString() + "." + version.Minor.ToString();
+                string versionString = version.Major.ToString(CultureInfo.InvariantCulture) +
+                    "." + version.Minor.ToString(CultureInfo.InvariantCulture);
 
-                versionString += "." + version.Build.ToString();
-                versionString += "." + version.Revision.ToString();
+                versionString += "." + version.Build.ToString(CultureInfo.InvariantCulture);
+                versionString += "." + version.Revision.ToString(CultureInfo.InvariantCulture);
 
                 return versionString;
             }
@@ -3545,7 +3547,7 @@ namespace BitMiracle.LibTiff.Classic
                 case 16:
                     break;
                 default:
-                    emsg = string.Format("Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
+                    emsg = string.Format(CultureInfo.InvariantCulture, "Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
                     return false;
             }
             
@@ -3563,7 +3565,7 @@ namespace BitMiracle.LibTiff.Classic
                         photometric = Photometric.RGB;
                         break;
                     default:
-                        emsg = string.Format("Missing needed {0} tag", TiffRGBAImage.photoTag);
+                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", TiffRGBAImage.photoTag);
                         return false;
                 }
             }
@@ -3575,7 +3577,7 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.PALETTE:
                     if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
                     {
-                        emsg = string.Format(
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}", 
                             TiffRGBAImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel, 
                             m_dir.td_bitspersample);
@@ -3599,7 +3601,7 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.RGB:
                     if (colorchannels < 3)
                     {
-                        emsg = string.Format(
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle RGB image with {0}={1}", 
                             "Color channels", colorchannels);
 
@@ -3611,13 +3613,14 @@ namespace BitMiracle.LibTiff.Classic
                     InkSet inkset = (InkSet)result[0].ToByte();
                     if (inkset != InkSet.CMYK)
                     {
-                        emsg = string.Format(
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                         return false;
                     }
                     if (m_dir.td_samplesperpixel < 4)
                     {
-                        emsg = string.Format("Sorry, can not handle separated image with {0}={1}",
+                        emsg = string.Format(CultureInfo.InvariantCulture,
+                            "Sorry, can not handle separated image with {0}={1}",
                             "Samples/pixel", m_dir.td_samplesperpixel);
                         return false;
                     }
@@ -3625,7 +3628,8 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.LOGL:
                     if (m_dir.td_compression != Compression.SGILOG)
                     {
-                        emsg = string.Format("Sorry, LogL data must have {0}={1}",
+                        emsg = string.Format(CultureInfo.InvariantCulture,
+                            "Sorry, LogL data must have {0}={1}",
                             "Compression", Compression.SGILOG);
                         return false;
                     }
@@ -3634,14 +3638,16 @@ namespace BitMiracle.LibTiff.Classic
                     if (m_dir.td_compression != Compression.SGILOG &&
                         m_dir.td_compression != Compression.SGILOG24)
                     {
-                        emsg = string.Format("Sorry, LogLuv data must have {0}={1} or {2}",
+                        emsg = string.Format(CultureInfo.InvariantCulture,
+                            "Sorry, LogLuv data must have {0}={1} or {2}",
                             "Compression", Compression.SGILOG, Compression.SGILOG24);
                         return false;
                     }
 
                     if (m_dir.td_planarconfig != PlanarConfig.CONTIG)
                     {
-                        emsg = string.Format("Sorry, can not handle LogLuv images with {0}={1}",
+                        emsg = string.Format(CultureInfo.InvariantCulture,
+                            "Sorry, can not handle LogLuv images with {0}={1}",
                             "Planarconfiguration", m_dir.td_planarconfig);
                         return false;
                     }
@@ -3649,7 +3655,8 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.CIELAB:
                     break;
                 default:
-                    emsg = string.Format("Sorry, can not handle image with {0}={1}",
+                    emsg = string.Format(CultureInfo.InvariantCulture,
+                        "Sorry, can not handle image with {0}={1}",
                         TiffRGBAImage.photoTag, photometric);
                     return false;
             }
