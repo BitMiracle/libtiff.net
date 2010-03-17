@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{281EF657-40C0-432D-8AC4-E9ADDFD792B2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BitMiracle.LibTiff.Classic</RootNamespace>
+    <AssemblyName>BitMiracle.LibTiff.NET</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;EXPOSE_LIBTIFF</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;EXPOSE_LIBTIFF</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyVersion.cs" />
+    <Compile Include="FieldValue.cs" />
+    <Compile Include="Internal\CCITTCodec.cs" />
+    <Compile Include="Internal\CCITTCodecTagMethods.cs" />
+    <Compile Include="Internal\CCITTCodec_Data.cs" />
+    <Compile Include="Internal\CodecWithPredictor.cs" />
+    <Compile Include="Internal\CodecWithPredictorTagMethods.cs" />
+    <Compile Include="Internal\DeflateCodec.cs" />
+    <Compile Include="Internal\DeflateCodecTagMethods.cs" />
+    <Compile Include="Internal\DumpModeCodec.cs" />
+    <Compile Include="Internal\Field.cs" />
+    <Compile Include="Internal\JpegCodec.cs" />
+    <Compile Include="Internal\JpegCodecTagMethods.cs" />
+    <Compile Include="Internal\JpegErrorManager.cs" />
+    <Compile Include="Internal\JpegStdDestination.cs" />
+    <Compile Include="Internal\JpegStdSource.cs" />
+    <Compile Include="Internal\JpegTablesDestination.cs" />
+    <Compile Include="Internal\JpegTablesSource.cs" />
+    <Compile Include="Internal\LZWCodec.cs" />
+    <Compile Include="Internal\PackBitsCodec.cs" />
+    <Compile Include="Internal\TagCompare.cs" />
+    <Compile Include="Internal\TiffCIELabToRGB.cs" />
+    <Compile Include="Internal\TiffDirectory.cs" />
+    <Compile Include="Internal\TiffDirEntry.cs" />
+    <Compile Include="Internal\TiffDisplay.cs" />
+    <Compile Include="Internal\TiffHeader.cs" />
+    <Compile Include="Internal\TiffRGBAImage.cs" />
+    <Compile Include="Internal\TiffTagValue.cs" />
+    <Compile Include="Internal\TiffYCbCrToRGB.cs" />
+    <Compile Include="Internal\Tiff_Aux.cs" />
+    <Compile Include="Internal\Tiff_Codec.cs" />
+    <Compile Include="Internal\Tiff_Dir.cs" />
+    <Compile Include="Internal\Tiff_DirInfo.cs" />
+    <Compile Include="Internal\Tiff_DirRead.cs" />
+    <Compile Include="Internal\Tiff_DirWrite.cs" />
+    <Compile Include="Internal\Tiff_Internal.cs" />
+    <Compile Include="Internal\Tiff_Open.cs" />
+    <Compile Include="Internal\Tiff_Print.cs" />
+    <Compile Include="Internal\Tiff_Read.cs" />
+    <Compile Include="Internal\Tiff_Strip.cs" />
+    <Compile Include="Internal\Tiff_Swab.cs" />
+    <Compile Include="Internal\Tiff_Write.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TagDefinitions.cs" />
+    <Compile Include="Tiff.cs" />
+    <Compile Include="TiffCodec.cs" />
+    <Compile Include="TiffType.cs" />
+    <Compile Include="TiffErrorHandler.cs" />
+    <Compile Include="TiffFieldInfo.cs" />
+    <Compile Include="TiffPrintFlags.cs" />
+    <Compile Include="TiffStream.cs" />
+    <Compile Include="TiffTagMethods.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LibJpeg.NET\LibJpeg\LibJpeg2005.csproj">
+      <Project>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</Project>
+      <Name>LibJpeg2005</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\zLib\zLib2005.csproj">
+      <Project>{366A602D-AF6F-4FE1-8A95-392ED17845DC}</Project>
+      <Name>zLib2005</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PreBuildEvent>cd "$(SolutionDir)"
+update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -895,8 +895,12 @@ namespace BitMiracle.LibTiff.Classic
                     * want to be able to open some of the damaged TIFF
                     * files: 
                     */
-                    if ((short)va[i] == EXTRASAMPLE_COREL_UNASSALPHA)
-                        va[i] = (byte)ExtraSample.UNASSALPHA;
+                    if (i < v - 1)
+                    {
+                        short s = BitConverter.ToInt16(va, i);
+                        if (s == EXTRASAMPLE_COREL_UNASSALPHA)
+                            va[i] = (byte)ExtraSample.UNASSALPHA;
+                    }
                     else
                         return false;
                 }

@@ -80,8 +80,8 @@ namespace BitMiracle.LibJpeg.Classic
         // does not support anything except 8-bit images, sorry.
         public const int BITS_IN_JSAMPLE = 8;
 
-        public const J_DCT_METHOD JDCT_DEFAULT = J_DCT_METHOD.JDCT_ISLOW;
-        public const J_DCT_METHOD JDCT_FASTEST = J_DCT_METHOD.JDCT_IFAST;
+        public static J_DCT_METHOD JDCT_DEFAULT = J_DCT_METHOD.JDCT_ISLOW;
+        public static J_DCT_METHOD JDCT_FASTEST = J_DCT_METHOD.JDCT_IFAST;
 
         // a tad under 64K to prevent overflows
         public const int JPEG_MAX_DIMENSION = 65500;

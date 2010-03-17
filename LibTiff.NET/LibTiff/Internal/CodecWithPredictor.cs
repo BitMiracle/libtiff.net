@@ -958,7 +958,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     return false;
             }
 
-            stride = (td.td_planarconfig == PlanarConfig.CONTIG ? td.td_samplesperpixel : 1);
+            stride = (td.td_planarconfig == PlanarConfig.CONTIG ? (int)td.td_samplesperpixel : 1);
             
             /*
             * Calculate the scanline/tile-width size in bytes.

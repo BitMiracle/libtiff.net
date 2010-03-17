@@ -765,7 +765,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return false;
             }
 
-            if (m_decompression.Num_components != (td.td_planarconfig == PlanarConfig.CONTIG ? td.td_samplesperpixel : 1))
+            if (m_decompression.Num_components != (td.td_planarconfig == PlanarConfig.CONTIG ? (int)td.td_samplesperpixel : 1))
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG component count");
                 return false;
@@ -1050,7 +1050,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return false;
             }
 
-            if (m_decompression.Num_components != (td.td_planarconfig == PlanarConfig.CONTIG ? td.td_samplesperpixel : 1))
+            if (m_decompression.Num_components != (td.td_planarconfig == PlanarConfig.CONTIG ? (int)td.td_samplesperpixel : 1))
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Improper JPEG component count");
                 return false;

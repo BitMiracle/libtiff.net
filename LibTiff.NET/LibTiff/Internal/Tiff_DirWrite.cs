@@ -200,7 +200,7 @@ namespace BitMiracle.LibTiff.Classic
                 /*
                  * Handle other fields.
                  */
-                TiffTag tag = FIELD.FIELD_IGNORE;
+                TiffTag tag = (TiffTag)FIELD.FIELD_IGNORE;
                 switch (fip.Field_bit)
                 {
                     case FIELD.FIELD_STRIPOFFSETS:
