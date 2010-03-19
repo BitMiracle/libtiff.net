@@ -129,11 +129,10 @@ namespace BitMiracle.LibJpeg.Classic
         }
 
         /// <summary>
-        /// Format a message string for the most recent JPEG error or message
-        /// 
+        /// Format a message string for the most recent JPEG error or message.
+        /// <br/>
         /// Few applications should need to override this method.
         /// </summary>
-        /// <param name="buffer">The buffer.</param>
         public virtual string format_message()
         {
             string msgtext = GetMessageText(m_msg_code);

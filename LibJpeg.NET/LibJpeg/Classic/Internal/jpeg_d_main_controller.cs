@@ -105,7 +105,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
     /// the first or last sample row as necessary (this is cheaper than copying
     /// sample rows around).
     /// 
-    /// This scheme breaks down if M < 2, ie, min_DCT_scaled_size is 1.  In that
+    /// This scheme breaks down if M less than 2, ie, min_DCT_scaled_size is 1.  In that
     /// situation each iMCU row provides only one row group so the buffering logic
     /// must be different (eg, we must read two iMCU rows before we can emit the
     /// first row group).  For now, we simply do not support providing context

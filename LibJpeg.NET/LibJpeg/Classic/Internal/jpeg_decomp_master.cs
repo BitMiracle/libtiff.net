@@ -273,18 +273,21 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// a (subscript-check-less) C table lookup
         ///     x = sample_range_limit[x];
         /// is faster than explicit tests
-        ///     if (x < 0)  x = 0;
-        ///     else if (x > MAXJSAMPLE)  x = MAXJSAMPLE;
+        /// <c>
+        ///     if (x &amp; 0)
+        ///        x = 0;
+        ///     else if (x > MAXJSAMPLE)
+        ///        x = MAXJSAMPLE;
+        /// </c>
         /// These processes all use a common table prepared by the routine below.
         /// 
         /// For most steps we can mathematically guarantee that the initial value
-        /// of x is within MAXJSAMPLE+1 of the legal range, so a table running from
-        /// -(MAXJSAMPLE+1) to 2*MAXJSAMPLE+1 is sufficient.  But for the initial
+        /// of x is within MAXJSAMPLE + 1 of the legal range, so a table running from
+        /// -(MAXJSAMPLE + 1) to 2 * MAXJSAMPLE + 1 is sufficient.  But for the initial
         /// limiting step (just after the IDCT), a wildly out-of-range value is 
         /// possible if the input data is corrupt.  To avoid any chance of indexing
         /// off the end of memory and getting a bad-pointer trap, we perform the
-        /// post-IDCT limiting thus:
-        ///     x = range_limit[x & MASK];
+        /// post-IDCT limiting thus: <c>x = range_limit[x &amp; MASK];</c>
         /// where MASK is 2 bits wider than legal sample data, ie 10 bits for 8-bit
         /// samples.  Under normal circumstances this is more than enough range and
         /// a correct output will be generated; with bogus input data the mask will
@@ -292,10 +295,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// For the post-IDCT step, we want to convert the data from signed to unsigned
         /// representation by adding CENTERJSAMPLE at the same time that we limit it.
         /// So the post-IDCT limiting table ends up looking like this:
-        ///     CENTERJSAMPLE,CENTERJSAMPLE+1,...,MAXJSAMPLE,
-        ///     MAXJSAMPLE (repeat 2*(MAXJSAMPLE+1)-CENTERJSAMPLE times),
-        ///     0          (repeat 2*(MAXJSAMPLE+1)-CENTERJSAMPLE times),
-        ///     0,1,...,CENTERJSAMPLE-1
+        /// <pre>
+        ///     CENTERJSAMPLE, CENTERJSAMPLE + 1, ..., MAXJSAMPLE,
+        ///     MAXJSAMPLE (repeat 2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE times),
+        ///     0          (repeat 2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE times),
+        ///     0, 1, ..., CENTERJSAMPLE - 1
+        /// </pre>
         /// Negative inputs select values from the upper half of the table after
         /// masking.
         /// 

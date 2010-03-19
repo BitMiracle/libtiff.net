@@ -668,7 +668,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         }
 
         /// <summary>
-        /// Check for a restart marker & resynchronize decoder.
+        /// Check for a restart marker and resynchronize decoder.
         /// Returns false if must suspend.
         /// </summary>
         private bool process_restart()

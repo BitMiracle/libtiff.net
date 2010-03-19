@@ -15,11 +15,15 @@ namespace BitMiracle.LibJpeg
         private byte[] m_bytes;
         private Sample[] m_samples;
 
-        /// <summary>Creates row from raw samples data.</summary>
-        /// <param name="sampleComponents">Raw description of samples. 
-        /// You can pass collection with more than sampleCount samples - when sampleCount samples will be parsed all remaining bytes 
+        /// <summary>
+        /// Creates row from raw samples data.
+        /// </summary>
+        /// <param name="row">Raw description of samples.
+        /// You can pass collection with more than sampleCount samples - when sampleCount samples will be parsed all remaining bytes
         /// will be ignored.</param>
         /// <param name="sampleCount">The number of samples in row.</param>
+        /// <param name="bitsPerComponent">The number of bits per component.</param>
+        /// <param name="componentsPerSample">The number of components per sample.</param>
         public SampleRow(byte[] row, int sampleCount, byte bitsPerComponent, byte componentsPerSample)
         {
             if (row == null)
@@ -47,12 +51,16 @@ namespace BitMiracle.LibJpeg
             }
         }
 
-        /// <summary>Creates row from an array of components.</summary>
+        /// <summary>
+        /// Creates row from an array of components.
+        /// </summary>
         /// <param name="sampleComponents">Array of color components.</param>
-        /// <remarks>The difference between this constructor and another one - 
-        /// this constructor accept an array of prepared color components whereas 
+        /// <param name="bitsPerComponent">The number of bits per component.</param>
+        /// <param name="componentsPerSample">The number of components per sample.</param>
+        /// <remarks>The difference between this constructor and another one -
+        /// this constructor accept an array of prepared color components whereas
         /// another constructor accept raw bytes and parse them.
-        ///</remarks>
+        /// </remarks>
         internal SampleRow(short[] sampleComponents, byte bitsPerComponent, byte componentsPerSample)
         {
             if (sampleComponents == null)

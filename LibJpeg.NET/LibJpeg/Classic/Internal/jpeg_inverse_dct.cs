@@ -401,7 +401,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// intermediate int array would be needed.)
         /// 
         /// To avoid overflow of the 32-bit intermediate results in pass 2, we must
-        /// have BITS_IN_JSAMPLE + SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS <= 26.  Error analysis
+        /// have BITS_IN_JSAMPLE + SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS &lt;= 26.  Error analysis
         /// shows that the values given below are the most effective.
         /// </summary>
         private void jpeg_idct_islow(int component_index, short[] coef_block, int output_row, int output_col)
@@ -670,14 +670,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// 
         /// This implementation is based on Arai, Agui, and Nakajima's algorithm for
         /// scaled DCT.  Their original paper (Trans. IEICE E-71(11):1095) is in
-        /// Japanese, but the algorithm is described in the Pennebaker & Mitchell
+        /// Japanese, but the algorithm is described in the Pennebaker &amp; Mitchell
         /// JPEG textbook (see REFERENCES section in file README).  The following code
-        /// is based directly on figure 4-8 in P&M.
+        /// is based directly on figure 4-8 in P&amp;M.
         /// While an 8-point DCT cannot be done in less than 11 multiplies, it is
         /// possible to arrange the computation so that many of the multiplies are
         /// simple scalings of the final outputs.  These multiplies can then be
         /// folded into the multiplications or divisions by the JPEG quantization
-        /// table entries.  The AA&N method leaves only 5 multiplies and 29 adds
+        /// table entries.  The AA&amp;N method leaves only 5 multiplies and 29 adds
         /// to be done in the DCT itself.
         /// The primary disadvantage of this method is that with fixed-point math,
         /// accuracy is lost due to imprecise representation of the scaled
@@ -685,7 +685,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// precise the scaled value, so this implementation does worse with high-
         /// quality-setting files than with low-quality ones.
         /// 
-        /// Scaling decisions are generally the same as in the LL&M algorithm;
+        /// Scaling decisions are generally the same as in the LL&amp;M algorithm;
         /// However, we choose to descale
         /// (right shift) multiplication products as soon as they are formed,
         /// rather than carrying additional fractional bits into subsequent additions.
@@ -694,7 +694,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// everywhere except in the multiplications proper; this saves a good deal
         /// of work on 16-bit-int machines.
         /// 
-        /// The dequantized coefficients are not integers because the AA&N scaling
+        /// The dequantized coefficients are not integers because the AA&amp;N scaling
         /// factors have been incorporated.  We represent them scaled up by FAST_INTEGER_PASS1_BITS,
         /// so that the first and second IDCT rounds have the same input scaling.
         /// For 8-bit JSAMPLEs, we choose IFAST_SCALE_BITS = FAST_INTEGER_PASS1_BITS so as to
@@ -978,14 +978,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// 
         /// This implementation is based on Arai, Agui, and Nakajima's algorithm for
         /// scaled DCT.  Their original paper (Trans. IEICE E-71(11):1095) is in
-        /// Japanese, but the algorithm is described in the Pennebaker & Mitchell
+        /// Japanese, but the algorithm is described in the Pennebaker &amp; Mitchell
         /// JPEG textbook (see REFERENCES section in file README).  The following code
-        /// is based directly on figure 4-8 in P&M.
+        /// is based directly on figure 4-8 in P&amp;M.
         /// While an 8-point DCT cannot be done in less than 11 multiplies, it is
         /// possible to arrange the computation so that many of the multiplies are
         /// simple scalings of the final outputs.  These multiplies can then be
         /// folded into the multiplications or divisions by the JPEG quantization
-        /// table entries.  The AA&N method leaves only 5 multiplies and 29 adds
+        /// table entries.  The AA&amp;N method leaves only 5 multiplies and 29 adds
         /// to be done in the DCT itself.
         /// The primary disadvantage of this method is that with a fixed-point
         /// implementation, accuracy is lost due to imprecise representation of the
@@ -1181,12 +1181,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// 
         /// NOTE: this code only copes with 8x8 DCTs.
         /// 
-        /// The implementation is based on the Loeffler, Ligtenberg and Moschytz (LL&M)
+        /// The implementation is based on the Loeffler, Ligtenberg and Moschytz (LL&amp;M)
         /// algorithm. We simply replace each 8-to-8 1-D IDCT step
         /// with an 8-to-4 step that produces the four averages of two adjacent outputs
         /// (or an 8-to-2 step producing two averages of four outputs, for 2x2 output).
         /// These steps were derived by computing the corresponding values at the end
-        /// of the normal LL&M code, then simplifying as much as possible.
+        /// of the normal LL&amp;M code, then simplifying as much as possible.
         /// 
         /// 1x1 is trivial: just take the DC coefficient divided by 8.
         /// 

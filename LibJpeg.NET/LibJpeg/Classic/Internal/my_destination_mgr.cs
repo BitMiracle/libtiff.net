@@ -57,8 +57,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Empty the output buffer --- called whenever buffer fills up.
         /// 
         /// In typical applications, this should write the entire output buffer
-        /// (ignoring the current state of next_output_byte & free_in_buffer),
-        /// reset the pointer & count to the start of the buffer, and return true
+        /// (ignoring the current state of next_output_byte and free_in_buffer),
+        /// reset the pointer and count to the start of the buffer, and return true
         /// indicating that the buffer has been dumped.
         /// 
         /// In applications that need to be able to suspend compression due to output
@@ -70,7 +70,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// suspension --- see the documentation.
         /// 
         /// When suspending, the compressor will back up to a convenient restart point
-        /// (typically the start of the current MCU). next_output_byte & free_in_buffer
+        /// (typically the start of the current MCU). next_output_byte and free_in_buffer
         /// indicate where the restart point will be if the current call returns false.
         /// Data beyond this point will be regenerated after resumption, so do not
         /// write it out when emptying the buffer externally.

@@ -22,7 +22,7 @@ using System.Text;
 namespace BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
-    /// Marker reading & parsing
+    /// Marker reading and parsing
     /// </summary>
     class jpeg_marker_reader
     {

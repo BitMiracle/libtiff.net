@@ -518,7 +518,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         }
 
         /// <summary>
-        /// Emit a restart marker & resynchronize predictions.
+        /// Emit a restart marker and resynchronize predictions.
         /// </summary>
         private bool emit_restart(savable_state state, int restart_num)
         {

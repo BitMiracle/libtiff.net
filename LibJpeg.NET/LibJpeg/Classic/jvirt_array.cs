@@ -48,6 +48,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         /// <param name="width">Width of array</param>
         /// <param name="height">Total virtual array height</param>
+        /// <param name="allocator">The allocator.</param>
         internal jvirt_array(int width, int height, Allocator allocator)
         {
             m_cinfo = null;

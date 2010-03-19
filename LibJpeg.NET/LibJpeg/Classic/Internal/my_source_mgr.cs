@@ -67,8 +67,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Fill the input buffer - called whenever buffer is emptied.
         /// 
         /// In typical applications, this should read fresh data into the buffer
-        /// (ignoring the current state of next_input_byte & bytes_in_buffer),
-        /// reset the pointer & count to the start of the buffer, and return true
+        /// (ignoring the current state of next_input_byte and bytes_in_buffer),
+        /// reset the pointer and count to the start of the buffer, and return true
         /// indicating that the buffer has been reloaded.  It is not necessary to
         /// fill the buffer entirely, only to obtain at least one more byte.
         /// 
@@ -90,7 +90,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// the documentation.
         /// 
         /// When suspending, the decompressor will back up to a convenient restart point
-        /// (typically the start of the current MCU). next_input_byte & bytes_in_buffer
+        /// (typically the start of the current MCU). next_input_byte and bytes_in_buffer
         /// indicate where the restart point will be if the current call returns false.
         /// Data beyond this point must be rescanned after resumption, so move it to
         /// the front of the buffer rather than discarding it.
