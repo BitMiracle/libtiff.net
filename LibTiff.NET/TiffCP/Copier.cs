@@ -249,9 +249,25 @@ namespace BitMiracle.TiffCP
                 }
             }
             else if (m_compression == Compression.SGILOG || m_compression == Compression.SGILOG24)
+            {
                 outImage.SetField(TiffTag.PHOTOMETRIC, samplesperpixel == 1 ? Photometric.LOGL : Photometric.LOGLUV);
+            }
             else
-                copyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
+            {
+                result = inImage.GetField(TiffTag.COMPRESSION);
+                if (result != null)
+                {
+                    Compression input_compression = (Compression)result[0].ToInt();
+                    if (input_compression == Compression.JPEG)
+                        inImage.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
+                    else
+                        copyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
+                }
+                else
+                {
+                    copyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
+                }
+            }
 
             if (m_fillorder != 0)
                 outImage.SetField(TiffTag.FILLORDER, m_fillorder);

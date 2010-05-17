@@ -59,5 +59,11 @@ namespace UnitTests.TiffCP
         {
             performTest("tiger-rgb-tile-planar-24.tif", m_args, m_suffix);
         }
+
+        [Test]
+        public void test_penguin_jpeg()
+        {
+            performTest("penguin_jpeg.tif", m_args, m_suffix);
+        }
     }
 }
