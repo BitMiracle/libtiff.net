@@ -806,7 +806,10 @@ namespace BitMiracle.LibJpeg.Classic
             int componentCount = data.Length; // maybe we should use max_lines here
             ComponentBuffer[] cb = new ComponentBuffer[componentCount];
             for (int i = 0; i < componentCount; i++)
+            {
+                cb[i] = new ComponentBuffer();
                 cb[i].SetBuffer(data[i], null, 0);
+            }
 
             /* Decompress directly into user's buffer. */
             if (m_coef.decompress_data(cb) == ReadResult.JPEG_SUSPENDED)

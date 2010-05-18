@@ -125,7 +125,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_jpegtables = null;
             m_jpegtables_length = 0;
             m_jpegquality = 75; /* Default IJG quality */
-            m_jpegcolormode = JpegColorMode.RAW;
+            m_jpegcolormode = JpegColorMode.RGB;
             m_jpegtablesmode = JpegTablesMode.QUANT | JpegTablesMode.HUFF;
 
             m_recvparams = 0;
@@ -698,7 +698,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             const string module = "JPEGPreDecode";
             int segment_width;
             int segment_height;
-            bool downsampled_output;
             int ci;
 
             Debug.Assert(m_common.m_is_decompressor);
@@ -844,7 +843,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 }
             }
 
-            downsampled_output = false;
+            bool downsampled_output = false;
             if (td.td_planarconfig == PlanarConfig.CONTIG &&
                 m_photometric == Photometric.YCBCR &&
                 m_jpegcolormode == JpegColorMode.RGB)
@@ -1071,6 +1070,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             int inptr = 0;
 
                             int outptr = bufOffset + clumpoffset;
+                            if (outptr >= buf.Length)
+                                break;
 
                             if (hsamp == 1)
                             {

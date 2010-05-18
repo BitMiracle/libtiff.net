@@ -41,7 +41,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         */
         public override void error_exit()
         {
-            string buffer = m_sp.m_err.format_message();
+            string buffer = format_message();
             Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", "{0}", buffer); /* display the error message */
             m_sp.m_common.jpeg_abort(); /* clean up libjpeg state */
 

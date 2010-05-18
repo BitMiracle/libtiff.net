@@ -65,5 +65,13 @@ namespace UnitTests.TiffCP
         {
             performTest("penguin_jpeg.tif", m_args, m_suffix);
         }
+
+        [Test]
+        public void test_penguin_separate_jpeg()
+        {
+            performTest("penguin_jpeg.tif", 
+                new string[] { "-c", "none", "-p", "separate" },
+                "_converted_strips_separate");
+        }
     }
 }
