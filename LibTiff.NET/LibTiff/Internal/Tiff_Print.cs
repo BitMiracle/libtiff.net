@@ -53,7 +53,7 @@ namespace BitMiracle.LibTiff.Classic
 
         private static void printField(Stream fd, TiffFieldInfo fip, int value_count, object raw_data)
         {
-            fprintf(fd, "  {0}: ", fip.Field_name);
+            fprintf(fd, "  {0}: ", fip.Name);
 
             byte[] bytes = raw_data as byte[];
             sbyte[] sbytes = raw_data as sbyte[];
@@ -67,58 +67,54 @@ namespace BitMiracle.LibTiff.Classic
 
             for (int j = 0; j < value_count; j++)
             {
-                if (fip.Field_type == TiffType.BYTE || 
-                    fip.Field_type == TiffType.SBYTE)
+                if (fip.Type == TiffType.BYTE || fip.Type == TiffType.SBYTE)
                 {
                     if (bytes != null)
                         fprintf(fd, "{0}", bytes[j]);
                     else if (sbytes != null)
                         fprintf(fd, "{0}", sbytes[j]);
                 }
-                else if (fip.Field_type == TiffType.UNDEFINED)
+                else if (fip.Type == TiffType.UNDEFINED)
                 {
                     if (bytes != null)
                         fprintf(fd, "0x{0:x}", bytes[j]);
                 }
-                else if (fip.Field_type == TiffType.SHORT || 
-                    fip.Field_type == TiffType.SSHORT)
+                else if (fip.Type == TiffType.SHORT || fip.Type == TiffType.SSHORT)
                 {
                     if (shorts != null)
                         fprintf(fd, "{0}", shorts[j]);
                     else if (ushorts != null)
                         fprintf(fd, "{0}", ushorts[j]);
                 }
-                else if (fip.Field_type == TiffType.LONG || 
-                    fip.Field_type == TiffType.SLONG)
+                else if (fip.Type == TiffType.LONG || fip.Type == TiffType.SLONG)
                 {
                     if (ints != null)
                         fprintf(fd, "{0}", ints[j]);
                     else if (uints != null)
                         fprintf(fd, "{0}", uints[j]);
                 }
-                else if (fip.Field_type == TiffType.RATIONAL ||
-                    fip.Field_type == TiffType.SRATIONAL ||
-                    fip.Field_type == TiffType.FLOAT)
+                else if (fip.Type == TiffType.RATIONAL ||
+                    fip.Type == TiffType.SRATIONAL ||
+                    fip.Type == TiffType.FLOAT)
                 {
                     if (floats != null)
                         fprintf(fd, "{0}", floats[j]);
                 }
-                else if (fip.Field_type == TiffType.IFD)
+                else if (fip.Type == TiffType.IFD)
                 {
                     if (ints != null)
                         fprintf(fd, "0x{0:x}", ints[j]);
                     else if (uints != null)
                         fprintf(fd, "0x{0:x}", uints[j]);
                 }
-                else if (fip.Field_type == TiffType.ASCII)
+                else if (fip.Type == TiffType.ASCII)
                 {
                     if (s != null)
                         fprintf(fd, "{0}", s);
 
                     break;
                 }
-                else if (fip.Field_type == TiffType.DOUBLE ||
-                    fip.Field_type == TiffType.FLOAT)
+                else if (fip.Type == TiffType.DOUBLE || fip.Type == TiffType.FLOAT)
                 {
                     if (floats != null)
                         fprintf(fd, "{0}", floats[j]);
@@ -203,10 +199,8 @@ namespace BitMiracle.LibTiff.Classic
                     return false;
 
                 case TiffTag.RICHTIFFIPTC:
-                    /*
-                     * XXX: for some weird reason RichTIFFIPTC tag
-                     * defined as array of LONG values.
-                     */
+                    // XXX: for some weird reason RichTIFFIPTC tag defined
+                    // as array of LONG values.
                     fprintf(fd, "  RichTIFFIPTC Data: <present>, {0} bytes\n", value_count * 4);
                     return true;
 

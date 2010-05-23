@@ -29,7 +29,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case TiffTag.PREDICTOR:
                     sp.SetPredictorValue((Predictor)ap[0].ToByte());
                     tif.setFieldBit(CodecWithPredictor.FIELD_PREDICTOR);
-                    tif.m_flags |= Tiff.TIFF_DIRTYDIRECT;
+                    tif.m_flags |= TiffFlags.DIRTYDIRECT;
                     return true;
             }
 

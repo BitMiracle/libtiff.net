@@ -36,7 +36,8 @@ namespace BitMiracle.LibTiff.Classic
 
         private bool isFillOrder(FillOrder o)
         {
-            return ((m_flags & (int)o) != 0);
+            TiffFlags order = (TiffFlags)o;
+            return ((m_flags & order) == order);
         }
 
         private static int BITn(int n)
@@ -58,22 +59,22 @@ namespace BitMiracle.LibTiff.Classic
             TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
             if (fip == null)
             {
-                /* unknown tag */
+                // unknown tag
                 ErrorExt(this, m_clientdata, "SetField", "{0}: Unknown {1}tag {2}",
                     m_name, isPseudoTag(tag) ? "pseudo-" : "", tag);
                 return false;
             }
 
-            if (tag != TiffTag.IMAGELENGTH && (m_flags & TIFF_BEENWRITING) != 0 && !fip.Field_okto_change)
+            if (tag != TiffTag.IMAGELENGTH &&
+                (m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING &&
+                !fip.OkToChange)
             {
-                /*
-                 * Consult info table to see if tag can be changed
-                 * after we've started writing.  We only allow changes
-                 * to those tags that don't/shouldn't affect the
-                 * compression and/or format of the data.
-                 */
+                // Consult info table to see if tag can be changed after we've
+                // started writing. We only allow changes to those tags that
+                // don't / shouldn't affect the compression and / or format of
+                // the data.
                 ErrorExt(this, m_clientdata, "SetField", "{0}: Cannot modify tag \"{1}\" while writing",
-                    m_name, fip.Field_name);
+                    m_name, fip.Name);
                 return false;
             }
 
@@ -107,18 +108,18 @@ namespace BitMiracle.LibTiff.Classic
             /*
              * NB: The directory is marked dirty as a result of setting
              * up the default compression scheme.  However, this really
-             * isn't correct -- we want TIFF_DIRTYDIRECT to be set only
+             * isn't correct -- we want DIRTYDIRECT to be set only
              * if the user does something.  We could just do the setup
              * by hand, but it seems better to use the normal mechanism
              * (i.e. SetField).
              */
-            m_flags &= ~TIFF_DIRTYDIRECT;
+            m_flags &= ~TiffFlags.DIRTYDIRECT;
 
             /*
              * we clear the ISTILED flag when setting up a new directory.
              * Should we also be clearing stuff like INSUBIFD?
              */
-            m_flags &= ~TIFF_ISTILED;
+            m_flags &= ~TiffFlags.ISTILED;
         }
 
         private bool advanceDirectory(ref uint nextdir, out long off)
@@ -134,7 +135,7 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            if ((m_flags & Tiff.TIFF_SWAB) != 0)
+            if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                 SwabShort(ref dircount);
 
             off = seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
@@ -145,7 +146,7 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            if ((m_flags & Tiff.TIFF_SWAB) != 0)
+            if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                 SwabUInt(ref nextdir);
             
             return true;

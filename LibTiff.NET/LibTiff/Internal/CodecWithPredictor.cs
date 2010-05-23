@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
     /// </summary>
     class CodecWithPredictor : TiffCodec
     {
-        public const int FIELD_PREDICTOR = (FIELD.FIELD_CODEC + 0);
+        public const int FIELD_PREDICTOR = (FieldBit.Codec + 0);
         
         private enum PredictorType
         {
@@ -838,7 +838,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 * routine and override the normal post decoding logic that
                 * the library setup when the directory was read.
                 */
-                if ((m_tif.m_flags & Tiff.TIFF_SWAB) != 0)
+                if ((m_tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                 {
                     if (m_predictorType == PredictorType.ptHorAcc16)
                     {
@@ -867,7 +867,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 * point predictor, the accumulation routine should return
                 * byres in the native order.
                 */
-                if ((m_tif.m_flags & Tiff.TIFF_SWAB) != 0)
+                if ((m_tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                     m_tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmNone;
 
                 /*

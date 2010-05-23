@@ -47,7 +47,7 @@
     <Compile Include="Internal\DeflateCodec.cs" />
     <Compile Include="Internal\DeflateCodecTagMethods.cs" />
     <Compile Include="Internal\DumpModeCodec.cs" />
-    <Compile Include="Internal\Field.cs" />
+    <Compile Include="FieldBit.cs" />
     <Compile Include="Internal\JpegCodec.cs" />
     <Compile Include="Internal\JpegCodecTagMethods.cs" />
     <Compile Include="Internal\JpegErrorManager.cs" />
@@ -62,6 +62,7 @@
     <Compile Include="Internal\TiffDirectory.cs" />
     <Compile Include="Internal\TiffDirEntry.cs" />
     <Compile Include="Internal\TiffDisplay.cs" />
+    <Compile Include="Internal\TiffFlags.cs" />
     <Compile Include="Internal\TiffHeader.cs" />
     <Compile Include="Internal\TiffRGBAImage.cs" />
     <Compile Include="Internal\TiffTagValue.cs" />

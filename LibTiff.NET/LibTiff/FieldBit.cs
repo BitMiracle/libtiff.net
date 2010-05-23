@@ -13,39 +13,49 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace BitMiracle.LibTiff.Classic
 {
-    class FIELD
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    class FieldBit
     {
-        public const int FIELD_SETLONGS = 4;
+        /// <summary>
+        /// FieldBit.Ignore is used to signify tags that are to be processed
+        /// but otherwise ignored. This permits antiquated tags to be quietly
+        /// read and discarded. Note that a bit *is* allocated for ignored tags;
+        /// this is understood by the directory reading logic which uses this
+        /// fact to avoid special-case handling
+        /// </summary>
+        public const short Ignore = 0;
+
+        /// <summary>
+        /// Pseudo-tags don't normally need field bits since they are not
+        /// written to an output file (by definition). The library also has
+        /// express logic to always query a codec for a pseudo-tag so allocating
+        /// a field bit for one is a waste. If codec wants to promote the notion
+        /// of a pseudo-tag being "set" or "unset" then it can do using
+        /// internal state flags without polluting the field bit space defined
+        /// for real tags.
+        /// </summary>
+        public const short Pseudo = 0;
+
+        public const short Custom = 65;
+
+        /// <summary>
+        /// base of codec-private tags
+        /// </summary>
+        public const short Codec = 66;
+
+        public const short Last = (32 * FIELD_SETLONGS - 1);
+
+        internal const int FIELD_SETLONGS = 4;
 
         /*
          * Field flags used to indicate fields that have
          * been set in a directory, and to reference fields
          * when manipulating a directory.
          */
-
-        /*
-         * FIELD_IGNORE is used to signify tags that are to
-         * be processed but otherwise ignored.  This permits
-         * antiquated tags to be quietly read and discarded.
-         * Note that a bit *is* allocated for ignored tags;
-         * this is understood by the directory reading logic
-         * which uses this fact to avoid special-case handling
-         */
-        internal const short FIELD_IGNORE = 0;
-
-        /*
-         * Pseudo-tags don't normally need field bits since they
-         * are not written to an output file (by definition).
-         * The library also has express logic to always query a
-         * codec for a pseudo-tag so allocating a field bit for
-         * one is a waste.   If codec wants to promote the notion
-         * of a pseudo-tag being ``set'' or ``unset'' then it can
-         * do using internal state flags without polluting the
-         * field bit space defined for real tags.
-         */
-        internal const short FIELD_PSEUDO = 0;
 
         /* multi-item fields */
         internal const short FIELD_IMAGEDIMENSIONS = 1;
@@ -82,11 +92,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         internal const short FIELD_YCBCRPOSITIONING = 40;
         internal const short FIELD_TRANSFERFUNCTION = 44;
         internal const short FIELD_INKNAMES = 46;
-        internal const short FIELD_SUBIFD = 49;
-        internal const short FIELD_CUSTOM = 65;
-        /* end of support for well-known tags; codec-private tags follow */
-
-        internal const short FIELD_CODEC = 66;  /* base of codec-private tags */
-        internal const short FIELD_LAST = (32 * FIELD_SETLONGS - 1);
+        internal const short FIELD_SUBIFD = 49;        
+        /* end of support for well-known tags; codec-private tags follow */        
     }
 }

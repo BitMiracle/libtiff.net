@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
+using BitMiracle.LibTiff.Classic.Internal;
+
 namespace BitMiracle.LibTiff.Classic
 {
 #if EXPOSE_LIBTIFF
@@ -83,7 +85,7 @@ namespace BitMiracle.LibTiff.Classic
             if (magic == TIFF_BIGENDIAN)
             {
                 m_typeshift = bigTypeshift;
-                m_flags |= Tiff.TIFF_SWAB;
+                m_flags |= TiffFlags.SWAB;
             }
             else
             {

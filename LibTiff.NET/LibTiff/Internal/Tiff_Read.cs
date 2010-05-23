@@ -222,7 +222,7 @@ namespace BitMiracle.LibTiff.Classic
 
         private int readRawStrip1(int strip, byte[] buf, int offset, int size, string module)
         {
-            Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
+            Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
 
             if (!seekOK(m_dir.td_stripoffset[strip]))
             {
@@ -245,7 +245,7 @@ namespace BitMiracle.LibTiff.Classic
 
         private int readRawTile1(int tile, byte[] buf, int offset, int size, string module)
         {
-            Debug.Assert((m_flags & TIFF_NOREADRAW) == 0);
+            Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
 
             if (!seekOK(m_dir.td_stripoffset[tile]))
             {
@@ -272,19 +272,19 @@ namespace BitMiracle.LibTiff.Classic
         */
         private bool startStrip(int strip)
         {
-            if ((m_flags & TIFF_CODERSETUP) == 0)
+            if ((m_flags & TiffFlags.CODERSETUP) != TiffFlags.CODERSETUP)
             {
                 if (!m_currentCodec.SetupDecode())
                     return false;
 
-                m_flags |= TIFF_CODERSETUP;
+                m_flags |= TiffFlags.CODERSETUP;
             }
 
             m_curstrip = strip;
             m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
             m_rawcp = 0;
 
-            if ((m_flags & TIFF_NOREADRAW) != 0)
+            if ((m_flags & TiffFlags.NOREADRAW) == TiffFlags.NOREADRAW)
                 m_rawcc = 0;
             else
                 m_rawcc = m_dir.td_stripbytecount[strip];
@@ -298,19 +298,20 @@ namespace BitMiracle.LibTiff.Classic
         */
         private bool startTile(int tile)
         {
-            if ((m_flags & TIFF_CODERSETUP) == 0)
+            if ((m_flags & TiffFlags.CODERSETUP) != TiffFlags.CODERSETUP)
             {
                 if (!m_currentCodec.SetupDecode())
                     return false;
 
-                m_flags |= TIFF_CODERSETUP;
+                m_flags |= TiffFlags.CODERSETUP;
             }
 
             m_curtile = tile;
             m_row = (tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilelength;
             m_col = (tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilewidth;
             m_rawcp = 0;
-            if ((m_flags & TIFF_NOREADRAW) != 0)
+
+            if ((m_flags & TiffFlags.NOREADRAW) == TiffFlags.NOREADRAW)
                 m_rawcc = 0;
             else
                 m_rawcc = m_dir.td_stripbytecount[tile];
@@ -393,8 +394,8 @@ namespace BitMiracle.LibTiff.Classic
         internal bool fillStrip(int strip)
         {
             const string module = "fillStrip";
-    
-            if ((m_flags & TIFF_NOREADRAW) == 0)
+
+            if ((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW)
             {
                 int bytecount = m_dir.td_stripbytecount[strip];
                 if (bytecount <= 0)
@@ -413,7 +414,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (bytecount > m_rawdatasize)
                 {
                     m_curstrip = NOSTRIP;
-                    if ((m_flags & TIFF_MYBUFFER) == 0)
+                    if ((m_flags & TiffFlags.MYBUFFER) != TiffFlags.MYBUFFER)
                     {
                         ErrorExt(this, m_clientdata, module,
                             "{0}: Data buffer too small to hold strip {1}", m_name, strip);
@@ -425,8 +426,8 @@ namespace BitMiracle.LibTiff.Classic
                 
                 if (readRawStrip1(strip, m_rawdata, 0, bytecount, module) != bytecount)
                     return false;
-                
-                if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
+
+                if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TiffFlags.NOBITREV) != TiffFlags.NOBITREV)
                     ReverseBits(m_rawdata, bytecount);
             }
 
@@ -442,7 +443,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             const string module = "fillTile";
 
-            if ((m_flags & TIFF_NOREADRAW) == 0)
+            if ((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW)
             {
                 int bytecount = m_dir.td_stripbytecount[tile];
                 if (bytecount <= 0)
@@ -461,7 +462,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (bytecount > m_rawdatasize)
                 {
                     m_curtile = NOTILE;
-                    if ((m_flags & TIFF_MYBUFFER) == 0)
+                    if ((m_flags & TiffFlags.MYBUFFER) != TiffFlags.MYBUFFER)
                     {
                         ErrorExt(this, m_clientdata, module,
                             "{0}: Data buffer too small to hold tile {1}", m_name, tile);
@@ -474,7 +475,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (readRawTile1(tile, m_rawdata, 0, bytecount, module) != bytecount)
                     return false;
 
-                if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
+                if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TiffFlags.NOBITREV) != TiffFlags.NOBITREV)
                     ReverseBits(m_rawdata, bytecount);
             }
 

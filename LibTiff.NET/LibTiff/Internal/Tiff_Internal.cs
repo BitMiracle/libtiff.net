@@ -25,81 +25,6 @@ namespace BitMiracle.LibTiff.Classic
     {
         internal const int STRIP_SIZE_DEFAULT = 8192;
 
-        /// <summary>
-        /// natural bit fill order for machine
-        /// </summary>
-        internal const int TIFF_FILLORDER = 0x0003;
-
-        /// <summary>
-        /// current directory must be written
-        /// </summary>
-        internal const int TIFF_DIRTYDIRECT = 0x0008;
-
-        /// <summary>
-        /// data buffers setup
-        /// </summary>
-        internal const int TIFF_BUFFERSETUP = 0x0010;
-
-        /// <summary>
-        /// encoder/decoder setup done
-        /// </summary>
-        internal const int TIFF_CODERSETUP = 0x0020;
-
-        /// <summary>
-        /// written 1+ scanlines to file
-        /// </summary>
-        internal const int TIFF_BEENWRITING = 0x0040;
-
-        /// <summary>
-        /// byte swap file information
-        /// </summary>
-        internal const int TIFF_SWAB = 0x0080;
-
-        /// <summary>
-        /// inhibit bit reversal logic
-        /// </summary>
-        internal const int TIFF_NOBITREV = 0x0100;
-
-        /// <summary>
-        /// my raw data buffer; free on close
-        /// </summary>
-        internal const int TIFF_MYBUFFER = 0x0200;
-
-        /// <summary>
-        /// file is tile, not strip- based
-        /// </summary>
-        internal const int TIFF_ISTILED = 0x0400;
-
-        /// <summary>
-        /// need call to postencode routine
-        /// </summary>
-        internal const int TIFF_POSTENCODE = 0x1000;
-
-        /// <summary>
-        /// currently writing a subifd
-        /// </summary>
-        internal const int TIFF_INSUBIFD = 0x2000;
-
-        /// <summary>
-        /// library is doing data up-sampling
-        /// </summary>
-        internal const int TIFF_UPSAMPLED = 0x4000;
-
-        /// <summary>
-        /// enable strip chopping support
-        /// </summary>
-        internal const int TIFF_STRIPCHOP = 0x8000;
-
-        /// <summary>
-        /// read header only, do not process the first directory
-        /// </summary>
-        internal const int TIFF_HEADERONLY = 0x10000;
-
-        /// <summary>
-        /// skip reading of raw uncompressed image data
-        /// </summary>
-        internal const int TIFF_NOREADRAW = 0x20000;
-
         internal enum PostDecodeMethodType
         {
             pdmNone,
@@ -118,7 +43,7 @@ namespace BitMiracle.LibTiff.Classic
         /// open mode (O_*)
         /// </summary>
         internal int m_mode;
-        internal int m_flags;
+        internal TiffFlags m_flags;
 
         //
         // the first directory
@@ -463,7 +388,7 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             m_decodestatus = c.CanDecode();
-            m_flags &= ~(TIFF_NOBITREV | TIFF_NOREADRAW);
+            m_flags &= ~(TiffFlags.NOBITREV | TiffFlags.NOREADRAW);
 
             m_currentCodec = c;
             return c.Init();

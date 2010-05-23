@@ -20,6 +20,6 @@ using System.Runtime.InteropServices;
 // 
 //      Build Number gets placed in strings below using SVN version info
 
-[assembly: AssemblyVersion("1.0.$WCREV$.0")]
-[assembly: AssemblyFileVersion("1.0.$WCREV$.0")]
+[assembly: AssemblyVersion("1.1.$WCREV$.0")]
+[assembly: AssemblyFileVersion("1.1.$WCREV$.0")]
 

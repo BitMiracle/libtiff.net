@@ -30,17 +30,17 @@ namespace BitMiracle.LibTiff.Classic
     {
         private bool writeCheckStrips(string module)
         {
-            return ((m_flags & TIFF_BEENWRITING) != 0 || WriteCheck(0, module));
+            return ((m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING || WriteCheck(0, module));
         }
 
         private bool writeCheckTiles(string module)
         {
-            return ((m_flags & TIFF_BEENWRITING) != 0 || WriteCheck(1, module));
+            return ((m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING || WriteCheck(1, module));
         }
 
         private void bufferCheck()
         {
-            if (!((m_flags & TIFF_BUFFERSETUP) != 0 && m_rawdata != null))
+            if (!((m_flags & TiffFlags.BUFFERSETUP) == TiffFlags.BUFFERSETUP && m_rawdata != null))
                 WriteBufferSetup(null, -1);
         }
 
@@ -197,7 +197,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             if (m_rawcc > 0)
             {
-                if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TIFF_NOBITREV) == 0)
+                if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TiffFlags.NOBITREV) != TiffFlags.NOBITREV)
                     ReverseBits(m_rawdata, m_rawcc);
 
                 if (!appendToStrip(IsTiled() ? m_curtile : m_curstrip, m_rawdata, m_rawcc))

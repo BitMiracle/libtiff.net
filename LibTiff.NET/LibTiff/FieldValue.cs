@@ -299,7 +299,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Retrieves value converted to array of short.
         /// If value is short[] then it retrieved unaltered.
-        /// If value is byte[], ushort[], int[] or uint[] then
+        /// If value is byte[] then each pair of bytes is converted to
+        /// short and added to resulting array. If value contains odd amount of
+        /// bytes, then null is returned.
+        /// If value is ushort[], int[] or uint[] then
         /// each element of source array gets converted to short and added to
         /// resulting array.
         /// If value is of any other type then null is returned.
@@ -317,9 +320,19 @@ namespace BitMiracle.LibTiff.Classic
                 else if (m_value is byte[])
                 {
                     byte[] temp = m_value as byte[];
-                    short[] result = new short[temp.Length];
-                    for (int i = 0; i < temp.Length; i++)
-                        result[i] = (short)temp[i];
+                    if (temp.Length % sizeof(short) != 0)
+                        return null;
+
+                    int totalShorts = temp.Length / sizeof(short);
+                    short[] result = new short[totalShorts];
+
+                    int byteOffset = 0;
+                    for (int i = 0; i < totalShorts; i++)
+                    {
+                        short s = BitConverter.ToInt16(temp, byteOffset);
+                        result[i] = s;
+                        byteOffset += sizeof(short);
+                    }
 
                     return result;
                 }
@@ -358,7 +371,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Retrieves value converted to array of ushort.
         /// If value is ushort[] then it retrieved unaltered.
-        /// If value is byte[], short[], int[] or uint[] then
+        /// If value is byte[] then each pair of bytes is converted to
+        /// ushort and added to resulting array. If value contains odd amount of
+        /// bytes, then null is returned.
+        /// If value is short[], int[] or uint[] then
         /// each element of source array gets converted to ushort and added to
         /// resulting array.
         /// If value is of any other type then null is returned.
@@ -379,9 +395,19 @@ namespace BitMiracle.LibTiff.Classic
                 else if (m_value is byte[])
                 {
                     byte[] temp = m_value as byte[];
-                    ushort[] result = new ushort[temp.Length];
-                    for (int i = 0; i < temp.Length; i++)
-                        result[i] = (ushort)temp[i];
+                    if (temp.Length % sizeof(ushort) != 0)
+                        return null;
+
+                    int totalUShorts = temp.Length / sizeof(ushort);
+                    ushort[] result = new ushort[totalUShorts];
+
+                    int byteOffset = 0;
+                    for (int i = 0; i < totalUShorts; i++)
+                    {
+                        ushort s = BitConverter.ToUInt16(temp, byteOffset);
+                        result[i] = s;
+                        byteOffset += sizeof(ushort);
+                    }
 
                     return result;
                 }
@@ -420,7 +446,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Retrieves value converted to array of int.
         /// If value is int[] then it retrieved unaltered.
-        /// If value is byte[], short[], ushort[] or uint[] then
+        /// If value is byte[] then each 4 bytes are converted to
+        /// int and added to resulting array. If value contains amount of
+        /// bytes that can't be divided by 4 without remainder, then null is returned.
+        /// If value is short[], ushort[] or uint[] then
         /// each element of source array gets converted to int and added to
         /// resulting array.
         /// If value is of any other type then null is returned.
@@ -438,9 +467,19 @@ namespace BitMiracle.LibTiff.Classic
                 else if (m_value is byte[])
                 {
                     byte[] temp = m_value as byte[];
-                    int[] result = new int[temp.Length];
-                    for (int i = 0; i < temp.Length; i++)
-                        result[i] = (int)temp[i];
+                    if (temp.Length % sizeof(int) != 0)
+                        return null;
+
+                    int totalInts = temp.Length / sizeof(int);
+                    int[] result = new int[totalInts];
+
+                    int byteOffset = 0;
+                    for (int i = 0; i < totalInts; i++)
+                    {
+                        int s = BitConverter.ToInt32(temp, byteOffset);
+                        result[i] = s;
+                        byteOffset += sizeof(int);
+                    }
 
                     return result;
                 }
@@ -479,7 +518,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Retrieves value converted to array of uint.
         /// If value is uint[] then it retrieved unaltered.
-        /// If value is byte[], short[], ushort[] or int[] then
+        /// If value is byte[] then each 4 bytes are converted to
+        /// uint and added to resulting array. If value contains amount of
+        /// bytes that can't be divided by 4 without remainder, then null is returned.
+        /// If value is short[], ushort[] or int[] then
         /// each element of source array gets converted to uint and added to
         /// resulting array.
         /// If value is of any other type then null is returned.
@@ -500,9 +542,19 @@ namespace BitMiracle.LibTiff.Classic
                 else if (m_value is byte[])
                 {
                     byte[] temp = m_value as byte[];
-                    uint[] result = new uint[temp.Length];
-                    for (int i = 0; i < temp.Length; i++)
-                        result[i] = (uint)temp[i];
+                    if (temp.Length % sizeof(uint) != 0)
+                        return null;
+
+                    int totalUInts = temp.Length / sizeof(uint);
+                    uint[] result = new uint[totalUInts];
+
+                    int byteOffset = 0;
+                    for (int i = 0; i < totalUInts; i++)
+                    {
+                        uint s = BitConverter.ToUInt32(temp, byteOffset);
+                        result[i] = s;
+                        byteOffset += sizeof(uint);
+                    }
 
                     return result;
                 }
@@ -544,7 +596,8 @@ namespace BitMiracle.LibTiff.Classic
         /// If value is double[] then each element of source array gets 
         /// converted to float and added to resulting array.
         /// If value is byte[] then each 4 bytes are converted to float
-        /// and added to resulting array.
+        /// and added to resulting array. If value contains amount of
+        /// bytes that can't be divided by 4 without remainder, then null is returned.
         /// If value is of any other type then null is returned.
         /// </summary>
         public float[] ToFloatArray()
@@ -569,6 +622,9 @@ namespace BitMiracle.LibTiff.Classic
                 else if (m_value is byte[])
                 {
                     byte[] temp = m_value as byte[];
+                    if (temp.Length % sizeof(float) != 0)
+                        return null;
+
                     int tempPos = 0; 
                     
                     int floatCount = temp.Length / sizeof(float);
@@ -594,7 +650,8 @@ namespace BitMiracle.LibTiff.Classic
         /// If value is float[] then each element of source array gets 
         /// converted to double and added to resulting array.
         /// If value is byte[] then each 8 bytes are converted to double
-        /// and added to resulting array.
+        /// and added to resulting array. If value contains amount of
+        /// bytes that can't be divided by 8 without remainder, then null is returned.
         /// If value is of any other type then null is returned.
         /// </summary>
         public double[] ToDoubleArray()
@@ -619,6 +676,9 @@ namespace BitMiracle.LibTiff.Classic
                 else if (m_value is byte[])
                 {
                     byte[] temp = m_value as byte[];
+                    if (temp.Length % sizeof(double) != 0)
+                        return null;
+
                     int tempPos = 0;
 
                     int floatCount = temp.Length / sizeof(double);

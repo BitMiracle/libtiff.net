@@ -47,14 +47,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
         */
         public delegate void FaxFillFunc(byte[] buf, int startOffset, int[] runs, int thisrun, int erun, int lastx);
 
-        public const int FIELD_BADFAXLINES = (FIELD.FIELD_CODEC + 0);
-        public const int FIELD_CLEANFAXDATA = (FIELD.FIELD_CODEC + 1);
-        public const int FIELD_BADFAXRUN = (FIELD.FIELD_CODEC + 2);
-        public const int FIELD_RECVPARAMS = (FIELD.FIELD_CODEC + 3);
-        public const int FIELD_SUBADDRESS = (FIELD.FIELD_CODEC + 4);
-        public const int FIELD_RECVTIME = (FIELD.FIELD_CODEC + 5);
-        public const int FIELD_FAXDCS = (FIELD.FIELD_CODEC + 6);
-        public const int FIELD_OPTIONS = (FIELD.FIELD_CODEC + 7);
+        public const int FIELD_BADFAXLINES = (FieldBit.Codec + 0);
+        public const int FIELD_CLEANFAXDATA = (FieldBit.Codec + 1);
+        public const int FIELD_BADFAXRUN = (FieldBit.Codec + 2);
+        public const int FIELD_RECVPARAMS = (FieldBit.Codec + 3);
+        public const int FIELD_SUBADDRESS = (FieldBit.Codec + 4);
+        public const int FIELD_RECVTIME = (FieldBit.Codec + 5);
+        public const int FIELD_FAXDCS = (FieldBit.Codec + 6);
+        public const int FIELD_OPTIONS = (FieldBit.Codec + 7);
 
         internal FaxMode m_mode; /* operating mode */
         internal Group3Opt m_groupoptions; /* Group 3/4 options tag */
@@ -155,8 +155,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static TiffFieldInfo[] m_faxFieldInfo =
         {
-            new TiffFieldInfo(TiffTag.FAXMODE, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, "FaxMode"), 
-            new TiffFieldInfo(TiffTag.FAXFILLFUNC, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, "FaxFillFunc"), 
+            new TiffFieldInfo(TiffTag.FAXMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, "FaxMode"), 
+            new TiffFieldInfo(TiffTag.FAXFILLFUNC, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, "FaxFillFunc"), 
             new TiffFieldInfo(TiffTag.BADFAXLINES, 1, 1, TiffType.LONG, FIELD_BADFAXLINES, true, false, "BadFaxLines"), 
             new TiffFieldInfo(TiffTag.BADFAXLINES, 1, 1, TiffType.SHORT, FIELD_BADFAXLINES, true, false, "BadFaxLines"), 
             new TiffFieldInfo(TiffTag.CLEANFAXDATA, 1, 1, TiffType.SHORT, FIELD_CLEANFAXDATA, true, false, "CleanFaxData"), 
@@ -1449,9 +1449,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (m_rw_mode == Tiff.O_RDONLY)
             {
-                /* FIXME: improve for in place update */
-                m_tif.m_flags |= Tiff.TIFF_NOBITREV;
-                /* decoder does bit reversal */
+                // FIXME: improve for in place update
+                m_tif.m_flags |= TiffFlags.NOBITREV;
+                // decoder does bit reversal
             }
 
             m_runs = null;

@@ -24,10 +24,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
             Debug.Assert(ta != null);
             Debug.Assert(tb != null);
 
-            if (ta.Field_tag != tb.Field_tag)
-                return ((int)ta.Field_tag - (int)tb.Field_tag);
+            if (ta.Tag != tb.Tag)
+                return ((int)ta.Tag - (int)tb.Tag);
 
-            return (ta.Field_type == TiffType.ANY) ? 0 : ((int)tb.Field_type - (int)ta.Field_type);
+            return (ta.Type == TiffType.ANY) ? 0 : ((int)tb.Type - (int)ta.Type);
         }
     }
 }

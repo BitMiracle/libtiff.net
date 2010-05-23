@@ -69,11 +69,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             TiffFieldInfo fip = tif.FieldWithTag(tag);
             if (fip != null)
-                tif.setFieldBit(fip.Field_bit);
+                tif.setFieldBit(fip.Bit);
             else
                 return false;
 
-            tif.m_flags |= Tiff.TIFF_DIRTYDIRECT;
+            tif.m_flags |= TiffFlags.DIRTYDIRECT;
             return true;
         }
 

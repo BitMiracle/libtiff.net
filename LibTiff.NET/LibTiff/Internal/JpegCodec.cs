@@ -31,11 +31,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
 {
     class JpegCodec : TiffCodec
     {
-        public const int FIELD_JPEGTABLES = (FIELD.FIELD_CODEC + 0);
-        public const int FIELD_RECVPARAMS = (FIELD.FIELD_CODEC + 1);
-        public const int FIELD_SUBADDRESS = (FIELD.FIELD_CODEC + 2);
-        public const int FIELD_RECVTIME = (FIELD.FIELD_CODEC + 3);
-        public const int FIELD_FAXDCS = (FIELD.FIELD_CODEC + 4);
+        public const int FIELD_JPEGTABLES = (FieldBit.Codec + 0);
+        public const int FIELD_RECVPARAMS = (FieldBit.Codec + 1);
+        public const int FIELD_SUBADDRESS = (FieldBit.Codec + 2);
+        public const int FIELD_RECVTIME = (FieldBit.Codec + 3);
+        public const int FIELD_FAXDCS = (FieldBit.Codec + 4);
 
         internal jpeg_compress_struct m_compression;
         internal jpeg_decompress_struct m_decompression;
@@ -61,9 +61,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private static TiffFieldInfo[] jpegFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.JPEGTABLES, -3, -3, TiffType.UNDEFINED, FIELD_JPEGTABLES, false, true, "JPEGTables"), 
-            new TiffFieldInfo(TiffTag.JPEGQUALITY, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, true, false, ""), 
-            new TiffFieldInfo(TiffTag.JPEGCOLORMODE, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, ""), 
-            new TiffFieldInfo(TiffTag.JPEGTABLESMODE, 0, 0, TiffType.ANY, FIELD.FIELD_PSEUDO, false, false, ""), 
+            new TiffFieldInfo(TiffTag.JPEGQUALITY, 0, 0, TiffType.ANY, FieldBit.Pseudo, true, false, ""), 
+            new TiffFieldInfo(TiffTag.JPEGCOLORMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, ""), 
+            new TiffFieldInfo(TiffTag.JPEGTABLESMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, ""), 
             /* Specific for JPEG in faxes */
             new TiffFieldInfo(TiffTag.FAXRECVPARAMS, 1, 1, TiffType.LONG, FIELD_RECVPARAMS, true, false, "FaxRecvParams"), 
             new TiffFieldInfo(TiffTag.FAXSUBADDRESS, -1, -1, TiffType.ASCII, FIELD_SUBADDRESS, true, false, "FaxSubAddress"), 
@@ -136,7 +136,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             m_rawDecode = false;
             m_rawEncode = false;
-            m_tif.m_flags |= Tiff.TIFF_NOBITREV; /* no bit reversal, please */
+            m_tif.m_flags |= TiffFlags.NOBITREV; // no bit reversal, please
 
             m_cinfo_initialized = false;
 
@@ -158,7 +158,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
              * Mark the YCBCRSAMPLES as present even if it is not
              * see: JPEGFixupTestSubsampling().
              */
-            m_tif.setFieldBit(FIELD.FIELD_YCBCRSUBSAMPLING);
+            m_tif.setFieldBit(FieldBit.FIELD_YCBCRSUBSAMPLING);
             return true;
         }
 
@@ -361,11 +361,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
             * and TIFFTileSize return values that reflect the true amount of
             * data.
             */
-            m_tif.m_flags &= ~Tiff.TIFF_UPSAMPLED;
+            m_tif.m_flags &= ~TiffFlags.UPSAMPLED;
             if (m_tif.m_dir.td_planarconfig == PlanarConfig.CONTIG)
             {
                 if (m_tif.m_dir.td_photometric == Photometric.YCBCR && m_jpegcolormode == JpegColorMode.RGB)
-                    m_tif.m_flags |= Tiff.TIFF_UPSAMPLED;
+                    m_tif.m_flags |= TiffFlags.UPSAMPLED;
             }
 
             /*
@@ -630,7 +630,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 /* Mark the field present */
                 /* Can't use SetField since BEENWRITING is already set! */
                 m_tif.setFieldBit(FIELD_JPEGTABLES);
-                m_tif.m_flags |= Tiff.TIFF_DIRTYDIRECT;
+                m_tif.m_flags |= TiffFlags.DIRTYDIRECT;
             }
             else
             {
