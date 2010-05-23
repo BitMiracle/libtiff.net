@@ -345,7 +345,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     short temp = (short)data[dir].tdir_tag;
                     SwabShort(ref temp);
-                    data[dir].tdir_tag = (TiffTag)temp;
+                    data[dir].tdir_tag = (TiffTag)(ushort)temp;
 
                     temp = (short)data[dir].tdir_type;
                     SwabShort(ref temp);

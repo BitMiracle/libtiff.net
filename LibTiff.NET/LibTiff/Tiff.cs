@@ -1074,7 +1074,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     short temp = (short)dp.tdir_tag;
                     SwabShort(ref temp);
-                    dp.tdir_tag = (TiffTag)temp;
+                    dp.tdir_tag = (TiffTag)(ushort)temp;
 
                     temp = (short)dp.tdir_type;
                     SwabShort(ref temp);
@@ -1126,7 +1126,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     WarningExt(this, m_clientdata, module,
                         "{0}: unknown field with tag {1} (0x{2:x}) encountered",
-                        m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+                        m_name, (ushort)dir[i].tdir_tag, (ushort)dir[i].tdir_tag);
 
                     TiffFieldInfo[] arr = new TiffFieldInfo[1];
                     arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
@@ -1677,7 +1677,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     short temp = (short)dir[i].tdir_tag;
                     SwabShort(ref temp);
-                    dir[i].tdir_tag = (TiffTag)temp;
+                    dir[i].tdir_tag = (TiffTag)(ushort)temp;
 
                     temp = (short)dir[i].tdir_type;
                     SwabShort(ref temp);
@@ -1697,7 +1697,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     WarningExt(this, m_clientdata, module,
                         "{0}: unknown field with tag {1} (0x{2:x}) encountered",
-                        m_name, dir[i].tdir_tag, dir[i].tdir_tag);
+                        m_name, (ushort)dir[i].tdir_tag, (ushort)dir[i].tdir_tag);
 
                     TiffFieldInfo[] arr = new TiffFieldInfo[1];
                     arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
@@ -1843,7 +1843,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     short temp = (short)dirEntry.tdir_tag;
                     SwabShort(ref temp);
-                    dirEntry.tdir_tag = (TiffTag)temp;
+                    dirEntry.tdir_tag = (TiffTag)(ushort)temp;
 
                     temp = (short)dirEntry.tdir_type;
                     SwabShort(ref temp);
@@ -3047,7 +3047,7 @@ namespace BitMiracle.LibTiff.Classic
             for (int i = 0; i < count; i++)
             {
                 TiffTag tag = (TiffTag)GetTagListEntry(i);
-                TiffFieldInfo fip = FieldWithTag((TiffTag)tag);
+                TiffFieldInfo fip = FieldWithTag(tag);
                 if (fip == null)
                     continue;
 

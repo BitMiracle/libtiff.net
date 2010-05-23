@@ -360,7 +360,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
-    enum TiffTag
+    enum TiffTag : int
     {
         IGNORE = 0, /* tag placeholder */
         SUBFILETYPE = 254, /* subfile data descriptor. see SubFileType */

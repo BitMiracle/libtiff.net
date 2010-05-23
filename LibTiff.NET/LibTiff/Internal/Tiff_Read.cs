@@ -128,7 +128,7 @@ namespace BitMiracle.LibTiff.Classic
             for (int i = 0; i < dircount; i++)
             {
                 TiffDirEntry entry = new TiffDirEntry();
-                entry.tdir_tag = (TiffTag)readShort(bytes, pos);
+                entry.tdir_tag = (TiffTag)(ushort)readShort(bytes, pos);
                 pos += sizeof(short);
                 entry.tdir_type = (TiffType)readShort(bytes, pos);
                 pos += sizeof(short);
