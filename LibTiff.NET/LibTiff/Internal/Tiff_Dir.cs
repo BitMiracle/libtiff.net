@@ -121,7 +121,7 @@ namespace BitMiracle.LibTiff.Classic
             m_flags &= ~TIFF_ISTILED;
         }
 
-        private bool advanceDirectory(ref int nextdir, out int off)
+        private bool advanceDirectory(ref uint nextdir, out long off)
         {
             off = 0;
 
@@ -139,14 +139,14 @@ namespace BitMiracle.LibTiff.Classic
 
             off = seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
 
-            if (!readIntOK(out nextdir))
+            if (!readUIntOK(out nextdir))
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
                 return false;
             }
 
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
-                SwabLong(ref nextdir);
+                SwabUInt(ref nextdir);
             
             return true;
         }

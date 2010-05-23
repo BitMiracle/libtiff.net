@@ -25,21 +25,80 @@ namespace BitMiracle.LibTiff.Classic
     {
         internal const int STRIP_SIZE_DEFAULT = 8192;
 
-        internal const int TIFF_FILLORDER = 0x0003;  /* natural bit fill order for machine */
-        internal const int TIFF_DIRTYDIRECT = 0x0008;  /* current directory must be written */
-        internal const int TIFF_BUFFERSETUP = 0x0010;  /* data buffers setup */
-        internal const int TIFF_CODERSETUP = 0x0020;  /* encoder/decoder setup done */
-        internal const int TIFF_BEENWRITING = 0x0040;  /* written 1+ scanlines to file */
-        internal const int TIFF_SWAB = 0x0080;  /* byte swap file information */
-        internal const int TIFF_NOBITREV = 0x0100;  /* inhibit bit reversal logic */
-        internal const int TIFF_MYBUFFER = 0x0200;  /* my raw data buffer; free on close */
-        internal const int TIFF_ISTILED = 0x0400;  /* file is tile, not strip- based */
-        internal const int TIFF_POSTENCODE = 0x1000;  /* need call to postencode routine */
-        internal const int TIFF_INSUBIFD = 0x2000;  /* currently writing a subifd */
-        internal const int TIFF_UPSAMPLED = 0x4000;  /* library is doing data up-sampling */
-        internal const int TIFF_STRIPCHOP = 0x8000;  /* enable strip chopping support */
-        internal const int TIFF_HEADERONLY = 0x10000; /* read header only, do not process the first directory*/
-        internal const int TIFF_NOREADRAW = 0x20000; /* skip reading of raw uncompressed image data*/
+        /// <summary>
+        /// natural bit fill order for machine
+        /// </summary>
+        internal const int TIFF_FILLORDER = 0x0003;
+
+        /// <summary>
+        /// current directory must be written
+        /// </summary>
+        internal const int TIFF_DIRTYDIRECT = 0x0008;
+
+        /// <summary>
+        /// data buffers setup
+        /// </summary>
+        internal const int TIFF_BUFFERSETUP = 0x0010;
+
+        /// <summary>
+        /// encoder/decoder setup done
+        /// </summary>
+        internal const int TIFF_CODERSETUP = 0x0020;
+
+        /// <summary>
+        /// written 1+ scanlines to file
+        /// </summary>
+        internal const int TIFF_BEENWRITING = 0x0040;
+
+        /// <summary>
+        /// byte swap file information
+        /// </summary>
+        internal const int TIFF_SWAB = 0x0080;
+
+        /// <summary>
+        /// inhibit bit reversal logic
+        /// </summary>
+        internal const int TIFF_NOBITREV = 0x0100;
+
+        /// <summary>
+        /// my raw data buffer; free on close
+        /// </summary>
+        internal const int TIFF_MYBUFFER = 0x0200;
+
+        /// <summary>
+        /// file is tile, not strip- based
+        /// </summary>
+        internal const int TIFF_ISTILED = 0x0400;
+
+        /// <summary>
+        /// need call to postencode routine
+        /// </summary>
+        internal const int TIFF_POSTENCODE = 0x1000;
+
+        /// <summary>
+        /// currently writing a subifd
+        /// </summary>
+        internal const int TIFF_INSUBIFD = 0x2000;
+
+        /// <summary>
+        /// library is doing data up-sampling
+        /// </summary>
+        internal const int TIFF_UPSAMPLED = 0x4000;
+
+        /// <summary>
+        /// enable strip chopping support
+        /// </summary>
+        internal const int TIFF_STRIPCHOP = 0x8000;
+
+        /// <summary>
+        /// read header only, do not process the first directory
+        /// </summary>
+        internal const int TIFF_HEADERONLY = 0x10000;
+
+        /// <summary>
+        /// skip reading of raw uncompressed image data
+        /// </summary>
+        internal const int TIFF_NOREADRAW = 0x20000;
 
         internal enum PostDecodeMethodType
         {
@@ -50,39 +109,103 @@ namespace BitMiracle.LibTiff.Classic
             pdmSwab64Bit
         };
 
-        internal string m_name; /* name of open file */
-        internal int m_mode; /* open mode (O_*) */
+        /// <summary>
+        /// name of open file
+        /// </summary>
+        internal string m_name;
+
+        /// <summary>
+        /// open mode (O_*)
+        /// </summary>
+        internal int m_mode;
         internal int m_flags;
 
-        /* the first directory */
-        internal int m_diroff; /* file offset of current directory */
+        //
+        // the first directory
+        //
 
-        /* directories to prevent IFD looping */
-        internal TiffDirectory m_dir; /* internal rep of current directory */
-        internal int m_row; /* current scanline */
-        internal int m_curstrip; /* current strip for read/write */
+        /// <summary>
+        /// file offset of current directory
+        /// </summary>
+        internal uint m_diroff;
 
-        /* tiling support */
-        internal int m_curtile; /* current tile for read/write */
-        internal int m_tilesize; /* # of bytes in a tile */
+        // directories to prevent IFD looping
 
-        /* compression scheme hooks */
+        /// <summary>
+        /// internal rep of current directory
+        /// </summary>
+        internal TiffDirectory m_dir;
+
+        /// <summary>
+        /// current scanline
+        /// </summary>
+        internal int m_row;
+
+        /// <summary>
+        /// current strip for read/write
+        /// </summary>
+        internal int m_curstrip;
+
+        // tiling support
+
+        /// <summary>
+        /// current tile for read/write
+        /// </summary>
+        internal int m_curtile;
+
+        /// <summary>
+        /// # of bytes in a tile
+        /// </summary>
+        internal int m_tilesize;
+
+        // compression scheme hooks
         internal TiffCodec m_currentCodec;
 
-        /* input/output buffering */
-        internal int m_scanlinesize; /* # of bytes in a scanline */
-        internal byte[] m_rawdata; /* raw data buffer */
-        internal int m_rawdatasize; /* # of bytes in raw data buffer */
-        internal int m_rawcp; /* current spot in raw buffer */
-        internal int m_rawcc; /* bytes unread from raw buffer */
+        // input/output buffering
 
-        internal object m_clientdata; /* callback parameter */
+        /// <summary>
+        /// # of bytes in a scanline
+        /// </summary>
+        internal int m_scanlinesize;
 
-        /* post-decoding support */
-        internal PostDecodeMethodType m_postDecodeMethod;  /* post decoding method type */
+        /// <summary>
+        /// raw data buffer
+        /// </summary>
+        internal byte[] m_rawdata;
 
-        /* tag support */
-        internal TiffTagMethods m_tagmethods; /* tag get/set/print routines */
+        /// <summary>
+        /// # of bytes in raw data buffer
+        /// </summary>
+        internal int m_rawdatasize;
+
+        /// <summary>
+        /// current spot in raw buffer
+        /// </summary>
+        internal int m_rawcp;
+
+        /// <summary>
+        /// bytes unread from raw buffer
+        /// </summary>
+        internal int m_rawcc;
+
+        /// <summary>
+        /// callback parameter
+        /// </summary>
+        internal object m_clientdata;
+
+        // post-decoding support
+
+        /// <summary>
+        /// post decoding method type
+        /// </summary>
+        internal PostDecodeMethodType m_postDecodeMethod;
+
+        // tag support
+
+        /// <summary>
+        /// tag get/set/print routines
+        /// </summary>
+        internal TiffTagMethods m_tagmethods;
 
         private class codecList
         {
@@ -97,34 +220,104 @@ namespace BitMiracle.LibTiff.Classic
             public string name;
         };
 
-        /* the first directory */
-        private int m_nextdiroff; /* file offset of following directory */
-        private int[] m_dirlist; /* list of offsets to already seen directories to prevent IFD looping */
-        private int m_dirlistsize; /* number of entires in offset list */
-        private short m_dirnumber; /* number of already seen directories */
-        private TiffHeader m_header; /* file's header block */
-        private int[] m_typeshift; /* data type shift counts */
-        private int[] m_typemask; /* data type masks */
-        private short m_curdir; /* current directory (index) */
-        private int m_curoff; /* current offset for read/write */
-        private int m_dataoff; /* current offset for writing dir */
+        // the first directory
 
-        /* SubIFD support */
-        private short m_nsubifd; /* remaining subifds to write */
-        private int m_subifdoff; /* offset for patching SubIFD link */
+        /// <summary>
+        /// file offset of following directory
+        /// </summary>
+        private uint m_nextdiroff;
 
-        /* tiling support */
-        private int m_col; /* current column (offset by row too) */
+        /// <summary>
+        /// list of offsets to already seen directories to prevent IFD looping
+        /// </summary>
+        private uint[] m_dirlist;
 
-        /* compression scheme hooks */
+        /// <summary>
+        /// number of entires in offset list
+        /// </summary>
+        private int m_dirlistsize;
+
+        /// <summary>
+        /// number of already seen directories
+        /// </summary>
+        private short m_dirnumber;
+
+        /// <summary>
+        /// file's header block
+        /// </summary>
+        private TiffHeader m_header;
+
+        /// <summary>
+        /// data type shift counts
+        /// </summary>
+        private int[] m_typeshift;
+
+        /// <summary>
+        /// data type masks
+        /// </summary>
+        private uint[] m_typemask;
+
+        /// <summary>
+        /// current directory (index)
+        /// </summary>
+        private short m_curdir;
+
+        /// <summary>
+        /// current offset for read/write
+        /// </summary>
+        private uint m_curoff;
+
+        /// <summary>
+        /// current offset for writing dir
+        /// </summary>
+        private uint m_dataoff;
+
+        //
+        // SubIFD support
+        // 
+
+        /// <summary>
+        /// remaining subifds to write
+        /// </summary>
+        private short m_nsubifd;
+
+        /// <summary>
+        /// offset for patching SubIFD link
+        /// </summary>
+        private uint m_subifdoff;
+
+        // tiling support
+
+        /// <summary>
+        /// current column (offset by row too)
+        /// </summary>
+        private int m_col;
+
+        // compression scheme hooks
+
         private bool m_decodestatus;
 
-        /* tag support */
-        private TiffFieldInfo[] m_fieldinfo; /* sorted table of registered tags */
-        private int m_nfields; /* # entries in registered tag table */
-        private TiffFieldInfo m_foundfield; /* cached pointer to already found tag */
+        // tag support
 
-        private clientInfoLink m_clientinfo; /* extra client information. */
+        /// <summary>
+        /// sorted table of registered tags
+        /// </summary>
+        private TiffFieldInfo[] m_fieldinfo;
+
+        /// <summary>
+        /// # entries in registered tag table
+        /// </summary>
+        private int m_nfields;
+
+        /// <summary>
+        /// cached pointer to already found tag
+        /// </summary>
+        private TiffFieldInfo m_foundfield;
+
+        /// <summary>
+        /// extra client information.
+        /// </summary>
+        private clientInfoLink m_clientinfo;
 
         private TiffCodec[] m_builtInCodecs;
         private codecList m_registeredCodecs;
@@ -137,12 +330,15 @@ namespace BitMiracle.LibTiff.Classic
         private bool m_disposed;
         private Stream m_fileStream;
  
-        /*
-        * Client Tag extension support (from Niles Ritter).
-        */
+        //
+        // Client Tag extension support (from Niles Ritter).
+        //
         private static TiffExtendProc m_extender;
 
-        private TiffStream m_stream; // stream used for read|write|etc.
+        /// <summary>
+        /// stream used for read|write|etc.
+        /// </summary>
+        private TiffStream m_stream;
 
         private Tiff()
         {
@@ -190,6 +386,40 @@ namespace BitMiracle.LibTiff.Classic
                 // Note disposing has been done.
                 m_disposed = true;
             }
+        }
+
+        internal static void SwabUInt(ref uint lp)
+        {
+            byte[] cp = new byte[4];
+            cp[0] = (byte)lp;
+            cp[1] = (byte)(lp >> 8);
+            cp[2] = (byte)(lp >> 16);
+            cp[3] = (byte)(lp >> 24);
+
+            byte t = cp[3];
+            cp[3] = cp[0];
+            cp[0] = t;
+
+            t = cp[2];
+            cp[2] = cp[1];
+            cp[1] = t;
+
+            lp = (uint)(cp[0] & 0xFF);
+            lp += (uint)((cp[1] & 0xFF) << 8);
+            lp += (uint)((cp[2] & 0xFF) << 16);
+            lp += (uint)(cp[3] << 24);
+        }
+
+        internal static uint[] Realloc(uint[] oldBuffer, int elementCount, int newElementCount)
+        {
+            uint[] newBuffer = new uint[newElementCount];
+            if (oldBuffer != null)
+            {
+                int copyLength = Math.Min(elementCount, newElementCount);
+                Array.Copy(oldBuffer, newBuffer, copyLength);
+            }
+
+            return newBuffer;
         }
 
         internal static TiffFieldInfo[] Realloc(TiffFieldInfo[] oldBuffer, int elementCount, int newElementCount)

@@ -26,7 +26,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private const int SHIFT = 16;
         private const int ONE_HALF = 1 << (SHIFT - 1);
 
-        private byte[] clamptab; /* range clamping table */
+        /// <summary>
+        /// range clamping table
+        /// </summary>
+        private byte[] clamptab;
+
         private int[] Cr_r_tab;
         private int[] Cb_b_tab;
         private int[] Cr_g_tab;

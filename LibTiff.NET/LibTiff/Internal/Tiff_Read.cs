@@ -28,8 +28,15 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     partial class Tiff
     {
-        private const int NOSTRIP = -1;         /* undefined state */
-        private const int NOTILE = -1;          /* undefined state */
+        /// <summary>
+        /// undefined state
+        /// </summary>
+        private const int NOSTRIP = -1;
+
+        /// <summary>
+        /// undefined state
+        /// </summary>
+        private const int NOTILE = -1;
 
         internal const int O_RDONLY = 0;
         internal const int O_WRONLY = 0x0001;
@@ -37,22 +44,23 @@ namespace BitMiracle.LibTiff.Classic
         internal const int O_TRUNC = 0x0200;
         internal const int O_RDWR = 0x0002;
 
-        /*
-        * Default Read/Seek/Write definitions.
-        */
+        //
+        // Default Read/Seek/Write definitions.
+        //
+
         private int readFile(byte[] buf, int offset, int size)
         {
             return m_stream.Read(m_clientdata, buf, offset, size);
         }
 
-        private int seekFile(int off, SeekOrigin whence)
+        private long seekFile(long off, SeekOrigin whence)
         {
-            return (int)m_stream.Seek(m_clientdata, off, whence);
+            return m_stream.Seek(m_clientdata, off, whence);
         }
 
-        private int getFileSize()
+        private long getFileSize()
         {
-            return (int)m_stream.Size(m_clientdata);
+            return m_stream.Size(m_clientdata);
         }
 
         private bool readOK(byte[] buf, int size)
@@ -70,6 +78,18 @@ namespace BitMiracle.LibTiff.Classic
                 value = (short)(bytes[0] & 0xFF);
                 value += (short)((bytes[1] & 0xFF) << 8);
             }
+
+            return res;
+        }
+
+        private bool readUIntOK(out uint value)
+        {
+            int temp;
+            bool res = readIntOK(out temp);
+            if (res)
+                value = (uint)temp;
+            else
+                value = 0;
 
             return res;
         }
@@ -114,7 +134,7 @@ namespace BitMiracle.LibTiff.Classic
                 pos += sizeof(short);
                 entry.tdir_count = readInt(bytes, pos);
                 pos += sizeof(int);
-                entry.tdir_offset = readInt(bytes, pos);
+                entry.tdir_offset = (uint)readInt(bytes, pos);
                 pos += sizeof(int);
                 dir[i] = entry;
             }
@@ -128,12 +148,12 @@ namespace BitMiracle.LibTiff.Classic
                 res = readShortOK(out header.tiff_version);
 
             if (res)
-                res = readIntOK(out header.tiff_diroff);
+                res = readUIntOK(out header.tiff_diroff);
 
             return res;
         }
 
-        private bool seekOK(int off)
+        private bool seekOK(long off)
         {
             return (seekFile(off, SeekOrigin.Begin) == off);
         }

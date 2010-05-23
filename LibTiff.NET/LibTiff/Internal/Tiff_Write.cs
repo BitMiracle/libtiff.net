@@ -72,7 +72,7 @@ namespace BitMiracle.LibTiff.Classic
                 res = writeShortOK(header.tiff_version);
 
             if (res)
-                res = writeIntOK(header.tiff_diroff);
+                res = writeIntOK((int)header.tiff_diroff);
 
             return res;
         }
@@ -91,7 +91,7 @@ namespace BitMiracle.LibTiff.Classic
                     res = writeIntOK(entries[i].tdir_count);
 
                 if (res)
-                    res = writeIntOK(entries[i].tdir_offset);
+                    res = writeIntOK((int)entries[i].tdir_offset);
 
                 if (!res)
                     break;
@@ -131,7 +131,7 @@ namespace BitMiracle.LibTiff.Classic
         private bool growStrips(int delta)
         {
             Debug.Assert(m_dir.td_planarconfig == PlanarConfig.CONTIG);
-            int[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            uint[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             int[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             m_dir.td_stripoffset = new_stripoffset;
             m_dir.td_stripbytecount = new_stripbytecount;
@@ -141,9 +141,9 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        /*
-        * Append the data to the specified strip.
-        */
+        /// <summary>
+        /// Appends the data to the specified strip.
+        /// </summary>
         private bool appendToStrip(int strip, byte[] data, int cc)
         {
             const string module = "appendToStrip";
@@ -153,13 +153,11 @@ namespace BitMiracle.LibTiff.Classic
                 Debug.Assert(m_dir.td_nstrips > 0);
                 if (m_dir.td_stripbytecount[strip] != 0 && m_dir.td_stripoffset[strip] != 0 && m_dir.td_stripbytecount[strip] >= cc)
                 {
-                    /* 
-                    * There is already tile data on disk, and the new tile
-                    * data we have to will fit in the same space.  The only 
-                    * aspect of this that is risky is that there could be
-                    * more data to append to this strip before we are done
-                    * depending on how we are getting called.
-                    */
+                    // There is already tile data on disk, and the new tile 
+                    // data we have to will fit in the same space. The only
+                    // aspect of this that is risky is that there could be
+                    // more data to append to this strip before we are done
+                    // depending on how we are getting called.
                     if (!seekOK(m_dir.td_stripoffset[strip]))
                     {
                         ErrorExt(this, m_clientdata, module, "Seek error at scanline {0}", m_row);
@@ -168,18 +166,14 @@ namespace BitMiracle.LibTiff.Classic
                 }
                 else
                 {
-                    /* 
-                    * Seek to end of file, and set that as our location to 
-                    * write this strip.
-                    */
-                    m_dir.td_stripoffset[strip] = seekFile(0, SeekOrigin.End);
+                    // Seek to end of file, and set that as our location
+                    // to write this strip.
+                    m_dir.td_stripoffset[strip] = (uint)seekFile(0, SeekOrigin.End);
                 }
 
                 m_curoff = m_dir.td_stripoffset[strip];
 
-                /*
-                * We are starting a fresh strip/tile, so set the size to zero.
-                */
+                // We are starting a fresh strip/tile, so set the size to zero.
                 m_dir.td_stripbytecount[strip] = 0;
             }
 
@@ -189,7 +183,7 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            m_curoff += cc;
+            m_curoff += (uint)cc;
             m_dir.td_stripbytecount[strip] += cc;
             return true;
         }

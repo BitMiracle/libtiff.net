@@ -30,10 +30,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
     class TiffDirEntry
     {
         public const int SizeInBytes = 12;
-        public TiffTag tdir_tag; /* see below */
-        public TiffType tdir_type; /* data type; see below */
-        public int tdir_count; /* number of items; length in spec */
-        public int tdir_offset; /* byte offset to field data */
+
+        public TiffTag tdir_tag;
+        public TiffType tdir_type;
+
+        /// <summary>
+        /// number of items; length in spec
+        /// </summary>
+        public int tdir_count;
+
+        /// <summary>
+        /// byte offset to field data
+        /// </summary>
+        public uint tdir_offset;
 
         public new string ToString()
         {

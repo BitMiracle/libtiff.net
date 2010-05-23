@@ -29,9 +29,11 @@ namespace BitMiracle.LibTiff.Classic
     {
         private int extractData(TiffDirEntry dir)
         {
-            return (m_header.tiff_magic == TIFF_BIGENDIAN ?
-                (dir.tdir_offset >> m_typeshift[(int)dir.tdir_type]) & m_typemask[(int)dir.tdir_type] :
-                dir.tdir_offset & m_typemask[(int)dir.tdir_type]);
+            int type = (int)dir.tdir_type;
+            if (m_header.tiff_magic == TIFF_BIGENDIAN)
+                return (int)((dir.tdir_offset >> m_typeshift[type]) & m_typemask[type]);
+
+            return (int)(dir.tdir_offset & m_typemask[type]);
         }
 
         private bool byteCountLooksBad(TiffDirectory td)
@@ -67,10 +69,10 @@ namespace BitMiracle.LibTiff.Classic
 
             if (m_dir.td_compression != Compression.NONE)
             {
-                int space = TiffHeader.SizeInBytes + sizeof(short) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(int);
-                int filesize = getFileSize();
+                long space = TiffHeader.SizeInBytes + sizeof(short) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(int);
+                long filesize = getFileSize();
 
-                /* calculate amount of space used by indirect values */
+                // calculate amount of space used by indirect values
                 for (short n = 0; n < dircount; n++)
                 {
                     int cc = DataWidth((TiffType)dir[n].tdir_type);
@@ -93,23 +95,20 @@ namespace BitMiracle.LibTiff.Classic
                 
                 int strip = 0;
                 for ( ; strip < m_dir.td_nstrips; strip++)
-                    m_dir.td_stripbytecount[strip] = space;
+                    m_dir.td_stripbytecount[strip] = (int)space;
                 
-                /*
-                 * This gross hack handles the case were the offset to
-                 * the last strip is past the place where we think the strip
-                 * should begin.  Since a strip of data must be contiguous,
-                 * it's safe to assume that we've overestimated the amount
-                 * of data in the strip and trim this number back accordingly.
-                 */
+                // This gross hack handles the case were the offset to the last
+                // strip is past the place where we think the strip should begin.
+                // Since a strip of data must be contiguous, it's safe to assume
+                // that we've overestimated the amount of data in the strip and
+                // trim this number back accordingly.
                 strip--;
                 if ((m_dir.td_stripoffset[strip] + m_dir.td_stripbytecount[strip]) > filesize)
-                    m_dir.td_stripbytecount[strip] = filesize - m_dir.td_stripoffset[strip];
+                    m_dir.td_stripbytecount[strip] = (int)(filesize - m_dir.td_stripoffset[strip]);
             }
             else if (IsTiled()) 
             {
                 int bytespertile = TileSize();
-
                 for (int strip = 0; strip < m_dir.td_nstrips; strip++)
                     m_dir.td_stripbytecount[strip] = bytespertile;
             }
@@ -154,17 +153,19 @@ namespace BitMiracle.LibTiff.Classic
             return -1;
         }
 
-        /*
-        * Check the directory offset against the list of already seen directory
-        * offsets. This is a trick to prevent IFD looping. The one can create TIFF
-        * file with looped directory pointers. We will maintain a list of already
-        * seen directories and check every IFD offset against that list.
-        */
-        private bool checkDirOffset(int diroff)
+        /// <summary>
+        /// Checks the directory offset against the list of already seen directory
+        /// offsets.
+        /// </summary>
+        /// <remarks> This is a trick to prevent IFD looping. The one can
+        /// create TIFF file with looped directory pointers. We will maintain a
+        /// list of already seen directories and check every IFD offset against
+        /// that list.</remarks>
+        private bool checkDirOffset(uint diroff)
         {
             if (diroff == 0)
             {
-                /* no more directories */
+                // no more directories
                 return false;
             }
 
@@ -178,10 +179,8 @@ namespace BitMiracle.LibTiff.Classic
 
             if (m_dirnumber > m_dirlistsize)
             {
-                /*
-                * XXX: Reduce memory allocation granularity of the dirlist array.
-                */
-                int[] new_dirlist = Realloc(m_dirlist, m_dirnumber - 1, 2 * m_dirnumber);
+                // XXX: Reduce memory allocation granularity of the dirlist array.
+                uint[] new_dirlist = Realloc(m_dirlist, m_dirnumber - 1, 2 * m_dirnumber);
                 m_dirlistsize = 2 * m_dirnumber;
                 m_dirlist = new_dirlist;
             }
@@ -190,12 +189,11 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
         
-        /*
-        * Read IFD structure from the specified offset. If the pointer to
-        * nextdiroff variable has been specified, read it too. Function returns a
-        * number of fields in the directory or 0 if failed.
-        */
-        private short fetchDirectory(int diroff, out TiffDirEntry[] pdir, out int nextdiroff)
+        /// <summary>
+        /// Reads IFD structure from the specified offset.
+        /// </summary>
+        /// <returns>The number of fields in the directory or 0 if failed.</returns>
+        private short fetchDirectory(uint diroff, out TiffDirEntry[] pdir, out uint nextdiroff)
         {
             const string module = "fetchDirectory";
 
@@ -230,13 +228,17 @@ namespace BitMiracle.LibTiff.Classic
                 return 0;
             }
 
-            /*
-            * Read offset to next directory for sequential scans.
-            */
-            readIntOK(out nextdiroff);
+            // Read offset to next directory for sequential scans.
+            int temp;
+            readIntOK(out temp);
+            nextdiroff = (uint)temp;
 
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
-                SwabLong(ref nextdiroff);
+            {
+                temp = (int)nextdiroff;
+                SwabLong(ref temp);
+                nextdiroff = (uint)temp;
+            }
 
             pdir = dir;
             return dircount;
@@ -298,15 +300,15 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        /*
-        * Fetch a contiguous directory item.
-        */
+        /// <summary>
+        /// Fetches a contiguous directory item.
+        /// </summary>
         private int fetchData(TiffDirEntry dir, byte[] cp)
         {
             int w = DataWidth(dir.tdir_type);
-            int cc = dir.tdir_count * w;
+            int cc = (int)dir.tdir_count * w;
 
-            /* Check for overflow. */
+            // Check for overflow.
             if (dir.tdir_count == 0 || w == 0 || (cc / w) != dir.tdir_count)
                 fetchFailed(dir);
 
@@ -351,16 +353,16 @@ namespace BitMiracle.LibTiff.Classic
             return cc;
         }
 
-        /*
-        * Fetch an ASCII item from the file.
-        */
+        /// <summary>
+        /// Fetches an ASCII item from the file.
+        /// </summary>
         private int fetchString(TiffDirEntry dir, out string cp)
         {
             byte[] bytes = null;
 
             if (dir.tdir_count <= 4)
             {
-                int l = dir.tdir_offset;
+                int l = (int)dir.tdir_offset;
                 if ((m_flags & Tiff.TIFF_SWAB) != 0)
                     SwabLong(ref l);
 
@@ -420,27 +422,24 @@ namespace BitMiracle.LibTiff.Classic
             return 1.0f;
         }
 
-        /*
-        * Fetch a single floating point value
-        * from the offset field and return it
-        * as a native float.
-        */
+        /// <summary>
+        /// Fetch a single floating point value from the offset field and
+        /// return it as a native float.
+        /// </summary>
         private float fetchFloat(TiffDirEntry dir)
         {
             int l = extractData(dir);
             return BitConverter.ToSingle(BitConverter.GetBytes(l), 0);
         }
 
-        /*
-        * Fetch an array of BYTE or SBYTE values.
-        */
+        /// <summary>
+        /// Fetches an array of BYTE or SBYTE values.
+        /// </summary>
         private bool fetchByteArray(TiffDirEntry dir, byte[] v)
         {
             if (dir.tdir_count <= 4)
             {
-                /*
-                 * Extract data from offset field.
-                 */
+                // Extract data from offset field.
                 int count = dir.tdir_count;
 
                 if (m_header.tiff_magic == TIFF_BIGENDIAN)
@@ -478,9 +477,9 @@ namespace BitMiracle.LibTiff.Classic
             return (fetchData(dir, v) != 0);
         }
 
-        /*
-        * Fetch an array of SHORT or SSHORT values.
-        */
+        /// <summary>
+        /// Fetch an array of SHORT or SSHORT values.
+        /// </summary>
         private bool fetchShortArray(TiffDirEntry dir, short[] v)
         {
             if (dir.tdir_count <= 2)
@@ -553,14 +552,14 @@ namespace BitMiracle.LibTiff.Classic
             return false;
         }
 
-        /*
-        * Fetch an array of LONG or SLONG values.
-        */
+        /// <summary>
+        /// Fetches an array of LONG or SLONG values.
+        /// </summary>
         private bool fetchLongArray(TiffDirEntry dir, int[] v)
         {
             if (dir.tdir_count == 1)
             {
-                v[0] = dir.tdir_offset;
+                v[0] = (int)dir.tdir_offset;
                 return true;
             }
 
@@ -605,9 +604,9 @@ namespace BitMiracle.LibTiff.Classic
             return ok;
         }
 
-        /*
-        * Fetch an array of FLOAT values.
-        */
+        /// <summary>
+        /// Fetches an array of FLOAT values.
+        /// </summary>
         private bool fetchFloatArray(TiffDirEntry dir, float[] v)
         {
             if (dir.tdir_count == 1)
@@ -633,9 +632,9 @@ namespace BitMiracle.LibTiff.Classic
             return (read != 0);
         }
 
-        /*
-        * Fetch an array of DOUBLE values.
-        */
+        /// <summary>
+        /// Fetches an array of DOUBLE values.
+        /// </summary>
         private bool fetchDoubleArray(TiffDirEntry dir, double[] v)
         {
             int w = DataWidth(dir.tdir_type);
@@ -655,17 +654,15 @@ namespace BitMiracle.LibTiff.Classic
             return (read != 0);
         }
 
-        /*
-        * Fetch an array of ANY values.  The actual values are
-        * returned as doubles which should be able hold all the
-        * types.  Yes, there really should be an tany_t to avoid
-        * this potential non-portability ...  Note in particular
-        * that we assume that the double return value vector is
-        * large enough to read in any fundamental type.  We use
-        * that vector as a buffer to read in the base type vector
-        * and then convert it in place to double (from end
-        * to front of course).
-        */
+        /// <summary>
+        /// Fetches an array of ANY values.
+        /// </summary>
+        /// <remarks>The actual values are returned as doubles which should be
+        /// able hold all the types. Note in particular that we assume that the
+        /// double return value vector is large enough to read in any
+        /// fundamental type. We use that vector as a buffer to read in the base
+        /// type vector and then convert it in place to double (from end to
+        /// front of course).</remarks>
         private bool fetchAnyArray(TiffDirEntry dir, double[] v)
         {
             int i = 0;
@@ -744,9 +741,9 @@ namespace BitMiracle.LibTiff.Classic
                 case TiffType.DOUBLE:
                     return fetchDoubleArray(dir, v);
                 default:
-                    /* TIFF_NOTYPE */
-                    /* ASCII */
-                    /* UNDEFINED */
+                    // NOTYPE
+                    // ASCII
+                    // UNDEFINED
                     ErrorExt(this, m_clientdata, m_name,
                         "cannot read TIFF_ANY type {0} for field \"{1}\"",
                         dir.tdir_type, FieldWithTag(dir.tdir_tag).Field_name);
@@ -756,9 +753,9 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        /*
-        * Fetch a tag that is not handled by special case code.
-        */
+        /// <summary>
+        /// Fetches a tag that is not handled by special case code.
+        /// </summary>
         private bool fetchNormalTag(TiffDirEntry dir)
         {
             bool ok = false;
@@ -846,11 +843,10 @@ namespace BitMiracle.LibTiff.Classic
 
                     case TiffType.ASCII:
                     case TiffType.UNDEFINED:
-                        /* bit of a cheat... */
-                        /*
-                         * Some vendors write strings w/o the trailing
-                         * null byte, so always append one just in case.
-                         */
+                        // bit of a cheat...
+
+                        // Some vendors write strings w/o the trailing null
+                        // byte, so always append one just in case.
                         string cp;
                         ok = fetchString(dir, out cp) != 0;
                         if (ok)
@@ -866,23 +862,21 @@ namespace BitMiracle.LibTiff.Classic
             else if (checkDirCount(dir, 1))
             {
                 int v32 = 0;
-                /* singleton value */
+                // singleton value
                 switch (dir.tdir_type)
                 {
                     case TiffType.BYTE:
                     case TiffType.SBYTE:
                     case TiffType.SHORT:
                     case TiffType.SSHORT:
-                        /*
-                         * If the tag is also acceptable as a LONG or SLONG
-                         * then SetField will expect an int parameter
-                         * passed to it. 
-                         *
-                         * NB: We use FieldWithTag here knowing that
-                         *     it returns us the first entry in the table
-                         *     for the tag and that that entry is for the
-                         *     widest potential data type the tag may have.
-                         */
+                        // If the tag is also acceptable as a LONG or SLONG
+                        // then SetField will expect an int parameter
+                        // passed to it. 
+                        //
+                        // NB: We use FieldWithTag here knowing that
+                        //     it returns us the first entry in the table
+                        //     for the tag and that that entry is for the
+                        //     widest potential data type the tag may have.
                         TiffType type = fip.Field_type;
                         if (type != TiffType.LONG && type != TiffType.SLONG)
                         {
@@ -903,7 +897,7 @@ namespace BitMiracle.LibTiff.Classic
                         if (fip.Field_pass_count)
                         {
                             int[] a = new int[1];
-                            a[0] = v32;
+                            a[0] = (int)v32;
                             ok = SetField(dir.tdir_tag, 1, a);
                         }
                         else
@@ -917,7 +911,7 @@ namespace BitMiracle.LibTiff.Classic
                         if (fip.Field_pass_count)
                         {
                             int[] a = new int[1];
-                            a[0] = v32;
+                            a[0] = (int)v32;
                             ok = SetField(dir.tdir_tag, 1, a);
                         }
                         else
@@ -954,7 +948,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     case TiffType.ASCII:
                     case TiffType.UNDEFINED:
-                        /* bit of a cheat... */
+                        // bit of a cheat...
                         string c;
                         ok = fetchString(dir, out c) != 0;
                         if (ok)
@@ -971,11 +965,10 @@ namespace BitMiracle.LibTiff.Classic
             return ok;
         }
 
-        /*
-        * Fetch samples/pixel short values for 
-        * the specified tag and verify that
-        * all values are the same.
-        */
+        /// <summary>
+        /// Fetches samples/pixel short values for the specified tag and verify
+        /// that all values are the same.
+        /// </summary>
         private bool fetchPerSampleShorts(TiffDirEntry dir, out short pl)
         {
             pl = 0;
@@ -992,7 +985,7 @@ namespace BitMiracle.LibTiff.Classic
                         check_count = samples;
 
                     bool failed = false;
-                    for (short i = 1; i < check_count; i++)
+                    for (ushort i = 1; i < check_count; i++)
                     {
                         if (v[i] != v[0])
                         {
@@ -1015,11 +1008,10 @@ namespace BitMiracle.LibTiff.Classic
             return status;
         }
 
-        /*
-        * Fetch samples/pixel long values for 
-        * the specified tag and verify that
-        * all values are the same.
-        */
+        /// <summary>
+        /// Fetches samples/pixel long values for the specified tag and verify
+        /// that all values are the same.
+        /// </summary>
         private bool fetchPerSampleLongs(TiffDirEntry dir, out int pl)
         {
             pl = 0;
@@ -1036,7 +1028,7 @@ namespace BitMiracle.LibTiff.Classic
                         check_count = samples;
 
                     bool failed = false;
-                    for (short i = 1; i < check_count; i++)
+                    for (ushort i = 1; i < check_count; i++)
                     {
                         if (v[i] != v[0])
                         {
@@ -1050,7 +1042,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     if (!failed)
                     {
-                        pl = v[0];
+                        pl = (int)v[0];
                         status = true;
                     }
                 }
@@ -1059,10 +1051,10 @@ namespace BitMiracle.LibTiff.Classic
             return status;
         }
 
-        /*
-        * Fetch samples/pixel ANY values for the specified tag and verify that all
-        * values are the same.
-        */
+        /// <summary>
+        /// Fetches samples/pixel ANY values for the specified tag and verify
+        /// that all values are the same.
+        /// </summary>
         private bool fetchPerSampleAnys(TiffDirEntry dir, out double pl)
         {
             pl = 0;
@@ -1079,7 +1071,7 @@ namespace BitMiracle.LibTiff.Classic
                         check_count = samples;
 
                     bool failed = false;
-                    for (short i = 1; i < check_count; i++)
+                    for (ushort i = 1; i < check_count; i++)
                     {
                         if (v[i] != v[0])
                         {
@@ -1102,17 +1094,16 @@ namespace BitMiracle.LibTiff.Classic
             return status;
         }
 
-        /*
-        * Fetch a set of offsets or lengths.
-        * While this routine says "strips", in fact it's also used for tiles.
-        */
+        /// <summary>
+        /// Fetches a set of offsets or lengths.
+        /// </summary>
+        /// <remarks>While this routine says "strips", in fact it's also used
+        /// for tiles.</remarks>
         private bool fetchStripThing(TiffDirEntry dir, int nstrips, ref int[] lpp)
         {
             checkDirCount(dir, nstrips);
 
-            /*
-             * Allocate space for strip information.
-             */
+            // Allocate space for strip information.
             if (lpp == null)
                 lpp = new int [nstrips];
             else
@@ -1121,9 +1112,7 @@ namespace BitMiracle.LibTiff.Classic
             bool status = false;
             if (dir.tdir_type == TiffType.SHORT)
             {
-                /*
-                 * Handle short -> int expansion.
-                 */
+                // Handle short -> int expansion.
                 short[] dp = new short[dir.tdir_count];
                 status = fetchShortArray(dir, dp);
                 if (status)
@@ -1134,8 +1123,7 @@ namespace BitMiracle.LibTiff.Classic
             }
             else if (nstrips != dir.tdir_count)
             {
-                /* Special case to correct length */
-
+                // Special case to correct length
                 int[] dp = new int[dir.tdir_count];
                 status = fetchLongArray(dir, dp);
                 if (status)
@@ -1145,22 +1133,40 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
             else
+            {
                 status = fetchLongArray(dir, lpp);
+            }
 
             return status;
         }
 
-        /*
-        * Fetch and set the RefBlackWhite tag.
-        */
+        private bool fetchStripThing(TiffDirEntry dir, int nstrips, ref uint[] lpp)
+        {
+            int[] temp = null;
+            if (lpp != null)
+                temp = new int[lpp.Length];
+
+            bool res = fetchStripThing(dir, nstrips, ref temp);
+            if (res)
+            {
+                if (lpp == null)
+                    lpp = new uint[temp.Length];
+
+                Buffer.BlockCopy(temp, 0, lpp, 0, temp.Length * sizeof(uint));
+            }
+
+            return res;
+        }
+
+        /// <summary>
+        /// Fetches and sets the RefBlackWhite tag.
+        /// </summary>
         private bool fetchRefBlackWhite(TiffDirEntry dir)
         {
             if (dir.tdir_type == TiffType.RATIONAL)
                 return fetchNormalTag(dir);
             
-            /*
-             * Handle LONG's for backward compatibility.
-             */
+            // Handle LONG's for backward compatibility.
             int[] cp = new int [dir.tdir_count];
             bool ok = fetchLongArray(dir, cp);
             if (ok)
@@ -1175,22 +1181,19 @@ namespace BitMiracle.LibTiff.Classic
             return ok;
         }
 
-        /*
-        * Replace a single strip (tile) of uncompressed data by
-        * multiple strips (tiles), each approximately 8Kbytes.
-        * This is useful for dealing with large images or
-        * for dealing with machines with a limited amount
-        * memory.
-        */
+        /// <summary>
+        /// Replace a single strip (tile) of uncompressed data with multiple
+        /// strips (tiles), each approximately 8Kbytes.
+        /// </summary>
+        /// <remarks>This is useful for dealing with large images or for
+        /// dealing with machines with a limited amount of memory.</remarks>
         private void chopUpSingleUncompressedStrip()
         {
             int bytecount = m_dir.td_stripbytecount[0];
-            int offset = m_dir.td_stripoffset[0];
+            uint offset = m_dir.td_stripoffset[0];
 
-            /*
-             * Make the rows hold at least one scanline, but fill specified amount
-             * of data if possible.
-             */
+            // Make the rows hold at least one scanline, but fill specified
+            // amount of data if possible.
             int rowbytes = VTileSize(1);
             int stripbytes;
             int rowsperstrip;
@@ -1205,28 +1208,26 @@ namespace BitMiracle.LibTiff.Classic
                 stripbytes = rowbytes * rowsperstrip;
             }
             else
+            {
                 return;
+            }
 
-            /* 
-             * never increase the number of strips in an image
-             */
+            // never increase the number of strips in an image
             if (rowsperstrip >= m_dir.td_rowsperstrip)
                 return;
             
             int nstrips = howMany(bytecount, stripbytes);
             if (nstrips == 0)
             {
-                /* something is wonky, do nothing. */
+                // something is wonky, do nothing.
                 return;
             }
 
             int[] newcounts = new int [nstrips];
-            int[] newoffsets = new int [nstrips];
+            uint[] newoffsets = new uint [nstrips];
 
-            /*
-             * Fill the strip information arrays with new bytecounts and offsets
-             * that reflect the broken-up format.
-             */
+            // Fill the strip information arrays with new bytecounts and offsets
+            // that reflect the broken-up format.
             for (int strip = 0; strip < nstrips; strip++)
             {
                 if (stripbytes > bytecount)
@@ -1234,20 +1235,18 @@ namespace BitMiracle.LibTiff.Classic
 
                 newcounts[strip] = stripbytes;
                 newoffsets[strip] = offset;
-                offset += stripbytes;
+                offset += (uint)stripbytes;
                 bytecount -= stripbytes;
             }
 
-            /*
-             * Replace old single strip info with multi-strip info.
-             */
+            // Replace old single strip info with multi-strip info.
             m_dir.td_nstrips = nstrips;
             m_dir.td_stripsperimage = nstrips;
             SetField(TiffTag.ROWSPERSTRIP, rowsperstrip);
 
             m_dir.td_stripbytecount = newcounts;
             m_dir.td_stripoffset = newoffsets;
-            m_dir.td_stripbytecountsorted = 1;
+            m_dir.td_stripbytecountsorted = true;
         }
 
         internal static int roundUp(int x, int y)
@@ -1256,6 +1255,11 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         internal static int howMany(int x, int y)
+        {
+            return ((x + (y - 1)) / y);
+        }
+
+        internal static uint howMany(uint x, uint y)
         {
             return ((x + (y - 1)) / y);
         }

@@ -24,7 +24,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             Debug.Assert(ta != null);
             Debug.Assert(tb != null);
 
-            /* NB: be careful of return values for 16-bit platforms */
             if (ta.Field_tag != tb.Field_tag)
                 return ((int)ta.Field_tag - (int)tb.Field_tag);
 

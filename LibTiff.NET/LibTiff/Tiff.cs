@@ -65,31 +65,41 @@ namespace BitMiracle.LibTiff.Classic
 
         internal const string TIFFLIB_VERSION_STR = "LibTiff.NET, Version {0}\nCopyright (c) 2008-2009, Bit Miracle.";
 
-        /*
-         * These constants can be used in code that requires
-         * compilation-related definitions specific to a
-         * version or versions of the library.  Runtime
-         * version checking should be done based on the
-         * string returned by TIFFGetVersion.
-         */
+        //
+        // These constants can be used in code that requires
+        // compilation-related definitions specific to a
+        // version or versions of the library.  Runtime
+        // version checking should be done based on the
+        // string returned by GetVersion.
 
         public delegate void TiffExtendProc(Tiff tif);
 
         private const int TIFF_VERSION = 42;
         private const int TIFF_BIGTIFF_VERSION = 43;
 
-        internal const short TIFF_BIGENDIAN = 0x4d4d;
+        private const short TIFF_BIGENDIAN = 0x4d4d;
         private const short TIFF_LITTLEENDIAN = 0x4949;
         private const short MDI_LITTLEENDIAN = 0x5045;
 
-        /* reference white */
+        // reference white
         private const float D50_X0 = 96.4250F;
         private const float D50_Y0 = 100.0F;
         private const float D50_Z0 = 82.4680F;
 
-        internal const short TIFF_VARIABLE = -1; /* marker for variable length tags */
-        internal const short TIFF_SPP = -2; /* marker for SamplesPerPixel tags */
-        internal const short TIFF_VARIABLE2 = -3; /* marker for int var-length tags */
+        /// <summary>
+        /// marker for variable length tags
+        /// </summary>
+        internal const short TIFF_VARIABLE = -1;
+
+        /// <summary>
+        /// marker for SamplesPerPixel tags
+        /// </summary>
+        internal const short TIFF_SPP = -2;
+
+        /// <summary>
+        /// marker for int var-length tags
+        /// </summary>
+        internal const short TIFF_VARIABLE2 = -3;
 
         internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
 
@@ -203,11 +213,13 @@ namespace BitMiracle.LibTiff.Classic
                 "Cannot remove compression scheme {0}; not registered", c.m_name);
         }
 
-        /**
-        * Check whether we have working codec for the specific coding scheme.
-        * @return returns true if the codec is configured and working. Otherwise
-        * false will be returned.
-        */
+        /// <summary>
+        /// Checks whether we have working codec for the specific coding scheme.
+        /// </summary>
+        /// <param name="scheme">The scheme to check.</param>
+        /// <returns>
+        /// <c>true</c> if the codec is configured and working; otherwise, <c>false</c>.
+        /// </returns>
         public bool IsCodecConfigured(Compression scheme)
         {
             TiffCodec codec = FindCodec(scheme);
@@ -221,12 +233,13 @@ namespace BitMiracle.LibTiff.Classic
             return false;
         }
 
-        /**
-        * Get array of configured codecs, both built-in and registered by user.
-        * Caller is responsible to free this array (but not codecs).
-        * @return returns array of TiffCodec records (the last record should be null)
-        * or null if function failed.
-        */
+        /// <summary>
+        /// Gets the array of configured codecs, both built-in and
+        /// registered by user.
+        /// </summary>
+        /// <returns>The array of configured codecs or <c>null</c> if function
+        /// have failed.</returns>
+        /// <remarks>The last record in array is null.</remarks>
         public TiffCodec[] GetConfiguredCodecs()
         {
             int totalCodecs = 0;
@@ -255,9 +268,9 @@ namespace BitMiracle.LibTiff.Classic
             return codecs;
         }
 
-        /*
-         * Auxiliary functions.
-         */
+        //
+        // Auxiliary functions.
+        //
 
         /**
         * Re-allocates array and copies data from old to new array. 
@@ -356,10 +369,10 @@ namespace BitMiracle.LibTiff.Classic
             tif.m_name = name.Clone() as string;
 
             tif.m_mode = m & ~(O_CREAT | O_TRUNC);
-            tif.m_curdir = -1; /* non-existent directory */
+            tif.m_curdir = -1; // non-existent directory
             tif.m_curoff = 0;
-            tif.m_curstrip = -1; /* invalid strip */
-            tif.m_row = -1; /* read/write pre-increment */
+            tif.m_curstrip = -1; // invalid strip
+            tif.m_row = -1; // read/write pre-increment
             tif.m_clientdata = clientdata;
 
             if (stream == null)
@@ -370,14 +383,11 @@ namespace BitMiracle.LibTiff.Classic
 
             tif.m_stream = stream;
 
-            /* setup default state */
+            // setup default state
             tif.m_currentCodec = tif.m_builtInCodecs[0];
 
-            /*
-             * Default is to return data MSB2LSB and enable the
-             * use of memory-mapped files and strip chopping when
-             * a file is opened read-only.
-             */
+            // Default is to return data MSB2LSB and enable the use of
+            // memory-mapped files and strip chopping when a file is opened read-only.
             tif.m_flags = (int)FillOrder.MSB2LSB;
 
             if (m == O_RDONLY || m == O_RDWR)
@@ -460,9 +470,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-             * Read in TIFF header.
-             */
+            // Read in TIFF header.
 
             if ((tif.m_mode & O_TRUNC) != 0 || !tif.readHeaderOk(ref tif.m_header))
             {
@@ -472,9 +480,8 @@ namespace BitMiracle.LibTiff.Classic
                     return tif.safeOpenFailed();
                 }
 
-                /*
-                 * Setup header and write.
-                 */
+                // Setup header and write.
+
                 tif.m_header.tiff_magic = (tif.m_flags & Tiff.TIFF_SWAB) != 0 ? TIFF_BIGENDIAN : TIFF_LITTLEENDIAN;
                 tif.m_header.tiff_version = TIFF_VERSION;
                 if ((tif.m_flags & Tiff.TIFF_SWAB) != 0)
@@ -489,14 +496,11 @@ namespace BitMiracle.LibTiff.Classic
                     ErrorExt(tif, tif.m_clientdata, name, "Error writing TIFF header");
                     return tif.safeOpenFailed();
                 }
-                /*
-                 * Setup the byte order handling.
-                 */
+
+                // Setup the byte order handling.
                 tif.initOrder(tif.m_header.tiff_magic);
 
-                /*
-                 * Setup default directory.
-                 */
+                // Setup default directory.
                 tif.setupDefaultDirectory();
                 tif.m_diroff = 0;
                 tif.m_dirlist = null;
@@ -505,9 +509,7 @@ namespace BitMiracle.LibTiff.Classic
                 return tif;
             }
 
-            /*
-             * Setup the byte order handling.
-             */
+            // Setup the byte order handling.
             if (tif.m_header.tiff_magic != TIFF_BIGENDIAN && tif.m_header.tiff_magic != TIFF_LITTLEENDIAN && tif.m_header.tiff_magic != MDI_LITTLEENDIAN)
             {
                 ErrorExt(tif, tif.m_clientdata, name,
@@ -518,19 +520,16 @@ namespace BitMiracle.LibTiff.Classic
 
             tif.initOrder(tif.m_header.tiff_magic);
 
-            /*
-             * Swap header if required.
-             */
+            // Swap header if required.
             if ((tif.m_flags & Tiff.TIFF_SWAB) != 0)
             {
                 SwabShort(ref tif.m_header.tiff_version);
-                SwabLong(ref tif.m_header.tiff_diroff);
+                SwabUInt(ref tif.m_header.tiff_diroff);
             }
-            /*
-             * Now check version (if needed, it's been byte-swapped).
-             * Note that this isn't actually a version number, it's a
-             * magic number that doesn't change (stupid).
-             */
+
+            // Now check version (if needed, it's been byte-swapped).
+            // Note that this isn't actually a version number, it's a
+            // magic number that doesn't change (stupid).
             if (tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
                 ErrorExt(tif, tif.m_clientdata, name, "This is a BigTIFF file.  This format not supported\nby this version of libtiff.");
@@ -550,18 +549,14 @@ namespace BitMiracle.LibTiff.Classic
             tif.m_rawdata = null;
             tif.m_rawdatasize = 0;
 
-            /*
-             * Sometimes we do not want to read the first directory (for example,
-             * it may be broken) and want to proceed to other directories. I this
-             * case we use the TIFF_HEADERONLY flag to open file and return
-             * immediately after reading TIFF header.
-             */
+            // Sometimes we do not want to read the first directory (for example,
+            // it may be broken) and want to proceed to other directories. I this
+            // case we use the TIFF_HEADERONLY flag to open file and return
+            // immediately after reading TIFF header.
             if ((tif.m_flags & TIFF_HEADERONLY) != 0)
                 return tif;
 
-            /*
-             * Setup initial directory.
-             */
+            // Setup initial directory.
             switch (mode[0])
             {
                 case 'r':
@@ -575,11 +570,8 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case 'a':
-                    /*
-                     * New directories are automatically append
-                     * to the end of the directory chain when they
-                     * are written out (see TIFFWriteDirectory).
-                     */
+                    // New directories are automatically append to the end of
+                    // the directory chain when they are written out (see WriteDirectory).
                     tif.setupDefaultDirectory();
                     return tif;
             }
@@ -587,9 +579,10 @@ namespace BitMiracle.LibTiff.Classic
             return tif.safeOpenFailed();
         }
 
-        /*
-         ** Stuff, related to tag handling and creating custom tags.
-         */
+        //
+        // Stuff, related to tag handling and creating custom tags.
+        //
+
         public int GetTagListCount()
         {
             return m_dir.td_customValueCount;
@@ -616,7 +609,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 TiffFieldInfo fip = FindFieldInfo(info[i].Field_tag, info[i].Field_type);
 
-                /* only add definitions that aren't already present */
+                // only add definitions that aren't already present
                 if (fip == null)
                 {
                     m_fieldinfo[m_nfields] = info[i];
@@ -624,7 +617,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /* Sort the field info by tag number */
+            // Sort the field info by tag number
             IComparer myComparer = new TagCompare();
             Array.Sort(m_fieldinfo, myComparer);
         }
@@ -657,7 +650,7 @@ namespace BitMiracle.LibTiff.Classic
             if (m_foundfield != null && m_foundfield.Field_name == field_name && (dt == TiffType.ANY || dt == m_foundfield.Field_type))
                 return m_foundfield;
 
-            /* If we are invoked with no field information, then just return. */
+            // If we are invoked with no field information, then just return.
             if (m_fieldinfo == null)
                 return null;
 
@@ -678,28 +671,23 @@ namespace BitMiracle.LibTiff.Classic
         public TiffFieldInfo FieldWithTag(TiffTag tag)
         {
             TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
-            if (fip == null)
-            {
-                ErrorExt(this, m_clientdata, "FieldWithTag",
-                    "Internal error, unknown tag 0x{0:x}", tag);
-                Debug.Assert(false);
-                /*NOTREACHED*/
-            }
+            if (fip != null)
+                return fip;
 
-            return fip;
+            ErrorExt(this, m_clientdata, "FieldWithTag", "Internal error, unknown tag 0x{0:x}", tag);
+            Debug.Assert(false);
+            return null;            
         }
 
         public TiffFieldInfo FieldWithName(string field_name)
         {
             TiffFieldInfo fip = FindFieldInfoByName(field_name, TiffType.ANY);
-            if (fip == null)
-            {
-                ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag {0}", field_name);
-                Debug.Assert(false);
-                /*NOTREACHED*/
-            }
+            if (fip != null)
+                return fip;
 
-            return fip;
+            ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag {0}", field_name);
+            Debug.Assert(false);
+            return null;
         }
 
         public TiffTagMethods GetTagMethods()
@@ -735,10 +723,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             clientInfoLink link = m_clientinfo;
 
-            /*
-             ** Do we have an existing link with this name?  If so, just
-             ** set it.
-             */
+            // Do we have an existing link with this name? If so, just set it.
             while (link != null && link.name != name)
                 link = link.next;
 
@@ -748,10 +733,7 @@ namespace BitMiracle.LibTiff.Classic
                 return;
             }
 
-            /*
-             ** Create a new link.
-             */
-
+            // Create a new link.
             link = new clientInfoLink();
             link.next = m_clientinfo;
             link.name = name.Clone() as string;
@@ -1099,7 +1081,7 @@ namespace BitMiracle.LibTiff.Classic
                     dp.tdir_type = (TiffType)temp;
 
                     SwabLong(ref dp.tdir_count);
-                    SwabLong(ref dp.tdir_offset);
+                    SwabUInt(ref dp.tdir_offset);
                 }
                 
                 if (dp.tdir_tag == TiffTag.SAMPLESPERPIXEL)
@@ -1204,12 +1186,9 @@ namespace BitMiracle.LibTiff.Classic
                 switch (dir[i].tdir_tag)
                 {
                     case TiffTag.COMPRESSION:
-                        /*
-                         * The 5.0 spec says the Compression tag has
-                         * one value, while earlier specs say it has
-                         * one value per sample.  Because of this, we
-                         * accept the tag if one value is supplied.
-                         */
+                        // The 5.0 spec says the Compression tag has one value,
+                        // while earlier specs say it has one value per sample.
+                        // Because of this, we accept the tag if one value is supplied.
                         if (dir[i].tdir_count == 1)
                         {
                             int v = extractData(dir[i]);
@@ -1217,7 +1196,7 @@ namespace BitMiracle.LibTiff.Classic
                                 return false;
                             
                             break;
-                            /* XXX: workaround for broken TIFFs */
+                            // XXX: workaround for broken TIFFs
                         }
                         else if (dir[i].tdir_type == TiffType.LONG)
                         {
@@ -1605,12 +1584,12 @@ namespace BitMiracle.LibTiff.Classic
              */
             if (m_dir.td_nstrips > 1)
             {
-                m_dir.td_stripbytecountsorted = 1;
+                m_dir.td_stripbytecountsorted = true;
                 for (int strip = 1; strip < m_dir.td_nstrips; strip++)
                 {
                     if (m_dir.td_stripoffset[strip - 1] > m_dir.td_stripoffset[strip])
                     {
-                        m_dir.td_stripbytecountsorted = 0;
+                        m_dir.td_stripbytecountsorted = false;
                         break;
                     }
                 }
@@ -1668,22 +1647,23 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
         
-        /* 
-        * Read custom directory from the arbitrary offset.
-        * The code is very similar to ReadDirectory().
-        */
-        public bool ReadCustomDirectory(int diroff, TiffFieldInfo[] info, int n)
+        /// <summary>
+        /// Read custom directory from the arbitrary offset.
+        /// </summary>
+        /// <remarks>The code is very similar to ReadDirectory().</remarks>
+        public bool ReadCustomDirectory(long diroff, TiffFieldInfo[] info, int n)
         {
             const string module = "ReadCustomDirectory";
 
             setupFieldInfo(info, n);
 
-            int dummyNextDirOff;
+            uint dummyNextDirOff;
             TiffDirEntry[] dir;
-            short dircount = fetchDirectory(diroff, out dir, out dummyNextDirOff);
+            short dircount = fetchDirectory((uint)diroff, out dir, out dummyNextDirOff);
             if (dircount == 0)
             {
-                ErrorExt(this, m_clientdata, module, "{0}: Failed to read custom directory at offset {1}", m_name, diroff);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Failed to read custom directory at offset {1}", m_name, diroff);
                 return false;
             }
 
@@ -1704,7 +1684,7 @@ namespace BitMiracle.LibTiff.Classic
                     dir[i].tdir_type = (TiffType)temp;
 
                     SwabLong(ref dir[i].tdir_count);
-                    SwabLong(ref dir[i].tdir_offset);
+                    SwabUInt(ref dir[i].tdir_offset);
                 }
 
                 if (fix >= m_nfields || dir[i].tdir_tag == TiffTag.IGNORE)
@@ -1791,18 +1771,15 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        public bool WriteCustomDirectory(out int pdiroff)
+        public bool WriteCustomDirectory(out long pdiroff)
         {
             pdiroff = -1;
 
             if (m_mode == O_RDONLY)
                 return true;
 
-            /*
-            * Size the directory so that we can calculate
-            * offsets for the data items that aren't kept
-            * in-place in each field.
-            */
+            // Size the directory so that we can calculate offsets for the data
+            // items that aren't kept in-place in each field.
             int nfields = 0;
             for (int b = 0; b <= FIELD.FIELD_LAST; b++)
             {
@@ -1814,20 +1791,15 @@ namespace BitMiracle.LibTiff.Classic
             int dirsize = nfields * TiffDirEntry.SizeInBytes;
             TiffDirEntry[] data = new TiffDirEntry[nfields];
 
-            /*
-            * Put the directory  at the end of the file.
-            */
-            m_diroff = (seekFile(0, SeekOrigin.End) + 1) & ~1;
-            m_dataoff = m_diroff + sizeof(short) + dirsize + sizeof(int);
+            // Put the directory at the end of the file.
+            m_diroff = (uint)((seekFile(0, SeekOrigin.End) + 1) & ~1);
+            m_dataoff = m_diroff + sizeof(short) + (uint)dirsize + sizeof(int);
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
             seekFile(m_dataoff, SeekOrigin.Begin);
             
-            /*
-            * Setup external form of directory
-            * entries and write data items.
-            */
+            // Setup external form of directory entries and write data items.
             int[] fields = new int[FIELD.FIELD_SETLONGS];
             Array.Copy(m_dir.td_fieldsset, fields, FIELD.FIELD_SETLONGS);
 
@@ -1835,11 +1807,8 @@ namespace BitMiracle.LibTiff.Classic
             {
                 TiffFieldInfo fip = m_fieldinfo[fi];
 
-                /*
-                * For custom fields, we test to see if the custom field
-                * is set or not.  For normal fields, we just use the
-                * FieldSet test.
-                */
+                // For custom fields, we test to see if the custom field
+                // is set or not.  For normal fields, we just use the FieldSet test.
                 if (fip.Field_bit == FIELD.FIELD_CUSTOM)
                 {
                     bool is_set = false;
@@ -1856,23 +1825,18 @@ namespace BitMiracle.LibTiff.Classic
                     resetFieldBit(fields, fip.Field_bit);
             }
 
-            /*
-            * Write directory.
-            */
+            // Write directory.
+
             short dircount = (short)nfields;
             pdiroff = m_nextdiroff;
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
             {
-                /*
-                * The file's byte order is opposite to the
-                * native machine architecture.  We overwrite
-                * the directory information with impunity
-                * because it'll be released below after we
-                * write it to the file.  Note that all the
-                * other tag construction routines assume that
-                * we do this byte-swapping; i.e. they only
-                * byte-swap indirect data.
-                */
+                // The file's byte order is opposite to the native machine
+                // architecture. We overwrite the directory information with
+                // impunity because it'll be released below after we write it
+                // to the file. Note that all the other tag construction
+                // routines assume that we do this byte-swapping; i.e. they only
+                // byte-swap indirect data.
                 for (int i = 0; i < dircount; i++)
                 {
                     TiffDirEntry dirEntry = data[i];
@@ -1886,12 +1850,15 @@ namespace BitMiracle.LibTiff.Classic
                     dirEntry.tdir_type = (TiffType)temp;
 
                     SwabLong(ref dirEntry.tdir_count);
-                    SwabLong(ref dirEntry.tdir_offset);
+                    SwabUInt(ref dirEntry.tdir_offset);
                 }
                 
                 dircount = (short)nfields;
                 SwabShort(ref dircount);
-                SwabLong(ref pdiroff);
+
+                int tempOff = (int)pdiroff;
+                SwabLong(ref tempOff);
+                pdiroff = tempOff;
             }
 
             seekFile(m_diroff, SeekOrigin.Begin);
@@ -1907,7 +1874,7 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            if (!writeIntOK(pdiroff))
+            if (!writeIntOK((int)pdiroff))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory link");
                 return false;
@@ -1920,7 +1887,7 @@ namespace BitMiracle.LibTiff.Classic
         * EXIF is important special case of custom IFD, so we have a special
         * function to read it.
         */
-        public bool ReadEXIFDirectory(int diroff)
+        public bool ReadEXIFDirectory(long diroff)
         {
             int exifFieldInfoCount;
             TiffFieldInfo[] exifFieldInfo = getExifFieldInfo(out exifFieldInfoCount);
@@ -2078,9 +2045,12 @@ namespace BitMiracle.LibTiff.Classic
             return VTileSize(m_dir.td_tilelength);
         }
                 
-        /*
-        * Compute the # bytes in a variable length, row-aligned tile.
-        */
+        /// <summary>
+        /// Computes the number of bytes in a variable length, row-aligned tile.
+        /// </summary>
+        /// <param name="nrows">The number of rows in a tile.</param>
+        /// <returns>The number of bytes in a variable length, row-aligned
+        /// tile.</returns>
         public int VTileSize(int nrows)
         {
             if (m_dir.td_tilelength == 0 || m_dir.td_tilewidth == 0 || m_dir.td_tiledepth == 0)
@@ -2112,7 +2082,9 @@ namespace BitMiracle.LibTiff.Classic
                 tilesize = summarize(tilesize, multiply(2, tilesize / samplingarea, "VTileSize"), "VTileSize");
             }
             else
+            {
                 tilesize = multiply(nrows, TileRowSize(), "VTileSize");
+            }
 
             return multiply(tilesize, m_dir.td_tiledepth, "VTileSize");
         }
@@ -2237,39 +2209,42 @@ namespace BitMiracle.LibTiff.Classic
             return m_curdir;
         }
 
-        /*
-        * Count the number of directories in a file.
-        */
+        /// <summary>
+        /// Gets the number of directories in a file.
+        /// </summary>
         public short NumberOfDirectories()
         {
-            int nextdir = m_header.tiff_diroff;
+            uint nextdir = m_header.tiff_diroff;
             short n = 0;
-            int dummyOff;
+            long dummyOff;
             while (nextdir != 0 && advanceDirectory(ref nextdir, out dummyOff))
                 n++;
 
             return n;
         }
 
-        /*
-        * Return file offset of the current directory.
-        */
-        public int CurrentDirOffset()
+        /// <summary>
+        /// Returns file offset of the current directory.
+        /// </summary>
+        /// <returns></returns>
+        public long CurrentDirOffset()
         {
             return m_diroff;
         }
 
-        /*
-        * Return current strip.
-        */
+        /// <summary>
+        /// Returns current strip index.
+        /// </summary>
+        /// <returns></returns>
         public int CurrentStrip()
         {
             return m_curstrip;
         }
 
-        /*
-        * Return current tile.
-        */
+        /// <summary>
+        /// Returns current tile index.
+        /// </summary>
+        /// <returns></returns>
         public int CurrentTile()
         {
             return m_curtile;
@@ -2356,7 +2331,7 @@ namespace BitMiracle.LibTiff.Classic
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
 
-            m_dir.td_stripoffset = new int[m_dir.td_nstrips];
+            m_dir.td_stripoffset = new uint[m_dir.td_nstrips];
             m_dir.td_stripbytecount = new int[m_dir.td_nstrips];
 
             setFieldBit(FIELD.FIELD_STRIPOFFSETS);
@@ -2437,9 +2412,9 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
         
-        /*
-        * Release storage associated with a directory.
-        */
+        /// <summary>
+        /// Release storage associated with a directory.
+        /// </summary>
         public void FreeDirectory()
         {
             if (m_dir != null)
@@ -2451,15 +2426,16 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * Setup for a new directory.  Should we automatically call
-        * WriteDirectory() if the current one is dirty?
-        *
-        * The newly created directory will not exist on the file till
-        * WriteDirectory(), Flush() or Close() is called.
-        */
+        /// <summary>
+        /// Creates a new directory.
+        /// </summary>
+        /// <remarks>The newly created directory will not exist on the file till
+        /// WriteDirectory(), Flush() or Close() is called.</remarks>
         public void CreateDirectory()
         {
+            // Should we automatically call WriteDirectory()
+            // if the current one is dirty?
+
             setupDefaultDirectory();
             m_diroff = 0;
             m_nextdiroff = 0;
@@ -2468,24 +2444,25 @@ namespace BitMiracle.LibTiff.Classic
             m_curstrip = -1;
         }
         
-        /*
-        * Return an indication of whether or not we are
-        * at the last directory in the file.
-        */
+        /// <summary>
+        /// Return an indication of whether or not we are at the last directory
+        /// in the file.
+        /// </summary>
         public bool LastDirectory()
         {
             return (m_nextdiroff == 0);
         }
         
-        /*
-        * Set the n-th directory as the current directory.
-        * NB: Directories are numbered starting at 0.
-        */
+        /// <summary>
+        /// Set the directory with specified number as the current directory.
+        /// </summary>
+        /// <param name="dirn">The directory number.</param>
+        /// <remarks>Directories are numbered starting at 0.</remarks>
         public bool SetDirectory(short dirn)
         {
             short n;
-            int dummyOff;
-            int nextdir = m_header.tiff_diroff;
+            long dummyOff;
+            uint nextdir = m_header.tiff_diroff;
             for (n = dirn; n > 0 && nextdir != 0; n--)
             {
                 if (!advanceDirectory(ref nextdir, out dummyOff))
@@ -2494,41 +2471,40 @@ namespace BitMiracle.LibTiff.Classic
 
             m_nextdiroff = nextdir;
 
-            /*
-             * Set curdir to the actual directory index.  The
-             * -1 is because ReadDirectory will increment
-             * m_curdir after successfully reading the directory.
-             */
+            // Set curdir to the actual directory index. The -1 is because
+            // ReadDirectory will increment m_curdir after successfully reading
+            // the directory.
             m_curdir = (short)(dirn - n - 1);
 
-            /*
-             * Reset m_dirnumber counter and start new list of seen directories.
-             * We need this to prevent IFD loops.
-             */
+            // Reset m_dirnumber counter and start new list of seen directories.
+            // We need this to prevent IFD loops.
             m_dirnumber = 0;
             return ReadDirectory();
         }
 
-        /*
-        * Set the current directory to be the directory
-        * located at the specified file offset.  This interface
-        * is used mainly to access directories linked with
-        * the SubIFD tag (e.g. thumbnail images).
-        */
-        public bool SetSubDirectory(int diroff)
+        /// <summary>
+        /// Set the current directory to be the directory located at the
+        /// specified file offset.
+        /// </summary>
+        /// <param name="diroff">The file offset of the directory to set
+        /// as current.</param>
+        /// <remarks>This method is used mainly to access directories linked
+        /// with the SubIFD tag (e.g. thumbnail images).</remarks>
+        public bool SetSubDirectory(long diroff)
         {
-            m_nextdiroff = diroff;
-            /*
-             * Reset m_dirnumber counter and start new list of seen directories.
-             * We need this to prevent IFD loops.
-             */
+            m_nextdiroff = (uint)diroff;
+            
+            // Reset m_dirnumber counter and start new list of seen directories.
+            // We need this to prevent IFD loops.
             m_dirnumber = 0;
             return ReadDirectory();
         }
 
-        /*
-        * Unlink the specified directory from the directory chain.
-        */
+        /// <summary>
+        /// Unlinks the specified directory from the directory chain.
+        /// </summary>
+        /// <param name="dirn">The directory number.</param>
+        /// <returns></returns>
         public bool UnlinkDirectory(short dirn)
         {
             const string module = "UnlinkDirectory";
@@ -2539,13 +2515,11 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            /*
-             * Go to the directory before the one we want
-             * to unlink and nab the offset of the link
-             * field we'll need to patch.
-             */
-            int nextdir = m_header.tiff_diroff;
-            int off = sizeof(short) + sizeof(short);
+            // Go to the directory before the one we want
+            // to unlink and nab the offset of the link
+            // field we'll need to patch.
+            uint nextdir = m_header.tiff_diroff;
+            long off = sizeof(short) + sizeof(short);
             for (int n = dirn - 1; n > 0; n--)
             {
                 if (nextdir == 0)
@@ -2563,7 +2537,7 @@ namespace BitMiracle.LibTiff.Classic
              * Advance to the directory to be unlinked and fetch
              * the offset of the directory that follows.
              */
-            int dummyOff;
+            long dummyOff;
             if (!advanceDirectory(ref nextdir, out dummyOff))
                 return false;
 
@@ -2574,9 +2548,9 @@ namespace BitMiracle.LibTiff.Classic
              */
             seekFile(off, SeekOrigin.Begin);
             if ((m_flags & Tiff.TIFF_SWAB) != 0)
-                SwabLong(ref nextdir);
+                SwabUInt(ref nextdir);
             
-            if (!writeIntOK(nextdir))
+            if (!writeIntOK((int)nextdir))
             {
                 ErrorExt(this, m_clientdata, module, "Error writing directory link");
                 return false;
@@ -2670,7 +2644,7 @@ namespace BitMiracle.LibTiff.Classic
                 m_diroff = 0;
 
                 seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SeekOrigin.Begin);
-                if (!writeIntOK(m_header.tiff_diroff))
+                if (!writeIntOK((int)m_header.tiff_diroff))
                 {
                     ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
                     return false;
@@ -2678,7 +2652,7 @@ namespace BitMiracle.LibTiff.Classic
             }
             else
             {
-                int nextdir = m_header.tiff_diroff;
+                uint nextdir = m_header.tiff_diroff;
                 do
                 {
                     short dircount;
@@ -2693,22 +2667,23 @@ namespace BitMiracle.LibTiff.Classic
 
                     seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
                     
-                    if (!readIntOK(out nextdir))
+                    if (!readUIntOK(out nextdir))
                     {
                         ErrorExt(this, m_clientdata, module, "Error fetching directory link");
                         return false;
                     }
 
                     if ((m_flags & Tiff.TIFF_SWAB) != 0)
-                        SwabLong(ref nextdir);
+                        SwabUInt(ref nextdir);
                 }
                 while (nextdir != m_diroff && nextdir != 0);
 
-                int off = seekFile(0, SeekOrigin.Current); /* get current offset */
+                // get current offset
+                long off = seekFile(0, SeekOrigin.Current);
                 seekFile(off - sizeof(int), SeekOrigin.Begin);
                 m_diroff = 0;
                 
-                if (!writeIntOK(m_diroff))
+                if (!writeIntOK((int)m_diroff))
                 {
                     ErrorExt(this, m_clientdata, module, "Error writing directory link");
                     return false;
@@ -2721,10 +2696,9 @@ namespace BitMiracle.LibTiff.Classic
             return WriteDirectory();
         }
         
-        /*
-        * Print the contents of the current directory
-        * to the specified stdio file stream.
-        */
+        /// <summary>
+        /// Print the contents of the current directory to the specified stream.
+        /// </summary>
         public void PrintDirectory(Stream fd)
         {
             PrintDirectory(fd, TiffPrintFlags.NONE);
@@ -3067,9 +3041,8 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(fd, "\n");
             }
 
-            /*
-             ** Custom tag support.
-             */
+            // Custom tag support.
+
             int count = GetTagListCount();
             for (int i = 0; i < count; i++)
             {
@@ -3118,12 +3091,9 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     else
                     {
-                        /* 
-                         * XXX: Should be fixed and removed, see the
-                         * notes related to PAGENUMBER,
-                         * HALFTONEHINTS,
-                         * YCBCRSUBSAMPLING and
-                         * DOTRANGE tags in tif_dir.c. */
+                        // XXX: Should be fixed and removed, see the notes
+                        // related to PAGENUMBER, HALFTONEHINTS,
+                        // YCBCRSUBSAMPLING and DOTRANGE tags
                         raw_data = new byte [dataSize(fip.Field_type) * value_count];
 
                         FieldValue[] result = GetField(tag);
@@ -3138,12 +3108,9 @@ namespace BitMiracle.LibTiff.Classic
                     }
                 }
 
-                /*
-                 * Catch the tags which needs to be specially handled and
-                 * pretty print them. If tag not handled in
-                 * prettyPrintField() fall down and print it as any other
-                 * tag.
-                 */
+                // Catch the tags which needs to be specially handled and
+                // pretty print them. If tag not handled in prettyPrintField()
+                // fall down and print it as any other tag.
                 if (prettyPrintField(fd, tag, value_count, raw_data))
                     continue;
                 else
@@ -3173,12 +3140,10 @@ namespace BitMiracle.LibTiff.Classic
             bool e = seek(row, sample);
             if (e)
             {
-                /*
-                 * Decompress desired row into user buffer.
-                 */
+                // Decompress desired row into user buffer.
                 e = m_currentCodec.DecodeRow(buf, m_scanlinesize, sample);
 
-                /* we are now poised at the beginning of the next row */
+                // we are now poised at the beginning of the next row
                 m_row = row + 1;
 
                 if (e)
@@ -3200,21 +3165,15 @@ namespace BitMiracle.LibTiff.Classic
             if (!writeCheckStrips(module))
                 return false;
 
-            /*
-             * Handle delayed allocation of data buffer.  This
-             * permits it to be sized more intelligently (using
-             * directory information).
-             */
+            // Handle delayed allocation of data buffer. This permits it to be
+            // sized more intelligently (using directory information).
             bufferCheck();
-            
-            /*
-             * Extend image length if needed
-             * (but only for PlanarConfig=1).
-             */
+
+            // Extend image length if needed (but only for PlanarConfig.CONTIG).
             bool imagegrew = false;
             if (row >= m_dir.td_imagelength)
             {
-                /* extend image */
+                // extend image
                 if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 {
                     ErrorExt(this, m_clientdata, m_name, "Can not change \"ImageLength\" when using separate planes");
@@ -3224,9 +3183,8 @@ namespace BitMiracle.LibTiff.Classic
                 m_dir.td_imagelength = row + 1;
                 imagegrew = true;
             }
-            /*
-             * Calculate strip and check for crossings.
-             */
+
+            // Calculate strip and check for crossings.
             int strip;
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
             {
@@ -3240,32 +3198,29 @@ namespace BitMiracle.LibTiff.Classic
                 strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
             }
             else
+            {
                 strip = row / m_dir.td_rowsperstrip;
-            /*
-             * Check strip array to make sure there's space. We don't support
-             * dynamically growing files that have data organized in separate
-             * bitplanes because it's too painful.  In that case we require that
-             * the imagelength be set properly before the first write (so that the
-             * strips array will be fully allocated above).
-             */
+            }
+
+            // Check strip array to make sure there's space. We don't support
+            // dynamically growing files that have data organized in separate
+            // bitplanes because it's too painful.  In that case we require that
+            // the imagelength be set properly before the first write (so that
+            // the strips array will be fully allocated above).
             if (strip >= m_dir.td_nstrips && !growStrips(1))
                 return false;
 
             if (strip != m_curstrip)
             {
-                /*
-                 * Changing strips -- flush any data present.
-                 */
+                // Changing strips - flush any data present.
                 if (!FlushData())
                     return false;
 
                 m_curstrip = strip;
 
-                /*
-                 * Watch out for a growing image.  The value of strips/image
-                 * will initially be 1 (since it can't be deduced until the
-                 * imagelength is known).
-                 */
+                // Watch out for a growing image. The value of strips/image 
+                // will initially be 1 (since it can't be deduced until the
+                // imagelength is known).
                 if (strip >= m_dir.td_stripsperimage && imagegrew)
                     m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
                 
@@ -3283,10 +3238,10 @@ namespace BitMiracle.LibTiff.Classic
 
                 if (m_dir.td_stripbytecount[strip] > 0)
                 {
-                    /* if we are writing over existing tiles, zero length */
+                    // if we are writing over existing tiles, zero length
                     m_dir.td_stripbytecount[strip] = 0;
 
-                    /* this forces appendToStrip() to do a seek */
+                    // this forces appendToStrip() to do a seek
                     m_curoff = 0;
                 }
 
@@ -3296,46 +3251,39 @@ namespace BitMiracle.LibTiff.Classic
                 m_flags |= TIFF_POSTENCODE;
             }
 
-            /*
-             * Ensure the write is either sequential or at the
-             * beginning of a strip (or that we can randomly
-             * access the data -- i.e. no encoding).
-             */
+            // Ensure the write is either sequential or at the beginning of a
+            // strip (or that we can randomly access the data - i.e. no encoding).
             if (row != m_row)
             {
                 if (row < m_row)
                 {
-                    /*
-                     * Moving backwards within the same strip:
-                     * backup to the start and then decode
-                     * forward (below).
-                     */
+                    // Moving backwards within the same strip:
+                    // backup to the start and then decode forward (below).
                     m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
                     m_rawcp = 0;
                 }
-                /*
-                 * Seek forward to the desired row.
-                 */
+
+                // Seek forward to the desired row.
                 if (!m_currentCodec.Seek(row - m_row))
                     return false;
 
                 m_row = row;
             }
 
-            /* swab if needed - note that source buffer will be altered */
+            // swab if needed - note that source buffer will be altered
             postDecode(buf, m_scanlinesize);
 
             bool status = m_currentCodec.EncodeRow(buf, m_scanlinesize, sample);
 
-            /* we are now poised at the beginning of the next row */
+            // we are now poised at the beginning of the next row
             m_row = row + 1;
             return status;
         }
         
-        /*
-        * Read the specified image into an ABGR-format raster. Use bottom left
-        * origin for raster by default.
-        */
+        /// <summary>
+        /// Reads the specified image into an ABGR-format raster.
+        /// </summary>
+        /// <remarks>Uses bottom left origin for raster by default.</remarks>
         public bool ReadRGBAImage(int rwidth, int rheight, int[] raster)
         {
             return ReadRGBAImage(rwidth, rheight, raster, false);
@@ -3370,7 +3318,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (img != null)
                 {
                     img.req_orientation = orientation;
-                    /* XXX verify rwidth and rheight against width and height */
+                    // XXX verify rwidth and rheight against width and height
                     ok = img.Get(raster, (rheight - img.height) * rwidth, rwidth, img.height);
                 }
             }
@@ -4298,20 +4246,23 @@ namespace BitMiracle.LibTiff.Classic
             return (appendToStrip(tile, data, cc) ? cc: -1);
         }
 
-        /*
-        * Set the current write offset.  This should only be
-        * used to set the offset to a known previous location
-        * (very carefully), or to 0 so that the next write gets
-        * appended to the end of the file.
-        */
-        public void SetWriteOffset(int off)
+        /// <summary>
+        /// Sets the current write offset.
+        /// </summary>
+        /// <param name="off">The write offset.</param>
+        /// <remarks>This should only be used to set the offset to a known
+        /// previous location (very carefully), or to 0 so that the next write
+        /// gets appended to the end of the file.</remarks>
+        public void SetWriteOffset(long off)
         {
-            m_curoff = off;
+            m_curoff = (uint)off;
         }
 
-        /*
-        * Return size of TiffDataType in bytes
-        */
+        /// <summary>
+        /// Gets the size of a TiffType in bytes.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The size of TiffType in bytes.</returns>
         public static int DataWidth(TiffType type)
         {
             switch (type)
@@ -4322,20 +4273,24 @@ namespace BitMiracle.LibTiff.Classic
                 case TiffType.SBYTE:
                 case TiffType.UNDEFINED:
                     return 1;
+
                 case TiffType.SHORT:
                 case TiffType.SSHORT:
                     return 2;
+
                 case TiffType.LONG:
                 case TiffType.SLONG:
                 case TiffType.FLOAT:
                 case TiffType.IFD:
                     return 4;
+
                 case TiffType.RATIONAL:
                 case TiffType.SRATIONAL:
                 case TiffType.DOUBLE:
                     return 8;
+
                 default:
-                    /* will return 0 for unknown types */
+                    // will return 0 for unknown types
                     return 0;
             }
         }
@@ -4418,7 +4373,7 @@ namespace BitMiracle.LibTiff.Classic
 
         public static void SwabArrayOfTriples(byte[] tp, int n)
         {
-            /* XXX unroll loop some */
+            // XXX unroll loop some
             int tpPos = 0;
             while (n-- > 0)
             {

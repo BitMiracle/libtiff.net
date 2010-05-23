@@ -68,8 +68,8 @@ namespace BitMiracle.LibTiff.Classic
                 if (m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
                 {
                     FieldValue[] result = GetField(TiffTag.YCBCRSUBSAMPLING);
-                    short ycbcrsubsampling0 = result[0].ToShort();
-                    short ycbcrsubsampling1 = result[1].ToShort();
+                    ushort ycbcrsubsampling0 = result[0].ToUShort();
+                    ushort ycbcrsubsampling1 = result[1].ToUShort();
 
                     if (ycbcrsubsampling0 * ycbcrsubsampling1 == 0)
                     {
@@ -85,7 +85,9 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
             else
+            {
                 scanline = m_dir.td_imagewidth;
+            }
 
             return howMany8(multiply(scanline, m_dir.td_bitspersample, "TIFFScanlineSize"));
         }

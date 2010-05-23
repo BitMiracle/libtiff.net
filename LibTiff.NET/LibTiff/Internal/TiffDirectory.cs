@@ -20,7 +20,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
     /// </summary>
     class TiffDirectory
     {
-        /* bit vector of fields that are set */
+        /// <summary>
+        /// bit vector of fields that are set
+        /// </summary>
         public int[] td_fieldsset = new int[FIELD.FIELD_SETLONGS];
 
         public int td_imagewidth;
@@ -55,18 +57,31 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public short td_extrasamples;
         public ExtraSample[] td_sampleinfo;
         public int td_stripsperimage;
-        public int td_nstrips; /* size of offset & bytecount arrays */
-        public int[] td_stripoffset;
+
+        /// <summary>
+        /// size of offset and bytecount arrays
+        /// </summary>
+        public int td_nstrips;
+        public uint[] td_stripoffset;
         public int[] td_stripbytecount;
-        public int td_stripbytecountsorted; /* is the bytecount array sorted ascending? */
+
+        /// <summary>
+        /// is the bytecount array sorted ascending?
+        /// </summary>
+        public bool td_stripbytecountsorted;
+
         public short td_nsubifd;
         public int[] td_subifd;
-        /* YCbCr parameters */
+
+        // YCbCr parameters
         public short[] td_ycbcrsubsampling = new short[2];
         public YCbCrPosition td_ycbcrpositioning;
-        /* Colorimetry parameters */
+        
+        // Colorimetry parameters
+
         public short[][] td_transferfunction = { null, null, null };
-        /* CMYK parameters */
+        
+        // CMYK parameters
         public int td_inknameslen;
         public string td_inknames;
 
@@ -87,7 +102,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             td_samplesperpixel = 1;
             td_rowsperstrip = -1;
             td_tiledepth = 1;
-            td_stripbytecountsorted = 1; /* Our own arrays always sorted. */
+            td_stripbytecountsorted = true; // Our own arrays always sorted.
             td_resolutionunit = ResUnit.INCH;
             td_sampleformat = SampleFormat.UINT;
             td_imagedepth = 1;

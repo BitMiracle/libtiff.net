@@ -27,28 +27,28 @@ namespace BitMiracle.LibTiff.Classic
     {
         private static readonly string[] photoNames = 
         {
-            "min-is-white",                         /* Photometric.MINISWHITE */
-            "min-is-black",                         /* Photometric.MINISBLACK */
-            "RGB color",                            /* Photometric.RGB */
-            "palette color (RGB from colormap)",    /* Photometric.PALETTE */
-            "transparency mask",                    /* Photometric.MASK */
-            "separated",                            /* Photometric.SEPARATED */
-            "YCbCr",                                /* Photometric.YCBCR */
+            "min-is-white",                         // Photometric.MINISWHITE
+            "min-is-black",                         // Photometric.MINISBLACK
+            "RGB color",                            // Photometric.RGB
+            "palette color (RGB from colormap)",    // Photometric.PALETTE
+            "transparency mask",                    // Photometric.MASK
+            "separated",                            // Photometric.SEPARATED
+            "YCbCr",                                // Photometric.YCBCR
             "7 (0x7)",
-            "CIE L*a*b*",                           /* Photometric.CIELAB */
+            "CIE L*a*b*",                           // Photometric.CIELAB
         };
 
         private static readonly string[] orientNames = 
         {
             "0 (0x0)",
-            "row 0 top, col 0 lhs",                 /* Orientation.TOPLEFT */
-            "row 0 top, col 0 rhs",                 /* Orientation.TOPRIGHT */
-            "row 0 bottom, col 0 rhs",              /* Orientation.BOTRIGHT */
-            "row 0 bottom, col 0 lhs",              /* Orientation.BOTLEFT */
-            "row 0 lhs, col 0 top",                 /* Orientation.LEFTTOP */
-            "row 0 rhs, col 0 top",                 /* Orientation.RIGHTTOP */
-            "row 0 rhs, col 0 bottom",              /* Orientation.RIGHTBOT */
-            "row 0 lhs, col 0 bottom",              /* Orientation.LEFTBOT */
+            "row 0 top, col 0 lhs",                 // Orientation.TOPLEFT
+            "row 0 top, col 0 rhs",                 // Orientation.TOPRIGHT
+            "row 0 bottom, col 0 rhs",              // Orientation.BOTRIGHT
+            "row 0 bottom, col 0 lhs",              // Orientation.BOTLEFT
+            "row 0 lhs, col 0 top",                 // Orientation.LEFTTOP
+            "row 0 rhs, col 0 top",                 // Orientation.RIGHTTOP
+            "row 0 rhs, col 0 bottom",              // Orientation.RIGHTBOT
+            "row 0 lhs, col 0 bottom",              // Orientation.LEFTBOT
         };
 
         private static void printField(Stream fd, TiffFieldInfo fip, int value_count, object raw_data)

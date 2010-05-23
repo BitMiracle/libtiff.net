@@ -20,18 +20,28 @@ namespace BitMiracle.LibTiff.Classic.Internal
     /// </summary>
     class TiffDisplay
     {
-        /* XYZ -> luminance matrix */
+        /// <summary>
+        /// XYZ -> luminance matrix
+        /// </summary>
         internal float[][] d_mat;
-        internal float d_YCR; /* Light o/p for reference white */
+
+        // Light o/p for reference white
+        internal float d_YCR;
         internal float d_YCG;
         internal float d_YCB;
-        internal int d_Vrwr; /* Pixel values for ref. white */
+
+        // Pixel values for ref. white
+        internal int d_Vrwr;
         internal int d_Vrwg;
         internal int d_Vrwb;
-        internal float d_Y0R; /* Residual light for black pixel */
+
+        // Residual light for black pixel
+        internal float d_Y0R;
         internal float d_Y0G;
         internal float d_Y0B;
-        internal float d_gammaR; /* Gamma values for the three guns */
+
+        // Gamma values for the three guns
+        internal float d_gammaR;
         internal float d_gammaG;
         internal float d_gammaB;
 

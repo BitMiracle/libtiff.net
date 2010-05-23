@@ -26,12 +26,39 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     enum TiffPrintFlags
     {
-        NONE = 0x0,  /* no extra info */
-        STRIPS = 0x1,  /* strips/tiles info */
-        CURVES = 0x2,  /* color/gray response curves */
-        COLORMAP = 0x4,  /* colormap */
-        JPEGQTABLES = 0x100,  /* JPEG Q matrices */
-        JPEGACTABLES = 0x200,  /* JPEG AC tables */
-        JPEGDCTABLES = 0x200,  /* JPEG DC tables */
+        /// <summary>
+        /// no extra info
+        /// </summary>
+        NONE = 0x0,
+
+        /// <summary>
+        /// strips/tiles info
+        /// </summary>
+        STRIPS = 0x1,
+
+        /// <summary>
+        /// color/gray response curves
+        /// </summary>
+        CURVES = 0x2,
+
+        /// <summary>
+        /// colormap
+        /// </summary>
+        COLORMAP = 0x4,
+
+        /// <summary>
+        /// JPEG Q matrices
+        /// </summary>
+        JPEGQTABLES = 0x100,
+
+        /// <summary>
+        /// JPEG AC tables
+        /// </summary>
+        JPEGACTABLES = 0x200,
+
+        /// <summary>
+        /// JPEG DC tables
+        /// </summary>
+        JPEGDCTABLES = 0x200,
     }
 }

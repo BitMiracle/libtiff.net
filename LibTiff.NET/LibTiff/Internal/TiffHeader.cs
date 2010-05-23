@@ -23,8 +23,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public const int SizeInBytes = TIFF_MAGIC_SIZE + TIFF_VERSION_SIZE + TIFF_DIROFFSET_SIZE;
 
-        public short tiff_magic; /* magic number (defines byte order) */
-        public short tiff_version; /* TIFF version number */
-        public int tiff_diroff; /* byte offset to first directory */
+        /// <summary>
+        /// magic number (defines byte order)
+        /// </summary>
+        public short tiff_magic;
+
+        /// <summary>
+        /// TIFF version number
+        /// </summary>
+        public short tiff_version;
+
+        /// <summary>
+        /// byte offset to first directory
+        /// </summary>
+        public uint tiff_diroff;
     }
 }

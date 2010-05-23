@@ -23,13 +23,29 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     class TiffTagMethods
     {
-        /*
-         * These are used in the backwards compatibility code...
-         */
-        private const short DATATYPE_VOID = 0;      /* !untyped data */
-        private const short DATATYPE_INT = 1;       /* !signed integer data */
-        private const short DATATYPE_UINT = 2;      /* !unsigned integer data */
-        private const short DATATYPE_IEEEFP = 3;    /* !IEEE floating point data */
+        //
+        // These are used in the backwards compatibility code...
+        // 
+
+        /// <summary>
+        /// !untyped data
+        /// </summary>
+        private const short DATATYPE_VOID = 0;
+
+        /// <summary>
+        /// !signed integer data
+        /// </summary>
+        private const short DATATYPE_INT = 1;
+
+        /// <summary>
+        /// !unsigned integer data
+        /// </summary>
+        private const short DATATYPE_UINT = 2;
+
+        /// <summary>
+        /// !IEEE floating point data
+        /// </summary>
+        private const short DATATYPE_IEEEFP = 3;
 
         /* tag set routine */
         public virtual bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)

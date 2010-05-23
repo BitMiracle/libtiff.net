@@ -21,26 +21,43 @@ using System.Text;
 
 namespace BitMiracle.LibTiff.Classic.Internal
 {
+    /// <summary>
+    /// CIE Lab 1976->RGB support
+    /// </summary>
     class TiffCIELabToRGB
     {
         public const int CIELABTORGB_TABLE_RANGE = 1500;
 
-        /* CIE Lab 1976->RGB support */
-        private int range; /* Size of conversion table */
+        /// <summary>
+        /// Size of conversion table
+        /// </summary>
+        private int range;
 
         private float rstep;
         private float gstep;
         private float bstep;
 
+        // Reference white point
         private float X0;
         private float Y0;
-        private float Z0; /* Reference white point */
+        private float Z0;
 
         private TiffDisplay display;
 
-        private float[] Yr2r = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yr to r */
-        private float[] Yg2g = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yg to g */
-        private float[] Yb2b = new float[CIELABTORGB_TABLE_RANGE + 1]; /* Conversion of Yb to b */
+        /// <summary>
+        /// Conversion of Yr to r
+        /// </summary>
+        private float[] Yr2r = new float[CIELABTORGB_TABLE_RANGE + 1];
+
+        /// <summary>
+        /// Conversion of Yg to g
+        /// </summary>
+        private float[] Yg2g = new float[CIELABTORGB_TABLE_RANGE + 1];
+
+        /// <summary>
+        /// Conversion of Yb to b
+        /// </summary>
+        private float[] Yb2b = new float[CIELABTORGB_TABLE_RANGE + 1];
 
         /* 
         * Allocate conversion state structures and make look_up tables for
