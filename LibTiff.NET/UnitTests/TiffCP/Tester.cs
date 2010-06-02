@@ -8,7 +8,7 @@ namespace UnitTests.TiffCP
 {
     class Tester
     {
-        private const string m_testcase = @"..\..\..\..\TestCase\";
+        private const string m_testcase = @"..\..\..\TestCase\";
 
         private static object locked = new object();
 

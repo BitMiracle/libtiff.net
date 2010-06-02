@@ -91,7 +91,7 @@
     <Compile Include="TiffTagMethods.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\LibJpeg.NET\LibJpeg\LibJpeg2005.csproj">
+    <ProjectReference Include="..\LibJpeg\LibJpeg2005.csproj">
       <Project>{7300CDF5-1C93-4611-8CC9-47FE79F340AB}</Project>
       <Name>LibJpeg2005</Name>
     </ProjectReference>

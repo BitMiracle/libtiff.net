@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff", "LibTiff\LibTiff.csproj", "{281EF657-40C0-432D-8AC4-E9ADDFD792B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibJpeg", "..\LibJpeg.NET\LibJpeg\LibJpeg.csproj", "{7300CDF5-1C93-4611-8CC9-47FE79F340AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibJpeg", "LibJpeg\LibJpeg.csproj", "{7300CDF5-1C93-4611-8CC9-47FE79F340AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zLib", "zLib\zLib.csproj", "{366A602D-AF6F-4FE1-8A95-392ED17845DC}"
 EndProject

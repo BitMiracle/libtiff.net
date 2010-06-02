@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibJpeg2005", "..\LibJpeg.NET\LibJpeg\LibJpeg2005.csproj", "{7300CDF5-1C93-4611-8CC9-47FE79F340AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibJpeg2005", "LibJpeg\LibJpeg2005.csproj", "{7300CDF5-1C93-4611-8CC9-47FE79F340AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff2005", "LibTiff\LibTiff2005.csproj", "{281EF657-40C0-432D-8AC4-E9ADDFD792B2}"
 EndProject

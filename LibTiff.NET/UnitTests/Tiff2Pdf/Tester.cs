@@ -9,7 +9,7 @@ namespace UnitTests.Tiff2Pdf
 {
     class Tester
     {
-        private const string m_testcase = @"..\..\..\..\TestCase\";
+        private const string m_testcase = @"..\..\..\TestCase\";
 	
         private static object locked = new object();
 

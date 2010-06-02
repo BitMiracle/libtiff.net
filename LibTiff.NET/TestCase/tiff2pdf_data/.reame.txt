@@ -1,0 +1,3 @@
+This folder contains subset of libtiff's sample images
+
+This subset contains only images supported by tiff2pdf utility
