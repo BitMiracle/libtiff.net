@@ -351,7 +351,7 @@ namespace BitMiracle.LibTiff.Classic
             int m = getMode(mode, module, out fm, out fa);
 
             Tiff tif = new Tiff();
-            tif.m_name = name.Clone() as string;
+            tif.m_name = name;
 
             tif.m_mode = m & ~(O_CREAT | O_TRUNC);
             tif.m_curdir = -1; // non-existent directory
@@ -725,7 +725,7 @@ namespace BitMiracle.LibTiff.Classic
             // Create a new link.
             link = new clientInfoLink();
             link.next = m_clientinfo;
-            link.name = name.Clone() as string;
+            link.name = name;
             link.data = data;
 
             m_clientinfo = link;
@@ -3314,7 +3314,7 @@ namespace BitMiracle.LibTiff.Classic
 
         public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, Orientation orientation, bool stop)
         {
-            bool ok = true;
+            bool ok = false;
             string emsg;
             if (RGBAImageOK(out emsg))
             {
@@ -3521,6 +3521,11 @@ namespace BitMiracle.LibTiff.Classic
                         return false;
                 }
             }
+            else
+            {
+                // San Chen <bigsan.chen@gmail.com>
+                photometric = (Photometric)result[0].Value;
+            }
 
             switch (photometric)
             {
@@ -3629,8 +3634,8 @@ namespace BitMiracle.LibTiff.Classic
         */
         public string SetFileName(string name)
         {
-            string old_name = m_name.Clone() as string;
-            m_name = name.Clone() as string;
+            string old_name = m_name;
+            m_name = name;
             return old_name;
         }
 

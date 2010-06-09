@@ -26,33 +26,36 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     partial class Tiff
     {
-        /*
-         * Compression schemes statically built into the library.
-         */
+        /// <summary>
+        /// Compression schemes statically built into the library.
+        /// </summary>
         private void setupBuiltInCodecs()
         {
-            m_builtInCodecs = new TiffCodec[19];
+            // change initial syntax of m_builtInCodecs, maintains easier.
+            // San Chen <bigsan.chen@gmail.com>
 
-            int i = 0;
-            m_builtInCodecs[i++] = new TiffCodec(this, (Compression)(-1), "Not configured");
-            m_builtInCodecs[i++] = new DumpModeCodec(this, Compression.NONE, "None");
-            m_builtInCodecs[i++] = new LZWCodec(this, Compression.LZW, "LZW");
-            m_builtInCodecs[i++] = new PackBitsCodec(this, Compression.PACKBITS, "PackBits");
-            m_builtInCodecs[i++] = new TiffCodec(this, Compression.THUNDERSCAN, "ThunderScan");
-            m_builtInCodecs[i++] = new TiffCodec(this, Compression.NEXT, "NeXT");
-            m_builtInCodecs[i++] = new JpegCodec(this, Compression.JPEG, "JPEG");
-            m_builtInCodecs[i++] = new TiffCodec(this, Compression.OJPEG, "Old-style JPEG");
-            m_builtInCodecs[i++] = new CCITTCodec(this, Compression.CCITTRLE, "CCITT RLE");
-            m_builtInCodecs[i++] = new CCITTCodec(this, Compression.CCITTRLEW, "CCITT RLE/W");
-            m_builtInCodecs[i++] = new CCITTCodec(this, Compression.CCITTFAX3, "CCITT Group 3");
-            m_builtInCodecs[i++] = new CCITTCodec(this, Compression.CCITTFAX4, "CCITT Group 4");
-            m_builtInCodecs[i++] = new TiffCodec(this, Compression.JBIG, "ISO JBIG");
-            m_builtInCodecs[i++] = new DeflateCodec(this, Compression.DEFLATE, "Deflate");
-            m_builtInCodecs[i++] = new DeflateCodec(this, Compression.ADOBE_DEFLATE, "AdobeDeflate");
-            m_builtInCodecs[i++] = new TiffCodec(this, Compression.PIXARLOG, "PixarLog");
-            m_builtInCodecs[i++] = new TiffCodec(this, Compression.SGILOG, "SGILog");
-            m_builtInCodecs[i++] = new TiffCodec(this, Compression.SGILOG24, "SGILog24");
-            m_builtInCodecs[i++] = null;
+            m_builtInCodecs = new TiffCodec[]
+            {
+                new TiffCodec(this, (Compression)(-1), "Not configured"),
+                new DumpModeCodec(this, Compression.NONE, "None"),
+                new LZWCodec(this, Compression.LZW, "LZW"),
+                new PackBitsCodec(this, Compression.PACKBITS, "PackBits"),
+                new TiffCodec(this, Compression.THUNDERSCAN, "ThunderScan"),
+                new TiffCodec(this, Compression.NEXT, "NeXT"),
+                new JpegCodec(this, Compression.JPEG, "JPEG"),
+                new TiffCodec(this, Compression.OJPEG, "Old-style JPEG"),
+                new CCITTCodec(this, Compression.CCITTRLE, "CCITT RLE"),
+                new CCITTCodec(this, Compression.CCITTRLEW, "CCITT RLE/W"),
+                new CCITTCodec(this, Compression.CCITTFAX3, "CCITT Group 3"),
+                new CCITTCodec(this, Compression.CCITTFAX4, "CCITT Group 4"),
+                new TiffCodec(this, Compression.JBIG, "ISO JBIG"),
+                new DeflateCodec(this, Compression.DEFLATE, "Deflate"),
+                new DeflateCodec(this, Compression.ADOBE_DEFLATE, "AdobeDeflate"),
+                new TiffCodec(this, Compression.PIXARLOG, "PixarLog"),
+                new TiffCodec(this, Compression.SGILOG, "SGILog"),
+                new TiffCodec(this, Compression.SGILOG24, "SGILog24"),
+                null,
+            };
         }
     }
 }

@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+
+#if !SILVERLIGHT
 using System.Drawing;
 using System.Drawing.Imaging;
+#endif
+
 using System.IO;
 using System.Text;
 
@@ -50,11 +54,14 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         private MemoryStream m_decompressedData;
 
+#if !SILVERLIGHT
         /// <summary>
         /// .NET bitmap associated with this image
         /// </summary>
         private Bitmap m_bitmap;
+#endif
 
+#if !SILVERLIGHT
         /// <summary>
         /// Creates JpegImage from .NET bitmap
         /// </summary>
@@ -62,6 +69,7 @@ namespace BitMiracle.LibJpeg
         {
             createFromBitmap(bitmap);
         }
+#endif
 
         /// <summary>
         /// Creates JpegImage from stream with an arbitrary image data
@@ -111,6 +119,7 @@ namespace BitMiracle.LibJpeg
             m_colorspace = colorspace;
         }
 
+#if !SILVERLIGHT
         /// <summary>
         /// Factory method, constructs JpegImage from .NET Bitmap
         /// </summary>
@@ -118,6 +127,7 @@ namespace BitMiracle.LibJpeg
         {
             return new JpegImage(bitmap);
         }
+#endif
 
         public void Dispose()
         {
@@ -138,16 +148,19 @@ namespace BitMiracle.LibJpeg
                     if (m_decompressedData != null)
                         m_decompressedData.Dispose();
 
+#if !SILVERLIGHT
                     if (m_bitmap != null)
                         m_bitmap.Dispose();
-
+#endif
                 }
 
                 // free native resources
                 m_compressionParameters = null;
                 m_compressedData = null;
                 m_decompressedData = null;
+#if !SILVERLIGHT                
                 m_bitmap = null;
+#endif
                 m_rows = null;
                 m_alreadyDisposed = true;
             }
@@ -266,6 +279,7 @@ namespace BitMiracle.LibJpeg
             decompressedData.WriteTo(output);
         }
 
+#if !SILVERLIGHT
         /// <summary>
         /// Retrieves image as .NET Bitmap.
         /// </summary>
@@ -273,6 +287,7 @@ namespace BitMiracle.LibJpeg
         {
             return bitmap.Clone() as Bitmap;
         }
+#endif
 
         private MemoryStream compressedData
         {
@@ -301,6 +316,7 @@ namespace BitMiracle.LibJpeg
             }
         }
 
+#if !SILVERLIGHT
         private Bitmap bitmap
         {
             get
@@ -315,6 +331,7 @@ namespace BitMiracle.LibJpeg
                 return m_bitmap;
             }
         }
+#endif
 
         /// <summary>
         /// Needs for DecompressorToJpegImage class
@@ -344,11 +361,13 @@ namespace BitMiracle.LibJpeg
             return (first == 0xFF && second == (int)JPEG_MARKER.SOI);
         }
 
+#if !SILVERLIGHT
         private void createFromBitmap(System.Drawing.Bitmap bitmap)
         {
             initializeFromBitmap(bitmap);
             compress(new CompressionParameters());
         }
+#endif
 
         private void createFromStream(Stream imageData)
         {
@@ -362,10 +381,15 @@ namespace BitMiracle.LibJpeg
             }
             else
             {
+#if !SILVERLIGHT
                 createFromBitmap(new Bitmap(imageData));
+#else
+                throw new NotImplementedException("JpegImage.createFromStream(Stream)");
+#endif
             }
         }
 
+#if !SILVERLIGHT
         private void initializeFromBitmap(Bitmap bitmap)
         {
             if (bitmap == null)
@@ -377,6 +401,7 @@ namespace BitMiracle.LibJpeg
             processPixelFormat(bitmap.PixelFormat);
             fillSamplesFromBitmap();
         }
+#endif
 
         private void compress(CompressionParameters parameters)
         {
@@ -426,6 +451,7 @@ namespace BitMiracle.LibJpeg
             jpeg.Decompress(compressedData, dest);
         }
 
+#if !SILVERLIGHT
         private void processPixelFormat(PixelFormat pixelFormat)
         {
             //See GdiPlusPixelFormats.h for details
@@ -460,7 +486,9 @@ namespace BitMiracle.LibJpeg
             else if (pixelSizeByte == 48 || pixelSizeByte == 64)
                 m_bitsPerComponent = 16;
         }
+#endif
 
+#if !SILVERLIGHT
         private void fillSamplesFromBitmap()
         {
             Debug.Assert(m_bitmap != null);
@@ -478,5 +506,6 @@ namespace BitMiracle.LibJpeg
                 m_rows.Add(new SampleRow(samples, m_bitsPerComponent, m_componentsPerSample));
             }
         }
+#endif
     }
 }

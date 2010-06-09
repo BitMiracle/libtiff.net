@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff.Classic
             m_scheme = scheme;
             m_tif = tif;
 
-            m_name = name.Clone() as string;
+            m_name = name;
         }
 
         public virtual bool CanEncode()

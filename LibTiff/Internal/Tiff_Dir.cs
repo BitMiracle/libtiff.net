@@ -154,7 +154,7 @@ namespace BitMiracle.LibTiff.Classic
 
         internal static void setString(out string cpp, string cp)
         {
-            cpp = cp.Clone() as string;
+            cpp = cp;
         }
 
         internal static void setShortArray(out short[] wpp, short[] wp, int n)
