@@ -132,7 +132,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Debug.Assert(m_dir.td_planarconfig == PlanarConfig.CONTIG);
             uint[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
-            int[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            uint[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             m_dir.td_stripoffset = new_stripoffset;
             m_dir.td_stripbytecount = new_stripbytecount;
             Array.Clear(m_dir.td_stripoffset, m_dir.td_nstrips, delta);
@@ -184,7 +184,7 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             m_curoff += (uint)cc;
-            m_dir.td_stripbytecount[strip] += cc;
+            m_dir.td_stripbytecount[strip] += (uint)cc;
             return true;
         }
 

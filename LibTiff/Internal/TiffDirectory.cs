@@ -63,7 +63,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// </summary>
         public int td_nstrips;
         public uint[] td_stripoffset;
-        public int[] td_stripbytecount;
+        public uint[] td_stripbytecount;
 
         /// <summary>
         /// is the bytecount array sorted ascending?

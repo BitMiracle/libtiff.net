@@ -1880,12 +1880,12 @@ namespace BitMiracle.LibTiff.Classic
             return ReadCustomDirectory(diroff, exifFieldInfo, exifFieldInfoCount);
         }
 
-        /*
-        * Return the number of bytes to read/write in a call to
-        * one of the scanline-oriented i/o routines.  Note that
-        * this number may be 1/samples-per-pixel if data is
-        * stored as separate planes.
-        */
+        /// <summary>
+        /// Return the number of bytes to read/write in a call to one of the
+        /// scanline-oriented i/o routines.
+        /// Note that this number may be 1/samples-per-pixel if data is
+        /// stored as separate planes.
+        /// </summary>
         public int ScanlineSize()
         {
             int scanline;
@@ -1952,12 +1952,12 @@ namespace BitMiracle.LibTiff.Classic
             return VStripSize(rps);
         }
         
-        /*
-        * Compute the # bytes in a raw strip.
-        */
-        public int RawStripSize(int strip)
+        /// <summary>
+        /// Compute the # bytes in a raw strip.
+        /// </summary>
+        public long RawStripSize(int strip)
         {
-            int bytecount = m_dir.td_stripbytecount[strip];
+            long bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
                 ErrorExt(this, m_clientdata, m_name,
@@ -2318,7 +2318,7 @@ namespace BitMiracle.LibTiff.Classic
                 m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
 
             m_dir.td_stripoffset = new uint[m_dir.td_nstrips];
-            m_dir.td_stripbytecount = new int[m_dir.td_nstrips];
+            m_dir.td_stripbytecount = new uint[m_dir.td_nstrips];
 
             setFieldBit(FieldBit.FIELD_STRIPOFFSETS);
             setFieldBit(FieldBit.FIELD_STRIPBYTECOUNTS);
@@ -3841,9 +3841,9 @@ namespace BitMiracle.LibTiff.Classic
             return -1;
         }
 
-        /*
-        * Read a tile of data from the file.
-        */
+        /// <summary>
+        /// Read a tile of data from the file.
+        /// </summary>
         public int ReadRawTile(int tile, byte[] buf, int offset, int size)
         {
             const string module = "ReadRawTile";
@@ -3863,11 +3863,11 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            int bytecount = m_dir.td_stripbytecount[tile];
-            if (size != -1 && size < bytecount)
-                bytecount = size;
+            uint bytecount = m_dir.td_stripbytecount[tile];
+            if (size != -1 && (uint)size < bytecount)
+                bytecount = (uint)size;
             
-            return readRawTile1(tile, buf, offset, bytecount, module);
+            return readRawTile1(tile, buf, offset, (int)bytecount, module);
         }
 
         /*
@@ -3971,9 +3971,9 @@ namespace BitMiracle.LibTiff.Classic
             return -1;
         }
 
-        /*
-        * Read a strip of data from the file.
-        */
+        /// <summary>
+        /// Read a strip of data from the file.
+        /// </summary>
         public int ReadRawStrip(int strip, byte[] buf, int offset, int size)
         {
             const string module = "ReadRawStrip";
@@ -3993,17 +3993,17 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            int bytecount = m_dir.td_stripbytecount[strip];
+            uint bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
                 ErrorExt(this, m_clientdata, m_name, "{0}: Invalid strip byte count, strip {1}", bytecount, strip);
                 return -1;
             }
 
-            if (size != -1 && size < bytecount)
-                bytecount = size;
+            if (size != -1 && (uint)size < bytecount)
+                bytecount = (uint)size;
             
-            return readRawStrip1(strip, buf, offset, bytecount, module);
+            return readRawStrip1(strip, buf, offset, (int)bytecount, module);
         }
 
         /*

@@ -65,7 +65,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             const string module = "estimateStripByteCounts";
 
-            m_dir.td_stripbytecount = new int [m_dir.td_nstrips];
+            m_dir.td_stripbytecount = new uint [m_dir.td_nstrips];
 
             if (m_dir.td_compression != Compression.NONE)
             {
@@ -95,7 +95,7 @@ namespace BitMiracle.LibTiff.Classic
                 
                 int strip = 0;
                 for ( ; strip < m_dir.td_nstrips; strip++)
-                    m_dir.td_stripbytecount[strip] = (int)space;
+                    m_dir.td_stripbytecount[strip] = (uint)space;
                 
                 // This gross hack handles the case were the offset to the last
                 // strip is past the place where we think the strip should begin.
@@ -104,20 +104,20 @@ namespace BitMiracle.LibTiff.Classic
                 // trim this number back accordingly.
                 strip--;
                 if ((m_dir.td_stripoffset[strip] + m_dir.td_stripbytecount[strip]) > filesize)
-                    m_dir.td_stripbytecount[strip] = (int)(filesize - m_dir.td_stripoffset[strip]);
+                    m_dir.td_stripbytecount[strip] = (uint)(filesize - m_dir.td_stripoffset[strip]);
             }
             else if (IsTiled()) 
             {
                 int bytespertile = TileSize();
                 for (int strip = 0; strip < m_dir.td_nstrips; strip++)
-                    m_dir.td_stripbytecount[strip] = bytespertile;
+                    m_dir.td_stripbytecount[strip] = (uint)bytespertile;
             }
             else
             {
                 int rowbytes = ScanlineSize();
                 int rowsperstrip = m_dir.td_imagelength / m_dir.td_stripsperimage;
                 for (int strip = 0; strip < m_dir.td_nstrips; strip++)
-                    m_dir.td_stripbytecount[strip] = rowbytes * rowsperstrip;
+                    m_dir.td_stripbytecount[strip] = (uint)(rowbytes * rowsperstrip);
             }
             
             setFieldBit(FieldBit.FIELD_STRIPBYTECOUNTS);
@@ -1195,23 +1195,23 @@ namespace BitMiracle.LibTiff.Classic
         /// dealing with machines with a limited amount of memory.</remarks>
         private void chopUpSingleUncompressedStrip()
         {
-            int bytecount = m_dir.td_stripbytecount[0];
+            uint bytecount = m_dir.td_stripbytecount[0];
             uint offset = m_dir.td_stripoffset[0];
 
             // Make the rows hold at least one scanline, but fill specified
             // amount of data if possible.
             int rowbytes = VTileSize(1);
-            int stripbytes;
+            uint stripbytes;
             int rowsperstrip;
             if (rowbytes > STRIP_SIZE_DEFAULT)
             {
-                stripbytes = rowbytes;
+                stripbytes = (uint)rowbytes;
                 rowsperstrip = 1;
             }
             else if (rowbytes > 0)
             {
                 rowsperstrip = STRIP_SIZE_DEFAULT / rowbytes;
-                stripbytes = rowbytes * rowsperstrip;
+                stripbytes = (uint)(rowbytes * rowsperstrip);
             }
             else
             {
@@ -1222,14 +1222,14 @@ namespace BitMiracle.LibTiff.Classic
             if (rowsperstrip >= m_dir.td_rowsperstrip)
                 return;
             
-            int nstrips = howMany(bytecount, stripbytes);
+            uint nstrips = howMany(bytecount, stripbytes);
             if (nstrips == 0)
             {
                 // something is wonky, do nothing.
                 return;
             }
 
-            int[] newcounts = new int [nstrips];
+            uint[] newcounts = new uint [nstrips];
             uint[] newoffsets = new uint [nstrips];
 
             // Fill the strip information arrays with new bytecounts and offsets
@@ -1241,13 +1241,13 @@ namespace BitMiracle.LibTiff.Classic
 
                 newcounts[strip] = stripbytes;
                 newoffsets[strip] = offset;
-                offset += (uint)stripbytes;
+                offset += stripbytes;
                 bytecount -= stripbytes;
             }
 
             // Replace old single strip info with multi-strip info.
-            m_dir.td_nstrips = nstrips;
-            m_dir.td_stripsperimage = nstrips;
+            m_dir.td_nstrips = (int)nstrips;
+            m_dir.td_stripsperimage = (int)nstrips;
             SetField(TiffTag.ROWSPERSTRIP, rowsperstrip);
 
             m_dir.td_stripbytecount = newcounts;

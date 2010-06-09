@@ -266,10 +266,9 @@ namespace BitMiracle.LibTiff.Classic
             return size;
         }
 
-        /*
-        * Set state to appear as if a
-        * strip has just been read in.
-        */
+        /// <summary>
+        /// Set state to appear as if a strip has just been read in.
+        /// </summary>
         private bool startStrip(int strip)
         {
             if ((m_flags & TiffFlags.CODERSETUP) != TiffFlags.CODERSETUP)
@@ -287,7 +286,7 @@ namespace BitMiracle.LibTiff.Classic
             if ((m_flags & TiffFlags.NOREADRAW) == TiffFlags.NOREADRAW)
                 m_rawcc = 0;
             else
-                m_rawcc = m_dir.td_stripbytecount[strip];
+                m_rawcc = (int)m_dir.td_stripbytecount[strip];
 
             return m_currentCodec.PreDecode((short)(strip / m_dir.td_stripsperimage));
         }
@@ -314,7 +313,7 @@ namespace BitMiracle.LibTiff.Classic
             if ((m_flags & TiffFlags.NOREADRAW) == TiffFlags.NOREADRAW)
                 m_rawcc = 0;
             else
-                m_rawcc = m_dir.td_stripbytecount[tile];
+                m_rawcc = (int)m_dir.td_stripbytecount[tile];
 
             return m_currentCodec.PreDecode((short)(tile / m_dir.td_stripsperimage));
         }
@@ -386,18 +385,17 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * Read the specified strip and setup for decoding. 
-        * The data buffer is expanded, as necessary, to
-        * hold the strip's data.
-        */
+        /// <summary>
+        /// Read the specified strip and setup for decoding.
+        /// The data buffer is expanded, as necessary, to hold the strip's data.
+        /// </summary>
         internal bool fillStrip(int strip)
         {
             const string module = "fillStrip";
 
             if ((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW)
             {
-                int bytecount = m_dir.td_stripbytecount[strip];
+                int bytecount = (int)m_dir.td_stripbytecount[strip];
                 if (bytecount <= 0)
                 {
                     ErrorExt(this, m_clientdata, m_name,
@@ -434,18 +432,17 @@ namespace BitMiracle.LibTiff.Classic
             return startStrip(strip);
         }
 
-        /*
-        * Read the specified tile and setup for decoding. 
-        * The data buffer is expanded, as necessary, to
-        * hold the tile's data.
-        */
+        /// <summary>
+        /// Read the specified tile and setup for decoding. 
+        /// The data buffer is expanded, as necessary, to hold the tile's data.
+        /// </summary>
         internal bool fillTile(int tile)
         {
             const string module = "fillTile";
 
             if ((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW)
             {
-                int bytecount = m_dir.td_stripbytecount[tile];
+                int bytecount = (int)m_dir.td_stripbytecount[tile];
                 if (bytecount <= 0)
                 {
                     ErrorExt(this, m_clientdata, m_name,
