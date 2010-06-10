@@ -12,8 +12,30 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "2Strips";
 
-        private static string[] m_args = new string[] { "-c", "none", "-s" };
-        private const string m_suffix = "_converted_strips_none";
+        private static string[] TiledFiles
+        {
+            get
+            {
+                return new string[]
+                {
+                    "tiger-minisblack-tile-03.tif",
+                    "tiger-minisblack-tile-04.tif",
+                    "tiger-minisblack-tile-32.tif",
+                    "tiger-minisblack-tile-64.tif",
+                    "tiger-palette-tile-03.tif",
+                    "tiger-palette-tile-04.tif",
+                    "tiger-palette-tile-15.tif",
+                    "tiger-palette-tile-16.tif",
+                    "tiger-rgb-tile-contig-03.tif",
+                    "tiger-rgb-tile-contig-04.tif",
+                    "tiger-rgb-tile-contig-32.tif",
+                    "tiger-rgb-tile-contig-64.tif",
+                    "tiger-rgb-tile-planar-24.tif",
+                    "tiger-rgb-tile-planar-32.tif",
+                    "tiger-rgb-tile-planar-64.tif",
+                };
+            }
+        }
 
         public void performTest(string file, string[] args, string suffix)
         {
@@ -24,94 +46,10 @@ namespace UnitTests.TiffCP
             tester.Run(args, inputFile, outputFile);
         }
 
-        [Test]
-        public void test_tiger_minisblack_tile_03()
+        [Test, TestCaseSource("TiledFiles")]
+        public void Test(string file)
         {
-            performTest("tiger-minisblack-tile-03.tif", m_args, m_suffix);
-        }
-        
-        [Test]
-        public void test_tiger_minisblack_tile_04()
-        {
-            performTest("tiger-minisblack-tile-04.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_minisblack_tile_32()
-        {
-            performTest("tiger-minisblack-tile-32.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_minisblack_tile_64()
-        {
-            performTest("tiger-minisblack-tile-64.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_palette_tile_03()
-        {
-            performTest("tiger-palette-tile-03.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_palette_tile_04()
-        {
-            performTest("tiger-palette-tile-04.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_palette_tile_15()
-        {
-            performTest("tiger-palette-tile-15.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_palette_tile_16()
-        {
-            performTest("tiger-palette-tile-16.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_contig_03()
-        {
-            performTest("tiger-rgb-tile-contig-03.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_contig_04()
-        {
-            performTest("tiger-rgb-tile-contig-04.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_contig_32()
-        {
-            performTest("tiger-rgb-tile-contig-32.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_contig_64()
-        {
-            performTest("tiger-rgb-tile-contig-64.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_planar_24()
-        {
-            performTest("tiger-rgb-tile-planar-24.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_planar_32()
-        {
-            performTest("tiger-rgb-tile-planar-32.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_planar_64()
-        {
-            performTest("tiger-rgb-tile-planar-64.tif", m_args, m_suffix);
+            performTest(file, new string[] { "-c", "none", "-s" }, "_converted_strips_none");
         }
     }
 }

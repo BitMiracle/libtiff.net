@@ -12,8 +12,22 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "None";
 
-        private static string[] m_args = new string[] { "-c", "none", "-s" };
-        private const string m_suffix = "_converted_strips";
+        private static string[] Files
+        {
+            get
+            {
+                return new string[]
+                {
+                    "tiger-minisblack-strip-05.tif",
+                    "tiger-palette-strip-07.tif",
+                    "tiger-rgb-strip-contig-03.tif",
+                    "tiger-rgb-strip-planar-03.tif",
+                    "tiger-rgb-tile-contig-03.tif",
+                    "tiger-rgb-tile-planar-24.tif",
+                    "penguin_jpeg.tif",
+                };
+            }
+        }
 
         public void performTest(string file, string[] args, string suffix)
         {
@@ -24,46 +38,10 @@ namespace UnitTests.TiffCP
             tester.Run(args, inputFile, outputFile);
         }
 
-        [Test]
-        public void test_tiger_minisblack_strip_05()
+        [Test, TestCaseSource("Files")]
+        public void Test(string file)
         {
-            performTest("tiger-minisblack-strip-05.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_palette_strip_07()
-        {
-            performTest("tiger-palette-strip-07.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_strip_contig_03()
-        {
-            performTest("tiger-rgb-strip-contig-03.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_strip_planar_03()
-        {
-            performTest("tiger-rgb-strip-planar-03.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_contig_03()
-        {
-            performTest("tiger-rgb-tile-contig-03.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_planar_24()
-        {
-            performTest("tiger-rgb-tile-planar-24.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_penguin_jpeg()
-        {
-            performTest("penguin_jpeg.tif", m_args, m_suffix);
+            performTest(file, new string[] { "-c", "none", "-s" }, "_converted_strips");
         }
 
         [Test]

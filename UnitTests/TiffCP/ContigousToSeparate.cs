@@ -12,8 +12,18 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "2Separate";
 
-        private static string[] m_args = new string[] { "-p", "separate", "-c", "lzw" };
-        private const string m_suffix = "_converted_separate_lzw";
+        private static string[] ContigousFiles
+        {
+            get
+            {
+                return new string[]
+                {
+                    "tiger-minisblack-strip-08.tif",
+                    "tiger-minisblack-tile-08.tif",
+                    "tiger-rgb-tile-contig-08.tif",
+                };
+            }
+        }
 
         public void performTest(string file, string[] args, string suffix)
         {
@@ -24,22 +34,10 @@ namespace UnitTests.TiffCP
             tester.Run(args, inputFile, outputFile);
         }
 
-        [Test]
-        public void test_tiger_minisblack_strip_08()
+        [Test, TestCaseSource("ContigousFiles")]
+        public void Test(string file)
         {
-            performTest("tiger-minisblack-strip-08.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_minisblack_tile_08()
-        {
-            performTest("tiger-minisblack-tile-08.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_tile_contig_08()
-        {
-            performTest("tiger-rgb-tile-contig-08.tif", m_args, m_suffix);
+            performTest(file, new string[] { "-p", "separate", "-c", "lzw" }, "_converted_separate_lzw");
         }
     }
 }

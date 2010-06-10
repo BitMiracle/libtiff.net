@@ -12,8 +12,19 @@ namespace UnitTests.TiffCP
         private const string m_dataFolder = @"tiffcp_data\";
         private const string m_dataSubFolder = "2Contig";
         
-        private static string[] m_args = new string[] { "-p", "contig", "-c", "lzw" };
-        private const string m_suffix = "_converted_contig_lzw";
+        private static string[] SeparateFiles
+        {
+            get
+            {
+                return new string[]
+                {
+                    "tiger-minisblack-strip-08.tif",
+                    "tiger-minisblack-tile-08.tif",
+                    "tiger-rgb-strip-planar-08.tif",
+                    "tiger-separated-strip-planar-08.tif",
+                };
+            }
+        }
 
         public void performTest(string file, string[] args, string suffix)
         {
@@ -24,28 +35,10 @@ namespace UnitTests.TiffCP
             tester.Run(args, inputFile, outputFile);
         }
 
-        [Test]
-        public void test_tiger_minisblack_strip_08()
+        [Test, TestCaseSource("SeparateFiles")]
+        public void Test(string file)
         {
-            performTest("tiger-minisblack-strip-08.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_minisblack_tile_08()
-        {
-            performTest("tiger-minisblack-tile-08.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_rgb_strip_planar_08()
-        {
-            performTest("tiger-rgb-strip-planar-08.tif", m_args, m_suffix);
-        }
-
-        [Test]
-        public void test_tiger_separated_strip_planar_08()
-        {
-            performTest("tiger-separated-strip-planar-08.tif", m_args, m_suffix);
+            performTest(file, new string[] { "-p", "contig", "-c", "lzw" }, "_converted_contig_lzw");
         }
     }
 }

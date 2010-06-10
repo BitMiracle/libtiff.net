@@ -14,14 +14,64 @@ namespace UnitTests.TiffCP
         private const string m_hp_data_subfolder = "Predictor_Horizontal";
         private const string m_fp_data_subfolder = "Predictor_float";
 
-        private static string[] m_deflate_hp_args = new string[] { "-c", "zip" };
-        private static string m_deflate_hp_suffix = "_converted_deflate";
+        private static string[] HP_Files
+        {
+            get
+            {
+                return new string[]
+                {
+                    "tiger-minisblack-strip-08.tif",
+                    "tiger-minisblack-strip-16.tif",
+                    "tiger-minisblack-tile-08.tif",
+                    "tiger-minisblack-tile-16.tif",
+                    "tiger-palette-strip-16.tif",
+                    "tiger-palette-tile-16.tif",
+                    "tiger-rgb-strip-contig-16.tif",
+                    "tiger-rgb-strip-planar-08.tif",
+                    "tiger-rgb-strip-planar-16.tif",
+                    "tiger-rgb-tile-contig-08.tif",
+                    "tiger-rgb-tile-contig-16.tif",
+                    "tiger-rgb-tile-planar-16.tif",
+                    "tiger-separated-strip-contig-16.tif",
+                    "tiger-separated-strip-planar-08.tif",
+                    "tiger-separated-strip-planar-16.tif",
+                };
+            }
+        }
 
-        private static string[] m_deflate_hp_2_args = new string[] { "-c", "zip:2" };
-        private static string m_deflate_hp_2_suffix = "_converted_deflate_2";
-
-        private static string[] m_deflate_fp_args = new string[] { "-c", "zip:3" };
-        private static string m_deflate_fp_suffix = "_converted_deflate_3";
+        private static string[] FP_Files
+        {
+            get
+            {
+                return new string[]
+                {
+                    "tiger-minisblack-float-strip-16.tif",
+                    "tiger-minisblack-float-strip-24.tif",
+                    "tiger-minisblack-float-strip-32.tif",
+                    "tiger-minisblack-float-strip-64.tif",
+                    "tiger-minisblack-float-tile-16.tif",
+                    "tiger-minisblack-float-tile-24.tif",
+                    "tiger-minisblack-float-tile-32.tif",
+                    "tiger-minisblack-float-tile-64.tif",
+                    "tiger-rgb-float-strip-contig-16.tif",
+                    "tiger-rgb-float-strip-contig-24.tif",
+                    "tiger-rgb-float-strip-contig-32.tif",
+                    "tiger-rgb-float-strip-contig-64.tif",
+                    "tiger-rgb-float-strip-planar-16.tif",
+                    "tiger-rgb-float-strip-planar-24.tif",
+                    "tiger-rgb-float-strip-planar-32.tif",
+                    "tiger-rgb-float-strip-planar-64.tif",
+                    "tiger-rgb-float-tile-contig-16.tif",
+                    "tiger-rgb-float-tile-contig-24.tif",
+                    "tiger-rgb-float-tile-contig-32.tif",
+                    "tiger-rgb-float-tile-contig-64.tif",
+                    "tiger-rgb-float-tile-planar-16.tif",
+                    "tiger-rgb-float-tile-planar-24.tif",
+                    "tiger-rgb-float-tile-planar-32.tif",
+                    "tiger-rgb-float-tile-planar-64.tif",
+                };
+            }
+        }
 
         public void performTest(string file, string dataSubFolder, string[] args, string suffix)
         {
@@ -32,328 +82,22 @@ namespace UnitTests.TiffCP
             tester.Run(args, inputFile, outputFile);
         }
 
-        [Test]
-        public void test_deflate_hp_tiger_minisblack_strip_08()
+        [Test, TestCaseSource("HP_Files")]
+        public void Test_HP(string file)
         {
-            performTest("tiger-minisblack-strip-08.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
+            performTest(file, m_hp_data_subfolder, new string[] { "-c", "zip" }, "_converted_deflate");
         }
 
-        [Test]
-        public void test_deflate_hp_tiger_minisblack_strip_16()
+        [Test, TestCaseSource("HP_Files")]
+        public void Test_HP_2(string file)
         {
-            performTest("tiger-minisblack-strip-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
+            performTest(file, m_hp_data_subfolder, new string[] { "-c", "zip:2" }, "_converted_deflate_2");
         }
 
-        [Test]
-        public void test_deflate_hp_tiger_minisblack_tile_08()
+        [Test, TestCaseSource("FP_Files")]
+        public void Test_FP(string file)
         {
-            performTest("tiger-minisblack-tile-08.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_minisblack_tile_16()
-        {
-            performTest("tiger-minisblack-tile-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_palette_strip_16()
-        {
-            performTest("tiger-palette-strip-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_palette_tile_16()
-        {
-            performTest("tiger-palette-tile-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_rgb_strip_contig_16()
-        {
-            performTest("tiger-rgb-strip-contig-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_rgb_strip_planar_08()
-        {
-            performTest("tiger-rgb-strip-planar-08.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_rgb_strip_planar_16()
-        {
-            performTest("tiger-rgb-strip-planar-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_rgb_tile_contig_08()
-        {
-            performTest("tiger-rgb-tile-contig-08.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_rgb_tile_contig_16()
-        {
-            performTest("tiger-rgb-tile-contig-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_rgb_tile_planar_16()
-        {
-            performTest("tiger-rgb-tile-planar-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_separated_strip_contig_16()
-        {
-            performTest("tiger-separated-strip-contig-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_separated_strip_planar_08()
-        {
-            performTest("tiger-separated-strip-planar-08.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_tiger_separated_strip_planar_16()
-        {
-            performTest("tiger-separated-strip-planar-16.tif", m_hp_data_subfolder, m_deflate_hp_args, m_deflate_hp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_minisblack_strip_08()
-        {
-            performTest("tiger-minisblack-strip-08.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_minisblack_strip_16()
-        {
-            performTest("tiger-minisblack-strip-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_minisblack_tile_08()
-        {
-            performTest("tiger-minisblack-tile-08.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_minisblack_tile_16()
-        {
-            performTest("tiger-minisblack-tile-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_palette_strip_16()
-        {
-            performTest("tiger-palette-strip-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_palette_tile_16()
-        {
-            performTest("tiger-palette-tile-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_rgb_strip_contig_16()
-        {
-            performTest("tiger-rgb-strip-contig-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_rgb_strip_planar_08()
-        {
-            performTest("tiger-rgb-strip-planar-08.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_rgb_strip_planar_16()
-        {
-            performTest("tiger-rgb-strip-planar-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_rgb_tile_contig_08()
-        {
-            performTest("tiger-rgb-tile-contig-08.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_rgb_tile_contig_16()
-        {
-            performTest("tiger-rgb-tile-contig-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_rgb_tile_planar_16()
-        {
-            performTest("tiger-rgb-tile-planar-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_separated_strip_contig_16()
-        {
-            performTest("tiger-separated-strip-contig-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_separated_strip_planar_08()
-        {
-            performTest("tiger-separated-strip-planar-08.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_hp_2_tiger_separated_strip_planar_16()
-        {
-            performTest("tiger-separated-strip-planar-16.tif", m_hp_data_subfolder, m_deflate_hp_2_args, m_deflate_hp_2_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_strip_16()
-        {
-            performTest("tiger-minisblack-float-strip-16.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_strip_24()
-        {
-            performTest("tiger-minisblack-float-strip-24.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_strip_32()
-        {
-            performTest("tiger-minisblack-float-strip-32.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_strip_64()
-        {
-            performTest("tiger-minisblack-float-strip-64.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_tile_16()
-        {
-            performTest("tiger-minisblack-float-tile-16.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_tile_24()
-        {
-            performTest("tiger-minisblack-float-tile-24.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_tile_32()
-        {
-            performTest("tiger-minisblack-float-tile-32.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_minisblack_float_tile_64()
-        {
-            performTest("tiger-minisblack-float-tile-64.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_contig_16()
-        {
-            performTest("tiger-rgb-float-strip-contig-16.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_contig_24()
-        {
-            performTest("tiger-rgb-float-strip-contig-24.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_contig_32()
-        {
-            performTest("tiger-rgb-float-strip-contig-32.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_contig_64()
-        {
-            performTest("tiger-rgb-float-strip-contig-64.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_planar_16()
-        {
-            performTest("tiger-rgb-float-strip-planar-16.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_planar_24()
-        {
-            performTest("tiger-rgb-float-strip-planar-24.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_planar_32()
-        {
-            performTest("tiger-rgb-float-strip-planar-32.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_strip_planar_64()
-        {
-            performTest("tiger-rgb-float-strip-planar-64.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_contig_16()
-        {
-            performTest("tiger-rgb-float-tile-contig-16.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_contig_24()
-        {
-            performTest("tiger-rgb-float-tile-contig-24.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_contig_32()
-        {
-            performTest("tiger-rgb-float-tile-contig-32.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_contig_64()
-        {
-            performTest("tiger-rgb-float-tile-contig-64.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_planar_16()
-        {
-            performTest("tiger-rgb-float-tile-planar-16.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_planar_24()
-        {
-            performTest("tiger-rgb-float-tile-planar-24.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_planar_32()
-        {
-            performTest("tiger-rgb-float-tile-planar-32.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
-        }
-
-        [Test]
-        public void test_deflate_fp_tiger_rgb_float_tile_planar_64()
-        {
-            performTest("tiger-rgb-float-tile-planar-64.tif", m_fp_data_subfolder, m_deflate_fp_args, m_deflate_fp_suffix);
+            performTest(file, m_fp_data_subfolder, new string[] { "-c", "zip:3" }, "_converted_deflate_3");
         }
     }
 }

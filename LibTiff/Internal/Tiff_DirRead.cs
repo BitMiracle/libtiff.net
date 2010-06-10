@@ -768,11 +768,9 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffType.BYTE:
                     case TiffType.SBYTE:
                     case TiffType.UNDEFINED:
-                        /*
-                         * DO NOT treat field as string of case TiffType.UNDEFINED,
-                         * or the text encode/decode will corrupt the data.
-                         * San Chen <bigsan.chen@gmail.com>
-                         */
+                        // DO NOT treat field as string of case TiffType.UNDEFINED,
+                        // or the text encode/decode will corrupt the data.
+                        // San Chen <bigsan.chen@gmail.com>
 
                         byte[] bytes = new byte [dir.tdir_count];
                         ok = fetchByteArray(dir, bytes);
