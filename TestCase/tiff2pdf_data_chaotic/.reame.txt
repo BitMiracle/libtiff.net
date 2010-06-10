@@ -1,3 +1,0 @@
-This folder contains chaotically compiled set sample tiff images
-
-This set contains various images found on internet and sent by users to use by tiff2pdf utility
