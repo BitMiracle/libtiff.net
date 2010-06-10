@@ -9,19 +9,19 @@ namespace UnitTests.TiffCP
     class Tester
     {
         private const string m_testcase = @"..\..\..\TestCase\";
-
         private static object locked = new object();
-
-        private string m_dataFolder;
-
-        public Tester(string dataFolder)
-        {
-            m_dataFolder = dataFolder;
-        }
 
         public static string TestCaseFolder
         {
             get { return m_testcase; }
+        }
+
+        public static void PerformTest(string file, string[] args, string suffix)
+        {
+            Tester tester = new Tester();
+            string inputFile = Path.Combine(Tester.TestCaseFolder, Path.GetFileName(file));
+            string outputFile = Tester.TestCaseFolder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
+            tester.Run(args, inputFile, outputFile);
         }
 
         public void Run(string[] args, string sourceFile, string targetFile)
@@ -31,7 +31,6 @@ namespace UnitTests.TiffCP
 
             lock (locked)
             {
-                string dataFolder = m_testcase + m_dataFolder;
                 List<string> completeArgs = new List<string>(args.Length + 2);
 
                 for (int i = 0; i < args.Length; ++i)
@@ -44,7 +43,7 @@ namespace UnitTests.TiffCP
 
                 BitMiracle.TiffCP.Program.Main(completeArgs.ToArray());
 
-                string sampleFile = targetFile.Replace(@"\_converted\", @"\_sample\");
+                string sampleFile = targetFile.Replace(@"\Output.Tiff\", @"\Expected.Tiff\");
                 Assert.IsTrue(File.Exists(targetFile));
                 Assert.IsTrue(Utils.FilesAreEqual(sampleFile, targetFile));
             }

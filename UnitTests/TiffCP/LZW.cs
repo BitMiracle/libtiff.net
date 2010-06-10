@@ -9,11 +9,6 @@ namespace UnitTests.TiffCP
     [TestFixture]
     public class LZW
     {
-        private const string m_dataFolder = @"tiffcp_data\";
-
-        private const string m_hp_data_subfolder = "Predictor_Horizontal";
-        private const string m_fp_data_subfolder = "Predictor_float";
-
         private static string[] FP_Files
         {
             get
@@ -73,31 +68,22 @@ namespace UnitTests.TiffCP
             }
         }
 
-        public void performTest(string file, string dataSubFolder, string[] args, string suffix)
-        {
-            Tester tester = new Tester(m_dataFolder);
-            string fullPath = Path.Combine(Tester.TestCaseFolder, m_dataFolder);
-            string outputFile = fullPath + @"_converted\" + Path.GetFileName(file) + suffix + ".tif";
-            string inputFile = Path.Combine(Path.Combine(fullPath, dataSubFolder), Path.GetFileName(file));
-            tester.Run(args, inputFile, outputFile);
-        }
-
         [Test, TestCaseSource("FP_Files")]
         public void Test_FP(string file)
         {
-            performTest(file, m_fp_data_subfolder, new string[] { "-c", "lzw" }, "_converted_lzw");
+            Tester.PerformTest(file, new string[] { "-c", "lzw" }, "_converted_lzw");
         }
 
         [Test, TestCaseSource("FP_Files")]
         public void Test_FP_3(string file)
         {
-            performTest(file, m_fp_data_subfolder, new string[] { "-c", "lzw:3" }, "_converted_lzw_3");
+            Tester.PerformTest(file, new string[] { "-c", "lzw:3" }, "_converted_lzw_3");
         }
 
         [Test, TestCaseSource("HP_Files")]
         public void Test_HP(string file)
         {
-            performTest(file, m_hp_data_subfolder, new string[] { "-c", "lzw:2" }, "_converted_lzw_2");
+            Tester.PerformTest(file, new string[] { "-c", "lzw:2" }, "_converted_lzw_2");
         }
     }
 }
