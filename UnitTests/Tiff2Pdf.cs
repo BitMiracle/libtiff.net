@@ -10,7 +10,6 @@ namespace UnitTests
     [TestFixture]
     class Tiff2Pdf
     {
-        private const string m_testcase = @"..\..\..\TestCase\";
         private static object locked = new object();
 
         private static string[] SampleFiles
@@ -132,8 +131,8 @@ namespace UnitTests
 
             lock (locked)
             {
-                string inputFile = Path.Combine(m_testcase, file);
-                string outputFile = m_testcase + @"Output.Pdf\" + Path.GetFileName(file) + ".pdf";
+                string inputFile = Path.Combine(TestCase.Folder, file);
+                string outputFile = TestCase.Folder + @"Output.Pdf\" + Path.GetFileName(file) + ".pdf";
                 
                 File.Delete(outputFile);
 
@@ -143,7 +142,7 @@ namespace UnitTests
                 string sampleFile = outputFile.Replace(@"\Output.Pdf\", @"\Expected.Pdf\");
 
                 Assert.IsTrue(File.Exists(outputFile));
-                Assert.IsTrue(Utils.FilesAreEqual(sampleFile, outputFile));
+                FileAssert.AreEqual(sampleFile, outputFile);
             }
         }
 

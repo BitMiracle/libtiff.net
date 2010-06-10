@@ -297,9 +297,9 @@ namespace BitMiracle.LibTiff.Classic
             return 0;
         }
 
-        /*
-        * Open a TIFF file for read/writing.
-        */
+        /// <summary>
+        /// Open a TIFF file for read/writing.
+        /// </summary>
         public static Tiff Open(string fileName, string mode)
         {
             const string module = "Open";
@@ -309,23 +309,10 @@ namespace BitMiracle.LibTiff.Classic
             getMode(mode, module, out m, out a);
 
             FileStream fd = null;
-            try
-            {
-                if (a == FileAccess.Read)
-                    fd = File.Open(fileName, m, a, FileShare.Read);
-                else
-                    fd = File.Open(fileName, m, a);
-            }
-            catch (System.Exception)
-            {
-                fd = null;
-            }
-
-            if (fd == null)
-            {
-                ErrorExt(null, 0, module, "{0}: Cannot open", fileName);
-                return null;
-            }
+            if (a == FileAccess.Read)
+                fd = File.Open(fileName, m, a, FileShare.Read);
+            else
+                fd = File.Open(fileName, m, a);
 
             Tiff tif = ClientOpen(fileName, mode, fd, new TiffStream());
             if (tif == null)

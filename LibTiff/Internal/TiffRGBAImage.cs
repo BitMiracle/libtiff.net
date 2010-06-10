@@ -646,12 +646,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return ret;
         }
 
-        /*
-        * Get a strip-organized image that has
-        *  PlanarConfiguration contiguous if SamplesPerPixel > 1
-        * or
-        *  SamplesPerPixel == 1
-        */
+        /// <summary>
+        /// Get a strip-organized image that has 
+        /// PlanarConfiguration contiguous if SamplesPerPixel > 1
+        ///  or
+        /// SamplesPerPixel == 1
+        /// </summary>
         private static bool gtStripContig(TiffRGBAImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
@@ -675,6 +675,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             FieldValue[] result = tif.GetFieldDefaulted(TiffTag.ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
+            if (rowsperstrip == -1)
+            {
+                // San Chen <bigsan.chen@gmail.com>
+                // HACK: should be UInt32.MaxValue
+                rowsperstrip = Int32.MaxValue;
+            }
 
             result = tif.GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
             short subsamplingver = result[1].ToShort();
@@ -1132,9 +1138,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * 4-bit palette => colormap/RGB
-        */
+        /// <summary>
+        /// 4-bit palette => colormap/RGB
+        /// </summary>
         private static void put4bitcmaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
@@ -1144,7 +1150,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             while (h-- > 0)
             {
                 int[] bw = null;
-                int bwPos = 0;
 
                 int _x;
                 for (_x = w; _x >= 2; _x -= 2)
@@ -1153,21 +1158,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     ppPos++;
                     for (int rc = 0; rc < 2; rc++)
                     {
-                        cp[cpPos] = bw[bwPos];
+                        cp[cpPos] = bw[rc];
                         cpPos++;
-                        bwPos++;
                     }
                 }
 
                 if (_x != 0)
                 {
-                    bwPos = 0;
                     bw = PALmap[pp[ppPos]];
                     ppPos++;
 
-                    cp[cpPos] = bw[bwPos];
+                    cp[cpPos] = bw[0];
                     cpPos++;
-                    bwPos++;
                 }
 
                 cpPos += toskew;
@@ -1175,9 +1177,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * 2-bit palette => colormap/RGB
-        */
+        /// <summary>
+        /// 2-bit palette => colormap/RGB
+        /// </summary>
         private static void put2bitcmaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
@@ -1187,7 +1189,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             while (h-- > 0)
             {
                 int[] bw = null;
-                int bwPos = 0;
 
                 int _x;
                 for (_x = w; _x >= 4; _x -= 4)
@@ -1196,25 +1197,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     ppPos++;
                     for (int rc = 0; rc < 4; rc++)
                     {
-                        cp[cpPos] = bw[bwPos];
+                        cp[cpPos] = bw[rc];
                         cpPos++;
-                        bwPos++;
                     }
                 }
 
                 if (_x > 0)
                 {
-                    bwPos = 0;
                     bw = PALmap[pp[ppPos]];
                     ppPos++;
 
                     if (_x <= 3 && _x > 0)
                     {
-                        for (int i = _x; i > 0; i--)
+                        for (int i = 0; i < _x; i++)
                         {
-                            cp[cpPos] = bw[bwPos];
+                            cp[cpPos] = bw[i];
                             cpPos++;
-                            bwPos++;
                         }
                     }
                 }
@@ -1224,9 +1222,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * 1-bit palette => colormap/RGB
-        */
+        /// <summary>
+        /// 1-bit palette => colormap/RGB
+        /// </summary>
         private static void put1bitcmaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
@@ -1254,17 +1252,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 if (_x > 0)
                 {
-                    bwPos = 0;
                     bw = PALmap[pp[ppPos]];
                     ppPos++;
 
                     if (_x <= 7 && _x > 0)
                     {
-                        for (int i = _x; i > 0; i--)
+                        for (int i = 0; i < _x; i++)
                         {
-                            cp[cpPos] = bw[bwPos];
+                            cp[cpPos] = bw[i];
                             cpPos++;
-                            bwPos++;
                         }
                     }
                 }
@@ -1297,9 +1293,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * 16-bit greyscale => colormap/RGB
-        */
+        /// <summary>
+        /// 16-bit greyscale => colormap/RGB
+        /// </summary>
         private static void put16bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1308,14 +1304,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
             int ppPos = ppOffset;
             while (h-- > 0)
             {
-                short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
+                short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length - ppPos);
                 int wpPos = 0;
 
-                for (x = w; x-- > 0;)
+                for (x = w; x-- > 0; )
                 {
-                    /* use high order byte of 16bit value */
+                    // use high order byte of 16bit value
 
-                    cp[cpPos] = BWmap[wp[wpPos] >> 8][0];
+                    cp[cpPos] = BWmap[(wp[wpPos] & 0xffff) >> 8][0];
                     cpPos++;
                     ppPos += 2 * samplesperpixel;
                     wpPos += samplesperpixel;
@@ -1326,9 +1322,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * 1-bit bilevel => colormap/RGB
-        */
+        /// <summary>
+        /// 1-bit bilevel => colormap/RGB
+        /// </summary>
         private static void put1bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] BWmap = img.BWmap;
@@ -1338,7 +1334,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             while (h-- > 0)
             {
                 int[] bw = null;
-                int bwPos = 0;
 
                 int _x;
                 for (_x = w; _x >= 8; _x -= 8)
@@ -1348,25 +1343,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        cp[cpPos] = bw[bwPos];
+                        cp[cpPos] = bw[rc];
                         cpPos++;
-                        bwPos++;
                     }
                 }
 
                 if (_x > 0)
                 {
-                    bwPos = 0;
                     bw = BWmap[pp[ppPos]];
                     ppPos++;
 
                     if (_x <= 7 && _x > 0)
                     {
-                        for (int i = _x; i > 0; i--)
+                        for (int i = 0; i < _x; i++)
                         {
-                            cp[cpPos] = bw[bwPos];
+                            cp[cpPos] = bw[i];
                             cpPos++;
-                            bwPos++;
                         }
                     }
                 }
@@ -1376,9 +1368,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * 2-bit greyscale => colormap/RGB
-        */
+        /// <summary>
+        /// 2-bit greyscale => colormap/RGB
+        /// </summary>
         private static void put2bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] BWmap = img.BWmap;
@@ -1388,7 +1380,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             while (h-- > 0)
             {
                 int[] bw = null;
-                int bwPos = 0;
 
                 int _x;
                 for (_x = w; _x >= 4; _x -= 4)
@@ -1397,25 +1388,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     ppPos++;
                     for (int rc = 0; rc < 4; rc++)
                     {
-                        cp[cpPos] = bw[bwPos];
+                        cp[cpPos] = bw[rc];
                         cpPos++;
-                        bwPos++;
                     }
                 }
 
                 if (_x > 0)
                 {
-                    bwPos = 0;
                     bw = BWmap[pp[ppPos]];
                     ppPos++;
 
                     if (_x <= 3 && _x > 0)
                     {
-                        for (int i = _x; i > 0; i--)
+                        for (int i = 0; i < _x; i++)
                         {
-                            cp[cpPos] = bw[bwPos];
+                            cp[cpPos] = bw[i];
                             cpPos++;
-                            bwPos++;
                         }
                     }
                 }
@@ -1425,9 +1413,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * 4-bit greyscale => colormap/RGB
-        */
+        /// <summary>
+        /// 4-bit greyscale => colormap/RGB
+        /// </summary>
         private static void put4bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] BWmap = img.BWmap;
@@ -1437,7 +1425,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             while (h-- > 0)
             {
                 int[] bw = null;
-                int bwPos = 0;
 
                 int _x;
                 for (_x = w; _x >= 2; _x -= 2)
@@ -1446,21 +1433,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     ppPos++;
                     for (int rc = 0; rc < 2; rc++)
                     {
-                        cp[cpPos] = bw[bwPos];
+                        cp[cpPos] = bw[rc];
                         cpPos++;
-                        bwPos++;
                     }
                 }
 
                 if (_x != 0)
                 {
-                    bwPos = 0;
                     bw = BWmap[pp[ppPos]];
                     ppPos++;
 
-                    cp[cpPos] = bw[bwPos];
+                    cp[cpPos] = bw[0];
                     cpPos++;
-                    bwPos++;
                 }
 
                 cpPos += toskew;

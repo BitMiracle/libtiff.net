@@ -13,10 +13,10 @@ namespace UnitTests.TiffCP
         {
             Tester tester = new Tester();
 
-            string inputFile = Path.Combine(Tester.TestCaseFolder, Path.GetFileName(file));
+            string inputFile = Path.Combine(TestCase.Folder, Path.GetFileName(file));
             inputFile += pageSpecifier;
             
-            string outputFile = Tester.TestCaseFolder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
+            string outputFile = TestCase.Folder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
             tester.Run(args, inputFile, outputFile);
         }
 

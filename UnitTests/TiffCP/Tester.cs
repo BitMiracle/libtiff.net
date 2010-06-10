@@ -8,19 +8,13 @@ namespace UnitTests.TiffCP
 {
     class Tester
     {
-        private const string m_testcase = @"..\..\..\TestCase\";
         private static object locked = new object();
-
-        public static string TestCaseFolder
-        {
-            get { return m_testcase; }
-        }
 
         public static void PerformTest(string file, string[] args, string suffix)
         {
             Tester tester = new Tester();
-            string inputFile = Path.Combine(Tester.TestCaseFolder, Path.GetFileName(file));
-            string outputFile = Tester.TestCaseFolder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
+            string inputFile = Path.Combine(TestCase.Folder, Path.GetFileName(file));
+            string outputFile = TestCase.Folder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
             tester.Run(args, inputFile, outputFile);
         }
 
@@ -45,7 +39,7 @@ namespace UnitTests.TiffCP
 
                 string sampleFile = targetFile.Replace(@"\Output.Tiff\", @"\Expected.Tiff\");
                 Assert.IsTrue(File.Exists(targetFile));
-                Assert.IsTrue(Utils.FilesAreEqual(sampleFile, targetFile));
+                FileAssert.AreEqual(sampleFile, targetFile);
             }
         }
     }
