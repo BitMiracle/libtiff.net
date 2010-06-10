@@ -41,9 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomTags.cs" />
-    <Compile Include="Tiff2Pdf\Chaotic.cs" />
-    <Compile Include="Tiff2Pdf\Tester.cs" />
-    <Compile Include="Tiff2Pdf\Sample.cs" />
+    <Compile Include="Tiff2Pdf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TiffCP\CCITT.cs" />
     <Compile Include="TiffCP\Deflate.cs" />
@@ -68,6 +66,9 @@
       <Project>{A5D6375E-7A29-48F2-A839-B7AE7ADB9753}</Project>
       <Name>TiffCP</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tiff2Pdf\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
