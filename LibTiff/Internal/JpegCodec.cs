@@ -289,9 +289,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (m_cinfo_initialized)
             {
-                if (force_encode && m_common.m_is_decompressor)
+                if (force_encode && m_common.IsDecompressor)
                     TIFFjpeg_destroy();
-                else if (force_decode && !m_common.m_is_decompressor)
+                else if (force_decode && !m_common.IsDecompressor)
                     TIFFjpeg_destroy();
                 else
                     return true;
@@ -385,7 +385,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             int segment_height;
             bool downsampled_input;
 
-            Debug.Assert(!m_common.m_is_decompressor);
+            Debug.Assert(!m_common.IsDecompressor);
             /*
              * Set encoding parameters for this strip/tile.
              */
@@ -526,7 +526,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             InitializeLibJPEG(true, false);
 
-            Debug.Assert(!m_common.m_is_decompressor);
+            Debug.Assert(!m_common.IsDecompressor);
 
             /*
              * Initialize all JPEG parameters to default values.
@@ -700,7 +700,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             int segment_height;
             int ci;
 
-            Debug.Assert(m_common.m_is_decompressor);
+            Debug.Assert(m_common.IsDecompressor);
 
             /*
              * Reset decoder state from any previous strip/tile,
@@ -938,7 +938,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             InitializeLibJPEG(false, true);
 
-            Debug.Assert(m_common.m_is_decompressor);
+            Debug.Assert(m_common.IsDecompressor);
 
             /* Read JPEGTables if it is present */
             if (m_tif.fieldSet(FIELD_JPEGTABLES))

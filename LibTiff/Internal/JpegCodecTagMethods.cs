@@ -220,7 +220,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 * this we actually have to scan the header of a strip or tile of
                 * jpeg data to get the sampling.  
                 */
-                if (!sp.m_common.m_is_decompressor || sp.m_ycbcrsampling_fetched ||
+                if (!sp.m_common.IsDecompressor || sp.m_ycbcrsampling_fetched ||
                     tif.m_dir.td_photometric != Photometric.YCBCR)
                 {
                     return;
