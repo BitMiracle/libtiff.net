@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="c6f4159f-10b1-4d19-b02c-eac46e2d86e0" revisionNumber="1">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+      <para>This topic describes the outline of typical usage LibJpeg.Net
+      for JPEG compression and decompression.</para>
+    </introduction>
+    <section address="JPEG Compression">
+      <title>JPEG Compression</title>
+      <content>
+        <para>The rough outline of a JPEG compression operation is:</para>
+        <para> </para>
+        <para><legacyItalic>Allocate and initialize a JPEG compression object</legacyItalic></para>
+        <para><legacyItalic>Specify the destination for the compressed data (e.g., a file)</legacyItalic></para>
+        <para><legacyItalic>Set parameters for compression, including image size and colorspace</legacyItalic></para>
+        <para><legacyItalic><codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_compress_struct.jpeg_start_compress(System.Boolean)</codeEntityReference>;</legacyItalic></para>
+        <para><legacyItalic>while (scan lines remain to be written)</legacyItalic></para>
+        <para><legacyItalic>&#160;&#160;&#160;&#160;<codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_compress_struct.jpeg_write_scanlines(System.Byte[][],System.Int32)</codeEntityReference>;</legacyItalic></para>
+        <para><legacyItalic><codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_compress_struct.jpeg_finish_compress</codeEntityReference>;</legacyItalic></para>
+        <para> </para>
+        <para>A JPEG compression object holds parameters and working state for 
+        the JPEG library. We make creation/destruction of the object separate 
+        from starting or finishing compression of an image; the same object can 
+        be re-used for a series of image compression operations. This makes 
+        it easy to re-use the same parameter settings for a sequence of images.
+        Re-use of a JPEG object also has important implications for processing 
+        abbreviated JPEG datastreams, as discussed later.</para>
+        <para>The image data to be compressed is supplied to 
+        <codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_compress_struct.jpeg_write_scanlines(System.Byte[][],System.Int32)</codeEntityReference>
+        from in-memory buffers. If the application is doing file-to-file compression,
+        reading image data from the source file is the application's responsibility.</para>
+        <para>The library emits compressed data by calling a "data destination manager", 
+        which typically will write the data into a file; but the application can 
+        provide its own destination manager to do something else.</para>
+        <para>For further information see the article 
+        "<link xlink:href="07136fd7-d482-48de-b88c-1a4b9658c69e">Compression details</link>".</para>
+      </content>
+    </section>
+    <section address="JPEG Decompression">
+      <title>JPEG Decompression</title>
+      <content>
+        <para>Similarly, the rough outline of a JPEG decompression operation is:</para>
+        <para> </para>
+        <para><legacyItalic>Allocate and initialize a JPEG decompression object</legacyItalic></para>
+        <para><legacyItalic>Specify the source of the compressed data (e.g., a file)</legacyItalic></para>
+        <para><legacyItalic>Call jpeg_read_header() to obtain image info</legacyItalic></para>
+        <para><legacyItalic>Set parameters for decompression</legacyItalic></para>
+        <para><legacyItalic><codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_decompress_struct.jpeg_start_decompress</codeEntityReference>;</legacyItalic></para>
+        <para><legacyItalic>while (scan lines remain to be read)</legacyItalic></para>
+        <para><legacyItalic>&#160;&#160;&#160;&#160;<codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_decompress_struct.jpeg_read_scanlines(System.Byte[][],System.Int32)</codeEntityReference>;</legacyItalic></para>
+        <para><legacyItalic><codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_decompress_struct.jpeg_finish_decompress</codeEntityReference>;</legacyItalic></para>
+        <para> </para>
+        <para>This is comparable to the compression outline except that reading 
+        the datastream header is a separate step. This is helpful because 
+        information about the image's size, colorspace, etc is available when the 
+        application selects decompression parameters. For example, the application 
+        can choose an output scaling ratio that will fit the image into the 
+        available screen size.</para>
+        <para>The decompression library obtains compressed data by calling a data
+        source manager, which typically will read the data from a file; but other
+        behaviors can be obtained with a custom source manager. Decompressed data
+        is delivered into in-memory buffers passed to 
+        <codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_decompress_struct.jpeg_read_scanlines(System.Byte[][],System.Int32)</codeEntityReference>
+        </para>
+        <para>It is possible to abort an incomplete compression or decompression
+        operation by calling <codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_common_struct.jpeg_abort</codeEntityReference> 
+        or, if you do not need to retain the JPEG object, simply release it by 
+        calling <codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_common_struct.jpeg_destroy</codeEntityReference></para>
+        <para>JPEG compression and decompression objects are two separate struct 
+        types. However, they share some common fields, and certain routines such 
+        as <codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_common_struct.jpeg_destroy</codeEntityReference> can work on 
+        either type of object.</para>
+        <para>The JPEG library has no static variables: all state is in the 
+        compression or decompression object. Therefore it is possible to process 
+        multiple compression and decompression operations concurrently, using 
+        multiple JPEG objects.</para>
+        <para>For further information see the article 
+        "<link xlink:href="9d052723-a7f9-42de-8747-0bd9896f8157">Decompression details</link>".</para>
+      </content>
+    </section>
+    <relatedTopics>
+      <link xlink:href="07136fd7-d482-48de-b88c-1a4b9658c69e">Compression details</link>
+      <link xlink:href="9d052723-a7f9-42de-8747-0bd9896f8157">Decompression details</link>
+    </relatedTopics>
+  </developerConceptualDocument>
+</topic>

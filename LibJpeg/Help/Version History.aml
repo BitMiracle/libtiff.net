@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="5200b425-c5b7-4675-b138-b055935bb221" revisionNumber="1">
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <section address="Section1">
+            <content></content>
+            <sections>
+                <section address="SubSection3">
+                    <title>Version 1.2</title>
+                    <content>
+                        <list class="bullet">
+                            <listItem>
+                                Greatly improved the documentation.
+                            </listItem>
+                            <listItem>
+                                Added Silverlight support
+                            </listItem>
+                            <listItem>
+                                Added support for Visual Studio 2010. Now Visual 2005, 2008 and 2010
+                                can be used to build LibJpeg.Net.
+                            </listItem>
+                            <listItem>
+                                Fixed bugs within JpegImage.WriteBitmap.
+                            </listItem>                            
+                        </list>
+                    </content>
+                </section>
+                <section address="SubSection2">
+                    <title>Version 1.1</title>
+                    <content>
+                        <list class="bullet">
+                            <listItem>A bug fix release.</listItem>
+                        </list>
+                    </content>
+                </section>
+                <section address="SubSection1">
+                    <title>Version 1.0</title>
+                    <content>
+                        <list class="bullet">
+                            <listItem>Initial release.</listItem>
+                        </list>
+                    </content>
+                </section>
+            </sections>
+        </section>
+    </developerConceptualDocument>
+</topic>

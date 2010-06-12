@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="f81c4ea0-6b70-446a-b190-cad2f245d65e" revisionNumber="1">
+  <developerWalkthroughDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <procedure>
+      <steps class="ordered">
+        <step>
+          <content>
+            <para>If you want to use LibJpeg.Net as external assembly in your project.</para>
+            
+            <para>Simply add reference to <legacyItalic>BitMiracle.LibJpeg.NET.dll</legacyItalic>
+            and then use classes from namespaces <legacyItalic>BitMiracle.LibJpeg</legacyItalic> or 
+            <legacyItalic>BitMiracle.LibJpeg.Classic</legacyItalic>. Usually you 
+            also need to use <legacyItalic>System.IO</legacyItalic> namespace.
+            </para>
+            
+          </content>
+        </step>
+        <step>
+          <content>
+            <para>If you embed some code files from LibJpeg.Net into your project.</para>
+            
+            <para>If you want to mark imported classes as "public" just build your 
+            project with compilation symbol <legacyBold>EXPOSE_LIBJPEG</legacyBold>.</para>
+            
+            <para>If you don't declare this symbol then all imported classes will be 
+            declared as "internal".</para>
+          </content>
+        </step>
+      </steps>
+      <!-- <conclusion>Optional conclusion</conclusion> -->
+    </procedure>
+  </developerWalkthroughDocument>
+</topic>
