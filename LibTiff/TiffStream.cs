@@ -16,11 +16,22 @@ using System.IO;
 
 namespace BitMiracle.LibTiff.Classic
 {
+    /// <summary>
+    /// 
+    /// </summary>
 #if EXPOSE_LIBTIFF
     public
 #endif
     class TiffStream
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fd"></param>
+        /// <param name="buf"></param>
+        /// <param name="offset"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
         public virtual int Read(object fd, byte[] buf, int offset, int size)
         {
             Stream s = fd as Stream;
@@ -30,6 +41,12 @@ namespace BitMiracle.LibTiff.Classic
             return s.Read(buf, offset, size);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fd"></param>
+        /// <param name="buf"></param>
+        /// <param name="size"></param>
         public virtual void Write(object fd, byte[] buf, int size)
         {
             Stream s = fd as Stream;
@@ -39,6 +56,13 @@ namespace BitMiracle.LibTiff.Classic
             s.Write(buf, 0, size);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fd"></param>
+        /// <param name="off"></param>
+        /// <param name="whence"></param>
+        /// <returns></returns>
         public virtual long Seek(object fd, long off, SeekOrigin whence)
         {
             /* we use this as a special code, so avoid accepting it */
@@ -52,6 +76,10 @@ namespace BitMiracle.LibTiff.Classic
             return s.Seek(off, whence);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fd"></param>
         public virtual void Close(object fd)
         {
             Stream s = fd as Stream;
@@ -61,6 +89,11 @@ namespace BitMiracle.LibTiff.Classic
             s.Close();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fd"></param>
+        /// <returns></returns>
         public virtual long Size(object fd)
         {
             Stream s = fd as Stream;

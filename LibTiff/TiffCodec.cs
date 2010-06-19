@@ -27,10 +27,27 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     class TiffCodec
     {
+        /// <summary>
+        /// 
+        /// </summary>
         protected Tiff m_tif;
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected internal Compression m_scheme;
+
+        /// <summary>
+        /// 
+        /// </summary>
         protected internal string m_name;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TiffCodec"/> class.
+        /// </summary>
+        /// <param name="tif">The tif.</param>
+        /// <param name="scheme">The scheme.</param>
+        /// <param name="name">The name.</param>
         public TiffCodec(Tiff tif, Compression scheme, string name)
         {
             m_scheme = scheme;
@@ -39,16 +56,32 @@ namespace BitMiracle.LibTiff.Classic
             m_name = name;
         }
 
+        /// <summary>
+        /// Determines whether this instance can encode.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this instance can encode; otherwise, <c>false</c>.
+        /// </returns>
         public virtual bool CanEncode()
         {
             return false;
         }
 
+        /// <summary>
+        /// Determines whether this instance can decode.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this instance can decode; otherwise, <c>false</c>.
+        /// </returns>
         public virtual bool CanDecode()
         {
             return false;
         }
 
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
+        /// <returns><c>true</c> if initialized successfully</returns>
         public virtual bool Init()
         {
             return true;
@@ -56,31 +89,57 @@ namespace BitMiracle.LibTiff.Classic
 
         // decode part
 
-        /* called once before predecode */
+        /// <summary>
+        /// Setups the decode.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Called once before <see cref="TiffCodec.PreDecode(System.Int16)"/>.</remarks>
         public virtual bool SetupDecode()
         {
             return true;
         }
 
-        /* pre-row/strip/tile decoding */
+        /// <summary>
+        /// Called before decoding.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool PreDecode(short s)
         {
             return true;
         }
 
-        /* scanline decoding routine */
+        /// <summary>
+        /// Decodes the row.
+        /// </summary>
+        /// <param name="pp"></param>
+        /// <param name="cc"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool DecodeRow(byte[] pp, int cc, short s)
         {
             return noDecode("scanline");
         }
 
-        /* strip decoding routine */
+        /// <summary>
+        /// Decodes the strip.
+        /// </summary>
+        /// <param name="pp"></param>
+        /// <param name="cc"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool DecodeStrip(byte[] pp, int cc, short s)
         {
             return noDecode("strip");
         }
 
-        /* tile decoding routine */
+        /// <summary>
+        /// Decodes the tile.
+        /// </summary>
+        /// <param name="pp"></param>
+        /// <param name="cc"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool DecodeTile(byte[] pp, int cc, short s)
         {
             return noDecode("tile");
@@ -88,63 +147,102 @@ namespace BitMiracle.LibTiff.Classic
 
         // encode part
 
-        /* called once before preencode */
+        /// <summary>
+        /// Setups the encode.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Called once before <see cref="TiffCodec.PreEncode(System.Int16)"/>.</remarks>
         public virtual bool SetupEncode()
         {
             return true;
         }
 
-        /* pre-row/strip/tile encoding */
+        /// <summary>
+        /// Called before decoding.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool PreEncode(short s)
         {
             return true;
         }
 
-        /* post-row/strip/tile encoding */
+        /// <summary>
+        /// Called after encoding.
+        /// </summary>
+        /// <returns></returns>
         public virtual bool PostEncode()
         {
             return true;
         }
 
-        /* scanline encoding routine */
+        /// <summary>
+        /// Encodes the row.
+        /// </summary>
+        /// <param name="pp"></param>
+        /// <param name="cc"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool EncodeRow(byte[] pp, int cc, short s)
         {
             return noEncode("scanline");
         }
 
-        /* strip encoding routine */
+        /// <summary>
+        /// Encodes the strip.
+        /// </summary>
+        /// <param name="pp"></param>
+        /// <param name="cc"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool EncodeStrip(byte[] pp, int cc, short s)
         {
             return noEncode("strip");
         }
 
-        /* tile encoding routine */
+        /// <summary>
+        /// Encodes the tile.
+        /// </summary>
+        /// <param name="pp"></param>
+        /// <param name="cc"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual bool EncodeTile(byte[] pp, int cc, short s)
         {
             return noEncode("tile");
         }
 
-        /* cleanup-on-close routine */
+        /// <summary>
+        /// Closes this instance.
+        /// </summary>
         public virtual void Close()
         {
         }
 
-        /* position within a strip routine
-         * Seek forwards nrows in the current strip.
-         */
-        public virtual bool Seek(int off)
+        /// <summary>
+        /// Seeks the specified offset in the current strip.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns></returns>
+        public virtual bool Seek(int offset)
         {
             Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                 "Compression algorithm does not support random access");
             return false;
         }
 
-        /* cleanup state routine */
+        /// <summary>
+        /// Cleanups state of this instance.
+        /// </summary>
         public virtual void Cleanup()
         {
         }
 
-        /* calculate/constrain strip size */
+        /// <summary>
+        /// calculate/constrain strip size
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public virtual int DefStripSize(int s)
         {
             if (s < 1)
@@ -166,7 +264,11 @@ namespace BitMiracle.LibTiff.Classic
             return s;
         }
 
-        /* calculate/constrain tile size */
+        /// <summary>
+        /// Calculate/constrain tile size
+        /// </summary>
+        /// <param name="tw"></param>
+        /// <param name="th"></param>
         public virtual void DefTileSize(ref int tw, ref int th)
         {
             if (tw < 1)

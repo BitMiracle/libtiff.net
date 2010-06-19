@@ -48,6 +48,10 @@ namespace BitMiracle.LibTiff.Classic
             m_value = o;
         }
 
+        /// <summary>
+        /// Gets the value.
+        /// </summary>
+        /// <value>The value.</value>
         public object Value
         {
             get { return m_value; }
