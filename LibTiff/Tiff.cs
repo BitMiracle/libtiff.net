@@ -2282,54 +2282,70 @@ namespace BitMiracle.LibTiff.Classic
             return ((m_flags & TiffFlags.ISTILED) == TiffFlags.ISTILED);
         }
 
-        /*
-        * Return nonzero if the file has byte-swapped data.
-        */
+        /// <summary>
+        /// Determines whether the file has byte-swapped data.
+        /// </summary>
+        /// <returns><c>true</c> if the file has byte-swapped data; otherwise, <c>false</c>.</returns>
         public bool IsByteSwapped()
         {
             return ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB);
         }
 
-        /*
-        * Return nonzero if the data is returned up-sampled.
-        */
+        /// <summary>
+        /// Determines whether the data is returned up-sampled.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if the data is returned up-sampled; otherwise, <c>false</c>.
+        /// </returns>
         public bool IsUpSampled()
         {
             return ((m_flags & TiffFlags.UPSAMPLED) == TiffFlags.UPSAMPLED);
         }
 
-        /*
-        * Return nonzero if the data is returned in MSB-to-LSB bit order.
-        */
+        /// <summary>
+        /// Determines whether the data is returned in MSB-to-LSB bit order.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if the data is returned in MSB-to-LSB bit order; otherwise, <c>false</c>.
+        /// </returns>
         public bool IsMSB2LSB()
         {
             return isFillOrder(FillOrder.MSB2LSB);
         }
 
-        /*
-        * Return nonzero if given file was written in big-endian order.
-        */
+        /// <summary>
+        /// Determines whether given file was written in big-endian order.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if given file was written in big-endian order; otherwise, <c>false</c>.
+        /// </returns>
         public bool IsBigEndian()
         {
             return (m_header.tiff_magic == TIFF_BIGENDIAN);
         }
 
+        /// <summary>
+        /// Gets the tiff stream.
+        /// </summary>
+        /// <returns>The tiff stream.</returns>
         public TiffStream GetStream()
         {
             return m_stream;
         }
 
-        /*
-        * Return current row being read/written.
-        */
+        /// <summary>
+        /// Current row being read/written.
+        /// </summary>
+        /// <returns>Current row being read/written.</returns>
         public int CurrentRow()
         {
             return m_row;
         }
 
-        /*
-        * Return index of the current directory.
-        */
+        /// <summary>
+        /// Gets the index of the current directory.
+        /// </summary>
+        /// <returns>index of the current directory</returns>
         public short CurrentDirectory()
         {
             return m_curdir;
@@ -2338,6 +2354,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Gets the number of directories in a file.
         /// </summary>
+        /// <returns>The number of directories in a file.</returns>
         public short NumberOfDirectories()
         {
             uint nextdir = m_header.tiff_diroff;
@@ -2352,7 +2369,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Returns file offset of the current directory.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>File offset of the current directory.</returns>
         public long CurrentDirOffset()
         {
             return m_diroff;
@@ -2361,7 +2378,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Returns current strip index.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Current strip index.</returns>
         public int CurrentStrip()
         {
             return m_curstrip;
@@ -2370,21 +2387,22 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Returns current tile index.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Current tile index.</returns>
         public int CurrentTile()
         {
             return m_curtile;
         }
 
-        /*
-        * Setup the raw data buffer in preparation for
-        * reading a strip of raw data.  If the buffer
-        * is specified as zero, then a buffer of appropriate
-        * size is allocated by the library.  Otherwise,
-        * the client must guarantee that the buffer is
-        * large enough to hold any individual strip of
-        * raw data.
-        */
+        /// <summary>
+        /// Setup the raw data buffer in preparation for reading a strip of raw data.
+        /// </summary>
+        /// <param name="bp">The data buffer.</param>
+        /// <param name="size">The buffer size.</param>
+        /// <remarks>If the buffer is specified as <c>null</c>, then a buffer of 
+        /// appropriate size is allocated by the library. Otherwise,
+        /// the client must guarantee that the buffer is large enough 
+        /// to hold any individual strip of raw data.
+        /// </remarks>
         public void ReadBufferSetup(byte[] bp, int size)
         {
             Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
@@ -2404,9 +2422,11 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * Setup the raw data buffer used for encoding.
-        */
+        /// <summary>
+        /// Setup the raw data buffer used for encoding.
+        /// </summary>
+        /// <param name="bp">The data buffer.</param>
+        /// <param name="size">The buffer size.</param>
         public void WriteBufferSetup(byte[] bp, int size)
         {
             if (m_rawdata != null)
@@ -2445,6 +2465,10 @@ namespace BitMiracle.LibTiff.Classic
             m_flags |= TiffFlags.BUFFERSETUP;
         }
 
+        /// <summary>
+        /// Setups the strips.
+        /// </summary>
+        /// <returns><c>true</c> if setup successfully; otherwise, <c>false</c></returns>
         public bool SetupStrips()
         {
             if (IsTiled())
@@ -2466,11 +2490,16 @@ namespace BitMiracle.LibTiff.Classic
         }
         
         /*
-        * Verify file is writable and that the directory
-        * information is setup properly.  In doing the latter
+        *   In doing the latter
         * we also "freeze" the state of the directory so
         * that important information is not changed.
         */
+        /// <summary>
+        /// Verify file is writable and that the directory information is setup properly.
+        /// </summary>
+        /// <param name="tiles">The number of tiles.</param>
+        /// <param name="module">The module.</param>
+        /// <returns><c>true</c> if checked successfully; otherwise, <c>false</c></returns>
         public bool WriteCheck(int tiles, string module)
         {
             if (m_mode == O_RDONLY)
@@ -2569,20 +2598,23 @@ namespace BitMiracle.LibTiff.Classic
             m_row = -1;
             m_curstrip = -1;
         }
-        
+
         /// <summary>
         /// Return an indication of whether or not we are at the last directory
         /// in the file.
         /// </summary>
+        /// <returns><c>true</c> if we are at the last directory
+        /// in the file.</returns>
         public bool LastDirectory()
         {
             return (m_nextdiroff == 0);
         }
-        
+
         /// <summary>
         /// Set the directory with specified number as the current directory.
         /// </summary>
         /// <param name="dirn">The directory number.</param>
+        /// <returns><c>true</c> if set successfully</returns>
         /// <remarks>Directories are numbered starting at 0.</remarks>
         public bool SetDirectory(short dirn)
         {
@@ -2614,6 +2646,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="diroff">The file offset of the directory to set
         /// as current.</param>
+        /// <returns><c>true</c> if set successfully</returns>
         /// <remarks>This method is used mainly to access directories linked
         /// with the SubIFD tag (e.g. thumbnail images).</remarks>
         public bool SetSubDirectory(long diroff)
@@ -2630,7 +2663,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Unlinks the specified directory from the directory chain.
         /// </summary>
         /// <param name="dirn">The directory number.</param>
-        /// <returns></returns>
+        /// <returns><c>true</c> if unlinked successfully</returns>
         public bool UnlinkDirectory(short dirn)
         {
             const string module = "UnlinkDirectory";
@@ -2707,13 +2740,15 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
         
-        /*
-        * Record the value of a field in the
-        * internal directory structure.  The
-        * field will be written to the file
-        * when/if the directory structure is
-        * updated.
-        */
+        /// <summary>
+        /// Records the value of a field in the internal directory structure.
+        /// </summary>
+        /// <param name="tag">The tag.</param>
+        /// <param name="ap">The field value(s).</param>
+        /// <returns><c>true</c> if set successfully</returns>
+        /// <remarks>The field will be written to the file
+        /// when/if the directory structure is updated.
+        /// </remarks>
         public bool SetField(TiffTag tag, params object[] ap)
         {
             if (okToChangeTag(tag))
@@ -2722,17 +2757,25 @@ namespace BitMiracle.LibTiff.Classic
             return false;
         }
 
+        /// <summary>
+        /// Writes the directory.
+        /// </summary>
+        /// <returns><c>true</c> if written successfully.</returns>
         public bool WriteDirectory()
         {
             return writeDirectory(true);
         }
         
         /*
-        * Similar to WriteDirectory(), writes the directory out
-        * but leaves all data structures in memory so that it can be
-        * written again.  This will make a partially written TIFF file
-        * readable before it is successfully completed/closed.
+        *   
         */
+        /// <summary>
+        /// Similar to <see cref="Tiff.WriteDirectory"/>, writes the directory out
+        /// but leaves all data structures in memory so that it can be written again.
+        /// </summary>
+        /// <returns><c>true</c> if written successfully.</returns>
+        /// <remarks>This will make a partially written TIFF file 
+        /// readable before it is successfully completed/closed.</remarks>
         public bool CheckpointDirectory()
         {
             /* Setup the strips arrays, if they haven't already been. */
@@ -2744,12 +2787,14 @@ namespace BitMiracle.LibTiff.Classic
             return rc;
         }
 
-        /*
-        * Similar to WriteDirectory(), but if the directory has already
-        * been written once, it is relocated to the end of the file, in case it
-        * has changed in size.  Note that this will result in the loss of the 
-        * previously used directory space. 
-        */
+        /// <summary>
+        /// Similar to <see cref="Tiff.WriteDirectory"/>, but if the directory has already
+        /// been written once, it is relocated to the end of the file, in case it
+        /// has changed in size.
+        /// </summary>
+        /// <returns><c>true</c> if written successfully.</returns>
+        /// <remarks>Note that this will result in the loss of the 
+        /// previously used directory space.</remarks>
         public bool RewriteDirectory()
         {
             const string module = "RewriteDirectory";
@@ -2821,15 +2866,21 @@ namespace BitMiracle.LibTiff.Classic
              */
             return WriteDirectory();
         }
-        
+
         /// <summary>
-        /// Print the contents of the current directory to the specified stream.
+        /// Prints the contents of the current directory to the specified stream.
         /// </summary>
+        /// <param name="fd">The stream.</param>
         public void PrintDirectory(Stream fd)
         {
             PrintDirectory(fd, TiffPrintFlags.NONE);
         }
 
+        /// <summary>
+        /// Prints the directory.
+        /// </summary>
+        /// <param name="fd">The stream.</param>
+        /// <param name="flags">The flags.</param>
         public void PrintDirectory(Stream fd, TiffPrintFlags flags)
         {
             fprintf(fd, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
@@ -3271,11 +3322,24 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        /// <summary>
+        /// Reads the scanline.
+        /// </summary>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="row">The row.</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         public bool ReadScanline(byte[] buf, int row)
         {
             return ReadScanline(buf, row, 0);
         }
 
+        /// <summary>
+        /// Reads the scanline.
+        /// </summary>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="row">The row.</param>
+        /// <param name="sample">The sample.</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         public bool ReadScanline(byte[] buf, int row, short sample)
         {
             if (!checkRead(0))
@@ -3297,11 +3361,24 @@ namespace BitMiracle.LibTiff.Classic
             return e;
         }
 
+        /// <summary>
+        /// Writes the scanline.
+        /// </summary>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="row">The row.</param>
+        /// <returns><c>true</c> if written successfully; otherwise, <c>false</c></returns>
         public bool WriteScanline(byte[] buf, int row)
         {
             return WriteScanline(buf, row, 0);
         }
 
+        /// <summary>
+        /// Writes the scanline.
+        /// </summary>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="row">The row.</param>
+        /// <param name="sample">The sample.</param>
+        /// <returns><c>true</c> if written successfully; otherwise, <c>false</c></returns>
         public bool WriteScanline(byte[] buf, int row, short sample)
         {
             const string module = "WriteScanline";
@@ -3423,16 +3500,28 @@ namespace BitMiracle.LibTiff.Classic
             m_row = row + 1;
             return status;
         }
-        
+
         /// <summary>
         /// Reads the specified image into an ABGR-format raster.
         /// </summary>
+        /// <param name="rwidth">The raster width.</param>
+        /// <param name="rheight">The raster height.</param>
+        /// <param name="raster">The raster.</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         /// <remarks>Uses bottom left origin for raster by default.</remarks>
         public bool ReadRGBAImage(int rwidth, int rheight, int[] raster)
         {
             return ReadRGBAImage(rwidth, rheight, raster, false);
         }
 
+        /// <summary>
+        /// Reads the RGBA image.
+        /// </summary>
+        /// <param name="rwidth">The raster width.</param>
+        /// <param name="rheight">The raster height.</param>
+        /// <param name="raster">The raster.</param>
+        /// <param name="stop"></param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         public bool ReadRGBAImage(int rwidth, int rheight, int[] raster, bool stop)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, stop);
@@ -3442,16 +3531,40 @@ namespace BitMiracle.LibTiff.Classic
         * Read the specified image into an ABGR-format raster taking in account
         * specified orientation.
         */
+        /// <summary>
+        /// Reads the RGBA image oriented.
+        /// </summary>
+        /// <param name="rwidth">The raster width.</param>
+        /// <param name="rheight">The raster height.</param>
+        /// <param name="raster">The raster.</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, false);
         }
 
+        /// <summary>
+        /// Reads the RGBA image oriented.
+        /// </summary>
+        /// <param name="rwidth">The raster width.</param>
+        /// <param name="rheight">The raster height.</param>
+        /// <param name="raster">The raster.</param>
+        /// <param name="orientation">The orientation.</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, Orientation orientation)
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, orientation, false);
         }
 
+        /// <summary>
+        /// Reads the RGBA image oriented.
+        /// </summary>
+        /// <param name="rwidth">The raster width.</param>
+        /// <param name="rheight">The raster height.</param>
+        /// <param name="raster">The raster.</param>
+        /// <param name="orientation">The orientation.</param>
+        /// <param name="stop">if set to <c>true</c> [stop].</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, Orientation orientation, bool stop)
         {
             bool ok = false;
@@ -3475,12 +3588,15 @@ namespace BitMiracle.LibTiff.Classic
             return ok;
         }
 
-        /*
-        * Read a whole strip off data from the file, and convert to RGBA form.
-        * If this is the last strip, then it will only contain the portion of
-        * the strip that is actually within the image space.  The result is
-        * organized in bottom to top form.
-        */
+        /// <summary>
+        /// Reads a whole strip off data from the file, and convert to RGBA form.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <param name="raster">The raster.</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
+        /// <remarks>If this is the last strip, then it will only contain the portion of
+        /// the strip that is actually within the image space.  The result is
+        /// organized in bottom to top form.</remarks>
         public bool ReadRGBAStrip(int row, int[] raster)
         {
             if (IsTiled())
@@ -3522,11 +3638,15 @@ namespace BitMiracle.LibTiff.Classic
             return false;
         }
 
-        /*
-        * Read a whole tile off data from the file, and convert to RGBA form.
-        * The returned RGBA data is organized from bottom to top of tile,
-        * and may include zeroed areas if the tile extends off the image.
-        */
+        /// <summary>
+        /// Reads a whole tile off data from the file, and convert to RGBA form.
+        /// </summary>
+        /// <param name="col">The column.</param>
+        /// <param name="row">The row.</param>
+        /// <param name="raster">The raster.</param>
+        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
+        /// <remarks>The returned RGBA data is organized from bottom to top of tile,
+        /// and may include zeroed areas if the tile extends off the image.</remarks>
         public bool ReadRGBATile(int col, int row, int[] raster)
         {
             /*
@@ -3614,12 +3734,14 @@ namespace BitMiracle.LibTiff.Classic
             return ok;
         }
         
-        /*
-        * Check the image to see if ReadRGBAImage can deal with it.
-        * true/false is returned according to whether or not the image can
-        * be handled.  If false is returned, emsg contains the reason
-        * why it is being rejected.
-        */
+        /// <summary>
+        /// Check the image to see if <see cref="Tiff.ReadRGBAImage"/> can deal with it.
+        /// </summary>
+        /// <param name="emsg">The error message.</param>
+        /// <returns><c>true</c> if the image can
+        /// be handled by <see cref="Tiff.ReadRGBAImage"/>. 
+        /// If <c>false</c> is returned, emsg contains the reason
+        /// why it is being rejected.</returns>
         public bool RGBAImageOK(out string emsg)
         {
             emsg = null;
@@ -3761,17 +3883,20 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        /*
-        * Return open file's name.
-        */
+        /// <summary>
+        /// Open file's name.
+        /// </summary>
+        /// <returns>File name.</returns>
         public string FileName()
         {
             return m_name;
         }
 
-        /*
-        * Set the file name.
-        */
+        /// <summary>
+        /// Sets the name of the file.
+        /// </summary>
+        /// <param name="name">The file name.</param>
+        /// <returns>Previous file name.</returns>
         public string SetFileName(string name)
         {
             string old_name = m_name;
@@ -3779,51 +3904,111 @@ namespace BitMiracle.LibTiff.Classic
             return old_name;
         }
 
-        // "tif" parameter can be null
+        /// <summary>
+        /// Forces the error.
+        /// </summary>
+        /// <param name="tif">The tif. Can be <c>null</c></param>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void Error(Tiff tif, string module, string fmt, params object[] ap)
         {
             m_errorHandler.ErrorHandler(tif, module, fmt, ap);
             m_errorHandler.ErrorHandlerExt(tif, null, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Forces the error.
+        /// </summary>
+        /// <param name="tif">The tif. Can be <c>null</c></param>
+        /// <param name="fd">The fd.</param>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void ErrorExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
         {
             m_errorHandler.ErrorHandler(tif, module, fmt, ap);
             m_errorHandler.ErrorHandlerExt(tif, fd, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Forces the warning.
+        /// </summary>
+        /// <param name="tif">The tif. Can be <c>null</c></param>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void Warning(Tiff tif, string module, string fmt, params object[] ap)
         {
             m_errorHandler.WarningHandler(tif, module, fmt, ap);
             m_errorHandler.WarningHandlerExt(tif, null, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Forces the warning.
+        /// </summary>
+        /// <param name="tif">The tif. Can be <c>null</c></param>
+        /// <param name="fd">The fd.</param>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void WarningExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
         {
             m_errorHandler.WarningHandler(tif, module, fmt, ap);
             m_errorHandler.WarningHandlerExt(tif, fd, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Forces the error.
+        /// </summary>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void Error(string module, string fmt, params object[] ap)
         {
             Error(null, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Forces the error.
+        /// </summary>
+        /// <param name="fd">The fd.</param>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void ErrorExt(object fd, string module, string fmt, params object[] ap)
         {
             ErrorExt(null, fd, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Forces the warning.
+        /// </summary>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void Warning(string module, string fmt, params object[] ap)
         {
             Warning(null, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Forces the warning.
+        /// </summary>
+        /// <param name="fd">The fd.</param>
+        /// <param name="module">The module.</param>
+        /// <param name="fmt">The message format.</param>
+        /// <param name="ap">The optional formatted message arguments.</param>
         public static void WarningExt(object fd, string module, string fmt, params object[] ap)
         {
             WarningExt(null, fd, module, fmt, ap);
         }
 
+        /// <summary>
+        /// Sets the error handler.
+        /// </summary>
+        /// <param name="errorHandler">The error handler.</param>
+        /// <returns>Previous error handler.</returns>
         public static TiffErrorHandler SetErrorHandler(TiffErrorHandler errorHandler)
         {
             TiffErrorHandler prev = m_errorHandler;
@@ -3831,6 +4016,11 @@ namespace BitMiracle.LibTiff.Classic
             return prev;
         }
 
+        /// <summary>
+        /// Sets the tag extender.
+        /// </summary>
+        /// <param name="proc">The tag extender.</param>
+        /// <returns>Previous tag extender.</returns>
         public static TiffExtendProc SetTagExtender(TiffExtendProc proc)
         {
             TiffExtendProc prev = m_extender;
@@ -3841,6 +4031,14 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * Compute which tile an (x,y,z,s) value is in.
         */
+        /// <summary>
+        /// Computes which tile an (x,y,z,s) value is in.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <param name="z">The z.</param>
+        /// <param name="s">The s.</param>
+        /// <returns>Which tile an (x,y,z,s) value is in.</returns>
         public int ComputeTile(int x, int y, int z, short s)
         {
             if (m_dir.td_imagedepth == 1)
@@ -3874,10 +4072,14 @@ namespace BitMiracle.LibTiff.Classic
             return tile;
         }
 
-        /*
-        * Check an (x,y,z,s) coordinate
-        * against the image bounds.
-        */
+        /// <summary>
+        /// Checks an (x,y,z,s) coordinate against the image bounds.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <param name="z">The z.</param>
+        /// <param name="s">The s.</param>
+        /// <returns><c>true</c> if values are correct.</returns>
         public bool CheckTile(int x, int y, int z, short s)
         {
             if (x >= m_dir.td_imagewidth)
@@ -3907,9 +4109,10 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        /*
-        * Compute how many tiles are in an image.
-        */
+        /// <summary>
+        /// Computes how many tiles are in an image.
+        /// </summary>
+        /// <returns>The number of tiles.</returns>
         public int NumberOfTiles()
         {
             int dx = m_dir.td_tilewidth;
@@ -3948,10 +4151,15 @@ namespace BitMiracle.LibTiff.Classic
             return ReadEncodedTile(ComputeTile(x, y, z, s), buf, offset, -1);
         }
 
-        /*
-        * Read a tile of data and decompress the specified
-        * amount into the user-supplied buffer.
-        */
+        /// <summary>
+        /// Reads a tile of data and decompress the specified
+        /// amount into the user-supplied buffer.
+        /// </summary>
+        /// <param name="tile">The tile.</param>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="size">The size.</param>
+        /// <returns>The tile size.</returns>
         public int ReadEncodedTile(int tile, byte[] buf, int offset, int size)
         {
             if (!checkRead(1))
@@ -3982,8 +4190,13 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Read a tile of data from the file.
+        /// Reads a tile of data from the file.
         /// </summary>
+        /// <param name="tile">The tile.</param>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="size">The size.</param>
+        /// <returns>The tile size.</returns>
         public int ReadRawTile(int tile, byte[] buf, int offset, int size)
         {
             const string module = "ReadRawTile";
@@ -4010,10 +4223,16 @@ namespace BitMiracle.LibTiff.Classic
             return readRawTile1(tile, buf, offset, (int)bytecount, module);
         }
 
-        /*
-        * Write and compress a tile of data.  The
-        * tile is selected by the (x,y,z,s) coordinates.
-        */
+        /// <summary>
+        /// Writes and compress a tile of data.
+        /// </summary>
+        /// <param name="buf">The buf.</param>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <param name="z">The z.</param>
+        /// <param name="s">The s.</param>
+        /// <returns>The tile size.</returns>
+        /// <remarks>The tile is selected by the (x,y,z,s) coordinates.</remarks>
         public int WriteTile(byte[] buf, int x, int y, int z, short s)
         {
             if (!CheckTile(x, y, z, s))
@@ -4028,9 +4247,12 @@ namespace BitMiracle.LibTiff.Classic
             return WriteEncodedTile(ComputeTile(x, y, z, s), buf, -1);
         }
         
-        /*
-        * Compute which strip a (row,sample) value is in.
-        */
+        /// <summary>
+        /// Computes which strip a (row,sample) value is in.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <param name="sample">The sample.</param>
+        /// <returns>The number of strip.</returns>
         public int ComputeStrip(int row, short sample)
         {
             int strip = row / m_dir.td_rowsperstrip;
@@ -4048,9 +4270,10 @@ namespace BitMiracle.LibTiff.Classic
             return strip;
         }
 
-        /*
-        * Compute how many strips are in an image.
-        */
+        /// <summary>
+        /// Computes how many strips are in an image.
+        /// </summary>
+        /// <returns>The number of strips.</returns>
         public int NumberOfStrips()
         {
             int nstrips = (m_dir.td_rowsperstrip == -1 ? 1: howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
@@ -4060,10 +4283,14 @@ namespace BitMiracle.LibTiff.Classic
             return nstrips;
         }
         
-        /*
-        * Read a strip of data and decompress the specified
-        * amount into the user-supplied buffer.
-        */
+        /// <summary>
+        /// Read a strip of data and decompress the specified amount into the user-supplied buffer.
+        /// </summary>
+        /// <param name="strip">The strip.</param>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="size">The size.</param>
+        /// <returns>The strip size.</returns>
         public int ReadEncodedStrip(int strip, byte[] buf, int offset, int size)
         {
             if (!checkRead(0))
@@ -4114,6 +4341,11 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Read a strip of data from the file.
         /// </summary>
+        /// <param name="strip">The strip.</param>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="size">The size.</param>
+        /// <returns>The strip size.</returns>
         public int ReadRawStrip(int strip, byte[] buf, int offset, int size)
         {
             const string module = "ReadRawStrip";
@@ -4146,12 +4378,14 @@ namespace BitMiracle.LibTiff.Classic
             return readRawStrip1(strip, buf, offset, (int)bytecount, module);
         }
 
-        /*
-        * Encode the supplied data and write it to the
-        * specified strip.
-        *
-        * NB: Image length must be setup before writing.
-        */
+        /// <summary>
+        /// Encode the supplied data and write it to the specified strip.
+        /// </summary>
+        /// <param name="strip">The strip.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="cc">The size.</param>
+        /// <returns>The strip size.</returns>
+        /// <remarks>Image length must be setup before writing.</remarks>
         public int WriteEncodedStrip(int strip, byte[] data, int cc)
         {
             const string module = "WriteEncodedStrip";
@@ -4233,11 +4467,14 @@ namespace BitMiracle.LibTiff.Classic
             return cc;
         }
 
-        /*
-        * Write the supplied data to the specified strip.
-        *
-        * NB: Image length must be setup before writing.
-        */
+        /// <summary>
+        /// Writes the supplied data to the specified strip.
+        /// </summary>
+        /// <param name="strip">The strip.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="cc">The size.</param>
+        /// <returns>The strip size.</returns>
+        /// <remarks>Image length must be setup before writing.</remarks>
         public int WriteRawStrip(int strip, byte[] data, int cc)
         {
             const string module = "WriteRawStrip";
@@ -4279,18 +4516,24 @@ namespace BitMiracle.LibTiff.Classic
             return (appendToStrip(strip, data, cc) ? cc: -1);
         }
 
-        /*
-        * Encode the supplied data and write it to the
-        * specified tile.  There must be space for the
-        * data.  The function clamps individual writes
-        * to a tile to the tile size, but does not (and
-        * can not) check that multiple writes to the same
-        * tile do not write more than tile size data.
-        *
-        * NB: Image length must be setup before writing; this
-        *     interface does not support automatically growing
-        *     the image on each write (as WriteScanline does).
-        */
+        /// <summary>
+        /// Encodes the supplied data and write it to the specified tile.
+        /// </summary>
+        /// <param name="tile">The tile.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="cc">The size.</param>
+        /// <returns>The tile size.</returns>
+        /// <remarks>
+        ///     <para>There must be space for the data. The function clamps 
+        ///     individual writes to a tile to the tile size, but does not 
+        ///     (and can not) check that multiple writes to the same tile 
+        ///     do not write more than tile size data.
+        ///     </para>
+        ///     <para>Image length must be setup before writing; this 
+        ///     interface does not support automatically growing the 
+        ///     image on each write (as <see cref="Tiff.WriteScanline"/> does).
+        ///     </para>
+        /// </remarks>
         public int WriteEncodedTile(int tile, byte[] data, int cc)
         {
             const string module = "WriteEncodedTile";
@@ -4370,15 +4613,18 @@ namespace BitMiracle.LibTiff.Classic
             return cc;
         }
 
-        /*
-        * Write the supplied data to the specified strip.
-        * There must be space for the data; we don't check
-        * if strips overlap!
-        *
-        * NB: Image length must be setup before writing; this
-        *     interface does not support automatically growing
-        *     the image on each write (as WriteScanline does).
-        */
+        /// <summary>
+        /// Writes the supplied data to the specified strip.
+        /// </summary>
+        /// <param name="tile">The tile.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="cc">The cc.</param>
+        /// <returns>The tile size.</returns>
+        /// <remarks>
+        ///     <para>There must be space for the data; we don't check if strips overlap!</para>
+        ///     <para>Image length must be setup before writing; this interface does not 
+        ///     support automatically growing the image on each write (as <see cref="Tiff.WriteScanline"/> does).</para>
+        /// </remarks>
         public int WriteRawTile(int tile, byte[] data, int cc)
         {
             const string module = "WriteRawTile";
@@ -4449,6 +4695,10 @@ namespace BitMiracle.LibTiff.Classic
         *
         * XXX We assume short = 16-bits and long = 32-bits XXX
         */
+        /// <summary>
+        /// Swaps the short.
+        /// </summary>
+        /// <param name="wp">The short number.</param>
         public static void SwabShort(ref short wp)
         {
             byte[] cp = new byte[2];
@@ -4463,6 +4713,10 @@ namespace BitMiracle.LibTiff.Classic
             wp += (short)((cp[1] & 0xFF) << 8);
         }
 
+        /// <summary>
+        /// Swaps the integer.
+        /// </summary>
+        /// <param name="lp">The integer number.</param>
         public static void SwabLong(ref int lp)
         {
             byte[] cp = new byte[4];
@@ -4485,6 +4739,10 @@ namespace BitMiracle.LibTiff.Classic
             lp += cp[3] << 24;
         }
 
+        /// <summary>
+        /// Swaps the double.
+        /// </summary>
+        /// <param name="dp">The double number.</param>
         public static void SwabDouble(ref double dp)
         {
             byte[] bytes = BitConverter.GetBytes(dp);
@@ -4503,6 +4761,11 @@ namespace BitMiracle.LibTiff.Classic
             dp = BitConverter.ToDouble(bytes, 0);
         }
 
+        /// <summary>
+        /// Swaps the array of short.
+        /// </summary>
+        /// <param name="wp">The array of short numbers.</param>
+        /// <param name="n">The array length.</param>
         public static void SwabArrayOfShort(short[] wp, int n)
         {
             byte[] cp = new byte[2];
@@ -4520,6 +4783,11 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        /// <summary>
+        /// Swaps the array of triples.
+        /// </summary>
+        /// <param name="tp">The array of triples.</param>
+        /// <param name="n">The array length.</param>
         public static void SwabArrayOfTriples(byte[] tp, int n)
         {
             // XXX unroll loop some
@@ -4533,6 +4801,11 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        /// <summary>
+        /// Swaps the array of integers.
+        /// </summary>
+        /// <param name="lp">The array of integers.</param>
+        /// <param name="n">The array length.</param>
         public static void SwabArrayOfLong(int[] lp, int n)
         {
             byte[] cp = new byte[4];
@@ -4559,6 +4832,11 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        /// <summary>
+        /// Swabs the array of doubles.
+        /// </summary>
+        /// <param name="dp">The array of doubles.</param>
+        /// <param name="n">The array length.</param>
         public static void SwabArrayOfDouble(double[] dp, int n)
         {
             byte[] bytes = new byte[n * sizeof(double)];
@@ -4582,6 +4860,11 @@ namespace BitMiracle.LibTiff.Classic
                 dp[i] = BitConverter.ToDouble(bytes, i * sizeof(double));
         }
 
+        /// <summary>
+        /// Reverses the bits.
+        /// </summary>
+        /// <param name="cp">The byte array.</param>
+        /// <param name="n">The array length.</param>
         public static void ReverseBits(byte[] cp, int n)
         {
             int cpPos = 0;
@@ -4605,11 +4888,23 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        /// <summary>
+        /// Gets the bit reversal table.
+        /// </summary>
+        /// <param name="reversed">if set to <c>true</c> reversed table will be retrieved.</param>
+        /// <returns>The reversal table.</returns>
         public static byte[] GetBitRevTable(bool reversed)
         {
             return (reversed ? TIFFBitRevTable : TIFFNoBitRevTable);
         }
 
+        /// <summary>
+        /// Converts byte array to array of integers.
+        /// </summary>
+        /// <param name="b">The byte array.</param>
+        /// <param name="byteStartOffset">The start offset.</param>
+        /// <param name="byteCount">The byte count.</param>
+        /// <returns>The array of integers.</returns>
         public static int[] ByteArrayToInts(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 4;
@@ -4629,6 +4924,14 @@ namespace BitMiracle.LibTiff.Classic
             return integers;
         }
 
+        /// <summary>
+        /// Convert array of integers to array of bytes.
+        /// </summary>
+        /// <param name="integers">The array of integers.</param>
+        /// <param name="intStartOffset">The start offset.</param>
+        /// <param name="intCount">The number of integers.</param>
+        /// <param name="bytes">The byte array.</param>
+        /// <param name="byteStartOffset">The start offset in byte array.</param>
         public static void IntsToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
@@ -4643,6 +4946,13 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        /// <summary>
+        /// Convert array of bytes to array of shorts.
+        /// </summary>
+        /// <param name="b">The byte array.</param>
+        /// <param name="byteStartOffset">The start offset.</param>
+        /// <param name="byteCount">The byte count.</param>
+        /// <returns>The array of short.</returns>
         public static short[] ByteArrayToShorts(byte[] b, int byteStartOffset, int byteCount)
         {
             int intCount = byteCount / 2;
@@ -4660,6 +4970,14 @@ namespace BitMiracle.LibTiff.Classic
             return integers;
         }
 
+        /// <summary>
+        /// Converts array of shorts to array of bytes.
+        /// </summary>
+        /// <param name="integers">The array of integers.</param>
+        /// <param name="intStartOffset">The start offset.</param>
+        /// <param name="intCount">The integers count.</param>
+        /// <param name="bytes">The bytes array.</param>
+        /// <param name="byteStartOffset">The start offset in array of bytes.</param>
         public static void ShortsToByteArray(short[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
             int bytePos = byteStartOffset;
