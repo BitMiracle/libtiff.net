@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="fa16a5c5-6f52-4455-b130-9363a5bec120" revisionNumber="1">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <section address="Main">
+      <content>
+	      <para>CLEANFAXDATA_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.CleanFaxData</codeEntityReference>.*</para>
+		  <para>COLORRESPONSEUNIT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.ColorResponseUnit</codeEntityReference>.CRU*</para>
+		  <para>COMPRESSION_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.Compression</codeEntityReference>.*</para>
+		  <para>DCSIMAGERFILTER_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.DCSImagerFilter</codeEntityReference>.*</para>
+		  <para>DCSIMAGERMODEL_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.DCSImagerModel</codeEntityReference>.*</para>
+		  <para>DCSINTERPMODE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.DCSInterpMode</codeEntityReference>.*</para>
+		  <para>EXIFTAG_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffTag</codeEntityReference>.EXIF_*</para>
+		  <para>EXTRASAMPLE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.ExtraSample</codeEntityReference>.*</para>
+		  <para>FAXMODE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.FaxMode</codeEntityReference>.*</para>
+		  <para>FILETYPE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.FileType</codeEntityReference>.*</para>
+		  <para>FILLORDER_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.FillOrder</codeEntityReference>.*</para>
+		  <para>GRAYRESPONSEUNIT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.GrayResponseUnit</codeEntityReference>.GRU*</para>
+		  <para>GROUP3OPT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.Group3Opt</codeEntityReference>.* 
+		  (note, that GROUP3OPT_2DENCODING -> <codeEntityReference>F:BitMiracle.LibTiff.Classic.Group3Opt.ENCODING2D</codeEntityReference>)
+		  </para>
+		  <para>INKSET_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.InkSet</codeEntityReference>.*</para>
+		  <para>JPEGCOLORMODE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.JpegColorMode</codeEntityReference>.*</para>
+		  <para>JPEGPROC_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.JpegProc</codeEntityReference>.*</para>
+		  <para>JPEGTABLESMODE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.JpegTablesMode</codeEntityReference>.*</para>
+		  <para>OFILETYPE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.OFileType</codeEntityReference>.*</para>
+		  <para>ORIENTATION_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.Orientation</codeEntityReference>.*</para>
+		  <para>PHOTOMETRIC_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.Photometric</codeEntityReference>.*</para>
+		  <para>PIXARLOGDATAFMT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.PixarLogDataFmt</codeEntityReference>.FMT*</para>
+		  <para>PLANARCONFIG_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.PlanarConfig</codeEntityReference>.*</para>
+		  <para>PREDICTOR_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.Predictor</codeEntityReference>.*</para>
+		  <para>RESUNIT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.ResUnit</codeEntityReference>.*</para>
+		  <para>SAMPLEFORMAT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.SampleFormat</codeEntityReference>.*</para>
+		  <para>SGILOGDATAFMT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.SGILogDataFmt</codeEntityReference>.FMT*</para>
+		  <para>SGILOGENCODE_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.SGILogEncode</codeEntityReference>.*</para>
+		  <para>THRESHHOLD_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.Threshold</codeEntityReference>.*</para>
+		  <para>TIFFPRINT_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffPrintFlags</codeEntityReference>.*</para>
+		  <para>TIFFTAG_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffTag</codeEntityReference>.*</para>
+		  <para>YCBCRPOSITION_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.YCbCrPosition</codeEntityReference>.*</para>
+		  
+		  <para></para>
+	
+		  <para>TIFFDataType.TIFF_* -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffType</codeEntityReference>.*</para>
+		  <para>TIFFFieldInfo -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffFieldInfo</codeEntityReference></para>
+      </content>
+    </section>
+  </developerConceptualDocument>
+</topic>
