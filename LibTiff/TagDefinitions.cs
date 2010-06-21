@@ -29,7 +29,7 @@ using System.Text;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// 
+    /// FileType
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -51,7 +51,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// OFileType
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -73,7 +73,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// Compression
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -190,7 +190,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// Photometric
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -248,7 +248,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// Threshold
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -270,7 +270,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// FillOrder
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -288,7 +288,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// Orientation
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -330,7 +330,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// PlanarConfig
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -352,7 +352,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// GrayResponseUnit
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -382,7 +382,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// Group3Opt
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -408,7 +408,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// ResUnit
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -430,7 +430,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// ColorResponseUnit
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -460,7 +460,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// Predictor
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -482,7 +482,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// CleanFaxData
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -504,7 +504,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// InkSet
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -522,7 +522,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// ExtraSample
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -544,7 +544,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// SampleFormat
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -578,7 +578,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// JpegProc
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -596,7 +596,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// YCbCrPosition
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -614,7 +614,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// FaxMode
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -648,7 +648,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// JpegColorMode
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -666,7 +666,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// JpegTablesMode
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -688,7 +688,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// PixarLogDataFmt
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -722,7 +722,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// DCSImagerModel
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -744,7 +744,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// DCSImagerFilter
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -770,7 +770,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// DCSInterpMode
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -788,7 +788,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// SGILogDataFmt
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -814,7 +814,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// SGILogEncode
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -832,7 +832,7 @@ namespace BitMiracle.LibTiff.Classic
     };
 
     /// <summary>
-    /// 
+    /// TiffTag
     /// </summary>
 #if EXPOSE_LIBTIFF
     public

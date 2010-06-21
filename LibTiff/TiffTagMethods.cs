@@ -19,7 +19,7 @@ using BitMiracle.LibTiff.Classic.Internal;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// 
+    /// Tiff tag methods.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public

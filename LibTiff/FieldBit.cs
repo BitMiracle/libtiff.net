@@ -16,7 +16,7 @@ using System.Text;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// 
+    /// FieldBit
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -44,7 +44,7 @@ namespace BitMiracle.LibTiff.Classic
         public const short Pseudo = 0;
 
         /// <summary>
-        /// 
+        /// Custom
         /// </summary>
         public const short Custom = 65;
 
@@ -54,7 +54,7 @@ namespace BitMiracle.LibTiff.Classic
         public const short Codec = 66;
 
         /// <summary>
-        /// 
+        /// Last
         /// </summary>
         public const short Last = (32 * FIELD_SETLONGS - 1);
 

@@ -17,7 +17,7 @@ using System.IO;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// 
+    /// Tiff stream.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -25,13 +25,13 @@ namespace BitMiracle.LibTiff.Classic
     class TiffStream
     {
         /// <summary>
-        /// 
+        /// Reads data from stream.
         /// </summary>
-        /// <param name="fd"></param>
-        /// <param name="buf"></param>
-        /// <param name="offset"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
+        /// <param name="fd">Stream object.</param>
+        /// <param name="buf">Data buffer.</param>
+        /// <param name="offset">Offset in buffer.</param>
+        /// <param name="size">Bytes to read.</param>
+        /// <returns>The number of read bytes.</returns>
         public virtual int Read(object fd, byte[] buf, int offset, int size)
         {
             Stream s = fd as Stream;
@@ -42,11 +42,11 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Writes data to stream.
         /// </summary>
-        /// <param name="fd"></param>
-        /// <param name="buf"></param>
-        /// <param name="size"></param>
+        /// <param name="fd">Stream object.</param>
+        /// <param name="buf">Data buffer.</param>
+        /// <param name="size">Bytes to write.</param>
         public virtual void Write(object fd, byte[] buf, int size)
         {
             Stream s = fd as Stream;
@@ -57,12 +57,12 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Seeks stream.
         /// </summary>
-        /// <param name="fd"></param>
-        /// <param name="off"></param>
-        /// <param name="whence"></param>
-        /// <returns></returns>
+        /// <param name="fd">Stream object.</param>
+        /// <param name="off">Offset</param>
+        /// <param name="whence">Seek origin.</param>
+        /// <returns>The new position within stream.</returns>
         public virtual long Seek(object fd, long off, SeekOrigin whence)
         {
             /* we use this as a special code, so avoid accepting it */
@@ -77,9 +77,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Closes the stream.
         /// </summary>
-        /// <param name="fd"></param>
+        /// <param name="fd">Stream object.</param>
         public virtual void Close(object fd)
         {
             Stream s = fd as Stream;
@@ -90,9 +90,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Retrieves a size of stream.
         /// </summary>
-        /// <param name="fd"></param>
+        /// <param name="fd">Stream object.</param>
         /// <returns></returns>
         public virtual long Size(object fd)
         {

@@ -61,7 +61,7 @@ namespace BitMiracle.LibTiff.Classic
         // string returned by GetVersion.
 
         /// <summary>
-        /// 
+        /// TiffExtendProc
         /// </summary>
         public delegate void TiffExtendProc(Tiff tif);
 
@@ -80,16 +80,16 @@ namespace BitMiracle.LibTiff.Classic
         internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
 
         /// <summary>
-        /// 
+        /// Gets the library version.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Library version.</returns>
         public static string GetVersion()
         {
             return string.Format(CultureInfo.InvariantCulture, TIFFLIB_VERSION_STR, AssemblyVersion);
         }
 
         /// <summary>
-        /// 
+        /// Retrieves the version of assembly.
         /// </summary>
         public static string AssemblyVersion
         {
@@ -111,7 +111,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
-        /// <returns></returns>
+        /// <returns>R component.</returns>
         public static int GetR(int abgr)
         {
             return (abgr & 0xff);
@@ -122,7 +122,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
-        /// <returns></returns>
+        /// <returns>G component.</returns>
         public static int GetG(int abgr)
         {
             return ((abgr >> 8) & 0xff);
@@ -133,7 +133,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
-        /// <returns></returns>
+        /// <returns>B component.</returns>
         public static int GetB(int abgr)
         {
             return ((abgr >> 16) & 0xff);
@@ -144,20 +144,21 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
-        /// <returns></returns>
+        /// <returns>A component.</returns>
         public static int GetA(int abgr)
         {
             return ((abgr >> 24) & 0xff);
         }
 
         /// <summary>
-        /// 
+        /// Retrieves codec corresponding to compression scheme.
         /// </summary>
-        /// <param name="scheme"></param>
-        /// <returns></returns>
+        /// <param name="scheme">The compression scheme.</param>
+        /// <returns>Found codec.</returns>
         /// <remarks>Other compression schemes may be registered. 
         /// Registered schemes can also override the built in versions 
-        /// provided by this library.</remarks>
+        /// provided by this library.
+        /// </remarks>
         public TiffCodec FindCodec(Compression scheme)
         {
             for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
@@ -177,10 +178,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Registers codec.
         /// </summary>
-        /// <param name="codec"></param>
-        /// <returns></returns>
+        /// <param name="codec">Codec.</param>
+        /// <returns><c>true</c> if registered successfully.</returns>
         public bool RegisterCodec(TiffCodec codec)
         {
             if (codec == null)
@@ -195,9 +196,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Unregisters codec.
         /// </summary>
-        /// <param name="c"></param>
+        /// <param name="c">Codec for unregistering.</param>
         public void UnRegisterCodec(TiffCodec c)
         {
             if (m_registeredCodecs == null)
@@ -674,7 +675,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves field information for specified tag.
         /// </summary>
         /// <param name="tag">The tag.</param>
-        /// <param name="dt"></param>
+        /// <param name="dt">The tiff type.</param>
         /// <returns>The field information or <c>null</c> if the field isn't found.</returns>
         public TiffFieldInfo FindFieldInfo(TiffTag tag, TiffType dt)
         {
@@ -703,7 +704,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves field information by field name.
         /// </summary>
         /// <param name="field_name">The field name.</param>
-        /// <param name="dt"></param>
+        /// <param name="dt">The tiff type.</param>
         /// <returns>The field information or <c>null</c> if the field isn't found.</returns>
         public TiffFieldInfo FindFieldInfoByName(string field_name, TiffType dt)
         {
@@ -765,19 +766,19 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Gets the tag methods.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Tag methods.</returns>
         public TiffTagMethods GetTagMethods()
         {
             return m_tagmethods;
         }
 
         /// <summary>
-        /// 
+        /// Sets the tag methods.
         /// </summary>
-        /// <param name="tagMethods"></param>
-        /// <returns></returns>
+        /// <param name="tagMethods">Tag methods.</param>
+        /// <returns>Previous tag methods.</returns>
         public TiffTagMethods SetTagMethods(TiffTagMethods tagMethods)
         {
             TiffTagMethods oldTagMethods = m_tagmethods;
@@ -789,10 +790,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Gets the information about client.
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
+        /// <param name="name">Name</param>
+        /// <returns>Data</returns>
         public object GetClientInfo(string name)
         {
             // should get copy
@@ -808,10 +809,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Sets information about client.
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="name"></param>
+        /// <param name="data">Data</param>
+        /// <param name="name">Name</param>
         public void SetClientInfo(object data, string name)
         {
             clientInfoLink link = m_clientinfo;
@@ -836,9 +837,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Flushes tiff content to file.
         /// </summary>
-        /// <returns></returns>
+        /// <returns><c>true</c> if succeed</returns>
         public bool Flush()
         {
             if (m_mode != O_RDONLY)
@@ -856,9 +857,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Flushes buffered data to the file.
         /// </summary>
-        /// <returns><c>false</c> if <see cref="TiffFlags.BEENWRITING"/> is not set, so that 
-        /// <see cref="Tiff.Flush"/> will proceed to write out the directory.
-        /// </returns>
+        /// <returns><c>true</c> if succeed.</returns>
         public bool FlushData()
         {
             if ((m_flags & TiffFlags.BEENWRITING) != TiffFlags.BEENWRITING)
@@ -893,7 +892,7 @@ namespace BitMiracle.LibTiff.Classic
         /// if the tag is not present in the directory.
         /// </summary>
         /// <param name="tag">The tag.</param>
-        /// <returns></returns>
+        /// <returns>Default value for tag.</returns>
         public FieldValue[] GetFieldDefaulted(TiffTag tag)
         {
             TiffDirectory td = m_dir;
@@ -1740,10 +1739,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Read custom directory from the arbitrary offset.
         /// </summary>
-        /// <param name="diroff"></param>
-        /// <param name="info"></param>
-        /// <param name="n"></param>
-        /// <returns></returns>
+        /// <param name="diroff">Directory offset.</param>
+        /// <param name="info">Field info.</param>
+        /// <param name="n">The number of elements in field info array.</param>
+        /// <returns><c>true</c> if succeed.</returns>
         /// <remarks>The code is very similar to <see cref="Tiff.ReadDirectory"/>.</remarks>
         public bool ReadCustomDirectory(long diroff, TiffFieldInfo[] info, int n)
         {
@@ -1865,10 +1864,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Writes custom directory.
         /// </summary>
-        /// <param name="pdiroff"></param>
-        /// <returns></returns>
+        /// <param name="pdiroff">Output directory offset.</param>
+        /// <returns><c>true</c> if succeed.</returns>
         public bool WriteCustomDirectory(out long pdiroff)
         {
             pdiroff = -1;
@@ -1984,8 +1983,8 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// EXIF is important special case of custom IFD, so we have a special function to read it.
         /// </summary>
-        /// <param name="diroff"></param>
-        /// <returns></returns>
+        /// <param name="diroff">Directory offset.</param>
+        /// <returns><c>true</c> if read successfully.</returns>
         public bool ReadEXIFDirectory(long diroff)
         {
             int exifFieldInfoCount;
@@ -2226,8 +2225,8 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Computes a default tile size based on the image characteristics and a requested value.
         /// </summary>
-        /// <param name="tw"></param>
-        /// <param name="th"></param>
+        /// <param name="tw">Result tile width.</param>
+        /// <param name="th">Result tile height.</param>
         public void DefaultTileSize(ref int tw, ref int th)
         {
             m_currentCodec.DefTileSize(ref tw, ref th);
@@ -3524,7 +3523,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="rwidth">The raster width.</param>
         /// <param name="rheight">The raster height.</param>
         /// <param name="raster">The raster.</param>
-        /// <param name="stop"></param>
+        /// <param name="stop">Stop.</param>
         /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
         public bool ReadRGBAImage(int rwidth, int rheight, int[] raster, bool stop)
         {
@@ -4154,7 +4153,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="y">The y.</param>
         /// <param name="z">The z.</param>
         /// <param name="s">The s.</param>
-        /// <returns></returns>
+        /// <returns>The tile size.</returns>
         /// <remarks>The tile is selected by the (x,y,z,s) coordinates.</remarks>
         public int ReadTile(byte[] buf, int offset, int x, int y, int z, short s)
         {

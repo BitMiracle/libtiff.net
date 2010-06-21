@@ -28,17 +28,17 @@ namespace BitMiracle.LibTiff.Classic
     class TiffCodec
     {
         /// <summary>
-        /// 
+        /// An instance of <see cref="Tiff"/>.
         /// </summary>
         protected Tiff m_tif;
 
         /// <summary>
-        /// 
+        /// Compression scheme.
         /// </summary>
         protected internal Compression m_scheme;
 
         /// <summary>
-        /// 
+        /// Codec name.
         /// </summary>
         protected internal string m_name;
 
@@ -112,10 +112,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Decodes the row.
         /// </summary>
-        /// <param name="pp"></param>
-        /// <param name="cc"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="pp">The pp.</param>
+        /// <param name="cc">The cc.</param>
+        /// <param name="s">The s.</param>
+        /// <returns><c>true</c> if decoded successfully.</returns>
         public virtual bool DecodeRow(byte[] pp, int cc, short s)
         {
             return noDecode("scanline");
@@ -124,10 +124,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Decodes the strip.
         /// </summary>
-        /// <param name="pp"></param>
-        /// <param name="cc"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="pp">The pp.</param>
+        /// <param name="cc">The cc.</param>
+        /// <param name="s">The s.</param>
+        /// <returns><c>true</c> if decoded successfully.</returns>
         public virtual bool DecodeStrip(byte[] pp, int cc, short s)
         {
             return noDecode("strip");
@@ -136,10 +136,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Decodes the tile.
         /// </summary>
-        /// <param name="pp"></param>
-        /// <param name="cc"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="pp">The pp.</param>
+        /// <param name="cc">The cc.</param>
+        /// <param name="s">The s.</param>
+        /// <returns><c>true</c> if decoded successfully.</returns>
         public virtual bool DecodeTile(byte[] pp, int cc, short s)
         {
             return noDecode("tile");
@@ -150,7 +150,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Setups the encode.
         /// </summary>
-        /// <returns></returns>
+        /// <returns><c>true</c> if setup successfully.</returns>
         /// <remarks>Called once before <see cref="TiffCodec.PreEncode(System.Int16)"/>.</remarks>
         public virtual bool SetupEncode()
         {
@@ -160,8 +160,8 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Called before decoding.
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="s">s</param>
+        /// <returns><c>true</c> if succeed.</returns>
         public virtual bool PreEncode(short s)
         {
             return true;
@@ -170,7 +170,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Called after encoding.
         /// </summary>
-        /// <returns></returns>
+        /// <returns><c>true</c> if succeed.</returns>
         public virtual bool PostEncode()
         {
             return true;
@@ -179,10 +179,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Encodes the row.
         /// </summary>
-        /// <param name="pp"></param>
-        /// <param name="cc"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="pp">The pp.</param>
+        /// <param name="cc">The cc.</param>
+        /// <param name="s">The s.</param>
+        /// <returns><c>true</c> if encoded successfully.</returns>
         public virtual bool EncodeRow(byte[] pp, int cc, short s)
         {
             return noEncode("scanline");
@@ -191,10 +191,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Encodes the strip.
         /// </summary>
-        /// <param name="pp"></param>
-        /// <param name="cc"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="pp">The pp.</param>
+        /// <param name="cc">The cc.</param>
+        /// <param name="s">The s.</param>
+        /// <returns><c>true</c> if encoded successfully.</returns>
         public virtual bool EncodeStrip(byte[] pp, int cc, short s)
         {
             return noEncode("strip");
@@ -203,10 +203,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Encodes the tile.
         /// </summary>
-        /// <param name="pp"></param>
-        /// <param name="cc"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="pp">The pp.</param>
+        /// <param name="cc">The cc.</param>
+        /// <param name="s">The s.</param>
+        /// <returns><c>true</c> if encoded successfully.</returns>
         public virtual bool EncodeTile(byte[] pp, int cc, short s)
         {
             return noEncode("tile");
@@ -223,7 +223,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Seeks the specified offset in the current strip.
         /// </summary>
         /// <param name="offset">The offset.</param>
-        /// <returns></returns>
+        /// <returns><c>true</c> if succeed.</returns>
         public virtual bool Seek(int offset)
         {
             Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
@@ -239,10 +239,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// calculate/constrain strip size
+        /// Calculates/constrains strip size
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="s">s</param>
+        /// <returns>Strip size</returns>
         public virtual int DefStripSize(int s)
         {
             if (s < 1)
@@ -267,8 +267,8 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Calculate/constrain tile size
         /// </summary>
-        /// <param name="tw"></param>
-        /// <param name="th"></param>
+        /// <param name="tw">Output tile width.</param>
+        /// <param name="th">Output tile height.</param>
         public virtual void DefTileSize(ref int tw, ref int th)
         {
             if (tw < 1)
