@@ -107,7 +107,8 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the R component from ABGR form returned by ReadRGBAImage.
+        /// Gets the R component from ABGR form returned by 
+        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
         /// <returns></returns>
@@ -117,7 +118,8 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the G component from ABGR form returned by ReadRGBAImage.
+        /// Gets the G component from ABGR form returned by 
+        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
         /// <returns></returns>
@@ -127,7 +129,8 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the B component from ABGR form returned by ReadRGBAImage.
+        /// Gets the B component from ABGR form returned by 
+        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
         /// <returns></returns>
@@ -137,7 +140,8 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the A component from ABGR form returned by ReadRGBAImage.
+        /// Gets the A component from ABGR form returned by 
+        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR.</param>
         /// <returns></returns>
@@ -3735,11 +3739,13 @@ namespace BitMiracle.LibTiff.Classic
         }
         
         /// <summary>
-        /// Check the image to see if <see cref="Tiff.ReadRGBAImage"/> can deal with it.
+        /// Check the image to see if 
+        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>
+        /// can deal with it.
         /// </summary>
         /// <param name="emsg">The error message.</param>
         /// <returns><c>true</c> if the image can
-        /// be handled by <see cref="Tiff.ReadRGBAImage"/>. 
+        /// be handled by <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>. 
         /// If <c>false</c> is returned, emsg contains the reason
         /// why it is being rejected.</returns>
         public bool RGBAImageOK(out string emsg)
@@ -4139,10 +4145,17 @@ namespace BitMiracle.LibTiff.Classic
         * Contributed by Nancy Cam (Silicon Graphics).
         */
 
-        /*
-        * Read and decompress a tile of data.  The
-        * tile is selected by the (x,y,z,s) coordinates.
-        */
+        /// <summary>
+        /// Reads and decompresses a tile of data.
+        /// </summary>
+        /// <param name="buf">The buffer.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="x">The x.</param>
+        /// <param name="y">The y.</param>
+        /// <param name="z">The z.</param>
+        /// <param name="s">The s.</param>
+        /// <returns></returns>
+        /// <remarks>The tile is selected by the (x,y,z,s) coordinates.</remarks>
         public int ReadTile(byte[] buf, int offset, int x, int y, int z, short s)
         {
             if (!checkRead(1) || !CheckTile(x, y, z, s))
@@ -4531,7 +4544,9 @@ namespace BitMiracle.LibTiff.Classic
         ///     </para>
         ///     <para>Image length must be setup before writing; this 
         ///     interface does not support automatically growing the 
-        ///     image on each write (as <see cref="Tiff.WriteScanline"/> does).
+        ///     image on each write (as 
+        ///     <see cref="M:BitMiracle.LibTiff.Classic.Tiff.WriteScanline(System.Byte[],System.Int32,System.Int16)">WriteScanline</see>
+        ///     does).
         ///     </para>
         /// </remarks>
         public int WriteEncodedTile(int tile, byte[] data, int cc)
@@ -4623,7 +4638,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <remarks>
         ///     <para>There must be space for the data; we don't check if strips overlap!</para>
         ///     <para>Image length must be setup before writing; this interface does not 
-        ///     support automatically growing the image on each write (as <see cref="Tiff.WriteScanline"/> does).</para>
+        ///     support automatically growing the image on each write (as 
+        ///     <see cref="M:BitMiracle.LibTiff.Classic.Tiff.WriteScanline(System.Byte[],System.Int32,System.Int16)">WriteScanline</see>
+        ///     does).
+        ///     </para>
         /// </remarks>
         public int WriteRawTile(int tile, byte[] data, int cc)
         {

@@ -28,10 +28,10 @@ using System.Text;
 
 namespace BitMiracle.LibTiff.Classic
 {
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum FileType
@@ -50,10 +50,10 @@ namespace BitMiracle.LibTiff.Classic
         MASK = 0x4
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum OFileType
@@ -72,10 +72,10 @@ namespace BitMiracle.LibTiff.Classic
         PAGE = 3
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum Compression
@@ -105,7 +105,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         CCITT_T6 = 4,
         /// <summary>
-        /// Lempel-Ziv  & Welch
+        /// Lempel-Ziv &amp; Welch
         /// </summary>
         LZW = 5,
         /// <summary>
@@ -189,10 +189,10 @@ namespace BitMiracle.LibTiff.Classic
         JP2000 = 34712,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum Photometric
@@ -247,16 +247,16 @@ namespace BitMiracle.LibTiff.Classic
         LOGLUV = 32845,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum Threshold
     {
         /// <summary>
-        /// B&W art scan
+        /// B&amp;W art scan
         /// </summary>
         BILEVEL = 1,
         /// <summary>
@@ -269,10 +269,10 @@ namespace BitMiracle.LibTiff.Classic
         ERRORDIFFUSE = 3,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum FillOrder
@@ -287,10 +287,10 @@ namespace BitMiracle.LibTiff.Classic
         LSB2MSB = 2,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum Orientation
@@ -329,10 +329,10 @@ namespace BitMiracle.LibTiff.Classic
         LEFTBOT = 8,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum PlanarConfig
@@ -351,10 +351,10 @@ namespace BitMiracle.LibTiff.Classic
         SEPARATE = 2
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum GrayResponseUnit
@@ -381,10 +381,10 @@ namespace BitMiracle.LibTiff.Classic
         GRU100000S = 5,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum Group3Opt
@@ -407,10 +407,10 @@ namespace BitMiracle.LibTiff.Classic
         FILLBITS = 0x4,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum ResUnit
@@ -429,10 +429,10 @@ namespace BitMiracle.LibTiff.Classic
         CENTIMETER = 3,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum ColorResponseUnit
@@ -459,10 +459,10 @@ namespace BitMiracle.LibTiff.Classic
         CRU100000S = 5,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum Predictor
@@ -481,10 +481,10 @@ namespace BitMiracle.LibTiff.Classic
         FLOATINGPOINT = 3,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum CleanFaxData
@@ -503,10 +503,10 @@ namespace BitMiracle.LibTiff.Classic
         UNCLEAN = 2,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum InkSet
@@ -521,10 +521,10 @@ namespace BitMiracle.LibTiff.Classic
         MULTIINK = 2,// !
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum ExtraSample
@@ -543,10 +543,10 @@ namespace BitMiracle.LibTiff.Classic
         UNASSALPHA = 2,// !
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum SampleFormat
@@ -577,10 +577,10 @@ namespace BitMiracle.LibTiff.Classic
         COMPLEXIEEEFP = 6,// !
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum JpegProc
@@ -595,10 +595,10 @@ namespace BitMiracle.LibTiff.Classic
         LOSSLESS = 14,// !
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum YCbCrPosition
@@ -613,10 +613,10 @@ namespace BitMiracle.LibTiff.Classic
         COSITED = 2,// !
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum FaxMode
@@ -647,10 +647,10 @@ namespace BitMiracle.LibTiff.Classic
         CLASSF = NORTC,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum JpegColorMode
@@ -665,10 +665,10 @@ namespace BitMiracle.LibTiff.Classic
         RGB = 0x0001,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum JpegTablesMode
@@ -687,10 +687,10 @@ namespace BitMiracle.LibTiff.Classic
         HUFF = 0x0002,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum PixarLogDataFmt
@@ -721,10 +721,10 @@ namespace BitMiracle.LibTiff.Classic
         FMTFLOAT = 5,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum DCSImagerModel
@@ -743,10 +743,10 @@ namespace BitMiracle.LibTiff.Classic
         M6 = 2,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum DCSImagerFilter
@@ -769,10 +769,10 @@ namespace BitMiracle.LibTiff.Classic
         OTHER = 3,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum DCSInterpMode
@@ -787,10 +787,10 @@ namespace BitMiracle.LibTiff.Classic
         PREVIEW = 0x1,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum SGILogDataFmt
@@ -813,10 +813,10 @@ namespace BitMiracle.LibTiff.Classic
         FMT8BIT = 3,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum SGILogEncode
@@ -831,10 +831,10 @@ namespace BitMiracle.LibTiff.Classic
         RANDITHER = 1,
     };
 
-#if EXPOSE_LIBTIFF
     /// <summary>
     /// 
     /// </summary>
+#if EXPOSE_LIBTIFF
     public
 #endif
     enum TiffTag
@@ -1004,7 +1004,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         TRANSFERFUNCTION = 301,//!
         /// <summary>
-        /// Name & release
+        /// Name &amp; release
         /// </summary>
         SOFTWARE = 305,
         /// <summary>
@@ -1092,7 +1092,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         TARGETPRINTER = 337,//!
         /// <summary>
-        /// Information about extra samples. See <see cref="ExtraSamples"/>
+        /// Information about extra samples. See <see cref="ExtraSample"/>
         /// </summary>
         EXTRASAMPLES = 338,//!
         /// <summary>
@@ -1253,7 +1253,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         PIXAR_TEXTUREFORMAT = 33302, /* t */
         /// <summary>
-        /// S & T wrap modes.
+        /// S&amp;T wrap modes.
         /// </summary>
         PIXAR_WRAPMODES = 33303,
         /// <summary>
@@ -1630,11 +1630,11 @@ namespace BitMiracle.LibTiff.Classic
         /// <remarks>Quality level is on the IJG 0-100 scale.  Default value is 75.</remarks>
         JPEGQUALITY = 65537,
         /// <summary>
-        /// Auto RGB<=>YCbCr convert. See <see cref="JpegColorMode"/>.
+        /// Auto RGB&lt;=&gt;YCbCr convert. See <see cref="JpegColorMode"/>.
         /// </summary>
         JPEGCOLORMODE = 65538,
         /// <summary>
-        /// What to put in <see cref="JPEGTables"/>. See <see cref="JpegTablesMode"/>
+        /// What to put in <see cref="JpegTablesMode"/>. See <see cref="JpegTablesMode"/>
         /// </summary>
         /// <remarks>Default is <see cref="JpegTablesMode.QUANT"/> | <see cref="JpegTablesMode.HUFF"/></remarks>
         JPEGTABLESMODE = 65539,
@@ -1648,7 +1648,7 @@ namespace BitMiracle.LibTiff.Classic
         PIXARLOGDATAFMT = 65549,
         /* 65550-65556 are allocated to Oceana Matrix <dev@oceana.com> */
         /// <summary>
-        /// Imager mode & filter. See <see cref="DCSImagerType"/>
+        /// Imager mode &amp; filter. See <see cref="DCSImagerFilter"/>
         /// </summary>
         DCSIMAGERTYPE = 65550,
         /// <summary>
@@ -1668,7 +1668,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         DCSGAMMA = 65554,
         /// <summary>
-        /// Toe & shoulder points.
+        /// Toe &amp; shoulder points.
         /// </summary>
         DCSTOESHOULDERPTS = 65555,
         /// <summary>
@@ -1690,7 +1690,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         DCSCLIPRECTANGLE = 65559,
         /// <summary>
-        /// SGILog user data format. See <see cref="SGILogDataFormat"/>
+        /// SGILog user data format. See <see cref="SGILogDataFmt"/>
         /// </summary>
         SGILOGDATAFMT = 65560,
         /// <summary>

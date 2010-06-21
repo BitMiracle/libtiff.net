@@ -286,6 +286,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        /// <summary>
+        /// Frees and releases all resources allocated by this <see cref="Tiff"/>.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);

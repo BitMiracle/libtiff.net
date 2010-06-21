@@ -15,6 +15,9 @@ using System.Text;
 
 namespace BitMiracle.LibTiff.Classic
 {
+    /// <summary>
+    /// Field info.
+    /// </summary>
 #if EXPOSE_LIBTIFF
     public
 #endif

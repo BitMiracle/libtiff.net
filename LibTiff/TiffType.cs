@@ -24,20 +24,65 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     enum TiffType : short
     {
-        NOTYPE = 0,     /* placeholder */
-        ANY = NOTYPE,   /* for field descriptor searching */
-        BYTE = 1,       /* 8-bit unsigned integer */
-        ASCII = 2,      /* 8-bit bytes w/ last byte null */
-        SHORT = 3,      /* 16-bit unsigned integer */
-        LONG = 4,       /* 32-bit unsigned integer */
-        RATIONAL = 5,   /* 64-bit unsigned fraction */
-        SBYTE = 6,      /* !8-bit signed integer */
-        UNDEFINED = 7,  /* !8-bit untyped data */
-        SSHORT = 8,     /* !16-bit signed integer */
-        SLONG = 9,      /* !32-bit signed integer */
-        SRATIONAL = 10, /* !64-bit signed fraction */
-        FLOAT = 11,     /* !32-bit IEEE floating point */
-        DOUBLE = 12,    /* !64-bit IEEE floating point */
-        IFD = 13        /* %32-bit unsigned integer (offset) */
+        /// <summary>
+        /// Placeholder.
+        /// </summary>
+        NOTYPE = 0,
+        /// <summary>
+        /// For field descriptor searching.
+        /// </summary>
+        ANY = NOTYPE,
+        /// <summary>
+        /// 8-bit unsigned integer.
+        /// </summary>
+        BYTE = 1,
+        /// <summary>
+        /// 8-bit bytes with last byte <c>null</c>.
+        /// </summary>
+        ASCII = 2,
+        /// <summary>
+        /// 16-bit unsigned integer.
+        /// </summary>
+        SHORT = 3,
+        /// <summary>
+        /// 32-bit unsigned integer.
+        /// </summary>
+        LONG = 4,
+        /// <summary>
+        /// 64-bit unsigned fraction.
+        /// </summary>
+        RATIONAL = 5,
+        /// <summary>
+        /// 8-bit signed integer.
+        /// </summary>
+        SBYTE = 6,
+        /// <summary>
+        /// 8-bit untyped data.
+        /// </summary>
+        UNDEFINED = 7,
+        /// <summary>
+        /// 16-bit signed integer.
+        /// </summary>
+        SSHORT = 8,
+        /// <summary>
+        /// 32-bit signed integer.
+        /// </summary>
+        SLONG = 9,
+        /// <summary>
+        /// 64-bit signed fraction.
+        /// </summary>
+        SRATIONAL = 10,
+        /// <summary>
+        /// 32-bit IEEE floating point.
+        /// </summary>
+        FLOAT = 11,
+        /// <summary>
+        /// 64-bit IEEE floating point.
+        /// </summary>
+        DOUBLE = 12,
+        /// <summary>
+        /// 32-bit unsigned integer (offset)
+        /// </summary>
+        IFD = 13
     }
 }

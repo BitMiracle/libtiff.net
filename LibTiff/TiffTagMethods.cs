@@ -18,6 +18,9 @@ using BitMiracle.LibTiff.Classic.Internal;
 
 namespace BitMiracle.LibTiff.Classic
 {
+    /// <summary>
+    /// 
+    /// </summary>
 #if EXPOSE_LIBTIFF
     public
 #endif
@@ -47,7 +50,13 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private const short DATATYPE_IEEEFP = 3;
 
-        /* tag set routine */
+        /// <summary>
+        /// Sets the tag field.
+        /// </summary>
+        /// <param name="tif">The tif.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="ap">The field value.</param>
+        /// <returns><c>true</c> if set successfully; otherwise, <c>false</c></returns>
         public virtual bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             const string module = "vsetfield";
@@ -572,7 +581,12 @@ namespace BitMiracle.LibTiff.Classic
             return status;
         }
 
-        /* tag get routine */
+        /// <summary>
+        /// Gets the field value by specified tag.
+        /// </summary>
+        /// <param name="tif">The tif.</param>
+        /// <param name="tag">The tag.</param>
+        /// <returns>The field value.</returns>
         public virtual FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
             TiffDirectory td = tif.m_dir;
@@ -880,7 +894,12 @@ namespace BitMiracle.LibTiff.Classic
             return result;
         }
 
-        /* directory print routine */
+        /// <summary>
+        /// Prints the directory.
+        /// </summary>
+        /// <param name="tif">The tif.</param>
+        /// <param name="fd">The fd.</param>
+        /// <param name="flags">The flags.</param>
         public virtual void PrintDir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
         }
