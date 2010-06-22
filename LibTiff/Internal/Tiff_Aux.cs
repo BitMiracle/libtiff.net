@@ -59,6 +59,34 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
+        private static void defaultRefBlackWhite(TiffDirectory td)
+        {
+            int i;
+
+            td.td_refblackwhite = new float[6];
+            if (td.td_photometric == Photometric.YCBCR)
+            {
+                /*
+                 * YCbCr (Class Y) images must have the ReferenceBlackWhite
+                 * tag set. Fix the broken images, which lacks that tag.
+                 */
+                td.td_refblackwhite[0] = 0.0F;
+                td.td_refblackwhite[1] = td.td_refblackwhite[3] = td.td_refblackwhite[5] = 255.0F;
+                td.td_refblackwhite[2] = td.td_refblackwhite[4] = 128.0F;
+            }
+            else
+            {
+                /*
+                 * Assume RGB (Class R)
+                 */
+                for (i = 0; i < 3; i++)
+                {
+                    td.td_refblackwhite[2 * i + 0] = 0;
+                    td.td_refblackwhite[2 * i + 1] = (float)((1L << td.td_bitspersample) - 1L);
+                }
+            }
+        }
+
         internal static int readInt(byte[] b, int byteStartOffset)
         {
             int value = b[byteStartOffset++] & 0xFF;

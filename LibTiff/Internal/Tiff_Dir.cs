@@ -120,6 +120,12 @@ namespace BitMiracle.LibTiff.Classic
              * Should we also be clearing stuff like INSUBIFD?
              */
             m_flags &= ~TiffFlags.ISTILED;
+
+            /*
+             * Clear other directory-specific fields.
+             */
+            m_tilesize = -1;
+            m_scanlinesize = -1;
         }
 
         private bool advanceDirectory(ref uint nextdir, out long off)
@@ -169,6 +175,13 @@ namespace BitMiracle.LibTiff.Classic
             lpp = new int[n];
             for (int i = 0; i < n; i++)
                 lpp[i] = lp[i];
+        }
+
+        internal static void setFloatArray(out float[] fpp, float[] fp, int n)
+        {
+            fpp = new float[n];
+            for (int i = 0; i < n; i++)
+                fpp[i] = fp[i];
         }
 
         internal bool fieldSet(int field)

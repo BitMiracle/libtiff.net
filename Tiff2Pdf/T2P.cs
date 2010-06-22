@@ -1246,6 +1246,7 @@ namespace BitMiracle.Tiff2Pdf
                     }
                     
                     m_tiff_datasize += 2; /* use EOI of last strip */
+                    return;
                 }
             }
 

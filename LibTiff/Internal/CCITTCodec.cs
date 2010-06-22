@@ -1079,9 +1079,32 @@ namespace BitMiracle.LibTiff.Classic.Internal
             bool needsRefLine = ((m_groupoptions & Group3Opt.ENCODING2D) != 0 ||
                 m_tif.m_dir.td_compression == Compression.CCITTFAX4);
 
-            int nruns = needsRefLine ? 2 * Tiff.roundUp(rowpixels, 32) : rowpixels;
-            nruns += 3;
-            m_runs = new int [2 * nruns];
+            // Assure that allocation computations do not overflow.
+            m_runs = null;
+            int nruns = Tiff.roundUp(rowpixels, 32);
+            if (needsRefLine)
+            {
+                long multiplied = (long)nruns * 2;
+                if (multiplied > int.MaxValue)
+                {
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        "Row pixels integer overflow (rowpixels {0})", rowpixels);
+                    return false;
+                }
+                else
+                {
+                    nruns = (int)multiplied;
+                }
+            }
+
+            if (nruns == 0 || ((long)nruns * 2) > int.MaxValue)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    "Row pixels integer overflow (rowpixels {0})", rowpixels);
+                return false;
+            }
+
+            m_runs = new int[2 * nruns];
             m_curruns = 0;
 
             if (needsRefLine)

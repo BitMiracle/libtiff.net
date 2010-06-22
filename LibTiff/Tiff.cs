@@ -1043,42 +1043,12 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.REFERENCEBLACKWHITE:
-                    {
-                        float[] ycbcr_refblackwhite = new float [6];
-                        ycbcr_refblackwhite[0] = 0.0F;
-                        ycbcr_refblackwhite[1] = 255.0F;
-                        ycbcr_refblackwhite[2] = 128.0F;
-                        ycbcr_refblackwhite[3] = 255.0F;
-                        ycbcr_refblackwhite[4] = 128.0F;
-                        ycbcr_refblackwhite[5] = 255.0F;
-                        
-                        float[] rgb_refblackwhite = new float[6];
-                        for (int i = 0; i < 3; i++)
-                        {
-                            rgb_refblackwhite[2 * i + 0] = 0.0F;
-                            rgb_refblackwhite[2 * i + 1] = (float)((1L << td.td_bitspersample) - 1L);
-                        }
+                    if (td.td_refblackwhite == null)
+                        defaultRefBlackWhite(td);
 
-                        result = new FieldValue[1];
-                        if (td.td_photometric == Photometric.YCBCR)
-                        {
-                            /*
-                             * YCbCr (Class Y) images must have the
-                             * ReferenceBlackWhite tag set. Fix the
-                             * broken images, which lacks that tag.
-                             */
-                            result[0].Set(ycbcr_refblackwhite);
-                        }
-                        else
-                        {
-                            /*
-                             * Assume RGB (Class R)
-                             */
-                            result[0].Set(rgb_refblackwhite);
-                        }
-
-                        break;
-                    }
+                    result = new FieldValue[1];
+                    result[0].Set(td.td_refblackwhite);
+                    break;
             }
 
             return result;
@@ -1087,7 +1057,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Read the next TIFF directory from a file and convert it to the internal format.
         /// </summary>
-        /// <returns>We read directories sequentially.</returns>
+        /// <remarks>We read directories sequentially.</remarks>
         public bool ReadDirectory()
         {
             const string module = "ReadDirectory";
@@ -1189,10 +1159,14 @@ namespace BitMiracle.LibTiff.Classic
              */
             int fix = 0;
             bool diroutoforderwarning = false;
+            bool haveunknowntags = false;
             for (int i = 0; i < dircount; i++)
             {
-                if (fix >= m_nfields || dir[i].tdir_tag == TiffTag.IGNORE)
+                if (dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
+
+                if (fix >= m_nfields)
+                    fix = 0;
 
                 /*
                  * Silicon Beach (at least) writes unordered
@@ -1215,17 +1189,9 @@ namespace BitMiracle.LibTiff.Classic
 
                 if (fix >= m_nfields || m_fieldinfo[fix].Tag != dir[i].tdir_tag)
                 {
-                    WarningExt(this, m_clientdata, module,
-                        "{0}: unknown field with tag {1} (0x{2:x}) encountered",
-                        m_name, (ushort)dir[i].tdir_tag, (ushort)dir[i].tdir_tag);
-
-                    TiffFieldInfo[] arr = new TiffFieldInfo[1];
-                    arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
-                    MergeFieldInfo(arr, 1);
-
-                    fix = 0;
-                    while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
-                        fix++;
+                    /* Unknown tag ... we'll deal with it below */
+                    haveunknowntags = true;
+                    continue;
                 }
 
                 /*
@@ -1323,6 +1289,72 @@ namespace BitMiracle.LibTiff.Classic
                         break;
                 }
             }
+
+            /*
+	         * If we saw any unknown tags, make an extra pass over the directory
+	         * to deal with them.  This must be done separately because the tags
+	         * could have become known when we registered a codec after finding
+	         * the Compression tag.  In a correctly-sorted directory there's
+	         * no problem because Compression will come before any codec-private
+	         * tags, but if the sorting is wrong that might not hold.
+	         */
+	        if (haveunknowntags)
+            {
+	            fix = 0;
+                for (int i = 0; i < dircount; i++)
+                {
+		            if (dir[i].tdir_tag == TiffTag.IGNORE)
+			            continue;
+
+                    if (fix >= m_nfields || dir[i].tdir_tag < m_fieldinfo[fix].Tag)
+                    {
+                        /* O(n^2) */
+                        fix = 0;
+                    }
+
+		            while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
+			            fix++;
+
+		            if (fix >= m_nfields || m_fieldinfo[fix].Tag != dir[i].tdir_tag)
+                    {
+                        Tiff.WarningExt(this, m_clientdata, module,
+                            "{0}: unknown field with tag {1} (0x{2:x}) encountered",
+                            m_name, (ushort)dir[i].tdir_tag, (ushort)dir[i].tdir_tag);
+
+                        TiffFieldInfo[] arr = new TiffFieldInfo[1];
+                        arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
+                        MergeFieldInfo(arr, 1);
+					    			        
+                        fix = 0;
+			            while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
+				            fix++;
+		            }
+
+		            /*
+		             * Check data type.
+		             */
+                    TiffFieldInfo fip = m_fieldinfo[fix];
+		            while (dir[i].tdir_type != fip.Type && fix < m_nfields)
+                    {
+                        if (fip.Type == TiffType.ANY)
+                        {
+                            /* wildcard */
+                            break;
+                        }
+
+			            fip = m_fieldinfo[++fix];
+			            if (fix >= m_nfields || fip.Tag != dir[i].tdir_tag)
+                        {
+                            Tiff.WarningExt(this, m_clientdata, module,
+                                "{0}: wrong data type {1} for \"{2}\"; tag ignored",
+                                m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Name);
+
+				            dir[i].tdir_tag = TiffTag.IGNORE;
+				            break;
+			            }
+		            }
+	            }
+	        }
 
             /*
             * XXX: OJPEG hack.
@@ -2420,7 +2452,17 @@ namespace BitMiracle.LibTiff.Classic
             else
             {
                 m_rawdatasize = roundUp(size, 1024);
-                m_rawdata = new byte [m_rawdatasize];
+                if (m_rawdatasize > 0)
+                {
+                    m_rawdata = new byte[m_rawdatasize];
+                }
+                else
+                {
+                    Tiff.ErrorExt(this, m_clientdata,
+                        "ReadBufferSetup", "{0}: No space for data buffer at scanline {1}", m_name, m_row);
+                    m_rawdatasize = 0;
+                }
+
                 m_flags |= TiffFlags.MYBUFFER;
             }
         }

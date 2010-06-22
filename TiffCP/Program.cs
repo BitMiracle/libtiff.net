@@ -247,6 +247,9 @@ namespace BitMiracle.TiffCP
                         case 'C':
                             mode[mp++] = 'c';
                             break;
+                        case 'x':
+                            c.m_pageInSeq = 1;
+                            break;
                         case '?':
                             usage();
                             return;

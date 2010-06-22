@@ -90,6 +90,7 @@ namespace BitMiracle.TiffCP
         public short m_defpredictor = -1;
         public Tiff m_bias = null;
         public int m_pageNum = 0;
+        public int m_pageInSeq = 0;
 
         Orientation m_orientation;
         int m_quality = 75; /* JPEG quality */
@@ -223,30 +224,37 @@ namespace BitMiracle.TiffCP
                 }
             }
 
+            result = inImage.GetFieldDefaulted(TiffTag.COMPRESSION);
+            Compression input_compression = (Compression)result[0].ToShort();
+
+            result = inImage.GetFieldDefaulted(TiffTag.PHOTOMETRIC);
+            Photometric input_photometric = (Photometric)result[0].ToShort();
+	
+	        if (input_compression == Compression.JPEG)
+            {
+		        /* Force conversion to RGB */
+		        inImage.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
+	        }
+            else if (input_photometric == Photometric.YCBCR)
+            {
+                /* Otherwise, can't handle subsampled input */
+                result = inImage.GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
+                short subsamplinghor = result[0].ToShort();
+                short subsamplingver = result[1].ToShort();
+
+                if (subsamplinghor != 1 || subsamplingver != 1)
+                {
+                    Console.Error.WriteLine("tiffcp: {0}: Can't copy/convert subsampled image.", inImage.FileName());
+                    return false;
+                }
+            }
+
             if (m_compression == Compression.JPEG)
             {
-                result = inImage.GetField(TiffTag.COMPRESSION);
-                if (result != null)
-                {
-                    Compression input_compression = (Compression)result[0].ToInt();
-                    if (input_compression == Compression.JPEG)
-                        inImage.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
-                }
-
-                result = inImage.GetField(TiffTag.PHOTOMETRIC);
-                if (result != null)
-                {
-                    Photometric input_photometric = (Photometric)result[0].ToInt();
-                    if (input_photometric == Photometric.RGB)
-                    {
-                        if (m_jpegcolormode == JpegColorMode.RGB)
-                            outImage.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR);
-                        else
-                            outImage.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
-                    }
-                    else
-                        outImage.SetField(TiffTag.PHOTOMETRIC, input_photometric);
-                }
+                if (input_photometric == Photometric.RGB && m_jpegcolormode == JpegColorMode.RGB)
+		            outImage.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR);
+		        else
+		            outImage.SetField(TiffTag.PHOTOMETRIC, input_photometric);
             }
             else if (m_compression == Compression.SGILOG || m_compression == Compression.SGILOG24)
             {
@@ -254,19 +262,8 @@ namespace BitMiracle.TiffCP
             }
             else
             {
-                result = inImage.GetField(TiffTag.COMPRESSION);
-                if (result != null)
-                {
-                    Compression input_compression = (Compression)result[0].ToInt();
-                    if (input_compression == Compression.JPEG)
-                        inImage.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
-                    else
-                        copyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
-                }
-                else
-                {
+                if (input_compression != Compression.JPEG)
                     copyTag(inImage, outImage, TiffTag.PHOTOMETRIC, 1, TiffType.SHORT);
-                }
             }
 
             if (m_fillorder != 0)
@@ -460,16 +457,34 @@ namespace BitMiracle.TiffCP
             }
 
             result = inImage.GetField(TiffTag.PAGENUMBER);
-            if (result != null)
+            if (m_pageInSeq == 1)
             {
-                if (m_pageNum < 0)
+	  	        if (m_pageNum < 0)
                 {
-                    /* only one input file */
-                    outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
-                }
+                    /* only one input file */ 
+		            if (result != null) 
+			            outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
+		        }
                 else
-                    outImage.SetField(TiffTag.PAGENUMBER, m_pageNum++, 0);
-            }
+                {
+			        outImage.SetField(TiffTag.PAGENUMBER, m_pageNum++, 0);
+                }
+	        }
+            else
+            {
+		        if (result != null)
+                {
+			        if (m_pageNum < 0)
+                    {
+                        /* only one input file */
+				        outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
+                    }
+			        else
+                    {
+                        outImage.SetField(TiffTag.PAGENUMBER, m_pageNum++, 0);
+                    }
+		        }
+	        }
 
             int NTAGS = g_tags.Length;
             for (int i = 0; i < NTAGS; i++)

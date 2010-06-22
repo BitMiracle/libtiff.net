@@ -388,6 +388,10 @@ namespace BitMiracle.LibTiff.Classic
                         Tiff.setShortArray(out td.td_transferfunction[i], ap[0].ToShortArray(), 1 << td.td_bitspersample);
                     }
                     break;
+                case TiffTag.REFERENCEBLACKWHITE:
+		            /* XXX should check for null range */
+		            Tiff.setFloatArray(out td.td_refblackwhite, ap[0].ToFloatArray(), 6);
+		            break;
                 case TiffTag.INKNAMES:
                     v = ap[0].ToInt();
                     string s = ap[1].ToString();
@@ -777,6 +781,13 @@ namespace BitMiracle.LibTiff.Classic
                         result[2].Set(td.td_transferfunction[2]);
                     }
                     break;
+                case TiffTag.REFERENCEBLACKWHITE:
+                    if (td.td_refblackwhite != null)
+                    {
+                        result = new FieldValue[1];
+                        result[0].Set(td.td_refblackwhite);
+                    }
+	                break;
                 case TiffTag.INKNAMES:
                     result = new FieldValue[1];
                     result[0].Set(td.td_inknames);

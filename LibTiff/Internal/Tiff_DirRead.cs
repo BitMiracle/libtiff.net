@@ -249,8 +249,16 @@ namespace BitMiracle.LibTiff.Classic
         */
         private bool fetchSubjectDistance(TiffDirEntry dir)
         {
-            bool ok = false;
+            if (dir.tdir_count != 1 || dir.tdir_type != TiffType.RATIONAL)
+            {
+                Tiff.WarningExt(this, m_clientdata, m_name,
+                    "incorrect count or type for SubjectDistance, tag ignored");
 
+                return false;
+            }
+
+            bool ok = false;
+            
             byte[] b = new byte[2 * sizeof(int)];
             int read = fetchData(dir, b);
             if (read != 0)
@@ -1256,12 +1264,20 @@ namespace BitMiracle.LibTiff.Classic
 
         internal static int howMany(int x, int y)
         {
-            return ((x + (y - 1)) / y);
+            long res = (((long)x + ((long)y - 1)) / (long)y);
+            if (res > int.MaxValue)
+                return 0;
+
+            return (int)res;
         }
 
         internal static uint howMany(uint x, uint y)
         {
-            return ((x + (y - 1)) / y);
+            long res = (((long)x + ((long)y - 1)) / (long)y);
+            if (res > uint.MaxValue)
+                return 0;
+
+            return (uint)res;
         }
     }
 }

@@ -99,9 +99,10 @@ namespace BitMiracle.LibTiff.Classic
         internal const short FIELD_HALFTONEHINTS = 37;
         internal const short FIELD_YCBCRSUBSAMPLING = 39;
         internal const short FIELD_YCBCRPOSITIONING = 40;
+        internal const short FIELD_REFBLACKWHITE = 41;
         internal const short FIELD_TRANSFERFUNCTION = 44;
         internal const short FIELD_INKNAMES = 46;
-        internal const short FIELD_SUBIFD = 49;        
+        internal const short FIELD_SUBIFD = 49;
         /* end of support for well-known tags; codec-private tags follow */        
     }
 }

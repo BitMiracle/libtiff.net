@@ -78,7 +78,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public YCbCrPosition td_ycbcrpositioning;
         
         // Colorimetry parameters
-
+        public float[] td_refblackwhite;
         public short[][] td_transferfunction = { null, null, null };
         
         // CMYK parameters

@@ -149,7 +149,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (m_tif.m_diroff == 0)
             {
                 const int SIZE_OF_JPEGTABLES = 2000;
-                m_tif.setFieldBit(FIELD_JPEGTABLES);
+                
+                // The following line assumes incorrectly that all JPEG-in-TIFF
+                // files will have a JPEGTABLES tag generated and causes
+                // null-filled JPEGTABLES tags to be written when the JPEG data
+                // is placed with WriteRawStrip. The field bit should be 
+                // set, anyway, later when actual JPEGTABLES header is
+                // generated, so removing it here hopefully is harmless.
+                //
+                //       m_tif.setFieldBit(FIELD_JPEGTABLES);
+                //
+
                 m_jpegtables_length = SIZE_OF_JPEGTABLES;
                 m_jpegtables = new byte[m_jpegtables_length];
             }
@@ -372,12 +382,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
             * Must recalculate cached tile size in case sampling state changed.
             * Should we really be doing this now if image size isn't set? 
             */
-            m_tif.m_tilesize = m_tif.IsTiled() ? m_tif.TileSize() : -1;
+            if (m_tif.m_tilesize > 0)
+                m_tif.m_tilesize = m_tif.IsTiled() ? m_tif.TileSize() : -1;
+
+            if (m_tif.m_scanlinesize > 0)
+                m_tif.m_scanlinesize = m_tif.ScanlineSize();
         }
 
-        /*
-         * Set encoding state at the start of a strip or tile.
-         */
+        /// <summary>
+        /// Set encoding state at the start of a strip or tile.
+        /// </summary>
         private bool JPEGPreEncode(short s)
         {
             const string module = "JPEGPreEncode";
@@ -478,11 +492,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_compression.Write_Adobe_marker = false;
 
             /* set up table handling correctly */
+            if (!TIFFjpeg_set_quality(m_jpegquality, false))
+                return false;
+
             if ((m_jpegtablesmode & JpegTablesMode.QUANT) == 0)
             {
-                if (!TIFFjpeg_set_quality(m_jpegquality, false))
-                    return false;
-
                 unsuppress_quant_table(0);
                 unsuppress_quant_table(1);
             }
@@ -624,13 +638,33 @@ namespace BitMiracle.LibTiff.Classic.Internal
             /* Create a JPEGTables field if appropriate */
             if ((m_jpegtablesmode & (JpegTablesMode.QUANT | JpegTablesMode.HUFF)) != 0)
             {
-                if (!prepare_JPEGTables())
-                    return false;
+                bool startsWithZeroes = true;
+                if (m_jpegtables != null)
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if (m_jpegtables[i] != 0)
+                        {
+                            startsWithZeroes = false;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    startsWithZeroes = false;
+                }
 
-                /* Mark the field present */
-                /* Can't use SetField since BEENWRITING is already set! */
-                m_tif.setFieldBit(FIELD_JPEGTABLES);
-                m_tif.m_flags |= TiffFlags.DIRTYDIRECT;
+                if (m_jpegtables == null || startsWithZeroes)
+                {
+                    if (!prepare_JPEGTables())
+                        return false;
+
+                    /* Mark the field present */
+                    /* Can't use TIFFSetField since BEENWRITING is already set! */
+                    m_tif.m_flags |= TiffFlags.DIRTYDIRECT;
+                    m_tif.setFieldBit(FIELD_JPEGTABLES);
+                }
             }
             else
             {

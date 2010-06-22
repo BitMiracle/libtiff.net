@@ -130,9 +130,9 @@ namespace BitMiracle.LibTiff.Classic
             new TiffFieldInfo(TiffTag.YCBCRCOEFFICIENTS, 3, 3, TiffType.RATIONAL, FieldBit.Custom, false, false, "YCbCrCoefficients"), 
             new TiffFieldInfo(TiffTag.YCBCRSUBSAMPLING, 2, 2, TiffType.SHORT, FieldBit.FIELD_YCBCRSUBSAMPLING, false, false, "YCbCrSubsampling"), 
             new TiffFieldInfo(TiffTag.YCBCRPOSITIONING, 1, 1, TiffType.SHORT, FieldBit.FIELD_YCBCRPOSITIONING, false, false, "YCbCrPositioning"), 
-            new TiffFieldInfo(TiffTag.REFERENCEBLACKWHITE, 6, 6, TiffType.RATIONAL, FieldBit.Custom, true, false, "ReferenceBlackWhite"), 
+            new TiffFieldInfo(TiffTag.REFERENCEBLACKWHITE, 6, 6, TiffType.RATIONAL, FieldBit.FIELD_REFBLACKWHITE, true, false, "ReferenceBlackWhite"), 
             /* XXX temporarily accept LONG for backwards compatibility */
-            new TiffFieldInfo(TiffTag.REFERENCEBLACKWHITE, 6, 6, TiffType.LONG, FieldBit.Custom, true, false, "ReferenceBlackWhite"), 
+            new TiffFieldInfo(TiffTag.REFERENCEBLACKWHITE, 6, 6, TiffType.LONG, FieldBit.FIELD_REFBLACKWHITE, true, false, "ReferenceBlackWhite"), 
             new TiffFieldInfo(TiffTag.XMLPACKET, -3, -3, TiffType.BYTE, FieldBit.Custom, false, true, "XMLPacket"), 
             /* begin SGI tags */
             new TiffFieldInfo(TiffTag.MATTEING, 1, 1, TiffType.SHORT, FieldBit.FIELD_EXTRASAMPLES, false, false, "Matteing"), 

@@ -239,6 +239,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 }
 
                 tif.SetField(TiffTag.YCBCRSUBSAMPLING, sp.m_h_sampling, sp.m_v_sampling);
+
+                // We want to clear the loaded strip so the application has time
+                // to set JPEGCOLORMODE or other behavior modifiers. This essentially
+                // undoes the JPEGPreDecode triggers by FileStrip().
+                tif.m_curstrip = -1;
             }
         }
     }

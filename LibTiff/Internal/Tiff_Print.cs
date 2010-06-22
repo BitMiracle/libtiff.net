@@ -181,7 +181,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (fdata != null)
                     {
                         fprintf(fd, "  Reference Black/White:\n");
-                        for (short i = 0; i < m_dir.td_samplesperpixel; i++)
+                        for (short i = 0; i < 3; i++)
                             fprintf(fd, "    {0,2:D}: {1,5:G} {2,5:G}\n", i, fdata[2 * i + 0], fdata[2 * i + 1]);
                         return true;
                     }
