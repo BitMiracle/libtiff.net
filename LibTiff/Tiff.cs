@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2009, Bit Miracle
+﻿/* Copyright (C) 2008-2010, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * This software is based in part on the work of the Sam Leffler, Silicon 
@@ -51,7 +51,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         internal const bool CHECK_JPEG_YCBCR_SUBSAMPLING = true;
 
-        internal const string TIFFLIB_VERSION_STR = "LibTiff.NET, Version {0}\nCopyright (c) 2008-2009, Bit Miracle.";
+        internal const string TIFFLIB_VERSION_STR = "LibTiff.NET, Version {0}\nCopyright (C) 2008-2010, Bit Miracle.";
 
         //
         // These constants can be used in code that requires
