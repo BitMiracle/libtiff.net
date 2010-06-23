@@ -264,108 +264,79 @@ namespace BitMiracle.Tiff2Rgba
 
         static bool cvt_by_strip(Tiff inImage, Tiff outImage, int width, int height)
         {
-            //    uint* raster;			/* retrieve RGBA image */
-            //    uint  row;
-            //    uint  *wrk_line;
-            //    tsize_t raster_size;
-            //    int	    ok = 1;
+            FieldValue[] result = inImage.GetField(TiffTag.ROWSPERSTRIP);
+            if (result == null)
+            {
+                Tiff.Error(inImage.FileName(), "Source image not in strips");
+                return false;
+            }
 
-            //    if( !TIFFGetField(inImage, TiffTag.ROWSPERSTRIP, &rowsperstrip) ) {
-            //        TIFFError(TIFFFileName(inImage), "Source image not in strips");
-            //        return false;
-            //    }
+            rowsperstrip = result[0].ToInt();
+            outImage.SetField(TiffTag.ROWSPERSTRIP, rowsperstrip);
 
-            //    outImage.SetField(TiffTag.ROWSPERSTRIP, rowsperstrip);
+            /*
+             * Allocate strip buffer
+             */
+            int raster_size = multiply(width, rowsperstrip);
+            int rasterByteSize = multiply(raster_size, sizeof(int));
+            if (raster_size == 0 || rasterByteSize == 0)
+            {
+                Tiff.Error(inImage.FileName(),
+                    "Can't allocate buffer for raster of size {0}x{1}", width, rowsperstrip);
+                return false;
+            }
 
-            //    /*
-            //     * Allocate strip buffer
-            //     */
-            //    raster_size = multiply(multiply(width, rowsperstrip), sizeof (uint));
-            //    if (!raster_size) {
-            //    TIFFError(TIFFFileName(inImage),
-            //          "Can't allocate buffer for raster of size %lux%lu",
-            //          (unsigned long) width, (unsigned long) rowsperstrip);
-            //    return false;
-            //    }
-            //    raster = (uint*)_TIFFmalloc(raster_size);
-            //    if (raster == 0) {
-            //        TIFFError(TIFFFileName(inImage), "No space for raster buffer");
-            //        return false;
-            //    }
+            int[] raster = new int[raster_size];
+            byte[] rasterBytes = new byte[rasterByteSize];
 
-            //    /*
-            //     * Allocate a scanline buffer for swapping during the vertical
-            //     * mirroring pass.  (Request can't overflow given prior checks.)
-            //     */
-            //    wrk_line = (uint*)_TIFFmalloc(width * sizeof (uint));
-            //    if (!wrk_line) {
-            //        TIFFError(TIFFFileName(inImage), "No space for raster scanline buffer");
-            //        ok = 0;
-            //    }
+            /*
+             * Allocate a scanline buffer for swapping during the vertical
+             * mirroring pass.  (Request can't overflow given prior checks.)
+             */
+            int[] wrk_line = new int[width];
 
-            //    /*
-            //     * Loop over the strips.
-            //     */
-            //    for( row = 0; ok && row < height; row += rowsperstrip )
-            //    {
-            //        int	rows_to_write, i_row;
+            /*
+             * Loop over the strips.
+             */
+            for (int row = 0; row < height; row += rowsperstrip)
+            {
+                /* Read the strip into an RGBA array */
+                if (!inImage.ReadRGBAStrip(row, raster))
+                    return false;
 
-            //        /* Read the strip into an RGBA array */
-            //        if (!TIFFReadRGBAStrip(inImage, row, raster)) {
-            //            ok = 0;
-            //            break;
-            //        }
+                /*
+                 * Figure out the number of scanlines actually in this strip.
+                 */
+                int rows_to_write;
+                if (row + rowsperstrip > height)
+                    rows_to_write = height - row;
+                else
+                    rows_to_write = rowsperstrip;
 
-            //    /*
-            //     * XXX: raster array has 4-byte unsigned integer type, that is why
-            //     * we should rearrange it here.
-            //     */
-            //#if HOST_BIGENDIAN
-            //    TIFFSwabArrayOfLong(raster, width * rowsperstrip);
-            //#endif
+                /*
+                 * For some reason the TIFFReadRGBAStrip() function chooses the
+                 * lower left corner as the origin.  Vertically mirror scanlines.
+                 */
+                for (int i_row = 0; i_row < rows_to_write / 2; i_row++)
+                {
+                    int topIndex = width * i_row;
+                    int bottomIndex = width * (rows_to_write - i_row - 1);
 
-            //        /*
-            //         * Figure out the number of scanlines actually in this strip.
-            //         */
-            //        if( row + rowsperstrip > height )
-            //            rows_to_write = height - row;
-            //        else
-            //            rows_to_write = rowsperstrip;
+                    Array.Copy(raster, topIndex, wrk_line, 0, width);
+                    Array.Copy(raster, bottomIndex, raster, topIndex, width);
+                    Array.Copy(wrk_line, 0, raster, bottomIndex, width);
+                }
 
-            //        /*
-            //         * For some reason the TIFFReadRGBAStrip() function chooses the
-            //         * lower left corner as the origin.  Vertically mirror scanlines.
-            //         */
+                /*
+                 * Write out the result in a strip
+                 */
+                int bytesToWrite = rows_to_write * width * sizeof(int);
+                Buffer.BlockCopy(raster, 0, rasterBytes, 0, bytesToWrite);
+                if (outImage.WriteEncodedStrip(row / rowsperstrip, rasterBytes, bytesToWrite) == -1)
+                    return false;
+            }
 
-            //        for( i_row = 0; i_row < rows_to_write / 2; i_row++ )
-            //        {
-            //            uint	*top_line, *bottom_line;
-
-            //            top_line = raster + width * i_row;
-            //            bottom_line = raster + width * (rows_to_write-i_row-1);
-
-            //            _TIFFmemcpy(wrk_line, top_line, 4*width);
-            //            _TIFFmemcpy(top_line, bottom_line, 4*width);
-            //            _TIFFmemcpy(bottom_line, wrk_line, 4*width);
-            //        }
-
-            //        /*
-            //         * Write out the result in a strip
-            //         */
-
-            //        if( TIFFWriteEncodedStrip( outImage, row / rowsperstrip, raster,
-            //                                   4 * rows_to_write * width ) == -1 )
-            //        {
-            //            ok = 0;
-            //            break;
-            //        }
-            //    }
-
-            //    _TIFFfree( raster );
-            //    _TIFFfree( wrk_line );
-
-            //    return ok;
-            return false;
+            return true;
         }
 
         /// <summary>
