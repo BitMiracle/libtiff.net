@@ -136,7 +136,7 @@ namespace BitMiracle.Tiff2Rgba
             if (result == null)
                 return false;
             int width = result[0].ToInt();
-            
+
             result = inImage.GetField(TiffTag.IMAGELENGTH);
             if (result == null)
                 return false;
@@ -172,340 +172,304 @@ namespace BitMiracle.Tiff2Rgba
             copyField(inImage, outImage, TiffTag.DOCUMENTNAME);
 
             if (process_by_block && inImage.IsTiled())
-                return (cvt_by_tile(inImage, outImage));
+                return cvt_by_tile(inImage, outImage, width, height);
             else if (process_by_block)
-                return (cvt_by_strip(inImage, outImage));
+                return cvt_by_strip(inImage, outImage, width, height);
 
-            return (cvt_whole_image(inImage, outImage));
+            return cvt_whole_image(inImage, outImage, width, height);
         }
 
-        static bool cvt_by_tile(Tiff inImage, Tiff outImage)
+        static bool cvt_by_tile(Tiff inImage, Tiff outImage, int width, int height)
         {
-        //    uint* raster;			/* retrieve RGBA image */
-        //    uint  width, height;		/* image width & height */
-        //    uint  tile_width, tile_height;
-        //    uint  row, col;
-        //    uint  *wrk_line;
-        //    tsize_t raster_size;
-        //    int	    ok = 1;
+            int tile_width = 0;
+            int tile_height = 0;
 
-        //    TIFFGetField(in, TiffTag.IMAGEWIDTH, &width);
-        //    TIFFGetField(in, TiffTag.IMAGELENGTH, &height);
+            FieldValue[] result = inImage.GetField(TiffTag.TILEWIDTH);
+            if (result != null)
+            {
+                tile_width = result[0].ToInt();
 
-        //    if( !TIFFGetField(in, TiffTag.TILEWIDTH, &tile_width)
-        //        || !TIFFGetField(in, TiffTag.TILELENGTH, &tile_height) ) {
-        //        TIFFError(TIFFFileName(in), "Source image not tiled");
-        //        return (0);
-        //    }
+                result = inImage.GetField(TiffTag.TILELENGTH);
+                if (result != null)
+                    tile_height = result[0].ToInt();
+            }
 
-        //    TIFFSetField(out, TiffTag.TILEWIDTH, tile_width );
-        //    TIFFSetField(out, TiffTag.TILELENGTH, tile_height );
+            if (result == null)
+            {
+                Tiff.Error(inImage.FileName(), "Source image not tiled");
+                return false;
+            }
 
-        //    /*
-        //     * Allocate tile buffer
-        //     */
-        //    raster_size = multiply(multiply(tile_width, tile_height), sizeof (uint));
-        //    if (!raster_size) {
-        //    TIFFError(TIFFFileName(in),
-        //          "Can't allocate buffer for raster of size %lux%lu",
-        //          (unsigned long) tile_width, (unsigned long) tile_height);
-        //    return (0);
-        //    }
-        //    raster = (uint*)_TIFFmalloc(raster_size);
-        //    if (raster == 0) {
-        //        TIFFError(TIFFFileName(in), "No space for raster buffer");
-        //        return (0);
-        //    }
+            outImage.SetField(TiffTag.TILEWIDTH, tile_width);
+            outImage.SetField(TiffTag.TILELENGTH, tile_height);
 
-        //    /*
-        //     * Allocate a scanline buffer for swapping during the vertical
-        //     * mirroring pass.  (Request can't overflow given prior checks.)
-        //     */
-        //    wrk_line = (uint*)_TIFFmalloc(tile_width * sizeof (uint));
-        //    if (!wrk_line) {
-        //        TIFFError(TIFFFileName(in), "No space for raster scanline buffer");
-        //        ok = 0;
-        //    }
+            /*
+             * Allocate tile buffer
+             */
+            int raster_size = multiply(tile_width, tile_height);
+            int rasterByteSize = multiply(raster_size, sizeof(int));
+            if (raster_size == 0 || rasterByteSize == 0)
+            {
+                Tiff.Error(inImage.FileName(),
+                    "Can't allocate buffer for raster of size {0}x{1}", tile_width, tile_height);
+                return false;
+            }
 
-        //    /*
-        //     * Loop over the tiles.
-        //     */
-        //    for( row = 0; ok && row < height; row += tile_height )
-        //    {
-        //        for( col = 0; ok && col < width; col += tile_width )
-        //        {
-        //            uint i_row;
+            int[] raster = new int[raster_size];
+            byte[] rasterBytes = new byte[rasterByteSize];
 
-        //            /* Read the tile into an RGBA array */
-        //            if (!TIFFReadRGBATile(in, col, row, raster)) {
-        //                ok = 0;
-        //                break;
-        //            }
+            /*
+             * Allocate a scanline buffer for swapping during the vertical
+             * mirroring pass.  (Request can't overflow given prior checks.)
+             */
+            int[] wrk_line = new int[tile_width];
 
+            /*
+             * Loop over the tiles.
+             */
+            for (int row = 0; row < height; row += tile_height)
+            {
+                for (int col = 0; col < width; col += tile_width)
+                {
+                    /* Read the tile into an RGBA array */
+                    if (!inImage.ReadRGBATile(col, row, raster))
+                        return false;
 
-        //        /*
-        //         * XXX: raster array has 4-byte unsigned integer type, that is why
-        //         * we should rearrange it here.
-        //         */
-        //#if HOST_BIGENDIAN
-        //        TIFFSwabArrayOfLong(raster, tile_width * tile_height);
-        //#endif
+                    /*
+                     * For some reason the ReadRGBATile() function chooses the
+                     * lower left corner as the origin.  Vertically mirror scanlines.
+                     */
+                    for (int i_row = 0; i_row < tile_height / 2; i_row++)
+                    {
+                        int topIndex = tile_width * i_row;
+                        int bottomIndex = tile_width * (tile_height - i_row - 1);
 
-        //            /*
-        //             * For some reason the TIFFReadRGBATile() function chooses the
-        //             * lower left corner as the origin.  Vertically mirror scanlines.
-        //             */
-        //            for( i_row = 0; i_row < tile_height / 2; i_row++ )
-        //            {
-        //                uint	*top_line, *bottom_line;
+                        Array.Copy(raster, topIndex, wrk_line, 0, tile_width);
+                        Array.Copy(raster, bottomIndex, raster, topIndex, tile_width);
+                        Array.Copy(wrk_line, 0, raster, bottomIndex, tile_width);
+                    }
 
-        //                top_line = raster + tile_width * i_row;
-        //                bottom_line = raster + tile_width * (tile_height-i_row-1);
-
-        //                _TIFFmemcpy(wrk_line, top_line, 4*tile_width);
-        //                _TIFFmemcpy(top_line, bottom_line, 4*tile_width);
-        //                _TIFFmemcpy(bottom_line, wrk_line, 4*tile_width);
-        //            }
-
-        //            /*
-        //             * Write out the result in a tile.
-        //             */
-
-        //            if( TIFFWriteEncodedTile( out,
-        //                                      TIFFComputeTile( out, col, row, 0, 0),
-        //                                      raster,
-        //                                      4 * tile_width * tile_height ) == -1 )
-        //            {
-        //                ok = 0;
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    _TIFFfree( raster );
-        //    _TIFFfree( wrk_line );
-
-        //    return ok;
-            return false;
-        }
-
-        static bool cvt_by_strip(Tiff inImage, Tiff outImage)
-        {
-        //    uint* raster;			/* retrieve RGBA image */
-        //    uint  width, height;		/* image width & height */
-        //    uint  row;
-        //    uint  *wrk_line;
-        //    tsize_t raster_size;
-        //    int	    ok = 1;
-
-        //    TIFFGetField(in, TiffTag.IMAGEWIDTH, &width);
-        //    TIFFGetField(in, TiffTag.IMAGELENGTH, &height);
-
-        //    if( !TIFFGetField(in, TiffTag.ROWSPERSTRIP, &rowsperstrip) ) {
-        //        TIFFError(TIFFFileName(in), "Source image not in strips");
-        //        return (0);
-        //    }
-
-        //    TIFFSetField(out, TiffTag.ROWSPERSTRIP, rowsperstrip);
-
-        //    /*
-        //     * Allocate strip buffer
-        //     */
-        //    raster_size = multiply(multiply(width, rowsperstrip), sizeof (uint));
-        //    if (!raster_size) {
-        //    TIFFError(TIFFFileName(in),
-        //          "Can't allocate buffer for raster of size %lux%lu",
-        //          (unsigned long) width, (unsigned long) rowsperstrip);
-        //    return (0);
-        //    }
-        //    raster = (uint*)_TIFFmalloc(raster_size);
-        //    if (raster == 0) {
-        //        TIFFError(TIFFFileName(in), "No space for raster buffer");
-        //        return (0);
-        //    }
-
-        //    /*
-        //     * Allocate a scanline buffer for swapping during the vertical
-        //     * mirroring pass.  (Request can't overflow given prior checks.)
-        //     */
-        //    wrk_line = (uint*)_TIFFmalloc(width * sizeof (uint));
-        //    if (!wrk_line) {
-        //        TIFFError(TIFFFileName(in), "No space for raster scanline buffer");
-        //        ok = 0;
-        //    }
-
-        //    /*
-        //     * Loop over the strips.
-        //     */
-        //    for( row = 0; ok && row < height; row += rowsperstrip )
-        //    {
-        //        int	rows_to_write, i_row;
-
-        //        /* Read the strip into an RGBA array */
-        //        if (!TIFFReadRGBAStrip(in, row, raster)) {
-        //            ok = 0;
-        //            break;
-        //        }
-
-        //    /*
-        //     * XXX: raster array has 4-byte unsigned integer type, that is why
-        //     * we should rearrange it here.
-        //     */
-        //#if HOST_BIGENDIAN
-        //    TIFFSwabArrayOfLong(raster, width * rowsperstrip);
-        //#endif
-
-        //        /*
-        //         * Figure out the number of scanlines actually in this strip.
-        //         */
-        //        if( row + rowsperstrip > height )
-        //            rows_to_write = height - row;
-        //        else
-        //            rows_to_write = rowsperstrip;
-
-        //        /*
-        //         * For some reason the TIFFReadRGBAStrip() function chooses the
-        //         * lower left corner as the origin.  Vertically mirror scanlines.
-        //         */
-
-        //        for( i_row = 0; i_row < rows_to_write / 2; i_row++ )
-        //        {
-        //            uint	*top_line, *bottom_line;
-
-        //            top_line = raster + width * i_row;
-        //            bottom_line = raster + width * (rows_to_write-i_row-1);
-
-        //            _TIFFmemcpy(wrk_line, top_line, 4*width);
-        //            _TIFFmemcpy(top_line, bottom_line, 4*width);
-        //            _TIFFmemcpy(bottom_line, wrk_line, 4*width);
-        //        }
-
-        //        /*
-        //         * Write out the result in a strip
-        //         */
-
-        //        if( TIFFWriteEncodedStrip( out, row / rowsperstrip, raster,
-        //                                   4 * rows_to_write * width ) == -1 )
-        //        {
-        //            ok = 0;
-        //            break;
-        //        }
-        //    }
-
-        //    _TIFFfree( raster );
-        //    _TIFFfree( wrk_line );
-
-        //    return ok;
-            return false;
-        }
-
-        ///*
-        // * cvt_whole_image()
-        // *
-        // * read the whole image into one big RGBA buffer and then write out
-        // * strips from that.  This is using the traditional TIFFReadRGBAImage()
-        // * API that we trust.
-        // */
-        static bool cvt_whole_image(Tiff inImage, Tiff outImage)
-        {
-        //    uint* raster;			/* retrieve RGBA image */
-        //    uint  width, height;		/* image width & height */
-        //    uint  row;
-        //    size_t pixel_count;
-
-        //    TIFFGetField(in, TiffTag.IMAGEWIDTH, &width);
-        //    TIFFGetField(in, TiffTag.IMAGELENGTH, &height);
-        //    pixel_count = width * height;
-
-        //    /* XXX: Check the integer overflow. */
-        //    if (!width || !height || pixel_count / width != height) {
-        //        TIFFError(TIFFFileName(in),
-        //          "Malformed input file; can't allocate buffer for raster of %lux%lu size",
-        //          (unsigned long)width, (unsigned long)height);
-        //        return 0;
-        //    }
-
-        //    rowsperstrip = TIFFDefaultStripSize(out, rowsperstrip);
-        //    TIFFSetField(out, TiffTag.ROWSPERSTRIP, rowsperstrip);
-
-        //    raster = (uint*)_TIFFCheckMalloc(in, pixel_count, sizeof(uint), "raster buffer");
-        //    if (raster == 0) {
-        //        TIFFError(TIFFFileName(in), "Requested buffer size is %lu elements %lu each",
-        //          (unsigned long)pixel_count, (unsigned long)sizeof(uint));
-        //        return (0);
-        //    }
-
-        //    /* Read the image in one chunk into an RGBA array */
-        //    if (!TIFFReadRGBAImageOriented(in, width, height, raster,
-        //                                   ORIENTATION_TOPLEFT, 0)) {
-        //        _TIFFfree(raster);
-        //        return (0);
-        //    }
-
-        //    /*
-        //     * XXX: raster array has 4-byte unsigned integer type, that is why
-        //     * we should rearrange it here.
-        //     */
-        //#if HOST_BIGENDIAN
-        //    TIFFSwabArrayOfLong(raster, width * height);
-        //#endif
-
-        //    /*
-        //     * Do we want to strip away alpha components?
-        //     */
-        //    if (no_alpha)
-        //    {
-        //        size_t count = pixel_count;
-        //        unsigned char *src, *dst;
-
-        //    src = dst = (unsigned char *) raster;
-        //        while (count > 0)
-        //        {
-        //        *(dst++) = *(src++);
-        //        *(dst++) = *(src++);
-        //        *(dst++) = *(src++);
-        //        src++;
-        //        count--;
-        //        }
-        //    }
-
-        //    /*
-        //     * Write out the result in strips
-        //     */
-        //    for (row = 0; row < height; row += rowsperstrip)
-        //    {
-        //        unsigned char * raster_strip;
-        //        int	rows_to_write;
-        //        int	bytes_per_pixel;
-
-        //        if (no_alpha)
-        //        {
-        //            raster_strip = ((unsigned char *) raster) + 3 * row * width;
-        //            bytes_per_pixel = 3;
-        //        }
-        //        else
-        //        {
-        //            raster_strip = (unsigned char *) (raster + row * width);
-        //            bytes_per_pixel = 4;
-        //        }
-
-        //        if( row + rowsperstrip > height )
-        //            rows_to_write = height - row;
-        //        else
-        //            rows_to_write = rowsperstrip;
-
-        //        if( TIFFWriteEncodedStrip( out, row / rowsperstrip, raster_strip,
-        //                             bytes_per_pixel * rows_to_write * width ) == -1 )
-        //        {
-        //            _TIFFfree( raster );
-        //            return 0;
-        //        }
-        //    }
-
-        //    _TIFFfree( raster );
+                    /*
+                     * Write out the result in a tile.
+                     */
+                    int tile = outImage.ComputeTile(col, row, 0, 0);
+                    Buffer.BlockCopy(raster, 0, rasterBytes, 0, rasterByteSize);
+                    if (outImage.WriteEncodedTile(tile, rasterBytes, rasterByteSize) == -1)
+                        return false;
+                }
+            }
 
             return true;
-        }        
+        }
+
+        static bool cvt_by_strip(Tiff inImage, Tiff outImage, int width, int height)
+        {
+            //    uint* raster;			/* retrieve RGBA image */
+            //    uint  row;
+            //    uint  *wrk_line;
+            //    tsize_t raster_size;
+            //    int	    ok = 1;
+
+            //    if( !TIFFGetField(inImage, TiffTag.ROWSPERSTRIP, &rowsperstrip) ) {
+            //        TIFFError(TIFFFileName(inImage), "Source image not in strips");
+            //        return false;
+            //    }
+
+            //    outImage.SetField(TiffTag.ROWSPERSTRIP, rowsperstrip);
+
+            //    /*
+            //     * Allocate strip buffer
+            //     */
+            //    raster_size = multiply(multiply(width, rowsperstrip), sizeof (uint));
+            //    if (!raster_size) {
+            //    TIFFError(TIFFFileName(inImage),
+            //          "Can't allocate buffer for raster of size %lux%lu",
+            //          (unsigned long) width, (unsigned long) rowsperstrip);
+            //    return false;
+            //    }
+            //    raster = (uint*)_TIFFmalloc(raster_size);
+            //    if (raster == 0) {
+            //        TIFFError(TIFFFileName(inImage), "No space for raster buffer");
+            //        return false;
+            //    }
+
+            //    /*
+            //     * Allocate a scanline buffer for swapping during the vertical
+            //     * mirroring pass.  (Request can't overflow given prior checks.)
+            //     */
+            //    wrk_line = (uint*)_TIFFmalloc(width * sizeof (uint));
+            //    if (!wrk_line) {
+            //        TIFFError(TIFFFileName(inImage), "No space for raster scanline buffer");
+            //        ok = 0;
+            //    }
+
+            //    /*
+            //     * Loop over the strips.
+            //     */
+            //    for( row = 0; ok && row < height; row += rowsperstrip )
+            //    {
+            //        int	rows_to_write, i_row;
+
+            //        /* Read the strip into an RGBA array */
+            //        if (!TIFFReadRGBAStrip(inImage, row, raster)) {
+            //            ok = 0;
+            //            break;
+            //        }
+
+            //    /*
+            //     * XXX: raster array has 4-byte unsigned integer type, that is why
+            //     * we should rearrange it here.
+            //     */
+            //#if HOST_BIGENDIAN
+            //    TIFFSwabArrayOfLong(raster, width * rowsperstrip);
+            //#endif
+
+            //        /*
+            //         * Figure out the number of scanlines actually in this strip.
+            //         */
+            //        if( row + rowsperstrip > height )
+            //            rows_to_write = height - row;
+            //        else
+            //            rows_to_write = rowsperstrip;
+
+            //        /*
+            //         * For some reason the TIFFReadRGBAStrip() function chooses the
+            //         * lower left corner as the origin.  Vertically mirror scanlines.
+            //         */
+
+            //        for( i_row = 0; i_row < rows_to_write / 2; i_row++ )
+            //        {
+            //            uint	*top_line, *bottom_line;
+
+            //            top_line = raster + width * i_row;
+            //            bottom_line = raster + width * (rows_to_write-i_row-1);
+
+            //            _TIFFmemcpy(wrk_line, top_line, 4*width);
+            //            _TIFFmemcpy(top_line, bottom_line, 4*width);
+            //            _TIFFmemcpy(bottom_line, wrk_line, 4*width);
+            //        }
+
+            //        /*
+            //         * Write out the result in a strip
+            //         */
+
+            //        if( TIFFWriteEncodedStrip( outImage, row / rowsperstrip, raster,
+            //                                   4 * rows_to_write * width ) == -1 )
+            //        {
+            //            ok = 0;
+            //            break;
+            //        }
+            //    }
+
+            //    _TIFFfree( raster );
+            //    _TIFFfree( wrk_line );
+
+            //    return ok;
+            return false;
+        }
+
+        /// <summary>
+        /// Read the whole image into one big RGBA buffer and then write out
+        /// strips from that. This is using the traditional TIFFReadRGBAImage()
+        /// API that we trust.
+        /// </summary>
+        static bool cvt_whole_image(Tiff inImage, Tiff outImage, int width, int height)
+        {
+            //    uint* raster;			/* retrieve RGBA image */
+            //    uint  row;
+            //    size_t pixel_count;
+
+            //    pixel_count = width * height;
+
+            //    /* XXX: Check the integer overflow. */
+            //    if (!width || !height || pixel_count / width != height) {
+            //        TIFFError(TIFFFileName(inImage),
+            //          "Malformed input file; can't allocate buffer for raster of %lux%lu size",
+            //          (unsigned long)width, (unsigned long)height);
+            //        return 0;
+            //    }
+
+            //    rowsperstrip = TIFFDefaultStripSize(outImage, rowsperstrip);
+            //    outImage.SetField(TiffTag.ROWSPERSTRIP, rowsperstrip);
+
+            //    raster = (uint*)_TIFFCheckMalloc(inImage, pixel_count, sizeof(uint), "raster buffer");
+            //    if (raster == 0) {
+            //        TIFFError(TIFFFileName(inImage), "Requested buffer size is %lu elements %lu each",
+            //          (unsigned long)pixel_count, (unsigned long)sizeof(uint));
+            //        return false;
+            //    }
+
+            //    /* Read the image in one chunk into an RGBA array */
+            //    if (!TIFFReadRGBAImageOriented(inImage, width, height, raster,
+            //                                   ORIENTATION_TOPLEFT, 0)) {
+            //        _TIFFfree(raster);
+            //        return false;
+            //    }
+
+            //    /*
+            //     * XXX: raster array has 4-byte unsigned integer type, that is why
+            //     * we should rearrange it here.
+            //     */
+            //#if HOST_BIGENDIAN
+            //    TIFFSwabArrayOfLong(raster, width * height);
+            //#endif
+
+            //    /*
+            //     * Do we want to strip away alpha components?
+            //     */
+            //    if (no_alpha)
+            //    {
+            //        size_t count = pixel_count;
+            //        unsigned char *src, *dst;
+
+            //    src = dst = (unsigned char *) raster;
+            //        while (count > 0)
+            //        {
+            //        *(dst++) = *(src++);
+            //        *(dst++) = *(src++);
+            //        *(dst++) = *(src++);
+            //        src++;
+            //        count--;
+            //        }
+            //    }
+
+            //    /*
+            //     * Write out the result in strips
+            //     */
+            //    for (row = 0; row < height; row += rowsperstrip)
+            //    {
+            //        unsigned char * raster_strip;
+            //        int	rows_to_write;
+            //        int	bytes_per_pixel;
+
+            //        if (no_alpha)
+            //        {
+            //            raster_strip = ((unsigned char *) raster) + 3 * row * width;
+            //            bytes_per_pixel = 3;
+            //        }
+            //        else
+            //        {
+            //            raster_strip = (unsigned char *) (raster + row * width);
+            //            bytes_per_pixel = 4;
+            //        }
+
+            //        if( row + rowsperstrip > height )
+            //            rows_to_write = height - row;
+            //        else
+            //            rows_to_write = rowsperstrip;
+
+            //        if( TIFFWriteEncodedStrip( outImage, row / rowsperstrip, raster_strip,
+            //                             bytes_per_pixel * rows_to_write * width ) == -1 )
+            //        {
+            //            _TIFFfree( raster );
+            //            return 0;
+            //        }
+            //    }
+
+            //    _TIFFfree( raster );
+
+            return true;
+        }
 
         private static void usage()
         {
@@ -522,6 +486,15 @@ namespace BitMiracle.Tiff2Rgba
             FieldValue[] result = inImage.GetField(tag);
             if (result != null)
                 outImage.SetField(tag, result[0]);
+        }
+
+        private static int multiply(int x, int y)
+        {
+            long res = (long)x * (long)y;
+            if (res > int.MaxValue)
+                return 0;
+
+            return (int)res;
         }
     }
 }
