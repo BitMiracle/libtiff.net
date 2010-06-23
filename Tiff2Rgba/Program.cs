@@ -21,6 +21,14 @@ namespace BitMiracle.Tiff2Rgba
 {
     public class Program
     {
+        // setting this to true will make program to always output identical 
+        // output images for each given image.
+        //
+        // by default this is set false, so program will stamp output images
+        // with LibTiff.Net version string. this behavior is 
+        // more correct if you don't use the program as a test utility.
+        static public bool g_testFriendly = false;
+
         static string[] stuff =
         {
             "usage: tiff2rgba [-c comp] [-r rows] [-b] input... output",
@@ -40,6 +48,7 @@ namespace BitMiracle.Tiff2Rgba
         public static void Main(string[] args)
         {
             Converter c = new Converter();
+            c.m_testFriendly = g_testFriendly;
 
             int argn = 0;
             for (; argn < args.Length; argn++)

@@ -33,7 +33,7 @@ namespace BitMiracle.Tiff2Pdf
         //
         // by default this is set false, so program will use different PDF 
         // trailers and timestamps each time it runs. this behavior is 
-        // more correct if you don't use program as test utility.
+        // more correct if you don't use the program as a test utility.
         //
         // and yes, image data in produced PDFs is the same whether you 
         // use test friendly or not behavior.

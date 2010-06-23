@@ -23,6 +23,7 @@ namespace BitMiracle.Tiff2Rgba
         public int m_rowsPerStrip = -1;
         public bool m_processByBlock;
         public bool m_noAlpha;
+        public bool m_testFriendly;
 
         public bool tiffcvt(Tiff inImage, Tiff outImage)
         {
@@ -62,9 +63,12 @@ namespace BitMiracle.Tiff2Rgba
             copyField(inImage, outImage, TiffTag.YRESOLUTION);
             copyField(inImage, outImage, TiffTag.RESOLUTIONUNIT);
             outImage.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
-            outImage.SetField(TiffTag.SOFTWARE, Tiff.GetVersion());
-            copyField(inImage, outImage, TiffTag.DOCUMENTNAME);
 
+            if (!m_testFriendly)
+                outImage.SetField(TiffTag.SOFTWARE, Tiff.GetVersion());
+
+            copyField(inImage, outImage, TiffTag.DOCUMENTNAME);
+            
             if (m_processByBlock && inImage.IsTiled())
                 return cvt_by_tile(inImage, outImage, width, height);
             else if (m_processByBlock)

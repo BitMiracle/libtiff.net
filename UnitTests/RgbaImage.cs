@@ -105,6 +105,7 @@ namespace UnitTests
 
             File.Delete(outputFile);
 
+            BitMiracle.Tiff2Rgba.Program.g_testFriendly = true;
             BitMiracle.Tiff2Rgba.Program.Main(completeArgs.ToArray());
 
             string sampleFile = outputFile.Replace(@"\Output.Tiff\", @"\Expected.Tiff\");
@@ -144,10 +145,28 @@ namespace UnitTests
             testTiff2Rgba(file, new string[] { "-n" }, "_rgba_noalpha");
         }
 
-        //[Test, TestCaseSource("ToRgbaFiles")]
-        //public void TestTiff2RgbaJpeg(string file)
-        //{
-        //    testTiff2Rgba(file, new string[] { "-c", "jpeg" }, "_rgba_jpeg");
-        //}
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2RgbaJpeg(string file)
+        {
+            testTiff2Rgba(file, new string[] { "-c", "jpeg" }, "_rgba_jpeg");
+        }
+
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2RgbaZip(string file)
+        {
+            testTiff2Rgba(file, new string[] { "-c", "zip" }, "_rgba_zip");
+        }
+
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2RgbaLzw(string file)
+        {
+            testTiff2Rgba(file, new string[] { "-c", "lzw" }, "_rgba_lzw");
+        }
+
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2RgbaNone(string file)
+        {
+            testTiff2Rgba(file, new string[] { "-c", "none" }, "_rgba_none");
+        }
     }
 }

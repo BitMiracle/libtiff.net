@@ -1284,7 +1284,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private int JPEGDefaultStripSize(int s)
         {
-            base.DefStripSize(s);
+            s = base.DefStripSize(s);
             if (s < m_tif.m_dir.td_imagelength)
                 s = Tiff.roundUp(s, m_tif.m_dir.td_ycbcrsubsampling[1] * JpegConstants.DCTSIZE);
 
