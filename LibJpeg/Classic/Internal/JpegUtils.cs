@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2009, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -98,19 +98,19 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
-                Buffer.BlockCopy(input_array[source_row + row], 0, output_array[dest_row + row], 0, num_cols);
+                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
 
         public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, ComponentBuffer output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
-                Buffer.BlockCopy(input_array[source_row + row], 0, output_array[dest_row + row], 0, num_cols);
+                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
 
         public static void jcopy_sample_rows(byte[][] input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
-                Buffer.BlockCopy(input_array[source_row + row], 0, output_array[dest_row + row], 0, num_cols);
+                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
         }
     }
 }

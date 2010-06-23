@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2009, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -517,7 +517,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 /* Copy bytes with reasonable rapidity */
                 int read = cinfo.m_src.GetBytes(tempData, data_length - bytes_read);
-                Buffer.BlockCopy(tempData, 0, data, dataOffset, data_length - bytes_read);
+                Array.Copy(tempData, 0, data, dataOffset, data_length - bytes_read);
                 bytes_read += read;
             }
 
@@ -541,7 +541,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (data_length != 0 && (currentMarker == JPEG_MARKER.APP0 || currentMarker == JPEG_MARKER.APP14))
             {
                 tempData = new byte[data.Length];
-                Buffer.BlockCopy(data, dataOffset, tempData, 0, data.Length - dataOffset);
+                Array.Copy(data, dataOffset, tempData, 0, data.Length - dataOffset);
             }
 
             /* Process the marker if interesting; else just make a generic trace msg */
@@ -1053,8 +1053,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 if (index < 0 || index >= JpegConstants.NUM_HUFF_TBLS)
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_DHT_INDEX, index);
 
-                Buffer.BlockCopy(bits, 0, htblptr.Bits, 0, htblptr.Bits.Length);
-                Buffer.BlockCopy(huffval, 0, htblptr.Huffval, 0, htblptr.Huffval.Length);
+                Array.Copy(bits, htblptr.Bits, htblptr.Bits.Length);
+                Array.Copy(huffval, htblptr.Huffval, htblptr.Huffval.Length);
             }
 
             if (length != 0)

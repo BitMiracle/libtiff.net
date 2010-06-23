@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2009, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -277,7 +277,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             bits[i]--;
 
             /* Return final symbol counts (only for lengths 0..16) */
-            Buffer.BlockCopy(bits, 0, htbl.Bits, 0, htbl.Bits.Length);
+            Array.Copy(bits, htbl.Bits, htbl.Bits.Length);
 
             /* Return a list of the symbols sorted by code length */
             /* It's not real clear to me why we don't need to consider the codelength

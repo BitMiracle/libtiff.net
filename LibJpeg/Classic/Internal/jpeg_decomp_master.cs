@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2009, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -334,11 +334,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 table[tableOffset + i] = JpegConstants.MAXJSAMPLE;
 
             /* Second half of post-IDCT table */
-            Array.Clear(table, tableOffset + 2 * (JpegConstants.MAXJSAMPLE + 1),
-                2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE);
-
-            Buffer.BlockCopy(m_cinfo.m_sample_range_limit, 0, table,
-                tableOffset + 4 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE, JpegConstants.CENTERJSAMPLE);
+            Array.Clear(table, tableOffset + 2 * (JpegConstants.MAXJSAMPLE + 1), 2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE);
+            Array.Copy(m_cinfo.m_sample_range_limit, 0, table, tableOffset + 4 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE, JpegConstants.CENTERJSAMPLE);
         }
     }
 }

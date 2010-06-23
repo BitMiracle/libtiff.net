@@ -81,7 +81,7 @@ namespace BitMiracle.LibJpeg
             for (int i = 0; i < sampleCount; ++i)
             {
                 short[] components = new short[componentsPerSample];
-                Buffer.BlockCopy(sampleComponents, i * componentsPerSample * sizeof(short), components, 0, componentsPerSample * sizeof(short));
+                Array.Copy(sampleComponents, i * componentsPerSample, components, 0, componentsPerSample);
                 m_samples[i] = new Sample(components, bitsPerComponent);
             }
 

@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2009, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -299,8 +299,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 
                 /* OK, save away the quantization table */
                 JQUANT_TBL qtbl = new JQUANT_TBL();
-                Buffer.BlockCopy(m_cinfo.m_quant_tbl_ptrs[qtblno].quantval, 0,
-                    qtbl.quantval, 0, qtbl.quantval.Length * sizeof(short));
+                Array.Copy(m_cinfo.m_quant_tbl_ptrs[qtblno].quantval, qtbl.quantval, qtbl.quantval.Length);
                 qtbl.Sent_table = m_cinfo.m_quant_tbl_ptrs[qtblno].Sent_table;
                 componentInfo.quant_table = qtbl;
                 m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;

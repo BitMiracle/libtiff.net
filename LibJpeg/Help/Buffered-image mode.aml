@@ -414,7 +414,7 @@
 		  </row>
 		</table>
         
-        <para>All three are initialized <legacyBold>false</legacyBold> by 
+        <para>All three are initialized false by 
         <codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_decompress_struct.jpeg_read_header(System.Boolean)</codeEntityReference>.
         But <codeEntityReference>M:BitMiracle.LibJpeg.Classic.jpeg_decompress_struct.jpeg_start_decompress</codeEntityReference>
         automatically sets <legacyBold>true</legacyBold> the one selected by the 

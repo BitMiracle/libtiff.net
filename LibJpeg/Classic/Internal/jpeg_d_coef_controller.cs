@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2009, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -525,7 +525,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     {
                         /* Fetch current DCT block into workspace so we can modify it. */
                         JBLOCK workspace = new JBLOCK();
-                        Buffer.BlockCopy(buffer[bufferIndex][0].data, 0, workspace.data, 0, workspace.data.Length * sizeof(short));
+                        Array.Copy(buffer[bufferIndex][0].data, workspace.data, workspace.data.Length);
 
                         /* Update DC values */
                         if (block_num < last_block_column)

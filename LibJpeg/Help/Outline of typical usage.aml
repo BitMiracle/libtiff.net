@@ -2,7 +2,7 @@
 <topic id="c6f4159f-10b1-4d19-b02c-eac46e2d86e0" revisionNumber="1">
   <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
     <introduction>
-      <para>This topic describes the outline of typical usage LibJpeg.Net
+      <para>This topic describes the outline of typical usage LibJpeg.NET
       for JPEG compression and decompression.</para>
     </introduction>
     <section address="JPEG Compression">

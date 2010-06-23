@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Topics>
-  <Topic id="d7991abb-5124-4096-bae0-0eb66940e6ab" visible="True" noFile="true" apiParentMode="InsertAfter" title="Knowledge Base">
-    <Topic id="c6f4159f-10b1-4d19-b02c-eac46e2d86e0" visible="True" isDefault="true" title="Outline of typical usage">
+<Topics defaultTopic="c6f4159f-10b1-4d19-b02c-eac46e2d86e0" splitTOCTopic="d7991abb-5124-4096-bae0-0eb66940e6ab">
+  <Topic id="d7991abb-5124-4096-bae0-0eb66940e6ab" visible="True" noFile="True" title="Knowledge Base">
+    <Topic id="c6f4159f-10b1-4d19-b02c-eac46e2d86e0" visible="True" title="Outline of typical usage">
       <HelpAttributes>
         <HelpAttribute name="Description" value="The common review of compression and decompression procedures." />
       </HelpAttributes>
@@ -67,5 +67,4 @@
       </HelpAttributes>
     </Topic>
   </Topic>
-  <Topic id="5200b425-c5b7-4675-b138-b055935bb221" visible="True" title="Version History" />
 </Topics>

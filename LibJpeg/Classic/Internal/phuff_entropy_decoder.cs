@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2009, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -40,7 +40,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             public void Assign(savable_state ss)
             {
                 EOBRUN = ss.EOBRUN;
-                Buffer.BlockCopy(ss.last_dc_val, 0, last_dc_val, 0, last_dc_val.Length * sizeof(int));
+                Array.Copy(ss.last_dc_val, last_dc_val, last_dc_val.Length);
             }
         }
 

@@ -7,19 +7,19 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8a2e85bf-defb-4d67-9970-aa0a76fe1137}</ProjectGuid>
-    <SHFBSchemaVersion>1.9.0.0</SHFBSchemaVersion>
+    <SHFBSchemaVersion>1.8.0.3</SHFBSchemaVersion>
     <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual
          Studio adds them anyway -->
     <AssemblyName>Documentation</AssemblyName>
     <RootNamespace>Documentation</RootNamespace>
     <Name>Documentation</Name>
     <!-- SHFB properties -->
-    <OutputPath>bin\Release\Help\</OutputPath>
-    <HtmlHelpName>LibJpeg.Net</HtmlHelpName>
+    <OutputPath>bin\Release\</OutputPath>
+    <HtmlHelpName>LibJpeg.NET</HtmlHelpName>
     <Preliminary>False</Preliminary>
     <FrameworkVersion>2.0.50727</FrameworkVersion>
     <ComponentConfigurations>
-      <ComponentConfig id="Cached Framework Comments Index Data" enabled="True">
+      <ComponentConfig id="Cached Framework Comments Index Data" enabled="True" xmlns="">
         <component id="Cached Framework Comments Index Data" type="SandcastleBuilder.Components.CachedCopyFromIndexComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
           <index name="comments" value="/doc/members/member" key="@name" cache="100">
 {@CachedFrameworkCommentList}
@@ -28,31 +28,14 @@
           <copy name="comments" source="*" target="/document/comments" />
         </component>
       </ComponentConfig>
-      <ComponentConfig id="Cached MSDN URL References" enabled="True">
+      <ComponentConfig id="Cached MSDN URL References" enabled="True" xmlns="">
         <component id="Cached MSDN URL References" type="SandcastleBuilder.Components.CachedResolveReferenceLinksComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll" locale="{@Locale}" linkTarget="{@SdkLinkTarget}">
-          <helpOutput format="HtmlHelp1">
-            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
-            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@HtmlSdkLinkType}" />
-            <targets files="reflection.xml" type="Local" />
-          </helpOutput>
-          <helpOutput format="MSHelp2">
-            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
-            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@MSHelp2SdkLinkType}" />
-            <targets files="reflection.xml" type="Index" />
-          </helpOutput>
-          <helpOutput format="MSHelpViewer">
-            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
-            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@MSHelpViewerSdkLinkType}" />
-            <targets files="reflection.xml" type="Id" />
-          </helpOutput>
-          <helpOutput format="Website">
-            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
-            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@WebsiteSdkLinkType}" />
-            <targets files="reflection.xml" type="Local" />
-          </helpOutput>
+          <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
+          <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@SDKLinks}" />
+          <targets files="reflection.xml" type="{@ProjectLinks}" />
         </component>
       </ComponentConfig>
-      <ComponentConfig id="Cached Reflection Index Data" enabled="True">
+      <ComponentConfig id="Cached Reflection Index Data" enabled="True" xmlns="">
         <component id="Cached Reflection Index Data" type="SandcastleBuilder.Components.CachedCopyFromIndexComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
           <index name="reflection" value="/reflection/apis/api" key="@id" cache="10">
             <cache base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" cacheFile="{@LocalDataFolder}Cache\Reflection.cache" />
@@ -61,7 +44,7 @@
           <copy name="reflection" source="*" target="/document/reference" />
         </component>
       </ComponentConfig>
-      <ComponentConfig id="IntelliSense Component" enabled="True">
+      <ComponentConfig id="IntelliSense Component" enabled="True" xmlns="">
         <component id="IntelliSense Component" type="SandcastleBuilder.Components.IntelliSenseComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
           <!-- Output options (optional)
                  Attributes:
@@ -71,7 +54,7 @@
           <output includeNamespaces="false" namespacesFile="Namespaces" folder="{@OutputFolder}" />
         </component>
       </ComponentConfig>
-      <ComponentConfig id="Post-transform Component" enabled="True">
+      <ComponentConfig id="Post-transform Component" enabled="True" xmlns="">
         <component id="Post-transform Component" type="SandcastleBuilder.Components.PostTransformComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
           <!-- Code colorizer files (required).
                  Attributes:
@@ -82,7 +65,7 @@
           <!-- Base output path for the files (required).  This should match
                  the parent folder of the output path of the HTML files (see
                  SaveComponent). -->
-          <outputPaths>{@HelpFormatOutputPaths}</outputPaths>
+          <outputPath value="Output\" />
           <!-- Logo image file (optional).  Filename is required. The height,
                  width, altText, placement, and alignment attributes are
                  optional. -->
@@ -103,9 +86,8 @@
     <CopyrightText>Copyright &amp;#169%3b 2009-2010 Bit Miracle. All rights reserved.</CopyrightText>
     <FeedbackEMailAddress>support%40bitmiracle.com</FeedbackEMailAddress>
     <FeedbackEMailLinkText>support%40bitmiracle.com</FeedbackEMailLinkText>
-    <HelpTitle>LibJpeg.Net, a managed version of LibJpeg library used for reading and writing JPEG images.</HelpTitle>
+    <HelpTitle>LibJpeg.NET, a managed version of LibJpeg library used for reading and writing JPEG images.</HelpTitle>
     <IncludeFavorites>True</IncludeFavorites>
-    <HelpFileFormat>HtmlHelp1</HelpFileFormat>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in
        order for Visual Studio to perform the build.  The others are optional
@@ -134,7 +116,6 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Help\Version History.aml" />
     <None Include="Help\Progress monitoring.aml" />
     <None Include="Help\Special markers.aml" />
     <None Include="Help\Buffered-image mode.aml" />

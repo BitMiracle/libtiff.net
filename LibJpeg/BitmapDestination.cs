@@ -98,7 +98,7 @@ namespace BitMiracle.LibJpeg
         /// </summary>
         private void putGrayRow(byte[] row)
         {
-            for (int i = 0; i < m_parameters.Width; ++i)
+            for (int i = 0; i < m_parameters.Height; ++i)
                 m_pixels[i][m_currentRow] = row[i];
         }
 
