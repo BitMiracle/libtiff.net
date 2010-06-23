@@ -70,6 +70,17 @@ namespace UnitTests
             }
         }
 
+        private static string[] ToRgbaFiles
+        {
+            get
+            {
+                return new string[]
+                {
+                    "gray16-lzw-pc.tif"
+                };
+            }
+        }
+
         private static bool tryReadRGBAImage(string file)
         {
             Tiff tiff = Tiff.Open(file, "r");
@@ -80,6 +91,27 @@ namespace UnitTests
             return tiff.ReadRGBAImage(w, h, raster);
         }
 
+        private static void testTiff2Rgba(string file, string[] args, string suffix)
+        {
+            string inputFile = Path.Combine(TestCase.Folder, Path.GetFileName(file));
+            string outputFile = TestCase.Folder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
+
+            List<string> completeArgs = new List<string>(args.Length + 2);
+            for (int i = 0; i < args.Length; ++i)
+                completeArgs.Add(args[i]);
+
+            completeArgs.Add(inputFile);
+            completeArgs.Add(outputFile);
+
+            File.Delete(outputFile);
+
+            BitMiracle.Tiff2Rgba.Program.Main(completeArgs.ToArray());
+
+            string sampleFile = outputFile.Replace(@"\Output.Tiff\", @"\Expected.Tiff\");
+            Assert.IsTrue(File.Exists(outputFile));
+            FileAssert.AreEqual(sampleFile, outputFile);
+        }
+
         [Test, TestCaseSource("Files")]
         public void TestReadRGBAImage(string file)
         {
@@ -87,5 +119,35 @@ namespace UnitTests
             bool ok = tryReadRGBAImage(fullPath);
             Assert.True(ok);
         }
+
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2Rgba(string file)
+        {
+            testTiff2Rgba(file, new string[] {}, "_rgba");
+        }
+
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2RgbaBlocks(string file)
+        {
+            testTiff2Rgba(file, new string[] { "-b"}, "_rgba_b");
+        }
+
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2RgbaRows(string file)
+        {
+            testTiff2Rgba(file, new string[] { "-r", "3" }, "_rgba_r3");
+        }
+
+        [Test, TestCaseSource("ToRgbaFiles")]
+        public void TestTiff2RgbaNoAlpha(string file)
+        {
+            testTiff2Rgba(file, new string[] { "-n" }, "_rgba_noalpha");
+        }
+
+        //[Test, TestCaseSource("ToRgbaFiles")]
+        //public void TestTiff2RgbaJpeg(string file)
+        //{
+        //    testTiff2Rgba(file, new string[] { "-c", "jpeg" }, "_rgba_jpeg");
+        //}
     }
 }
