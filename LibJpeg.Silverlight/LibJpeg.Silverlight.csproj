@@ -1,0 +1,295 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{297AC639-8A6C-43D1-A3FF-01D8A79C4090}</ProjectGuid>
+    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LibJpeg.Silverlight</RootNamespace>
+    <AssemblyName>LibJpeg.Silverlight</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT EXPOSE_LIBJPEG</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>Bin\Debug\LibJpeg.Silverlight.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT EXPOSE_LIBJPEG</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>Bin\Release\LibJpeg.Silverlight.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows" />
+    <Reference Include="mscorlib" />
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Windows.Browser" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\LibJpeg\BitmapDestination.cs">
+      <Link>BitmapDestination.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\BitStream.cs">
+      <Link>BitStream.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\DensityUnit.cs">
+      <Link>Classic\DensityUnit.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\bitread_perm_state.cs">
+      <Link>Classic\Internal\bitread_perm_state.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\bitread_working_state.cs">
+      <Link>Classic\Internal\bitread_working_state.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\ComponentBuffer.cs">
+      <Link>Classic\Internal\ComponentBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\d_derived_tbl.cs">
+      <Link>Classic\Internal\d_derived_tbl.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\huff_entropy_decoder.cs">
+      <Link>Classic\Internal\huff_entropy_decoder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\huff_entropy_encoder.cs">
+      <Link>Classic\Internal\huff_entropy_encoder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\JpegUtils.cs">
+      <Link>Classic\Internal\JpegUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_color_converter.cs">
+      <Link>Classic\Internal\jpeg_color_converter.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_color_deconverter.cs">
+      <Link>Classic\Internal\jpeg_color_deconverter.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_color_quantizer.cs">
+      <Link>Classic\Internal\jpeg_color_quantizer.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_comp_master.cs">
+      <Link>Classic\Internal\jpeg_comp_master.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_c_coef_controller.cs">
+      <Link>Classic\Internal\jpeg_c_coef_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_c_main_controller.cs">
+      <Link>Classic\Internal\jpeg_c_main_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_c_prep_controller.cs">
+      <Link>Classic\Internal\jpeg_c_prep_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_decomp_master.cs">
+      <Link>Classic\Internal\jpeg_decomp_master.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_downsampler.cs">
+      <Link>Classic\Internal\jpeg_downsampler.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_d_coef_controller.cs">
+      <Link>Classic\Internal\jpeg_d_coef_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_d_main_controller.cs">
+      <Link>Classic\Internal\jpeg_d_main_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_d_post_controller.cs">
+      <Link>Classic\Internal\jpeg_d_post_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_entropy_decoder.cs">
+      <Link>Classic\Internal\jpeg_entropy_decoder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_entropy_encoder.cs">
+      <Link>Classic\Internal\jpeg_entropy_encoder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_forward_dct.cs">
+      <Link>Classic\Internal\jpeg_forward_dct.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_input_controller.cs">
+      <Link>Classic\Internal\jpeg_input_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_inverse_dct.cs">
+      <Link>Classic\Internal\jpeg_inverse_dct.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_marker_reader.cs">
+      <Link>Classic\Internal\jpeg_marker_reader.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_marker_writer.cs">
+      <Link>Classic\Internal\jpeg_marker_writer.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_scan_info.cs">
+      <Link>Classic\Internal\jpeg_scan_info.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\jpeg_upsampler.cs">
+      <Link>Classic\Internal\jpeg_upsampler.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\J_BUF_MODE.cs">
+      <Link>Classic\Internal\J_BUF_MODE.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_1pass_cquantizer.cs">
+      <Link>Classic\Internal\my_1pass_cquantizer.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_2pass_cquantizer.cs">
+      <Link>Classic\Internal\my_2pass_cquantizer.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_c_coef_controller.cs">
+      <Link>Classic\Internal\my_c_coef_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_destination_mgr.cs">
+      <Link>Classic\Internal\my_destination_mgr.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_merged_upsampler.cs">
+      <Link>Classic\Internal\my_merged_upsampler.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_source_mgr.cs">
+      <Link>Classic\Internal\my_source_mgr.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_trans_c_coef_controller.cs">
+      <Link>Classic\Internal\my_trans_c_coef_controller.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\my_upsampler.cs">
+      <Link>Classic\Internal\my_upsampler.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\phuff_entropy_decoder.cs">
+      <Link>Classic\Internal\phuff_entropy_decoder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\Internal\phuff_entropy_encoder.cs">
+      <Link>Classic\Internal\phuff_entropy_encoder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\JBLOCK.cs">
+      <Link>Classic\JBLOCK.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\JHUFF_TBL.cs">
+      <Link>Classic\JHUFF_TBL.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\JpegConstants.cs">
+      <Link>Classic\JpegConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_common_struct.cs">
+      <Link>Classic\jpeg_common_struct.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_component_info.cs">
+      <Link>Classic\jpeg_component_info.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_compress_struct.cs">
+      <Link>Classic\jpeg_compress_struct.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_decompress_struct.cs">
+      <Link>Classic\jpeg_decompress_struct.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_destination_mgr.cs">
+      <Link>Classic\jpeg_destination_mgr.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_error_mgr.cs">
+      <Link>Classic\jpeg_error_mgr.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\JPEG_MARKER.cs">
+      <Link>Classic\JPEG_MARKER.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_marker_struct.cs">
+      <Link>Classic\jpeg_marker_struct.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_progress_mgr.cs">
+      <Link>Classic\jpeg_progress_mgr.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jpeg_source_mgr.cs">
+      <Link>Classic\jpeg_source_mgr.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\JQUANT_TBL.cs">
+      <Link>Classic\JQUANT_TBL.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\jvirt_array.cs">
+      <Link>Classic\jvirt_array.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\J_COLOR_SPACE.cs">
+      <Link>Classic\J_COLOR_SPACE.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\J_DCT_METHOD.cs">
+      <Link>Classic\J_DCT_METHOD.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\J_DITHER_MODE.cs">
+      <Link>Classic\J_DITHER_MODE.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\J_MESSAGE_CODE.cs">
+      <Link>Classic\J_MESSAGE_CODE.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Classic\ReadResult.cs">
+      <Link>Classic\ReadResult.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\CompressionParameters.cs">
+      <Link>CompressionParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\DecompressionParameters.cs">
+      <Link>DecompressionParameters.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\DecompressorToJpegImage.cs">
+      <Link>DecompressorToJpegImage.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Enumerations.cs">
+      <Link>Enumerations.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\IDecompressDestination.cs">
+      <Link>IDecompressDestination.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\IRawImage.cs">
+      <Link>IRawImage.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Jpeg.cs">
+      <Link>Jpeg.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\JpegImage.cs">
+      <Link>JpegImage.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\RawImage.cs">
+      <Link>RawImage.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Sample.cs">
+      <Link>Sample.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\SampleRow.cs">
+      <Link>SampleRow.cs</Link>
+    </Compile>
+    <Compile Include="..\LibJpeg\Utils.cs">
+      <Link>Utils.cs</Link>
+    </Compile>
+    <Compile Include="AssemblyVersion.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\v3.0\Microsoft.Silverlight.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
+        <SilverlightProjectProperties />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PreBuildEvent>cd "$(SolutionDir)"
+update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
+  </PropertyGroup>
+</Project>

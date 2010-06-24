@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-
-using BitMiracle.LibJpeg.Classic;
-
-namespace BitMiracle.LibJpeg
+﻿namespace BitMiracle.LibJpeg
 {
     interface IRawImage
     {

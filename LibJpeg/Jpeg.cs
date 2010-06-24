@@ -95,7 +95,14 @@ namespace BitMiracle.LibJpeg
             {
                 byte[] row = source.GetPixelRow();
                 if (row == null)
+                {
+#if !SILVERLIGHT 
                     throw new InvalidDataException("Row of pixels is null");
+#else
+                    // System.IO.InvalidDataException is not available in Silverlight
+                    throw new IOException("Row of pixels is null");
+#endif
+                }
 
                 byte[][] rowForDecompressor = new byte[1][];
                 rowForDecompressor[0] = row;

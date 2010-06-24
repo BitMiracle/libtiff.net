@@ -6,11 +6,11 @@ using System;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BitMiracle.LibJpeg.NET")]
-[assembly: AssemblyDescription(".NET version of IJG's LibJpeg library made by Bit Miracle")]
+[assembly: AssemblyTitle("BitMiracle.LibJpeg.NET for Silverlight")]
+[assembly: AssemblyDescription("Silverlight-compatible version of IJG's LibJpeg library made by Bit Miracle")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bit Miracle")]
-[assembly: AssemblyProduct("BitMiracle.LibJpeg.NET")]
+[assembly: AssemblyProduct("BitMiracle.LibJpeg.NET for Silverlight")]
 [assembly: AssemblyCopyright("Copyright (C) 2008-2010, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -21,6 +21,6 @@ using System;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0614c098-c932-4bb7-998e-8b1cbc546871")]
+[assembly: Guid("8c8295a5-5514-46f0-963e-01ee8ca4aa40")]
 
 [assembly: CLSCompliant(true)]

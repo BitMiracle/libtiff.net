@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 #if !SILVERLIGHT
+// namespace System.Drawing.* is not available in Silverlight
 using System.Drawing;
 using System.Drawing.Imaging;
 #endif

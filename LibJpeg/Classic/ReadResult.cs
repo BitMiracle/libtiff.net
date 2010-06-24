@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2009, Bit Miracle
+﻿/* Copyright (C) 2008-2010, Bit Miracle
  * http://www.bitmiracle.com
  */
 

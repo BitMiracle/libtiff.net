@@ -77,8 +77,12 @@ namespace BitMiracle.LibTiff.Classic
         private const float D50_Y0 = 100.0F;
         private const float D50_Z0 = 82.4680F;
 
+#if !SILVERLIGHT
         internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
-
+#else
+        // Latin1Encoding is not supported in Silverlight. Will throw exceptions at runtime.
+        internal static Encoding Latin1Encoding = Encoding.UTF8;
+#endif
         /// <summary>
         /// Gets the library version.
         /// </summary>
