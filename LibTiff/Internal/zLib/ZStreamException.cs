@@ -44,9 +44,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
-	
-	
-	public class ZStreamException:System.IO.IOException
+	class ZStreamException:System.IO.IOException
 	{
 		public ZStreamException():base()
 		{

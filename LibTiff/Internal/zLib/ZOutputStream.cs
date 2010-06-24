@@ -46,7 +46,7 @@ using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
 	
-	public class ZOutputStream:System.IO.Stream
+	class ZOutputStream:System.IO.Stream
 	{
 		private void  InitBlock()
 		{

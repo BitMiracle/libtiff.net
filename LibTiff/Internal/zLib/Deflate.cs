@@ -45,7 +45,7 @@ using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
 	
-	public sealed class Deflate
+	sealed class Deflate
 	{
 		
 		private const int MAX_MEM_LEVEL = 9;

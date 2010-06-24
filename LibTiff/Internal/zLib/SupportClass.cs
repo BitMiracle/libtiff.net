@@ -4,7 +4,7 @@ using System;
 
 namespace ComponentAce.Compression.Libs.zlib
 {
-	public class SupportClass
+	class SupportClass
 	{
 		/// <summary>
 		/// This method returns the literal value received

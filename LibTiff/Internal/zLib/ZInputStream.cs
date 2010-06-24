@@ -45,7 +45,7 @@ using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
 	
-	public class ZInputStream:System.IO.BinaryReader
+	class ZInputStream:System.IO.BinaryReader
 	{
 		internal void  InitBlock()
 		{
