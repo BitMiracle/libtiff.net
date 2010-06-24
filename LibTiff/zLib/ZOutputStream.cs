@@ -45,8 +45,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
-	
-	class ZOutputStream:System.IO.Stream
+#if EXPOSE_ZLIB
+    public
+#endif
+    class ZOutputStream : System.IO.Stream
 	{
 		private void  InitBlock()
 		{

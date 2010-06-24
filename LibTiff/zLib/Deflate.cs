@@ -44,8 +44,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
-	
-	sealed class Deflate
+#if EXPOSE_ZLIB
+    public
+#endif
+    sealed class Deflate
 	{
 		
 		private const int MAX_MEM_LEVEL = 9;

@@ -44,8 +44,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
-	
-	class ZInputStream:System.IO.BinaryReader
+#if EXPOSE_ZLIB
+    public
+#endif
+    class ZInputStream : System.IO.BinaryReader
 	{
 		internal void  InitBlock()
 		{

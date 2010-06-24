@@ -1,10 +1,11 @@
-
 using System;
-
 
 namespace ComponentAce.Compression.Libs.zlib
 {
-	class SupportClass
+#if EXPOSE_ZLIB
+    public
+#endif
+    class SupportClass
 	{
 		/// <summary>
 		/// This method returns the literal value received

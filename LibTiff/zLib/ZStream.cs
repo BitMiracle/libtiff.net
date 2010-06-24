@@ -44,7 +44,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
-	sealed class ZStream
+#if EXPOSE_ZLIB
+    public
+#endif
+    sealed class ZStream
 	{
 		
 		private const int MAX_WBITS = 15; // 32K LZ77 window		

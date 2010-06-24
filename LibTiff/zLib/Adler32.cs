@@ -45,8 +45,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 using System;
 namespace ComponentAce.Compression.Libs.zlib
-{
-	
+{	
 	sealed class Adler32
 	{
 		

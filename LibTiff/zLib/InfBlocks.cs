@@ -43,8 +43,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 using System;
 namespace ComponentAce.Compression.Libs.zlib
-{
-	
+{	
 	sealed class InfBlocks
 	{
 		private const int MANY = 1440;

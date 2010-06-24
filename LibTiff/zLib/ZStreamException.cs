@@ -44,7 +44,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
-	class ZStreamException:System.IO.IOException
+#if EXPOSE_ZLIB
+    public
+#endif
+    class ZStreamException : System.IO.IOException
 	{
 		public ZStreamException():base()
 		{
