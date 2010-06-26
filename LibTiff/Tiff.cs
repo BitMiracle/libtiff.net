@@ -80,8 +80,8 @@ namespace BitMiracle.LibTiff.Classic
 #if !SILVERLIGHT
         internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
 #else
-        // Latin1Encoding is not supported in Silverlight. Will throw exceptions at runtime.
-        internal static Encoding Latin1Encoding = Encoding.UTF8;
+        // Encoding.GetEncoding("Latin1") is not supported in Silverlight. Will throw exceptions at runtime.
+        internal static Enc28591 Latin1Encoding = new Enc28591();
 #endif
         /// <summary>
         /// Gets the library version.

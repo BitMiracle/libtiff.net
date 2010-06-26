@@ -140,7 +140,7 @@ namespace SilverlightTestApplication
                                             }
 
                                             break;
-
+                                            
                                         default:
 
                                             resultFrame = this.CreateErrorMessageTextBlock("Compression not supported.");
