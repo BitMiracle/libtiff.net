@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibJpeg2005", "LibJpeg\LibJpeg2005.csproj", "{7300CDF5-1C93-4611-8CC9-47FE79F340AB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff2005", "LibTiff\LibTiff2005.csproj", "{281EF657-40C0-432D-8AC4-E9ADDFD792B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Pdf2005", "Tiff2Pdf\Tiff2Pdf2005.csproj", "{39B5DBF6-6A8E-483C-B62D-B29F13DB54CC}"
@@ -11,7 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiffCP2005", "TiffCP\TiffCP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests2005", "UnitTests\UnitTests2005.csproj", "{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zLib2005", "zLib\zLib2005.csproj", "{366A602D-AF6F-4FE1-8A95-392ED17845DC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3A2ABAC5-1FA3-4D80-89D1-6AAE053B3C8B}"
+	ProjectSection(SolutionItems) = preProject
+		LibTiff\Help.shfbproj = LibTiff\Help.shfbproj
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Rgba2005", "Tiff2Rgba\Tiff2Rgba2005.csproj", "{1AA921C1-0AA0-4C56-9CDC-781CD21C8494}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +22,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7300CDF5-1C93-4611-8CC9-47FE79F340AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7300CDF5-1C93-4611-8CC9-47FE79F340AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7300CDF5-1C93-4611-8CC9-47FE79F340AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7300CDF5-1C93-4611-8CC9-47FE79F340AB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{281EF657-40C0-432D-8AC4-E9ADDFD792B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{281EF657-40C0-432D-8AC4-E9ADDFD792B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{281EF657-40C0-432D-8AC4-E9ADDFD792B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,10 +38,10 @@ Global
 		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{366A602D-AF6F-4FE1-8A95-392ED17845DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{366A602D-AF6F-4FE1-8A95-392ED17845DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{366A602D-AF6F-4FE1-8A95-392ED17845DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{366A602D-AF6F-4FE1-8A95-392ED17845DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AA921C1-0AA0-4C56-9CDC-781CD21C8494}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AA921C1-0AA0-4C56-9CDC-781CD21C8494}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AA921C1-0AA0-4C56-9CDC-781CD21C8494}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AA921C1-0AA0-4C56-9CDC-781CD21C8494}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
