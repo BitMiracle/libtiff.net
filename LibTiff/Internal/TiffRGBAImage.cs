@@ -1229,44 +1229,39 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             int[][] PALmap = img.PALmap;
             fromskew /= 8;
+
             int cpPos = cpOffset;
             int ppPos = ppOffset;
+
             while (h-- > 0)
             {
-                int[] bw = null;
+                int[] bw;
                 int bwPos = 0;
 
                 int _x;
                 for (_x = w; _x >= 8; _x -= 8)
                 {
-                    bw = PALmap[pp[ppPos]];
-                    ppPos++;
+                    bw = PALmap[pp[ppPos++]];
+                    bwPos = 0;
 
-                    for (int rc = 0; rc < 8; rc++)
-                    {
-                        cp[cpPos] = bw[bwPos];
-                        cpPos++;
-                        bwPos++;
-                    }
+                    for (int i = 0; i < 8; i++)
+                        cp[cpPos++] = bw[bwPos++];
                 }
 
                 if (_x > 0)
                 {
-                    bw = PALmap[pp[ppPos]];
-                    ppPos++;
+                    bw = PALmap[pp[ppPos++]];
+                    bwPos = 0;
 
                     if (_x <= 7 && _x > 0)
                     {
                         for (int i = 0; i < _x; i++)
-                        {
-                            cp[cpPos] = bw[i];
-                            cpPos++;
-                        }
+                            cp[cpPos++] = bw[bwPos++];
                     }
                 }
-
-                cpPos += toskew;
-                ppPos += fromskew;
+    
+	            cpPos += toskew;
+	            ppPos += fromskew;
             }
         }
 

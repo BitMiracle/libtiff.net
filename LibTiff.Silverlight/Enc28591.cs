@@ -13,8 +13,6 @@ namespace BitMiracle.LibTiff.Classic
 {
     class Enc28591
     {
-        //public static Enc28591 Value;
-
         public virtual char[] GetChars(byte[] bytes)
         {
             return GetChars(bytes, 0, bytes.Length);

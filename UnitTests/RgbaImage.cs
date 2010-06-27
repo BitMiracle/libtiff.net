@@ -70,6 +70,18 @@ namespace UnitTests
             }
         }
 
+        private static string[] ToPlainRgbaFiles
+        {
+            get
+            {
+                return new string[]
+                {
+                    "gray16-lzw-pc.tif",
+                    "tiger-palette-strip-01.tif"
+                };
+            }
+        }
+
         private static string[] ToRgbaFiles
         {
             get
@@ -121,7 +133,7 @@ namespace UnitTests
             Assert.True(ok);
         }
 
-        [Test, TestCaseSource("ToRgbaFiles")]
+        [Test, TestCaseSource("ToPlainRgbaFiles")]
         public void TestTiff2Rgba(string file)
         {
             testTiff2Rgba(file, new string[] {}, "_rgba");

@@ -3465,11 +3465,17 @@ namespace BitMiracle.LibTiff.Classic
                     return false;
                 }
 
-                strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
+                if (m_dir.td_rowsperstrip != -1)
+                    strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
+                else
+                    strip = 0;
             }
             else
             {
-                strip = row / m_dir.td_rowsperstrip;
+                if (m_dir.td_rowsperstrip != -1)
+                    strip = row / m_dir.td_rowsperstrip;
+                else
+                    strip = 0;
             }
 
             // Check strip array to make sure there's space. We don't support
@@ -3486,14 +3492,14 @@ namespace BitMiracle.LibTiff.Classic
                 if (!FlushData())
                     return false;
 
-                m_curstrip = strip;
+                m_curstrip = (int)strip;
 
                 // Watch out for a growing image. The value of strips/image 
                 // will initially be 1 (since it can't be deduced until the
                 // imagelength is known).
                 if (strip >= m_dir.td_stripsperimage && imagegrew)
                     m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
-                
+
                 m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
                 if ((m_flags & TiffFlags.CODERSETUP) != TiffFlags.CODERSETUP)
                 {
@@ -4313,7 +4319,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The number of strip.</returns>
         public int ComputeStrip(int row, short sample)
         {
-            int strip = row / m_dir.td_rowsperstrip;
+            int strip = 0;
+            if (m_dir.td_rowsperstrip != -1)
+                strip = row / m_dir.td_rowsperstrip;
+
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
             {
                 if (sample >= m_dir.td_samplesperpixel)

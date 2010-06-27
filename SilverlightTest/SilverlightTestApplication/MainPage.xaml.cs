@@ -172,7 +172,9 @@ namespace SilverlightTestApplication
             var imageByteRows = new List<byte[]>(frameHeight);
             for (int row = 0; row < frameHeight; row++)
             {
-                byte[] buffer = new byte[frameWidth / 8 + 1];
+                //byte[] buffer = new byte[frameWidth / 8 + 1];
+                int size = tiffWorker.ScanlineSize();
+                byte[] buffer = new byte[size];
 
                 if (!tiffWorker.ReadScanline(buffer, row))
                 {
@@ -381,18 +383,18 @@ namespace SilverlightTestApplication
                 "tiger-palette-tile-06.tif",
                 "tiger-palette-tile-07.tif",
                 "tiger-palette-tile-08.tif",
-                "tiger-rgb-strip-contig-01.tif",
-                "tiger-rgb-strip-contig-02.tif",
-                "tiger-rgb-strip-contig-04.tif",
+                    "tiger-rgb-strip-contig-01.tif", // unsupported by LibTiff
+                    "tiger-rgb-strip-contig-02.tif", // unsupported by LibTiff
+                    "tiger-rgb-strip-contig-04.tif", // unsupported by LibTiff
                 "tiger-rgb-strip-contig-08.tif",
                 "tiger-rgb-strip-planar-08.tif",
-                "tiger-rgb-tile-contig-01.tif",
-                "tiger-rgb-tile-contig-02.tif",
-                "tiger-rgb-tile-contig-04.tif",
+                    "tiger-rgb-tile-contig-01.tif", // unsupported by LibTiff
+                    "tiger-rgb-tile-contig-02.tif", // unsupported by LibTiff
+                    "tiger-rgb-tile-contig-04.tif", // unsupported by LibTiff
                 "tiger-rgb-tile-contig-08.tif",
                 "tiger-rgb-tile-planar-08.tif",
                 "tiger-separated-strip-contig-08.tif",
-                "tiger-separated-strip-planar-08.tif",
+                    "tiger-separated-strip-planar-08.tif", // unsupported by LibTiff
                 "XING_T24.TIF",
                 "ycbcr-cat.tif",
             };

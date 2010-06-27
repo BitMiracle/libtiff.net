@@ -181,10 +181,18 @@ namespace BitMiracle.LibTiff.Classic
                     return false;
                 }
 
-                strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
+                if (m_dir.td_rowsperstrip != -1)
+                    strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
+                else
+                    strip = 0;
             }
             else
-                strip = row / m_dir.td_rowsperstrip;
+            {
+                if (m_dir.td_rowsperstrip != -1)
+                    strip = row / m_dir.td_rowsperstrip;
+                else
+                    strip = 0;
+            }
             
             if (strip != m_curstrip)
             {
