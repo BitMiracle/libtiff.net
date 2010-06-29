@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4982B49A-C3D7-4C2A-82D9-195CAC547CFE}"
+	ProjectSection(SolutionItems) = preProject
+		LibTiff\Help.shfbproj = LibTiff\Help.shfbproj
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff", "LibTiff\LibTiff.csproj", "{281EF657-40C0-432D-8AC4-E9ADDFD792B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiffCP", "TiffCP\TiffCP.csproj", "{A5D6375E-7A29-48F2-A839-B7AE7ADB9753}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Pdf", "Tiff2Pdf\Tiff2Pdf.csproj", "{39B5DBF6-6A8E-483C-B62D-B29F13DB54CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Rgba", "Tiff2Rgba\Tiff2Rgba.csproj", "{0609056D-F67F-463A-AE18-FD3C60FF273D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{281EF657-40C0-432D-8AC4-E9ADDFD792B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{281EF657-40C0-432D-8AC4-E9ADDFD792B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{281EF657-40C0-432D-8AC4-E9ADDFD792B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{281EF657-40C0-432D-8AC4-E9ADDFD792B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5D6375E-7A29-48F2-A839-B7AE7ADB9753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5D6375E-7A29-48F2-A839-B7AE7ADB9753}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5D6375E-7A29-48F2-A839-B7AE7ADB9753}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5D6375E-7A29-48F2-A839-B7AE7ADB9753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39B5DBF6-6A8E-483C-B62D-B29F13DB54CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39B5DBF6-6A8E-483C-B62D-B29F13DB54CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39B5DBF6-6A8E-483C-B62D-B29F13DB54CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39B5DBF6-6A8E-483C-B62D-B29F13DB54CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F75C2A2-442F-46F5-B0A0-27A52B0193DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0609056D-F67F-463A-AE18-FD3C60FF273D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0609056D-F67F-463A-AE18-FD3C60FF273D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0609056D-F67F-463A-AE18-FD3C60FF273D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0609056D-F67F-463A-AE18-FD3C60FF273D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

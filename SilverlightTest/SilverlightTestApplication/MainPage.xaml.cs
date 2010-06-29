@@ -98,9 +98,12 @@ namespace SilverlightTestApplication
                                         case Compression.CCITTRLE:
                                         case Compression.CCITTRLEW:
 
+                                            // special processing for 2-bit images is NOT required.
+                                            // it left here only for illustrative purposes
+                                            // you can comment out next 10 line (from 'try' to 'break' inclusive)
                                             try
                                             {
-                                                resultFrame = this.CreateImage(this.CreateBmpFrom2Bit(tiffWorker, frameWidth, frameHeight));
+                                                resultFrame = this.CreateImage(tiffWorker, this.CreateBmpFrom2Bit(tiffWorker, frameWidth, frameHeight));
                                             }
                                             catch (Exception exc)
                                             {
@@ -132,7 +135,7 @@ namespace SilverlightTestApplication
 
                                             try
                                             {
-                                                resultFrame = this.CreateImage(this.CreateBmpFromRgba(tiffWorker, frameWidth, frameHeight));
+                                                resultFrame = this.CreateImage(tiffWorker, this.CreateBmpFromRgba(tiffWorker, frameWidth, frameHeight));
                                             }
                                             catch (Exception exc)
                                             {
@@ -172,10 +175,7 @@ namespace SilverlightTestApplication
             var imageByteRows = new List<byte[]>(frameHeight);
             for (int row = 0; row < frameHeight; row++)
             {
-                //byte[] buffer = new byte[frameWidth / 8 + 1];
-                int size = tiffWorker.ScanlineSize();
-                byte[] buffer = new byte[size];
-
+                byte[] buffer = new byte[frameWidth / 8 + 1];
                 if (!tiffWorker.ReadScanline(buffer, row))
                 {
                     throw new InvalidOperationException(String.Concat("Could not read row ", row, "."));
@@ -205,7 +205,6 @@ namespace SilverlightTestApplication
             tiffWorker.ReadRGBAImage(frameWidth, frameHeight, buffer);
 
             var bmp = new WriteableBitmap(frameWidth, frameHeight);
-
             for (int y = 0; y < frameHeight; y++)
             {
                 var ytif = y * frameWidth;
@@ -222,14 +221,32 @@ namespace SilverlightTestApplication
             return bmp;
         }
 
-        private Image CreateImage(WriteableBitmap bmp)
+        private Image CreateImage(Tiff tiffWorker, WriteableBitmap bmp)
         {
+            double widthMul = 1;
+            double heightMul = 1;
+            var field = tiffWorker.GetField(TiffTag.XRESOLUTION);
+            if (field != null)
+            {
+                double dpiX = field[0].ToDouble();
+                double dpiY = dpiX;
+
+                field = tiffWorker.GetField(TiffTag.YRESOLUTION);
+                if (field != null)
+                    dpiY = field[0].ToDouble();
+
+                if (dpiX > dpiY)
+                    widthMul = dpiY / dpiX;
+                else if (dpiY > dpiX)
+                    heightMul = dpiX / dpiY;
+            }
+
             return new Image()
             {
-                Stretch = Stretch.None,
+                Stretch = Stretch.Fill,
                 Source = bmp,
-                Width = bmp.PixelWidth,
-                Height = bmp.PixelHeight
+                Width = bmp.PixelWidth * widthMul,
+                Height = bmp.PixelHeight * heightMul
             };
         }
 
