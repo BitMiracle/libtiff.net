@@ -1386,7 +1386,7 @@ namespace BitMiracle.LibTiff.Classic
             /*
              * Allocate directory structure and setup defaults.
              */
-            if (!fieldSet(FieldBit.FIELD_IMAGEDIMENSIONS))
+            if (!fieldSet(FieldBit.ImageDimensions))
             {
                 missingRequired("ImageLength");
                 return false;
@@ -1395,7 +1395,7 @@ namespace BitMiracle.LibTiff.Classic
             /* 
              * Setup appropriate structures (by strip or by tile)
              */
-            if (!fieldSet(FieldBit.FIELD_TILEDIMENSIONS))
+            if (!fieldSet(FieldBit.TileDimensions))
             {
                 m_dir.td_nstrips = NumberOfStrips();
                 m_dir.td_tilewidth = m_dir.td_imagewidth;
@@ -1419,7 +1419,7 @@ namespace BitMiracle.LibTiff.Classic
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
 
-            if (!fieldSet(FieldBit.FIELD_STRIPOFFSETS))
+            if (!fieldSet(FieldBit.StripOffsets))
             {
                 if ((m_dir.td_compression == Compression.OJPEG) && !IsTiled() && (m_dir.td_nstrips == 1)) 
                 {
@@ -1431,7 +1431,7 @@ namespace BitMiracle.LibTiff.Classic
                     * because, presumably, all required data is in the
                     * JpegInterchangeFormat stream.
                     */
-                    setFieldBit(FieldBit.FIELD_STRIPOFFSETS);
+                    setFieldBit(FieldBit.StripOffsets);
                 } 
                 else 
                 {
@@ -1597,7 +1597,7 @@ namespace BitMiracle.LibTiff.Classic
             */
             if (m_dir.td_compression == Compression.OJPEG)
             {
-                if (!fieldSet(FieldBit.FIELD_PHOTOMETRIC))
+                if (!fieldSet(FieldBit.Photometric))
                 {
                     WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag is missing, assuming data is YCbCr");
                     if (!SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR))
@@ -1609,14 +1609,14 @@ namespace BitMiracle.LibTiff.Classic
                     WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag value assumed incorrect, assuming data is YCbCr instead of RGB");
                 }
                 
-                if (!fieldSet(FieldBit.FIELD_BITSPERSAMPLE))
+                if (!fieldSet(FieldBit.BitsPerSample))
                 {
                     WarningExt(this, m_clientdata, "ReadDirectory", "BitsPerSample tag is missing, assuming 8 bits per sample");
                     if (!SetField(TiffTag.BITSPERSAMPLE, 8))
                         return false;
                 }
 
-                if (!fieldSet(FieldBit.FIELD_SAMPLESPERPIXEL))
+                if (!fieldSet(FieldBit.SamplesPerPixel))
                 {
                     if ((m_dir.td_photometric == Photometric.RGB) || (m_dir.td_photometric == Photometric.YCBCR))
                     {
@@ -1636,7 +1636,7 @@ namespace BitMiracle.LibTiff.Classic
             /*
              * Verify Palette image has a Colormap.
              */
-            if (m_dir.td_photometric == Photometric.PALETTE && !fieldSet(FieldBit.FIELD_COLORMAP))
+            if (m_dir.td_photometric == Photometric.PALETTE && !fieldSet(FieldBit.ColorMap))
             {
                 missingRequired("Colormap");
                 return false;
@@ -1652,7 +1652,7 @@ namespace BitMiracle.LibTiff.Classic
                 /*
                  * Attempt to deal with a missing StripByteCounts tag.
                  */
-                if (!fieldSet(FieldBit.FIELD_STRIPBYTECOUNTS))
+                if (!fieldSet(FieldBit.StripByteCounts))
                 {
                     /*
                      * Some manufacturers violate the spec by not giving
@@ -1697,7 +1697,7 @@ namespace BitMiracle.LibTiff.Classic
 
             dir = null;
 
-            if (!fieldSet(FieldBit.FIELD_MAXSAMPLEVALUE))
+            if (!fieldSet(FieldBit.MaxSampleValue))
                 m_dir.td_maxsamplevalue = (short)((1 << m_dir.td_bitspersample) - 1);
 
             /*
@@ -1721,7 +1721,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            if (!fieldSet(FieldBit.FIELD_COMPRESSION))
+            if (!fieldSet(FieldBit.Compression))
                 SetField(TiffTag.COMPRESSION, Compression.NONE);
 
             // Some manufacturers make life difficult by writing large amounts
@@ -1917,7 +1917,7 @@ namespace BitMiracle.LibTiff.Classic
             for (int b = 0; b <= FieldBit.Last; b++)
             {
                 if (fieldSet(b) && b != FieldBit.Custom)
-                    nfields += (b < FieldBit.FIELD_SUBFILETYPE ? 2 : 1);
+                    nfields += (b < FieldBit.SubFileType ? 2 : 1);
             }
 
             nfields += m_dir.td_customValueCount;
@@ -1933,8 +1933,8 @@ namespace BitMiracle.LibTiff.Classic
             seekFile(m_dataoff, SeekOrigin.Begin);
             
             // Setup external form of directory entries and write data items.
-            int[] fields = new int[FieldBit.FIELD_SETLONGS];
-            Array.Copy(m_dir.td_fieldsset, fields, FieldBit.FIELD_SETLONGS);
+            int[] fields = new int[FieldBit.SetLongs];
+            Array.Copy(m_dir.td_fieldsset, fields, FieldBit.SetLongs);
 
             for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
             {
@@ -2521,9 +2521,9 @@ namespace BitMiracle.LibTiff.Classic
         public bool SetupStrips()
         {
             if (IsTiled())
-                m_dir.td_stripsperimage = isUnspecified(FieldBit.FIELD_TILEDIMENSIONS) ? m_dir.td_samplesperpixel : NumberOfTiles();
+                m_dir.td_stripsperimage = isUnspecified(FieldBit.TileDimensions) ? m_dir.td_samplesperpixel : NumberOfTiles();
             else
-                m_dir.td_stripsperimage = isUnspecified(FieldBit.FIELD_ROWSPERSTRIP) ? m_dir.td_samplesperpixel : NumberOfStrips();
+                m_dir.td_stripsperimage = isUnspecified(FieldBit.RowsPerStrip) ? m_dir.td_samplesperpixel : NumberOfStrips();
 
             m_dir.td_nstrips = m_dir.td_stripsperimage;
 
@@ -2533,8 +2533,8 @@ namespace BitMiracle.LibTiff.Classic
             m_dir.td_stripoffset = new uint[m_dir.td_nstrips];
             m_dir.td_stripbytecount = new uint[m_dir.td_nstrips];
 
-            setFieldBit(FieldBit.FIELD_STRIPOFFSETS);
-            setFieldBit(FieldBit.FIELD_STRIPBYTECOUNTS);
+            setFieldBit(FieldBit.StripOffsets);
+            setFieldBit(FieldBit.StripByteCounts);
             return true;
         }
         
@@ -2577,7 +2577,7 @@ namespace BitMiracle.LibTiff.Classic
              * BEENWRITING is set, TIFFSetField will only allow
              * the image's length to be changed).
              */
-            if (!fieldSet(FieldBit.FIELD_IMAGEDIMENSIONS))
+            if (!fieldSet(FieldBit.ImageDimensions))
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Must set \"ImageWidth\" before writing data", m_name);
                 return false;
@@ -2591,12 +2591,12 @@ namespace BitMiracle.LibTiff.Classic
                  * because this field is used in other parts of library even
                  * in the single band case.
                  */
-                if (!fieldSet(FieldBit.FIELD_PLANARCONFIG))
+                if (!fieldSet(FieldBit.PlanarConfig))
                     m_dir.td_planarconfig = PlanarConfig.CONTIG;
             }
             else
             {
-                if (!fieldSet(FieldBit.FIELD_PLANARCONFIG))
+                if (!fieldSet(FieldBit.PlanarConfig))
                 {
                     ErrorExt(this, m_clientdata, module, "{0}: Must set \"PlanarConfiguration\" before writing data", m_name);
                     return false;
@@ -2623,8 +2623,8 @@ namespace BitMiracle.LibTiff.Classic
         {
             if (m_dir != null)
             {
-                clearFieldBit(FieldBit.FIELD_YCBCRSUBSAMPLING);
-                clearFieldBit(FieldBit.FIELD_YCBCRPOSITIONING);
+                clearFieldBit(FieldBit.YCbCrSubsampling);
+                clearFieldBit(FieldBit.YCbCrPositioning);
 
                 m_dir = null;
             }
@@ -2934,7 +2934,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             fprintf(fd, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
     
-            if (fieldSet(FieldBit.FIELD_SUBFILETYPE))
+            if (fieldSet(FieldBit.SubFileType))
             {
                 fprintf(fd, "  Subfile Type:");
                 string sep = " ";
@@ -2956,26 +2956,26 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(fd, " ({0} = 0x{1:x})\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
             }
 
-            if (fieldSet(FieldBit.FIELD_IMAGEDIMENSIONS))
+            if (fieldSet(FieldBit.ImageDimensions))
             {
                 fprintf(fd, "  Image Width: {0} Image Length: {1}", m_dir.td_imagewidth, m_dir.td_imagelength);
-                if (fieldSet(FieldBit.FIELD_IMAGEDEPTH))
+                if (fieldSet(FieldBit.ImageDepth))
                     fprintf(fd, " Image Depth: {0}", m_dir.td_imagedepth);
                 fprintf(fd, "\n");
             }
 
-            if (fieldSet(FieldBit.FIELD_TILEDIMENSIONS))
+            if (fieldSet(FieldBit.TileDimensions))
             {
                 fprintf(fd, "  Tile Width: {0} Tile Length: {1}", m_dir.td_tilewidth, m_dir.td_tilelength);
-                if (fieldSet(FieldBit.FIELD_TILEDEPTH))
+                if (fieldSet(FieldBit.TileDepth))
                     fprintf(fd, " Tile Depth: {0}", m_dir.td_tiledepth);
                 fprintf(fd, "\n");
             }
 
-            if (fieldSet(FieldBit.FIELD_RESOLUTION))
+            if (fieldSet(FieldBit.Resolution))
             {
                 fprintf(fd, "  Resolution: {0:G}, {1:G}", m_dir.td_xresolution, m_dir.td_yresolution);
-                if (fieldSet(FieldBit.FIELD_RESOLUTIONUNIT))
+                if (fieldSet(FieldBit.ResolutionUnit))
                 {
                     switch (m_dir.td_resolutionunit)
                     {
@@ -2996,13 +2996,13 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(fd, "\n");
             }
 
-            if (fieldSet(FieldBit.FIELD_POSITION))
+            if (fieldSet(FieldBit.Position))
                 fprintf(fd, "  Position: {0:G}, {1:G}\n", m_dir.td_xposition, m_dir.td_yposition);
             
-            if (fieldSet(FieldBit.FIELD_BITSPERSAMPLE))
+            if (fieldSet(FieldBit.BitsPerSample))
                 fprintf(fd, "  Bits/Sample: {0}\n", m_dir.td_bitspersample);
             
-            if (fieldSet(FieldBit.FIELD_SAMPLEFORMAT))
+            if (fieldSet(FieldBit.SampleFormat))
             {
                 fprintf(fd, "  Sample Format: ");
                 switch (m_dir.td_sampleformat)
@@ -3031,7 +3031,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            if (fieldSet(FieldBit.FIELD_COMPRESSION))
+            if (fieldSet(FieldBit.Compression))
             {
                 TiffCodec c = FindCodec(m_dir.td_compression);
                 fprintf(fd, "  Compression Scheme: ");
@@ -3041,7 +3041,7 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_compression, m_dir.td_compression);
             }
 
-            if (fieldSet(FieldBit.FIELD_PHOTOMETRIC))
+            if (fieldSet(FieldBit.Photometric))
             {
                 fprintf(fd, "  Photometric Interpretation: ");
                 if ((int)m_dir.td_photometric < photoNames.Length)
@@ -3063,7 +3063,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            if (fieldSet(FieldBit.FIELD_EXTRASAMPLES) && m_dir.td_extrasamples != 0)
+            if (fieldSet(FieldBit.ExtraSamples) && m_dir.td_extrasamples != 0)
             {
                 fprintf(fd, "  Extra Samples: {0}<", m_dir.td_extrasamples);
                 string sep = "";
@@ -3089,7 +3089,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(fd, ">\n");
             }
 
-            if (fieldSet(FieldBit.FIELD_INKNAMES))
+            if (fieldSet(FieldBit.InkNames))
             {
                 fprintf(fd, "  Ink Names: ");
                 
@@ -3103,7 +3103,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(fd, "\n");
             }
 
-            if (fieldSet(FieldBit.FIELD_THRESHHOLDING))
+            if (fieldSet(FieldBit.Thresholding))
             {
                 fprintf(fd, "  Thresholding: ");
                 switch (m_dir.td_threshholding)
@@ -3123,7 +3123,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            if (fieldSet(FieldBit.FIELD_FILLORDER))
+            if (fieldSet(FieldBit.FillOrder))
             {
                 fprintf(fd, "  FillOrder: ");
                 switch (m_dir.td_fillorder)
@@ -3140,7 +3140,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            if (fieldSet(FieldBit.FIELD_YCBCRSUBSAMPLING))
+            if (fieldSet(FieldBit.YCbCrSubsampling))
             {
                 /*
                  * For hacky reasons (see tif_jpeg.c - JPEGFixupTestSubsampling),
@@ -3153,7 +3153,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(fd, "  YCbCr Subsampling: {0}, {1}\n", subsampling0, subsampling1);
             }
 
-            if (fieldSet(FieldBit.FIELD_YCBCRPOSITIONING))
+            if (fieldSet(FieldBit.YCbCrPositioning))
             {
                 fprintf(fd, "  YCbCr Positioning: ");
                 switch (m_dir.td_ycbcrpositioning)
@@ -3170,10 +3170,10 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            if (fieldSet(FieldBit.FIELD_HALFTONEHINTS))
+            if (fieldSet(FieldBit.HalftoneHints))
                 fprintf(fd, "  Halftone Hints: light {0} dark {1}\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
             
-            if (fieldSet(FieldBit.FIELD_ORIENTATION))
+            if (fieldSet(FieldBit.Orientation))
             {
                 fprintf(fd, "  Orientation: ");
                 if ((int)m_dir.td_orientation < orientNames.Length)
@@ -3182,10 +3182,10 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_orientation, m_dir.td_orientation);
             }
 
-            if (fieldSet(FieldBit.FIELD_SAMPLESPERPIXEL))
+            if (fieldSet(FieldBit.SamplesPerPixel))
                 fprintf(fd, "  Samples/Pixel: {0}\n", m_dir.td_samplesperpixel);
             
-            if (fieldSet(FieldBit.FIELD_ROWSPERSTRIP))
+            if (fieldSet(FieldBit.RowsPerStrip))
             {
                 fprintf(fd, "  Rows/Strip: ");
                 if (m_dir.td_rowsperstrip == -1)
@@ -3194,19 +3194,19 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(fd, "{0}\n", m_dir.td_rowsperstrip);
             }
 
-            if (fieldSet(FieldBit.FIELD_MINSAMPLEVALUE))
+            if (fieldSet(FieldBit.MinSampleValue))
                 fprintf(fd, "  Min Sample Value: {0}\n", m_dir.td_minsamplevalue);
             
-            if (fieldSet(FieldBit.FIELD_MAXSAMPLEVALUE))
+            if (fieldSet(FieldBit.MaxSampleValue))
                 fprintf(fd, "  Max Sample Value: {0}\n", m_dir.td_maxsamplevalue);
             
-            if (fieldSet(FieldBit.FIELD_SMINSAMPLEVALUE))
+            if (fieldSet(FieldBit.SMinSampleValue))
                 fprintf(fd, "  SMin Sample Value: {0:G}\n", m_dir.td_sminsamplevalue);
             
-            if (fieldSet(FieldBit.FIELD_SMAXSAMPLEVALUE))
+            if (fieldSet(FieldBit.SMaxSampleValue))
                 fprintf(fd, "  SMax Sample Value: {0:G}\n", m_dir.td_smaxsamplevalue);
             
-            if (fieldSet(FieldBit.FIELD_PLANARCONFIG))
+            if (fieldSet(FieldBit.PlanarConfig))
             {
                 fprintf(fd, "  Planar Configuration: ");
                 switch (m_dir.td_planarconfig)
@@ -3223,10 +3223,10 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            if (fieldSet(FieldBit.FIELD_PAGENUMBER))
+            if (fieldSet(FieldBit.PageNumber))
                 fprintf(fd, "  Page Number: {0}-{1}\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
             
-            if (fieldSet(FieldBit.FIELD_COLORMAP))
+            if (fieldSet(FieldBit.ColorMap))
             {
                 fprintf(fd, "  Color Map: ");
                 if ((flags & TiffPrintFlags.COLORMAP) != 0)
@@ -3240,7 +3240,7 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(fd, "(present)\n");
             }
 
-            if (fieldSet(FieldBit.FIELD_TRANSFERFUNCTION))
+            if (fieldSet(FieldBit.TransferFunction))
             {
                 fprintf(fd, "  Transfer Function: ");
                 if ((flags & TiffPrintFlags.CURVES) != 0)
@@ -3259,7 +3259,7 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(fd, "(present)\n");
             }
 
-            if (fieldSet(FieldBit.FIELD_SUBIFD) && m_dir.td_subifd != null)
+            if (fieldSet(FieldBit.SubIFD) && m_dir.td_subifd != null)
             {
                 fprintf(fd, "  SubIFD Offsets:");
                 for (short i = 0; i < m_dir.td_nsubifd; i++)
@@ -3363,7 +3363,7 @@ namespace BitMiracle.LibTiff.Classic
 
             m_tagmethods.PrintDir(this, fd, flags);
 
-            if ((flags & TiffPrintFlags.STRIPS) != 0 && fieldSet(FieldBit.FIELD_STRIPOFFSETS))
+            if ((flags & TiffPrintFlags.STRIPS) != 0 && fieldSet(FieldBit.StripOffsets))
             {
                 fprintf(fd, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
                 for (int s = 0; s < m_dir.td_nstrips; s++)

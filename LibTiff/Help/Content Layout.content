@@ -1,8 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Topics defaultTopic="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" splitTOCTopic="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb">
-  <Topic id="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" visible="True" title="Differences between LibTiff-3.9.2 and LibTiff.NET">
+<Topics defaultTopic="28e55885-805a-4a45-b62e-2f8e71c1a9bf" splitTOCTopic="b104b853-026c-4369-b748-4810c886edfc">
+  <Topic id="28e55885-805a-4a45-b62e-2f8e71c1a9bf" visible="True" />
+  <Topic id="c3b8a067-673b-42d0-9d38-991c8964d125" visible="True" />
+  <Topic id="abdb7196-7bdc-4dee-88c7-fe25459575df" visible="True" />
+  <Topic id="04c510d6-361c-4325-b3e5-6d8139a21d5f" visible="True" />
+  <Topic id="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" visible="True" title="Differences between LibTiff-3.9.4 and LibTiff.NET">
     <Topic id="6b83b9ec-01f4-43db-a54e-e0e2f9193517" visible="True" title="General notes" />
     <Topic id="10524b34-596d-4865-a6bc-9b4eecbee300" visible="True" title="Renamings of functions" />
     <Topic id="fa16a5c5-6f52-4455-b130-9363a5bec120" visible="True" title="Renamings of constants and types" />
   </Topic>
+  <Topic id="b104b853-026c-4369-b748-4810c886edfc" visible="True" />
+  <Topic id="1b462c16-6d61-4002-912d-53f796c60ec2" visible="True" />
 </Topics>

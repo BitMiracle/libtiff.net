@@ -110,10 +110,10 @@
     <CopyrightText>Copyright &amp;#169%3b 2009-2010 Bit Miracle. All rights reserved.</CopyrightText>
     <FeedbackEMailAddress>support%40bitmiracle.com</FeedbackEMailAddress>
     <FeedbackEMailLinkText>support%40bitmiracle.com</FeedbackEMailLinkText>
-    <HelpTitle>LibTiff.NET, a managed version of LibTiff library used for reading and writing TIFF images.</HelpTitle>
+    <HelpTitle>LibTiff.NET, a managed version of the LibTiff library for reading and writing TIFF.</HelpTitle>
     <NamespaceSummaries>
-      <NamespaceSummaryItem name="BitMiracle.LibTiff.Classic" isDocumented="True">The .NET port of original libtiff.</NamespaceSummaryItem>
-    </NamespaceSummaries>
+      <NamespaceSummaryItem name="BitMiracle.LibTiff.Classic" isDocumented="True">This namespace contains all classes, structures, delegates, and enumerations in the .NET version (port) of the original LibTiff library.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="(global)" isDocumented="False" /></NamespaceSummaries>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in
        order for Visual Studio to perform the build.  The others are optional
@@ -141,6 +141,12 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Help\Getting Started.aml" />
+    <None Include="Help\Copyright.aml" />
+    <None Include="Help\Links to Resources.aml" />
+    <None Include="Help\TIFF 6.0 specification coverage.aml" />
+    <None Include="Help\License.aml" />
+    <None Include="Help\Welcome.aml" />
     <None Include="Help\Renamings of constants and types.aml" />
     <None Include="Help\Renaming of functions.aml" />
     <None Include="Help\General notes.aml" />

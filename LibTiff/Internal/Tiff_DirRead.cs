@@ -120,8 +120,8 @@ namespace BitMiracle.LibTiff.Classic
                     m_dir.td_stripbytecount[strip] = (uint)(rowbytes * rowsperstrip);
             }
             
-            setFieldBit(FieldBit.FIELD_STRIPBYTECOUNTS);
-            if (!fieldSet(FieldBit.FIELD_ROWSPERSTRIP))
+            setFieldBit(FieldBit.StripByteCounts);
+            if (!fieldSet(FieldBit.RowsPerStrip))
                 m_dir.td_rowsperstrip = m_dir.td_imagelength;
 
             return true;

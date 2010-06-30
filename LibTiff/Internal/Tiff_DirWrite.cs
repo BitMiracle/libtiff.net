@@ -123,7 +123,7 @@ namespace BitMiracle.LibTiff.Classic
             for (int b = 0; b <= FieldBit.Last; b++)
             {
                 if (fieldSet(b) && b != FieldBit.Custom)
-                    nfields += (b < FieldBit.FIELD_SUBFILETYPE ? 2 : 1);
+                    nfields += (b < FieldBit.SubFileType ? 2 : 1);
             }
 
             nfields += m_dir.td_customValueCount;
@@ -146,13 +146,13 @@ namespace BitMiracle.LibTiff.Classic
             int dir = 0;
 
             // Setup external form of directory entries and write data items.
-            int[] fields = new int[FieldBit.FIELD_SETLONGS];
-            Array.Copy(m_dir.td_fieldsset, fields, FieldBit.FIELD_SETLONGS);
+            int[] fields = new int[FieldBit.SetLongs];
+            Array.Copy(m_dir.td_fieldsset, fields, FieldBit.SetLongs);
 
             // Write out ExtraSamples tag only if extra samples are present in the data.
-            if (fieldSet(fields, FieldBit.FIELD_EXTRASAMPLES) && m_dir.td_extrasamples == 0)
+            if (fieldSet(fields, FieldBit.ExtraSamples) && m_dir.td_extrasamples == 0)
             {
-                resetFieldBit(fields, FieldBit.FIELD_EXTRASAMPLES);
+                resetFieldBit(fields, FieldBit.ExtraSamples);
                 nfields--;
                 dirsize -= TiffDirEntry.SizeInBytes;
             } /*XXX*/
@@ -182,7 +182,7 @@ namespace BitMiracle.LibTiff.Classic
                 TiffTag tag = (TiffTag)FieldBit.Ignore;
                 switch (fip.Bit)
                 {
-                    case FieldBit.FIELD_STRIPOFFSETS:
+                    case FieldBit.StripOffsets:
                         // We use one field bit for both strip and tile 
                         // offsets, and so must be careful in selecting
                         // the appropriate field descriptor (so that tags
@@ -198,7 +198,7 @@ namespace BitMiracle.LibTiff.Classic
                             return false;
 
                         break;
-                    case FieldBit.FIELD_STRIPBYTECOUNTS:
+                    case FieldBit.StripByteCounts:
                         // We use one field bit for both strip and tile byte
                         // counts, and so must be careful in selecting the
                         // appropriate field descriptor (so that tags are
@@ -214,72 +214,72 @@ namespace BitMiracle.LibTiff.Classic
                             return false;
 
                         break;
-                    case FieldBit.FIELD_ROWSPERSTRIP:
+                    case FieldBit.RowsPerStrip:
                         setupShortLong(TiffTag.ROWSPERSTRIP, ref data[dir], m_dir.td_rowsperstrip);
                         break;
-                    case FieldBit.FIELD_COLORMAP:
+                    case FieldBit.ColorMap:
                         if (!writeShortTable(TiffTag.COLORMAP, ref data[dir], 3, m_dir.td_colormap))
                             return false;
 
                         break;
-                    case FieldBit.FIELD_IMAGEDIMENSIONS:
+                    case FieldBit.ImageDimensions:
                         setupShortLong(TiffTag.IMAGEWIDTH, ref data[dir++], m_dir.td_imagewidth);
                         setupShortLong(TiffTag.IMAGELENGTH, ref data[dir], m_dir.td_imagelength);
                         break;
-                    case FieldBit.FIELD_TILEDIMENSIONS:
+                    case FieldBit.TileDimensions:
                         setupShortLong(TiffTag.TILEWIDTH, ref data[dir++], m_dir.td_tilewidth);
                         setupShortLong(TiffTag.TILELENGTH, ref data[dir], m_dir.td_tilelength);
                         break;
-                    case FieldBit.FIELD_COMPRESSION:
+                    case FieldBit.Compression:
                         setupShort(TiffTag.COMPRESSION, ref data[dir], (short)m_dir.td_compression);
                         break;
-                    case FieldBit.FIELD_PHOTOMETRIC:
+                    case FieldBit.Photometric:
                         setupShort(TiffTag.PHOTOMETRIC, ref data[dir], (short)m_dir.td_photometric);
                         break;
-                    case FieldBit.FIELD_POSITION:
+                    case FieldBit.Position:
                         if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XPOSITION, m_dir.td_xposition, TiffTag.YPOSITION, m_dir.td_yposition))
                             return false;
 
                         dir++;
                         break;
-                    case FieldBit.FIELD_RESOLUTION:
+                    case FieldBit.Resolution:
                         if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XRESOLUTION, m_dir.td_xresolution, TiffTag.YRESOLUTION, m_dir.td_yresolution))
                             return false;
 
                         dir++;
                         break;
-                    case FieldBit.FIELD_BITSPERSAMPLE:
-                    case FieldBit.FIELD_MINSAMPLEVALUE:
-                    case FieldBit.FIELD_MAXSAMPLEVALUE:
-                    case FieldBit.FIELD_SAMPLEFORMAT:
+                    case FieldBit.BitsPerSample:
+                    case FieldBit.MinSampleValue:
+                    case FieldBit.MaxSampleValue:
+                    case FieldBit.SampleFormat:
                         if (!writePerSampleShorts(fip.Tag, ref data[dir]))
                             return false;
 
                         break;
-                    case FieldBit.FIELD_SMINSAMPLEVALUE:
-                    case FieldBit.FIELD_SMAXSAMPLEVALUE:
+                    case FieldBit.SMinSampleValue:
+                    case FieldBit.SMaxSampleValue:
                         if (!writePerSampleAnys(sampleToTagType(), fip.Tag, ref data[dir]))
                             return false;
 
                         break;
-                    case FieldBit.FIELD_PAGENUMBER:
-                    case FieldBit.FIELD_HALFTONEHINTS:
-                    case FieldBit.FIELD_YCBCRSUBSAMPLING:
+                    case FieldBit.PageNumber:
+                    case FieldBit.HalftoneHints:
+                    case FieldBit.YCbCrSubsampling:
                         if (!setupShortPair(fip.Tag, ref data[dir]))
                             return false;
 
                         break;
-                    case FieldBit.FIELD_INKNAMES:
+                    case FieldBit.InkNames:
                         if (!writeInkNames(ref data[dir]))
                             return false;
 
                         break;
-                    case FieldBit.FIELD_TRANSFERFUNCTION:
+                    case FieldBit.TransferFunction:
                         if (!writeTransferFunction(ref data[dir]))
                             return false;
 
                         break;
-                    case FieldBit.FIELD_SUBIFD:
+                    case FieldBit.SubIFD:
                         // XXX: Always write this field using LONG type
                         // for backward compatibility.
                         data[dir].tdir_tag = fip.Tag;

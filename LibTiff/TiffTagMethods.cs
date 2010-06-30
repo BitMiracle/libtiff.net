@@ -115,7 +115,7 @@ namespace BitMiracle.LibTiff.Classic
                     * previous module so that it can cleanup any state it's
                     * setup.
                     */
-                    if (tif.fieldSet(FieldBit.FIELD_COMPRESSION))
+                    if (tif.fieldSet(FieldBit.Compression))
                     {
                         if (td.td_compression == comp)
                             break;
@@ -181,7 +181,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
 
                     td.td_rowsperstrip = v32;
-                    if (!tif.fieldSet(FieldBit.FIELD_TILEDIMENSIONS))
+                    if (!tif.fieldSet(FieldBit.TileDimensions))
                     {
                         td.td_tilelength = v32;
                         td.td_tilewidth = td.td_imagewidth;

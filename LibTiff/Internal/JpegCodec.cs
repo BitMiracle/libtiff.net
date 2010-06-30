@@ -168,7 +168,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
              * Mark the YCBCRSAMPLES as present even if it is not
              * see: JPEGFixupTestSubsampling().
              */
-            m_tif.setFieldBit(FieldBit.FIELD_YCBCRSUBSAMPLING);
+            m_tif.setFieldBit(FieldBit.YCbCrSubsampling);
             return true;
         }
 

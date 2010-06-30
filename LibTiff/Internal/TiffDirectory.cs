@@ -23,7 +23,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// bit vector of fields that are set
         /// </summary>
-        public int[] td_fieldsset = new int[FieldBit.FIELD_SETLONGS];
+        public int[] td_fieldsset = new int[FieldBit.SetLongs];
 
         public int td_imagewidth;
         public int td_imagelength;
