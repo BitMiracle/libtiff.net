@@ -1,54 +1,85 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="28e55885-805a-4a45-b62e-2f8e71c1a9bf" revisionNumber="1">
-  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <introduction>
-    <para>Welcome to the <legacyBold>LibTiff.Net</legacyBold> library.</para>
-    
-    <para>LibTiff.Net is the .NET library for the Tag Image File Format (TIFF),
-    a widely used format for storing image data.</para>
-    
-    <para>The library does <legacyBold>not</legacyBold> rely on GDI, GDI+
-    or any other imaging technologies of the .NET Framework and Windows OS.</para>
-    
-    <para>This software distribution includes two flavours (for general .NET
-    applications and for Silverlight applications) of the Libtiff.Net library for
-    reading and writing TIFF, a small collection of tools for doing simple
-    manipulations of TIFF images, and documentation on the library and tools.</para>
-    </introduction>
-    
-    <alert class="note">
-    	<para>If you are new to the LibTiff.Net, see the
-    	<link xlink:href="04c510d6-361c-4325-b3e5-6d8139a21d5f" />
-    	topic to get familiar with the library and set up your project for
-    	reading and writing TIFF.
-		</para>
-    </alert>
-    
-    <para>The library, along with associated tool programs, should handle most
-    of your needs for reading and writing TIFF images.</para>
-    
-    <para>This software is based in part on the work of the Sam Leffler, Silicon
-    Graphics, Inc. and contributors.</para>
-       
-    
-	<para>The following sections are included in this documentation:</para>
-	<list class="bullet">
-		<listItem>Welcome</listItem>
-		<listItem><link xlink:href="c3b8a067-673b-42d0-9d38-991c8964d125" /></listItem>
-		<listItem><link xlink:href="abdb7196-7bdc-4dee-88c7-fe25459575df" /></listItem>
-		<listItem><link xlink:href="04c510d6-361c-4325-b3e5-6d8139a21d5f" /></listItem>
-		<listItem>
-			<link xlink:href="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" />
-			<list class="bullet">
-  				<listItem><link xlink:href="6b83b9ec-01f4-43db-a54e-e0e2f9193517" /></listItem>
-  				<listItem><link xlink:href="10524b34-596d-4865-a6bc-9b4eecbee300" /></listItem>
-  				<listItem><link xlink:href="fa16a5c5-6f52-4455-b130-9363a5bec120" /></listItem>
-			</list>
-		</listItem>
-		<listItem><codeEntityReference>N:BitMiracle.LibTiff.Classic</codeEntityReference> namespace</listItem>
-		<listItem><link xlink:href="b104b853-026c-4369-b748-4810c886edfc" /></listItem>
-		<listItem><link xlink:href="1b462c16-6d61-4002-912d-53f796c60ec2" /></listItem>
-	</list>
-	
-  </developerConceptualDocument>
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <introduction>
+            <para>
+                Welcome to the <legacyBold>LibTiff.Net</legacyBold> library.
+            </para>
+
+            <para>
+                LibTiff.Net is the .NET library for the Tag Image File Format (TIFF),
+                a widely used format for storing image data.
+            </para>
+
+            <para>
+                The library does <legacyBold>not</legacyBold> rely on GDI, GDI+
+                or any other imaging technologies of the .NET Framework and Windows OS.
+            </para>
+
+            <para>
+                This software distribution includes two flavours (for general .NET
+                applications and for Silverlight applications) of the Libtiff.Net library for
+                reading and writing TIFF, a small collection of tools for doing simple
+                manipulations of TIFF images, and documentation on the library and tools.
+            </para>
+        </introduction>
+
+        <alert class="note">
+            <para>
+                If you are new to the LibTiff.Net, see the
+                <link xlink:href="04c510d6-361c-4325-b3e5-6d8139a21d5f" />
+                topic to get familiar with the library and set up your project for
+                reading and writing TIFF.
+            </para>
+        </alert>
+
+        <para>
+            The library, along with associated tool programs, should handle most
+            of your needs for reading and writing TIFF images.
+        </para>
+
+        <para>
+            This software is based in part on the work of the Sam Leffler, Silicon
+            Graphics, Inc. and contributors.
+        </para>
+
+
+        <para>The following sections are included in this documentation:</para>
+        <list class="bullet">
+            <listItem>Welcome</listItem>
+            <listItem>
+                <link xlink:href="c3b8a067-673b-42d0-9d38-991c8964d125" />
+            </listItem>
+            <listItem>
+                <link xlink:href="abdb7196-7bdc-4dee-88c7-fe25459575df" />
+            </listItem>
+            <listItem>
+                <link xlink:href="04c510d6-361c-4325-b3e5-6d8139a21d5f" />
+            </listItem>
+            <listItem>
+                <link xlink:href="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" />
+                <list class="bullet">
+                    <listItem>
+                        <link xlink:href="6b83b9ec-01f4-43db-a54e-e0e2f9193517" />
+                    </listItem>
+                    <listItem>
+                        <link xlink:href="10524b34-596d-4865-a6bc-9b4eecbee300" />
+                    </listItem>
+                    <listItem>
+                        <link xlink:href="fa16a5c5-6f52-4455-b130-9363a5bec120" />
+                    </listItem>
+                </list>
+            </listItem>
+            <listItem>
+                <codeEntityReference>N:BitMiracle.LibTiff.Classic</codeEntityReference> namespace
+            </listItem>
+            <listItem>
+                <link xlink:href="b104b853-026c-4369-b748-4810c886edfc" />
+            </listItem>
+            <listItem>
+                <link xlink:href="1b462c16-6d61-4002-912d-53f796c60ec2" />
+            </listItem>
+        </list>
+
+    </developerConceptualDocument>
 </topic>

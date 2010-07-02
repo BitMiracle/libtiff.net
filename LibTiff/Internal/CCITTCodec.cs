@@ -29,24 +29,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
 {
     partial class CCITTCodec : TiffCodec
     {
-        /*
-        * To override the default routine used to image decoded
-        * spans one can use the pseduo tag FAXFILLFUNC.
-        * The routine must have the type signature given below;
-        * for example:
-        *
-        * fillruns(byte[] buf, int startOffset, int[] runs, int thisrun, int erun, int lastx)
-        *
-        * where buf is place to set the bits, startOffset is index of first byte to process,
-        * runs is the array of b&w run lengths (white then black), thisrun is current 
-        * row's run array index, erun is the index of last run in the array, and
-        * lastx is the width of the row in pixels.  Fill routines can assume
-        * the run array has room for at least lastx runs and can overwrite
-        * data in the run array as needed (e.g. to append zero runs to bring
-        * the count up to a nice multiple).
-        */
-        public delegate void FaxFillFunc(byte[] buf, int startOffset, int[] runs, int thisrun, int erun, int lastx);
-
         public const int FIELD_BADFAXLINES = (FieldBit.Codec + 0);
         public const int FIELD_CLEANFAXDATA = (FieldBit.Codec + 1);
         public const int FIELD_BADFAXRUN = (FieldBit.Codec + 2);
@@ -67,7 +49,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         internal string m_faxdcs; /* Table 2/T.30 encoded session params */
 
         /* Decoder state info */
-        internal FaxFillFunc fill; /* fill routine */
+        internal Tiff.FaxFillFunc fill; /* fill routine */
 
         private const int EOL_CODE = 0x001;   /* EOL code value - 0000 0000 0000 1 */
 
@@ -1478,7 +1460,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
 
             m_runs = null;
-            m_tif.SetField(TiffTag.FAXFILLFUNC, new FaxFillFunc(fax3FillRuns));
+            m_tif.SetField(TiffTag.FAXFILLFUNC, new Tiff.FaxFillFunc(fax3FillRuns));
             m_refline = null;
 
             m_decoder = Decoder.useFax3_1DDecoder;

@@ -137,7 +137,8 @@ namespace BitMiracle.LibTiff.Classic
 
         private Tiff safeOpenFailed()
         {
-            m_mode = O_RDONLY; /* XXX avoid flush */
+            // XXX avoid flush
+            m_mode = O_RDONLY;
             return null;
         }
     }

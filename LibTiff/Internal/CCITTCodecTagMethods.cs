@@ -30,7 +30,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     sp.m_mode = (FaxMode)ap[0].ToShort();
                     return true; /* NB: pseudo tag */
                 case TiffTag.FAXFILLFUNC:
-                    sp.fill = ap[0].Value as CCITTCodec.FaxFillFunc;
+                    sp.fill = ap[0].Value as Tiff.FaxFillFunc;
                     return true; /* NB: pseudo tag */
                 case TiffTag.GROUP3OPTIONS:
                     /* XXX: avoid reading options if compression mismatches. */

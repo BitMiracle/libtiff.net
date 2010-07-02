@@ -1,39 +1,49 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="c3b8a067-673b-42d0-9d38-991c8964d125" revisionNumber="1">
-  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-  	<para>Copyright (c) 2009-2010, Bit Miracle</para>
-	
-	<para>All rights reserved.</para>
-	
-	<para>Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met:</para>
-		
-	<list class="bullet">
-	  	<listItem>Redistributions of source code must retain the above copyright
-      	notice, this list of conditions and the following disclaimer.</listItem>
-      	
-	  	<listItem>Redistributions in binary form must reproduce the above copyright
-      	notice, this list of conditions and the following disclaimer in the
-      	documentation and/or other materials provided with the distribution.</listItem>
-      	
-	  	<listItem>Neither the name of the Bit Miracle nor the names of its
-	  	contributors may be used to endorse or promote products derived from
-	  	this software without specific prior written permission.</listItem>
-	</list>
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <para>Copyright (c) 2009-2010, Bit Miracle</para>
 
-	<para>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-	"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-	TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-	PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL BIT MIRACLE BE LIABLE FOR ANY
-	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</para>
+        <para>All rights reserved.</para>
 
-    <relatedTopics>
-      <link xlink:href="1b462c16-6d61-4002-912d-53f796c60ec2" />
-    </relatedTopics>
-  </developerConceptualDocument>
+        <para>
+            Redistribution and use in source and binary forms, with or without
+            modification, are permitted provided that the following conditions are met:
+        </para>
+
+        <list class="bullet">
+            <listItem>
+                Redistributions of source code must retain the above copyright
+                notice, this list of conditions and the following disclaimer.
+            </listItem>
+
+            <listItem>
+                Redistributions in binary form must reproduce the above copyright
+                notice, this list of conditions and the following disclaimer in the
+                documentation and/or other materials provided with the distribution.
+            </listItem>
+
+            <listItem>
+                Neither the name of the Bit Miracle nor the names of its
+                contributors may be used to endorse or promote products derived from
+                this software without specific prior written permission.
+            </listItem>
+        </list>
+
+        <para>
+            THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+            "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+            TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+            PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL BIT MIRACLE BE LIABLE FOR ANY
+            DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+            (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+            LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+            ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+            (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+            SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+        </para>
+
+        <relatedTopics>
+            <link xlink:href="1b462c16-6d61-4002-912d-53f796c60ec2" />
+        </relatedTopics>
+    </developerConceptualDocument>
 </topic>

@@ -1,52 +1,59 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="6b83b9ec-01f4-43db-a54e-e0e2f9193517" revisionNumber="1">
-  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <section address="Main">
-      <content>
-        <para><legacyBold>TIFF</legacyBold> struct changed it's name to 
-        <codeEntityReference>T:BitMiracle.LibTiff.Classic.Tiff</codeEntityReference>
-        and became full-featured class.
-        </para>
-        
-        <para>In LibTiff most functions were accepting pointer to a 
-        <legacyBold>TIFF</legacyBold> struct as first parameter. LibTiff.NET does 
-        not need it because these functions are now methods of 
-        <codeEntityReference>T:BitMiracle.LibTiff.Classic.Tiff</codeEntityReference>
-        class.
-        </para>
-        
-        <para><legacyBold>TIFFCodec</legacyBold> struct changed it's name to 
-        <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffCodec</codeEntityReference>
-        and became full-featured class with virtual methods suitable for overloading.
-        </para>
-        
-        <para><legacyBold>TIFFTagMethods</legacyBold> struct changed it's name to 
-        <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffTagMethods</codeEntityReference>
-        and became full-featured class with virtual methods suitable for overloading.
-        </para>
-        
-        <para><legacyBold>TIFFRegisterCODEC</legacyBold> function changed it's name 
-        and signature. It is now known as 
-        <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.RegisterCodec(BitMiracle.LibTiff.Classic.TiffCodec)</codeEntityReference>
-        and gets an instance of class derived from TiffCodec.
-        </para>
-        
-        <para>Custom error handling strategy changed. Now you should provide 
-        implementation of a class derived from 
-        <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffErrorHandler</codeEntityReference>
-        and pass it as parameter to 
-        <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.SetErrorHandler(BitMiracle.LibTiff.Classic.TiffErrorHandler)</codeEntityReference>
-        method.
-        </para>
-        
-        <para>Custom file/stream handling strategy changed. Now you should provide
-        implementation of a class derived from
-        <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffStream</codeEntityReference>
-        and pass it as parameter to
-        <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ClientOpen(System.String,System.String,System.Object,BitMiracle.LibTiff.Classic.TiffStream)</codeEntityReference>
-        method.
-        </para>
-      </content>
-    </section>
-  </developerConceptualDocument>
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <section address="Main">
+            <content>
+                <para>
+                    <legacyBold>TIFF</legacyBold> struct changed it's name to
+                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.Tiff</codeEntityReference>
+                    and became full-featured class.
+                </para>
+
+                <para>
+                    In LibTiff most functions were accepting pointer to a
+                    <legacyBold>TIFF</legacyBold> struct as first parameter. LibTiff.NET does
+                    not need it because these functions are now methods of
+                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.Tiff</codeEntityReference>
+                    class.
+                </para>
+
+                <para>
+                    <legacyBold>TIFFCodec</legacyBold> struct changed it's name to
+                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffCodec</codeEntityReference>
+                    and became full-featured class with virtual methods suitable for overloading.
+                </para>
+
+                <para>
+                    <legacyBold>TIFFTagMethods</legacyBold> struct changed it's name to
+                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffTagMethods</codeEntityReference>
+                    and became full-featured class with virtual methods suitable for overloading.
+                </para>
+
+                <para>
+                    <legacyBold>TIFFRegisterCODEC</legacyBold> function changed it's name
+                    and signature. It is now known as
+                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.RegisterCodec(BitMiracle.LibTiff.Classic.TiffCodec)</codeEntityReference>
+                    and gets an instance of class derived from TiffCodec.
+                </para>
+
+                <para>
+                    Custom error handling strategy changed. Now you should provide
+                    implementation of a class derived from
+                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffErrorHandler</codeEntityReference>
+                    and pass it as parameter to
+                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.SetErrorHandler(BitMiracle.LibTiff.Classic.TiffErrorHandler)</codeEntityReference>
+                    method.
+                </para>
+
+                <para>
+                    Custom file/stream handling strategy changed. Now you should provide
+                    implementation of a class derived from
+                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffStream</codeEntityReference>
+                    and pass it as parameter to
+                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ClientOpen(System.String,System.String,System.Object,BitMiracle.LibTiff.Classic.TiffStream)</codeEntityReference>
+                    method.
+                </para>
+            </content>
+        </section>
+    </developerConceptualDocument>
 </topic>

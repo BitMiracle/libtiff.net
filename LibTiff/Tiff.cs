@@ -65,6 +65,21 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         public delegate void TiffExtendProc(Tiff tif);
 
+        /// <summary>
+        /// To override the default routine used to image decoded spans one can use the pseudo
+        /// tag FAXFILLFUNC with an instance of this delegate.
+        /// </summary>
+        /// <param name="buf">place to set the bits</param>
+        /// <param name="startOffset">index of first byte to process</param>
+        /// <param name="runs">the array of black and white run lengths (white then black)</param>
+        /// <param name="thisrun">current row's run array index</param>
+        /// <param name="erun">the index of last run in the array</param>
+        /// <param name="lastx">the width of the row in pixels</param>
+        /// <remarks>Fill routines can assume the run array has room for at least
+        /// <paramref name="lastx"/> runs and can overwrite data in the run array as
+        /// needed (e.g. to append zero runs to bring the count up to a nice multiple).</remarks>
+        public delegate void FaxFillFunc(byte[] buf, int startOffset, int[] runs, int thisrun, int erun, int lastx);
+
         private const int TIFF_VERSION = 42;
         private const int TIFF_BIGTIFF_VERSION = 43;
 

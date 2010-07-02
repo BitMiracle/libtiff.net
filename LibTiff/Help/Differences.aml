@@ -1,36 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" revisionNumber="1">
-  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <section address="Main">
-      <content>
-        <para>Our priority was to introduce as little changes into LibTiff's API 
-        as possible. But, as you can imagine, some changes had to be made because 
-        of differences between C and C# languages and underlying class libraries.
-        </para>
-        
-        <para>Also, we were unable to resist the temptation to rename some methods 
-        and types.
-        </para>
-        
-        <para>LibTiff prefers unsigned integer types for parameters and return 
-        values. LibTiff.NET, by contrast, prefers signed integer types for 
-        parameters and return values. You can pass unsigned values or convert 
-        return values to unsigned types if you wish, but keep in mind, that it 
-        will affect performance (not seriously, though).
-        </para>
-        
-        <para>
-          <link xlink:href="6b83b9ec-01f4-43db-a54e-e0e2f9193517">General notes</link>
-        </para>
-        
-        <para>
-          <link xlink:href="10524b34-596d-4865-a6bc-9b4eecbee300">Renamings of functions</link>
-        </para>
-        
-        <para>
-          <link xlink:href="fa16a5c5-6f52-4455-b130-9363a5bec120">Renamings of constants and types</link>
-        </para>
-      </content>
-    </section>
-  </developerConceptualDocument>
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <section address="Main">
+            <content>
+                <para>
+                    Our priority was to introduce as little changes into LibTiff's API
+                    as possible. But, as you can imagine, some changes had to be made because
+                    of differences between C and C# languages and underlying class libraries.
+                </para>
+
+                <para>
+                    Also, we were unable to resist the temptation to rename some methods
+                    and types.
+                </para>
+
+                <para>
+                    LibTiff prefers unsigned integer types for parameters and return
+                    values. LibTiff.NET, by contrast, prefers signed integer types for
+                    parameters and return values. You can pass unsigned values or convert
+                    return values to unsigned types if you wish, but keep in mind, that it
+                    will affect performance (not seriously, though).
+                </para>
+
+                <para>
+                    <link xlink:href="6b83b9ec-01f4-43db-a54e-e0e2f9193517">General notes</link>
+                </para>
+
+                <para>
+                    <link xlink:href="10524b34-596d-4865-a6bc-9b4eecbee300">Renamings of functions</link>
+                </para>
+
+                <para>
+                    <link xlink:href="fa16a5c5-6f52-4455-b130-9363a5bec120">Renamings of constants and types</link>
+                </para>
+            </content>
+        </section>
+    </developerConceptualDocument>
 </topic>
