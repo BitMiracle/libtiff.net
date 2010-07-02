@@ -113,7 +113,8 @@
     <HelpTitle>LibTiff.NET, a managed version of the LibTiff library for reading and writing TIFF.</HelpTitle>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="BitMiracle.LibTiff.Classic" isDocumented="True">This namespace contains all classes, structures, delegates, and enumerations in the .NET version (port) of the original LibTiff library.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="(global)" isDocumented="False" /></NamespaceSummaries>
+      <NamespaceSummaryItem name="(global)" isDocumented="False" />
+    </NamespaceSummaries>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in
        order for Visual Studio to perform the build.  The others are optional
@@ -141,11 +142,22 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Help\Test Images.aml" />
+    <None Include="Help\Version History.aml" />
+    <None Include="Help\Acknowledgements.aml" />
+    <None Include="Help\TiffCP.aml" />
+    <None Include="Help\Tiff2Rgba.aml" />
+    <None Include="Help\Tiff2Pdf.aml" />
+    <None Include="Help\TIFF tools.aml" />
+    <None Include="Help\Adding new (custom) tags.aml" />
+    <None Include="Help\Graphics programming with LibTiff.Net.aml" />
+    <None Include="Help\Basic introduction to the capabilities of the library.aml" />
+    <None Include="Help\Building source code of LibTiff.Net.aml" />
+    <None Include="Help\Using pre-built LibTiff.Net.aml" />
+    <None Include="Help\License and Copyright.aml" />
     <None Include="Help\Getting Started.aml" />
-    <None Include="Help\Copyright.aml" />
     <None Include="Help\Links to Resources.aml" />
     <None Include="Help\TIFF 6.0 specification coverage.aml" />
-    <None Include="Help\License.aml" />
     <None Include="Help\Welcome.aml" />
     <None Include="Help\Renamings of constants and types.aml" />
     <None Include="Help\Renaming of functions.aml" />
