@@ -136,6 +136,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Help\Images\" />
     <Folder Include="Help\" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,24 @@
     <None Include="Help\Renaming of functions.aml" />
     <None Include="Help\General notes.aml" />
     <None Include="Help\Differences.aml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Help\Images\AddReference.png">
+      <AlternateText>Add reference dialog</AlternateText>
+      <ImageId>AddReference</ImageId>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Help\Images\RandomTif.png">
+      <ImageId>RandomTif</ImageId>
+      <AlternateText>random.tif opened in default TIFF viewer</AlternateText>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Help\Images\AddReferenceSilverlight.png">
+      <AlternateText>Add reference dialog</AlternateText>
+      <ImageId>AddReferenceSilverlight</ImageId>
+    </Image>
   </ItemGroup>
   <!-- Import the SHFB build targets -->
   <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" />
