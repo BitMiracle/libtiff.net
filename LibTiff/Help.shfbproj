@@ -136,6 +136,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Help\Getting Started\TIFF Tools\" />
+    <Folder Include="Help\Differences\" />
     <Folder Include="Help\Getting Started\Graphics programming with LibTiff.Net\" />
     <Folder Include="Help\Getting Started\" />
     <Folder Include="Help\Graphics programming with LibTiff.Net\" />
@@ -147,30 +149,30 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Help\Differences\Renamings of constants and types.aml" />
+    <None Include="Help\Differences\Renaming of functions.aml" />
+    <None Include="Help\Differences\General notes.aml" />
+    <None Include="Help\Differences\Differences.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Graphics programming with LibTiff.Net.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Part2. Grayscale and color imaging.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Part1. Black-and-white imaging.aml" />
-    <None Include="Help\InvisibleFromTOC\Writing TIFF. Full source code.aml" />
-    <None Include="Help\Test Images.aml" />
-    <None Include="Help\Version History.aml" />
-    <None Include="Help\Acknowledgements.aml" />
-    <None Include="Help\TiffCP.aml" />
-    <None Include="Help\Tiff2Rgba.aml" />
-    <None Include="Help\Tiff2Pdf.aml" />
-    <None Include="Help\TIFF tools.aml" />
+    <None Include="Help\Getting Started\TIFF Tools\TiffCP.aml" />
+    <None Include="Help\Getting Started\TIFF Tools\Tiff2Rgba.aml" />
+    <None Include="Help\Getting Started\TIFF Tools\Tiff2Pdf.aml" />
+    <None Include="Help\Getting Started\TIFF Tools\TIFF tools.aml" />
     <None Include="Help\Getting Started\Adding new (custom) tags.aml" />
     <None Include="Help\Getting Started\Basic introduction to the capabilities of the library.aml" />
     <None Include="Help\Getting Started\Building source code of LibTiff.Net.aml" />
-    <None Include="Help\Getting Started\Using pre-built LibTiff.Net.aml" />
-    <None Include="Help\License and Copyright.aml" />
     <None Include="Help\Getting Started\Getting Started.aml" />
+    <None Include="Help\Getting Started\Test Images.aml" />
+    <None Include="Help\Getting Started\Using pre-built LibTiff.Net.aml" />
+    <None Include="Help\InvisibleFromTOC\Writing TIFF. Full source code.aml" />
+    <None Include="Help\Acknowledgements.aml" />
+    <None Include="Help\License and Copyright.aml" />
     <None Include="Help\Links to Resources.aml" />
     <None Include="Help\TIFF 6.0 specification coverage.aml" />
+    <None Include="Help\Version History.aml" />
     <None Include="Help\Welcome.aml" />
-    <None Include="Help\Renamings of constants and types.aml" />
-    <None Include="Help\Renaming of functions.aml" />
-    <None Include="Help\General notes.aml" />
-    <None Include="Help\Differences.aml" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Help\Images\AddReference.png">
