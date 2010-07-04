@@ -286,15 +286,6 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /// <summary>
-        /// Frees and releases all resources allocated by this <see cref="Tiff"/>.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         private void Dispose(bool disposing)
         {
             if (!this.m_disposed)
@@ -304,6 +295,8 @@ namespace BitMiracle.LibTiff.Classic
                 if (disposing)
                 {
                     // Dispose managed resources.
+                    Close();
+
                     if (m_fileStream != null)
                         m_fileStream.Dispose();
                 }

@@ -136,6 +136,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Help\InvisibleFromTOC\" />
     <Folder Include="Help\Images\" />
     <Folder Include="Help\" />
   </ItemGroup>
@@ -143,6 +144,7 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Help\InvisibleFromTOC\Writing TIFF. Full source code.aml" />
     <None Include="Help\Test Images.aml" />
     <None Include="Help\Version History.aml" />
     <None Include="Help\Acknowledgements.aml" />

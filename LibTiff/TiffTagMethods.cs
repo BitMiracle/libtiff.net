@@ -389,9 +389,9 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.REFERENCEBLACKWHITE:
-		            /* XXX should check for null range */
-		            Tiff.setFloatArray(out td.td_refblackwhite, ap[0].ToFloatArray(), 6);
-		            break;
+                    /* XXX should check for null range */
+                    Tiff.setFloatArray(out td.td_refblackwhite, ap[0].ToFloatArray(), 6);
+                    break;
                 case TiffTag.INKNAMES:
                     v = ap[0].ToInt();
                     string s = ap[1].ToString();
@@ -787,7 +787,7 @@ namespace BitMiracle.LibTiff.Classic
                         result = new FieldValue[1];
                         result[0].Set(td.td_refblackwhite);
                     }
-	                break;
+                    break;
                 case TiffTag.INKNAMES:
                     result = new FieldValue[1];
                     result[0].Set(td.td_inknames);

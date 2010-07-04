@@ -1,85 +1,171 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="7aac47e1-7126-4e75-8667-be7549d6c0b6" revisionNumber="1">
     <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <!--
-    <summary>
-      <para>Optional summary abstract</para>
-    </summary>
-    -->
         <introduction>
-            The library requires Microsoft Visual Studio 2005 or later for building source code
-            of .NET version and Microsoft Visual Studio 2008 or later for xfor use.
-
-            <!-- Uncomment this to generate an outline of the section and sub-section
-           titles.  Specify a numeric value as the inner text to limit it to
-           a specific number of sub-topics when creating the outline.  Specify
-           zero (0) to limit it to top-level sections only.  -->
-            <!-- <autoOutline /> -->
-            <para>Required introduction</para>
+            <para>
+                This article explains how to build source code package of LibTiff.Net library.
+            </para>
+            <para>
+                If you prefer to use pre-built LibTiff.Net library, please read
+                <link xlink:href="aa770c56-8f9f-489f-b5b3-ad8797ef3727">this article</link>.
+                It describes the steps you need to take to setup your environment to read
+                and write TIFF files in your applications.
+            </para>
         </introduction>
-        <!-- Add one or more top-level section elements.  These are collapsible.
-         If using <autoOutline />, add an address attribute to identify it
-         and specify a title so that it can be jumped to with a hyperlink. -->
+        <para>
+            The source code of the library may be built using Microsoft Visual Studio 2005 or later
+            (general .NET version). Silverlight version of the library may be built using
+            Microsoft Visual Studio 2008 or later.
+        </para>
+
+        <alert class="note">
+            <para>
+                The zip with latest source code release of the LibTiff.Net library
+                can always be downloaded from
+                <externalLink>
+                    <linkText>http://bitmiracle.com/libtiff.net_src.zip</linkText>
+                    <linkUri>http://bitmiracle.com/libtiff.net_src.zip</linkUri>
+                    <linkTarget>_blank</linkTarget>
+                </externalLink>.
+            </para>
+        </alert>
+
+        <alert class="note">
+            <para>
+                The source code package of the LibTiff.Net library contains source code
+                for the library, all tools and sample applications. Unit tests and test
+                images are also included in source code package.
+            </para>
+        </alert>
+
         <section address="Section1">
-            <title>Optional section title</title>
-            <content>
-                <!-- Uncomment this to create a sub-section outline
-        <autoOutline /> -->
-                <para>Add one or more sections with content</para>
-            </content>
-            <!-- If a section contains a sections element, its content creates
-           sub-sections.  These are not collapsible.
-      <sections>
-          <section address="SubSection1">
-              <title>Sub-section 1</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-          <section address="SubSection2">
-              <title>Sub-section 2</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-      </sections> -->
+            <content></content>
+            <sections>
+                <section address="SubSection1">
+                    <title>Building LibTiff.net using Microsoft Visual Studio 2005</title>
+                    <content>
+                        <para>
+                            First of all, you need to extract source code package into a
+                            folder of your choice.
+                        </para>
+                        <para>
+                            Next, open the folder that you extracted source code package to.
+                            To build source code of the library just open
+                            <legacyBold>LibTiff.NET.2005.sln</legacyBold>
+                            file from the folder in Microsoft Visual Studio 2005
+                            and build the solution.
+                        </para>
+                    </content>
+                </section>
+                <section address="SubSection2">
+                    <title>Building LibTiff.net using Microsoft Visual Studio 2008</title>
+                    <content>
+                        <para>
+                            First of all, you need to extract source code package into a
+                            folder of your choice.
+                        </para>
+                        <para>
+                            Next, open the folder that you extracted source code package to.
+                            You have two choices:
+                            <list class="bullet">
+                                <listItem>
+                                    To build just general .NET version of the library
+                                    open <legacyBold>LibTiff.NET.2008_NoSilverlight.sln</legacyBold>
+                                    file from the folder in Microsoft Visual Studio 2008 and
+                                    build the solution.
+                                </listItem>
+                                <listItem>
+                                    To build general .NET version and Silverlight version of the
+                                    library open <legacyBold>LibTiff.NET.2008.sln</legacyBold> file
+                                    from the folder in Microsoft Visual Studio 2008 and
+                                    build the solution.
+                                </listItem>
+                            </list>
+                        </para>
+                        <alert class="note">
+                            <para>
+                                To build Silverlight version of the LibTiff.Net using Microsoft
+                                Visual Studio 2008 you'll need Microsoft Silverlight 3 SDK and
+                                Microsoft Silverlight 3 Tools for Visual Studio 2008 SP1 installed.
+                            </para>
+                        </alert>
+                    </content>
+                </section>
+                <section address="SubSection3">
+                    <title>Building LibTiff.net using Microsoft Visual Studio 2010</title>
+                    <content>
+                        <para>
+                            First of all, you need to extract source code package into a
+                            folder of your choice.
+                        </para>
+                        <para>
+                            Next, open the folder that you extracted source code package to.
+                            You have three choices:
+                            <list class="bullet">
+                                <listItem>
+                                    To build just general .NET version of the library
+                                    open <legacyBold>LibTiff.NET_NoSilverlight</legacyBold>
+                                    file from the folder in Microsoft Visual Studio 2010 and
+                                    build the solution.
+                                </listItem>
+                                <listItem>
+                                    To build general .NET version and Silverlight version of the
+                                    library targeting Silverlight 3 runtime open
+                                    <legacyBold>LibTiff.NET_Silverlight3</legacyBold> file
+                                    from the folder in Microsoft Visual Studio 2010 and
+                                    build the solution.
+                                </listItem>
+                                <listItem>
+                                    To build general .NET version and Silverlight version of the
+                                    library targeting Silverlight 4 runtime open
+                                    <legacyBold>LibTiff.NET</legacyBold> file
+                                    from the folder in Microsoft Visual Studio 2010 and
+                                    build the solution.
+                                </listItem>
+                            </list>
+                        </para>
+                        <alert class="note">
+                            <para>
+                                To build Silverlight version of the LibTiff.Net targeting Silverlight 3
+                                runtime using Microsoft Visual Studio 2010 you'll need Microsoft
+                                Silverlight 3 SDK installed.
+                            </para>
+                        </alert>
+                        <alert class="note">
+                            <para>
+                                To build Silverlight version of the LibTiff.Net targeting Silverlight 4
+                                runtime using Microsoft Visual Studio 2010 you'll need Microsoft
+                                Silverlight 4 SDK and Microsoft Silverlight 4 Tools for Visual
+                                Studio 2010 installed.
+                            </para>
+                        </alert>
+                    </content>
+                </section>
+                <section address="SubSection4">
+                    <title>Building documentation for LibTiff.net</title>
+                    <content>
+                        <para>
+                            First of all, you need to extract source code package into a
+                            folder of your choice.
+                        </para>
+                        <para>
+                            Next, open the folder that you extracted source code package to.
+                            After that open LibTiff subfolder in that folder.
+                            To build documentation for LibTiff.Net just open
+                            <legacyBold>Help.shfbproj</legacyBold>
+                            file from the folder in Sandcastle Help File Builder GUI
+                            and build the project.
+                        </para>
+                        <alert class="note">
+                            <para>
+                                To build documentation for the LibTiff.Net you'll need
+                                latest Sandcastle, Sandcastle Help File Builder GUI,
+                                and patch from Sandcastle Styles Project installed.
+                            </para>
+                        </alert>
+                    </content>
+                </section>
+            </sections>
         </section>
-        <relatedTopics>
-            <!-- One or more of the following:
-           - A local link
-           - An external link
-           - A code entity reference
-
-      <link xlink:href="Other Topic's ID"/>
-      <link xlink:href="Other Topic's ID">Link inner text</link>
-
-      <externalLink>
-          <linkText>Link text</linkText>
-          <linkAlternateText>Optional alternate link text</linkAlternateText>
-          <linkUri>URI</linkUri>
-      </externalLink>
-
-      <codeEntityReference>API member ID</codeEntityReference>
-
-      Examples:
-
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8270" />
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8278">Some other topic</link>
-
-      <externalLink>
-          <linkText>SHFB on CodePlex</linkText>
-          <linkAlternateText>Go to CodePlex</linkAlternateText>
-          <linkUri>http://shfb.codeplex.com</linkUri>
-      </externalLink>
-
-      <codeEntityReference>T:TestDoc.TestClass</codeEntityReference>
-      <codeEntityReference>P:TestDoc.TestClass.SomeProperty</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor(System.String,System.Int32)</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.ToString</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.FirstMethod</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.SecondMethod(System.Int32,System.String)</codeEntityReference>
-      -->
-        </relatedTopics>
     </developerConceptualDocument>
 </topic>

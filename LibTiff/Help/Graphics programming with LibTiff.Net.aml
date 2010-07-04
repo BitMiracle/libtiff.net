@@ -1,48 +1,207 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="0a42c654-edcb-404a-bbfa-1d50cfad9769" revisionNumber="1">
-  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!--
-    <summary>
-      <para>Optional summary abstract</para>
-    </summary>
-    -->
-    <introduction>
-      <!-- Uncomment this to generate an outline of the section and sub-section
-           titles.  Specify a numeric value as the inner text to limit it to
-           a specific number of sub-topics when creating the outline.  Specify
-           zero (0) to limit it to top-level sections only.  -->
-      <!-- <autoOutline /> -->
-      <para>Required introduction</para>
-    </introduction>
-    <!-- Add one or more top-level section elements.  These are collapsible.
-         If using <autoOutline />, add an address attribute to identify it
-         and specify a title so that it can be jumped to with a hyperlink. -->
-    <section address="Section1">
-      <title>Optional section title</title>
-      <content>
-        <!-- Uncomment this to create a sub-section outline
-        <autoOutline /> -->
-        <para>Add one or more sections with content</para>
-      </content>
-      <!-- If a section contains a sections element, its content creates
-           sub-sections.  These are not collapsible.
-      <sections>
-          <section address="SubSection1">
-              <title>Sub-section 1</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-          <section address="SubSection2">
-              <title>Sub-section 2</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-      </sections> -->
-    </section>
-    <relatedTopics>
-      <!-- One or more of the following:
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <introduction>
+            <para>
+                This article is the "Graphics programming with libtiff" tutorial by Michael Still
+                rewritten to reflect differences between libtiff and LibTiff.Net.
+                You can read original article at
+                <externalLink>
+                    <linkText>IBM DeveloperWorks site</linkText>
+                    <linkUri>http://www.ibm.com/developerworks/linux/library/l-libtiff</linkUri>
+                    <linkTarget>_blank</linkTarget>
+                </externalLink>.
+            </para>
+        </introduction>
+        <section address="Section1">
+            <content></content>
+
+            <sections>
+                <section address="SubSection1">
+                    <title>Summary for part 1</title>
+                    <content>
+                        <para>
+                            TIFF is an extremely common but quite complex raster image format.
+                            LibTiff.Net, a free managed implementation of the TIFF specification,
+                            based on LibTiff, a standard ANSI C implementation. This article
+                            discusses some of the pitfalls of TIFF and guides you through use of
+                            the LibTiff.Net library. The article also shows examples of how to use
+                            LibTiff.Net for your black-and-white imaging needs.
+                        </para>
+                        <para>
+                            TIFF (Tag Image File Format) is a raster image format that was
+                            originally produced by Adobe. Raster image formats store the picture
+                            as a bitmap describing the state of pixels, as opposed to recording
+                            the length and locations of primitives such as lines and curves.
+                            LibTiff.Net is one of the implementations of the TIFF specification.
+                            This article focuses on black-and-white TIFF images; a possible future
+                            article will cover color images.
+                        </para>
+                    </content>
+                </section>
+                <section address="SubSection2">
+                    <title>The TIFF challenge</title>
+                    <content>
+                        <para>
+                            Most file format specifications define some basic rules for the
+                            representation of the file. For instance, PNG documents (a competitor to
+                            TIFF) are always big endian. TIFF, however, doesn't mandate things like
+                            this. Here are some examples of the seemingly basic things that it
+                            doesn't define:
+                            <list class="bullet">
+                                <listItem>Byte order: big endian or little endian</listItem>
+                                <listItem>
+                                    Fill order of the bit within the image bytes: most
+                                    significant or least significant bit first
+                                </listItem>
+                                <listItem>
+                                    Meaning of a given pixel value for black and white:
+                                    is 0 black or white?
+                                </listItem>
+                            </list>
+                        </para>
+                        <para>
+                            Creating a TIFF file can be very easy, because it is rare to have to
+                            do any conversion of the data that you already have. On the other
+                            hand, it also means that reading in random TIFFs created by other
+                            applications can be very hard - you have to code for all possible
+                            combinations to be reasonably certain of having a reliable product.
+                        </para>
+                        <para>
+                            So, how do you write an application that can read in all these
+                            different possible permutations of the TIFF format? The most important
+                            thing to remember is
+                            <legacyItalic>
+                                never make assumptions about the format of the image data you
+                                are reading in.
+                            </legacyItalic>
+                        </para>
+                    </content>
+                </section>
+                <section address="SubSection3">
+                    <title>Writing TIFF files</title>
+                    <content>
+                        <para>
+                            First I'll show how to write a TIFF file out. Then I'll show how to
+                            read a TIFF file back into your program.
+                        </para>
+                        <para>
+                            <legacyBold>Infrastructure for writing</legacyBold>
+                        </para>
+                        <para>
+                            Bitmaps are traditionally represented inside your code by an array of
+                            bytes. In Listing 1, I set up LibTiff.Net and create a simple buffer
+                            that contains an image I can then write out to disk.
+                        </para>
+                        <para>
+                            <legacyItalic>Listing 1. Setting up the infrastructure</legacyItalic>
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ConsoleApplication1
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        byte[] buffer = new byte[25 * 144];
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            The code above is pretty simple. To use LibTiff.Net, all you need is
+                            to add reference to BitMiracle.LibTiff.NET.dll (or
+                            BitMiracle.LibTiff.Silverligh.dll in Silverlight project) and
+                            add using statement for BitMiracle.LibTiff.Classic namespace.
+                            The byte buffer that we have defined here is going to be our
+                            black-and-white image, so we should define one of those next.
+                        </para>
+                        <para>
+                            <legacyBold>Writing the image</legacyBold>
+                        </para>
+                        <para>
+                            To make up for that boring example, I am now pleased to present you
+                            with what is possibly the worst picture of the Sydney Harbor Bridge
+                            ever drawn. In Listing 2, the image is already in the image buffer
+                            and all we have to do is save it to the file on disk. The example
+                            first opens a TIFF image in write mode and then places the image
+                            into that file.
+                        </para>
+                        <para>
+                            Please note that for clarity I have omitted the actual hex for the
+                            image; this is available in the
+                            <link xlink:href="df711b0d-97d4-4add-861c-9a0fe1da68eb">full version
+                            of this code</link>, for those who are interested.
+                        </para>
+                        <para>
+                            <legacyItalic>Listing 2. The writing code</legacyItalic>
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ConsoleApplication1
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        byte[] buffer = new byte[25 * 144]
+                                        {
+                                            // boring hex omitted
+                                        };
+
+                                        // Open the TIFF file
+                                        using (Tiff image = Tiff.Open("output.tif", "w"))
+                                        {
+                                            if (image == null)
+                                            {
+                                                System.Console.Error.WriteLine("Could not open output.tif for writing");
+                                                return;
+                                            }
+
+                                            // We need to set some values for basic tags before we can add any data
+                                            image.SetField(TiffTag.IMAGEWIDTH, 25 * 8);
+                                            image.SetField(TiffTag.IMAGELENGTH, 144);
+                                            image.SetField(TiffTag.BITSPERSAMPLE, 1);
+                                            image.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                                            image.SetField(TiffTag.ROWSPERSTRIP, 144);
+
+                                            image.SetField(TiffTag.COMPRESSION, Compression.CCITTFAX4);
+                                            image.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISWHITE);
+                                            image.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+                                            image.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+                                            image.SetField(TiffTag.XRESOLUTION, 150.0);
+                                            image.SetField(TiffTag.YRESOLUTION, 150.0);
+                                            image.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.INCH);
+
+                                            // Write the information to the file
+                                            image.WriteEncodedStrip(0, buffer, 25 * 144);
+                
+                                            // file will be auto-closed during disposal
+                                            // but you can close image yourself
+                                            image.Close();
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                    </content>
+                </section>
+
+                <section address="SubSection1">
+                    <title></title>
+                    <content>
+                        <para>
+                        </para>
+                    </content>
+                </section>
+            </sections>
+        </section>
+        <relatedTopics>
+            <!-- One or more of the following:
            - A local link
            - An external link
            - A code entity reference
@@ -77,6 +236,6 @@
       <codeEntityReference>M:TestDoc.TestClass.FirstMethod</codeEntityReference>
       <codeEntityReference>M:TestDoc.TestClass.SecondMethod(System.Int32,System.String)</codeEntityReference>
       -->
-    </relatedTopics>
-  </developerConceptualDocument>
+        </relatedTopics>
+    </developerConceptualDocument>
 </topic>

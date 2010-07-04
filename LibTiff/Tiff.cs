@@ -119,7 +119,7 @@ namespace BitMiracle.LibTiff.Classic
                     "." + version.Minor.ToString(CultureInfo.InvariantCulture);
 
                 versionString += "." + version.Build.ToString(CultureInfo.InvariantCulture);
-                versionString += "." + version.Revision.ToString(CultureInfo.InvariantCulture);
+                versionString += "." + version.Revision.ToString(CultureInfo.InvariantCulture);    
 
                 return versionString;
             }
@@ -631,6 +631,33 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             return tif.safeOpenFailed();
+        }
+
+        /// <summary>
+        /// Closes a previously opened TIFF file.
+        /// <remarks>This method closes a file or stream that was previously opened with
+        /// <see cref="Open"/> or <see cref="ClientOpen"/>. Any buffered data are flushed to the
+        /// file/stream, including the contents of the current directory (if modified); and all
+        /// resources are reclaimed.</remarks>
+        /// </summary>
+        public void Close()
+        {
+            // Flush buffered data and directory (if dirty).
+            Flush();
+
+            m_stream.Close(m_clientdata);
+
+            if (m_fileStream != null)
+                m_fileStream.Close();
+        }
+
+        /// <summary>
+        /// Frees and releases all resources allocated by this <see cref="Tiff"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         //
@@ -1310,20 +1337,20 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             /*
-	         * If we saw any unknown tags, make an extra pass over the directory
-	         * to deal with them.  This must be done separately because the tags
-	         * could have become known when we registered a codec after finding
-	         * the Compression tag.  In a correctly-sorted directory there's
-	         * no problem because Compression will come before any codec-private
-	         * tags, but if the sorting is wrong that might not hold.
-	         */
-	        if (haveunknowntags)
+             * If we saw any unknown tags, make an extra pass over the directory
+             * to deal with them.  This must be done separately because the tags
+             * could have become known when we registered a codec after finding
+             * the Compression tag.  In a correctly-sorted directory there's
+             * no problem because Compression will come before any codec-private
+             * tags, but if the sorting is wrong that might not hold.
+             */
+            if (haveunknowntags)
             {
-	            fix = 0;
+                fix = 0;
                 for (int i = 0; i < dircount; i++)
                 {
-		            if (dir[i].tdir_tag == TiffTag.IGNORE)
-			            continue;
+                    if (dir[i].tdir_tag == TiffTag.IGNORE)
+                        continue;
 
                     if (fix >= m_nfields || dir[i].tdir_tag < m_fieldinfo[fix].Tag)
                     {
@@ -1331,10 +1358,10 @@ namespace BitMiracle.LibTiff.Classic
                         fix = 0;
                     }
 
-		            while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
-			            fix++;
+                    while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
+                        fix++;
 
-		            if (fix >= m_nfields || m_fieldinfo[fix].Tag != dir[i].tdir_tag)
+                    if (fix >= m_nfields || m_fieldinfo[fix].Tag != dir[i].tdir_tag)
                     {
                         Tiff.WarningExt(this, m_clientdata, module,
                             "{0}: unknown field with tag {1} (0x{2:x}) encountered",
@@ -1343,17 +1370,17 @@ namespace BitMiracle.LibTiff.Classic
                         TiffFieldInfo[] arr = new TiffFieldInfo[1];
                         arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
                         MergeFieldInfo(arr, 1);
-					    			        
+                                            
                         fix = 0;
-			            while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
-				            fix++;
-		            }
+                        while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
+                            fix++;
+                    }
 
-		            /*
-		             * Check data type.
-		             */
+                    /*
+                     * Check data type.
+                     */
                     TiffFieldInfo fip = m_fieldinfo[fix];
-		            while (dir[i].tdir_type != fip.Type && fix < m_nfields)
+                    while (dir[i].tdir_type != fip.Type && fix < m_nfields)
                     {
                         if (fip.Type == TiffType.ANY)
                         {
@@ -1361,19 +1388,19 @@ namespace BitMiracle.LibTiff.Classic
                             break;
                         }
 
-			            fip = m_fieldinfo[++fix];
-			            if (fix >= m_nfields || fip.Tag != dir[i].tdir_tag)
+                        fip = m_fieldinfo[++fix];
+                        if (fix >= m_nfields || fip.Tag != dir[i].tdir_tag)
                         {
                             Tiff.WarningExt(this, m_clientdata, module,
                                 "{0}: wrong data type {1} for \"{2}\"; tag ignored",
                                 m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Name);
 
-				            dir[i].tdir_tag = TiffTag.IGNORE;
-				            break;
-			            }
-		            }
-	            }
-	        }
+                            dir[i].tdir_tag = TiffTag.IGNORE;
+                            break;
+                        }
+                    }
+                }
+            }
 
             /*
             * XXX: OJPEG hack.

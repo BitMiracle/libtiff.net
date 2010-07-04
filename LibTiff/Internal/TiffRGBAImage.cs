@@ -1260,8 +1260,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     }
                 }
     
-	            cpPos += toskew;
-	            ppPos += fromskew;
+                cpPos += toskew;
+                ppPos += fromskew;
             }
         }
 

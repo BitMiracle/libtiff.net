@@ -229,12 +229,12 @@ namespace BitMiracle.TiffCP
 
             result = inImage.GetFieldDefaulted(TiffTag.PHOTOMETRIC);
             Photometric input_photometric = (Photometric)result[0].ToShort();
-	
-	        if (input_compression == Compression.JPEG)
+    
+            if (input_compression == Compression.JPEG)
             {
-		        /* Force conversion to RGB */
-		        inImage.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
-	        }
+                /* Force conversion to RGB */
+                inImage.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
+            }
             else if (input_photometric == Photometric.YCBCR)
             {
                 /* Otherwise, can't handle subsampled input */
@@ -252,9 +252,9 @@ namespace BitMiracle.TiffCP
             if (m_compression == Compression.JPEG)
             {
                 if (input_photometric == Photometric.RGB && m_jpegcolormode == JpegColorMode.RGB)
-		            outImage.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR);
-		        else
-		            outImage.SetField(TiffTag.PHOTOMETRIC, input_photometric);
+                    outImage.SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR);
+                else
+                    outImage.SetField(TiffTag.PHOTOMETRIC, input_photometric);
             }
             else if (m_compression == Compression.SGILOG || m_compression == Compression.SGILOG24)
             {
@@ -459,32 +459,32 @@ namespace BitMiracle.TiffCP
             result = inImage.GetField(TiffTag.PAGENUMBER);
             if (m_pageInSeq == 1)
             {
-	  	        if (m_pageNum < 0)
+                if (m_pageNum < 0)
                 {
                     /* only one input file */ 
-		            if (result != null) 
-			            outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
-		        }
+                    if (result != null) 
+                        outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
+                }
                 else
                 {
-			        outImage.SetField(TiffTag.PAGENUMBER, m_pageNum++, 0);
+                    outImage.SetField(TiffTag.PAGENUMBER, m_pageNum++, 0);
                 }
-	        }
+            }
             else
             {
-		        if (result != null)
+                if (result != null)
                 {
-			        if (m_pageNum < 0)
+                    if (m_pageNum < 0)
                     {
                         /* only one input file */
-				        outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
+                        outImage.SetField(TiffTag.PAGENUMBER, result[0], result[1]);
                     }
-			        else
+                    else
                     {
                         outImage.SetField(TiffTag.PAGENUMBER, m_pageNum++, 0);
                     }
-		        }
-	        }
+                }
+            }
 
             int NTAGS = g_tags.Length;
             for (int i = 0; i < NTAGS; i++)
