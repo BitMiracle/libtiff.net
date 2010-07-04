@@ -7,7 +7,10 @@
     <Topic id="aa770c56-8f9f-489f-b5b3-ad8797ef3727" visible="True" />
     <Topic id="7aac47e1-7126-4e75-8667-be7549d6c0b6" visible="True" />
     <Topic id="7404175a-f67f-479b-83f7-0e6dc75b9acf" visible="True" />
-    <Topic id="0a42c654-edcb-404a-bbfa-1d50cfad9769" visible="True" />
+    <Topic id="EE9522F3-9E7F-4B29-98F7-D9C22DD0497C" visible="True">
+      <Topic id="0a42c654-edcb-404a-bbfa-1d50cfad9769" visible="True" />
+      <Topic id="c0ab407e-de25-46db-9cc9-e0bf3f1bc83d" visible="True" />
+    </Topic>
     <Topic id="e0ed9e8f-4b0e-4480-9693-fbf731ed3b2f" visible="True" />
     <Topic id="77f96b22-949a-40a4-9e5c-8f7a81e78f74" visible="True">
       <Topic id="be4bae3c-8484-4c61-bccb-d67118e8f0a4" visible="True" />
@@ -24,7 +27,4 @@
   <Topic id="609bf177-82ad-4b3f-8a2a-04d0aded0be5" visible="True" />
   <Topic id="5200b425-c5b7-4675-b138-b055935bb221" visible="True" />
   <Topic id="b104b853-026c-4369-b748-4810c886edfc" visible="True" />
-  <Topic id="e5aab6d8-9bad-4b43-a2a5-21ae7a860d2d" visible="False" noFile="True" title="InvisibleFromTOC">
-    <Topic id="df711b0d-97d4-4add-861c-9a0fe1da68eb" visible="False" />
-  </Topic>
 </Topics>

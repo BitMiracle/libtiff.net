@@ -26,13 +26,9 @@
         </para>
 
         <para>
-            This chapter also contains tutorial "Graphics programming with libtiff" by Michael Still rewritten
-            to reflect differences between libtiff and LibTiff.Net. You can read original article at
-            <externalLink>
-                <linkText>IBM DeveloperWorks site</linkText>
-                <linkUri>http://www.ibm.com/developerworks/linux/library/l-libtiff</linkUri>
-                <linkTarget>_blank</linkTarget>
-            </externalLink>.
+            This chapter also contains both parts of the "Graphics programming with libtiff"
+            tutorial by Michael Still rewritten to reflect differences between libtiff and
+            LibTiff.Net.
         </para>
 
         <para>The following articles are found in this chapter:</para>

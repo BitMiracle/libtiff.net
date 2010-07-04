@@ -145,6 +145,9 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Help\Graphics programming with LibTiff.Net\Graphics programming with LibTiff.Net.aml" />
+    <None Include="Help\Graphics programming with LibTiff.Net\Part2. Grayscale and color imaging.aml" />
+    <None Include="Help\Graphics programming with LibTiff.Net\Part1. Black-and-white imaging.aml" />
     <None Include="Help\InvisibleFromTOC\Writing TIFF. Full source code.aml" />
     <None Include="Help\Test Images.aml" />
     <None Include="Help\Version History.aml" />
@@ -154,7 +157,6 @@
     <None Include="Help\Tiff2Pdf.aml" />
     <None Include="Help\TIFF tools.aml" />
     <None Include="Help\Adding new (custom) tags.aml" />
-    <None Include="Help\Graphics programming with LibTiff.Net.aml" />
     <None Include="Help\Basic introduction to the capabilities of the library.aml" />
     <None Include="Help\Building source code of LibTiff.Net.aml" />
     <None Include="Help\Using pre-built LibTiff.Net.aml" />
