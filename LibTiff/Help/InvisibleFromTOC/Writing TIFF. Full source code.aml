@@ -10,7 +10,7 @@
         <code language="cs">
             using BitMiracle.LibTiff.Classic;
 
-            namespace ConsoleApplication1
+            namespace WriteTiff
             {
                 class Program
                 {

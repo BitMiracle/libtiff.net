@@ -136,6 +136,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Help\Graphics programming with LibTiff.Net\" />
     <Folder Include="Help\InvisibleFromTOC\" />
     <Folder Include="Help\Images\" />
     <Folder Include="Help\" />
@@ -183,6 +184,20 @@
     <Image Include="Help\Images\AddReferenceSilverlight.png">
       <AlternateText>Add reference dialog</AlternateText>
       <ImageId>AddReferenceSilverlight</ImageId>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Help\Images\SydneyHarborBridgeTiles.jpg">
+      <AlternateText>Sydney Harbor Bridge in tiles</AlternateText>
+      <ImageId>SydneyHarborBridgeTiles</ImageId>
+    </Image>
+    <Image Include="Help\Images\SydneyHarborBridgeStrips.jpg">
+      <AlternateText>Sydney Harbor Bridge in strips</AlternateText>
+      <ImageId>SydneyHarborBridgeStrips</ImageId>
+    </Image>
+    <Image Include="Help\Images\SydneyHarborBridge.png">
+      <AlternateText>Sydney Harbor Bridge</AlternateText>
+      <ImageId>SydneyHarborBridge</ImageId>
     </Image>
   </ItemGroup>
   <!-- Import the SHFB build targets -->
