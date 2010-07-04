@@ -27,4 +27,7 @@
   <Topic id="609bf177-82ad-4b3f-8a2a-04d0aded0be5" visible="True" />
   <Topic id="5200b425-c5b7-4675-b138-b055935bb221" visible="True" />
   <Topic id="b104b853-026c-4369-b748-4810c886edfc" visible="True" />
+  <Topic id="099e528b-e4e7-42c8-877d-44f735535693" visible="False" noFile="True" title="Invisible from TOC">
+    <Topic id="df711b0d-97d4-4add-861c-9a0fe1da68eb" visible="True" />
+  </Topic>
 </Topics>
