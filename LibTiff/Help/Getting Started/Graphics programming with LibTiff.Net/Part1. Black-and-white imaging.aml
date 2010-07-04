@@ -392,7 +392,7 @@
                                             short bps = value[0].ToShort();
                                             if (bps != 1)
                                             {
-                                                System.Console.Error.WriteLine("unsupported number of bits per sample");
+                                                System.Console.Error.WriteLine("Unsupported number of bits per sample");
                                                 return;
                                             }
 
@@ -406,7 +406,7 @@
                                             short spp = value[0].ToShort();
                                             if (spp != 1)
                                             {
-                                                System.Console.Error.WriteLine("unsupported number of samples per pixel");
+                                                System.Console.Error.WriteLine("Unsupported number of samples per pixel");
                                                 return;
                                             }
 

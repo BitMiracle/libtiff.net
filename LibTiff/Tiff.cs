@@ -3686,14 +3686,60 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Reads a whole strip off data from the file, and convert to RGBA form.
+        /// Reads a whole strip of a strip-based image, decodes it and converts it to RGBA format.
         /// </summary>
         /// <param name="row">The row.</param>
-        /// <param name="raster">The raster.</param>
+        /// <param name="raster">The RGBA raster.</param>
         /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        /// <remarks>If this is the last strip, then it will only contain the portion of
-        /// the strip that is actually within the image space.  The result is
-        /// organized in bottom to top form.</remarks>
+        /// <remarks>
+        /// <para>
+        /// ReadRGBAStrip reads a single strip of a strip-based image into memory, storing
+        /// the result in the user supplied RGBA <paramref name="raster"/>. If specified strip is
+        /// the last strip, then it will only contain the portion of the strip that is actually
+        /// within the image space. The raster is assumed to be an array of width times
+        /// rowsperstrip 32-bit entries, where width is the width of the image
+        /// (<see cref="TiffTag.IMAGEWIDTH"/>) and rowsperstrip is the maximum lines in a strip
+        /// (<see cref="TiffTag.ROWSPERSTRIP"/>).
+        /// </para>
+        /// <para>
+        /// The <paramref name="row"/> value should be the row of the first row in the strip
+        /// (strip * rowsperstrip, zero based).
+        /// </para>
+        /// <para>
+        /// Note that the raster is assume to be organized such that the pixel at location (x, y)
+        /// is raster[y * width + x]; with the raster origin in the lower-left hand corner of the
+        /// strip. That is bottom to top organization. When reading a partial last strip in the
+        /// file the last line of the image will begin at the beginning of the buffer.
+        /// </para>
+        /// <para>
+        /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
+        /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
+        /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
+        /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
+        /// </para>
+        /// <para>
+        /// See <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> for more details
+        /// on how various image types are converted to RGBA values.
+        /// </para>
+        /// <para>
+        /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
+        /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
+        /// </para>
+        /// <para>
+        /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
+        /// automatically scaled to 16-bits.
+        /// </para>
+        /// <para>
+        /// ReadRGBAStrip's main advantage over the similar
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> function is that for
+        /// large images a single buffer capable of holding the whole image doesn't need to be
+        /// allocated, only enough for one strip. The <see cref="ReadRGBATile"/> function does a
+        /// similar operation for tiled images.
+        /// </para>
+        /// <para>
+        /// All error messages are directed to the current error handler.
+        /// </para>
+        /// </remarks>
         public bool ReadRGBAStrip(int row, int[] raster)
         {
             if (IsTiled())
