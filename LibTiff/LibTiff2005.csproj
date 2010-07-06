@@ -64,7 +64,6 @@
     <Compile Include="Internal\TiffDisplay.cs" />
     <Compile Include="Internal\TiffFlags.cs" />
     <Compile Include="Internal\TiffHeader.cs" />
-    <Compile Include="Internal\TiffRGBAImage.cs" />
     <Compile Include="Internal\TiffTagValue.cs" />
     <Compile Include="Internal\TiffYCbCrToRGB.cs" />
     <Compile Include="Internal\Tiff_Aux.cs" />
@@ -144,6 +143,7 @@
     <Compile Include="TagDefinitions.cs" />
     <Compile Include="Tiff.cs" />
     <Compile Include="TiffCodec.cs" />
+    <Compile Include="TiffRgbaImage.cs" />
     <Compile Include="TiffType.cs" />
     <Compile Include="TiffErrorHandler.cs" />
     <Compile Include="TiffFieldInfo.cs" />

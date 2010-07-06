@@ -398,7 +398,7 @@
     <Compile Include="..\LibTiff\TiffPrintFlags.cs">
       <Link>TiffPrintFlags.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\TiffRGBAImage.cs">
+    <Compile Include="..\LibTiff\TiffRgbaImage.cs">
       <Link>TiffRGBAImage.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\TiffStream.cs">

@@ -21,7 +21,7 @@ namespace BitMiracle.LibTiff.Classic
     /// <summary>
     /// RGBA-style image support.
     /// </summary>
-    public class TiffRGBAImage
+    public class TiffRgbaImage
     {       
         internal const string photoTag = "PhotometricInterpretation";
 
@@ -95,46 +95,9 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private short[] bluecmap;
 
-        // The image reading and conversion routines invoke
-        // "put routines" to copy/image/whatever tiles of
-        // raw image data.  A default set of routines are 
-        // provided to convert/copy raw image data to 8-bit
-        // packed ABGR format rasters.  Applications can supply
-        // alternate routines that unpack the data into a
-        // different format or, for example, unpack the data
-        // and draw the unpacked raster on the display.
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public delegate void tileContigRoutine(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public delegate void tileSeparateRoutine(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
-
-        /* get image data routine */
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public delegate bool getRoutine(TiffRGBAImage img, int[] raster, int offset, int w, int h);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public getRoutine getRoutineInstance;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public tileContigRoutine contig;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public tileSeparateRoutine separate;
+        private GetRoutine getRoutineInstance;       
+        private TileContigRoutine contig;
+        private TileSeparateRoutine separate;
 
         /// <summary>
         /// sample mapping array
@@ -181,9 +144,35 @@ namespace BitMiracle.LibTiff.Classic
         * Helper constants used in Orientation tag handling
         */
         private const int FLIP_VERTICALLY = 0x01;
-        private const int FLIP_HORIZONTALLY = 0x02;        
+        private const int FLIP_HORIZONTALLY = 0x02;
 
-        private TiffRGBAImage()
+        // The image reading and conversion routines invoke
+        // "put routines" to copy/image/whatever tiles of
+        // raw image data.  A default set of routines are 
+        // provided to convert/copy raw image data to 8-bit
+        // packed ABGR format rasters.  Applications can supply
+        // alternate routines that unpack the data into a
+        // different format or, for example, unpack the data
+        // and draw the unpacked raster on the display.
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public delegate void TileContigRoutine(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public delegate void TileSeparateRoutine(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
+
+        /* get image data routine */
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public delegate bool GetRoutine(TiffRgbaImage img, int[] raster, int offset, int w, int h);
+
+        private TiffRgbaImage()
         {
         }
 
@@ -194,10 +183,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="stop">if set to <c>true</c> [stop].</param>
         /// <param name="emsg">The emsg.</param>
         /// <returns></returns>
-        public static TiffRGBAImage Create(Tiff tif, bool stop, out string emsg)
+        public static TiffRgbaImage Create(Tiff tif, bool stop, out string emsg)
         {
             emsg = null;
-            TiffRGBAImage img = new TiffRGBAImage();
+            TiffRgbaImage img = new TiffRgbaImage();
             /* Initialize to normal values */
             img.row_offset = 0;
             img.col_offset = 0;
@@ -600,6 +589,51 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 
         /// </summary>
+        public GetRoutine GetRoutineInstance
+        {
+            get
+            {
+                return getRoutineInstance;
+            }
+            set
+            {
+                getRoutineInstance = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TileContigRoutine Contig
+        {
+            get
+            {
+                return contig;
+            }
+            set
+            {
+                contig = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TileSeparateRoutine Separate
+        {
+            get
+            {
+                return separate;
+            }
+            set
+            {
+                separate = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="raster">The raster.</param>
         /// <param name="offset">The offset.</param>
         /// <param name="w">The w.</param>
@@ -672,10 +706,10 @@ namespace BitMiracle.LibTiff.Classic
         * or
         *  SamplesPerPixel == 1
         */
-        private static bool gtTileContig(TiffRGBAImage img, int[] raster, int offset, int w, int h)
+        private static bool gtTileContig(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            tileContigRoutine put = img.contig;
+            TileContigRoutine put = img.contig;
 
             byte[] buf = new byte[tif.TileSize()];
 
@@ -761,10 +795,10 @@ namespace BitMiracle.LibTiff.Classic
         *   PlanarConfiguration separated
         * We assume that all such images are RGB.
         */
-        private static bool gtTileSeparate(TiffRGBAImage img, int[] raster, int offset, int w, int h)
+        private static bool gtTileSeparate(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            tileSeparateRoutine put = img.separate;
+            TileSeparateRoutine put = img.separate;
 
             int tilesize = tif.TileSize();
             byte[] buf = new byte[(img.alpha != 0 ? 4 : 3) * tilesize];
@@ -877,10 +911,10 @@ namespace BitMiracle.LibTiff.Classic
         ///  or
         /// SamplesPerPixel == 1
         /// </summary>
-        private static bool gtStripContig(TiffRGBAImage img, int[] raster, int offset, int w, int h)
+        private static bool gtStripContig(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            tileContigRoutine put = img.contig;
+            TileContigRoutine put = img.contig;
 
             byte[] buf = new byte[tif.StripSize()];
 
@@ -961,10 +995,10 @@ namespace BitMiracle.LibTiff.Classic
         *   PlanarConfiguration separated
         * We assume that all such images are RGB.
         */
-        private static bool gtStripSeparate(TiffRGBAImage img, int[] raster, int offset, int w, int h)
+        private static bool gtStripSeparate(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            tileSeparateRoutine put = img.separate;
+            TileSeparateRoutine put = img.separate;
 
             int stripsize = tif.StripSize();
             byte[] buf = new byte[(img.alpha != 0 ? 4 : 3) * stripsize];
@@ -1123,7 +1157,7 @@ namespace BitMiracle.LibTiff.Classic
         */
         private bool pickContigCase()
         {
-            getRoutineInstance = tif.IsTiled() ? new getRoutine(gtTileContig) : new getRoutine(gtStripContig);
+            getRoutineInstance = tif.IsTiled() ? new GetRoutine(gtTileContig) : new GetRoutine(gtStripContig);
             contig = null;
 
             switch (photometric)
@@ -1276,7 +1310,7 @@ namespace BitMiracle.LibTiff.Classic
         */
         private bool pickSeparateCase()
         {
-            getRoutineInstance = tif.IsTiled() ? new getRoutine(gtTileSeparate) : new getRoutine(gtStripSeparate);
+            getRoutineInstance = tif.IsTiled() ? new GetRoutine(gtTileSeparate) : new GetRoutine(gtStripSeparate);
             separate = null;
 
             switch (photometric)
@@ -1342,7 +1376,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit palette => colormap/RGB
         */
-        private static void put8bitcmaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put8bitcmaptile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
             int samplesperpixel = img.samplesperpixel;
@@ -1366,7 +1400,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 4-bit palette => colormap/RGB
         /// </summary>
-        private static void put4bitcmaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put4bitcmaptile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
             fromskew /= 2;
@@ -1405,7 +1439,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 2-bit palette => colormap/RGB
         /// </summary>
-        private static void put2bitcmaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put2bitcmaptile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
             fromskew /= 4;
@@ -1450,7 +1484,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 1-bit palette => colormap/RGB
         /// </summary>
-        private static void put1bitcmaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put1bitcmaptile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
             fromskew /= 8;
@@ -1493,7 +1527,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit greyscale => colormap/RGB
         */
-        private static void putgreytile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putgreytile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             int[][] BWmap = img.BWmap;
@@ -1516,7 +1550,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 16-bit greyscale => colormap/RGB
         /// </summary>
-        private static void put16bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put16bitbwtile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             int[][] BWmap = img.BWmap;
@@ -1545,7 +1579,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 1-bit bilevel => colormap/RGB
         /// </summary>
-        private static void put1bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put1bitbwtile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] BWmap = img.BWmap;
             fromskew /= 8;
@@ -1591,7 +1625,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 2-bit greyscale => colormap/RGB
         /// </summary>
-        private static void put2bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put2bitbwtile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] BWmap = img.BWmap;
             fromskew /= 4;
@@ -1636,7 +1670,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 4-bit greyscale => colormap/RGB
         /// </summary>
-        private static void put4bitbwtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void put4bitbwtile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] BWmap = img.BWmap;
             fromskew /= 2;
@@ -1675,7 +1709,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed samples, no Map => RGB
         */
-        private static void putRGBcontig8bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBcontig8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
@@ -1716,7 +1750,7 @@ namespace BitMiracle.LibTiff.Classic
         * 8-bit packed samples => RGBA w/ associated alpha
         * (known to have Map == null)
         */
-        private static void putRGBAAcontig8bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBAAcontig8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
@@ -1757,7 +1791,7 @@ namespace BitMiracle.LibTiff.Classic
         * 8-bit packed samples => RGBA w/ unassociated alpha
         * (known to have Map == null)
         */
-        private static void putRGBUAcontig8bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBUAcontig8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
@@ -1784,7 +1818,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 16-bit packed samples => RGB
         */
-        private static void putRGBcontig16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBcontig16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             int cpPos = cpOffset;
@@ -1812,7 +1846,7 @@ namespace BitMiracle.LibTiff.Classic
         * 16-bit packed samples => RGBA w/ associated alpha
         * (known to have Map == null)
         */
-        private static void putRGBAAcontig16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBAAcontig16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             int cpPos = cpOffset;
@@ -1840,7 +1874,7 @@ namespace BitMiracle.LibTiff.Classic
         * 16-bit packed samples => RGBA w/ unassociated alpha
         * (known to have Map == null)
         */
-        private static void putRGBUAcontig16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBUAcontig16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
@@ -1874,7 +1908,7 @@ namespace BitMiracle.LibTiff.Classic
         *
         * NB: The conversion of CMYK->RGB is *very* crude.
         */
-        private static void putRGBcontig8bitCMYKtile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBcontig8bitCMYKtile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
@@ -1926,7 +1960,7 @@ namespace BitMiracle.LibTiff.Classic
         *
         * NB: The conversion of CMYK->RGB is *very* crude.
         */
-        private static void putRGBcontig8bitCMYKMaptile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putRGBcontig8bitCMYKMaptile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
             byte[] Map = img.Map;
@@ -1955,7 +1989,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit unpacked samples => RGB
         */
-        private static void putRGBseparate8bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+        private static void putRGBseparate8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             int cpPos = cpOffset;
             int rPos = rOffset;
@@ -2002,7 +2036,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit unpacked samples => RGBA w/ associated alpha
         */
-        private static void putRGBAAseparate8bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+        private static void putRGBAAseparate8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             int cpPos = cpOffset;
             int rPos = rOffset;
@@ -2053,7 +2087,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit unpacked samples => RGBA w/ unassociated alpha
         */
-        private static void putRGBUAseparate8bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+        private static void putRGBUAseparate8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             int cpPos = cpOffset;
             int rPos = rOffset;
@@ -2088,7 +2122,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 16-bit unpacked samples => RGB
         */
-        private static void putRGBseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+        private static void putRGBseparate16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
 
@@ -2118,7 +2152,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 16-bit unpacked samples => RGBA w/ associated alpha
         */
-        private static void putRGBAAseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+        private static void putRGBAAseparate16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
 
@@ -2152,7 +2186,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 16-bit unpacked samples => RGBA w/ unassociated alpha
         */
-        private static void putRGBUAseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+        private static void putRGBUAseparate16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
 
@@ -2190,7 +2224,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ no subsampling => RGB
         */
-        private static void putseparate8bitYCbCr11tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+        private static void putseparate8bitYCbCr11tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             /* TODO: naming of input vars is still off, change obfuscating declaration inside define, or resolve obfuscation */
             int cpPos = cpOffset;
@@ -2234,7 +2268,7 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        private tileContigRoutine initCIELabConversion()
+        private TileContigRoutine initCIELabConversion()
         {
             if (cielab == null)
                 cielab = new TiffCIELabToRGB();
@@ -2456,7 +2490,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed CIE L*a*b 1976 samples => RGB
         */
-        private static void putcontig8bitCIELab(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitCIELab(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew *= 3;
             int cpPos = cpOffset;
@@ -2484,7 +2518,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ 4,4 subsampling => RGB
         */
-        private static void putcontig8bitYCbCr44tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitYCbCr44tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
             int ppPos = ppOffset;
@@ -2695,7 +2729,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ 4,2 subsampling => RGB
         */
-        private static void putcontig8bitYCbCr42tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitYCbCr42tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
             int ppPos = ppOffset;
@@ -2809,7 +2843,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ 4,1 subsampling => RGB
         */
-        private static void putcontig8bitYCbCr41tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitYCbCr41tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
             int ppPos = ppOffset;
@@ -2861,7 +2895,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ 2,2 subsampling => RGB
         */
-        private static void putcontig8bitYCbCr22tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitYCbCr22tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew / 2) * 6;
             int cpPos = cpOffset;
@@ -2930,7 +2964,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ 2,1 subsampling => RGB
         */
-        private static void putcontig8bitYCbCr21tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitYCbCr21tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew * 4) / 2;
             int cpPos = cpOffset;
@@ -2972,7 +3006,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ no subsampling => RGB
         */
-        private static void putcontig8bitYCbCr11tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitYCbCr11tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
             int ppPos = ppOffset;
@@ -3001,7 +3035,7 @@ namespace BitMiracle.LibTiff.Classic
         /*
         * 8-bit packed YCbCr samples w/ 1,2 subsampling => RGB
         */
-        private static void putcontig8bitYCbCr12tile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
+        private static void putcontig8bitYCbCr12tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew / 2) * 4;
             int cpPos = cpOffset;

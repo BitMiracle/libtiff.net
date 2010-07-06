@@ -167,7 +167,7 @@
     <Compile Include="TagDefinitions.cs" />
     <Compile Include="Tiff.cs" />
     <Compile Include="TiffCodec.cs" />
-    <Compile Include="TiffRGBAImage.cs" />
+    <Compile Include="TiffRgbaImage.cs" />
     <Compile Include="TiffType.cs" />
     <Compile Include="TiffErrorHandler.cs" />
     <Compile Include="TiffFieldInfo.cs" />

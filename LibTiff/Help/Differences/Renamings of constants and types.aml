@@ -106,6 +106,9 @@
                 <para>
                     TIFFFieldInfo -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffFieldInfo</codeEntityReference>
                 </para>
+                <para>
+                    TIFFRGBAImage -> <codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffRgbaImage</codeEntityReference>
+                </para>
             </content>
         </section>
     </developerConceptualDocument>

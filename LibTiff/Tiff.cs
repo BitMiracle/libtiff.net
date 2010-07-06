@@ -3673,7 +3673,7 @@ namespace BitMiracle.LibTiff.Classic
             string emsg;
             if (RGBAImageOK(out emsg))
             {
-                TiffRGBAImage img = TiffRGBAImage.Create(this, stop, out emsg);
+                TiffRgbaImage img = TiffRgbaImage.Create(this, stop, out emsg);
                 if (img != null)
                 {
                     img.ReqOrientation = orientation;
@@ -3765,7 +3765,7 @@ namespace BitMiracle.LibTiff.Classic
             string emsg;
             if (RGBAImageOK(out emsg))
             {
-                TiffRGBAImage img = TiffRGBAImage.Create(this, false, out emsg);
+                TiffRgbaImage img = TiffRgbaImage.Create(this, false, out emsg);
                 if (img != null)
                 {
                     img.row_offset = row;
@@ -3823,7 +3823,7 @@ namespace BitMiracle.LibTiff.Classic
              * Setup the RGBA reader.
              */
             string emsg;
-            TiffRGBAImage img = TiffRGBAImage.Create(this, false, out emsg);
+            TiffRgbaImage img = TiffRgbaImage.Create(this, false, out emsg);
             if (!RGBAImageOK(out emsg) || img == null)
             {
                 ErrorExt(this, m_clientdata, FileName(), "{0}", emsg);
@@ -3929,7 +3929,7 @@ namespace BitMiracle.LibTiff.Classic
                         photometric = Photometric.RGB;
                         break;
                     default:
-                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", TiffRGBAImage.photoTag);
+                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", TiffRgbaImage.photoTag);
                         return false;
                 }
             }
@@ -3948,7 +3948,7 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
-                            TiffRGBAImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel,
+                            TiffRgbaImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel,
                             m_dir.td_bitspersample);
 
                         return false;
@@ -4026,7 +4026,7 @@ namespace BitMiracle.LibTiff.Classic
                 default:
                     emsg = string.Format(CultureInfo.InvariantCulture,
                         "Sorry, can not handle image with {0}={1}",
-                        TiffRGBAImage.photoTag, photometric);
+                        TiffRgbaImage.photoTag, photometric);
                     return false;
             }
 
