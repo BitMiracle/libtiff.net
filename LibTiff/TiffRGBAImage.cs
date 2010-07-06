@@ -14,13 +14,87 @@ using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+using BitMiracle.LibTiff.Classic.Internal;
+
+namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// RGBA-style image support.
     /// </summary>
-    class TiffRGBAImage
-    {
+    public class TiffRGBAImage
+    {       
+        internal const string photoTag = "PhotometricInterpretation";
+
+        /// <summary>
+        /// image handle
+        /// </summary>
+        private Tiff tif;
+
+        /// <summary>
+        /// stop on read error
+        /// </summary>
+        private bool stoponerr;
+
+        /// <summary>
+        /// data is packed/separate
+        /// </summary>
+        private bool isContig;
+
+        /// <summary>
+        /// type of alpha data present
+        /// </summary>
+        private ExtraSample alpha;
+
+        /// <summary>
+        /// image width
+        /// </summary>
+        private int width;
+
+        /// <summary>
+        /// image height
+        /// </summary>
+        private int height;
+
+        /// <summary>
+        /// image bits/sample
+        /// </summary>
+        private short bitspersample;
+
+        /// <summary>
+        /// image samples/pixel
+        /// </summary>
+        private short samplesperpixel;
+
+        /// <summary>
+        /// image orientation
+        /// </summary>
+        private Orientation orientation;
+
+        /// <summary>
+        /// requested orientation
+        /// </summary>
+        private Orientation req_orientation;
+
+        /// <summary>
+        /// image photometric interp
+        /// </summary>
+        private Photometric photometric;
+
+        /// <summary>
+        /// colormap pallete
+        /// </summary>
+        private short[] redcmap;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private short[] greencmap;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private short[] bluecmap;
+
         // The image reading and conversion routines invoke
         // "put routines" to copy/image/whatever tiles of
         // raw image data.  A default set of routines are 
@@ -30,41 +104,65 @@ namespace BitMiracle.LibTiff.Classic.Internal
         // different format or, for example, unpack the data
         // and draw the unpacked raster on the display.
 
+        /// <summary>
+        /// 
+        /// </summary>
         public delegate void tileContigRoutine(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset);
+
+        /// <summary>
+        /// 
+        /// </summary>
         public delegate void tileSeparateRoutine(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
 
-        public const string photoTag = "PhotometricInterpretation";
-
-        public Tiff tif; /* image handle */
-        public bool stoponerr; /* stop on read error */
-        public bool isContig; /* data is packed/separate */
-        public ExtraSample alpha; /* type of alpha data present */
-        public int width; /* image width */
-        public int height; /* image height */
-        public short bitspersample; /* image bits/sample */
-        public short samplesperpixel; /* image samples/pixel */
-        public Orientation orientation; /* image orientation */
-        public Orientation req_orientation; /* requested orientation */
-        public Photometric photometric; /* image photometric interp */
-        public short[] redcmap; /* colormap pallete */
-        public short[] greencmap;
-        public short[] bluecmap;
-
         /* get image data routine */
+
+        /// <summary>
+        /// 
+        /// </summary>
         public delegate bool getRoutine(TiffRGBAImage img, int[] raster, int offset, int w, int h);
+
+        /// <summary>
+        /// 
+        /// </summary>
         public getRoutine getRoutineInstance;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public tileContigRoutine contig;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public tileSeparateRoutine separate;
 
-        public byte[] Map; /* sample mapping array */
-        public int[][] BWmap; /* black&white map */
-        public int[][] PALmap; /* palette image map */
-        public TiffYCbCrToRGB ycbcr; /* YCbCr conversion state */
-        public TiffCIELabToRGB cielab; /* CIE L*a*b conversion state */
+        /// <summary>
+        /// sample mapping array
+        /// </summary>
+        private byte[] Map;
 
-        public int row_offset;
-        public int col_offset;
+        /// <summary>
+        /// black and white map
+        /// </summary>
+        private int[][] BWmap;
+
+        /// <summary>
+        /// palette image map
+        /// </summary>
+        private int[][] PALmap;
+
+        private TiffYCbCrToRGB ycbcr; /* YCbCr conversion state */
+        private TiffCIELabToRGB cielab; /* CIE L*a*b conversion state */
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal int row_offset;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal int col_offset;
 
         private static TiffDisplay display_sRGB = new TiffDisplay(
             /* XYZ -> luminance matrix */
@@ -83,8 +181,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
         * Helper constants used in Orientation tag handling
         */
         private const int FLIP_VERTICALLY = 0x01;
-        private const int FLIP_HORIZONTALLY = 0x02;
+        private const int FLIP_HORIZONTALLY = 0x02;        
 
+        private TiffRGBAImage()
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tif">The tif.</param>
+        /// <param name="stop">if set to <c>true</c> [stop].</param>
+        /// <param name="emsg">The emsg.</param>
+        /// <returns></returns>
         public static TiffRGBAImage Create(Tiff tif, bool stop, out string emsg)
         {
             emsg = null;
@@ -110,7 +219,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case 8:
                 case 16:
                     break;
-                
+
                 default:
                     emsg = string.Format(CultureInfo.InvariantCulture,
                         "Sorry, can not handle images with {0}-bit samples", img.bitspersample);
@@ -139,7 +248,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
 
                     case ExtraSample.ASSOCALPHA:
-                        /* data is pre-multiplied */
+                    /* data is pre-multiplied */
                     case ExtraSample.UNASSALPHA:
                         /* data is not pre-multiplied */
                         img.alpha = (ExtraSample)sampleinfo[0];
@@ -161,7 +270,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
 
             int colorchannels = img.samplesperpixel - extrasamples;
-            
+
             result = tif.GetFieldDefaulted(TiffTag.COMPRESSION);
             Compression compress = (Compression)result[0].ToInt();
 
@@ -208,15 +317,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     /* copy the colormaps so we can modify them */
                     int n_color = (1 << img.bitspersample);
-                    img.redcmap = new short [n_color];
-                    img.greencmap = new short [n_color];
-                    img.bluecmap = new short [n_color];
+                    img.redcmap = new short[n_color];
+                    img.greencmap = new short[n_color];
+                    img.bluecmap = new short[n_color];
 
                     Array.Copy(red_orig, img.redcmap, n_color);
                     Array.Copy(green_orig, img.greencmap, n_color);
                     Array.Copy(blue_orig, img.bluecmap, n_color);
 
-                    if (planarconfig == PlanarConfig.CONTIG && 
+                    if (planarconfig == PlanarConfig.CONTIG &&
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
                         emsg = string.Format(CultureInfo.InvariantCulture,
@@ -228,7 +337,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 case Photometric.MINISWHITE:
                 case Photometric.MINISBLACK:
-                    if (planarconfig == PlanarConfig.CONTIG && 
+                    if (planarconfig == PlanarConfig.CONTIG &&
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
                         emsg = string.Format(CultureInfo.InvariantCulture,
@@ -273,7 +382,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case Photometric.RGB:
                     if (colorchannels < 3)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle RGB image with {0}={1}", "Color channels", colorchannels);
                         return null;
                     }
@@ -285,14 +394,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     if (inkset != InkSet.CMYK)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                         return null;
                     }
 
                     if (img.samplesperpixel < 4)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle separated image with {0}={1}", "Samples/pixel", img.samplesperpixel);
                         return null;
                     }
@@ -301,7 +410,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case Photometric.LOGL:
                     if (compress != Compression.SGILOG)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, LogL data must have {0}={1}", "Compression", Compression.SGILOG);
                         return null;
                     }
@@ -314,14 +423,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 case Photometric.LOGLUV:
                     if (compress != Compression.SGILOG && compress != Compression.SGILOG24)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, LogLuv data must have {0}={1} or {2}", "Compression", Compression.SGILOG, Compression.SGILOG24);
                         return null;
                     }
 
                     if (planarconfig != PlanarConfig.CONTIG)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture, 
+                        emsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle LogLuv images with {0}={1}", "Planarconfiguration", planarconfig);
                         return null;
                     }
@@ -333,9 +442,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 case Photometric.CIELAB:
                     break;
-                
+
                 default:
-                    emsg = string.Format(CultureInfo.InvariantCulture, 
+                    emsg = string.Format(CultureInfo.InvariantCulture,
                         "Sorry, can not handle image with {0}={1}", photoTag, img.photometric);
                     return null;
             }
@@ -354,7 +463,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             result = tif.GetFieldDefaulted(TiffTag.ORIENTATION);
             img.orientation = (Orientation)result[0].ToByte();
-            
+
             img.isContig = !(planarconfig == PlanarConfig.SEPARATE && colorchannels > 1);
             if (img.isContig)
             {
@@ -376,6 +485,126 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return img;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether image data is contiguous (packed) or separated.
+        /// </summary>
+        /// <value><c>true</c> if this instance is contiguous (packed); otherwise, <c>false</c>.</value>
+        public bool IsContig
+        {
+            get
+            {
+                return isContig;
+            }
+        }
+
+        /// <summary>
+        /// Gets the type of alpha data present.
+        /// </summary>
+        /// <value>The type of alpha data present.</value>
+        public ExtraSample Alpha
+        {
+            get
+            {
+                return alpha;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image width.
+        /// </summary>
+        /// <value>The image width.</value>
+        public int Width
+        {
+            get
+            {
+                return width;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image height.
+        /// </summary>
+        /// <value>The image height.</value>
+        public int Height
+        {
+            get
+            {
+                return height;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image bits per sample count.
+        /// </summary>
+        /// <value>The image bits per sample count.</value>
+        public short BitsPerSample
+        {
+            get
+            {
+                return bitspersample;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image samples per pixel count.
+        /// </summary>
+        /// <value>The image samples per pixel count.</value>
+        public short SamplesPerPixel
+        {
+            get
+            {
+                return samplesperpixel;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image orientation.
+        /// </summary>
+        /// <value>The image orientation.</value>
+        public Orientation Orientation
+        {
+            get
+            {
+                return orientation;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the requested orientation.
+        /// </summary>
+        /// <value>The requested orientation.</value>
+        public Orientation ReqOrientation
+        {
+            get
+            {
+                return req_orientation;
+            }
+            set
+            {
+                req_orientation = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the image photometric interpretation.
+        /// </summary>
+        /// <value>The image photometric interpretation.</value>
+        public Photometric Photometric
+        {
+            get
+            {
+                return photometric;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="raster">The raster.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="w">The w.</param>
+        /// <param name="h">The h.</param>
+        /// <returns></returns>
         public bool Get(int[] raster, int offset, int w, int h)
         {
             if (getRoutineInstance == null)
@@ -383,12 +612,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"get\" routine setup");
                 return false;
             }
-            
-            return getRoutineInstance(this, raster, offset, w, h);
-        }
 
-        protected TiffRGBAImage()
-        {
+            return getRoutineInstance(this, raster, offset, w, h);
         }
 
         private static int PACK(int r, int g, int b)
@@ -452,7 +677,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             Tiff tif = img.tif;
             tileContigRoutine put = img.contig;
 
-            byte[] buf = new byte [tif.TileSize()];
+            byte[] buf = new byte[tif.TileSize()];
 
             FieldValue[] result = tif.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
@@ -478,7 +703,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             for (int row = 0; row < h; )
             {
                 int rowstoread = th - (row + img.row_offset) % th;
-                int nrow = (row + rowstoread > h ? h - row: rowstoread);
+                int nrow = (row + rowstoread > h ? h - row : rowstoread);
                 for (int col = 0; col < w; col += tw)
                 {
                     if (tif.ReadTile(buf, 0, col + img.col_offset, row + img.row_offset, 0, 0) < 0 && img.stoponerr)
@@ -505,7 +730,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     }
                 }
 
-                y += ((flip & FLIP_VERTICALLY) != 0 ?  -nrow : nrow);
+                y += ((flip & FLIP_VERTICALLY) != 0 ? -nrow : nrow);
                 row += nrow;
             }
 
@@ -542,13 +767,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
             tileSeparateRoutine put = img.separate;
 
             int tilesize = tif.TileSize();
-            byte[] buf = new byte [(img.alpha != 0 ? 4 : 3) * tilesize];
+            byte[] buf = new byte[(img.alpha != 0 ? 4 : 3) * tilesize];
 
             int p0 = 0;
             int p1 = p0 + tilesize;
             int p2 = p1 + tilesize;
             int pa = (img.alpha != 0 ? (p2 + tilesize) : -1);
-            
+
             FieldValue[] result = tif.GetField(TiffTag.TILEWIDTH);
             int tw = result[0].ToInt();
 
@@ -587,13 +812,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         ret = false;
                         break;
                     }
-                    
+
                     if (tif.ReadTile(buf, p2, col + img.col_offset, row + img.row_offset, 0, 2) < 0 && img.stoponerr)
                     {
                         ret = false;
                         break;
                     }
-                    
+
                     if (img.alpha != 0)
                     {
                         if (tif.ReadTile(buf, pa, col + img.col_offset, row + img.row_offset, 0, 3) < 0 && img.stoponerr)
@@ -657,7 +882,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             Tiff tif = img.tif;
             tileContigRoutine put = img.contig;
 
-            byte[] buf = new byte [tif.StripSize()];
+            byte[] buf = new byte[tif.StripSize()];
 
             int flip = img.setorientation();
             int y;
@@ -742,7 +967,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             tileSeparateRoutine put = img.separate;
 
             int stripsize = tif.StripSize();
-            byte[] buf = new byte [(img.alpha != 0 ? 4 : 3) * stripsize];
+            byte[] buf = new byte[(img.alpha != 0 ? 4 : 3) * stripsize];
 
             int p0 = 0;
             int p1 = p0 + stripsize;
@@ -775,25 +1000,25 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 int rowstoread = rowsperstrip - (row + img.row_offset) % rowsperstrip;
                 int nrow = (row + rowstoread > h ? h - row : rowstoread);
                 int offset_row = row + img.row_offset;
-                
+
                 if (tif.ReadEncodedStrip(tif.ComputeStrip(offset_row, 0), buf, p0, ((row + img.row_offset) % rowsperstrip + nrow) * scanline) < 0 && img.stoponerr)
                 {
                     ret = false;
                     break;
                 }
-                
+
                 if (tif.ReadEncodedStrip(tif.ComputeStrip(offset_row, 1), buf, p1, ((row + img.row_offset) % rowsperstrip + nrow) * scanline) < 0 && img.stoponerr)
                 {
                     ret = false;
                     break;
                 }
-                
+
                 if (tif.ReadEncodedStrip(tif.ComputeStrip(offset_row, 2), buf, p2, ((row + img.row_offset) % rowsperstrip + nrow) * scanline) < 0 && img.stoponerr)
                 {
                     ret = false;
                     break;
                 }
-                
+
                 if (img.alpha != 0)
                 {
                     if ((tif.ReadEncodedStrip(tif.ComputeStrip(offset_row, 3), buf, pa, ((row + img.row_offset) % rowsperstrip + nrow) * scanline) < 0 && img.stoponerr))
@@ -802,7 +1027,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
                     }
                 }
-                
+
                 int pos = ((row + img.row_offset) % rowsperstrip) * scanline;
                 put(img, raster, offset + y * w, 0, y, w, nrow, fromskew, toskew, buf, p0 + pos, p1 + pos, p2 + pos, img.alpha != 0 ? (pa + pos) : -1);
                 y += (flip & FLIP_VERTICALLY) != 0 ? -nrow : nrow;
@@ -835,9 +1060,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             FieldValue[] result = tif.GetField(TiffTag.COMPRESSION);
             Compression compress = (Compression)result[0].ToInt();
 
-            return (compress == Compression.CCITTFAX3 || 
-                compress == Compression.CCITTFAX4 || 
-                compress == Compression.CCITTRLE || 
+            return (compress == Compression.CCITTFAX3 ||
+                compress == Compression.CCITTFAX4 ||
+                compress == Compression.CCITTRLE ||
                 compress == Compression.CCITTRLEW);
         }
 
@@ -1259,7 +1484,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             cp[cpPos++] = bw[bwPos++];
                     }
                 }
-    
+
                 cpPos += toskew;
                 ppPos += fromskew;
             }
@@ -1571,7 +1796,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             while (h-- > 0)
             {
-                for (x = w; x-- > 0;)
+                for (x = w; x-- > 0; )
                 {
                     cp[cpPos] = PACKW(wp[wpPos], wp[wpPos + 1], wp[wpPos + 2]);
                     cpPos++;
@@ -1599,7 +1824,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             fromskew *= samplesperpixel;
             while (h-- > 0)
             {
-                for (x = w; x-- > 0;)
+                for (x = w; x-- > 0; )
                 {
                     cp[cpPos] = PACKW4(wp[wpPos], wp[wpPos + 1], wp[wpPos + 2], wp[wpPos + 3]);
                     cpPos++;
@@ -1619,16 +1844,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
-            
+
             int cpPos = cpOffset;
             int ppPos = ppOffset;
 
             short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
             int wpPos = 0;
-            
+
             while (h-- > 0)
             {
-                for (x = w; x-- > 0;)
+                for (x = w; x-- > 0; )
                 {
                     int a = W2B(wp[wpPos + 3]);
                     int r = (W2B(wp[wpPos]) * a + 127) / 255;
@@ -1866,7 +2091,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private static void putRGBseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
-    
+
             int wrPos = rOffset / sizeof(short);
             int wgPos = gOffset / sizeof(short);
             int wbPos = bOffset / sizeof(short);
@@ -1896,7 +2121,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private static void putRGBAAseparate16bittile(TiffRGBAImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
-    
+
             int wrPos = rOffset / sizeof(short);
             int wgPos = gOffset / sizeof(short);
             int wbPos = bOffset / sizeof(short);
@@ -1939,7 +2164,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             while (h-- > 0)
             {
-                for (x = w; x-- > 0;)
+                for (x = w; x-- > 0; )
                 {
                     int a = W2B(wrgba[waPos]);
                     int r = (W2B(wrgba[wrPos]) * a + 127) / 255;
@@ -2083,7 +2308,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (bitspersample == 16)
                 range = 255;
 
-            Map = new byte [range + 1];
+            Map = new byte[range + 1];
 
             if (photometric == Photometric.MINISWHITE)
             {
@@ -2095,7 +2320,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 for (int x = 0; x <= range; x++)
                     Map[x] = (byte)((x * 255) / range);
             }
-            
+
             if (bitspersample <= 16 && (photometric == Photometric.MINISBLACK || photometric == Photometric.MINISWHITE))
             {
                 /*
@@ -2104,7 +2329,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 */
                 if (!makebwmap())
                     return false;
-                
+
                 /* no longer need Map, free it */
                 Map = null;
             }
@@ -2147,7 +2372,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             PALmap = new int[256][];
             for (int i = 0; i < 256; i++)
-                PALmap[i] = new int [nsamples];
+                PALmap[i] = new int[nsamples];
 
             for (int i = 0; i < 256; i++)
             {
@@ -2179,7 +2404,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
                 }
             }
-            
+
             return true;
         }
 
@@ -2191,7 +2416,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             BWmap = new int[256][];
             for (int i = 0; i < 256; i++)
-                BWmap[i] = new int [nsamples];
+                BWmap[i] = new int[nsamples];
 
             for (int i = 0; i < 256; i++)
             {
@@ -2273,7 +2498,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             fromskew = (fromskew * 18) / 4;
             if ((h & 3) == 0 && (w & 3) == 0)
             {
-                for ( ; h >= 4; h -= 4)
+                for (; h >= 4; h -= 4)
                 {
                     x = w >> 2;
                     do
@@ -2481,7 +2706,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             fromskew = (fromskew * 10) / 4;
             if ((h & 3) == 0 && (w & 1) == 0)
             {
-                for ( ; h >= 2; h -= 2)
+                for (; h >= 2; h -= 2)
                 {
                     x = w >> 2;
                     do

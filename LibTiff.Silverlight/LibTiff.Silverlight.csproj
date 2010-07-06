@@ -155,9 +155,6 @@
     <Compile Include="..\LibTiff\Internal\TiffHeader.cs">
       <Link>Internal\TiffHeader.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\Internal\TiffRGBAImage.cs">
-      <Link>Internal\TiffRGBAImage.cs</Link>
-    </Compile>
     <Compile Include="..\LibTiff\Internal\TiffTagValue.cs">
       <Link>Internal\TiffTagValue.cs</Link>
     </Compile>
@@ -400,6 +397,9 @@
     </Compile>
     <Compile Include="..\LibTiff\TiffPrintFlags.cs">
       <Link>TiffPrintFlags.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\TiffRGBAImage.cs">
+      <Link>TiffRGBAImage.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\TiffStream.cs">
       <Link>TiffStream.cs</Link>

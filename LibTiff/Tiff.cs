@@ -29,7 +29,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
-    partial class Tiff : IDisposable
+ partial class Tiff : IDisposable
     {
         /// <summary>
         /// Support strip chopping (whether or not to convert single-strip 
@@ -119,7 +119,7 @@ namespace BitMiracle.LibTiff.Classic
                     "." + version.Minor.ToString(CultureInfo.InvariantCulture);
 
                 versionString += "." + version.Build.ToString(CultureInfo.InvariantCulture);
-                versionString += "." + version.Revision.ToString(CultureInfo.InvariantCulture);    
+                versionString += "." + version.Revision.ToString(CultureInfo.InvariantCulture);
 
                 return versionString;
             }
@@ -287,7 +287,7 @@ namespace BitMiracle.LibTiff.Classic
             for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
                 totalCodecs++;
 
-            TiffCodec[] codecs = new TiffCodec [totalCodecs + 1];
+            TiffCodec[] codecs = new TiffCodec[totalCodecs + 1];
 
             int codecPos = 0;
             for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
@@ -323,7 +323,7 @@ namespace BitMiracle.LibTiff.Classic
                 int copyLength = Math.Min(elementCount, newElementCount);
                 Array.Copy(oldBuffer, newBuffer, copyLength);
             }
-            
+
             return newBuffer;
         }
 
@@ -615,7 +615,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 case 'r':
                     tif.m_nextdiroff = tif.m_header.tiff_diroff;
-                    
+
                     if (tif.ReadDirectory())
                     {
                         tif.m_rawcc = -1;
@@ -698,7 +698,7 @@ namespace BitMiracle.LibTiff.Classic
             if (m_nfields > 0)
                 m_fieldinfo = Realloc(m_fieldinfo, m_nfields, m_nfields + n);
             else
-                m_fieldinfo = new TiffFieldInfo [n];
+                m_fieldinfo = new TiffFieldInfo[n];
 
             for (int i = 0; i < n; i++)
             {
@@ -792,7 +792,7 @@ namespace BitMiracle.LibTiff.Classic
 
             ErrorExt(this, m_clientdata, "FieldWithTag", "Internal error, unknown tag 0x{0:x}", tag);
             Debug.Assert(false);
-            return null;            
+            return null;
         }
 
         /// <summary>
@@ -918,7 +918,7 @@ namespace BitMiracle.LibTiff.Classic
 
             return flushData1();
         }
-        
+
         /// <summary>
         /// Gets the value of field corresponding to speciefed tag.
         /// </summary>
@@ -929,7 +929,7 @@ namespace BitMiracle.LibTiff.Classic
             TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
             if (fip != null && (isPseudoTag(tag) || fieldSet(fip.Bit)))
                 return m_tagmethods.GetField(this, tag);
-            
+
             return null;
         }
 
@@ -1042,7 +1042,7 @@ namespace BitMiracle.LibTiff.Classic
                 case TiffTag.YCBCRCOEFFICIENTS:
                     {
                         /* defaults are from CCIR Recommendation 601-1 */
-                        float[] ycbcrcoeffs = new float [3];
+                        float[] ycbcrcoeffs = new float[3];
                         ycbcrcoeffs[0] = 0.299f;
                         ycbcrcoeffs[1] = 0.587f;
                         ycbcrcoeffs[2] = 0.114f;
@@ -1099,7 +1099,7 @@ namespace BitMiracle.LibTiff.Classic
 
             return result;
         }
-        
+
         /// <summary>
         /// Read the next TIFF directory from a file and convert it to the internal format.
         /// </summary>
@@ -1143,7 +1143,7 @@ namespace BitMiracle.LibTiff.Classic
              * structures.  A second pass is made afterwards
              * to read in everthing not taken in the first pass.
              */
-            
+
             /* free any old stuff and reinit */
             FreeDirectory();
             setupDefaultDirectory();
@@ -1190,7 +1190,7 @@ namespace BitMiracle.LibTiff.Classic
                     SwabLong(ref dp.tdir_count);
                     SwabUInt(ref dp.tdir_offset);
                 }
-                
+
                 if (dp.tdir_tag == TiffTag.SAMPLESPERPIXEL)
                 {
                     if (!fetchNormalTag(dir[i]))
@@ -1296,7 +1296,7 @@ namespace BitMiracle.LibTiff.Classic
                             int v = extractData(dir[i]);
                             if (!SetField(dir[i].tdir_tag, v))
                                 return false;
-                            
+
                             break;
                             // XXX: workaround for broken TIFFs
                         }
@@ -1370,7 +1370,7 @@ namespace BitMiracle.LibTiff.Classic
                         TiffFieldInfo[] arr = new TiffFieldInfo[1];
                         arr[0] = createAnonFieldInfo(dir[i].tdir_tag, dir[i].tdir_type);
                         MergeFieldInfo(arr, 1);
-                                            
+
                         fix = 0;
                         while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
                             fix++;
@@ -1410,13 +1410,13 @@ namespace BitMiracle.LibTiff.Classic
             * that the buggy implementation of the buggy compression scheme
             * matches contig planarconfig best. So we 'fix-up' the tag here
             */
-            if ((m_dir.td_compression == Compression.OJPEG) && (m_dir.td_planarconfig == PlanarConfig.SEPARATE)) 
+            if ((m_dir.td_compression == Compression.OJPEG) && (m_dir.td_planarconfig == PlanarConfig.SEPARATE))
             {
                 int dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPOFFSETS);
-                if (dpIndex != -1 && dir[dpIndex].tdir_count == 1) 
+                if (dpIndex != -1 && dir[dpIndex].tdir_count == 1)
                 {
                     dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPBYTECOUNTS);
-                    if (dpIndex != -1 && dir[dpIndex].tdir_count == 1) 
+                    if (dpIndex != -1 && dir[dpIndex].tdir_count == 1)
                     {
                         m_dir.td_planarconfig = PlanarConfig.CONTIG;
                         WarningExt(this, m_clientdata, "ReadDirectory",
@@ -1463,7 +1463,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (!fieldSet(FieldBit.StripOffsets))
             {
-                if ((m_dir.td_compression == Compression.OJPEG) && !IsTiled() && (m_dir.td_nstrips == 1)) 
+                if ((m_dir.td_compression == Compression.OJPEG) && !IsTiled() && (m_dir.td_nstrips == 1))
                 {
                     /*
                     * XXX: OJPEG hack.
@@ -1474,8 +1474,8 @@ namespace BitMiracle.LibTiff.Classic
                     * JpegInterchangeFormat stream.
                     */
                     setFieldBit(FieldBit.StripOffsets);
-                } 
-                else 
+                }
+                else
                 {
                     missingRequired(IsTiled() ? "TileOffsets" : "StripOffsets");
                     return false;
@@ -1489,7 +1489,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if (dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
-                
+
                 switch (dir[i].tdir_tag)
                 {
                     case TiffTag.MINSAMPLEVALUE:
@@ -1563,7 +1563,7 @@ namespace BitMiracle.LibTiff.Classic
                                     break;
                             }
 
-                            byte[] cp = new byte [dir[i].tdir_count * sizeof(short)];
+                            byte[] cp = new byte[dir[i].tdir_count * sizeof(short)];
                             if (fetchData(dir[i], cp) != 0)
                             {
                                 int c = 1 << m_dir.td_bitspersample;
@@ -1597,7 +1597,7 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffTag.REFERENCEBLACKWHITE:
                         fetchRefBlackWhite(dir[i]);
                         break;
-                        /* BEGIN REV 4.0 COMPATIBILITY */
+                    /* BEGIN REV 4.0 COMPATIBILITY */
                     case TiffTag.OSUBFILETYPE:
                         FileType ft = 0;
                         switch ((OFileType)extractData(dir[i]))
@@ -1614,7 +1614,7 @@ namespace BitMiracle.LibTiff.Classic
                             SetField(TiffTag.SUBFILETYPE, ft);
 
                         break;
-                        /* END REV 4.0 COMPATIBILITY */
+                    /* END REV 4.0 COMPATIBILITY */
                     default:
                         fetchNormalTag(dir[i]);
                         break;
@@ -1650,7 +1650,7 @@ namespace BitMiracle.LibTiff.Classic
                     m_dir.td_photometric = Photometric.YCBCR;
                     WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag value assumed incorrect, assuming data is YCbCr instead of RGB");
                 }
-                
+
                 if (!fieldSet(FieldBit.BitsPerSample))
                 {
                     WarningExt(this, m_clientdata, "ReadDirectory", "BitsPerSample tag is missing, assuming 8 bits per sample");
@@ -1701,7 +1701,7 @@ namespace BitMiracle.LibTiff.Classic
                      * the size of the strips.  In this case, assume there
                      * is one uncompressed strip of data.
                      */
-                    if ((m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 1) || 
+                    if ((m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 1) ||
                         (m_dir.td_planarconfig == PlanarConfig.SEPARATE && m_dir.td_nstrips != m_dir.td_samplesperpixel))
                     {
                         missingRequired("StripByteCounts");
@@ -1923,11 +1923,11 @@ namespace BitMiracle.LibTiff.Classic
                         continue;
                     }
                 }
-            
+
                 /*
                 * EXIF tags which need to be specifically processed.
                 */
-                switch (dir[i].tdir_tag) 
+                switch (dir[i].tdir_tag)
                 {
                     case TiffTag.EXIF_SUBJECTDISTANCE:
                         fetchSubjectDistance(dir[i]);
@@ -1973,7 +1973,7 @@ namespace BitMiracle.LibTiff.Classic
                 m_dataoff++;
 
             seekFile(m_dataoff, SeekOrigin.Begin);
-            
+
             // Setup external form of directory entries and write data items.
             int[] fields = new int[FieldBit.SetLongs];
             Array.Copy(m_dir.td_fieldsset, fields, FieldBit.SetLongs);
@@ -2027,7 +2027,7 @@ namespace BitMiracle.LibTiff.Classic
                     SwabLong(ref dirEntry.tdir_count);
                     SwabUInt(ref dirEntry.tdir_offset);
                 }
-                
+
                 dircount = (short)nfields;
                 SwabShort(ref dircount);
 
@@ -2123,10 +2123,10 @@ namespace BitMiracle.LibTiff.Classic
                 scanline = multiply(scanline, m_dir.td_samplesperpixel, "RasterScanlineSize");
                 return howMany8(scanline);
             }
-            
+
             return multiply(howMany8(scanline), m_dir.td_samplesperpixel, "RasterScanlineSize");
         }
-        
+
         /*
         * 
         *
@@ -2167,7 +2167,7 @@ namespace BitMiracle.LibTiff.Classic
 
             return bytecount;
         }
-        
+
         /// <summary>
         /// Compute the number of bytes in a variable height, row-aligned strip.
         /// </summary>
@@ -2309,7 +2309,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             m_currentCodec.DefTileSize(ref tw, ref th);
         }
-        
+
         /// <summary>
         /// Returns the custom client data.
         /// </summary>
@@ -2488,7 +2488,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
             m_rawdata = null;
-            
+
             if (bp != null)
             {
                 m_rawdatasize = size;
@@ -2527,7 +2527,7 @@ namespace BitMiracle.LibTiff.Classic
 
                 m_rawdata = null;
             }
-            
+
             if (size == -1)
             {
                 size = (IsTiled() ? m_tilesize : StripSize());
@@ -2540,15 +2540,15 @@ namespace BitMiracle.LibTiff.Classic
 
                 bp = null; /* NB: force allocation */
             }
-            
+
             if (bp == null)
             {
-                bp = new byte [size];
+                bp = new byte[size];
                 m_flags |= TiffFlags.MYBUFFER;
             }
             else
                 m_flags &= ~TiffFlags.MYBUFFER;
-            
+
             m_rawdata = bp;
             m_rawdatasize = size;
             m_rawcc = 0;
@@ -2579,7 +2579,7 @@ namespace BitMiracle.LibTiff.Classic
             setFieldBit(FieldBit.StripByteCounts);
             return true;
         }
-        
+
         /*
         *   In doing the latter
         * we also "freeze" the state of the directory so
@@ -2605,7 +2605,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if ((tiles ^ temp) != 0)
             {
-                ErrorExt(this, m_clientdata, m_name, tiles != 0 ? "Can not write tiles to a stripped image": "Can not write scanlines to a tiled image");
+                ErrorExt(this, m_clientdata, m_name, tiles != 0 ? "Can not write tiles to a stripped image" : "Can not write scanlines to a tiled image");
                 return false;
             }
 
@@ -2657,7 +2657,7 @@ namespace BitMiracle.LibTiff.Classic
             m_flags |= TiffFlags.BEENWRITING;
             return true;
         }
-        
+
         /// <summary>
         /// Release storage associated with a directory.
         /// </summary>
@@ -2691,11 +2691,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Return an indication of whether or not we are at the last directory
+        /// Returns an indication of whether the current directory is the last directory
         /// in the file.
         /// </summary>
-        /// <returns><c>true</c> if we are at the last directory
-        /// in the file.</returns>
+        /// <returns><c>true</c> if current directory is the last directory in the file.</returns>
         public bool LastDirectory()
         {
             return (m_nextdiroff == 0);
@@ -2743,7 +2742,7 @@ namespace BitMiracle.LibTiff.Classic
         public bool SetSubDirectory(long diroff)
         {
             m_nextdiroff = (uint)diroff;
-            
+
             // Reset m_dirnumber counter and start new list of seen directories.
             // We need this to prevent IFD loops.
             m_dirnumber = 0;
@@ -2799,7 +2798,7 @@ namespace BitMiracle.LibTiff.Classic
             seekFile(off, SeekOrigin.Begin);
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                 SwabUInt(ref nextdir);
-            
+
             if (!writeIntOK((int)nextdir))
             {
                 ErrorExt(this, m_clientdata, module, "Error writing directory link");
@@ -2830,7 +2829,7 @@ namespace BitMiracle.LibTiff.Classic
             m_curstrip = -1;
             return true;
         }
-        
+
         /// <summary>
         /// Records the value of a field in the internal directory structure.
         /// </summary>
@@ -2844,7 +2843,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             if (okToChangeTag(tag))
                 return m_tagmethods.SetField(this, tag, FieldValue.FromParams(ap));
-            
+
             return false;
         }
 
@@ -2856,7 +2855,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             return writeDirectory(true);
         }
-        
+
         /*
         *   
         */
@@ -2923,12 +2922,12 @@ namespace BitMiracle.LibTiff.Classic
                         ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                         return false;
                     }
-                    
+
                     if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                         SwabShort(ref dircount);
 
                     seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
-                    
+
                     if (!readUIntOK(out nextdir))
                     {
                         ErrorExt(this, m_clientdata, module, "Error fetching directory link");
@@ -2944,7 +2943,7 @@ namespace BitMiracle.LibTiff.Classic
                 long off = seekFile(0, SeekOrigin.Current);
                 seekFile(off - sizeof(int), SeekOrigin.Begin);
                 m_diroff = 0;
-                
+
                 if (!writeIntOK((int)m_diroff))
                 {
                     ErrorExt(this, m_clientdata, module, "Error writing directory link");
@@ -2959,8 +2958,13 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Prints the contents of the current directory to the specified stream.
+        /// Prints formatted description of the contents of the current directory to the
+        /// specified stream.
         /// </summary>
+        /// <overloads>
+        /// Prints formatted description of the contents of the current directory to the
+        /// specified stream.
+        /// </overloads>
         /// <param name="fd">The stream.</param>
         public void PrintDirectory(Stream fd)
         {
@@ -2968,14 +2972,15 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Prints the directory.
+        /// Prints formatted description of the contents of the current directory to the
+        /// specified stream using specified formatting options.
         /// </summary>
         /// <param name="fd">The stream.</param>
         /// <param name="flags">The flags.</param>
         public void PrintDirectory(Stream fd, TiffPrintFlags flags)
         {
             fprintf(fd, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
-    
+
             if (fieldSet(FieldBit.SubFileType))
             {
                 fprintf(fd, "  Subfile Type:");
@@ -2991,7 +2996,7 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(fd, "{0}multi-page document", sep);
                     sep = "/";
                 }
-                
+
                 if ((m_dir.td_subfiletype & FileType.MASK) != 0)
                     fprintf(fd, "{0}transparency mask", sep);
 
@@ -3040,10 +3045,10 @@ namespace BitMiracle.LibTiff.Classic
 
             if (fieldSet(FieldBit.Position))
                 fprintf(fd, "  Position: {0:G}, {1:G}\n", m_dir.td_xposition, m_dir.td_yposition);
-            
+
             if (fieldSet(FieldBit.BitsPerSample))
                 fprintf(fd, "  Bits/Sample: {0}\n", m_dir.td_bitspersample);
-            
+
             if (fieldSet(FieldBit.SampleFormat))
             {
                 fprintf(fd, "  Sample Format: ");
@@ -3134,7 +3139,7 @@ namespace BitMiracle.LibTiff.Classic
             if (fieldSet(FieldBit.InkNames))
             {
                 fprintf(fd, "  Ink Names: ");
-                
+
                 string[] names = m_dir.td_inknames.Split(new char[] { '\0' });
                 for (int i = 0; i < names.Length; i++)
                 {
@@ -3214,7 +3219,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (fieldSet(FieldBit.HalftoneHints))
                 fprintf(fd, "  Halftone Hints: light {0} dark {1}\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
-            
+
             if (fieldSet(FieldBit.Orientation))
             {
                 fprintf(fd, "  Orientation: ");
@@ -3226,7 +3231,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (fieldSet(FieldBit.SamplesPerPixel))
                 fprintf(fd, "  Samples/Pixel: {0}\n", m_dir.td_samplesperpixel);
-            
+
             if (fieldSet(FieldBit.RowsPerStrip))
             {
                 fprintf(fd, "  Rows/Strip: ");
@@ -3238,16 +3243,16 @@ namespace BitMiracle.LibTiff.Classic
 
             if (fieldSet(FieldBit.MinSampleValue))
                 fprintf(fd, "  Min Sample Value: {0}\n", m_dir.td_minsamplevalue);
-            
+
             if (fieldSet(FieldBit.MaxSampleValue))
                 fprintf(fd, "  Max Sample Value: {0}\n", m_dir.td_maxsamplevalue);
-            
+
             if (fieldSet(FieldBit.SMinSampleValue))
                 fprintf(fd, "  SMin Sample Value: {0:G}\n", m_dir.td_sminsamplevalue);
-            
+
             if (fieldSet(FieldBit.SMaxSampleValue))
                 fprintf(fd, "  SMax Sample Value: {0:G}\n", m_dir.td_smaxsamplevalue);
-            
+
             if (fieldSet(FieldBit.PlanarConfig))
             {
                 fprintf(fd, "  Planar Configuration: ");
@@ -3267,7 +3272,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (fieldSet(FieldBit.PageNumber))
                 fprintf(fd, "  Page Number: {0}-{1}\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
-            
+
             if (fieldSet(FieldBit.ColorMap))
             {
                 fprintf(fd, "  Color Map: ");
@@ -3367,7 +3372,7 @@ namespace BitMiracle.LibTiff.Classic
                         fip.Tag != TiffTag.YCBCRSUBSAMPLING &&
                         fip.Tag != TiffTag.DOTRANGE)
                     {
-                        raw_data = new byte [dataSize(fip.Type) * value_count];
+                        raw_data = new byte[dataSize(fip.Type) * value_count];
 
                         FieldValue[] result = GetField(tag);
                         if (result == null)
@@ -3380,7 +3385,7 @@ namespace BitMiracle.LibTiff.Classic
                         // XXX: Should be fixed and removed, see the notes
                         // related to PAGENUMBER, HALFTONEHINTS,
                         // YCBCRSUBSAMPLING and DOTRANGE tags
-                        raw_data = new byte [dataSize(fip.Type) * value_count];
+                        raw_data = new byte[dataSize(fip.Type) * value_count];
 
                         FieldValue[] result = GetField(tag);
                         if (result == null)
@@ -3623,7 +3628,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, stop);
         }
-        
+
         /*
         * Read the specified image into an ABGR-format raster taking in account
         * specified orientation.
@@ -3671,9 +3676,9 @@ namespace BitMiracle.LibTiff.Classic
                 TiffRGBAImage img = TiffRGBAImage.Create(this, stop, out emsg);
                 if (img != null)
                 {
-                    img.req_orientation = orientation;
+                    img.ReqOrientation = orientation;
                     // XXX verify rwidth and rheight against width and height
-                    ok = img.Get(raster, (rheight - img.height) * rwidth, rwidth, img.height);
+                    ok = img.Get(raster, (rheight - img.Height) * rwidth, rwidth, img.Height);
                 }
             }
             else
@@ -3767,10 +3772,10 @@ namespace BitMiracle.LibTiff.Classic
                     img.col_offset = 0;
 
                     int rows_to_read = rowsperstrip;
-                    if (row + rowsperstrip > img.height)
-                        rows_to_read = img.height - row;
+                    if (row + rowsperstrip > img.Height)
+                        rows_to_read = img.Height - row;
 
-                    ok = img.Get(raster, 0, img.width, rows_to_read);
+                    ok = img.Get(raster, 0, img.Width, rows_to_read);
                     return ok;
                 }
 
@@ -3832,14 +3837,14 @@ namespace BitMiracle.LibTiff.Classic
              * a full tile configuration afterwards.
              */
             int read_ysize;
-            if (row + tile_ysize > img.height)
-                read_ysize = img.height - row;
+            if (row + tile_ysize > img.Height)
+                read_ysize = img.Height - row;
             else
                 read_ysize = tile_ysize;
 
             int read_xsize;
-            if (col + tile_xsize > img.width)
-                read_xsize = img.width - col;
+            if (col + tile_xsize > img.Width)
+                read_xsize = img.Width - col;
             else
                 read_xsize = tile_xsize;
 
@@ -3876,7 +3881,7 @@ namespace BitMiracle.LibTiff.Classic
 
             return ok;
         }
-        
+
         /// <summary>
         /// Check the image to see if 
         /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>
@@ -3909,7 +3914,7 @@ namespace BitMiracle.LibTiff.Classic
                     emsg = string.Format(CultureInfo.InvariantCulture, "Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
                     return false;
             }
-            
+
             int colorchannels = m_dir.td_samplesperpixel - m_dir.td_extrasamples;
             Photometric photometric = Photometric.RGB;
             FieldValue[] result = GetField(TiffTag.PHOTOMETRIC);
@@ -3942,8 +3947,8 @@ namespace BitMiracle.LibTiff.Classic
                     if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
                     {
                         emsg = string.Format(CultureInfo.InvariantCulture,
-                            "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}", 
-                            TiffRGBAImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel, 
+                            "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
+                            TiffRGBAImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel,
                             m_dir.td_bitspersample);
 
                         return false;
@@ -3966,7 +3971,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (colorchannels < 3)
                     {
                         emsg = string.Format(CultureInfo.InvariantCulture,
-                            "Sorry, can not handle RGB image with {0}={1}", 
+                            "Sorry, can not handle RGB image with {0}={1}",
                             "Color channels", colorchannels);
 
                         return false;
@@ -4263,22 +4268,22 @@ namespace BitMiracle.LibTiff.Classic
             int dx = m_dir.td_tilewidth;
             if (dx == -1)
                 dx = m_dir.td_imagewidth;
-            
+
             int dy = m_dir.td_tilelength;
             if (dy == -1)
                 dy = m_dir.td_imagelength;
-            
+
             int dz = m_dir.td_tiledepth;
             if (dz == -1)
                 dz = m_dir.td_imagedepth;
-            
+
             int ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
-            
+
             return ntiles;
         }
-        
+
         /*
         * Tile-oriented Read Support
         * Contributed by Nancy Cam (Silicon Graphics).
@@ -4322,13 +4327,13 @@ namespace BitMiracle.LibTiff.Classic
                 ErrorExt(this, m_clientdata, m_name, "{0}: Tile out of range, max {1}", tile, m_dir.td_nstrips);
                 return -1;
             }
-            
+
             if (size == -1)
                 size = m_tilesize;
             else if (size > m_tilesize)
                 size = m_tilesize;
-            
-            byte[] tempBuf = new byte [size];
+
+            byte[] tempBuf = new byte[size];
             Array.Copy(buf, offset, tempBuf, 0, size);
 
             if (fillTile(tile) && m_currentCodec.DecodeTile(tempBuf, size, (short)(tile / m_dir.td_stripsperimage)))
@@ -4352,10 +4357,10 @@ namespace BitMiracle.LibTiff.Classic
         public int ReadRawTile(int tile, byte[] buf, int offset, int size)
         {
             const string module = "ReadRawTile";
-    
+
             if (!checkRead(1))
                 return -1;
-            
+
             if (tile >= m_dir.td_nstrips)
             {
                 ErrorExt(this, m_clientdata, m_name, "{0}: Tile out of range, max {1}", tile, m_dir.td_nstrips);
@@ -4371,7 +4376,7 @@ namespace BitMiracle.LibTiff.Classic
             uint bytecount = m_dir.td_stripbytecount[tile];
             if (size != -1 && (uint)size < bytecount)
                 bytecount = (uint)size;
-            
+
             return readRawTile1(tile, buf, offset, (int)bytecount, module);
         }
 
@@ -4398,7 +4403,7 @@ namespace BitMiracle.LibTiff.Classic
              */
             return WriteEncodedTile(ComputeTile(x, y, z, s), buf, -1);
         }
-        
+
         /// <summary>
         /// Computes which strip a (row,sample) value is in.
         /// </summary>
@@ -4431,13 +4436,13 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The number of strips.</returns>
         public int NumberOfStrips()
         {
-            int nstrips = (m_dir.td_rowsperstrip == -1 ? 1: howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
+            int nstrips = (m_dir.td_rowsperstrip == -1 ? 1 : howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 nstrips = multiply(nstrips, m_dir.td_samplesperpixel, "NumberOfStrips");
 
             return nstrips;
         }
-        
+
         /// <summary>
         /// Read a strip of data and decompress the specified amount into the user-supplied buffer.
         /// </summary>
@@ -4479,7 +4484,7 @@ namespace BitMiracle.LibTiff.Classic
                 size = stripsize;
             else if (size > stripsize)
                 size = stripsize;
-            
+
             byte[] tempBuf = new byte[size];
             Array.Copy(buf, offset, tempBuf, 0, size);
 
@@ -4507,7 +4512,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (!checkRead(0))
                 return -1;
-            
+
             if (strip >= m_dir.td_nstrips)
             {
                 ErrorExt(this, m_clientdata, m_name, "{0}: Strip out of range, max {1}", strip, m_dir.td_nstrips);
@@ -4529,7 +4534,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (size != -1 && (uint)size < bytecount)
                 bytecount = (uint)size;
-            
+
             return readRawStrip1(strip, buf, offset, (int)bytecount, module);
         }
 
@@ -4544,7 +4549,7 @@ namespace BitMiracle.LibTiff.Classic
         public int WriteEncodedStrip(int strip, byte[] data, int cc)
         {
             const string module = "WriteEncodedStrip";
-    
+
             if (!writeCheckStrips(module))
                 return -1;
 
@@ -4668,7 +4673,7 @@ namespace BitMiracle.LibTiff.Classic
 
             m_curstrip = strip;
             m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
-            return (appendToStrip(strip, data, cc) ? cc: -1);
+            return (appendToStrip(strip, data, cc) ? cc : -1);
         }
 
         /// <summary>
@@ -4694,7 +4699,7 @@ namespace BitMiracle.LibTiff.Classic
         public int WriteEncodedTile(int tile, byte[] data, int cc)
         {
             const string module = "WriteEncodedTile";
-    
+
             if (!writeCheckTiles(module))
                 return -1;
 
@@ -4798,7 +4803,7 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            return (appendToStrip(tile, data, cc) ? cc: -1);
+            return (appendToStrip(tile, data, cc) ? cc : -1);
         }
 
         /// <summary>
