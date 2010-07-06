@@ -262,53 +262,468 @@
                             RGB, CMYK to RGB, YCbCr to RGB, 16-bit samples to 8-bit samples,
                             associated/unassociated alpha, etc.
                         </para>
+                        <para>
+                            There are two ways to read image data using this interface. If all the
+                            data is to be stored in memory and manipulated at once, then the
+                            <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage</codeEntityReference> or
+                            <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented</codeEntityReference>
+                            can be used:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace UsingReadRgbaImage
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff image = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (image == null)
+                                                return;
+
+                                            FieldValue[] value = image.GetField(TiffTag.IMAGEWIDTH);
+                                            int width = value[0].ToInt();
+
+                                            value = image.GetField(TiffTag.IMAGELENGTH);
+                                            int height = value[0].ToInt();
+
+                                            int imageSize = height * width;
+                                            int[] raster = new int[imageSize];
+
+                                            if (image.ReadRGBAImage(width, height, raster))
+                                            {
+                                                // ...process raster data...
+                                            }
+
+                                            image.Close();
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            Alternatively,
+                            <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage</codeEntityReference>
+                            can be replaced with a more low-level interface that permits an
+                            application to have more control over this reading procedure. The
+                            equivalent to the above is:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace UsingTiffRgbaImage
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff tif = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (tif == null)
+                                                return;
+
+                                            string emsg;
+                                            TiffRgbaImage img = TiffRgbaImage.Create(tif, false, out emsg);
+                                            if (img == null)
+                                            {
+                                                System.Console.Error.WriteLine(emsg);
+                                                return;
+                                            }
+
+                                            int rasterSize = img.Width * img.Height;
+                                            int[] raster = new int[rasterSize];
+                                            if (img.Get(raster, 0, img.Width, img.Height))
+                                            {
+                                                // ...process raster data...
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            However this usage does not take advantage of the more fine-grained
+                            control that's possible. That is, by using this interface it is
+                            possible to:
+                            <list class="bullet">
+                                <listItem>
+                                    <para>
+                                        repeatedly fetch (and manipulate) an image without opening
+                                        and closing the file
+                                    </para>
+                                </listItem>
+                                <listItem>
+                                    <para>
+                                        interpose a method for packing raster pixel data according
+                                        to application-specific needs (or write the data at all)
+                                    </para>
+                                </listItem>
+                                <listItem>
+                                    <para>
+                                        interpose methods that handle TIFF formats that are not
+                                        already handled by the core library
+                                    </para>
+                                </listItem>
+                            </list>
+                        </para>
+                        <para>
+                            The first item means that, for example, image viewers that want to
+                            handle multiple files can cache decoding information in order to
+                            speedup the work required to display a TIFF image.
+                        </para>
+                        <para>
+                            The second item is the main reason for this interface. By interposing a
+                            <codeEntityReference>P:BitMiracle.LibTiff.Classic.TiffRgbaImage.Contig</codeEntityReference> and
+                            <codeEntityReference>P:BitMiracle.LibTiff.Classic.TiffRgbaImage.Separate</codeEntityReference>
+                            (the routines that are called to pack pixel data in the raster) it is
+                            possible share the core logic that understands how to deal with TIFF
+                            while packing the resultant pixels in a format that is optimized for
+                            the application. This alternate format might be very different than
+                            the 8-bit per sample ABGR format the library writes by default. For
+                            example, if the application is going to display the image on an 8-bit
+                            colormap display the put routine might take the data and convert it
+                            on-the-fly to the best colormap indices for display.
+                        </para>
+                        <para>
+                            The last item permits an application to extend the library without
+                            modifying the core code. By overriding the code provided an application
+                            might add support for some esoteric flavor of TIFF that it needs, or
+                            it might substitute a packing routine that is able to do optimizations
+                            using application/environment-specific information.
+                        </para>
                     </content>
                 </section>
-                
-                <section address="SubSection2">
-                    <title>Sub-section 2</title>
+                <section address="SubSection9">
+                    <title>Scanline-based Image I/O</title>
                     <content>
-                        <para>Sub-section content.</para>
+                        <para>
+                            The simplest interface provided by LibTiff.Net is a scanline-oriented
+                            interface that can be used to read TIFF images that have their image
+                            data organized in strips (trying to use this interface to read data
+                            written in tiles will produce errors.) A scanline is a one pixel high
+                            row of image data whose width is the width of the image. Data is
+                            returned packed if the image data is stored with samples packed
+                            together, or as arrays of separate samples if the data is stored with
+                            samples separated. The major limitation of the scanline-oriented
+                            interface, other than the need to first identify an existing file as
+                            having a suitable organization, is that random access to individual
+                            scanlines can only be provided when data is not stored in a compressed
+                            format, or when the number of rows in a strip of image data is set to one 
+                            (<codeEntityReference>T:BitMiracle.LibTiff.Classic.TiffTag</codeEntityReference>.ROWSPERSTRIP
+                            is one).
+                        </para>
+                        <para>
+                            Two methods are provided for scanline-based i/o:
+                            <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadScanline</codeEntityReference> and
+                            <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteScanline</codeEntityReference>.
+                            For example, to read the contents of a file that is assumed to be
+                            organized in strips, the following might be used:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ReadScanlines
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff image = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (image == null)
+                                                return;
+
+                                            FieldValue[] value = image.GetField(TiffTag.IMAGELENGTH);
+                                            int imageLength = value[0].ToInt();
+
+                                            byte[] buf = new byte[image.ScanlineSize()];
+                                            for (int row = 0; row &lt; imageLength; row++)
+                                                image.ReadScanline(buf, row);
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ScanlineSize</codeEntityReference>
+                            returns the number of bytes in a decoded scanline, as returned by
+                            <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadScanline</codeEntityReference>.
+                            Note however that if the file had been create with samples written in
+                            separate planes, then the above code would only read data that
+                            contained the first sample of each pixel; to handle either case one
+                            might use the following instead:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ReadSeparatedScanlines
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff image = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (image == null)
+                                                return;
+
+                                            FieldValue[] value = image.GetField(TiffTag.IMAGELENGTH);
+                                            int imageLength = value[0].ToInt();
+
+                                            value = image.GetField(TiffTag.PLANARCONFIG);
+                                            PlanarConfig config = (PlanarConfig)value[0].ToInt();
+
+                                            byte[] buf = new byte[image.ScanlineSize()];
+
+                                            if (config == PlanarConfig.CONTIG)
+                                            {
+                                                for (int row = 0; row &lt; imageLength; row++)
+                                                    image.ReadScanline(buf, row);
+                                            }
+                                            else if (config == PlanarConfig.SEPARATE)
+                                            {
+                                                value = image.GetField(TiffTag.SAMPLESPERPIXEL);
+                                                short spp = value[0].ToShort();
+
+                                                for (short s = 0; s &lt; spp; s++)
+                                                {
+                                                    for (int row = 0; row &lt; imageLength; row++)
+                                                        image.ReadScanline(buf, row, s);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            Beware however that if the following code were used instead to read
+                            data in the case config == PlanarConfig.SEPARATE,...
+                        </para>
+                        <code language="cs">
+                            for (int row = 0; row &lt; imageLength; row++)
+                            {
+                                for (short s = 0; s &lt; spp; s++)
+                                    image.ReadScanline(buf, row, s);
+                            }
+                        </code>
+                        <para>
+                            ...then problems would arise if TiffTag.ROWSPERSTRIP was not one
+                            because the order in which scanlines are requested would require
+                            random access to data within strips (something that is not supported
+                            by the library when strips are compressed).
+                        </para>
+                    </content>
+                </section>
+                <section address="SubSection10">
+                    <title>Strip-oriented Image I/O</title>
+                    <content>
+                        <para>
+                            The strip-oriented interfaces provided by the library provide access
+                            to entire strips of data. Unlike the scanline-oriented calls, data can
+                            be read or written compressed or uncompressed. Accessing data at a
+                            strip (or tile) level is often desirable because there are no
+                            complications with regard to random access to data within strips.
+                        </para>
+                        <para>
+                            A simple example of reading an image by strips is:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ReadStrips
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff image = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (image == null)
+                                                return;
+
+                                            byte[] buf = new byte[image.StripSize()];
+                                            for (int strip = 0; strip &lt; image.NumberOfStrips(); strip++)
+                                                image.ReadEncodedStrip(strip, buf, 0, -1);
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            Notice how a strip size of -1 is used;
+                            <codeEntityReference>
+                                M:BitMiracle.LibTiff.Classic.Tiff.ReadEncodedStrip(System.Int32,System.Byte[],System.Int32,System.Int32)
+                            </codeEntityReference>
+                            will calculate the appropriate size in this case.
+                        </para>
+                        <para>
+                            The above code reads strips in the order in which the data is
+                            physically stored in the file. If multiple samples are present and
+                            data is stored with
+                            <codeEntityReference>T:BitMiracle.LibTiff.Classic.PlanarConfig</codeEntityReference>.SEPARATE
+                            then all the strips of data holding the first sample will be read,
+                            followed by strips for the second sample, etc.
+                        </para>
+                        <para>
+                            Finally, note that the last strip of data in an image may have fewer
+                            rows in it than specified by the TiffTag.ROWSPERSTRIP. A reader should
+                            not assume that each decoded strip contains a full set of rows in it.
+                        </para>
+                        <para>
+                            The following is an example of how to read raw strips of data from a file:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ReadRawStrips
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff image = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (image == null)
+                                                return;
+
+                                            FieldValue[] value = image.GetField(TiffTag.STRIPBYTECOUNTS);
+                                            int[] byteCounts = value[0].ToIntArray();
+                                            int stripSize = byteCounts[0];
+
+                                            byte[] buf = new byte[stripSize];
+                                            for (int strip = 0; strip &lt; image.NumberOfStrips(); strip++)
+                                            {
+                                                if (byteCounts[strip] &gt; stripSize)
+                                                {
+                                                    stripSize = byteCounts[strip];
+                                                    buf = new byte[stripSize];
+                                                }
+                    
+                                                image.ReadRawStrip(strip, buf, 0, stripSize);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            As above the strips are read in the order in which they are physically
+                            stored in the file; this may be different from the logical ordering
+                            expected by an application.
+                        </para>
+                    </content>
+                </section>
+                <section address="SubSection11">
+                    <title>Tile-oriented Image I/O</title>
+                    <content>
+                        <para>
+                            Tiles of data may be read and written in a manner similar to strips.
+                            With this interface, an image is broken up into a set of rectangular
+                            areas that may have dimensions less than the image width and height.
+                            All the tiles in an image have the same size, and the tile width and
+                            length must each be a multiple of 16 pixels. Tiles are ordered
+                            left-to-right and top-to-bottom in an image. As for scanlines, samples
+                            can be packed contiguously or separately. When separated, all the
+                            tiles for a sample are colocated in the file. That is, all the tiles
+                            for sample 0 appear before the tiles for sample 1, etc.
+                        </para>
+                        <para>
+                            Tiles and strips may also be extended in a z dimension to form
+                            volumes. Data volumes are organized as "slices". That is, all the data
+                            for a slice is colocated. Volumes whose data is organized in tiles can
+                            also have a tile depth so that data can be organized in cubes.
+                        </para>
+                        <para>
+                            There are actually two interfaces for tiles. One interface is similar
+                            to scanlines, to read a tiled image, code of the following sort might
+                            be used:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ReadTiles
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff image = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (image == null)
+                                                return;
+
+                                            FieldValue[] value = image.GetField(TiffTag.IMAGEWIDTH);
+                                            int imageWidth = value[0].ToInt();
+
+                                            value = image.GetField(TiffTag.IMAGELENGTH);
+                                            int imageLength = value[0].ToInt();
+
+                                            value = image.GetField(TiffTag.TILEWIDTH);
+                                            int tileWidth = value[0].ToInt();
+
+                                            value = image.GetField(TiffTag.TILELENGTH);
+                                            int tileLength = value[0].ToInt();
+
+                                            byte[] buf = new byte[image.TileSize()];
+                                            for (int y = 0; y &lt; imageLength; y += tileLength)
+                                            {
+                                                for (int x = 0; x &lt; imageWidth; x += tileWidth)
+                                                    image.ReadTile(buf, 0, x, y, 0, 0);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
+                        <para>
+                            (once again, we assume samples are packed contiguously).
+                        </para>
+                        <para>
+                            Alternatively a direct interface to the low-level data is provided a
+                            la strips. Tiles can be read with
+                            <codeEntityReference>
+                                M:BitMiracle.LibTiff.Classic.Tiff.ReadEncodedTile(System.Int32,System.Byte[],System.Int32,System.Int32)
+                            </codeEntityReference> or
+                            <codeEntityReference>
+                                M:BitMiracle.LibTiff.Classic.Tiff.ReadRawTile(System.Int32,System.Byte[],System.Int32,System.Int32)
+                            </codeEntityReference>,
+                            and written with
+                            <codeEntityReference>
+                                M:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedTile(System.Int32,System.Byte[],System.Int32)
+                            </codeEntityReference> or
+                            <codeEntityReference>
+                                M:BitMiracle.LibTiff.Classic.Tiff.WriteRawTile(System.Int32,System.Byte[],System.Int32)
+                            </codeEntityReference>.
+                            For example, to read all the tiles in an image:
+                        </para>
+                        <code language="cs">
+                            using BitMiracle.LibTiff.Classic;
+
+                            namespace ReadEncodedTile
+                            {
+                                class Program
+                                {
+                                    static void Main(string[] args)
+                                    {
+                                        using (Tiff image = Tiff.Open(args[0], "r"))
+                                        {
+                                            if (image == null)
+                                                return;
+
+                                            byte[] buf = new byte[image.TileSize()];
+                                            for (int tile = 0; tile &lt; image.NumberOfTiles(); tile++)
+                                                image.ReadEncodedTile(tile, buf, 0, -1);
+                                        }
+                                    }
+                                }
+                            }
+                        </code>
                     </content>
                 </section>
             </sections>
         </section>
-        <relatedTopics>
-            <!-- One or more of the following:
-           - A local link
-           - An external link
-           - A code entity reference
-
-      <link xlink:href="Other Topic's ID"/>
-      <link xlink:href="Other Topic's ID">Link inner text</link>
-
-      <externalLink>
-          <linkText>Link text</linkText>
-          <linkAlternateText>Optional alternate link text</linkAlternateText>
-          <linkUri>URI</linkUri>
-      </externalLink>
-
-      <codeEntityReference>API member ID</codeEntityReference>
-
-      Examples:
-
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8270" />
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8278">Some other topic</link>
-
-      <externalLink>
-          <linkText>SHFB on CodePlex</linkText>
-          <linkAlternateText>Go to CodePlex</linkAlternateText>
-          <linkUri>http://shfb.codeplex.com</linkUri>
-      </externalLink>
-
-      <codeEntityReference>T:TestDoc.TestClass</codeEntityReference>
-      <codeEntityReference>P:TestDoc.TestClass.SomeProperty</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor(System.String,System.Int32)</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.ToString</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.FirstMethod</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.SecondMethod(System.Int32,System.String)</codeEntityReference>
-      -->
-        </relatedTopics>
     </developerConceptualDocument>
 </topic>

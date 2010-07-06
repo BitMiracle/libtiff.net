@@ -3421,6 +3421,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Reads the scanline.
         /// </summary>
+        /// <overloads>
+        /// Reads the scanline.
+        /// </overloads>
         /// <param name="buf">The buffer.</param>
         /// <param name="row">The row.</param>
         /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
@@ -3460,6 +3463,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Writes the scanline.
         /// </summary>
+        /// <overloads>
+        /// Writes the scanline.
+        /// </overloads>
         /// <param name="buf">The buffer.</param>
         /// <param name="row">The row.</param>
         /// <returns><c>true</c> if written successfully; otherwise, <c>false</c></returns>
@@ -3606,6 +3612,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Reads the specified image into an ABGR-format raster.
         /// </summary>
+        /// <overloads>
+        /// Reads the specified image into an ABGR-format raster.
+        /// </overloads>
         /// <param name="rwidth">The raster width.</param>
         /// <param name="rheight">The raster height.</param>
         /// <param name="raster">The raster.</param>
@@ -3629,25 +3638,12 @@ namespace BitMiracle.LibTiff.Classic
             return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, stop);
         }
 
-        /*
-        * Read the specified image into an ABGR-format raster taking in account
-        * specified orientation.
-        */
         /// <summary>
-        /// Reads the RGBA image oriented.
+        /// Read the image into an ABGR-format raster taking in account specified orientation.
         /// </summary>
-        /// <param name="rwidth">The raster width.</param>
-        /// <param name="rheight">The raster height.</param>
-        /// <param name="raster">The raster.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster)
-        {
-            return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, false);
-        }
-
-        /// <summary>
-        /// Reads the RGBA image oriented.
-        /// </summary>
+        /// <overloads>
+        /// Read the image into an ABGR-format raster taking in account specified orientation.
+        /// </overloads>
         /// <param name="rwidth">The raster width.</param>
         /// <param name="rheight">The raster height.</param>
         /// <param name="raster">The raster.</param>
@@ -3659,7 +3655,7 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Reads the RGBA image oriented.
+        /// Read the image into an ABGR-format raster taking in account specified orientation.
         /// </summary>
         /// <param name="rwidth">The raster width.</param>
         /// <param name="rheight">The raster height.</param>
