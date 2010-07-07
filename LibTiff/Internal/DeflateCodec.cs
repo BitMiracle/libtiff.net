@@ -28,9 +28,6 @@
  * last found at ftp://ftp.uu.net/pub/archiving/zip/zlib/zlib-0.99.tar.gz.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 
 using ComponentAce.Compression.Libs.zlib;

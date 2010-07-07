@@ -13,10 +13,6 @@
  * Builtin Compression Scheme Configuration Support.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using BitMiracle.LibTiff.Classic.Internal;
 
 namespace BitMiracle.LibTiff.Classic

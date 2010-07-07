@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using BitMiracle.LibTiff.Classic;
 using NUnit.Framework;
-
-using BitMiracle.LibTiff.Classic;
 
 namespace UnitTests
 {

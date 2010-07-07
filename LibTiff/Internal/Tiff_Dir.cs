@@ -14,9 +14,6 @@
  * (and also some miscellaneous stuff)
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 using BitMiracle.LibTiff.Classic.Internal;

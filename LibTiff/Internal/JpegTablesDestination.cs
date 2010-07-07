@@ -9,10 +9,6 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using BitMiracle.LibJpeg.Classic;
 
 namespace BitMiracle.LibTiff.Classic.Internal

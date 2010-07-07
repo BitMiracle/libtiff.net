@@ -15,10 +15,6 @@
  * XXX We assume short = 16-bits and long = 32-bits XXX
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace BitMiracle.LibTiff.Classic
 {
 #if EXPOSE_LIBTIFF

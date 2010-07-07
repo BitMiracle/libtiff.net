@@ -22,10 +22,6 @@
  *  - items marked with a & are introduced by Adobe DNG specification.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>

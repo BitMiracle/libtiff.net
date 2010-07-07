@@ -14,12 +14,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Globalization;
 using System.IO;
 
 using BitMiracle.LibTiff.Classic.Internal;
-using System.Globalization;
 
 namespace BitMiracle.LibTiff.Classic
 {

@@ -10,13 +10,12 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Diagnostics;
 using System.Collections;
-using System.Reflection;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Text;
 
 using BitMiracle.LibTiff.Classic.Internal;
 

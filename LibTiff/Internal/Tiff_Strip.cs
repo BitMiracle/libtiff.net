@@ -13,10 +13,6 @@
  * Strip-organized Image Support Routines.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace BitMiracle.LibTiff.Classic
 {
 #if EXPOSE_LIBTIFF
