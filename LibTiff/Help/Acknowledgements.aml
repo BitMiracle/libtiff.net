@@ -1,82 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="609bf177-82ad-4b3f-8a2a-04d0aded0be5" revisionNumber="1">
-  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!--
-    <summary>
-      <para>Optional summary abstract</para>
-    </summary>
-    -->
-    <introduction>
-      <!-- Uncomment this to generate an outline of the section and sub-section
-           titles.  Specify a numeric value as the inner text to limit it to
-           a specific number of sub-topics when creating the outline.  Specify
-           zero (0) to limit it to top-level sections only.  -->
-      <!-- <autoOutline /> -->
-      <para>Required introduction</para>
-    </introduction>
-    <!-- Add one or more top-level section elements.  These are collapsible.
-         If using <autoOutline />, add an address attribute to identify it
-         and specify a title so that it can be jumped to with a hyperlink. -->
-    <section address="Section1">
-      <title>Optional section title</title>
-      <content>
-        <!-- Uncomment this to create a sub-section outline
-        <autoOutline /> -->
-        <para>Add one or more sections with content</para>
-      </content>
-      <!-- If a section contains a sections element, its content creates
-           sub-sections.  These are not collapsible.
-      <sections>
-          <section address="SubSection1">
-              <title>Sub-section 1</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-          <section address="SubSection2">
-              <title>Sub-section 2</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-      </sections> -->
-    </section>
-    <relatedTopics>
-      <!-- One or more of the following:
-           - A local link
-           - An external link
-           - A code entity reference
-
-      <link xlink:href="Other Topic's ID"/>
-      <link xlink:href="Other Topic's ID">Link inner text</link>
-
-      <externalLink>
-          <linkText>Link text</linkText>
-          <linkAlternateText>Optional alternate link text</linkAlternateText>
-          <linkUri>URI</linkUri>
-      </externalLink>
-
-      <codeEntityReference>API member ID</codeEntityReference>
-
-      Examples:
-
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8270" />
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8278">Some other topic</link>
-
-      <externalLink>
-          <linkText>SHFB on CodePlex</linkText>
-          <linkAlternateText>Go to CodePlex</linkAlternateText>
-          <linkUri>http://shfb.codeplex.com</linkUri>
-      </externalLink>
-
-      <codeEntityReference>T:TestDoc.TestClass</codeEntityReference>
-      <codeEntityReference>P:TestDoc.TestClass.SomeProperty</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor(System.String,System.Int32)</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.ToString</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.FirstMethod</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.SecondMethod(System.Int32,System.String)</codeEntityReference>
-      -->
-    </relatedTopics>
-  </developerConceptualDocument>
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <para>
+            The LibTiff.Net library is based in part on:
+            <list class="bullet">
+                <listItem>
+                    <para>
+                        <legacyBold>The Independent JPEG Group's JPEG software</legacyBold>
+                    </para>
+                    <para>http://www.ijg.org/</para>
+                    <para>Copyright (C) 1991-1998, Thomas G. Lane.</para>
+                </listItem>
+                <listItem>
+                    <para>
+                        <legacyBold>LibTIFF - TIFF Library and Utilities</legacyBold>
+                    </para>
+                    <para>http://www.remotesensing.org/libtiff/</para>
+                    <para>Copyright (c) 1988-1997 Sam Leffler</para>
+                    <para>Copyright (c) 1991-1997 Silicon Graphics, Inc.</para>
+                </listItem>
+            </list>
+        </para>
+        <para>
+            LibTiff.Net uses code from
+            <quote>
+                <para>
+                    <legacyBold>ZLIB.NET</legacyBold>
+                </para>
+                <para>http://www.componentace.com</para>
+                <para>Copyright (C) 2006, ComponentAce</para>
+            </quote>
+        </para>
+        <para>
+            Other people have by now helped with bug fixes, test images and code. We want to
+            say "thank you" to following people:
+            <list class="bullet">
+                <listItem>Adriaan van den Brand</listItem>
+                <listItem>Michael Epner</listItem>
+                <listItem>San Chen</listItem>
+                <listItem>Asger Sigurd Skovbo Petersen</listItem>
+                <listItem>Bryan Ellis</listItem>
+            </list>
+        </para>
+        <para>
+            This list is in no particular order and my apology to anyone that was inadvertently
+            not listed.
+        </para>
+        <relatedTopics>
+            <link xlink:href="c3b8a067-673b-42d0-9d38-991c8964d125"/>
+        </relatedTopics>
+    </developerConceptualDocument>
 </topic>

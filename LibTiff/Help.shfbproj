@@ -154,7 +154,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Help\Getting Started\TIFF Tools\" />
-    <Folder Include="Help\Differences\" />
     <Folder Include="Help\Getting Started\Graphics programming with LibTiff.Net\" />
     <Folder Include="Help\Getting Started\" />
     <Folder Include="Help\InvisibleFromTOC\" />
@@ -165,10 +164,7 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Help\Differences\Renamings of constants and types.aml" />
-    <None Include="Help\Differences\Renaming of functions.aml" />
-    <None Include="Help\Differences\General notes.aml" />
-    <None Include="Help\Differences\Differences.aml" />
+    <None Include="Help\Differences.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Graphics programming with LibTiff.Net.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Part2. Grayscale and color imaging.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Part1. Black-and-white imaging.aml" />
