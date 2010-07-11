@@ -19,11 +19,7 @@
     </Topic>
     <Topic id="9ccb55b6-cac8-4213-9bad-5fcf11d9d6af" visible="True" />
   </Topic>
-  <Topic id="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" visible="True" title="Differences between LibTiff-3.9.4 and LibTiff.Net">
-    <Topic id="6b83b9ec-01f4-43db-a54e-e0e2f9193517" visible="True" title="General notes" />
-    <Topic id="10524b34-596d-4865-a6bc-9b4eecbee300" visible="True" title="Renamings of functions" />
-    <Topic id="fa16a5c5-6f52-4455-b130-9363a5bec120" visible="True" title="Renamings of constants and types" />
-  </Topic>
+  <Topic id="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" visible="True" title="Differences between LibTiff-3.9.4 and LibTiff.Net" />
   <Topic id="609bf177-82ad-4b3f-8a2a-04d0aded0be5" visible="True" />
   <Topic id="5200b425-c5b7-4675-b138-b055935bb221" visible="True" />
   <Topic id="b104b853-026c-4369-b748-4810c886edfc" visible="True" />
