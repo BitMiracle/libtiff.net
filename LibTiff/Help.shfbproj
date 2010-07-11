@@ -14,7 +14,7 @@
     <RootNamespace>Documentation</RootNamespace>
     <Name>Documentation</Name>
     <!-- SHFB properties -->
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release\Help\</OutputPath>
     <HtmlHelpName>LibTiff.NET</HtmlHelpName>
     <SdkLinkTarget>Blank</SdkLinkTarget>
     <FrameworkVersion>2.0.50727</FrameworkVersion>
@@ -120,8 +120,7 @@
       </ComponentConfig>
     </ComponentConfigurations>
     <DocumentationSources>
-      <DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.dll" xmlns="" />
-      <DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.xml" xmlns="" />
+      <DocumentationSource sourceFile="LibTiff.csproj" />
     </DocumentationSources>
     <CopyrightHref>http://www.bitmiracle.com/libtiff</CopyrightHref>
     <CopyrightText>Copyright &amp;#169%3b 2009-2010 Bit Miracle. All rights reserved.</CopyrightText>
@@ -132,6 +131,7 @@
       <NamespaceSummaryItem name="BitMiracle.LibTiff.Classic" isDocumented="True">This namespace contains all classes, structures, delegates, and enumerations in the .NET version (port) of the original LibTiff library.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="(global)" isDocumented="False" />
     </NamespaceSummaries>
+    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in
        order for Visual Studio to perform the build.  The others are optional
