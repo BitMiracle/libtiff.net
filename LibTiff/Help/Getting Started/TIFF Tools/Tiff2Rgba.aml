@@ -1,82 +1,120 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <topic id="b85a8605-d3d4-4747-abfb-f7e71b5fa2b5" revisionNumber="1">
-  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!--
-    <summary>
-      <para>Optional summary abstract</para>
-    </summary>
-    -->
-    <introduction>
-      <!-- Uncomment this to generate an outline of the section and sub-section
-           titles.  Specify a numeric value as the inner text to limit it to
-           a specific number of sub-topics when creating the outline.  Specify
-           zero (0) to limit it to top-level sections only.  -->
-      <!-- <autoOutline /> -->
-      <para>Required introduction</para>
-    </introduction>
-    <!-- Add one or more top-level section elements.  These are collapsible.
-         If using <autoOutline />, add an address attribute to identify it
-         and specify a title so that it can be jumped to with a hyperlink. -->
-    <section address="Section1">
-      <title>Optional section title</title>
-      <content>
-        <!-- Uncomment this to create a sub-section outline
-        <autoOutline /> -->
-        <para>Add one or more sections with content</para>
-      </content>
-      <!-- If a section contains a sections element, its content creates
-           sub-sections.  These are not collapsible.
-      <sections>
-          <section address="SubSection1">
-              <title>Sub-section 1</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-          <section address="SubSection2">
-              <title>Sub-section 2</title>
-              <content>
-                  <para>Sub-section content.</para>
-              </content>
-          </section>
-      </sections> -->
-    </section>
-    <relatedTopics>
-      <!-- One or more of the following:
-           - A local link
-           - An external link
-           - A code entity reference
-
-      <link xlink:href="Other Topic's ID"/>
-      <link xlink:href="Other Topic's ID">Link inner text</link>
-
-      <externalLink>
-          <linkText>Link text</linkText>
-          <linkAlternateText>Optional alternate link text</linkAlternateText>
-          <linkUri>URI</linkUri>
-      </externalLink>
-
-      <codeEntityReference>API member ID</codeEntityReference>
-
-      Examples:
-
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8270" />
-      <link xlink:href="00e97994-e9e6-46e0-b420-5be86b2f8278">Some other topic</link>
-
-      <externalLink>
-          <linkText>SHFB on CodePlex</linkText>
-          <linkAlternateText>Go to CodePlex</linkAlternateText>
-          <linkUri>http://shfb.codeplex.com</linkUri>
-      </externalLink>
-
-      <codeEntityReference>T:TestDoc.TestClass</codeEntityReference>
-      <codeEntityReference>P:TestDoc.TestClass.SomeProperty</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.#ctor(System.String,System.Int32)</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.ToString</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.FirstMethod</codeEntityReference>
-      <codeEntityReference>M:TestDoc.TestClass.SecondMethod(System.Int32,System.String)</codeEntityReference>
-      -->
-    </relatedTopics>
-  </developerConceptualDocument>
+    <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <introduction>
+            <para>
+                Tiff2Rgba converts a TIFF image to RGBA color space.
+            </para>
+        </introduction>
+        <section address="Section1">
+            <content></content>
+            <sections>
+                <section address="SubSection1">
+                    <title>Usage</title>
+                    <content>
+                        <para>
+                            <legacyBold>Tiff2Rgba</legacyBold> [ options ] input.tif output.tif
+                        </para>
+                    </content>
+                </section>
+                <section address="SubSection2">
+                    <title>Description</title>
+                    <content>
+                        <para>
+                            Tiff2Rgba converts a wide variety of TIFF images into an RGBA TIFF
+                            image. This includes the ability to translate different color spaces
+                            and photometric interpretation into RGBA, support for alpha blending,
+                            and translation of many different bit depths into a 32bit RGBA image.
+                        </para>
+                        <para>
+                            Internally this program is implemented using the
+                            <codeEntityReference>
+                                Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage
+                            </codeEntityReference> method, and it suffers any limitations of that
+                            method. This includes limited support for > 8 BitsPerSample images,
+                            and flaws with some esoteric combinations of BitsPerSample,
+                            photometric interpretation, block organization and planar
+                            configuration.
+                        </para>
+                        <para>
+                            The generated images are stripped images with four samples per pixel
+                            (red, green, blue and alpha) or if the <legacyItalic>−n</legacyItalic>
+                            flag is used, three samples per pixel (red, green, and blue). The
+                            resulting images are always planar configuration contiguous. For this
+                            reason, this program is a useful utility for transform exotic TIFF
+                            files into a form ingestible by almost any TIFF supporting software.
+                        </para>                        
+                    </content>
+                </section>
+                <section address="SubSection3">
+                    <title>Options</title>
+                    <content>
+                        <table>
+                            <tableHeader>
+                                <row>
+                                    <entry>Option</entry>
+                                    <entry>Description</entry>
+                                </row>
+                            </tableHeader>
+                            <row>
+                                <entry>−c compression_name</entry>
+                                <entry>
+                                    Specify a compression scheme to use when writing image data:
+                                    <legacyItalic>−c none</legacyItalic> for no compression (the
+                                    default), <legacyItalic>−c packbits</legacyItalic> for the
+                                    PackBits compression algorithm,
+                                    <legacyItalic>−c zip</legacyItalic> for the Deflate
+                                    compression algorithm, <legacyItalic>−c jpeg</legacyItalic>
+                                    for the JPEG compression algorithm, and
+                                    <legacyItalic>−c lzw</legacyItalic> for Lempel-Ziv &amp; Welch.
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>−r number_of_rows</entry>
+                                <entry>
+                                    Write data with a specified number of rows per strip; by
+                                    default the number of rows/strip is selected so that each
+                                    strip is approximately 8 kilobytes.
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>−b</entry>
+                                <entry>
+                                    Process the image one block (strip/tile) at a time instead of
+                                    by reading the whole image into memory at once. This may be 
+                                    necessary for very large images on systems with limited RAM.
+                                </entry>
+                            </row>
+                            <row>
+                                <entry>−n</entry>
+                                <entry>
+                                    Drop the alpha component from the output file, producing a
+                                    pure RGB file. Currently this does not work if the
+                                    <legacyItalic>−b</legacyItalic> flag is also in effect.
+                                </entry>
+                            </row>
+                        </table>
+                    </content>
+                </section>
+                <section address="SubSection4">
+                    <title>Bugs</title>
+                    <content>
+                        <para>
+                            Please report bugs via the form at
+                            <externalLink>
+                                <linkText>http://bitmiracle.com/support.aspx</linkText>
+                                <linkUri>http://bitmiracle.com/support.aspx</linkUri>
+                                <linkTarget>_blank</linkTarget>
+                            </externalLink> or using
+                            <externalLink>
+                                <linkText>e-mail</linkText>
+                                <linkUri>mailto:support@bitmiracle.com</linkUri>
+                                <linkTarget>_blank</linkTarget>
+                            </externalLink>.
+                        </para>
+                    </content>
+                </section>
+            </sections>
+        </section>
+    </developerConceptualDocument>
 </topic>

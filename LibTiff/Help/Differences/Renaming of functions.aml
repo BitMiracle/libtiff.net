@@ -323,10 +323,10 @@
                     TIFFReadEncodedTile -> <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ReadEncodedTile(System.Int32,System.Byte[],System.Int32,System.Int32)</codeEntityReference>
                 </para>
                 <para>
-                    TIFFReadRGBAImage -> <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])</codeEntityReference>
+                    TIFFReadRGBAImage -> <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage</codeEntityReference>
                 </para>
                 <para>
-                    TIFFReadRGBAImageOriented -> <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented(System.Int32,System.Int32,System.Int32[])</codeEntityReference>
+                    TIFFReadRGBAImageOriented -> <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented</codeEntityReference>
                 </para>
                 <para>
                     TIFFReadRGBAStrip -> <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAStrip(System.Int32,System.Int32[])</codeEntityReference>
