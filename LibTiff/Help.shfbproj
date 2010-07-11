@@ -15,7 +15,7 @@
     <Name>Documentation</Name>
     <!-- SHFB properties -->
     <OutputPath>bin\Release\Help\</OutputPath>
-    <HtmlHelpName>LibTiff.NET</HtmlHelpName>
+    <HtmlHelpName>LibTiff.Net</HtmlHelpName>
     <SdkLinkTarget>Blank</SdkLinkTarget>
     <FrameworkVersion>2.0.50727</FrameworkVersion>
     <ComponentConfigurations>
@@ -126,7 +126,7 @@
     <CopyrightText>Copyright &amp;#169%3b 2009-2010 Bit Miracle. All rights reserved.</CopyrightText>
     <FeedbackEMailAddress>support%40bitmiracle.com</FeedbackEMailAddress>
     <FeedbackEMailLinkText>support%40bitmiracle.com</FeedbackEMailLinkText>
-    <HelpTitle>LibTiff.NET, a managed version of the LibTiff library for reading and writing TIFF.</HelpTitle>
+    <HelpTitle>LibTiff.Net, a managed version of the LibTiff library for reading and writing TIFF.</HelpTitle>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="BitMiracle.LibTiff.Classic" isDocumented="True">This namespace contains all classes, structures, delegates, and enumerations in the .NET version (port) of the original LibTiff library.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="(global)" isDocumented="False" />

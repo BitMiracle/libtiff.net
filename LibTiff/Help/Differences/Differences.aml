@@ -16,7 +16,7 @@
 
                 <para>
                     LibTiff prefers unsigned integer types for parameters and return
-                    values. LibTiff.NET, by contrast, prefers signed integer types for
+                    values. LibTiff.Net, by contrast, prefers signed integer types for
                     parameters and return values. You can pass unsigned values or convert
                     return values to unsigned types if you wish, but keep in mind, that it
                     will affect performance (not seriously, though).
