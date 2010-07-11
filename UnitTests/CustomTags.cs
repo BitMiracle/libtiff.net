@@ -14,7 +14,9 @@ namespace UnitTests
         private const TiffTag TIFFTAG_DOUBLETAG = (TiffTag)671;
         private const TiffTag TIFFTAG_BYTE = (TiffTag)672;
 
-        public static void TagExtender(Tiff tif)
+        private Tiff.TiffExtendProc m_parentExtender;
+
+        public void TagExtender(Tiff tif)
         {
             TiffFieldInfo[] tiffFieldInfo = 
             {
@@ -28,6 +30,9 @@ namespace UnitTests
             };
 
             tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
+
+            if (m_parentExtender != null)
+                m_parentExtender(tif);
         }
 
         [Test]
@@ -38,7 +43,7 @@ namespace UnitTests
 
             // Register the custom tag handler
             Tiff.TiffExtendProc extender = TagExtender;
-            Tiff.SetTagExtender(extender);
+            m_parentExtender = Tiff.SetTagExtender(extender);
 
             string outputFileName = "output.tif";
             Tiff image = Tiff.Open(outputFileName, "w");
@@ -84,7 +89,6 @@ namespace UnitTests
 
             // Write the information to the file
             image.WriteEncodedStrip(0, buffer, 25 * 144);
-            image.WriteDirectory();
 
             // Close the file
             image.Dispose();

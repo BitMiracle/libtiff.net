@@ -142,7 +142,7 @@
                     </content>
                 </section>
                 <section address="SubSection4">
-                    <title>Building documentation for LibTiff.net</title>
+                    <title>Building documentation for LibTiff.net (Optional)</title>
                     <content>
                         <para>
                             First of all, you need to extract source code package into a
@@ -159,8 +159,9 @@
                         <alert class="note">
                             <para>
                                 To build documentation for the LibTiff.Net you'll need
-                                latest Sandcastle, Sandcastle Help File Builder GUI,
-                                and patch from Sandcastle Styles Project installed.
+                                latest Sandcastle (June 2010 Release), Sandcastle Help File
+                                Builder GUI (v1.9.1.0), and Sandcastle June 2010 Patch - Rev 1
+                                patch from Sandcastle Styles Project installed.
                             </para>
                         </alert>
                     </content>
