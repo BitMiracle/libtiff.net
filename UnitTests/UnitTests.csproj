@@ -58,10 +58,12 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomTags.cs" />
+    <Compile Include="EncodeBitmap.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="RgbaImage.cs" />
     <Compile Include="TestCase.cs" />
