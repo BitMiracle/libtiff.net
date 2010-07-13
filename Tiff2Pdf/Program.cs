@@ -209,6 +209,7 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     case 'o':
                         outfilename = optarg;
+                        argn++;
                         break;
 
                     case 'j':  
@@ -234,29 +235,37 @@ namespace BitMiracle.Tiff2Pdf
                     case 'u': 
                         if (optarg[0] == 'm')
                             t2p.m_pdf_centimeters = true;
+
+                        argn++;
                         break;
 
                     case 'x': 
                         t2p.m_pdf_defaultxres = float.Parse(optarg, CultureInfo.InvariantCulture) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        argn++;
                         break;
 
                     case 'y':
                         t2p.m_pdf_defaultyres = float.Parse(optarg, CultureInfo.InvariantCulture) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        argn++;
                         break;
 
                     case 'w': 
                         t2p.m_pdf_overridepagesize = true;
                         t2p.m_pdf_defaultpagewidth = (float.Parse(optarg, CultureInfo.InvariantCulture) * Tiff2PdfConstants.PS_UNIT_SIZE) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        argn++;
                         break;
 
                     case 'l': 
                         t2p.m_pdf_overridepagesize = true;
                         t2p.m_pdf_defaultpagelength = (float.Parse(optarg, CultureInfo.InvariantCulture) * Tiff2PdfConstants.PS_UNIT_SIZE) / (t2p.m_pdf_centimeters ? 2.54F : 1.0F);
+                        argn++;
                         break;
 
                     case 'r': 
                         if (optarg[0] == 'o')
                             t2p.m_pdf_overrideres = true;
+
+                        argn++;
                         break;
 
                     case 'p': 
@@ -264,6 +273,8 @@ namespace BitMiracle.Tiff2Pdf
                             t2p.m_pdf_overridepagesize = true;
                         else
                             Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, "Unknown paper size {0}, ignoring option", optarg);
+
+                        argn++;
                         break;
 
                     case 'i':
@@ -288,26 +299,33 @@ namespace BitMiracle.Tiff2Pdf
                             bytes = T2P.Latin1Encoding.GetBytes(optarg);
                             Array.Copy(bytes, 0, t2p.m_pdf_datetime, 2, Math.Min(bytes.Length, 14));
                         }
+
+                        argn++;
                         break;
 
                     case 'c':
                         t2p.m_pdf_creator = T2P.Latin1Encoding.GetBytes(optarg);
+                        argn++;
                         break;
                     
                     case 'a':
                         t2p.m_pdf_author = T2P.Latin1Encoding.GetBytes(optarg);
+                        argn++;
                         break;
 
                     case 't':
                         t2p.m_pdf_title = T2P.Latin1Encoding.GetBytes(optarg);
+                        argn++;
                         break;
                     
                     case 's':
                         t2p.m_pdf_subject = T2P.Latin1Encoding.GetBytes(optarg);
+                        argn++;
                         break;
 
                     case 'k':
                         t2p.m_pdf_keywords = T2P.Latin1Encoding.GetBytes(optarg);
+                        argn++;
                         break;
 
                     case 'b':
@@ -327,7 +345,7 @@ namespace BitMiracle.Tiff2Pdf
             string inputFileName = null;
             if (args.Length > argn)
             {
-                inputFileName = args[++argn];
+                inputFileName = args[argn];
             }
             else
             {

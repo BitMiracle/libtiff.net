@@ -154,5 +154,33 @@ namespace UnitTests
         {
             performTest(file);
         }
+        
+        [Test]
+        public void TestArgs()
+        {
+            string inputFile = Path.Combine(TestCase.Folder, "CCITT_1.TIF");
+            string outputFile = "TestArgs.pdf";
+
+            File.Delete(outputFile);
+
+            string[] arguments = new string[] { "-x", "100", "-y", "100", "-o", outputFile, inputFile };
+            BitMiracle.Tiff2Pdf.Program.Main(arguments);
+
+            Assert.IsTrue(File.Exists(outputFile));
+        }
+
+        [Test]
+        public void TestArgs2()
+        {
+            string inputFile = Path.Combine(TestCase.Folder, "CCITT_1.TIF");
+            string outputFile = "TestArgs2.pdf";
+
+            File.Delete(outputFile);
+
+            string[] arguments = new string[] { "-o", outputFile, "-x", "100", "-y", "100", inputFile };
+            BitMiracle.Tiff2Pdf.Program.Main(arguments);
+
+            Assert.IsTrue(File.Exists(outputFile));
+        }
     }
 }
