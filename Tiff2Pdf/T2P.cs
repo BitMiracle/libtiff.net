@@ -3108,10 +3108,10 @@ namespace BitMiracle.Tiff2Pdf
             for ( ; i < samplecount; i++)
             {
                 int sample = data32[i];
-                byte alpha = (byte)(255 - (sample & 0xff));
-                data[i * 3] = (byte)(((sample >> 24) & 0xff) + alpha);
-                data[i * 3 + 1] = (byte)(((sample >> 16) & 0xff) + alpha);
-                data[i * 3 + 2] = (byte)(((sample >> 8) & 0xff) + alpha);
+                byte alpha = (byte)(255 - ((sample >> 24) & 0xff));
+                data[i * 3] = (byte)(((sample >> 16) & 0xff) + alpha);
+                data[i * 3 + 1] = (byte)(((sample >> 8) & 0xff) + alpha);
+                data[i * 3 + 2] = (byte)((sample & 0xff) + alpha);
             }
 
             return (i * 3);
