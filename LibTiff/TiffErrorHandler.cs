@@ -27,16 +27,16 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="tif">The tif.</param>
         /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional format arguments.</param>
-        public virtual void ErrorHandler(Tiff tif, string module, string fmt, params object[] ap)
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional format arguments.</param>
+        public virtual void ErrorHandler(Tiff tif, string module, string format, params object[] args)
         {
             using (TextWriter stderr = Console.Error)
             {
                 if (module != null)
                     stderr.Write("{0}: ", module);
 
-                stderr.Write(fmt, ap);
+                stderr.Write(format, args);
                 stderr.Write(".\n");
             }
         }
@@ -47,9 +47,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="tif">The tif.</param>
         /// <param name="fd">The fd.</param>
         /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional format arguments.</param>
-        public virtual void ErrorHandlerExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional format arguments.</param>
+        public virtual void ErrorHandlerExt(Tiff tif, object fd, string module, string format, params object[] args)
         {
         }
 
@@ -58,9 +58,9 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="tif">The tif.</param>
         /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional format arguments.</param>
-        public virtual void WarningHandler(Tiff tif, string module, string fmt, params object[] ap)
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional format arguments.</param>
+        public virtual void WarningHandler(Tiff tif, string module, string format, params object[] args)
         {
             using (TextWriter stderr = Console.Error)
             {
@@ -68,7 +68,7 @@ namespace BitMiracle.LibTiff.Classic
                     stderr.Write("{0}: ", module);
 
                 stderr.Write("Warning, ");
-                stderr.Write(fmt, ap);
+                stderr.Write(format, args);
                 stderr.Write(".\n");
             }
         }
@@ -79,9 +79,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="tif">The tif.</param>
         /// <param name="fd">The fd.</param>
         /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional format arguments.</param>
-        public virtual void WarningHandlerExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional format arguments.</param>
+        public virtual void WarningHandlerExt(Tiff tif, object fd, string module, string format, params object[] args)
         {
         }
     }

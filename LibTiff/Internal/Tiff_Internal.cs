@@ -266,9 +266,7 @@ namespace BitMiracle.LibTiff.Classic
         private Tiff()
         {
             m_clientdata = 0;
-
             m_postDecodeMethod = PostDecodeMethodType.pdmNone;
-
 
             setupBuiltInCodecs();
 

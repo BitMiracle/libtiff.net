@@ -219,6 +219,6 @@
 update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)Distributives\Scripts\replace.vbs" O:BitMiracle Overload:BitMiracle "$(TargetDir)BitMiracle.LibTiff.NET.xml"</PostBuildEvent>
+    <PostBuildEvent>"$(SolutionDir)Distributives\Scripts\replace.vbs" O: Overload: "$(TargetDir)BitMiracle.LibTiff.NET.xml"</PostBuildEvent>
   </PropertyGroup>
 </Project>

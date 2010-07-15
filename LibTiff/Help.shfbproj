@@ -120,8 +120,8 @@
       </ComponentConfig>
     </ComponentConfigurations>
     <DocumentationSources>
-      <DocumentationSource sourceFile="LibTiff.csproj" />
-    </DocumentationSources>
+      <DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.dll" />
+<DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.xml" /></DocumentationSources>
     <CopyrightHref>http://www.bitmiracle.com/libtiff</CopyrightHref>
     <CopyrightText>Copyright &amp;#169%3b 2009-2010 Bit Miracle. All rights reserved.</CopyrightText>
     <FeedbackEMailAddress>support%40bitmiracle.com</FeedbackEMailAddress>

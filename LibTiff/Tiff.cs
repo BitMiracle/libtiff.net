@@ -169,13 +169,23 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves codec corresponding to compression scheme.
+        /// Retrieves the codec registered for the specified compression scheme.
         /// </summary>
         /// <param name="scheme">The compression scheme.</param>
-        /// <returns>Found codec.</returns>
-        /// <remarks>Other compression schemes may be registered. 
-        /// Registered schemes can also override the built in versions 
-        /// provided by this library.
+        /// <returns>The codec registered for the specified compression scheme or <c>null</c>
+        /// if there is no codec registered for the given scheme.</returns>
+        /// <remarks>
+        /// <para>
+        /// LibTiff.Net supports a variety of compression schemes implemented by software codecs.
+        /// Each codec adheres to a modular interface that provides for the decoding and encoding
+        /// of image data; as well as some other methods for initialization, setup, cleanup, and
+        /// the control of default strip and tile sizes. Codecs are identified by the associated
+        /// value of the <see cref="TiffTag"/>.COMPRESSION tag.
+        /// </para>
+        /// <para>
+        /// Other compression schemes may be registered. Registered schemes can also override the
+        /// built-in versions provided by the library.
+        /// </para>
         /// </remarks>
         public TiffCodec FindCodec(Compression scheme)
         {
@@ -196,34 +206,37 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Registers codec.
+        /// Adds specified codec to a list of registered codec.
         /// </summary>
-        /// <param name="codec">Codec.</param>
-        /// <returns><c>true</c> if registered successfully.</returns>
-        public bool RegisterCodec(TiffCodec codec)
+        /// <param name="codec">The codec to register.</param>
+        /// <remarks>
+        /// This method can be used to augment or override the set of codecs available to an
+        /// application. If the <paramref name="codec"/> is for a scheme that already has a
+        /// registered codec then it is overridden and any images with data encoded with this
+        /// compression scheme will be decoded using the supplied codec.
+        /// </remarks>
+        public void RegisterCodec(TiffCodec codec)
         {
             if (codec == null)
-                return false;
+                throw new ArgumentNullException("codec");
 
             codecList cd = new codecList();
             cd.codec = codec;
             cd.next = m_registeredCodecs;
             m_registeredCodecs = cd;
-
-            return true;
         }
 
         /// <summary>
-        /// Unregisters codec.
+        /// Removes specified codec from a list of registered codecs.
         /// </summary>
-        /// <param name="c">Codec for unregistering.</param>
-        public void UnRegisterCodec(TiffCodec c)
+        /// <param name="codec">The codec to remove from a list of registered codecs.</param>
+        public void UnRegisterCodec(TiffCodec codec)
         {
             if (m_registeredCodecs == null)
                 return;
 
             codecList temp;
-            if (m_registeredCodecs.codec == c)
+            if (m_registeredCodecs.codec == codec)
             {
                 temp = m_registeredCodecs.next;
                 m_registeredCodecs = temp;
@@ -234,7 +247,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if (cd.next != null)
                 {
-                    if (cd.next.codec == c)
+                    if (cd.next.codec == codec)
                     {
                         temp = cd.next.next;
                         cd.next = temp;
@@ -244,11 +257,11 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             ErrorExt(this, 0, "UnRegisterCodec",
-                "Cannot remove compression scheme {0}; not registered", c.m_name);
+                "Cannot remove compression scheme {0}; not registered", codec.m_name);
         }
 
         /// <summary>
-        /// Checks whether we have working codec for the specific coding scheme.
+        /// Checks whether library has working codec for the specific compression scheme.
         /// </summary>
         /// <param name="scheme">The scheme to check.</param>
         /// <returns>
@@ -268,12 +281,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the array of configured codecs, both built-in and
-        /// registered by user.
+        /// Retrieves an array of configured codecs, both built-in and registered by user.
         /// </summary>
-        /// <returns>The array of configured codecs or <c>null</c> if function
-        /// have failed.</returns>
-        /// <remarks>The last record in array is null.</remarks>
+        /// <returns>An array of configured codecs.</returns>
         public TiffCodec[] GetConfiguredCodecs()
         {
             int totalCodecs = 0;
@@ -286,7 +296,7 @@ namespace BitMiracle.LibTiff.Classic
             for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
                 totalCodecs++;
 
-            TiffCodec[] codecs = new TiffCodec[totalCodecs + 1];
+            TiffCodec[] codecs = new TiffCodec[totalCodecs];
 
             int codecPos = 0;
             for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
@@ -298,13 +308,8 @@ namespace BitMiracle.LibTiff.Classic
                     codecs[codecPos++] = m_builtInCodecs[i];
             }
 
-            codecs[codecPos] = null;
             return codecs;
         }
-
-        //
-        // Auxiliary functions.
-        //
 
         /// <summary>
         /// Re-allocates byte array and copies data from old to new array.
@@ -634,11 +639,13 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Closes a previously opened TIFF file.
-        /// <remarks>This method closes a file or stream that was previously opened with
-        /// <see cref="Open"/> or <see cref="ClientOpen"/>. Any buffered data are flushed to the
-        /// file/stream, including the contents of the current directory (if modified); and all
-        /// resources are reclaimed.</remarks>
         /// </summary>
+        /// <remarks>
+        /// This method closes a file or stream that was previously opened with <see cref="Open"/>
+        /// or <see cref="ClientOpen"/>. Any buffered data are flushed to the file/stream,
+        /// including the contents of the current directory (if modified); and all resources
+        /// are reclaimed.
+        /// </remarks>
         public void Close()
         {
             // Flush buffered data and directory (if dirty).
@@ -2474,24 +2481,32 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Setup the raw data buffer in preparation for reading a strip of raw data.
+        /// Sets up the data buffer used to read raw (encoded) data from a file.
         /// </summary>
-        /// <param name="bp">The data buffer.</param>
+        /// <param name="buffer">The data buffer.</param>
         /// <param name="size">The buffer size.</param>
-        /// <remarks>If the buffer is specified as <c>null</c>, then a buffer of 
-        /// appropriate size is allocated by the library. Otherwise,
-        /// the client must guarantee that the buffer is large enough 
-        /// to hold any individual strip of raw data.
+        /// <remarks>
+        /// <para>
+        /// This method is provided for client-control of the I/O buffers used by the library.
+        /// Applications need never use this method; it's provided only for "intelligent clients"
+        /// that wish to optimize memory usage and/or eliminate potential copy operations that can
+        /// occur when working with images that have data stored without compression.
+        /// </para>
+        /// <para>
+        /// If the <paramref name="buffer"/> is <c>null</c>, then a buffer of appropriate size is
+        /// allocated by the library. Otherwise, the caller must guarantee that the buffer is
+        /// large enough to hold any individual strip of raw data.
+        /// </para>
         /// </remarks>
-        public void ReadBufferSetup(byte[] bp, int size)
+        public void ReadBufferSetup(byte[] buffer, int size)
         {
             Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
             m_rawdata = null;
 
-            if (bp != null)
+            if (buffer != null)
             {
                 m_rawdatasize = size;
-                m_rawdata = bp;
+                m_rawdata = buffer;
                 m_flags &= ~TiffFlags.MYBUFFER;
             }
             else
@@ -2513,11 +2528,25 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Setup the raw data buffer used for encoding.
+        /// Sets up the data buffer used to write raw (encoded) data to a file.
         /// </summary>
-        /// <param name="bp">The data buffer.</param>
+        /// <param name="buffer">The data buffer.</param>
         /// <param name="size">The buffer size.</param>
-        public void WriteBufferSetup(byte[] bp, int size)
+        /// <remarks>
+        /// <para>
+        /// This method is provided for client-control of the I/O buffers used by the library.
+        /// Applications need never use this method; it's provided only for "intelligent clients"
+        /// that wish to optimize memory usage and/or eliminate potential copy operations that can
+        /// occur when working with images that have data stored without compression.
+        /// </para>
+        /// <para>
+        /// If the <paramref name="size"/> is -1 then the buffer size is selected to hold a
+        /// complete tile or strip, or at least 8 kilobytes, whichever is greater. If the
+        /// <paramref name="buffer"/> is <c>null</c>, then a buffer of appropriate size is
+        /// allocated by the library.
+        /// </para>
+        /// </remarks>
+        public void WriteBufferSetup(byte[] buffer, int size)
         {
             if (m_rawdata != null)
             {
@@ -2531,24 +2560,25 @@ namespace BitMiracle.LibTiff.Classic
             {
                 size = (IsTiled() ? m_tilesize : StripSize());
 
-                /*
-                 * Make raw data buffer at least 8K
-                 */
+                // Make raw data buffer at least 8K
                 if (size < 8 * 1024)
                     size = 8 * 1024;
 
-                bp = null; /* NB: force allocation */
+                // force allocation
+                buffer = null;
             }
 
-            if (bp == null)
+            if (buffer == null)
             {
-                bp = new byte[size];
+                buffer = new byte[size];
                 m_flags |= TiffFlags.MYBUFFER;
             }
             else
+            {
                 m_flags &= ~TiffFlags.MYBUFFER;
+            }
 
-            m_rawdata = bp;
+            m_rawdata = buffer;
             m_rawdatasize = size;
             m_rawcc = 0;
             m_rawcp = 0;
@@ -2833,15 +2863,15 @@ namespace BitMiracle.LibTiff.Classic
         /// Records the value of a field in the internal directory structure.
         /// </summary>
         /// <param name="tag">The tag.</param>
-        /// <param name="ap">The field value(s).</param>
+        /// <param name="value">The field value(s).</param>
         /// <returns><c>true</c> if set successfully</returns>
         /// <remarks>The field will be written to the file
         /// when/if the directory structure is updated.
         /// </remarks>
-        public bool SetField(TiffTag tag, params object[] ap)
+        public bool SetField(TiffTag tag, params object[] value)
         {
             if (okToChangeTag(tag))
-                return m_tagmethods.SetField(this, tag, FieldValue.FromParams(ap));
+                return m_tagmethods.SetField(this, tag, FieldValue.FromParams(value));
 
             return false;
         }
@@ -4050,30 +4080,125 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Forces the error.
+        /// Invokes the library-wide error handling methods to (normally) write an error message
+        /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">The tif. Can be <c>null</c></param>
-        /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void Error(Tiff tif, string module, string fmt, params object[] ap)
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>
+        /// <para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// software module in which an error is detected.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of an error should use
+        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// </para>
+        /// </remarks>
+        /// <overloads>
+        /// Invokes the library-wide error handling methods to (normally) write an error message
+        /// to the <see cref="Console.Error"/>.
+        /// </overloads>
+        public static void Error(Tiff tif, string module, string format, params object[] args)
         {
-            m_errorHandler.ErrorHandler(tif, module, fmt, ap);
-            m_errorHandler.ErrorHandlerExt(tif, null, module, fmt, ap);
+            if (m_errorHandler == null)
+                return;
+
+            m_errorHandler.ErrorHandler(tif, module, format, args);
+            m_errorHandler.ErrorHandlerExt(tif, null, module, format, args);
         }
 
         /// <summary>
-        /// Forces the error.
+        /// Invokes the library-wide error handling methods to (normally) write an error message
+        /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">The tif. Can be <c>null</c></param>
-        /// <param name="fd">The fd.</param>
-        /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void ErrorExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
+        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>
+        /// <para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// software module in which an error is detected.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of an error should use
+        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// </para>
+        /// </remarks>
+        public static void Error(string module, string format, params object[] args)
         {
-            m_errorHandler.ErrorHandler(tif, module, fmt, ap);
-            m_errorHandler.ErrorHandlerExt(tif, fd, module, fmt, ap);
+            Error(null, module, format, args);
+        }
+
+        /// <summary>
+        /// Invokes the library-wide error handling methods to (normally) write an error message
+        /// to the <see cref="Console.Error"/>.
+        /// </summary>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="clientData">The client data to be passed to error handler.</param>
+        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>
+        /// <para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// software module in which an error is detected.
+        /// </para>
+        /// <para>
+        /// The <paramref name="clientData"/> parameter can be anything you want. It will be passed
+        /// unchanged to the error handler. Default error handler does not use it. Only custom
+        /// error handlers may make use of it.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of an error should use
+        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// </para>
+        /// </remarks>
+        /// <overloads>
+        /// Invokes the library-wide error handling methods to (normally) write an error message
+        /// to the <see cref="Console.Error"/> and passes client data to the error handler.
+        /// </overloads>
+        public static void ErrorExt(Tiff tif, object clientData, string module, string format, params object[] args)
+        {
+            if (m_errorHandler == null)
+                return;
+
+            m_errorHandler.ErrorHandler(tif, module, format, args);
+            m_errorHandler.ErrorHandlerExt(tif, clientData, module, format, args);
+        }
+
+        /// <summary>
+        /// Invokes the library-wide error handling methods to (normally) write an error message
+        /// to the <see cref="Console.Error"/>.
+        /// </summary>
+        /// <param name="clientData">The client data to be passed to error handler.</param>
+        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>
+        /// <para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// software module in which an error is detected.
+        /// </para>
+        /// <para>
+        /// The <paramref name="clientData"/> parameter can be anything you want. It will be passed
+        /// unchanged to the error handler. Default error handler does not use it. Only custom
+        /// error handlers may make use of it.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of an error should use
+        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// </para>
+        /// </remarks>
+        public static void ErrorExt(object clientData, string module, string format, params object[] args)
+        {
+            ErrorExt(null, clientData, module, format, args);
         }
 
         /// <summary>
@@ -4081,12 +4206,26 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="tif">The tif. Can be <c>null</c></param>
         /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void Warning(Tiff tif, string module, string fmt, params object[] ap)
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional formatted message arguments.</param>
+        public static void Warning(Tiff tif, string module, string format, params object[] args)
         {
-            m_errorHandler.WarningHandler(tif, module, fmt, ap);
-            m_errorHandler.WarningHandlerExt(tif, null, module, fmt, ap);
+            if (m_errorHandler == null)
+                return;
+
+            m_errorHandler.WarningHandler(tif, module, format, args);
+            m_errorHandler.WarningHandlerExt(tif, null, module, format, args);
+        }
+
+        /// <summary>
+        /// Forces the warning.
+        /// </summary>
+        /// <param name="module">The module.</param>
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional formatted message arguments.</param>
+        public static void Warning(string module, string format, params object[] args)
+        {
+            Warning(null, module, format, args);
         }
 
         /// <summary>
@@ -4095,46 +4234,15 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="tif">The tif. Can be <c>null</c></param>
         /// <param name="fd">The fd.</param>
         /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void WarningExt(Tiff tif, object fd, string module, string fmt, params object[] ap)
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional formatted message arguments.</param>
+        public static void WarningExt(Tiff tif, object fd, string module, string format, params object[] args)
         {
-            m_errorHandler.WarningHandler(tif, module, fmt, ap);
-            m_errorHandler.WarningHandlerExt(tif, fd, module, fmt, ap);
-        }
+            if (m_errorHandler == null)
+                return;
 
-        /// <summary>
-        /// Forces the error.
-        /// </summary>
-        /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void Error(string module, string fmt, params object[] ap)
-        {
-            Error(null, module, fmt, ap);
-        }
-
-        /// <summary>
-        /// Forces the error.
-        /// </summary>
-        /// <param name="fd">The fd.</param>
-        /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void ErrorExt(object fd, string module, string fmt, params object[] ap)
-        {
-            ErrorExt(null, fd, module, fmt, ap);
-        }
-
-        /// <summary>
-        /// Forces the warning.
-        /// </summary>
-        /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void Warning(string module, string fmt, params object[] ap)
-        {
-            Warning(null, module, fmt, ap);
+            m_errorHandler.WarningHandler(tif, module, format, args);
+            m_errorHandler.WarningHandlerExt(tif, fd, module, format, args);
         }
 
         /// <summary>
@@ -4142,18 +4250,22 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="fd">The fd.</param>
         /// <param name="module">The module.</param>
-        /// <param name="fmt">The message format.</param>
-        /// <param name="ap">The optional formatted message arguments.</param>
-        public static void WarningExt(object fd, string module, string fmt, params object[] ap)
+        /// <param name="format">The message format.</param>
+        /// <param name="args">The optional formatted message arguments.</param>
+        public static void WarningExt(object fd, string module, string format, params object[] args)
         {
-            WarningExt(null, fd, module, fmt, ap);
+            WarningExt(null, fd, module, format, args);
         }
 
         /// <summary>
-        /// Sets the error handler.
+        /// Sets an instance of the <see cref="TiffErrorHandler"/> class as custom library-wide
+        /// error handler.
         /// </summary>
-        /// <param name="errorHandler">The error handler.</param>
-        /// <returns>Previous error handler.</returns>
+        /// <param name="errorHandler">An instance of the <see cref="TiffErrorHandler"/> class
+        /// to set as custom library-wide error handler.</param>
+        /// <returns>
+        /// Previous error handler or <c>null</c> if there was no error handler set.
+        /// </returns>
         public static TiffErrorHandler SetErrorHandler(TiffErrorHandler errorHandler)
         {
             TiffErrorHandler prev = m_errorHandler;
@@ -4814,10 +4926,11 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the size of a TiffType in bytes.
+        /// Gets the number of bytes occupied by the item of given type.
         /// </summary>
         /// <param name="type">The type.</param>
-        /// <returns>The size of TiffType in bytes.</returns>
+        /// <returns>The number of bytes occupied by the <paramref name="type"/> or 0 if unknown
+        /// data type is supplied.</returns>
         public static int DataWidth(TiffType type)
         {
             switch (type)
@@ -4850,11 +4963,6 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * TIFF Library Bit & Byte Swapping Support.
-        *
-        * XXX We assume short = 16-bits and long = 32-bits XXX
-        */
         /// <summary>
         /// Swaps the short.
         /// </summary>

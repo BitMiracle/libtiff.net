@@ -53,9 +53,9 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="tif">The tif.</param>
         /// <param name="tag">The tag.</param>
-        /// <param name="ap">The field value.</param>
+        /// <param name="value">The field value.</param>
         /// <returns><c>true</c> if set successfully; otherwise, <c>false</c></returns>
-        public virtual bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
+        public virtual bool SetField(Tiff tif, TiffTag tag, FieldValue[] value)
         {
             const string module = "vsetfield";
 
@@ -71,16 +71,16 @@ namespace BitMiracle.LibTiff.Classic
             switch (tag)
             {
                 case TiffTag.SUBFILETYPE:
-                    td.td_subfiletype = (FileType)ap[0].ToByte();
+                    td.td_subfiletype = (FileType)value[0].ToByte();
                     break;
                 case TiffTag.IMAGEWIDTH:
-                    td.td_imagewidth = ap[0].ToInt();
+                    td.td_imagewidth = value[0].ToInt();
                     break;
                 case TiffTag.IMAGELENGTH:
-                    td.td_imagelength = ap[0].ToInt();
+                    td.td_imagelength = value[0].ToInt();
                     break;
                 case TiffTag.BITSPERSAMPLE:
-                    td.td_bitspersample = ap[0].ToShort();
+                    td.td_bitspersample = value[0].ToShort();
                     /*
                     * If the data require post-decoding processing to byte-swap
                     * samples, set it up here.  Note that since tags are required
@@ -106,7 +106,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.COMPRESSION:
-                    v = ap[0].ToInt() & 0xffff;
+                    v = value[0].ToInt() & 0xffff;
                     Compression comp = (Compression)v;
                     /*
                     * If we're changing the compression scheme, the notify the
@@ -132,13 +132,13 @@ namespace BitMiracle.LibTiff.Classic
                     break;
 
                 case TiffTag.PHOTOMETRIC:
-                    td.td_photometric = (Photometric)ap[0].ToInt();
+                    td.td_photometric = (Photometric)value[0].ToInt();
                     break;
                 case TiffTag.THRESHHOLDING:
-                    td.td_threshholding = (Threshold)ap[0].ToByte();
+                    td.td_threshholding = (Threshold)value[0].ToByte();
                     break;
                 case TiffTag.FILLORDER:
-                    v = ap[0].ToInt();
+                    v = value[0].ToInt();
                     FillOrder fo = (FillOrder)v;
                     if (fo != FillOrder.LSB2MSB && fo != FillOrder.MSB2LSB)
                     {
@@ -149,7 +149,7 @@ namespace BitMiracle.LibTiff.Classic
                     td.td_fillorder = fo;
                     break;
                 case TiffTag.ORIENTATION:
-                    v = ap[0].ToInt();
+                    v = value[0].ToInt();
                     Orientation or = (Orientation)v;
                     if (or < Orientation.TOPLEFT || Orientation.LEFTBOT < or)
                     {
@@ -161,7 +161,7 @@ namespace BitMiracle.LibTiff.Classic
                     break;
                 case TiffTag.SAMPLESPERPIXEL:
                     /* XXX should cross check -- e.g. if pallette, then 1 */
-                    v = ap[0].ToInt();
+                    v = value[0].ToInt();
                     if (v == 0)
                     {
                         badvalue = true;
@@ -171,7 +171,7 @@ namespace BitMiracle.LibTiff.Classic
                     td.td_samplesperpixel = (short)v;
                     break;
                 case TiffTag.ROWSPERSTRIP:
-                    v32 = ap[0].ToInt();
+                    v32 = value[0].ToInt();
                     if (v32 == 0)
                     {
                         badvalue32 = true;
@@ -186,25 +186,25 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.MINSAMPLEVALUE:
-                    td.td_minsamplevalue = ap[0].ToShort();
+                    td.td_minsamplevalue = value[0].ToShort();
                     break;
                 case TiffTag.MAXSAMPLEVALUE:
-                    td.td_maxsamplevalue = ap[0].ToShort();
+                    td.td_maxsamplevalue = value[0].ToShort();
                     break;
                 case TiffTag.SMINSAMPLEVALUE:
-                    td.td_sminsamplevalue = ap[0].ToDouble();
+                    td.td_sminsamplevalue = value[0].ToDouble();
                     break;
                 case TiffTag.SMAXSAMPLEVALUE:
-                    td.td_smaxsamplevalue = ap[0].ToDouble();
+                    td.td_smaxsamplevalue = value[0].ToDouble();
                     break;
                 case TiffTag.XRESOLUTION:
-                    td.td_xresolution = ap[0].ToFloat();
+                    td.td_xresolution = value[0].ToFloat();
                     break;
                 case TiffTag.YRESOLUTION:
-                    td.td_yresolution = ap[0].ToFloat();
+                    td.td_yresolution = value[0].ToFloat();
                     break;
                 case TiffTag.PLANARCONFIG:
-                    v = ap[0].ToInt();
+                    v = value[0].ToInt();
                     PlanarConfig pc = (PlanarConfig)v;
                     if (pc != PlanarConfig.CONTIG && pc != PlanarConfig.SEPARATE)
                     {
@@ -214,13 +214,13 @@ namespace BitMiracle.LibTiff.Classic
                     td.td_planarconfig = pc;
                     break;
                 case TiffTag.XPOSITION:
-                    td.td_xposition = ap[0].ToFloat();
+                    td.td_xposition = value[0].ToFloat();
                     break;
                 case TiffTag.YPOSITION:
-                    td.td_yposition = ap[0].ToFloat();
+                    td.td_yposition = value[0].ToFloat();
                     break;
                 case TiffTag.RESOLUTIONUNIT:
-                    v = ap[0].ToInt();
+                    v = value[0].ToInt();
                     ResUnit ru = (ResUnit)v;
                     if (ru < ResUnit.NONE || ResUnit.CENTIMETER < ru)
                     {
@@ -231,21 +231,21 @@ namespace BitMiracle.LibTiff.Classic
                     td.td_resolutionunit = ru;
                     break;
                 case TiffTag.PAGENUMBER:
-                    td.td_pagenumber[0] = ap[0].ToShort();
-                    td.td_pagenumber[1] = ap[1].ToShort();
+                    td.td_pagenumber[0] = value[0].ToShort();
+                    td.td_pagenumber[1] = value[1].ToShort();
                     break;
                 case TiffTag.HALFTONEHINTS:
-                    td.td_halftonehints[0] = ap[0].ToShort();
-                    td.td_halftonehints[1] = ap[1].ToShort();
+                    td.td_halftonehints[0] = value[0].ToShort();
+                    td.td_halftonehints[1] = value[1].ToShort();
                     break;
                 case TiffTag.COLORMAP:
                     v32 = 1 << td.td_bitspersample;
-                    Tiff.setShortArray(out td.td_colormap[0], ap[0].ToShortArray(), v32);
-                    Tiff.setShortArray(out td.td_colormap[1], ap[1].ToShortArray(), v32);
-                    Tiff.setShortArray(out td.td_colormap[2], ap[2].ToShortArray(), v32);
+                    Tiff.setShortArray(out td.td_colormap[0], value[0].ToShortArray(), v32);
+                    Tiff.setShortArray(out td.td_colormap[1], value[1].ToShortArray(), v32);
+                    Tiff.setShortArray(out td.td_colormap[2], value[2].ToShortArray(), v32);
                     break;
                 case TiffTag.EXTRASAMPLES:
-                    if (!setExtraSamples(td, ref v, ap))
+                    if (!setExtraSamples(td, ref v, value))
                     {
                         badvalue = true;
                         break;
@@ -253,7 +253,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     break;
                 case TiffTag.MATTEING:
-                    if (ap[0].ToShort() != 0)
+                    if (value[0].ToShort() != 0)
                         td.td_extrasamples = 1;
                     else
                         td.td_extrasamples = 0;
@@ -265,7 +265,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.TILEWIDTH:
-                    v32 = ap[0].ToInt();
+                    v32 = value[0].ToInt();
                     if ((v32 % 16) != 0)
                     {
                         if (tif.m_mode != Tiff.O_RDONLY)
@@ -281,7 +281,7 @@ namespace BitMiracle.LibTiff.Classic
                     tif.m_flags |= TiffFlags.ISTILED;
                     break;
                 case TiffTag.TILELENGTH:
-                    v32 = ap[0].ToInt();
+                    v32 = value[0].ToInt();
                     if ((v32 % 16) != 0)
                     {
                         if (tif.m_mode != Tiff.O_RDONLY)
@@ -297,7 +297,7 @@ namespace BitMiracle.LibTiff.Classic
                     tif.m_flags |= TiffFlags.ISTILED;
                     break;
                 case TiffTag.TILEDEPTH:
-                    v32 = ap[0].ToInt();
+                    v32 = value[0].ToInt();
                     if (v32 == 0)
                     {
                         badvalue32 = true;
@@ -307,7 +307,7 @@ namespace BitMiracle.LibTiff.Classic
                     td.td_tiledepth = v32;
                     break;
                 case TiffTag.DATATYPE:
-                    v = ap[0].ToInt();
+                    v = value[0].ToInt();
                     SampleFormat sf = SampleFormat.VOID;
                     switch (v)
                     {
@@ -333,7 +333,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     break;
                 case TiffTag.SAMPLEFORMAT:
-                    v = ap[0].ToInt();
+                    v = value[0].ToInt();
                     sf = (SampleFormat)v;
                     if (sf < SampleFormat.UINT || SampleFormat.COMPLEXIEEEFP < sf)
                     {
@@ -357,13 +357,13 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.IMAGEDEPTH:
-                    td.td_imagedepth = ap[0].ToInt();
+                    td.td_imagedepth = value[0].ToInt();
                     break;
                 case TiffTag.SUBIFD:
                     if ((tif.m_flags & TiffFlags.INSUBIFD) != TiffFlags.INSUBIFD)
                     {
-                        td.td_nsubifd = ap[0].ToShort();
-                        Tiff.setLongArray(out td.td_subifd, ap[1].ToIntArray(), td.td_nsubifd);
+                        td.td_nsubifd = value[0].ToShort();
+                        Tiff.setLongArray(out td.td_subifd, value[1].ToIntArray(), td.td_nsubifd);
                     }
                     else
                     {
@@ -373,26 +373,26 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.YCBCRPOSITIONING:
-                    td.td_ycbcrpositioning = (YCbCrPosition)ap[0].ToByte();
+                    td.td_ycbcrpositioning = (YCbCrPosition)value[0].ToByte();
                     break;
                 case TiffTag.YCBCRSUBSAMPLING:
-                    td.td_ycbcrsubsampling[0] = ap[0].ToShort();
-                    td.td_ycbcrsubsampling[1] = ap[1].ToShort();
+                    td.td_ycbcrsubsampling[0] = value[0].ToShort();
+                    td.td_ycbcrsubsampling[1] = value[1].ToShort();
                     break;
                 case TiffTag.TRANSFERFUNCTION:
                     v = ((td.td_samplesperpixel - td.td_extrasamples) > 1 ? 3 : 1);
                     for (int i = 0; i < v; i++)
                     {
-                        Tiff.setShortArray(out td.td_transferfunction[i], ap[0].ToShortArray(), 1 << td.td_bitspersample);
+                        Tiff.setShortArray(out td.td_transferfunction[i], value[0].ToShortArray(), 1 << td.td_bitspersample);
                     }
                     break;
                 case TiffTag.REFERENCEBLACKWHITE:
                     /* XXX should check for null range */
-                    Tiff.setFloatArray(out td.td_refblackwhite, ap[0].ToFloatArray(), 6);
+                    Tiff.setFloatArray(out td.td_refblackwhite, value[0].ToFloatArray(), 6);
                     break;
                 case TiffTag.INKNAMES:
-                    v = ap[0].ToInt();
-                    string s = ap[1].ToString();
+                    v = value[0].ToInt();
+                    string s = value[1].ToString();
                     v = checkInkNamesString(tif, v, s);
                     status = v > 0;
                     if (v > 0)
@@ -461,9 +461,9 @@ namespace BitMiracle.LibTiff.Classic
                     if (fip.PassCount)
                     {
                         if (fip.WriteCount == TiffFieldInfo.Variable2)
-                            td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
+                            td.td_customValues[tvIndex].count = value[paramIndex++].ToInt();
                         else
-                            td.td_customValues[tvIndex].count = ap[paramIndex++].ToInt();
+                            td.td_customValues[tvIndex].count = value[paramIndex++].ToInt();
                     }
                     else if (fip.WriteCount == TiffFieldInfo.Variable ||
                         fip.WriteCount == TiffFieldInfo.Variable2)
@@ -482,7 +482,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (fip.Type == TiffType.ASCII)
                     {
                         string ascii;
-                        Tiff.setString(out ascii, ap[paramIndex++].ToString());
+                        Tiff.setString(out ascii, value[paramIndex++].ToString());
                         td.td_customValues[tvIndex].value = Tiff.Latin1Encoding.GetBytes(ascii);
                     }
                     else
@@ -498,7 +498,7 @@ namespace BitMiracle.LibTiff.Classic
                             fip.Tag != TiffTag.YCBCRSUBSAMPLING &&
                             fip.Tag != TiffTag.DOTRANGE)
                         {
-                            byte[] apBytes = ap[paramIndex++].GetBytes();
+                            byte[] apBytes = value[paramIndex++].GetBytes();
                             Array.Copy(apBytes, td.td_customValues[tvIndex].value, apBytes.Length);
                         }
                         else
@@ -518,31 +518,31 @@ namespace BitMiracle.LibTiff.Classic
                                 {
                                     case TiffType.BYTE:
                                     case TiffType.UNDEFINED:
-                                        val[valPos] = ap[paramIndex + i].ToByte();
+                                        val[valPos] = value[paramIndex + i].ToByte();
                                         break;
                                     case TiffType.SBYTE:
-                                        val[valPos] = ap[paramIndex + i].ToByte();
+                                        val[valPos] = value[paramIndex + i].ToByte();
                                         break;
                                     case TiffType.SHORT:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.SSHORT:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.LONG:
                                     case TiffType.IFD:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.SLONG:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.RATIONAL:
                                     case TiffType.SRATIONAL:
                                     case TiffType.FLOAT:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToFloat()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToFloat()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.DOUBLE:
-                                        Array.Copy(BitConverter.GetBytes(ap[paramIndex + i].ToDouble()), 0, val, valPos, tv_size);
+                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToDouble()), 0, val, valPos, tv_size);
                                         break;
                                     default:
                                         Array.Clear(val, valPos, tv_size);
