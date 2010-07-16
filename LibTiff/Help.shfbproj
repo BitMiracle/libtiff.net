@@ -121,7 +121,8 @@
     </ComponentConfigurations>
     <DocumentationSources>
       <DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.dll" />
-<DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.xml" /></DocumentationSources>
+      <DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.xml" />
+    </DocumentationSources>
     <CopyrightHref>http://www.bitmiracle.com/libtiff</CopyrightHref>
     <CopyrightText>Copyright &amp;#169%3b 2009-2010 Bit Miracle. All rights reserved.</CopyrightText>
     <FeedbackEMailAddress>support%40bitmiracle.com</FeedbackEMailAddress>
@@ -164,6 +165,7 @@
     <ContentLayout Include="Help\Content Layout.content" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Help\Getting Started\Well-known tags and their value(s) data types.aml" />
     <None Include="Help\Differences.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Graphics programming with LibTiff.Net.aml" />
     <None Include="Help\Getting Started\Graphics programming with LibTiff.Net\Part2. Grayscale and color imaging.aml" />

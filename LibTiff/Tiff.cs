@@ -52,13 +52,6 @@ namespace BitMiracle.LibTiff.Classic
 
         internal const string TIFFLIB_VERSION_STR = "LibTiff.NET, Version {0}\nCopyright (C) 2008-2010, Bit Miracle.";
 
-        //
-        // These constants can be used in code that requires
-        // compilation-related definitions specific to a
-        // version or versions of the library.  Runtime
-        // version checking should be done based on the
-        // string returned by GetVersion.
-
         /// <summary>
         /// TiffExtendProc
         /// </summary>
@@ -98,17 +91,18 @@ namespace BitMiracle.LibTiff.Classic
         internal static Enc28591 Latin1Encoding = new Enc28591();
 #endif
         /// <summary>
-        /// Gets the library version.
+        /// Gets the library version string.
         /// </summary>
-        /// <returns>Library version.</returns>
+        /// <returns>The library version string.</returns>
         public static string GetVersion()
         {
             return string.Format(CultureInfo.InvariantCulture, TIFFLIB_VERSION_STR, AssemblyVersion);
         }
 
         /// <summary>
-        /// Retrieves the version of assembly.
+        /// Gets the version of the library's assembly.
         /// </summary>
+        /// <value>The version of the library's assembly.</value>
         public static string AssemblyVersion
         {
             get
@@ -312,116 +306,233 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Re-allocates byte array and copies data from old to new array.
+        /// Allocates new byte array of specified size and copies data from the existing to
+        /// the new array.
         /// </summary>
-        /// <param name="oldBuffer">The old buffer.</param>
-        /// <param name="elementCount">The element count.</param>
-        /// <param name="newElementCount">The new element count.</param>
-        /// <returns>The new allocated array.</returns>
-        /// <remarks>Size is in elements, not bytes!</remarks>
-        public static byte[] Realloc(byte[] oldBuffer, int elementCount, int newElementCount)
+        /// <param name="array">The existing array.</param>
+        /// <param name="newElementCount">The number of elements in new array.</param>
+        /// <returns>
+        /// The new byte array of specified size with data from the existing array.
+        /// </returns>
+        /// <remarks>Size of the array is in elements, not bytes.</remarks>
+        /// <overloads>Allocates new array of specified size and copies data from the existing to
+        /// the new array.</overloads>
+        public static byte[] Realloc(byte[] array, int newElementCount)
         {
-            byte[] newBuffer = new byte[newElementCount];
-            if (oldBuffer != null)
+            byte[] newArray = new byte[newElementCount];
+            if (array != null)
             {
-                int copyLength = Math.Min(elementCount, newElementCount);
-                Array.Copy(oldBuffer, newBuffer, copyLength);
+                int copyLength = Math.Min(array.Length, newElementCount);
+                Array.Copy(array, newArray, copyLength);
             }
 
-            return newBuffer;
+            return newArray;
         }
 
         /// <summary>
-        /// Re-allocates int array and copies data from old to new array.
+        /// Allocates new integer array of specified size and copies data from the existing to
+        /// the new array.
         /// </summary>
-        /// <param name="oldBuffer">The old buffer.</param>
-        /// <param name="elementCount">The element count.</param>
-        /// <param name="newElementCount">The new element count.</param>
-        /// <returns>The new allocated array.</returns>
-        /// <remarks>Size is in elements, not bytes!</remarks>
-        public static int[] Realloc(int[] oldBuffer, int elementCount, int newElementCount)
+        /// <param name="array">The existing array.</param>
+        /// <param name="newElementCount">The number of elements in new array.</param>
+        /// <returns>
+        /// The new integer array of specified size with data from the existing array.
+        /// </returns>
+        /// <remarks>Size of the array is in elements, not bytes.</remarks>
+        public static int[] Realloc(int[] array, int newElementCount)
         {
-            int[] newBuffer = new int[newElementCount];
-            if (oldBuffer != null)
+            int[] newArray = new int[newElementCount];
+            if (array != null)
             {
-                int copyLength = Math.Min(elementCount, newElementCount);
-                Array.Copy(oldBuffer, newBuffer, copyLength);
+                int copyLength = Math.Min(array.Length, newElementCount);
+                Array.Copy(array, newArray, copyLength);
             }
 
-            return newBuffer;
+            return newArray;
         }
 
         /// <summary>
-        /// Compares two arrays
+        /// Compares specified number of elements in two arrays.
         /// </summary>
-        /// <param name="p1">The first array.</param>
-        /// <param name="p2">The second array.</param>
-        /// <param name="elementCount">The number of compared elements.</param>
-        /// <returns>The difference between first different elements or 
-        /// 0 if arrays are equal.</returns>
-        public static int Compare(short[] p1, short[] p2, int elementCount)
+        /// <param name="first">The first array to compare.</param>
+        /// <param name="second">The second array to compare.</param>
+        /// <param name="elementCount">The number of elements to compare.</param>
+        /// <returns>
+        /// The difference between compared elements or 0 if all elements are equal.
+        /// </returns>
+        public static int Compare(short[] first, short[] second, int elementCount)
         {
             for (int i = 0; i < elementCount; i++)
             {
-                if (p1[i] != p2[i])
-                    return p1[i] - p2[i];
+                if (first[i] != second[i])
+                    return first[i] - second[i];
             }
 
             return 0;
         }
 
         /// <summary>
-        /// Initializes new instance of <see cref="Tiff"/> class.
+        /// Initializes new instance of <see cref="Tiff"/> class and opens a TIFF file for
+        /// reading or writing.
         /// </summary>
-        /// <param name="fileName">The target tiff file name.</param>
-        /// <param name="mode">Can be "r", "w" or "a" for reading, writing and 
-        /// appending correspondingly.</param>
-        /// <returns>The created instance.</returns>
+        /// <param name="fileName">The name of the file to open.</param>
+        /// <param name="mode">The open mode. Specifies if the file is to be opened for
+        /// reading ("r"), writing ("w"), or appending ("a") and, optionally, whether to override
+        /// certain default aspects of library operation (see remarks).</param>
+        /// <returns>The new instance of <see cref="Tiff"/> class if specified file is
+        /// successfully opened; otherwise, <c>null</c>.</returns>
+        /// <remarks>
+        /// <para>
+        /// <see cref="Open"/> opens a TIFF file whose name is <paramref name="fileName"/>. When
+        /// a file is opened for appending, existing data will not be touched; instead new data
+        /// will be written as additional subfiles. If an existing file is opened for writing,
+        /// all previous data is overwritten.
+        /// </para>
+        /// <para>
+        /// If a file is opened for reading, the first TIFF directory in the file is automatically
+        /// read (see <see cref="SetDirectory"/> for reading directories other than the first). If
+        /// a file is opened for writing or appending, a default directory is automatically
+        /// created for writing subsequent data. This directory has all the default values
+        /// specified in TIFF Revision 6.0: BitsPerSample = 1, ThreshHolding = Threshold.BILEVEL
+        /// (bilevel art scan), FillOrder = MSB2LSB (most significant bit of each data byte is
+        /// filled first), Orientation = TOPLEFT (the 0th row represents the visual top of the
+        /// image, and the 0th column represents the visual left hand side), SamplesPerPixel = 1,
+        /// RowsPerStrip = infinity, ResolutionUnit = INCH, and Compression = NONE. To alter
+        /// these values, or to define values for additional fields, <see cref="SetField"/> must
+        /// be used.
+        /// </para>
+        /// <para>
+        /// The <paramref name="mode"/> parameter can include the following flags in addition to
+        /// the "r", "w", and "a" flags. Note however that option flags must follow the
+        /// read-write-append specification.
+        /// </para>
+        /// <list type="table"><listheader>
+        /// <term>Flag</term><description>Description</description></listheader>
+        /// <item><term>l</term>
+        /// <description>When creating a new file force information be written with Little-Endian
+        /// byte order (but see below).</description></item>
+        /// <item><term>b</term>
+        /// <description>When creating a new file force information be written with Big-Endian
+        /// byte order (but see below).</description></item>
+        /// <item><term>L</term>
+        /// <description>Force image data that is read or written to be treated with bits filled
+        /// from Least Significant Bit (LSB) to Most Significant Bit (MSB). Note that this is the
+        /// opposite to the way the library has worked from its inception.</description></item>
+        /// <item><term>B</term>
+        /// <description>Force image data that is read or written to be treated with bits filled
+        /// from Most Significant Bit (MSB) to Least Significant Bit (LSB); this is the
+        /// default.</description></item>
+        /// <item><term>H</term>
+        /// <description>Force image data that is read or written to be treated with bits filled
+        /// in the same order as the native CPU.</description></item>
+        /// <item><term>C</term>
+        /// <description>Enable the use of "strip chopping" when reading images that are comprised
+        /// of a single strip or tile of uncompressed data. Strip chopping is a mechanism by which
+        /// the library will automatically convert the single-strip image to multiple strips, each
+        /// of which has about 8 Kilobytes of data. This facility can be useful in reducing the
+        /// amount of memory used to read an image because the library normally reads each strip
+        /// in its entirety. Strip chopping does however alter the apparent contents of the image
+        /// because when an image is divided into multiple strips it looks as though the
+        /// underlying file contains multiple separate strips. The default behaviour is to enable 
+        /// strip chopping.</description></item>
+        /// <item><term>c</term>
+        /// <description>Disable the use of strip chopping when reading images.</description></item>
+        /// <item><term>h</term>
+        /// <description>Read TIFF header only, do not load the first image directory. That could
+        /// be useful in case of the broken first directory. We can open the file and proceed to
+        /// the other directories.</description></item></list>
+        /// <para>
+        /// By default the library will create new files with the native byte-order of the CPU on
+        /// which the application is run. This ensures optimal performance and is portable to any
+        /// application that conforms to the TIFF specification. To force the library to use a
+        /// specific byte-order when creating a new file the "b" and "l" option flags may be
+        /// included in the <paramref name="mode"/> parameter; for example, "wb" or "wl".</para>
+        /// <para>The use of the "l" and "b" flags is strongly discouraged. These flags are
+        /// provided solely because numerous vendors do not correctly support TIFF; they only
+        /// support one of the two byte orders. It is strongly recommended that you not use this
+        /// feature except to deal with busted apps that write invalid TIFF.</para>
+        /// <para>The "L", "B", and "H" flags are intended for applications that can optimize
+        /// operations on data by using a particular bit order.  By default the library returns
+        /// data in MSB2LSB bit order. Returning data in the bit order of the native CPU makes the
+        /// most sense but also requires applications to check the value of the
+        /// <see cref="TiffTag.FILLORDER"/> tag; something they probably do not do right now.</para>
+        /// <para>The "c" option permits applications that only want to look at the tags, for
+        /// example, to get the unadulterated TIFF tag information.</para>
+        /// </remarks>
         public static Tiff Open(string fileName, string mode)
         {
             const string module = "Open";
 
-            FileMode m;
-            FileAccess a;
-            getMode(mode, module, out m, out a);
+            FileMode fileMode;
+            FileAccess fileAccess;
+            getMode(mode, module, out fileMode, out fileAccess);
 
-            FileStream fd = null;
-            if (a == FileAccess.Read)
-                fd = File.Open(fileName, m, a, FileShare.Read);
-            else
-                fd = File.Open(fileName, m, a);
+            FileStream stream = null;
+            try
+            {
+                if (fileAccess == FileAccess.Read)
+                    stream = File.Open(fileName, fileMode, fileAccess, FileShare.Read);
+                else
+                    stream = File.Open(fileName, fileMode, fileAccess);
+            }
+            catch (Exception e)
+            {
+                Error(module, "Failed to open '{0}'. {1}", fileName, e.Message);
+                return null;
+            }
 
-            Tiff tif = ClientOpen(fileName, mode, fd, new TiffStream());
+            Tiff tif = ClientOpen(fileName, mode, stream, new TiffStream());
             if (tif == null)
-                fd.Dispose();
+                stream.Dispose();
             else
-                tif.m_fileStream = fd;
+                tif.m_fileStream = stream;
 
             return tif;
         }
 
         /// <summary>
-        /// Similar to <see cref="Tiff.Open"/>, but more low-level.
+        /// Initializes new instance of <see cref="Tiff"/> class and opens a stream with TIFF data
+        /// for reading or writing.
         /// </summary>
-        /// <param name="name">The target tiff file name.</param>
-        /// <param name="mode">Can be "r", "w" or "a" for reading, writing and 
-        /// appending correspondingly.</param>
-        /// <param name="clientdata">Some client data.</param>
-        /// <param name="stream">The tiff stream.</param>
-        /// <returns>The created instance.</returns>
-        public static Tiff ClientOpen(string name, string mode, object clientdata, TiffStream stream)
+        /// <param name="name">The name for the new instance of <see cref="Tiff"/> class.</param>
+        /// <param name="mode">The open mode. Specifies if the file is to be opened for
+        /// reading ("r"), writing ("w"), or appending ("a") and, optionally, whether to override
+        /// certain default aspects of library operation (see remarks for <see cref="Open"/>
+        /// method for the list of the mode flags).</param>
+        /// <param name="clientData">Some client data. This data is passed as parameter to every
+        /// method of the <see cref="TiffStream"/> object specified by the
+        /// <paramref name="stream"/> parameter.</param>
+        /// <param name="stream">An instance of the <see cref="TiffStream"/> class to use for
+        /// reading, writing and seeking of TIFF data.</param>
+        /// <returns>The new instance of <see cref="Tiff"/> class if stream is successfully
+        /// opened; otherwise, <c>null</c>.</returns>
+        /// <remarks>
+        /// <para>
+        /// This method can be used to read TIFF data from sources other than file. When custom
+        /// stream class derived from <see cref="TiffStream"/> is used it is possible to read (or
+        /// write) TIFF data that reside in memory, database, etc.
+        /// </para>
+        /// <para>Please note, that <paramref name="name"/> is an arbitrary string used as
+        /// ID for the created <see cref="Tiff"/>. It's not required to be a file name or anything
+        /// meaningful at all.</para>
+        /// <para>
+        /// Please read remarks for <see cref="Open"/> method for the list of option flags that
+        /// can be specified in <paramref name="mode"/> parameter.
+        /// </para>
+        /// </remarks>
+        public static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream)
         {
             const string module = "ClientOpen";
 
             if (mode == null || mode.Length == 0)
             {
-                ErrorExt(null, clientdata, module, "{0}: mode string should contain at least one char", name);
+                ErrorExt(null, clientData, module, "{0}: mode string should contain at least one char", name);
                 return null;
             }
 
-            FileMode fm;
-            FileAccess fa;
-            int m = getMode(mode, module, out fm, out fa);
+            FileMode fileMode;
+            FileAccess fileAccess;
+            int m = getMode(mode, module, out fileMode, out fileAccess);
 
             Tiff tif = new Tiff();
             tif.m_name = name;
@@ -431,11 +542,11 @@ namespace BitMiracle.LibTiff.Classic
             tif.m_curoff = 0;
             tif.m_curstrip = -1; // invalid strip
             tif.m_row = -1; // read/write pre-increment
-            tif.m_clientdata = clientdata;
+            tif.m_clientdata = clientData;
 
             if (stream == null)
             {
-                ErrorExt(tif, clientdata, module, "TiffStream is null pointer.");
+                ErrorExt(tif, clientData, module, "TiffStream is null pointer.");
                 return null;
             }
 
@@ -445,55 +556,14 @@ namespace BitMiracle.LibTiff.Classic
             tif.m_currentCodec = tif.m_builtInCodecs[0];
 
             // Default is to return data MSB2LSB and enable the use of
-            // memory-mapped files and strip chopping when a file is opened read-only.
+            // strip chopping when a file is opened read-only.
             tif.m_flags = TiffFlags.MSB2LSB;
 
             if (m == O_RDONLY || m == O_RDWR)
                 tif.m_flags |= STRIPCHOP_DEFAULT;
 
-            /*
-             * Process library-specific flags in the open mode string.
-             * The following flags may be used to control intrinsic library
-             * behaviour that may or may not be desirable (usually for
-             * compatibility with some application that claims to support
-             * TIFF but only supports some braindead idea of what the
-             * vendor thinks TIFF is):
-             *
-             * 'l'      use little-endian byte order for creating a file
-             * 'b'      use big-endian byte order for creating a file
-             * 'L'      read/write information using LSB2MSB bit order
-             * 'B'      read/write information using MSB2LSB bit order
-             * 'H'      read/write information using host bit order
-             * 'C'      enable strip chopping support when reading
-             * 'c'      disable strip chopping support
-             * 'h'      read TIFF header only, do not load the first IFD
-             *
-             * The use of the 'l' and 'b' flags is strongly discouraged.
-             * These flags are provided solely because numerous vendors,
-             * typically on the PC, do not correctly support TIFF; they
-             * only support the Intel little-endian byte order.  This
-             * support is not configured by default because it supports
-             * the violation of the TIFF spec that says that readers *MUST*
-             * support both byte orders.  It is strongly recommended that
-             * you not use this feature except to deal with busted apps
-             * that write invalid TIFF.  And even in those cases you should
-             * bang on the vendors to fix their software.
-             *
-             * The 'L', 'B', and 'H' flags are intended for applications
-             * that can optimize operations on data by using a particular
-             * bit order.  By default the library returns data in MSB2LSB
-             * bit order for compatibiltiy with older versions of this
-             * library.  Returning data in the bit order of the native cpu
-             * makes the most sense but also requires applications to check
-             * the value of the FillOrder tag; something they probably do
-             * not do right now.
-             *
-             * The 'C' and 'c' flags are provided because the library support
-             * for chopping up large strips into multiple smaller strips is not
-             * application-transparent and as such can cause problems.  The 'c'
-             * option permits applications that only want to look at the tags,
-             * for example, to get the unadulterated TIFF tag information.
-             */
+            // Process library-specific flags in the open mode string.
+            // See remarks for Open method for the list of supported flags.
             int modelength = mode.Length;
             for (int i = 0; i < modelength; i++)
             {
@@ -535,7 +605,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (tif.m_mode == O_RDONLY)
                 {
                     ErrorExt(tif, tif.m_clientdata, name, "Cannot read TIFF header");
-                    return tif.safeOpenFailed();
+                    return null;
                 }
 
                 // Setup header and write.
@@ -552,7 +622,8 @@ namespace BitMiracle.LibTiff.Classic
                 if (!tif.writeHeaderOK(tif.m_header))
                 {
                     ErrorExt(tif, tif.m_clientdata, name, "Error writing TIFF header");
-                    return tif.safeOpenFailed();
+                    tif.m_mode = O_RDONLY;
+                    return null;
                 }
 
                 // Setup the byte order handling.
@@ -573,7 +644,8 @@ namespace BitMiracle.LibTiff.Classic
                 ErrorExt(tif, tif.m_clientdata, name,
                     "Not a TIFF or MDI file, bad magic number {0} (0x{1:x})",
                     tif.m_header.tiff_magic, tif.m_header.tiff_magic);
-                return tif.safeOpenFailed();
+                tif.m_mode = O_RDONLY;
+                return null;
             }
 
             tif.initOrder(tif.m_header.tiff_magic);
@@ -590,8 +662,9 @@ namespace BitMiracle.LibTiff.Classic
             // magic number that doesn't change (stupid).
             if (tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
-                ErrorExt(tif, tif.m_clientdata, name, "This is a BigTIFF file.  This format not supported\nby this version of libtiff.");
-                return tif.safeOpenFailed();
+                ErrorExt(tif, tif.m_clientdata, name, "This is a BigTIFF file.  This format not supported\nby this version of LibTiff.Net.");
+                tif.m_mode = O_RDONLY;
+                return null;
             }
 
             if (tif.m_header.tiff_version != TIFF_VERSION)
@@ -599,7 +672,8 @@ namespace BitMiracle.LibTiff.Classic
                 ErrorExt(tif, tif.m_clientdata, name,
                     "Not a TIFF file, bad version number {0} (0x{1:x})",
                     tif.m_header.tiff_version, tif.m_header.tiff_version);
-                return tif.safeOpenFailed();
+                tif.m_mode = O_RDONLY;
+                return null;
             }
 
             tif.m_flags |= TiffFlags.MYBUFFER;
@@ -634,7 +708,8 @@ namespace BitMiracle.LibTiff.Classic
                     return tif;
             }
 
-            return tif.safeOpenFailed();
+            tif.m_mode = O_RDONLY;
+            return null;
         }
 
         /// <summary>
@@ -889,9 +964,14 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Flushes tiff content to file.
+        /// Flushes pending writes to an open TIFF file.
         /// </summary>
-        /// <returns><c>true</c> if succeed</returns>
+        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
+        /// <remarks><see cref="Flush"/> causes any pending writes for the specified file
+        /// (including writes for the current directory) to be done. In normal operation this call
+        /// is never needed − the library automatically does any flushing required.
+        /// </remarks>
+        /// <seealso cref="FlushData"/>
         public bool Flush()
         {
             if (m_mode != O_RDONLY)
@@ -907,9 +987,14 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Flushes buffered data to the file.
+        /// Flushes any pending image data for the specified file to be written out.
         /// </summary>
-        /// <returns><c>true</c> if succeed.</returns>
+        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
+        /// <remarks><see cref="FlushData"/> flushes any pending image data for the specified file
+        /// to be written out; directory-related data are not flushed. In normal operation this
+        /// call is never needed − the library automatically does any flushing required.
+        /// </remarks>
+        /// <seealso cref="Flush"/>
         public bool FlushData()
         {
             if ((m_flags & TiffFlags.BEENWRITING) != TiffFlags.BEENWRITING)
@@ -926,10 +1011,27 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the value of field corresponding to speciefed tag.
+        /// Gets the value(s) of a tag in an open TIFF file.
         /// </summary>
         /// <param name="tag">The tag.</param>
-        /// <returns>The value of a field in the internal directory structure.</returns>
+        /// <returns>The value(s) of a tag in an open TIFF file as array of
+        /// <see cref="FieldValue"/> objects or <c>null</c> if there is no such tag set.</returns>
+        /// <remarks>
+        /// <para>
+        /// <see cref="GetField"/> returns the value(s) of a tag or pseudo-tag associated with the
+        /// current directory of the opened TIFF file. The tag is identified by
+        /// <paramref name="tag"/>. The type and number of values returned is dependent on the
+        /// tag being requested. You may want to consult
+        /// <a href = "54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// value(s) data types"</a> to become familiar with exact data types and calling
+        /// conventions required for each tag supported by the library.
+        /// </para>
+        /// <para>
+        /// A pseudo-tag is a parameter that is used to control the operation of the library but
+        /// whose value is not read or written to the underlying file.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="GetFieldDefaulted"/>
         public FieldValue[] GetField(TiffTag tag)
         {
             TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
@@ -940,11 +1042,32 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Like <see cref="Tiff.GetField"/>, but returns any default value 
-        /// if the tag is not present in the directory.
+        /// Gets the value(s) of a tag in an open TIFF file or default value(s) of a tag if a tag
+        /// is not defined in the current directory and it has a default value(s).
         /// </summary>
         /// <param name="tag">The tag.</param>
-        /// <returns>Default value for tag.</returns>
+        /// <returns>
+        /// The value(s) of a tag in an open TIFF file as array of
+        /// <see cref="FieldValue"/> objects or <c>null</c> if there is no such tag set and
+        /// tag has no default value.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <see cref="GetFieldDefaulted"/> returns the value(s) of a tag or pseudo-tag associated
+        /// with the current directory of the opened TIFF file or default value(s) of a tag if a
+        /// tag is not defined in the current directory and it has a default value(s). The tag is
+        /// identified by <paramref name="tag"/>. The type and number of values returned is
+        /// dependent on the tag being requested. You may want to consult
+        /// <a href="54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// value(s) data types"</a> to become familiar with exact data types and calling
+        /// conventions required for each tag supported by the library.
+        /// </para>
+        /// <para>
+        /// A pseudo-tag is a parameter that is used to control the operation of the library but
+        /// whose value is not read or written to the underlying file.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="GetField"/>
         public FieldValue[] GetFieldDefaulted(TiffTag tag)
         {
             TiffDirectory td = m_dir;
@@ -1047,7 +1170,7 @@ namespace BitMiracle.LibTiff.Classic
                     break;
                 case TiffTag.YCBCRCOEFFICIENTS:
                     {
-                        /* defaults are from CCIR Recommendation 601-1 */
+                        // defaults are from CCIR Recommendation 601-1
                         float[] ycbcrcoeffs = new float[3];
                         ycbcrcoeffs[0] = 0.299f;
                         ycbcrcoeffs[1] = 0.587f;
@@ -1068,9 +1191,9 @@ namespace BitMiracle.LibTiff.Classic
                     break;
                 case TiffTag.WHITEPOINT:
                     {
-                        /* TIFF 6.0 specification tells that it is no default
-                        value for the WhitePoint, but AdobePhotoshop TIFF
-                        Technical Note tells that it should be CIE D50. */
+                        // TIFF 6.0 specification tells that it is no default value for the
+                        // WhitePoint, but AdobePhotoshop TIFF Technical Note tells that it
+                        // should be CIE D50.
                         float[] whitepoint = new float[2];
                         whitepoint[0] = D50_X0 / (D50_X0 + D50_Y0 + D50_Z0);
                         whitepoint[1] = D50_Y0 / (D50_X0 + D50_Y0 + D50_Z0);
@@ -1826,7 +1949,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="diroff">Directory offset.</param>
         /// <param name="info">Field info.</param>
         /// <param name="n">The number of elements in field info array.</param>
-        /// <returns><c>true</c> if succeed.</returns>
+        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
         /// <remarks>The code is very similar to <see cref="Tiff.ReadDirectory"/>.</remarks>
         public bool ReadCustomDirectory(long diroff, TiffFieldInfo[] info, int n)
         {
@@ -1951,7 +2074,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Writes custom directory.
         /// </summary>
         /// <param name="pdiroff">Output directory offset.</param>
-        /// <returns><c>true</c> if succeed.</returns>
+        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
         public bool WriteCustomDirectory(out long pdiroff)
         {
             pdiroff = -1;
@@ -2338,31 +2461,33 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the read/write mode.
+        /// Gets the mode with which the underlying file or stream was opened.
         /// </summary>
-        /// <returns>Read/write mode</returns>
+        /// <returns>The mode with which the underlying file or stream was opened.</returns>
         public int GetMode()
         {
             return m_mode;
         }
 
         /// <summary>
-        /// Sets the read/write mode.
+        /// Sets the new mode for the underlying file or stream.
         /// </summary>
-        /// <param name="mode">Read/write mode</param>
-        /// <returns>Previous mode.</returns>
+        /// <param name="mode">The new mode for the underlying file or stream.</param>
+        /// <returns>The previous mode with which the underlying file or stream was opened.</returns>
         public int SetMode(int mode)
         {
-            int old_mode = m_mode;
+            int prevMode = m_mode;
             m_mode = mode;
-            return old_mode;
+            return prevMode;
         }
 
         /// <summary>
-        /// Determines whether this tiff file is organized in tiles.
+        /// Gets the value indicating whether the image data of this <see cref="Tiff"/> has a
+        /// tiled organization.
         /// </summary>
         /// <returns>
-        /// 	<c>true</c> if this instance is tiled; otherwise, <c>false</c>.
+        /// <c>true</c> if the image data of this <see cref="Tiff"/> has a tiled organization or
+        /// <c>false</c> if the image data of this <see cref="Tiff"/> is organized in strips.
         /// </returns>
         public bool IsTiled()
         {
@@ -2370,30 +2495,47 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Determines whether the file has byte-swapped data.
+        /// Gets the value indicating whether the image data was in a different byte-order than
+        /// the host computer.
         /// </summary>
-        /// <returns><c>true</c> if the file has byte-swapped data; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the image data was in a different byte-order than the host
+        /// computer or <c>false</c> if the TIFF file/stream and local host byte-orders are the
+        /// same.</returns>
+        /// <remarks><para>
+        /// Note that <see cref="ReadTile"/>, <see cref="ReadEncodedTile"/>,
+        /// <see cref="ReadEncodedStrip"/> and <see cref="O:ReadScanline"/> methods already
+        /// normally perform byte swapping to local host order if needed.
+        /// </para><para>
+        /// Also note that <see cref="ReadRawTile"/> and <see cref="ReadRawStrip"/> do not
+        /// perform byte swapping to local host order.
+        /// </para></remarks>
         public bool IsByteSwapped()
         {
             return ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB);
         }
 
         /// <summary>
-        /// Determines whether the data is returned up-sampled.
+        /// Gets the value indicating whether the image data returned through the read interface
+        /// methods is being up-sampled.
         /// </summary>
         /// <returns>
-        /// 	<c>true</c> if the data is returned up-sampled; otherwise, <c>false</c>.
+        /// <c>true</c> if the data is returned up-sampled; otherwise, <c>false</c>.
         /// </returns>
+        /// <remarks>The value returned by this method can be useful to applications that want to
+        /// calculate I/O buffer sizes to reflect this usage (though the usual strip and tile size
+        /// routines already do this).</remarks>
         public bool IsUpSampled()
         {
             return ((m_flags & TiffFlags.UPSAMPLED) == TiffFlags.UPSAMPLED);
         }
 
         /// <summary>
-        /// Determines whether the data is returned in MSB-to-LSB bit order.
+        /// Gets the value indicating whether the image data is being returned in MSB-to-LSB
+        /// bit order.
         /// </summary>
         /// <returns>
-        /// 	<c>true</c> if the data is returned in MSB-to-LSB bit order; otherwise, <c>false</c>.
+        /// <c>true</c> if the data is being returned in MSB-to-LSB bit order (i.e with bit 0 as
+        /// the most significant bit); otherwise, <c>false</c>.
         /// </returns>
         public bool IsMSB2LSB()
         {
@@ -2401,10 +2543,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Determines whether given file was written in big-endian order.
+        /// Gets the value indicating whether given image data was written in big-endian order.
         /// </summary>
         /// <returns>
-        /// 	<c>true</c> if given file was written in big-endian order; otherwise, <c>false</c>.
+        /// <c>true</c> if given image data was written in big-endian order; otherwise, <c>false</c>.
         /// </returns>
         public bool IsBigEndian()
         {
@@ -2421,18 +2563,22 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Current row being read/written.
+        /// Gets the current row that is being read or written.
         /// </summary>
-        /// <returns>Current row being read/written.</returns>
+        /// <returns>The current row that is being read or written.</returns>
+        /// <remarks>The current row is updated each time a read or write is done.</remarks>
         public int CurrentRow()
         {
             return m_row;
         }
 
         /// <summary>
-        /// Gets the index of the current directory.
+        /// Gets the zero-based index of the current directory.
         /// </summary>
-        /// <returns>index of the current directory</returns>
+        /// <returns>The zero-based index of the current directory.</returns>
+        /// <remarks>The zero-based index returned by this method is is suitable for use with
+        /// the <see cref="SetDirectory"/> method.
+        /// </remarks>
         public short CurrentDirectory()
         {
             return m_curdir;
@@ -2463,18 +2609,20 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Returns current strip index.
+        /// Gets the current strip that is being read or written.
         /// </summary>
-        /// <returns>Current strip index.</returns>
+        /// <returns>The current strip that is being read or written.</returns>
+        /// <remarks>The current strip is updated each time a read or write is done.</remarks>
         public int CurrentStrip()
         {
             return m_curstrip;
         }
 
         /// <summary>
-        /// Returns current tile index.
+        /// Gets the current tile that is being read or written.
         /// </summary>
-        /// <returns>Current tile index.</returns>
+        /// <returns>The current tile that is being read or written.</returns>
+        /// <remarks>The current tile is updated each time a read or write is done.</remarks>
         public int CurrentTile()
         {
             return m_curtile;
@@ -2723,7 +2871,8 @@ namespace BitMiracle.LibTiff.Classic
         /// Returns an indication of whether the current directory is the last directory
         /// in the file.
         /// </summary>
-        /// <returns><c>true</c> if current directory is the last directory in the file.</returns>
+        /// <returns><c>true</c> if current directory is the last directory in the file;
+        /// otherwise, <c>false</c>.</returns>
         public bool LastDirectory()
         {
             return (m_nextdiroff == 0);
@@ -2992,117 +3141,117 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <overloads>
         /// Prints formatted description of the contents of the current directory to the
-        /// specified stream.
+        /// specified stream possibly using specified print options.
         /// </overloads>
-        /// <param name="fd">The stream.</param>
-        public void PrintDirectory(Stream fd)
+        /// <param name="stream">The stream.</param>
+        public void PrintDirectory(Stream stream)
         {
-            PrintDirectory(fd, TiffPrintFlags.NONE);
+            PrintDirectory(stream, TiffPrintFlags.NONE);
         }
 
         /// <summary>
         /// Prints formatted description of the contents of the current directory to the
-        /// specified stream using specified formatting options.
+        /// specified stream using specified print (formatting) options.
         /// </summary>
-        /// <param name="fd">The stream.</param>
-        /// <param name="flags">The flags.</param>
-        public void PrintDirectory(Stream fd, TiffPrintFlags flags)
+        /// <param name="stream">The stream.</param>
+        /// <param name="flags">The print (formatting) options.</param>
+        public void PrintDirectory(Stream stream, TiffPrintFlags flags)
         {
-            fprintf(fd, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
+            fprintf(stream, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
 
             if (fieldSet(FieldBit.SubFileType))
             {
-                fprintf(fd, "  Subfile Type:");
+                fprintf(stream, "  Subfile Type:");
                 string sep = " ";
                 if ((m_dir.td_subfiletype & FileType.REDUCEDIMAGE) != 0)
                 {
-                    fprintf(fd, "{0}reduced-resolution image", sep);
+                    fprintf(stream, "{0}reduced-resolution image", sep);
                     sep = "/";
                 }
 
                 if ((m_dir.td_subfiletype & FileType.PAGE) != 0)
                 {
-                    fprintf(fd, "{0}multi-page document", sep);
+                    fprintf(stream, "{0}multi-page document", sep);
                     sep = "/";
                 }
 
                 if ((m_dir.td_subfiletype & FileType.MASK) != 0)
-                    fprintf(fd, "{0}transparency mask", sep);
+                    fprintf(stream, "{0}transparency mask", sep);
 
-                fprintf(fd, " ({0} = 0x{1:x})\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
+                fprintf(stream, " ({0} = 0x{1:x})\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
             }
 
             if (fieldSet(FieldBit.ImageDimensions))
             {
-                fprintf(fd, "  Image Width: {0} Image Length: {1}", m_dir.td_imagewidth, m_dir.td_imagelength);
+                fprintf(stream, "  Image Width: {0} Image Length: {1}", m_dir.td_imagewidth, m_dir.td_imagelength);
                 if (fieldSet(FieldBit.ImageDepth))
-                    fprintf(fd, " Image Depth: {0}", m_dir.td_imagedepth);
-                fprintf(fd, "\n");
+                    fprintf(stream, " Image Depth: {0}", m_dir.td_imagedepth);
+                fprintf(stream, "\n");
             }
 
             if (fieldSet(FieldBit.TileDimensions))
             {
-                fprintf(fd, "  Tile Width: {0} Tile Length: {1}", m_dir.td_tilewidth, m_dir.td_tilelength);
+                fprintf(stream, "  Tile Width: {0} Tile Length: {1}", m_dir.td_tilewidth, m_dir.td_tilelength);
                 if (fieldSet(FieldBit.TileDepth))
-                    fprintf(fd, " Tile Depth: {0}", m_dir.td_tiledepth);
-                fprintf(fd, "\n");
+                    fprintf(stream, " Tile Depth: {0}", m_dir.td_tiledepth);
+                fprintf(stream, "\n");
             }
 
             if (fieldSet(FieldBit.Resolution))
             {
-                fprintf(fd, "  Resolution: {0:G}, {1:G}", m_dir.td_xresolution, m_dir.td_yresolution);
+                fprintf(stream, "  Resolution: {0:G}, {1:G}", m_dir.td_xresolution, m_dir.td_yresolution);
                 if (fieldSet(FieldBit.ResolutionUnit))
                 {
                     switch (m_dir.td_resolutionunit)
                     {
                         case ResUnit.NONE:
-                            fprintf(fd, " (unitless)");
+                            fprintf(stream, " (unitless)");
                             break;
                         case ResUnit.INCH:
-                            fprintf(fd, " pixels/inch");
+                            fprintf(stream, " pixels/inch");
                             break;
                         case ResUnit.CENTIMETER:
-                            fprintf(fd, " pixels/cm");
+                            fprintf(stream, " pixels/cm");
                             break;
                         default:
-                            fprintf(fd, " (unit {0} = 0x{1:x})", m_dir.td_resolutionunit, m_dir.td_resolutionunit);
+                            fprintf(stream, " (unit {0} = 0x{1:x})", m_dir.td_resolutionunit, m_dir.td_resolutionunit);
                             break;
                     }
                 }
-                fprintf(fd, "\n");
+                fprintf(stream, "\n");
             }
 
             if (fieldSet(FieldBit.Position))
-                fprintf(fd, "  Position: {0:G}, {1:G}\n", m_dir.td_xposition, m_dir.td_yposition);
+                fprintf(stream, "  Position: {0:G}, {1:G}\n", m_dir.td_xposition, m_dir.td_yposition);
 
             if (fieldSet(FieldBit.BitsPerSample))
-                fprintf(fd, "  Bits/Sample: {0}\n", m_dir.td_bitspersample);
+                fprintf(stream, "  Bits/Sample: {0}\n", m_dir.td_bitspersample);
 
             if (fieldSet(FieldBit.SampleFormat))
             {
-                fprintf(fd, "  Sample Format: ");
+                fprintf(stream, "  Sample Format: ");
                 switch (m_dir.td_sampleformat)
                 {
                     case SampleFormat.VOID:
-                        fprintf(fd, "void\n");
+                        fprintf(stream, "void\n");
                         break;
                     case SampleFormat.INT:
-                        fprintf(fd, "signed integer\n");
+                        fprintf(stream, "signed integer\n");
                         break;
                     case SampleFormat.UINT:
-                        fprintf(fd, "unsigned integer\n");
+                        fprintf(stream, "unsigned integer\n");
                         break;
                     case SampleFormat.IEEEFP:
-                        fprintf(fd, "IEEE floating point\n");
+                        fprintf(stream, "IEEE floating point\n");
                         break;
                     case SampleFormat.COMPLEXINT:
-                        fprintf(fd, "complex signed integer\n");
+                        fprintf(stream, "complex signed integer\n");
                         break;
                     case SampleFormat.COMPLEXIEEEFP:
-                        fprintf(fd, "complex IEEE floating point\n");
+                        fprintf(stream, "complex IEEE floating point\n");
                         break;
                     default:
-                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_sampleformat, m_dir.td_sampleformat);
+                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_sampleformat, m_dir.td_sampleformat);
                         break;
                 }
             }
@@ -3110,30 +3259,30 @@ namespace BitMiracle.LibTiff.Classic
             if (fieldSet(FieldBit.Compression))
             {
                 TiffCodec c = FindCodec(m_dir.td_compression);
-                fprintf(fd, "  Compression Scheme: ");
+                fprintf(stream, "  Compression Scheme: ");
                 if (c != null)
-                    fprintf(fd, "{0}\n", c.m_name);
+                    fprintf(stream, "{0}\n", c.m_name);
                 else
-                    fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_compression, m_dir.td_compression);
+                    fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_compression, m_dir.td_compression);
             }
 
             if (fieldSet(FieldBit.Photometric))
             {
-                fprintf(fd, "  Photometric Interpretation: ");
+                fprintf(stream, "  Photometric Interpretation: ");
                 if ((int)m_dir.td_photometric < photoNames.Length)
-                    fprintf(fd, "{0}\n", photoNames[(int)m_dir.td_photometric]);
+                    fprintf(stream, "{0}\n", photoNames[(int)m_dir.td_photometric]);
                 else
                 {
                     switch (m_dir.td_photometric)
                     {
                         case Photometric.LOGL:
-                            fprintf(fd, "CIE Log2(L)\n");
+                            fprintf(stream, "CIE Log2(L)\n");
                             break;
                         case Photometric.LOGLUV:
-                            fprintf(fd, "CIE Log2(L) (u',v')\n");
+                            fprintf(stream, "CIE Log2(L) (u',v')\n");
                             break;
                         default:
-                            fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_photometric, m_dir.td_photometric);
+                            fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_photometric, m_dir.td_photometric);
                             break;
                     }
                 }
@@ -3141,206 +3290,203 @@ namespace BitMiracle.LibTiff.Classic
 
             if (fieldSet(FieldBit.ExtraSamples) && m_dir.td_extrasamples != 0)
             {
-                fprintf(fd, "  Extra Samples: {0}<", m_dir.td_extrasamples);
+                fprintf(stream, "  Extra Samples: {0}<", m_dir.td_extrasamples);
                 string sep = "";
                 for (short i = 0; i < m_dir.td_extrasamples; i++)
                 {
                     switch (m_dir.td_sampleinfo[i])
                     {
                         case ExtraSample.UNSPECIFIED:
-                            fprintf(fd, "{0}unspecified", sep);
+                            fprintf(stream, "{0}unspecified", sep);
                             break;
                         case ExtraSample.ASSOCALPHA:
-                            fprintf(fd, "{0}assoc-alpha", sep);
+                            fprintf(stream, "{0}assoc-alpha", sep);
                             break;
                         case ExtraSample.UNASSALPHA:
-                            fprintf(fd, "{0}unassoc-alpha", sep);
+                            fprintf(stream, "{0}unassoc-alpha", sep);
                             break;
                         default:
-                            fprintf(fd, "{0}{1} (0x{2:x})", sep, m_dir.td_sampleinfo[i], m_dir.td_sampleinfo[i]);
+                            fprintf(stream, "{0}{1} (0x{2:x})", sep, m_dir.td_sampleinfo[i], m_dir.td_sampleinfo[i]);
                             break;
                     }
                     sep = ", ";
                 }
-                fprintf(fd, ">\n");
+                fprintf(stream, ">\n");
             }
 
             if (fieldSet(FieldBit.InkNames))
             {
-                fprintf(fd, "  Ink Names: ");
+                fprintf(stream, "  Ink Names: ");
 
                 string[] names = m_dir.td_inknames.Split(new char[] { '\0' });
                 for (int i = 0; i < names.Length; i++)
                 {
-                    printAscii(fd, names[i]);
-                    fprintf(fd, ", ");
+                    printAscii(stream, names[i]);
+                    fprintf(stream, ", ");
                 }
 
-                fprintf(fd, "\n");
+                fprintf(stream, "\n");
             }
 
             if (fieldSet(FieldBit.Thresholding))
             {
-                fprintf(fd, "  Thresholding: ");
+                fprintf(stream, "  Thresholding: ");
                 switch (m_dir.td_threshholding)
                 {
                     case Threshold.BILEVEL:
-                        fprintf(fd, "bilevel art scan\n");
+                        fprintf(stream, "bilevel art scan\n");
                         break;
                     case Threshold.HALFTONE:
-                        fprintf(fd, "halftone or dithered scan\n");
+                        fprintf(stream, "halftone or dithered scan\n");
                         break;
                     case Threshold.ERRORDIFFUSE:
-                        fprintf(fd, "error diffused\n");
+                        fprintf(stream, "error diffused\n");
                         break;
                     default:
-                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_threshholding, m_dir.td_threshholding);
+                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_threshholding, m_dir.td_threshholding);
                         break;
                 }
             }
 
             if (fieldSet(FieldBit.FillOrder))
             {
-                fprintf(fd, "  FillOrder: ");
+                fprintf(stream, "  FillOrder: ");
                 switch (m_dir.td_fillorder)
                 {
                     case FillOrder.MSB2LSB:
-                        fprintf(fd, "msb-to-lsb\n");
+                        fprintf(stream, "msb-to-lsb\n");
                         break;
                     case FillOrder.LSB2MSB:
-                        fprintf(fd, "lsb-to-msb\n");
+                        fprintf(stream, "lsb-to-msb\n");
                         break;
                     default:
-                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_fillorder, m_dir.td_fillorder);
+                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_fillorder, m_dir.td_fillorder);
                         break;
                 }
             }
 
             if (fieldSet(FieldBit.YCbCrSubsampling))
             {
-                /*
-                 * For hacky reasons (see tif_jpeg.c - JPEGFixupTestSubsampling),
-                 * we need to fetch this rather than trust what is in our
-                 * structures.
-                 */
+                // For hacky reasons (see JpegCodecTagMethods.JPEGFixupTestSubsampling method),
+                // we need to fetch this rather than trust what is in our structures.
                 FieldValue[] result = GetField(TiffTag.YCBCRSUBSAMPLING);
                 short subsampling0 = result[0].ToShort();
                 short subsampling1 = result[1].ToShort();
-                fprintf(fd, "  YCbCr Subsampling: {0}, {1}\n", subsampling0, subsampling1);
+                fprintf(stream, "  YCbCr Subsampling: {0}, {1}\n", subsampling0, subsampling1);
             }
 
             if (fieldSet(FieldBit.YCbCrPositioning))
             {
-                fprintf(fd, "  YCbCr Positioning: ");
+                fprintf(stream, "  YCbCr Positioning: ");
                 switch (m_dir.td_ycbcrpositioning)
                 {
                     case YCbCrPosition.CENTERED:
-                        fprintf(fd, "centered\n");
+                        fprintf(stream, "centered\n");
                         break;
                     case YCbCrPosition.COSITED:
-                        fprintf(fd, "cosited\n");
+                        fprintf(stream, "cosited\n");
                         break;
                     default:
-                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_ycbcrpositioning, m_dir.td_ycbcrpositioning);
+                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_ycbcrpositioning, m_dir.td_ycbcrpositioning);
                         break;
                 }
             }
 
             if (fieldSet(FieldBit.HalftoneHints))
-                fprintf(fd, "  Halftone Hints: light {0} dark {1}\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
+                fprintf(stream, "  Halftone Hints: light {0} dark {1}\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
 
             if (fieldSet(FieldBit.Orientation))
             {
-                fprintf(fd, "  Orientation: ");
+                fprintf(stream, "  Orientation: ");
                 if ((int)m_dir.td_orientation < orientNames.Length)
-                    fprintf(fd, "{0}\n", orientNames[(int)m_dir.td_orientation]);
+                    fprintf(stream, "{0}\n", orientNames[(int)m_dir.td_orientation]);
                 else
-                    fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_orientation, m_dir.td_orientation);
+                    fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_orientation, m_dir.td_orientation);
             }
 
             if (fieldSet(FieldBit.SamplesPerPixel))
-                fprintf(fd, "  Samples/Pixel: {0}\n", m_dir.td_samplesperpixel);
+                fprintf(stream, "  Samples/Pixel: {0}\n", m_dir.td_samplesperpixel);
 
             if (fieldSet(FieldBit.RowsPerStrip))
             {
-                fprintf(fd, "  Rows/Strip: ");
+                fprintf(stream, "  Rows/Strip: ");
                 if (m_dir.td_rowsperstrip == -1)
-                    fprintf(fd, "(infinite)\n");
+                    fprintf(stream, "(infinite)\n");
                 else
-                    fprintf(fd, "{0}\n", m_dir.td_rowsperstrip);
+                    fprintf(stream, "{0}\n", m_dir.td_rowsperstrip);
             }
 
             if (fieldSet(FieldBit.MinSampleValue))
-                fprintf(fd, "  Min Sample Value: {0}\n", m_dir.td_minsamplevalue);
+                fprintf(stream, "  Min Sample Value: {0}\n", m_dir.td_minsamplevalue);
 
             if (fieldSet(FieldBit.MaxSampleValue))
-                fprintf(fd, "  Max Sample Value: {0}\n", m_dir.td_maxsamplevalue);
+                fprintf(stream, "  Max Sample Value: {0}\n", m_dir.td_maxsamplevalue);
 
             if (fieldSet(FieldBit.SMinSampleValue))
-                fprintf(fd, "  SMin Sample Value: {0:G}\n", m_dir.td_sminsamplevalue);
+                fprintf(stream, "  SMin Sample Value: {0:G}\n", m_dir.td_sminsamplevalue);
 
             if (fieldSet(FieldBit.SMaxSampleValue))
-                fprintf(fd, "  SMax Sample Value: {0:G}\n", m_dir.td_smaxsamplevalue);
+                fprintf(stream, "  SMax Sample Value: {0:G}\n", m_dir.td_smaxsamplevalue);
 
             if (fieldSet(FieldBit.PlanarConfig))
             {
-                fprintf(fd, "  Planar Configuration: ");
+                fprintf(stream, "  Planar Configuration: ");
                 switch (m_dir.td_planarconfig)
                 {
                     case PlanarConfig.CONTIG:
-                        fprintf(fd, "single image plane\n");
+                        fprintf(stream, "single image plane\n");
                         break;
                     case PlanarConfig.SEPARATE:
-                        fprintf(fd, "separate image planes\n");
+                        fprintf(stream, "separate image planes\n");
                         break;
                     default:
-                        fprintf(fd, "{0} (0x{1:x})\n", m_dir.td_planarconfig, m_dir.td_planarconfig);
+                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_planarconfig, m_dir.td_planarconfig);
                         break;
                 }
             }
 
             if (fieldSet(FieldBit.PageNumber))
-                fprintf(fd, "  Page Number: {0}-{1}\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
+                fprintf(stream, "  Page Number: {0}-{1}\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
 
             if (fieldSet(FieldBit.ColorMap))
             {
-                fprintf(fd, "  Color Map: ");
+                fprintf(stream, "  Color Map: ");
                 if ((flags & TiffPrintFlags.COLORMAP) != 0)
                 {
-                    fprintf(fd, "\n");
+                    fprintf(stream, "\n");
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
-                        fprintf(fd, "   {0,5}: {1,5} {2,5} {3,5}\n", l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
+                        fprintf(stream, "   {0,5}: {1,5} {2,5} {3,5}\n", l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
                 }
                 else
-                    fprintf(fd, "(present)\n");
+                    fprintf(stream, "(present)\n");
             }
 
             if (fieldSet(FieldBit.TransferFunction))
             {
-                fprintf(fd, "  Transfer Function: ");
+                fprintf(stream, "  Transfer Function: ");
                 if ((flags & TiffPrintFlags.CURVES) != 0)
                 {
-                    fprintf(fd, "\n");
+                    fprintf(stream, "\n");
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
                     {
-                        fprintf(fd, "    {0,2}: {0,5}", l, m_dir.td_transferfunction[0][l]);
+                        fprintf(stream, "    {0,2}: {0,5}", l, m_dir.td_transferfunction[0][l]);
                         for (short i = 1; i < m_dir.td_samplesperpixel; i++)
-                            fprintf(fd, " {0,5}", m_dir.td_transferfunction[i][l]);
-                        fprintf(fd, "\n");
+                            fprintf(stream, " {0,5}", m_dir.td_transferfunction[i][l]);
+                        fprintf(stream, "\n");
                     }
                 }
                 else
-                    fprintf(fd, "(present)\n");
+                    fprintf(stream, "(present)\n");
             }
 
             if (fieldSet(FieldBit.SubIFD) && m_dir.td_subifd != null)
             {
-                fprintf(fd, "  SubIFD Offsets:");
+                fprintf(stream, "  SubIFD Offsets:");
                 for (short i = 0; i < m_dir.td_nsubifd; i++)
-                    fprintf(fd, " {0,5}", m_dir.td_subifd[i]);
-                fprintf(fd, "\n");
+                    fprintf(stream, " {0,5}", m_dir.td_subifd[i]);
+                fprintf(stream, "\n");
             }
 
             // Custom tag support.
@@ -3431,19 +3577,19 @@ namespace BitMiracle.LibTiff.Classic
                 // Catch the tags which needs to be specially handled and
                 // pretty print them. If tag not handled in prettyPrintField()
                 // fall down and print it as any other tag.
-                if (prettyPrintField(fd, tag, value_count, raw_data))
+                if (prettyPrintField(stream, tag, value_count, raw_data))
                     continue;
                 else
-                    printField(fd, fip, value_count, raw_data);
+                    printField(stream, fip, value_count, raw_data);
             }
 
-            m_tagmethods.PrintDir(this, fd, flags);
+            m_tagmethods.PrintDir(this, stream, flags);
 
             if ((flags & TiffPrintFlags.STRIPS) != 0 && fieldSet(FieldBit.StripOffsets))
             {
-                fprintf(fd, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
+                fprintf(stream, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
                 for (int s = 0; s < m_dir.td_nstrips; s++)
-                    fprintf(fd, "    {0,3}: [{0,8}, {0,8}]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
+                    fprintf(stream, "    {0,3}: [{0,8}, {0,8}]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
             }
         }
 
@@ -4059,19 +4205,26 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Open file's name.
+        /// Gets the name of the file or ID string for this <see cref="Tiff"/>.
         /// </summary>
-        /// <returns>File name.</returns>
+        /// <returns>The name of the file or ID string for this <see cref="Tiff"/>.</returns>
+        /// <remarks>If this <see cref="Tiff"/> was created using <see cref="Open"/> method then
+        /// value of fileName parameter of <see cref="Open"/> method is returned. If this
+        /// <see cref="Tiff"/> was created using <see cref="ClientOpen"/> then value of
+        /// name parameter of <see cref="ClientOpen"/> method is returned.</remarks>
         public string FileName()
         {
             return m_name;
         }
 
         /// <summary>
-        /// Sets the name of the file.
+        /// Sets the new ID string for this <see cref="Tiff"/>.
         /// </summary>
-        /// <param name="name">The file name.</param>
-        /// <returns>Previous file name.</returns>
+        /// <param name="name">The ID string for this <see cref="Tiff"/>.</param>
+        /// <returns>The previous file name or ID string for this <see cref="Tiff"/>.</returns>
+        /// <remarks>Please note, that <paramref name="name"/> is an arbitrary string used as
+        /// ID for this <see cref="Tiff"/>. It's not required to be a file name or anything
+        /// meaningful at all.</remarks>
         public string SetFileName(string name)
         {
             string old_name = m_name;

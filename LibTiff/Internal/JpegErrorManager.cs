@@ -16,11 +16,11 @@ using BitMiracle.LibJpeg.Classic;
 namespace BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
-    /// libjpeg interface layer.
+    /// LibJpeg.Net interface layer.
     /// 
     /// We handle fatal errors when they are encountered within the JPEG
-    /// library.  We also direct libjpeg error and warning
-    /// messages through the appropriate libtiff handlers.
+    /// library.  We also direct LibJpeg.Net error and warning
+    /// messages through the appropriate LibTiff.Net handlers.
     /// </summary>
     class JpegErrorManager : jpeg_error_mgr
     {
@@ -41,7 +41,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             string buffer = format_message();
             Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", "{0}", buffer); /* display the error message */
-            m_sp.m_common.jpeg_abort(); /* clean up libjpeg state */
+            
+            // clean up LibJpeg.Net state
+            m_sp.m_common.jpeg_abort();
 
             throw new Exception(buffer);
         }

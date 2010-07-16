@@ -1465,7 +1465,7 @@ namespace BitMiracle.Tiff2Pdf
 
                     if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_REALIZE_PALETTE) != 0)
                     {
-                        samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_datasize * m_tiff_samplesperpixel);
+                        samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize * m_tiff_samplesperpixel);
                         buffer = samplebuffer;
                         m_tiff_datasize *= m_tiff_samplesperpixel;
                         sample_realize_palette(buffer);
@@ -1479,7 +1479,7 @@ namespace BitMiracle.Tiff2Pdf
 
                     if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_YCBCR_TO_RGB) != 0)
                     {
-                        samplebuffer = Tiff.Realloc(buffer, m_tiff_datasize, m_tiff_width * m_tiff_length * 4);
+                        samplebuffer = Tiff.Realloc(buffer, m_tiff_width * m_tiff_length * 4);
                         buffer = samplebuffer;
 
                         int[] buffer32 = Tiff.ByteArrayToInts(buffer, 0, m_tiff_width * m_tiff_length * 4);

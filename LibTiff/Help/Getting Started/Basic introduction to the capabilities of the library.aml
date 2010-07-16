@@ -186,11 +186,10 @@
                             method may be used.
                         </para>
                         <para>
-                            The documentation for
-                            <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.GetField(BitMiracle.LibTiff.Classic.TiffTag)</codeEntityReference> and
-                            <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.SetField(BitMiracle.LibTiff.Classic.TiffTag,System.Object[])</codeEntityReference>
-                            methods specifiy the exact data types and calling conventions required
-                            for each tag supported by the library.
+                            You may want to consult
+                            "<link xlink:href="54cbd23d-dc55-44b9-921f-3a06efc2f6ce"/>" to become
+                            familiar with exact data types and calling conventions required for
+                            each tag supported by the library.
                         </para>
                     </content>
                 </section>

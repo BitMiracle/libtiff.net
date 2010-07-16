@@ -264,7 +264,10 @@ namespace BitMiracle.TiffCP
             using (Tiff outImage = Tiff.Open(args[args.Length - 1], smode))
             {
                 if (outImage == null)
+                {
+                    Console.Error.WriteLine("Failed to open '{0}' as output.", args[args.Length - 1]);
                     return;
+                }
 
                 if ((args.Length - argn) == 2)
                     c.m_pageNum = -1;
@@ -333,7 +336,10 @@ namespace BitMiracle.TiffCP
                 tif = Tiff.Open(fileAndPageNums[0], "r");
 
             if (tif == null)
+            {
+                Console.Error.WriteLine("Failed to open '{0}' as input.", fileAndPageNums[0]);
                 return false;
+            }
 
             if (fileAndPageNums.Length > 1)
             {

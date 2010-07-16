@@ -37,7 +37,7 @@ namespace BitMiracle.LibTiff.Classic
                     stderr.Write("{0}: ", module);
 
                 stderr.Write(format, args);
-                stderr.Write(".\n");
+                stderr.Write("\n");
             }
         }
 
@@ -69,7 +69,7 @@ namespace BitMiracle.LibTiff.Classic
 
                 stderr.Write("Warning, ");
                 stderr.Write(format, args);
-                stderr.Write(".\n");
+                stderr.Write("\n");
             }
         }
 

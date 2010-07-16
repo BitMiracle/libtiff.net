@@ -34,7 +34,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public override bool empty_output_buffer()
         {
             /* the entire buffer has been filled; enlarge it by 1000 bytes */
-            byte[] newbuf = Tiff.Realloc(m_sp.m_jpegtables, m_sp.m_jpegtables_length, m_sp.m_jpegtables_length + 1000);
+            byte[] newbuf = Tiff.Realloc(m_sp.m_jpegtables, m_sp.m_jpegtables_length + 1000);
 
             initInternalBuffer(newbuf, m_sp.m_jpegtables_length);
             m_sp.m_jpegtables = newbuf;

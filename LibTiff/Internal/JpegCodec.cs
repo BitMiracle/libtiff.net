@@ -77,7 +77,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private bool m_cinfo_initialized;
 
-        internal jpeg_error_mgr m_err; /* libjpeg error manager */
+        internal jpeg_error_mgr m_err; /* LibJpeg.Net error manager */
         private Photometric m_photometric; /* copy of PhotometricInterpretation */
 
         private int m_bytesperline; /* decompressed bytes per scanline */
@@ -339,9 +339,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             else
                 decompress = true;
 
-            /*
-             * Initialize libjpeg.
-             */
+            // Initialize LibJpeg.Net
             if (decompress)
             {
                 if (!TIFFjpeg_create_decompress())
@@ -485,7 +483,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 }
             }
 
-            /* ensure libjpeg won't write any extraneous markers */
+            // ensure LibJpeg.Net won't write any extraneous markers
             m_compression.Write_JFIF_header = false;
             m_compression.Write_Adobe_marker = false;
 
@@ -506,13 +504,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (downsampled_input)
             {
-                /* Need to use raw-data interface to libjpeg */
+                // Need to use raw-data interface to LibJpeg.Net
                 m_compression.Raw_data_in = true;
                 m_rawEncode = true;
             }
             else
             {
-                /* Use normal interface to libjpeg */
+                // Use normal interface to LibJpeg.Net
                 m_compression.Raw_data_in = false;
                 m_rawEncode = false;
             }
@@ -593,11 +591,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             /* Verify miscellaneous parameters */
 
-            /*
-             * This would need work if libtiff ever supports different
-             * depths for different components, or if libjpeg ever supports
-             * run-time selection of depth.  Neither is imminent.
-             */
+            // This would need work if LibTiff.Net ever supports different
+            // depths for different components, or if LibJpeg.Net ever supports
+            // run-time selection of depth.  Neither is imminent.
             if (m_tif.m_dir.td_bitspersample != JpegConstants.BITS_IN_JSAMPLE)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
@@ -671,7 +667,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_tif.clearFieldBit(FIELD_JPEGTABLES);
             }
 
-            /* Direct libjpeg output to libtiff's output buffer */
+            /* Direct LibJpeg.Net output to LibTiff.Net's output buffer */
             TIFFjpeg_data_dest();
 
             return true;
@@ -712,8 +708,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (m_cinfo_initialized)
             {
+                // release LibJpeg.Net resources
                 TIFFjpeg_destroy();
-                /* release libjpeg resources */
             }
         }
 
@@ -899,13 +895,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (downsampled_output)
             {
-                /* Need to use raw-data interface to libjpeg */
+                // Need to use raw-data interface to LibJpeg.Net
                 m_decompression.Raw_data_out = true;
                 m_rawDecode = true;
             }
             else
             {
-                /* Use normal interface to libjpeg */
+                // Use normal interface to LibJpeg.Net
                 m_decompression.Raw_data_out = false;
                 m_rawDecode = false;
             }
@@ -953,7 +949,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     unsuppress_huff_table(1);
             }
 
-            /* Direct libjpeg output into jpegtables */
+            // Direct LibJpeg.Net output into jpegtables
             if (!TIFFjpeg_tables_dest())
                 return false;
 
@@ -1040,10 +1036,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 bufptr[0] = new byte[m_bytesperline];
                 do
                 {
-                    /*
-                     ** In the libjpeg6b 8bit case.  We read directly into the 
-                     ** TIFF buffer.
-                     */
+                    // In the 8bit case.  We read directly into the TIFF buffer.
                     Array.Clear(bufptr[0], 0, m_bytesperline);
                     if (TIFFjpeg_read_scanlines(bufptr, 1) != 1)
                         return false;
@@ -1298,9 +1291,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         /*
         * Interface routines.  This layer of routines exists
-        * primarily to limit side-effects from libjpeg exceptions.
+        * primarily to limit side-effects from LibJpeg.Net exceptions.
         * Also, normal/error returns are converted into return
-        * values per libtiff practice.
+        * values per LibTiff.Net practice.
         */
         private bool TIFFjpeg_create_compress()
         {
@@ -1561,7 +1554,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /*
         * Allocate downsampled-data buffers needed for downsampled I/O.
         * We use values computed in jpeg_start_compress or jpeg_start_decompress.
-        * We use libjpeg's allocator so that buffers will be released automatically
+        * We use LibJpeg.Net's allocator so that buffers will be released automatically
         * when done with strip/tile.
         * This is also a handy place to compute samplesperclump, bytesperline.
         */

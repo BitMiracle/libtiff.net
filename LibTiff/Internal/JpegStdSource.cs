@@ -15,7 +15,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// JPEG library source data manager.
-    /// These routines supply compressed data to libjpeg.
+    /// These routines supply compressed data to LibJpeg.Net
     /// </summary>
     class JpegStdSource : jpeg_source_mgr
     {

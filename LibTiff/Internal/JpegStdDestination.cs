@@ -15,8 +15,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// JPEG library destination data manager.
-    /// These routines direct compressed data from libjpeg into the
-    /// libtiff output buffer.
+    /// These routines direct compressed data from LibJpeg.Net into the
+    /// LibTiff.Net output buffer.
     /// </summary>
     class JpegStdDestination : jpeg_destination_mgr
     {
@@ -46,7 +46,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             m_tif.m_rawcp = m_tif.m_rawdatasize - freeInBuffer;
             m_tif.m_rawcc = m_tif.m_rawdatasize - freeInBuffer;
-            /* NB: libtiff does the final buffer flush */
+            /* NB: LibTiff.Net does the final buffer flush */
         }
     }
 }

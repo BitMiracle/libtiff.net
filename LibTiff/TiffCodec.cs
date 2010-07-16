@@ -157,7 +157,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Called before decoding.
         /// </summary>
         /// <param name="s">s</param>
-        /// <returns><c>true</c> if succeed.</returns>
+        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
         public virtual bool PreEncode(short s)
         {
             return true;
@@ -166,7 +166,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Called after encoding.
         /// </summary>
-        /// <returns><c>true</c> if succeed.</returns>
+        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
         public virtual bool PostEncode()
         {
             return true;
@@ -219,7 +219,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Seeks the specified offset in the current strip.
         /// </summary>
         /// <param name="offset">The offset.</param>
-        /// <returns><c>true</c> if succeed.</returns>
+        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
         public virtual bool Seek(int offset)
         {
             Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
