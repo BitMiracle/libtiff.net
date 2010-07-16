@@ -1230,9 +1230,23 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Read the next TIFF directory from a file and convert it to the internal format.
+        /// Reads the contents of the next TIFF directory in an open TIFF file/stream and makes
+        /// it the current directory.
         /// </summary>
-        /// <remarks>We read directories sequentially.</remarks>
+        /// <returns><c>true</c> if directory was successfully read; otherwise, <c>false</c> if an
+        /// error was encountered, or if there are no more directories to be read.</returns>
+        /// <remarks><para>Directories are read sequentially.</para>
+        /// <para>Applications only need to call <see cref="ReadDirectory"/> to read multiple
+        /// subfiles in a single TIFF file/stream - the first directory in a file/stream is
+        /// automatically read when <see cref="Open"/> or <see cref="ClientOpen"/> is called.
+        /// </para><para>
+        /// The images that have a single uncompressed strip or tile of data are automatically
+        /// treated as if they were made up of multiple strips or tiles of approximately 8
+        /// kilobytes each. This operation is done only in-memory; it does not alter the contents
+        /// of the file/stream. However, the construction of the "chopped strips" is visible to
+        /// the application through the number of strips returned by <see cref="NumberOfStrips"/>
+        /// or the number of tiles returned by <see cref="NumberOfTiles"/>.</para>
+        /// </remarks>
         public bool ReadDirectory()
         {
             const string module = "ReadDirectory";
@@ -1240,19 +1254,15 @@ namespace BitMiracle.LibTiff.Classic
             m_diroff = m_nextdiroff;
             if (m_diroff == 0)
             {
-                /* no more directories */
+                // no more directories
                 return false;
             }
 
-            /*
-            * Check whether we have the last offset or bad offset (IFD looping).
-            */
+            // Check whether we have the last offset or bad offset (IFD looping).
             if (!checkDirOffset(m_nextdiroff))
                 return false;
 
-            /*
-             * Cleanup any previous compression state.
-             */
+            // Cleanup any previous compression state.
             m_currentCodec.Cleanup();
             m_curdir++;
             TiffDirEntry[] dir;
@@ -1263,46 +1273,34 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            m_flags &= ~TiffFlags.BEENWRITING; /* reset before new dir */
+            // reset before new dir
+            m_flags &= ~TiffFlags.BEENWRITING;
 
-            /*
-             * Setup default value and then make a pass over
-             * the fields to check type and tag information,
-             * and to extract info required to size data
-             * structures.  A second pass is made afterwards
-             * to read in everthing not taken in the first pass.
-             */
+            // Setup default value and then make a pass over the fields to check type and tag
+            // information, and to extract info required to size data structures. A second pass is
+            // made afterwards to read in everthing not taken in the first pass.
 
-            /* free any old stuff and reinit */
+            // free any old stuff and reinit
             FreeDirectory();
             setupDefaultDirectory();
 
-            /*
-             * Electronic Arts writes gray-scale TIFF files
-             * without a PlanarConfiguration directory entry.
-             * Thus we setup a default value here, even though
-             * the TIFF spec says there is no default value.
-             */
+            // Electronic Arts writes gray-scale TIFF files without a PlanarConfiguration
+            // directory entry. Thus we setup a default value here, even though the TIFF spec says
+            // there is no default value.
             SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
-            /*
-             * Sigh, we must make a separate pass through the
-             * directory for the following reason:
-             *
-             * We must process the Compression tag in the first pass
-             * in order to merge in codec-private tag definitions (otherwise
-             * we may get complaints about unknown tags).  However, the
-             * Compression tag may be dependent on the SamplesPerPixel
-             * tag value because older TIFF specs permited Compression
-             * to be written as a SamplesPerPixel-count tag entry.
-             * Thus if we don't first figure out the correct SamplesPerPixel
-             * tag value then we may end up ignoring the Compression tag
-             * value because it has an incorrect count value (if the
-             * true value of SamplesPerPixel is not 1).
-             *
-             * It sure would have been nice if Aldus had really thought
-             * this stuff through carefully.
-             */
+            // Sigh, we must make a separate pass through the directory for the following reason:
+            // 
+            // We must process the Compression tag in the first pass in order to merge in
+            // codec-private tag definitions (otherwise we may get complaints about unknown tags).
+            // However, the Compression tag may be dependent on the SamplesPerPixel tag value
+            // because older TIFF specs permited Compression to be written as a
+            // SamplesPerPixel-count tag entry. Thus if we don't first figure out the correct
+            // SamplesPerPixel tag value then we may end up ignoring the Compression tag value
+            // because it has an incorrect count value (if the true value of SamplesPerPixel is not 1).
+            //
+            // It sure would have been nice if Aldus had really thought this stuff through carefully.
+
             for (int i = 0; i < dircount; i++)
             {
                 TiffDirEntry dp = dir[i];
@@ -1329,9 +1327,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-             * First real pass over the directory.
-             */
+            // First real pass over the directory.
             int fix = 0;
             bool diroutoforderwarning = false;
             bool haveunknowntags = false;
@@ -1343,11 +1339,8 @@ namespace BitMiracle.LibTiff.Classic
                 if (fix >= m_nfields)
                     fix = 0;
 
-                /*
-                 * Silicon Beach (at least) writes unordered
-                 * directory tags (violating the spec).  Handle
-                 * it here, but be obnoxious (maybe they'll fix it?).
-                 */
+                // Silicon Beach (at least) writes unordered directory tags (violating the spec).
+                // Handle it here, but be obnoxious (maybe they'll fix it?).
                 if (dir[i].tdir_tag < m_fieldinfo[fix].Tag)
                 {
                     if (!diroutoforderwarning)
@@ -1364,23 +1357,19 @@ namespace BitMiracle.LibTiff.Classic
 
                 if (fix >= m_nfields || m_fieldinfo[fix].Tag != dir[i].tdir_tag)
                 {
-                    /* Unknown tag ... we'll deal with it below */
+                    // Unknown tag ... we'll deal with it below
                     haveunknowntags = true;
                     continue;
                 }
 
-                /*
-                 * null out old tags that we ignore.
-                 */
+                // null out old tags that we ignore.
                 if (m_fieldinfo[fix].Bit == FieldBit.Ignore)
                 {
                     dir[i].tdir_tag = TiffTag.IGNORE;
                     continue;
                 }
 
-                /*
-                 * Check data type.
-                 */
+                // Check data type.
                 TiffFieldInfo fip = m_fieldinfo[fix];
                 while (dir[i].tdir_type != fip.Type && fix < m_nfields)
                 {
@@ -1465,14 +1454,11 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-             * If we saw any unknown tags, make an extra pass over the directory
-             * to deal with them.  This must be done separately because the tags
-             * could have become known when we registered a codec after finding
-             * the Compression tag.  In a correctly-sorted directory there's
-             * no problem because Compression will come before any codec-private
-             * tags, but if the sorting is wrong that might not hold.
-             */
+            // If we saw any unknown tags, make an extra pass over the directory to deal with
+            // them. This must be done separately because the tags could have become known when we
+            // registered a codec after finding the Compression tag. In a correctly-sorted
+            // directory there's no problem because Compression will come before any codec-private
+            // tags, but if the sorting is wrong that might not hold.
             if (haveunknowntags)
             {
                 fix = 0;
@@ -1483,7 +1469,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     if (fix >= m_nfields || dir[i].tdir_tag < m_fieldinfo[fix].Tag)
                     {
-                        /* O(n^2) */
+                        // O(n^2)
                         fix = 0;
                     }
 
@@ -1505,15 +1491,13 @@ namespace BitMiracle.LibTiff.Classic
                             fix++;
                     }
 
-                    /*
-                     * Check data type.
-                     */
+                    // Check data type.
                     TiffFieldInfo fip = m_fieldinfo[fix];
                     while (dir[i].tdir_type != fip.Type && fix < m_nfields)
                     {
                         if (fip.Type == TiffType.ANY)
                         {
-                            /* wildcard */
+                            // wildcard
                             break;
                         }
 
@@ -1531,14 +1515,11 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-            * XXX: OJPEG hack.
-            * If a) compression is OJPEG, b) planarconfig tag says it's separate,
-            * c) strip offsets/bytecounts tag are both present and
-            * d) both contain exactly one value, then we consistently find
-            * that the buggy implementation of the buggy compression scheme
-            * matches contig planarconfig best. So we 'fix-up' the tag here
-            */
+            // XXX: OJPEG hack.
+            // If a) compression is OJPEG, b) planarconfig tag says it's separate, c) strip
+            // offsets/bytecounts tag are both present and d) both contain exactly one value, then
+            // we consistently find that the buggy implementation of the buggy compression scheme
+            // matches contig planarconfig best. So we 'fix-up' the tag here
             if ((m_dir.td_compression == Compression.OJPEG) && (m_dir.td_planarconfig == PlanarConfig.SEPARATE))
             {
                 int dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPOFFSETS);
@@ -1554,18 +1535,14 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-             * Allocate directory structure and setup defaults.
-             */
+            // Allocate directory structure and setup defaults.
             if (!fieldSet(FieldBit.ImageDimensions))
             {
                 missingRequired("ImageLength");
                 return false;
             }
 
-            /* 
-             * Setup appropriate structures (by strip or by tile)
-             */
+            // Setup appropriate structures (by strip or by tile)
             if (!fieldSet(FieldBit.TileDimensions))
             {
                 m_dir.td_nstrips = NumberOfStrips();
@@ -1594,14 +1571,10 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if ((m_dir.td_compression == Compression.OJPEG) && !IsTiled() && (m_dir.td_nstrips == 1))
                 {
-                    /*
-                    * XXX: OJPEG hack.
-                    * If a) compression is OJPEG, b) it's not a tiled TIFF,
-                    * and c) the number of strips is 1,
-                    * then we tolerate the absence of stripoffsets tag,
-                    * because, presumably, all required data is in the
-                    * JpegInterchangeFormat stream.
-                    */
+                    // XXX: OJPEG hack.
+                    // If a) compression is OJPEG, b) it's not a tiled TIFF, and c) the number of
+                    // strips is 1, then we tolerate the absence of stripoffsets tag, because,
+                    // presumably, all required data is in the JpegInterchangeFormat stream.
                     setFieldBit(FieldBit.StripOffsets);
                 }
                 else
@@ -1611,9 +1584,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-             * Second pass: extract other information.
-             */
+            // Second pass: extract other information.
             for (int i = 0; i < dircount; i++)
             {
                 if (dir[i].tdir_tag == TiffTag.IGNORE)
@@ -1626,27 +1597,21 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffTag.BITSPERSAMPLE:
                     case TiffTag.DATATYPE:
                     case TiffTag.SAMPLEFORMAT:
-                        /*
-                         * The 5.0 spec says the Compression tag has
-                         * one value, while earlier specs say it has
-                         * one value per sample.  Because of this, we
-                         * accept the tag if one value is supplied.
-                         *
-                         * The MinSampleValue, MaxSampleValue, BitsPerSample
-                         * DataType and SampleFormat tags are supposed to be
-                         * written as one value/sample, but some vendors
-                         * incorrectly write one value only -- so we accept
-                         * that as well (yech). Other vendors write correct
-                         * value for NumberOfSamples, but incorrect one for
-                         * BitsPerSample and friends, and we will read this
-                         * too.
-                         */
+                        // The 5.0 spec says the Compression tag has one value, while earlier
+                        // specs say it has one value per sample. Because of this, we accept the
+                        // tag if one value is supplied.
+                        //
+                        // The MinSampleValue, MaxSampleValue, BitsPerSample DataType and
+                        // SampleFormat tags are supposed to be written as one value/sample, but
+                        // some vendors incorrectly write one value only - so we accept that as
+                        // well (yech). Other vendors write correct value for NumberOfSamples, but
+                        // incorrect one for BitsPerSample and friends, and we will read this too.
                         if (dir[i].tdir_count == 1)
                         {
                             int v = extractData(dir[i]);
                             if (!SetField(dir[i].tdir_tag, v))
                                 return false;
-                            /* XXX: workaround for broken TIFFs */
+                            // XXX: workaround for broken TIFFs
                         }
                         else if (dir[i].tdir_tag == TiffTag.BITSPERSAMPLE && dir[i].tdir_type == TiffType.LONG)
                         {
@@ -1680,11 +1645,8 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffTag.COLORMAP:
                     case TiffTag.TRANSFERFUNCTION:
                         {
-                            /*
-                             * TransferFunction can have either 1x or 3x
-                             * data values; Colormap can have only 3x
-                             * items.
-                             */
+                            // TransferFunction can have either 1x or 3x data values;
+                            // Colormap can have only 3x items.
                             int v = 1 << m_dir.td_bitspersample;
                             if (dir[i].tdir_tag == TiffTag.COLORMAP || dir[i].tdir_count != v)
                             {
@@ -1698,11 +1660,7 @@ namespace BitMiracle.LibTiff.Classic
                                 int c = 1 << m_dir.td_bitspersample;
                                 if (dir[i].tdir_count == c)
                                 {
-                                    /*
-                                    * This deals with there being
-                                    * only one array to apply to
-                                    * all samples.
-                                    */
+                                    // This deals with there being only one array to apply to all samples.
                                     short[] u = ByteArrayToShorts(cp, 0, dir[i].tdir_count * sizeof(short));
                                     SetField(dir[i].tdir_tag, u, u, u);
                                 }
@@ -1726,7 +1684,7 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffTag.REFERENCEBLACKWHITE:
                         fetchRefBlackWhite(dir[i]);
                         break;
-                    /* BEGIN REV 4.0 COMPATIBILITY */
+                    // BEGIN REV 4.0 COMPATIBILITY
                     case TiffTag.OSUBFILETYPE:
                         FileType ft = 0;
                         switch ((OFileType)extractData(dir[i]))
@@ -1743,29 +1701,25 @@ namespace BitMiracle.LibTiff.Classic
                             SetField(TiffTag.SUBFILETYPE, ft);
 
                         break;
-                    /* END REV 4.0 COMPATIBILITY */
+                    // END REV 4.0 COMPATIBILITY
                     default:
                         fetchNormalTag(dir[i]);
                         break;
                 }
             }
 
-            /*
-            * OJPEG hack:
-            * - If a) compression is OJPEG, and b) photometric tag is missing,
-            * then we consistently find that photometric should be YCbCr
-            * - If a) compression is OJPEG, and b) photometric tag says it's RGB,
-            * then we consistently find that the buggy implementation of the
-            * buggy compression scheme matches photometric YCbCr instead.
-            * - If a) compression is OJPEG, and b) bitspersample tag is missing,
-            * then we consistently find bitspersample should be 8.
-            * - If a) compression is OJPEG, b) samplesperpixel tag is missing,
-            * and c) photometric is RGB or YCbCr, then we consistently find
-            * samplesperpixel should be 3
-            * - If a) compression is OJPEG, b) samplesperpixel tag is missing,
-            * and c) photometric is MINISWHITE or MINISBLACK, then we consistently
-            * find samplesperpixel should be 3
-            */
+            // OJPEG hack:
+            // - If a) compression is OJPEG, and b) photometric tag is missing, then we
+            // consistently find that photometric should be YCbCr
+            // - If a) compression is OJPEG, and b) photometric tag says it's RGB, then we
+            // consistently find that the buggy implementation of the buggy compression scheme
+            // matches photometric YCbCr instead.
+            // - If a) compression is OJPEG, and b) bitspersample tag is missing, then we
+            // consistently find bitspersample should be 8.
+            // - If a) compression is OJPEG, b) samplesperpixel tag is missing, and c) photometric
+            // is RGB or YCbCr, then we consistently find samplesperpixel should be 3
+            // - If a) compression is OJPEG, b) samplesperpixel tag is missing, and c) photometric
+            // is MINISWHITE or MINISBLACK, then we consistently find samplesperpixel should be 3
             if (m_dir.td_compression == Compression.OJPEG)
             {
                 if (!fieldSet(FieldBit.Photometric))
@@ -1804,32 +1758,22 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-             * Verify Palette image has a Colormap.
-             */
+            // Verify Palette image has a Colormap.
             if (m_dir.td_photometric == Photometric.PALETTE && !fieldSet(FieldBit.ColorMap))
             {
                 missingRequired("Colormap");
                 return false;
             }
 
-            /*
-            * OJPEG hack:
-            * We do no further messing with strip/tile offsets/bytecounts in OJPEG
-            * TIFFs
-            */
+            // OJPEG hack:
+            // We do no further messing with strip/tile offsets/bytecounts in OJPEG TIFFs
             if (m_dir.td_compression != Compression.OJPEG)
             {
-                /*
-                 * Attempt to deal with a missing StripByteCounts tag.
-                 */
+                // Attempt to deal with a missing StripByteCounts tag.
                 if (!fieldSet(FieldBit.StripByteCounts))
                 {
-                    /*
-                     * Some manufacturers violate the spec by not giving
-                     * the size of the strips.  In this case, assume there
-                     * is one uncompressed strip of data.
-                     */
+                    // Some manufacturers violate the spec by not giving the size of the strips.
+                    // In this case, assume there is one uncompressed strip of data.
                     if ((m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 1) ||
                         (m_dir.td_planarconfig == PlanarConfig.SEPARATE && m_dir.td_nstrips != m_dir.td_samplesperpixel))
                     {
@@ -1843,23 +1787,17 @@ namespace BitMiracle.LibTiff.Classic
                 }
                 else if (m_dir.td_nstrips == 1 && m_dir.td_stripoffset[0] != 0 && byteCountLooksBad(m_dir))
                 {
-                    /*
-                     * XXX: Plexus (and others) sometimes give a value of zero for
-                     * a tag when they don't know what the correct value is!  Try
-                     * and handle the simple case of estimating the size of a one
-                     * strip image.
-                     */
+                    // XXX: Plexus (and others) sometimes give a value of zero for a tag when
+                    // they don't know what the correct value is! Try and handle the simple case
+                    // of estimating the size of a one strip image.
                     WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
                 else if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 2 && m_dir.td_compression == Compression.NONE && m_dir.td_stripbytecount[0] != m_dir.td_stripbytecount[1])
                 {
-                    /*
-                     * XXX: Some vendors fill StripByteCount array with absolutely
-                     * wrong values (it can be equal to StripOffset array, for
-                     * example). Catch this case here.
-                     */
+                    // XXX: Some vendors fill StripByteCount array with absolutely wrong values
+                    // (it can be equal to StripOffset array, for example). Catch this case here.
                     WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
@@ -1871,14 +1809,10 @@ namespace BitMiracle.LibTiff.Classic
             if (!fieldSet(FieldBit.MaxSampleValue))
                 m_dir.td_maxsamplevalue = (short)((1 << m_dir.td_bitspersample) - 1);
 
-            /*
-             * Setup default compression scheme.
-             */
+            // Setup default compression scheme.
 
-            /*
-             * XXX: We can optimize checking for the strip bounds using the sorted
-             * bytecounts array. See also comments for appendToStrip() function.
-             */
+            // XXX: We can optimize checking for the strip bounds using the sorted bytecounts
+            // array. See also comments for appendToStrip() function.
             if (m_dir.td_nstrips > 1)
             {
                 m_dir.td_stripbytecountsorted = true;
@@ -1895,12 +1829,11 @@ namespace BitMiracle.LibTiff.Classic
             if (!fieldSet(FieldBit.Compression))
                 SetField(TiffTag.COMPRESSION, Compression.NONE);
 
-            // Some manufacturers make life difficult by writing large amounts
-            // of uncompressed data as a single strip. This is contrary to the
-            // recommendations of the spec. The following makes an attempt at
-            // breaking such images into strips closer to the recommended 8k
-            // bytes. A side effect, however, is that the RowsPerStrip tag
-            // value may be changed.
+            // Some manufacturers make life difficult by writing large amounts of uncompressed
+            // data as a single strip. This is contrary to the recommendations of the spec. The
+            // following makes an attempt at breaking such images into strips closer to the
+            // recommended 8k bytes. A side effect, however, is that the RowsPerStrip tag value
+            // may be changed.
             if (m_dir.td_nstrips == 1 && m_dir.td_compression == Compression.NONE &&
                 (m_flags & TiffFlags.STRIPCHOP) == TiffFlags.STRIPCHOP &&
                 (m_flags & TiffFlags.ISTILED) != TiffFlags.ISTILED)
@@ -2277,6 +2210,17 @@ namespace BitMiracle.LibTiff.Classic
                 rps = m_dir.td_imagelength;
 
             return VStripSize(rps);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <returns></returns>
+        public long RawTileSize(int tile)
+        {
+            // yes, one method for raw tile and strip sizes
+            return RawStripSize(tile);
         }
 
         /// <summary>
@@ -4569,15 +4513,35 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Reads a tile of data and decompress the specified
-        /// amount into the user-supplied buffer.
+        /// Reads a tile of data from an open TIFF file/stream, decompresses it and places
+        /// specified amount of decompressed bytes into the user supplied buffer.
         /// </summary>
-        /// <param name="tile">The tile.</param>
-        /// <param name="buf">The buffer.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>The tile size.</returns>
-        public int ReadEncodedTile(int tile, byte[] buf, int offset, int size)
+        /// <param name="tile">The zero-based index of the tile to read.</param>
+        /// <param name="buffer">The buffer to place decompressed tile bytes to.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin storing
+        /// decompressed tile bytes.</param>
+        /// <param name="count">The maximum number of decompressed tile bytes to be stored
+        /// to buffer.</param>
+        /// <returns>The actual number of bytes of data that were placed in buffer or -1 if an
+        /// error was encountered.</returns>
+        /// <remarks>
+        /// <para>
+        /// The value of <paramref name="tile"/> is a "raw tile number". That is, the caller
+        /// must take into account whether or not the data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeTile"/> automatically does this when converting an (x, y, z, plane)
+        /// coordinate quadruple to a tile number.</para>
+        /// <para>To read a full tile of data the data buffer should typically be at least as
+        /// large as the number returned by <see cref="TileSize"/>. If the -1 passed in
+        /// <paramref name="count"/> parameter, the whole tile will be read. You should be sure
+        /// you have enough space allocated for the buffer.</para>
+        /// <para>The library attempts to hide bit- and byte-ordering differences between the
+        /// image and the native machine by converting data to the native machine order. Bit
+        /// reversal is done if the <see cref="TiffTag.FILLORDER"/> tag is opposite to the native
+        /// machine bit order. 16- and 32-bit samples are automatically byte-swapped if the file
+        /// was written with a byte order opposite to the native machine byte order.</para>
+        /// </remarks>
+        public int ReadEncodedTile(int tile, byte[] buffer, int offset, int count)
         {
             if (!checkRead(1))
                 return -1;
@@ -4588,33 +4552,47 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            if (size == -1)
-                size = m_tilesize;
-            else if (size > m_tilesize)
-                size = m_tilesize;
+            if (count == -1)
+                count = m_tilesize;
+            else if (count > m_tilesize)
+                count = m_tilesize;
 
-            byte[] tempBuf = new byte[size];
-            Array.Copy(buf, offset, tempBuf, 0, size);
+            byte[] tempBuf = new byte[count];
+            Array.Copy(buffer, offset, tempBuf, 0, count);
 
-            if (fillTile(tile) && m_currentCodec.DecodeTile(tempBuf, size, (short)(tile / m_dir.td_stripsperimage)))
+            if (fillTile(tile) && m_currentCodec.DecodeTile(tempBuf, count, (short)(tile / m_dir.td_stripsperimage)))
             {
-                postDecode(tempBuf, size);
-                Array.Copy(tempBuf, 0, buf, offset, size);
-                return size;
+                postDecode(tempBuf, count);
+                Array.Copy(tempBuf, 0, buffer, offset, count);
+                return count;
             }
 
             return -1;
         }
 
         /// <summary>
-        /// Reads a tile of data from the file.
+        /// Reads the undecoded contents of a tile of data from an open TIFF file/stream and places
+        /// specified amount of read bytes into the user supplied buffer.
         /// </summary>
-        /// <param name="tile">The tile.</param>
-        /// <param name="buf">The buffer.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>The tile size.</returns>
-        public int ReadRawTile(int tile, byte[] buf, int offset, int size)
+        /// <param name="tile">The zero-based index of the tile to read.</param>
+        /// <param name="buffer">The buffer to place read tile bytes to.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin storing
+        /// read tile bytes.</param>
+        /// <param name="count">The maximum number of read tile bytes to be stored to buffer.</param>
+        /// <returns>The actual number of bytes of data that were placed in buffer or -1 if an
+        /// error was encountered.</returns>
+        /// <remarks>
+        /// <para>
+        /// The value of <paramref name="tile"/> is a "raw tile number". That is, the caller
+        /// must take into account whether or not the data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeTile"/> automatically does this when converting an (x, y, z, plane)
+        /// coordinate quadruple to a tile number.</para>
+        /// <para>To read a full tile of data the data buffer should typically be at least as
+        /// large as the number returned by <see cref="RawTileSize"/>. If the -1 passed in
+        /// <paramref name="count"/> parameter, the whole tile will be read. You should be sure
+        /// you have enough space allocated for the buffer.</para></remarks>
+        public int ReadRawTile(int tile, byte[] buffer, int offset, int count)
         {
             const string module = "ReadRawTile";
 
@@ -4634,10 +4612,10 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             uint bytecount = m_dir.td_stripbytecount[tile];
-            if (size != -1 && (uint)size < bytecount)
-                bytecount = (uint)size;
+            if (count != -1 && (uint)count < bytecount)
+                bytecount = (uint)count;
 
-            return readRawTile1(tile, buf, offset, (int)bytecount, module);
+            return readRawTile1(tile, buffer, offset, (int)bytecount, module);
         }
 
         /// <summary>
@@ -4704,14 +4682,35 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Read a strip of data and decompress the specified amount into the user-supplied buffer.
+        /// Reads a strip of data from an open TIFF file/stream, decompresses it and places
+        /// specified amount of decompressed bytes into the user supplied buffer.
         /// </summary>
-        /// <param name="strip">The strip.</param>
-        /// <param name="buf">The buffer.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>The strip size.</returns>
-        public int ReadEncodedStrip(int strip, byte[] buf, int offset, int size)
+        /// <param name="strip">The zero-based index of the strip to read.</param>
+        /// <param name="buffer">The buffer to place decompressed strip bytes to.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin storing
+        /// decompressed strip bytes.</param>
+        /// <param name="count">The maximum number of decompressed strip bytes to be stored
+        /// to buffer.</param>
+        /// <returns>The actual number of bytes of data that were placed in buffer or -1 if an
+        /// error was encountered.</returns>
+        /// <remarks>
+        /// <para>
+        /// The value of <paramref name="strip"/> is a "raw strip number". That is, the caller
+        /// must take into account whether or not the data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to a
+        /// strip index.</para>
+        /// <para>To read a full strip of data the data buffer should typically be at least
+        /// as large as the number returned by <see cref="StripSize"/>. If the -1 passed in
+        /// <paramref name="count"/> parameter, the whole strip will be read. You should be sure
+        /// you have enough space allocated for the buffer.</para>
+        /// <para>The library attempts to hide bit- and byte-ordering differences between the
+        /// image and the native machine by converting data to the native machine order. Bit
+        /// reversal is done if the <see cref="TiffTag.FILLORDER"/> tag is opposite to the native
+        /// machine bit order. 16- and 32-bit samples are automatically byte-swapped if the file
+        /// was written with a byte order opposite to the native machine byte order.</para>
+        /// </remarks>
+        public int ReadEncodedStrip(int strip, byte[] buffer, int offset, int count)
         {
             if (!checkRead(0))
                 return -1;
@@ -4722,11 +4721,8 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            /*
-             * Calculate the strip size according to the number of
-             * rows in the strip (check for truncated last strip on any
-             * of the separations).
-             */
+            // Calculate the strip size according to the number of rows in the strip (check for
+            // truncated last strip on any of the separations).
             int strips_per_sep;
             if (m_dir.td_rowsperstrip >= m_dir.td_imagelength)
                 strips_per_sep = 1;
@@ -4740,33 +4736,47 @@ namespace BitMiracle.LibTiff.Classic
                 nrows = m_dir.td_rowsperstrip;
 
             int stripsize = VStripSize(nrows);
-            if (size == -1)
-                size = stripsize;
-            else if (size > stripsize)
-                size = stripsize;
+            if (count == -1)
+                count = stripsize;
+            else if (count > stripsize)
+                count = stripsize;
 
-            byte[] tempBuf = new byte[size];
-            Array.Copy(buf, offset, tempBuf, 0, size);
+            byte[] tempBuf = new byte[count];
+            Array.Copy(buffer, offset, tempBuf, 0, count);
 
-            if (fillStrip(strip) && m_currentCodec.DecodeStrip(tempBuf, size, (short)(strip / m_dir.td_stripsperimage)))
+            if (fillStrip(strip) && m_currentCodec.DecodeStrip(tempBuf, count, (short)(strip / m_dir.td_stripsperimage)))
             {
-                postDecode(tempBuf, size);
-                Array.Copy(tempBuf, 0, buf, offset, size);
-                return size;
+                postDecode(tempBuf, count);
+                Array.Copy(tempBuf, 0, buffer, offset, count);
+                return count;
             }
 
             return -1;
         }
 
         /// <summary>
-        /// Read a strip of data from the file.
+        /// Reads the undecoded contents of a strip of data from an open TIFF file/stream and
+        /// places specified amount of read bytes into the user supplied buffer.
         /// </summary>
-        /// <param name="strip">The strip.</param>
-        /// <param name="buf">The buffer.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="size">The size.</param>
-        /// <returns>The strip size.</returns>
-        public int ReadRawStrip(int strip, byte[] buf, int offset, int size)
+        /// <param name="strip">The zero-based index of the strip to read.</param>
+        /// <param name="buffer">The buffer to place read bytes to.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin storing
+        /// read bytes.</param>
+        /// <param name="count">The maximum number of read bytes to be stored to buffer.</param>
+        /// <returns>The actual number of bytes of data that were placed in buffer or -1 if an
+        /// error was encountered.</returns>
+        /// <remarks>
+        /// <para>
+        /// The value of <paramref name="strip"/> is a "raw strip number". That is, the caller
+        /// must take into account whether or not the data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to a
+        /// strip index.</para>
+        /// <para>To read a full strip of data the data buffer should typically be at least
+        /// as large as the number returned by <see cref="RawStripSize"/>. If the -1 passed in
+        /// <paramref name="count"/> parameter, the whole strip will be read. You should be sure
+        /// you have enough space allocated for the buffer.</para></remarks>
+        public int ReadRawStrip(int strip, byte[] buffer, int offset, int count)
         {
             const string module = "ReadRawStrip";
 
@@ -4792,10 +4802,10 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            if (size != -1 && (uint)size < bytecount)
-                bytecount = (uint)size;
+            if (count != -1 && (uint)count < bytecount)
+                bytecount = (uint)count;
 
-            return readRawStrip1(strip, buf, offset, (int)bytecount, module);
+            return readRawStrip1(strip, buffer, offset, (int)bytecount, module);
         }
 
         /// <summary>
