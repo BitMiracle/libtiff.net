@@ -304,7 +304,9 @@
                         </code>
                         <para>
                             Alternatively,
-                            <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage</codeEntityReference>
+                            <codeEntityReference>
+                                Overload:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage
+                            </codeEntityReference>
                             can be replaced with a more low-level interface that permits an
                             application to have more control over this reading procedure. The
                             equivalent to the above is:
@@ -323,17 +325,17 @@
                                             if (tif == null)
                                                 return;
 
-                                            string emsg;
-                                            TiffRgbaImage img = TiffRgbaImage.Create(tif, false, out emsg);
+                                            string errorMsg;
+                                            TiffRgbaImage img = TiffRgbaImage.Create(tif, false, out errorMsg);
                                             if (img == null)
                                             {
-                                                System.Console.Error.WriteLine(emsg);
+                                                System.Console.Error.WriteLine(errorMsg);
                                                 return;
                                             }
 
                                             int rasterSize = img.Width * img.Height;
                                             int[] raster = new int[rasterSize];
-                                            if (img.Get(raster, 0, img.Width, img.Height))
+                                            if (img.GetRaster(raster, 0, img.Width, img.Height))
                                             {
                                                 // ...process raster data...
                                             }

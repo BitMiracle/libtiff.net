@@ -17,8 +17,44 @@ using BitMiracle.LibTiff.Classic.Internal;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// RGBA-style image support. Provides methods for decoding images to RGBA format.
+    /// RGBA-style image support. Provides methods for decoding images into RGBA (or other) format.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>TiffRgbaImage</b> provide a high-level interface through which TIFF images may be read
+    /// into memory. Images may be strip- or tile-based and have a variety of different
+    /// characteristics: bits/sample, samples/pixel, photometric, etc. The target raster format
+    /// can be customized to a particular application's needs by installing custom methods that
+    /// manipulate image data according to application requirements.
+    /// </para><para>
+    /// The default usage for this class: check if an image can be processed using
+    /// <see cref="BitMiracle.LibTiff.Classic.Tiff.RGBAImageOK"/>, construct an instance of
+    /// <b>TiffRgbaImage</b> using <see cref="Create"/> and then read and decode an image into a
+    /// target raster using <see cref="GetRaster"/>. <see cref="GetRaster"/> can be called
+    /// multiple times to decode an image using different state parameters. If multiple images
+    /// are to be displayed and there is not enough space for each of the decoded rasters,
+    /// multiple instances of <b>TiffRgbaImage</b> can be managed and then calls can be made to
+    /// <see cref="GetRaster"/> as needed to display an image.</para>
+    /// <para>
+    /// To use the core support for reading and processing TIFF images, but write the resulting
+    /// raster data in a different format one need only override the "put methods" used to store
+    /// raster data. These methods are initially setup by <see cref="Create"/> to point to methods
+    /// that pack raster data in the default ABGR pixel format. Two different methods are used
+    /// according to the physical organization of the image data in the file: one for
+    /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.CONTIG (packed samples),
+    /// and another for <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE
+    /// (separated samples). Note that this mechanism can be used to transform the data before 
+    /// storing it in the raster. For example one can convert data to colormap indices for display
+    /// on a colormap display.</para><para>
+    /// To setup custom "put" method please use <see cref="PutContig"/> property for contiguously
+    /// packed samples and/or <see cref="PutSeparate"/> property for separated samples.</para>
+    /// <para>
+    /// The methods of <b>TiffRgbaImage</b> support the most commonly encountered flavors of TIFF.
+    /// It is possible to extend this support by overriding the "get method" invoked by
+    /// <see cref="GetRaster"/> to read TIFF image data. Details of doing this are a bit involved,
+    /// it is best to make a copy of an existing get method and modify it to suit the needs of an
+    /// application. To setup custom "get" method please use <see cref="Get"/> property.</para>
+    /// </remarks>
     public class TiffRgbaImage
     {       
         internal const string photoTag = "PhotometricInterpretation";
@@ -142,7 +178,7 @@ namespace BitMiracle.LibTiff.Classic
         /// used when converting contiguously packed samples.
         /// </summary>
         /// <remarks><para>
-        /// The image reading and conversion routines invoke "put" methods to copy/image/whatever
+        /// The image reading and conversion methods invoke "put" methods to copy/image/whatever
         /// tiles of raw image data. A default set of methods is provided to convert/copy raw
         /// image data to 8-bit packed ABGR format rasters. Applications can supply alternate
         /// methods that unpack the data into a different format or, for example, unpack the data
@@ -151,14 +187,16 @@ namespace BitMiracle.LibTiff.Classic
         /// To setup custom "put" method for contiguously packed samples please use
         /// <see cref="PutContig"/> property.
         /// </para></remarks>
-        public delegate void PutContigDelegate(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset);
+        public delegate void PutContigDelegate(
+            TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew,
+            int toskew, byte[] pp, int ppOffset);
 
         /// <summary>
         /// Delegate for "put" method (the method that is called to pack pixel data in the raster)
         /// used when converting separated samples.
         /// </summary>
         /// <remarks><para>
-        /// The image reading and conversion routines invoke "put" methods to copy/image/whatever
+        /// The image reading and conversion methods invoke "put" methods to copy/image/whatever
         /// tiles of raw image data. A default set of methods is provided to convert/copy raw
         /// image data to 8-bit packed ABGR format rasters. Applications can supply alternate
         /// methods that unpack the data into a different format or, for example, unpack the data
@@ -167,7 +205,9 @@ namespace BitMiracle.LibTiff.Classic
         /// To setup custom "put" method for separated samples please use
         /// <see cref="PutSeparate"/> property.
         /// </para></remarks>
-        public delegate void PutSeparateDelegate(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
+        public delegate void PutSeparateDelegate(
+            TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew,
+            int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
 
         /// <summary>
         /// Delegate for "get" method (the method that is called to produce RGBA raster).
@@ -178,33 +218,45 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// To setup custom "get" method please use <see cref="Get"/> property.
         /// </para></remarks>
-        public delegate bool GetDelegate(TiffRgbaImage img, int[] raster, int offset, int w, int h);
+        public delegate bool GetDelegate(TiffRgbaImage img, int[] raster, int offset, int width, int height);
 
         private TiffRgbaImage()
         {
         }
 
         /// <summary>
-        /// 
+        /// Creates new instance of the <see cref="TiffRgbaImage"/> class.
         /// </summary>
-        /// <param name="tif">The tif.</param>
-        /// <param name="stop">if set to <c>true</c> [stop].</param>
-        /// <param name="emsg">The emsg.</param>
-        /// <returns></returns>
-        public static TiffRgbaImage Create(Tiff tif, bool stop, out string emsg)
+        /// <param name="tif">
+        /// The instance of the <see cref="BitMiracle.LibTiff.Classic"/> class used to retrieve
+        /// image data.
+        /// </param>
+        /// <param name="stopOnError">
+        /// if set to <c>true</c> then an error will terminate the conversion; otherwise "get"
+        /// methods will continue processing data until all the possible data in the image have
+        /// been requested.
+        /// </param>
+        /// <param name="errorMsg">The error message (if any) gets placed here.</param>
+        /// <returns>
+        /// New instance of the <see cref="TiffRgbaImage"/> class if the image specified
+        /// by <paramref name="tif"/> can be converted to RGBA format; otherwise, <c>null</c> is
+        /// returned and <paramref name="errorMsg"/> contains the reason why it is being
+        /// rejected.
+        /// </returns>
+        public static TiffRgbaImage Create(Tiff tif, bool stopOnError, out string errorMsg)
         {
-            emsg = null;
+            errorMsg = null;
+
+            // Initialize to normal values
             TiffRgbaImage img = new TiffRgbaImage();
-            /* Initialize to normal values */
             img.row_offset = 0;
             img.col_offset = 0;
             img.redcmap = null;
             img.greencmap = null;
             img.bluecmap = null;
-            img.req_orientation = Orientation.BOTLEFT; /* It is the default */
-
+            img.req_orientation = Orientation.BOTLEFT; // It is the default
             img.tif = tif;
-            img.stoponerr = stop;
+            img.stoponerr = stopOnError;
 
             FieldValue[] result = tif.GetFieldDefaulted(TiffTag.BITSPERSAMPLE);
             img.bitspersample = result[0].ToShort();
@@ -218,7 +270,7 @@ namespace BitMiracle.LibTiff.Classic
                     break;
 
                 default:
-                    emsg = string.Format(CultureInfo.InvariantCulture,
+                    errorMsg = string.Format(CultureInfo.InvariantCulture,
                         "Sorry, can not handle images with {0}-bit samples", img.bitspersample);
                     return null;
             }
@@ -236,18 +288,17 @@ namespace BitMiracle.LibTiff.Classic
                 switch ((ExtraSample)sampleinfo[0])
                 {
                     case ExtraSample.UNSPECIFIED:
-                        /* Workaround for some images without */
                         if (img.samplesperpixel > 3)
                         {
-                            /* correct info about alpha channel */
+                            // Workaround for some images without correct info about alpha channel
                             img.alpha = ExtraSample.ASSOCALPHA;
                         }
                         break;
 
                     case ExtraSample.ASSOCALPHA:
-                    /* data is pre-multiplied */
+                        // data is pre-multiplied
                     case ExtraSample.UNASSALPHA:
-                        /* data is not pre-multiplied */
+                        // data is not pre-multiplied
                         img.alpha = (ExtraSample)sampleinfo[0];
                         break;
                 }
@@ -291,7 +342,7 @@ namespace BitMiracle.LibTiff.Classic
                         break;
 
                     default:
-                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", photoTag);
+                        errorMsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", photoTag);
                         return null;
                 }
             }
@@ -304,7 +355,7 @@ namespace BitMiracle.LibTiff.Classic
                     result = tif.GetField(TiffTag.COLORMAP);
                     if (result == null)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing required \"Colormap\" tag");
+                        errorMsg = string.Format(CultureInfo.InvariantCulture, "Missing required \"Colormap\" tag");
                         return null;
                     }
 
@@ -312,7 +363,7 @@ namespace BitMiracle.LibTiff.Classic
                     short[] green_orig = result[1].ToShortArray();
                     short[] blue_orig = result[2].ToShortArray();
 
-                    /* copy the colormaps so we can modify them */
+                    // copy the colormaps so we can modify them
                     int n_color = (1 << img.bitspersample);
                     img.redcmap = new short[n_color];
                     img.greencmap = new short[n_color];
@@ -325,7 +376,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (planarconfig == PlanarConfig.CONTIG &&
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
                             photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                         return null;
@@ -337,7 +388,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (planarconfig == PlanarConfig.CONTIG &&
                         img.samplesperpixel != 1 && img.bitspersample < 8)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
                             photoTag, img.photometric, "Samples/pixel", img.samplesperpixel, img.bitspersample);
                         return null;
@@ -345,41 +396,36 @@ namespace BitMiracle.LibTiff.Classic
                     break;
 
                 case Photometric.YCBCR:
-                    /* It would probably be nice to have a reality check here. */
+                    // It would probably be nice to have a reality check here.
                     if (planarconfig == PlanarConfig.CONTIG)
                     {
-                        /* can rely on libjpeg to convert to RGB */
-                        /* XXX should restore current state on exit */
+                        // can rely on LibJpeg.Net to convert to RGB
+                        // XXX should restore current state on exit
                         switch (compress)
                         {
                             case Compression.JPEG:
-                                /*
-                                * TODO: when complete tests verify complete desubsampling
-                                * and YCbCr handling, remove use of JPEGCOLORMODE in
-                                * favor of native handling
-                                */
+                                // TODO: when complete tests verify complete desubsampling and
+                                // YCbCr handling, remove use of JPEGCOLORMODE in favor of native
+                                // handling
                                 tif.SetField(TiffTag.JPEGCOLORMODE, JpegColorMode.RGB);
                                 img.photometric = Photometric.RGB;
                                 break;
 
                             default:
-                                /* do nothing */
+                                // do nothing
                                 break;
                         }
                     }
 
-                    /*
-                    * TODO: if at all meaningful and useful, make more complete
-                    * support check here, or better still, refactor to let supporting
-                    * code decide whether there is support and what meaningfull
-                    * error to return
-                    */
+                    // TODO: if at all meaningful and useful, make more complete support check
+                    // here, or better still, refactor to let supporting code decide whether there
+                    // is support and what meaningfull error to return
                     break;
 
                 case Photometric.RGB:
                     if (colorchannels < 3)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle RGB image with {0}={1}", "Color channels", colorchannels);
                         return null;
                     }
@@ -391,14 +437,14 @@ namespace BitMiracle.LibTiff.Classic
 
                     if (inkset != InkSet.CMYK)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                         return null;
                     }
 
                     if (img.samplesperpixel < 4)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle separated image with {0}={1}", "Samples/pixel", img.samplesperpixel);
                         return null;
                     }
@@ -407,7 +453,7 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.LOGL:
                     if (compress != Compression.SGILOG)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, LogL data must have {0}={1}", "Compression", Compression.SGILOG);
                         return null;
                     }
@@ -420,14 +466,14 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.LOGLUV:
                     if (compress != Compression.SGILOG && compress != Compression.SGILOG24)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, LogLuv data must have {0}={1} or {2}", "Compression", Compression.SGILOG, Compression.SGILOG24);
                         return null;
                     }
 
                     if (planarconfig != PlanarConfig.CONTIG)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle LogLuv images with {0}={1}", "Planarconfiguration", planarconfig);
                         return null;
                     }
@@ -441,7 +487,7 @@ namespace BitMiracle.LibTiff.Classic
                     break;
 
                 default:
-                    emsg = string.Format(CultureInfo.InvariantCulture,
+                    errorMsg = string.Format(CultureInfo.InvariantCulture,
                         "Sorry, can not handle image with {0}={1}", photoTag, img.photometric);
                     return null;
             }
@@ -466,7 +512,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if (!img.pickContigCase())
                 {
-                    emsg = "Sorry, can not handle image";
+                    errorMsg = "Sorry, can not handle image";
                     return null;
                 }
             }
@@ -474,7 +520,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if (!img.pickSeparateCase())
                 {
-                    emsg = "Sorry, can not handle image";
+                    errorMsg = "Sorry, can not handle image";
                     return null;
                 }
             }
@@ -483,9 +529,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets a value indicating whether image data is contiguous (packed) or separated.
+        /// Gets a value indicating whether image data has contiguous (packed) or separated samples.
         /// </summary>
-        /// <value><c>true</c> if this instance is contiguous (packed); otherwise, <c>false</c>.</value>
+        /// <value><c>true</c> if this image data has contiguous (packed) samples; otherwise,
+        /// <c>false</c>.</value>
         public bool IsContig
         {
             get
@@ -570,6 +617,8 @@ namespace BitMiracle.LibTiff.Classic
         /// Gets or sets the requested orientation.
         /// </summary>
         /// <value>The requested orientation.</value>
+        /// <remarks>The <see cref="GetRaster"/> method uses this value when placing converted
+        /// image data into raster buffer.</remarks>
         public Orientation ReqOrientation
         {
             get
@@ -583,9 +632,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the image photometric interpretation.
+        /// Gets the photometric interpretation of the image data.
         /// </summary>
-        /// <value>The image photometric interpretation.</value>
+        /// <value>The photometric interpretation of the image data.</value>
         public Photometric Photometric
         {
             get
@@ -595,8 +644,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the "get" method (the method that is called to produce RGBA raster).
         /// </summary>
+        /// <value>The "get" method.</value>
         public GetDelegate Get
         {
             get
@@ -610,8 +660,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the "put" method (the method that is called to pack pixel data in the
+        /// raster) used when converting contiguously packed samples.
         /// </summary>
+        /// <value>The "put" method used when converting contiguously packed samples.</value>
         public PutContigDelegate PutContig
         {
             get
@@ -625,8 +677,10 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the "put" method (the method that is called to pack pixel data in the
+        /// raster) used when converting separated samples.
         /// </summary>
+        /// <value>The "put" method used when converting separated samples.</value>
         public PutSeparateDelegate PutSeparate
         {
             get
@@ -640,22 +694,56 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Reads the underlaying TIFF image and decodes it into RGBA format raster.
         /// </summary>
-        /// <param name="raster">The raster.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="w">The w.</param>
-        /// <param name="h">The h.</param>
-        /// <returns></returns>
-        public bool GetRaster(int[] raster, int offset, int w, int h)
+        /// <param name="raster">The raster (the buffer to place decoded image data to).</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="raster"/> at which
+        /// to begin storing decoded bytes.</param>
+        /// <param name="width">The raster width.</param>
+        /// <param name="height">The raster height.</param>
+        /// <returns><c>true</c> if the image was successfully read and decoded; otherwise,
+        /// <c>false</c>.</returns>
+        /// <remarks><para>
+        /// <b>GetRaster</b> reads image into memory using current "get" (<see cref="Get"/>) method,
+        /// storing the result in the user supplied RGBA <paramref name="raster"/> using one of
+        /// the "put" (<see cref="PutContig"/> or <see cref="PutSeparate"/>) methods. The raster
+        /// is assumed to be an array of <paramref name="width"/> times <paramref name="height"/>
+        /// 32-bit entries, where <paramref name="width"/> must be less than or equal to the width
+        /// of the image (<paramref name="height"/> may be any non-zero size). If the raster
+        /// dimensions are smaller than the image, the image data is cropped to the raster bounds.
+        /// If the raster height is greater than that of the image, then the image data placement
+        /// depends on the value of <see cref="ReqOrientation"/> property. Note that the raster is
+        /// assumed to be organized such that the pixel at location (x, y) is
+        /// <paramref name="raster"/>[y * width + x]; with the raster origin specified by the
+        /// value of <see cref="ReqOrientation"/> property.
+        /// </para><para>
+        /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The 
+        /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
+        /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
+        /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
+        /// </para><para>
+        /// <b>GetRaster</b> converts non-8-bit images by scaling sample values. Palette,
+        /// grayscale, bilevel, CMYK, and YCbCr images are converted to RGB transparently.
+        /// Raster pixels are returned uncorrected by any colorimetry information present in
+        /// the directory.
+        /// </para><para>
+        /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
+        /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
+        /// </para><para>
+        /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
+        /// automatically scaled to 16-bits.
+        /// </para><para>
+        /// All error messages are directed to the current error handler.
+        /// </para></remarks>
+        public bool GetRaster(int[] raster, int offset, int width, int height)
         {
             if (get == null)
             {
-                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"get\" routine setup");
+                Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"get\" method setup");
                 return false;
             }
 
-            return get(this, raster, offset, w, h);
+            return get(this, raster, offset, width, height);
         }
 
         private static int PACK(int r, int g, int b)
@@ -683,37 +771,33 @@ namespace BitMiracle.LibTiff.Classic
             return (W2B(r) | (W2B(g) << 8) | (W2B(b) << 16) | (W2B(a) << 24));
         }
 
-        /*
-        * Palette images with <= 8 bits/sample are handled
-        * with a table to avoid lots of shifts and masks.  The table
-        * is setup so that put*cmaptile (below) can retrieve 8/bitspersample
-        * pixel values simply by indexing into the table with one
-        * number.
-        */
+        /// <summary>
+        /// Palette images with &lt;= 8 bits/sample are handled with a table to avoid lots of shifts
+        /// and masks. The table is setup so that put*cmaptile (below) can retrieve 8 / bitspersample
+        /// pixel values simply by indexing into the table with one number.
+        /// </summary>
         private void CMAP(int x, int i, ref int j)
         {
             PALmap[i][j++] = PACK(redcmap[x] & 0xff, greencmap[x] & 0xff, bluecmap[x] & 0xff);
         }
 
-        /*
-        * Greyscale images with less than 8 bits/sample are handled
-        * with a table to avoid lots of shifts and masks.  The table
-        * is setup so that put*bwtile (below) can retrieve 8/bitspersample
-        * pixel values simply by indexing into the table with one
-        * number.
-        */
+        /// <summary>
+        /// Greyscale images with less than 8 bits/sample are handled with a table to avoid lots
+        /// of shifts and masks. The table is setup so that put*bwtile (below) can retrieve
+        /// 8 / bitspersample pixel values simply by indexing into the table with one number.
+        /// </summary>
         private void GREY(int x, int i, ref int j)
         {
             int c = Map[x];
             BWmap[i][j++] = PACK(c, c, c);
         }
 
-        /*
-        * Get an tile-organized image that has
-        *  PlanarConfiguration contiguous if SamplesPerPixel > 1
-        * or
-        *  SamplesPerPixel == 1
-        */
+        /// <summary>
+        /// Get an tile-organized image that has
+        /// PlanarConfiguration contiguous if SamplesPerPixel > 1
+        ///  or
+        /// SamplesPerPixel == 1
+        /// </summary>
         private static bool gtTileContig(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
@@ -758,10 +842,8 @@ namespace BitMiracle.LibTiff.Classic
 
                     if (col + tw > w)
                     {
-                        /*
-                        * Tile is clipped horizontally.  Calculate
-                        * visible portion and skewing factors.
-                        */
+                        // Tile is clipped horizontally. Calculate visible portion and
+                        // skewing factors.
                         int npix = w - col;
                         int fromskew = tw - npix;
                         put(img, raster, offset + y * w + col, col, y, npix, nrow, fromskew, toskew + fromskew, buf, pos);
@@ -797,12 +879,12 @@ namespace BitMiracle.LibTiff.Classic
             return ret;
         }
 
-        /*
-        * Get an tile-organized image that has
-        *   SamplesPerPixel > 1
-        *   PlanarConfiguration separated
-        * We assume that all such images are RGB.
-        */
+        /// <summary>
+        /// Get an tile-organized image that has
+        /// SamplesPerPixel > 1
+        /// PlanarConfiguration separated
+        /// We assume that all such images are RGB.
+        /// </summary>
         private static bool gtTileSeparate(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
@@ -874,10 +956,8 @@ namespace BitMiracle.LibTiff.Classic
 
                     if (col + tw > w)
                     {
-                        /*
-                        * Tile is clipped horizontally.  Calculate
-                        * visible portion and skewing factors.
-                        */
+                        // Tile is clipped horizontally.
+                        // Calculate visible portion and skewing factors.
                         int npix = w - col;
                         int fromskew = tw - npix;
                         put(img, raster, offset + y * w + col, col, y, npix, nrow, fromskew, toskew + fromskew, buf, p0 + pos, p1 + pos, p2 + pos, img.alpha != 0 ? (pa + pos) : -1);
@@ -997,12 +1077,12 @@ namespace BitMiracle.LibTiff.Classic
             return ret;
         }
 
-        /*
-        * Get a strip-organized image with
-        *   SamplesPerPixel > 1
-        *   PlanarConfiguration separated
-        * We assume that all such images are RGB.
-        */
+        /// <summary>
+        /// Get a strip-organized image with
+        ///  SamplesPerPixel > 1
+        ///  PlanarConfiguration separated
+        /// We assume that all such images are RGB.
+        /// </summary>
         private static bool gtStripSeparate(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
@@ -1160,9 +1240,9 @@ namespace BitMiracle.LibTiff.Classic
             return 0;
         }
 
-        /*
-        * Select the appropriate conversion routine for packed data.
-        */
+        /// <summary>
+        /// Select the appropriate conversion routine for packed data.
+        /// </summary>
         private bool pickContigCase()
         {
             get = tif.IsTiled() ? new GetDelegate(gtTileContig) : new GetDelegate(gtStripContig);
@@ -1257,15 +1337,11 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         if (initYCbCrConversion())
                         {
-                            /*
-                            * The 6.0 spec says that subsampling must be
-                            * one of 1, 2, or 4, and that vertical subsampling
-                            * must always be <= horizontal subsampling; so
-                            * there are only a few possibilities and we just
-                            * enumerate the cases.
-                            * Joris: added support for the [1,2] case, nonetheless, to accommodate
-                            * some OJPEG files
-                            */
+                            // The 6.0 spec says that subsampling must be one of 1, 2, or 4, and
+                            // that vertical subsampling must always be <= horizontal subsampling;
+                            // so there are only a few possibilities and we just enumerate the cases.
+                            // Joris: added support for the [1, 2] case, nonetheless, to accommodate
+                            // some OJPEG files
                             FieldValue[] result = tif.GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
                             short SubsamplingHor = result[0].ToShort();
                             short SubsamplingVer = result[1].ToShort();
@@ -1310,12 +1386,10 @@ namespace BitMiracle.LibTiff.Classic
             return (putContig != null);
         }
 
-        /*
-        * Select the appropriate conversion routine for unpacked data.
-        *
-        * NB: we assume that unpacked single channel data is directed
-        *   to the "packed routines.
-        */
+        /// <summary>
+        /// Select the appropriate conversion routine for unpacked data.
+        /// NB: we assume that unpacked single channel data is directed to the "packed routines.
+        /// </summary>
         private bool pickSeparateCase()
         {
             get = tif.IsTiled() ? new GetDelegate(gtTileSeparate) : new GetDelegate(gtStripSeparate);
@@ -1360,7 +1434,7 @@ namespace BitMiracle.LibTiff.Classic
                                 case 0x11:
                                     putSeparate = putseparate8bitYCbCr11tile;
                                     break;
-                                /* TODO: add other cases here */
+                                // TODO: add other cases here
                             }
                         }
                     }
@@ -1370,20 +1444,254 @@ namespace BitMiracle.LibTiff.Classic
             return (putSeparate != null);
         }
 
-        /*
-        * The following routines move decoded data returned
-        * from the TIFF library into rasters filled with packed
-        * ABGR pixels (i.e. suitable for passing to lrecwrite.)
-        *
-        * The routines have been created according to the most
-        * important cases and optimized.  pickTileContigCase and
-        * pickTileSeparateCase analyze the parameters and select
-        * the appropriate "put" routine to use.
-        */
+        private bool initYCbCrConversion()
+        {
+            if (ycbcr == null)
+                ycbcr = new TiffYCbCrToRGB();
 
-        /*
-        * 8-bit palette => colormap/RGB
-        */
+            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.YCBCRCOEFFICIENTS);
+            float[] luma = result[0].ToFloatArray();
+
+            result = tif.GetFieldDefaulted(TiffTag.REFERENCEBLACKWHITE);
+            float[] refBlackWhite = result[0].ToFloatArray();
+
+            ycbcr.Init(luma, refBlackWhite);
+            return true;
+        }
+
+        private PutContigDelegate initCIELabConversion()
+        {
+            if (cielab == null)
+                cielab = new TiffCIELabToRGB();
+
+            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.WHITEPOINT);
+            float[] whitePoint = result[0].ToFloatArray();
+
+            float[] refWhite = new float[3];
+            refWhite[1] = 100.0F;
+            refWhite[0] = whitePoint[0] / whitePoint[1] * refWhite[1];
+            refWhite[2] = (1.0F - whitePoint[0] - whitePoint[1]) / whitePoint[1] * refWhite[1];
+            cielab.Init(display_sRGB, refWhite);
+
+            return putcontig8bitCIELab;
+        }
+
+        /// <summary>
+        /// Construct any mapping table used by the associated put method.
+        /// </summary>
+        private bool buildMap()
+        {
+            switch (photometric)
+            {
+                case Photometric.RGB:
+                case Photometric.YCBCR:
+                case Photometric.SEPARATED:
+                    if (bitspersample == 8)
+                        break;
+                    if (!setupMap())
+                        return false;
+                    break;
+
+                case Photometric.MINISBLACK:
+                case Photometric.MINISWHITE:
+                    if (!setupMap())
+                        return false;
+                    break;
+
+                case Photometric.PALETTE:
+                    // Convert 16-bit colormap to 8-bit
+                    // (unless it looks like an old-style 8-bit colormap).
+                    if (checkcmap() == 16)
+                        cvtcmap();
+                    else
+                        Tiff.WarningExt(tif, tif.m_clientdata, tif.FileName(), "Assuming 8-bit colormap");
+
+                    // Use mapping table and colormap to construct unpacking
+                    // tables for samples < 8 bits.
+                    if (bitspersample <= 8 && !makecmap())
+                        return false;
+                    break;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Construct a mapping table to convert from the range of the data samples to [0, 255] -
+        /// for display. This process also handles inverting B&amp;W images when needed.
+        /// </summary>
+        private bool setupMap()
+        {
+            int range = (1 << bitspersample) - 1;
+
+            // treat 16 bit the same as eight bit
+            if (bitspersample == 16)
+                range = 255;
+
+            Map = new byte[range + 1];
+
+            if (photometric == Photometric.MINISWHITE)
+            {
+                for (int x = 0; x <= range; x++)
+                    Map[x] = (byte)(((range - x) * 255) / range);
+            }
+            else
+            {
+                for (int x = 0; x <= range; x++)
+                    Map[x] = (byte)((x * 255) / range);
+            }
+
+            if (bitspersample <= 16 && (photometric == Photometric.MINISBLACK || photometric == Photometric.MINISWHITE))
+            {
+                // Use photometric mapping table to construct unpacking tables for samples <= 8 bits.
+                if (!makebwmap())
+                    return false;
+
+                // no longer need Map
+                Map = null;
+            }
+
+            return true;
+        }
+
+        private int checkcmap()
+        {
+            int r = 0;
+            int g = 0;
+            int b = 0;
+            int n = 1 << bitspersample;
+            while (n-- > 0)
+            {
+                if (redcmap[r] >= 256 || greencmap[g] >= 256 || bluecmap[b] >= 256)
+                    return 16;
+
+                r++;
+                g++;
+                b++;
+            }
+
+            return 8;
+        }
+
+        private void cvtcmap()
+        {
+            for (int i = (1 << bitspersample) - 1; i >= 0; i--)
+            {
+                redcmap[i] = (short)(redcmap[i] >> 8);
+                greencmap[i] = (short)(greencmap[i] >> 8);
+                bluecmap[i] = (short)(bluecmap[i] >> 8);
+            }
+        }
+
+        private bool makecmap()
+        {
+            int nsamples = 8 / bitspersample;
+
+            PALmap = new int[256][];
+            for (int i = 0; i < 256; i++)
+                PALmap[i] = new int[nsamples];
+
+            for (int i = 0; i < 256; i++)
+            {
+                int j = 0;
+                switch (bitspersample)
+                {
+                    case 1:
+                        CMAP(i >> 7, i, ref j);
+                        CMAP((i >> 6) & 1, i, ref j);
+                        CMAP((i >> 5) & 1, i, ref j);
+                        CMAP((i >> 4) & 1, i, ref j);
+                        CMAP((i >> 3) & 1, i, ref j);
+                        CMAP((i >> 2) & 1, i, ref j);
+                        CMAP((i >> 1) & 1, i, ref j);
+                        CMAP(i & 1, i, ref j);
+                        break;
+                    case 2:
+                        CMAP(i >> 6, i, ref j);
+                        CMAP((i >> 4) & 3, i, ref j);
+                        CMAP((i >> 2) & 3, i, ref j);
+                        CMAP(i & 3, i, ref j);
+                        break;
+                    case 4:
+                        CMAP(i >> 4, i, ref j);
+                        CMAP(i & 0xf, i, ref j);
+                        break;
+                    case 8:
+                        CMAP(i, i, ref j);
+                        break;
+                }
+            }
+
+            return true;
+        }
+
+        private bool makebwmap()
+        {
+            int nsamples = 8 / bitspersample;
+            if (nsamples == 0)
+                nsamples = 1;
+
+            BWmap = new int[256][];
+            for (int i = 0; i < 256; i++)
+                BWmap[i] = new int[nsamples];
+
+            for (int i = 0; i < 256; i++)
+            {
+                int j = 0;
+                switch (bitspersample)
+                {
+                    case 1:
+                        GREY(i >> 7, i, ref j);
+                        GREY((i >> 6) & 1, i, ref j);
+                        GREY((i >> 5) & 1, i, ref j);
+                        GREY((i >> 4) & 1, i, ref j);
+                        GREY((i >> 3) & 1, i, ref j);
+                        GREY((i >> 2) & 1, i, ref j);
+                        GREY((i >> 1) & 1, i, ref j);
+                        GREY(i & 1, i, ref j);
+                        break;
+                    case 2:
+                        GREY(i >> 6, i, ref j);
+                        GREY((i >> 4) & 3, i, ref j);
+                        GREY((i >> 2) & 3, i, ref j);
+                        GREY(i & 3, i, ref j);
+                        break;
+                    case 4:
+                        GREY(i >> 4, i, ref j);
+                        GREY(i & 0xf, i, ref j);
+                        break;
+                    case 8:
+                    case 16:
+                        GREY(i, i, ref j);
+                        break;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// YCbCr -> RGB conversion and packing routines.
+        /// </summary>
+        private void YCbCrtoRGB(out int dst, int Y, int Cb, int Cr)
+        {
+            int r, g, b;
+            ycbcr.YCbCrtoRGB(Y, Cb, Cr, out r, out g, out b);
+            dst = PACK(r, g, b);
+        }
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // The following routines move decoded data returned from the TIFF library into rasters
+        // filled with packed ABGR pixels
+        //
+        // The routines have been created according to the most important cases and optimized.
+        // pickTileContigCase and pickTileSeparateCase analyze the parameters and select the
+        // appropriate "put" routine to use.
+
+        /// <summary>
+        /// 8-bit palette => colormap/RGB
+        /// </summary>
         private static void put8bitcmaptile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int[][] PALmap = img.PALmap;
@@ -1532,9 +1840,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit greyscale => colormap/RGB
-        */
+        /// <summary>
+        /// 8-bit greyscale => colormap/RGB
+        /// </summary>
         private static void putgreytile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1714,9 +2022,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed samples, no Map => RGB
-        */
+        /// <summary>
+        /// 8-bit packed samples, no Map => RGB
+        /// </summary>
         private static void putRGBcontig8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1754,10 +2062,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed samples => RGBA w/ associated alpha
-        * (known to have Map == null)
-        */
+        /// <summary>
+        /// 8-bit packed samples => RGBA w/ associated alpha (known to have Map == null)
+        /// </summary>
         private static void putRGBAAcontig8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1795,10 +2102,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed samples => RGBA w/ unassociated alpha
-        * (known to have Map == null)
-        */
+        /// <summary>
+        /// 8-bit packed samples => RGBA w/ unassociated alpha (known to have Map == null)
+        /// </summary>
         private static void putRGBUAcontig8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1823,9 +2129,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 16-bit packed samples => RGB
-        */
+        /// <summary>
+        /// 16-bit packed samples => RGB
+        /// </summary>
         private static void putRGBcontig16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1850,10 +2156,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 16-bit packed samples => RGBA w/ associated alpha
-        * (known to have Map == null)
-        */
+        /// <summary>
+        /// 16-bit packed samples => RGBA w/ associated alpha (known to have Map == null)
+        /// </summary>
         private static void putRGBAAcontig16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1878,10 +2183,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 16-bit packed samples => RGBA w/ unassociated alpha
-        * (known to have Map == null)
-        */
+        /// <summary>
+        /// 16-bit packed samples => RGBA w/ unassociated alpha (known to have Map == null)
+        /// </summary>
         private static void putRGBUAcontig16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1911,11 +2215,10 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed CMYK samples w/o Map => RGB
-        *
-        * NB: The conversion of CMYK->RGB is *very* crude.
-        */
+        /// <summary>
+        /// 8-bit packed CMYK samples w/o Map => RGB.
+        /// NB: The conversion of CMYK->RGB is *very* crude.
+        /// </summary>
         private static void putRGBcontig8bitCMYKtile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1963,11 +2266,10 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed CMYK samples w/Map => RGB
-        *
-        * NB: The conversion of CMYK->RGB is *very* crude.
-        */
+        /// <summary>
+        /// 8-bit packed CMYK samples w/Map => RGB
+        /// NB: The conversion of CMYK->RGB is *very* crude.
+        /// </summary>
         private static void putRGBcontig8bitCMYKMaptile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
@@ -1994,9 +2296,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit unpacked samples => RGB
-        */
+        /// <summary>
+        /// 8-bit unpacked samples => RGB
+        /// </summary>
         private static void putRGBseparate8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             int cpPos = cpOffset;
@@ -2041,9 +2343,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit unpacked samples => RGBA w/ associated alpha
-        */
+        /// <summary>
+        /// 8-bit unpacked samples => RGBA w/ associated alpha
+        /// </summary>
         private static void putRGBAAseparate8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             int cpPos = cpOffset;
@@ -2092,9 +2394,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit unpacked samples => RGBA w/ unassociated alpha
-        */
+        /// <summary>
+        /// 8-bit unpacked samples => RGBA w/ unassociated alpha
+        /// </summary>
         private static void putRGBUAseparate8bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             int cpPos = cpOffset;
@@ -2127,9 +2429,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 16-bit unpacked samples => RGB
-        */
+        /// <summary>
+        /// 16-bit unpacked samples => RGB
+        /// </summary>
         private static void putRGBseparate16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
@@ -2157,9 +2459,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 16-bit unpacked samples => RGBA w/ associated alpha
-        */
+        /// <summary>
+        /// 16-bit unpacked samples => RGBA w/ associated alpha
+        /// </summary>
         private static void putRGBAAseparate16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
@@ -2191,9 +2493,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 16-bit unpacked samples => RGBA w/ unassociated alpha
-        */
+        /// <summary>
+        /// 16-bit unpacked samples => RGBA w/ unassociated alpha
+        /// </summary>
         private static void putRGBUAseparate16bittile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
@@ -2229,12 +2531,12 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ no subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ no subsampling => RGB
+        /// </summary>
         private static void putseparate8bitYCbCr11tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            /* TODO: naming of input vars is still off, change obfuscating declaration inside define, or resolve obfuscation */
+            // TODO: naming of input vars is still off, change obfuscating declaration inside define, or resolve obfuscation
             int cpPos = cpOffset;
             int rPos = rOffset;
             int gPos = gOffset;
@@ -2261,243 +2563,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        private bool initYCbCrConversion()
-        {
-            if (ycbcr == null)
-                ycbcr = new TiffYCbCrToRGB();
-
-            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.YCBCRCOEFFICIENTS);
-            float[] luma = result[0].ToFloatArray();
-
-            result = tif.GetFieldDefaulted(TiffTag.REFERENCEBLACKWHITE);
-            float[] refBlackWhite = result[0].ToFloatArray();
-
-            ycbcr.Init(luma, refBlackWhite);
-            return true;
-        }
-
-        private PutContigDelegate initCIELabConversion()
-        {
-            if (cielab == null)
-                cielab = new TiffCIELabToRGB();
-
-            FieldValue[] result = tif.GetFieldDefaulted(TiffTag.WHITEPOINT);
-            float[] whitePoint = result[0].ToFloatArray();
-
-            float[] refWhite = new float[3];
-            refWhite[1] = 100.0F;
-            refWhite[0] = whitePoint[0] / whitePoint[1] * refWhite[1];
-            refWhite[2] = (1.0F - whitePoint[0] - whitePoint[1]) / whitePoint[1] * refWhite[1];
-            cielab.Init(display_sRGB, refWhite);
-
-            return putcontig8bitCIELab;
-        }
-
-        /* 
-        * Construct any mapping table used
-        * by the associated put routine.
-        */
-        private bool buildMap()
-        {
-            switch (photometric)
-            {
-                case Photometric.RGB:
-                case Photometric.YCBCR:
-                case Photometric.SEPARATED:
-                    if (bitspersample == 8)
-                        break;
-                    if (!setupMap())
-                        return false;
-                    break;
-
-                case Photometric.MINISBLACK:
-                case Photometric.MINISWHITE:
-                    if (!setupMap())
-                        return false;
-                    break;
-
-                case Photometric.PALETTE:
-                    /*
-                    * Convert 16-bit colormap to 8-bit (unless it looks
-                    * like an old-style 8-bit colormap).
-                    */
-                    if (checkcmap() == 16)
-                        cvtcmap();
-                    else
-                        Tiff.WarningExt(tif, tif.m_clientdata, tif.FileName(), "Assuming 8-bit colormap");
-                    /*
-                    * Use mapping table and colormap to construct
-                    * unpacking tables for samples < 8 bits.
-                    */
-                    if (bitspersample <= 8 && !makecmap())
-                        return false;
-                    break;
-            }
-
-            return true;
-        }
-
-        /*
-        * Construct a mapping table to convert from the range
-        * of the data samples to [0,255] --for display.  This
-        * process also handles inverting B&W images when needed.
-        */
-        private bool setupMap()
-        {
-            int range = (1 << bitspersample) - 1;
-
-            /* treat 16 bit the same as eight bit */
-            if (bitspersample == 16)
-                range = 255;
-
-            Map = new byte[range + 1];
-
-            if (photometric == Photometric.MINISWHITE)
-            {
-                for (int x = 0; x <= range; x++)
-                    Map[x] = (byte)(((range - x) * 255) / range);
-            }
-            else
-            {
-                for (int x = 0; x <= range; x++)
-                    Map[x] = (byte)((x * 255) / range);
-            }
-
-            if (bitspersample <= 16 && (photometric == Photometric.MINISBLACK || photometric == Photometric.MINISWHITE))
-            {
-                /*
-                * Use photometric mapping table to construct
-                * unpacking tables for samples <= 8 bits.
-                */
-                if (!makebwmap())
-                    return false;
-
-                /* no longer need Map, free it */
-                Map = null;
-            }
-
-            return true;
-        }
-
-        private int checkcmap()
-        {
-            int r = 0;
-            int g = 0;
-            int b = 0;
-            int n = 1 << bitspersample;
-            while (n-- > 0)
-            {
-                if (redcmap[r] >= 256 || greencmap[g] >= 256 || bluecmap[b] >= 256)
-                    return 16;
-
-                r++;
-                g++;
-                b++;
-            }
-
-            return 8;
-        }
-
-        private void cvtcmap()
-        {
-            for (int i = (1 << bitspersample) - 1; i >= 0; i--)
-            {
-                redcmap[i] = (short)(redcmap[i] >> 8);
-                greencmap[i] = (short)(greencmap[i] >> 8);
-                bluecmap[i] = (short)(bluecmap[i] >> 8);
-            }
-        }
-
-        private bool makecmap()
-        {
-            int nsamples = 8 / bitspersample;
-
-            PALmap = new int[256][];
-            for (int i = 0; i < 256; i++)
-                PALmap[i] = new int[nsamples];
-
-            for (int i = 0; i < 256; i++)
-            {
-                int j = 0;
-                switch (bitspersample)
-                {
-                    case 1:
-                        CMAP(i >> 7, i, ref j);
-                        CMAP((i >> 6) & 1, i, ref j);
-                        CMAP((i >> 5) & 1, i, ref j);
-                        CMAP((i >> 4) & 1, i, ref j);
-                        CMAP((i >> 3) & 1, i, ref j);
-                        CMAP((i >> 2) & 1, i, ref j);
-                        CMAP((i >> 1) & 1, i, ref j);
-                        CMAP(i & 1, i, ref j);
-                        break;
-                    case 2:
-                        CMAP(i >> 6, i, ref j);
-                        CMAP((i >> 4) & 3, i, ref j);
-                        CMAP((i >> 2) & 3, i, ref j);
-                        CMAP(i & 3, i, ref j);
-                        break;
-                    case 4:
-                        CMAP(i >> 4, i, ref j);
-                        CMAP(i & 0xf, i, ref j);
-                        break;
-                    case 8:
-                        CMAP(i, i, ref j);
-                        break;
-                }
-            }
-
-            return true;
-        }
-
-        private bool makebwmap()
-        {
-            int nsamples = 8 / bitspersample;
-            if (nsamples == 0)
-                nsamples = 1;
-
-            BWmap = new int[256][];
-            for (int i = 0; i < 256; i++)
-                BWmap[i] = new int[nsamples];
-
-            for (int i = 0; i < 256; i++)
-            {
-                int j = 0;
-                switch (bitspersample)
-                {
-                    case 1:
-                        GREY(i >> 7, i, ref j);
-                        GREY((i >> 6) & 1, i, ref j);
-                        GREY((i >> 5) & 1, i, ref j);
-                        GREY((i >> 4) & 1, i, ref j);
-                        GREY((i >> 3) & 1, i, ref j);
-                        GREY((i >> 2) & 1, i, ref j);
-                        GREY((i >> 1) & 1, i, ref j);
-                        GREY(i & 1, i, ref j);
-                        break;
-                    case 2:
-                        GREY(i >> 6, i, ref j);
-                        GREY((i >> 4) & 3, i, ref j);
-                        GREY((i >> 2) & 3, i, ref j);
-                        GREY(i & 3, i, ref j);
-                        break;
-                    case 4:
-                        GREY(i >> 4, i, ref j);
-                        GREY(i & 0xf, i, ref j);
-                        break;
-                    case 8:
-                    case 16:
-                        GREY(i, i, ref j);
-                        break;
-                }
-            }
-
-            return true;
-        }
-
-        /*
-        * 8-bit packed CIE L*a*b 1976 samples => RGB
-        */
+        /// <summary>
+        /// 8-bit packed CIE L*a*b 1976 samples => RGB
+        /// </summary>
         private static void putcontig8bitCIELab(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew *= 3;
@@ -2523,9 +2591,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ 4,4 subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 4,4 subsampling => RGB
+        /// </summary>
         private static void putcontig8bitYCbCr44tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
@@ -2536,7 +2604,7 @@ namespace BitMiracle.LibTiff.Classic
             int cp3 = cp2 + w + toskew;
             int incr = 3 * w + 4 * toskew;
 
-            /* adjust fromskew */
+            // adjust fromskew
             fromskew = (fromskew * 18) / 4;
             if ((h & 3) == 0 && (w & 3) == 0)
             {
@@ -2734,9 +2802,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ 4,2 subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 4,2 subsampling => RGB
+        /// </summary>
         private static void putcontig8bitYCbCr42tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
@@ -2848,15 +2916,15 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ 4,1 subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 4,1 subsampling => RGB
+        /// </summary>
         private static void putcontig8bitYCbCr41tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
             int ppPos = ppOffset;
 
-            /* XXX adjust fromskew */
+            // XXX adjust fromskew
             do
             {
                 x = w >> 2;
@@ -2900,9 +2968,9 @@ namespace BitMiracle.LibTiff.Classic
             while (--h != 0);
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ 2,2 subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 2,2 subsampling => RGB
+        /// </summary>
         private static void putcontig8bitYCbCr22tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew / 2) * 6;
@@ -2969,9 +3037,9 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ 2,1 subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 2,1 subsampling => RGB
+        /// </summary>
         private static void putcontig8bitYCbCr21tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew * 4) / 2;
@@ -3011,9 +3079,9 @@ namespace BitMiracle.LibTiff.Classic
             while (--h != 0);
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ no subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ no subsampling => RGB
+        /// </summary>
         private static void putcontig8bitYCbCr11tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int cpPos = cpOffset;
@@ -3022,7 +3090,7 @@ namespace BitMiracle.LibTiff.Classic
             fromskew *= 3;
             do
             {
-                x = w; /* was x = w>>1; patched 2000/09/25 warmerda@home.com */
+                x = w; // was x = w >> 1; patched 2000/09/25 warmerda@home.com
                 do
                 {
                     int Cb = pp[ppPos + 1];
@@ -3040,9 +3108,9 @@ namespace BitMiracle.LibTiff.Classic
             while (--h != 0);
         }
 
-        /*
-        * 8-bit packed YCbCr samples w/ 1,2 subsampling => RGB
-        */
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 1,2 subsampling => RGB
+        /// </summary>
         private static void putcontig8bitYCbCr12tile(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew / 2) * 4;
@@ -3081,16 +3149,6 @@ namespace BitMiracle.LibTiff.Classic
                     ppPos += 4;
                 } while (--x != 0);
             }
-        }
-
-        /*
-        * YCbCr -> RGB conversion and packing routines.
-        */
-        private void YCbCrtoRGB(out int dst, int Y, int Cb, int Cr)
-        {
-            int r, g, b;
-            ycbcr.YCbCrtoRGB(Y, Cb, Cr, out r, out g, out b);
-            dst = PACK(r, g, b);
         }
     }
 }
