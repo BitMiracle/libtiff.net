@@ -374,9 +374,13 @@
                         </para>
                         <para>
                             The second item is the main reason for this interface. By interposing a
-                            <codeEntityReference>P:BitMiracle.LibTiff.Classic.TiffRgbaImage.Contig</codeEntityReference> and
-                            <codeEntityReference>P:BitMiracle.LibTiff.Classic.TiffRgbaImage.Separate</codeEntityReference>
-                            (the routines that are called to pack pixel data in the raster) it is
+                            <codeEntityReference>
+                                P:BitMiracle.LibTiff.Classic.TiffRgbaImage.PutContig
+                            </codeEntityReference> and
+                            <codeEntityReference>
+                                P:BitMiracle.LibTiff.Classic.TiffRgbaImage.PutSeparate
+                            </codeEntityReference>
+                            (the methods that are called to pack pixel data in the raster) it is
                             possible share the core logic that understands how to deal with TIFF
                             while packing the resultant pixels in a format that is optimized for
                             the application. This alternate format might be very different than

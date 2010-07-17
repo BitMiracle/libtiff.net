@@ -24,7 +24,10 @@ namespace BitMiracle.LibTiff.Classic
     /// <summary>
     /// Tag Image File Format (TIFF)
     /// </summary>
-    /// <remarks>Based on Rev 6.0 from <see href="http://partners.adobe.com/asn/developer/PDFS/TN/TIFF6.pdf" target="_blank"/></remarks>
+    /// <remarks>
+    /// Based on Rev 6.0 from
+    /// <see href="http://partners.adobe.com/asn/developer/PDFS/TN/TIFF6.pdf" target="_blank"/>
+    /// </remarks>
 #if EXPOSE_LIBTIFF
     public
 #endif
@@ -3964,7 +3967,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     img.ReqOrientation = orientation;
                     // XXX verify rwidth and rheight against image width and height
-                    ok = img.Get(raster, (height - img.Height) * width, width, img.Height);
+                    ok = img.GetRaster(raster, (height - img.Height) * width, width, img.Height);
                 }
             }
             else
@@ -4061,7 +4064,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (row + rowsperstrip > img.Height)
                         rows_to_read = img.Height - row;
 
-                    ok = img.Get(raster, 0, img.Width, rows_to_read);
+                    ok = img.GetRaster(raster, 0, img.Width, rows_to_read);
                     return ok;
                 }
 
@@ -4174,7 +4177,7 @@ namespace BitMiracle.LibTiff.Classic
             img.row_offset = row;
             img.col_offset = col;
 
-            bool ok = img.Get(raster, 0, read_xsize, read_ysize);
+            bool ok = img.GetRaster(raster, 0, read_xsize, read_ysize);
 
             // If our read was incomplete we will need to fix up the tile by shifting the data
             // around as if a full tile of data is being returned. This is all the more

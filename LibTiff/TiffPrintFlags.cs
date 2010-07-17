@@ -14,9 +14,9 @@ using System;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Flags that can be passed to <see cref="O:Tiff.PrintDirectory"/> method to control printing
-    /// of data structures that are potentially very large. Bit-or these flags to enable printing
-    /// multiple items.
+    /// Flags that can be passed to <see cref="O:BitMiracle.LibTiff.Classic.Tiff.PrintDirectory"/>
+    /// method to control printing of data structures that are potentially very large. Bit-or
+    /// these flags to enable printing multiple items.
     /// </summary>
     [Flags]
 #if EXPOSE_LIBTIFF

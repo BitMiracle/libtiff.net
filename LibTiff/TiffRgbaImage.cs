@@ -17,7 +17,7 @@ using BitMiracle.LibTiff.Classic.Internal;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// RGBA-style image support.
+    /// RGBA-style image support. Provides methods for decoding images to RGBA format.
     /// </summary>
     public class TiffRgbaImage
     {       
@@ -83,19 +83,13 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private short[] redcmap;
 
-        /// <summary>
-        /// 
-        /// </summary>
         private short[] greencmap;
 
-        /// <summary>
-        /// 
-        /// </summary>
         private short[] bluecmap;
 
-        private GetRoutine getRoutineInstance;       
-        private TileContigRoutine contig;
-        private TileSeparateRoutine separate;
+        private GetDelegate get;
+        private PutContigDelegate putContig;
+        private PutSeparateDelegate putSeparate;
 
         /// <summary>
         /// sample mapping array
@@ -112,63 +106,79 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private int[][] PALmap;
 
-        private TiffYCbCrToRGB ycbcr; /* YCbCr conversion state */
-        private TiffCIELabToRGB cielab; /* CIE L*a*b conversion state */
+        /// <summary>
+        /// YCbCr conversion state
+        /// </summary>
+        private TiffYCbCrToRGB ycbcr;
 
         /// <summary>
-        /// 
+        /// CIE L*a*b conversion state
         /// </summary>
+        private TiffCIELabToRGB cielab;
+
         internal int row_offset;
 
-        /// <summary>
-        /// 
-        /// </summary>
         internal int col_offset;
 
         private static TiffDisplay display_sRGB = new TiffDisplay(
-            /* XYZ -> luminance matrix */
+            // XYZ -> luminance matrix
             new float[] { 3.2410F, -1.5374F, -0.4986F },
             new float[] { -0.9692F, 1.8760F, 0.0416F },
             new float[] { 0.0556F, -0.2040F, 1.0570F },
-            100.0F, 100.0F, 100.0F,  /* Light o/p for reference white */
-            255, 255, 255,  /* Pixel values for ref. white */
-            1.0F, 1.0F, 1.0F,  /* Residual light o/p for black pixel */
-            2.4F, 2.4F, 2.4F  /* Gamma values for the three guns */
+            100.0F, 100.0F, 100.0F,  // Light o/p for reference white
+            255, 255, 255,  // Pixel values for ref. white
+            1.0F, 1.0F, 1.0F,  // Residual light o/p for black pixel
+            2.4F, 2.4F, 2.4F  // Gamma values for the three guns
         );
 
         private const int A1 = 0xff << 24;
 
-        /* 
-        * Helper constants used in Orientation tag handling
-        */
+        // Helper constants used in Orientation tag handling
         private const int FLIP_VERTICALLY = 0x01;
         private const int FLIP_HORIZONTALLY = 0x02;
 
-        // The image reading and conversion routines invoke
-        // "put routines" to copy/image/whatever tiles of
-        // raw image data.  A default set of routines are 
-        // provided to convert/copy raw image data to 8-bit
-        // packed ABGR format rasters.  Applications can supply
-        // alternate routines that unpack the data into a
-        // different format or, for example, unpack the data
-        // and draw the unpacked raster on the display.
+        /// <summary>
+        /// Delegate for "put" method (the method that is called to pack pixel data in the raster)
+        /// used when converting contiguously packed samples.
+        /// </summary>
+        /// <remarks><para>
+        /// The image reading and conversion routines invoke "put" methods to copy/image/whatever
+        /// tiles of raw image data. A default set of methods is provided to convert/copy raw
+        /// image data to 8-bit packed ABGR format rasters. Applications can supply alternate
+        /// methods that unpack the data into a different format or, for example, unpack the data
+        /// and draw the unpacked raster on the display.
+        /// </para><para>
+        /// To setup custom "put" method for contiguously packed samples please use
+        /// <see cref="PutContig"/> property.
+        /// </para></remarks>
+        public delegate void PutContigDelegate(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset);
 
         /// <summary>
-        /// 
+        /// Delegate for "put" method (the method that is called to pack pixel data in the raster)
+        /// used when converting separated samples.
         /// </summary>
-        public delegate void TileContigRoutine(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] pp, int ppOffset);
+        /// <remarks><para>
+        /// The image reading and conversion routines invoke "put" methods to copy/image/whatever
+        /// tiles of raw image data. A default set of methods is provided to convert/copy raw
+        /// image data to 8-bit packed ABGR format rasters. Applications can supply alternate
+        /// methods that unpack the data into a different format or, for example, unpack the data
+        /// and draw the unpacked raster on the display.
+        /// </para><para>
+        /// To setup custom "put" method for separated samples please use
+        /// <see cref="PutSeparate"/> property.
+        /// </para></remarks>
+        public delegate void PutSeparateDelegate(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
 
         /// <summary>
-        /// 
+        /// Delegate for "get" method (the method that is called to produce RGBA raster).
         /// </summary>
-        public delegate void TileSeparateRoutine(TiffRgbaImage img, int[] cp, int cpOffset, int x, int y, int w, int h, int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
-
-        /* get image data routine */
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public delegate bool GetRoutine(TiffRgbaImage img, int[] raster, int offset, int w, int h);
+        /// <remarks><para>
+        /// A default set of methods is provided to read and convert/copy raw image data to 8-bit
+        /// packed ABGR format rasters. Applications can supply alternate method for this.
+        /// </para><para>
+        /// To setup custom "get" method please use <see cref="Get"/> property.
+        /// </para></remarks>
+        public delegate bool GetDelegate(TiffRgbaImage img, int[] raster, int offset, int w, int h);
 
         private TiffRgbaImage()
         {
@@ -587,45 +597,45 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 
         /// </summary>
-        public GetRoutine GetRoutineInstance
+        public GetDelegate Get
         {
             get
             {
-                return getRoutineInstance;
+                return get;
             }
             set
             {
-                getRoutineInstance = value;
+                get = value;
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public TileContigRoutine Contig
+        public PutContigDelegate PutContig
         {
             get
             {
-                return contig;
+                return putContig;
             }
             set
             {
-                contig = value;
+                putContig = value;
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public TileSeparateRoutine Separate
+        public PutSeparateDelegate PutSeparate
         {
             get
             {
-                return separate;
+                return putSeparate;
             }
             set
             {
-                separate = value;
+                putSeparate = value;
             }
         }
 
@@ -637,15 +647,15 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="w">The w.</param>
         /// <param name="h">The h.</param>
         /// <returns></returns>
-        public bool Get(int[] raster, int offset, int w, int h)
+        public bool GetRaster(int[] raster, int offset, int w, int h)
         {
-            if (getRoutineInstance == null)
+            if (get == null)
             {
                 Tiff.ErrorExt(tif, tif.m_clientdata, tif.FileName(), "No \"get\" routine setup");
                 return false;
             }
 
-            return getRoutineInstance(this, raster, offset, w, h);
+            return get(this, raster, offset, w, h);
         }
 
         private static int PACK(int r, int g, int b)
@@ -707,7 +717,7 @@ namespace BitMiracle.LibTiff.Classic
         private static bool gtTileContig(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            TileContigRoutine put = img.contig;
+            PutContigDelegate put = img.putContig;
 
             byte[] buf = new byte[tif.TileSize()];
 
@@ -796,7 +806,7 @@ namespace BitMiracle.LibTiff.Classic
         private static bool gtTileSeparate(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            TileSeparateRoutine put = img.separate;
+            PutSeparateDelegate put = img.putSeparate;
 
             int tilesize = tif.TileSize();
             byte[] buf = new byte[(img.alpha != 0 ? 4 : 3) * tilesize];
@@ -912,7 +922,7 @@ namespace BitMiracle.LibTiff.Classic
         private static bool gtStripContig(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            TileContigRoutine put = img.contig;
+            PutContigDelegate put = img.putContig;
 
             byte[] buf = new byte[tif.StripSize()];
 
@@ -996,7 +1006,7 @@ namespace BitMiracle.LibTiff.Classic
         private static bool gtStripSeparate(TiffRgbaImage img, int[] raster, int offset, int w, int h)
         {
             Tiff tif = img.tif;
-            TileSeparateRoutine put = img.separate;
+            PutSeparateDelegate put = img.putSeparate;
 
             int stripsize = tif.StripSize();
             byte[] buf = new byte[(img.alpha != 0 ? 4 : 3) * stripsize];
@@ -1155,8 +1165,8 @@ namespace BitMiracle.LibTiff.Classic
         */
         private bool pickContigCase()
         {
-            getRoutineInstance = tif.IsTiled() ? new GetRoutine(gtTileContig) : new GetRoutine(gtStripContig);
-            contig = null;
+            get = tif.IsTiled() ? new GetDelegate(gtTileContig) : new GetDelegate(gtStripContig);
+            putContig = null;
 
             switch (photometric)
             {
@@ -1165,20 +1175,20 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         case 8:
                             if (alpha == ExtraSample.ASSOCALPHA)
-                                contig = putRGBAAcontig8bittile;
+                                putContig = putRGBAAcontig8bittile;
                             else if (alpha == ExtraSample.UNASSALPHA)
-                                contig = putRGBUAcontig8bittile;
+                                putContig = putRGBUAcontig8bittile;
                             else
-                                contig = putRGBcontig8bittile;
+                                putContig = putRGBcontig8bittile;
                             break;
 
                         case 16:
                             if (alpha == ExtraSample.ASSOCALPHA)
-                                contig = putRGBAAcontig16bittile;
+                                putContig = putRGBAAcontig16bittile;
                             else if (alpha == ExtraSample.UNASSALPHA)
-                                contig = putRGBUAcontig16bittile;
+                                putContig = putRGBUAcontig16bittile;
                             else
-                                contig = putRGBcontig16bittile;
+                                putContig = putRGBcontig16bittile;
                             break;
                     }
                     break;
@@ -1189,9 +1199,9 @@ namespace BitMiracle.LibTiff.Classic
                         if (bitspersample == 8)
                         {
                             if (Map == null)
-                                contig = putRGBcontig8bitCMYKtile;
+                                putContig = putRGBcontig8bitCMYKtile;
                             else
-                                contig = putRGBcontig8bitCMYKMaptile;
+                                putContig = putRGBcontig8bitCMYKMaptile;
                         }
                     }
                     break;
@@ -1202,16 +1212,16 @@ namespace BitMiracle.LibTiff.Classic
                         switch (bitspersample)
                         {
                             case 8:
-                                contig = put8bitcmaptile;
+                                putContig = put8bitcmaptile;
                                 break;
                             case 4:
-                                contig = put4bitcmaptile;
+                                putContig = put4bitcmaptile;
                                 break;
                             case 2:
-                                contig = put2bitcmaptile;
+                                putContig = put2bitcmaptile;
                                 break;
                             case 1:
-                                contig = put1bitcmaptile;
+                                putContig = put1bitcmaptile;
                                 break;
                         }
                     }
@@ -1224,19 +1234,19 @@ namespace BitMiracle.LibTiff.Classic
                         switch (bitspersample)
                         {
                             case 16:
-                                contig = put16bitbwtile;
+                                putContig = put16bitbwtile;
                                 break;
                             case 8:
-                                contig = putgreytile;
+                                putContig = putgreytile;
                                 break;
                             case 4:
-                                contig = put4bitbwtile;
+                                putContig = put4bitbwtile;
                                 break;
                             case 2:
-                                contig = put2bitbwtile;
+                                putContig = put2bitbwtile;
                                 break;
                             case 1:
-                                contig = put1bitbwtile;
+                                putContig = put1bitbwtile;
                                 break;
                         }
                     }
@@ -1263,25 +1273,25 @@ namespace BitMiracle.LibTiff.Classic
                             switch (((ushort)SubsamplingHor << 4) | (ushort)SubsamplingVer)
                             {
                                 case 0x44:
-                                    contig = putcontig8bitYCbCr44tile;
+                                    putContig = putcontig8bitYCbCr44tile;
                                     break;
                                 case 0x42:
-                                    contig = putcontig8bitYCbCr42tile;
+                                    putContig = putcontig8bitYCbCr42tile;
                                     break;
                                 case 0x41:
-                                    contig = putcontig8bitYCbCr41tile;
+                                    putContig = putcontig8bitYCbCr41tile;
                                     break;
                                 case 0x22:
-                                    contig = putcontig8bitYCbCr22tile;
+                                    putContig = putcontig8bitYCbCr22tile;
                                     break;
                                 case 0x21:
-                                    contig = putcontig8bitYCbCr21tile;
+                                    putContig = putcontig8bitYCbCr21tile;
                                     break;
                                 case 0x12:
-                                    contig = putcontig8bitYCbCr12tile;
+                                    putContig = putcontig8bitYCbCr12tile;
                                     break;
                                 case 0x11:
-                                    contig = putcontig8bitYCbCr11tile;
+                                    putContig = putcontig8bitYCbCr11tile;
                                     break;
                             }
                         }
@@ -1292,12 +1302,12 @@ namespace BitMiracle.LibTiff.Classic
                     if (buildMap())
                     {
                         if (bitspersample == 8)
-                            contig = initCIELabConversion();
+                            putContig = initCIELabConversion();
                     }
                     break;
             }
 
-            return (contig != null);
+            return (putContig != null);
         }
 
         /*
@@ -1308,8 +1318,8 @@ namespace BitMiracle.LibTiff.Classic
         */
         private bool pickSeparateCase()
         {
-            getRoutineInstance = tif.IsTiled() ? new GetRoutine(gtTileSeparate) : new GetRoutine(gtStripSeparate);
-            separate = null;
+            get = tif.IsTiled() ? new GetDelegate(gtTileSeparate) : new GetDelegate(gtStripSeparate);
+            putSeparate = null;
 
             switch (photometric)
             {
@@ -1318,20 +1328,20 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         case 8:
                             if (alpha == ExtraSample.ASSOCALPHA)
-                                separate = putRGBAAseparate8bittile;
+                                putSeparate = putRGBAAseparate8bittile;
                             else if (alpha == ExtraSample.UNASSALPHA)
-                                separate = putRGBUAseparate8bittile;
+                                putSeparate = putRGBUAseparate8bittile;
                             else
-                                separate = putRGBseparate8bittile;
+                                putSeparate = putRGBseparate8bittile;
                             break;
 
                         case 16:
                             if (alpha == ExtraSample.ASSOCALPHA)
-                                separate = putRGBAAseparate16bittile;
+                                putSeparate = putRGBAAseparate16bittile;
                             else if (alpha == ExtraSample.UNASSALPHA)
-                                separate = putRGBUAseparate16bittile;
+                                putSeparate = putRGBUAseparate16bittile;
                             else
-                                separate = putRGBseparate16bittile;
+                                putSeparate = putRGBseparate16bittile;
                             break;
                     }
                     break;
@@ -1348,7 +1358,7 @@ namespace BitMiracle.LibTiff.Classic
                             switch (((ushort)hs << 4) | (ushort)vs)
                             {
                                 case 0x11:
-                                    separate = putseparate8bitYCbCr11tile;
+                                    putSeparate = putseparate8bitYCbCr11tile;
                                     break;
                                 /* TODO: add other cases here */
                             }
@@ -1357,7 +1367,7 @@ namespace BitMiracle.LibTiff.Classic
                     break;
             }
 
-            return (separate != null);
+            return (putSeparate != null);
         }
 
         /*
@@ -2266,7 +2276,7 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        private TileContigRoutine initCIELabConversion()
+        private PutContigDelegate initCIELabConversion()
         {
             if (cielab == null)
                 cielab = new TiffCIELabToRGB();
