@@ -3729,71 +3729,242 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Reads the specified image into an ABGR-format raster.
+        /// Reads the image and decodes it into RGBA format raster.
         /// </summary>
         /// <overloads>
-        /// Reads the specified image into an ABGR-format raster.
+        /// Reads the image and decodes it into RGBA format raster.
         /// </overloads>
-        /// <param name="rwidth">The raster width.</param>
-        /// <param name="rheight">The raster height.</param>
-        /// <param name="raster">The raster.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        /// <remarks>Uses bottom left origin for raster by default.</remarks>
-        public bool ReadRGBAImage(int rwidth, int rheight, int[] raster)
+        /// <param name="width">The raster width.</param>
+        /// <param name="height">The raster height.</param>
+        /// <param name="raster">The raster (the buffer to place decoded image data to).</param>
+        /// <returns><c>true</c> if the image was successfully read and converted; otherwise,
+        /// <c>false</c> is returned if an error was encountered.</returns>
+        /// <remarks><para>
+        /// <b>ReadRGBAImage</b> reads a strip- or tile-based image into memory, storing the
+        /// result in the user supplied RGBA <paramref name="raster"/>. The raster is assumed to
+        /// be an array of <paramref name="width"/> times <paramref name="height"/> 32-bit entries,
+        /// where <paramref name="width"/> must be less than or equal to the width of the image
+        /// (<paramref name="height"/> may be any non-zero size). If the raster dimensions are
+        /// smaller than the image, the image data is cropped to the raster bounds. If the raster
+        /// height is greater than that of the image, then the image data are placed in the lower
+        /// part of the raster. Note that the raster is assumed to be organized such that the
+        /// pixel at location (x, y) is <paramref name="raster"/>[y * width + x]; with the raster
+        /// origin in the lower-left hand corner. Please use
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/> if you
+        /// want to specify another raster origin.
+        /// </para><para>
+        /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
+        /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
+        /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
+        /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
+        /// </para><para>
+        /// <b>ReadRGBAImage</b> converts non-8-bit images by scaling sample values. Palette,
+        /// grayscale, bilevel, CMYK, and YCbCr images are converted to RGB transparently. Raster
+        /// pixels are returned uncorrected by any colorimetry information present in the directory.
+        /// </para><para>
+        /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
+        /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
+        /// </para><para>
+        /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
+        /// automatically scaled to 16-bits.
+        /// </para><para>
+        /// <b>ReadRGBAImage</b> is just a wrapper around the more general
+        /// <see cref="TiffRgbaImage"/> facilities.
+        /// </para><para>
+        /// All error messages are directed to the current error handler.
+        /// </para></remarks>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="ReadRGBAStrip"/>
+        /// <seealso cref="ReadRGBATile"/>
+        /// <seealso cref="RGBAImageOK"/>
+        public bool ReadRGBAImage(int width, int height, int[] raster)
         {
-            return ReadRGBAImage(rwidth, rheight, raster, false);
+            return ReadRGBAImage(width, height, raster, false);
         }
 
         /// <summary>
-        /// Reads the RGBA image.
+        /// Reads the image and decodes it into RGBA format raster.
         /// </summary>
-        /// <param name="rwidth">The raster width.</param>
-        /// <param name="rheight">The raster height.</param>
-        /// <param name="raster">The raster.</param>
-        /// <param name="stop">Stop.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        public bool ReadRGBAImage(int rwidth, int rheight, int[] raster, bool stop)
+        /// <param name="width">The raster width.</param>
+        /// <param name="height">The raster height.</param>
+        /// <param name="raster">The raster (the buffer to place decoded image data to).</param>
+        /// <param name="stopOnError">if set to <c>true</c> then an error will terminate the
+        /// operation; otherwise method will continue processing data until all the possible data
+        /// in the image have been requested.</param>
+        /// <returns>
+        /// <c>true</c> if the image was successfully read and converted; otherwise, <c>false</c>
+        /// is returned if an error was encountered and stopOnError is <c>false</c>.
+        /// </returns>
+        /// <remarks><para>
+        /// <b>ReadRGBAImage</b> reads a strip- or tile-based image into memory, storing the
+        /// result in the user supplied RGBA <paramref name="raster"/>. The raster is assumed to
+        /// be an array of <paramref name="width"/> times <paramref name="height"/> 32-bit entries,
+        /// where <paramref name="width"/> must be less than or equal to the width of the image
+        /// (<paramref name="height"/> may be any non-zero size). If the raster dimensions are
+        /// smaller than the image, the image data is cropped to the raster bounds. If the raster
+        /// height is greater than that of the image, then the image data are placed in the lower
+        /// part of the raster. Note that the raster is assumed to be organized such that the
+        /// pixel at location (x, y) is <paramref name="raster"/>[y * width + x]; with the raster
+        /// origin in the lower-left hand corner. Please use
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/> if you
+        /// want to specify another raster origin.
+        /// </para><para>
+        /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
+        /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
+        /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
+        /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
+        /// </para><para>
+        /// <b>ReadRGBAImage</b> converts non-8-bit images by scaling sample values. Palette,
+        /// grayscale, bilevel, CMYK, and YCbCr images are converted to RGB transparently. Raster
+        /// pixels are returned uncorrected by any colorimetry information present in the directory.
+        /// </para><para>
+        /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
+        /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
+        /// </para><para>
+        /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
+        /// automatically scaled to 16-bits.
+        /// </para><para>
+        /// <b>ReadRGBAImage</b> is just a wrapper around the more general
+        /// <see cref="TiffRgbaImage"/> facilities.
+        /// </para><para>
+        /// All error messages are directed to the current error handler.
+        /// </para></remarks>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="ReadRGBAStrip"/>
+        /// <seealso cref="ReadRGBATile"/>
+        /// <seealso cref="RGBAImageOK"/>
+        public bool ReadRGBAImage(int width, int height, int[] raster, bool stopOnError)
         {
-            return ReadRGBAImageOriented(rwidth, rheight, raster, Orientation.BOTLEFT, stop);
+            return ReadRGBAImageOriented(width, height, raster, Orientation.BOTLEFT, stopOnError);
         }
 
         /// <summary>
-        /// Read the image into an ABGR-format raster taking in account specified orientation.
+        /// Reads the image and decodes it into RGBA format raster using specified raster origin.
         /// </summary>
         /// <overloads>
-        /// Read the image into an ABGR-format raster taking in account specified orientation.
+        /// Reads the image and decodes it into RGBA format raster using specified raster origin.
         /// </overloads>
-        /// <param name="rwidth">The raster width.</param>
-        /// <param name="rheight">The raster height.</param>
-        /// <param name="raster">The raster.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, Orientation orientation)
+        /// <param name="width">The raster width.</param>
+        /// <param name="height">The raster height.</param>
+        /// <param name="raster">The raster (the buffer to place decoded image data to).</param>
+        /// <param name="orientation">The raster origin position.</param>
+        /// <returns>
+        /// <c>true</c> if the image was successfully read and converted; otherwise, <c>false</c>
+        /// is returned if an error was encountered.
+        /// </returns>
+        /// <remarks><para>
+        /// <b>ReadRGBAImageOriented</b> reads a strip- or tile-based image into memory, storing the
+        /// result in the user supplied RGBA <paramref name="raster"/>. The raster is assumed to
+        /// be an array of <paramref name="width"/> times <paramref name="height"/> 32-bit entries,
+        /// where <paramref name="width"/> must be less than or equal to the width of the image
+        /// (<paramref name="height"/> may be any non-zero size). If the raster dimensions are
+        /// smaller than the image, the image data is cropped to the raster bounds. If the raster
+        /// height is greater than that of the image, then the image data placement depends on
+        /// <paramref name="orientation"/>. Note that the raster is assumed to be organized such
+        /// that the pixel at location (x, y) is <paramref name="raster"/>[y * width + x]; with
+        /// the raster origin specified by <paramref name="orientation"/> parameter.
+        /// </para><para>
+        /// When <b>ReadRGBAImageOriented</b> is used with <see cref="Orientation"/>.BOTLEFT for
+        /// the <paramref name="orientation"/> the produced result is the same as retuned by
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>.
+        /// </para><para>
+        /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
+        /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
+        /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
+        /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
+        /// </para><para>
+        /// <b>ReadRGBAImageOriented</b> converts non-8-bit images by scaling sample values.
+        /// Palette, grayscale, bilevel, CMYK, and YCbCr images are converted to RGB transparently.
+        /// Raster pixels are returned uncorrected by any colorimetry information present in
+        /// the directory.
+        /// </para><para>
+        /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
+        /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
+        /// </para><para>
+        /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
+        /// automatically scaled to 16-bits.
+        /// </para><para>
+        /// <b>ReadRGBAImageOriented</b> is just a wrapper around the more general
+        /// <see cref="TiffRgbaImage"/> facilities.
+        /// </para><para>
+        /// All error messages are directed to the current error handler.
+        /// </para></remarks>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
+        /// <seealso cref="ReadRGBAStrip"/>
+        /// <seealso cref="ReadRGBATile"/>
+        /// <seealso cref="RGBAImageOK"/>
+        public bool ReadRGBAImageOriented(int width, int height, int[] raster, Orientation orientation)
         {
-            return ReadRGBAImageOriented(rwidth, rheight, raster, orientation, false);
+            return ReadRGBAImageOriented(width, height, raster, orientation, false);
         }
 
         /// <summary>
-        /// Read the image into an ABGR-format raster taking in account specified orientation.
+        /// Reads the image and decodes it into RGBA format raster using specified raster origin.
         /// </summary>
-        /// <param name="rwidth">The raster width.</param>
-        /// <param name="rheight">The raster height.</param>
-        /// <param name="raster">The raster.</param>
-        /// <param name="orientation">The orientation.</param>
-        /// <param name="stop">if set to <c>true</c> [stop].</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        public bool ReadRGBAImageOriented(int rwidth, int rheight, int[] raster, Orientation orientation, bool stop)
+        /// <param name="width">The raster width.</param>
+        /// <param name="height">The raster height.</param>
+        /// <param name="raster">The raster (the buffer to place decoded image data to).</param>
+        /// <param name="orientation">The raster origin position.</param>
+        /// <param name="stopOnError">if set to <c>true</c> then an error will terminate the
+        /// operation; otherwise method will continue processing data until all the possible data
+        /// in the image have been requested.</param>
+        /// <returns>
+        /// <c>true</c> if the image was successfully read and converted; otherwise, <c>false</c>
+        /// is returned if an error was encountered and stopOnError is <c>false</c>.
+        /// </returns>
+        /// <remarks><para>
+        /// <b>ReadRGBAImageOriented</b> reads a strip- or tile-based image into memory, storing the
+        /// result in the user supplied RGBA <paramref name="raster"/>. The raster is assumed to
+        /// be an array of <paramref name="width"/> times <paramref name="height"/> 32-bit entries,
+        /// where <paramref name="width"/> must be less than or equal to the width of the image
+        /// (<paramref name="height"/> may be any non-zero size). If the raster dimensions are
+        /// smaller than the image, the image data is cropped to the raster bounds. If the raster
+        /// height is greater than that of the image, then the image data placement depends on
+        /// <paramref name="orientation"/>. Note that the raster is assumed to be organized such
+        /// that the pixel at location (x, y) is <paramref name="raster"/>[y * width + x]; with
+        /// the raster origin specified by <paramref name="orientation"/> parameter.
+        /// </para><para>
+        /// When <b>ReadRGBAImageOriented</b> is used with <see cref="Orientation"/>.BOTLEFT for
+        /// the <paramref name="orientation"/> the produced result is the same as retuned by
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>.
+        /// </para><para>
+        /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
+        /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
+        /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
+        /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
+        /// </para><para>
+        /// <b>ReadRGBAImageOriented</b> converts non-8-bit images by scaling sample values.
+        /// Palette, grayscale, bilevel, CMYK, and YCbCr images are converted to RGB transparently.
+        /// Raster pixels are returned uncorrected by any colorimetry information present in
+        /// the directory.
+        /// </para><para>
+        /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
+        /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
+        /// </para><para>
+        /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
+        /// automatically scaled to 16-bits.
+        /// </para><para>
+        /// <b>ReadRGBAImageOriented</b> is just a wrapper around the more general
+        /// <see cref="TiffRgbaImage"/> facilities.
+        /// </para><para>
+        /// All error messages are directed to the current error handler.
+        /// </para></remarks>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="ReadRGBAStrip"/>
+        /// <seealso cref="ReadRGBATile"/>
+        /// <seealso cref="RGBAImageOK"/>
+        public bool ReadRGBAImageOriented(int width, int height, int[] raster, Orientation orientation, bool stopOnError)
         {
             bool ok = false;
             string emsg;
             if (RGBAImageOK(out emsg))
             {
-                TiffRgbaImage img = TiffRgbaImage.Create(this, stop, out emsg);
+                TiffRgbaImage img = TiffRgbaImage.Create(this, stopOnError, out emsg);
                 if (img != null)
                 {
                     img.ReqOrientation = orientation;
-                    // XXX verify rwidth and rheight against width and height
-                    ok = img.Get(raster, (rheight - img.Height) * rwidth, rwidth, img.Height);
+                    // XXX verify rwidth and rheight against image width and height
+                    ok = img.Get(raster, (height - img.Height) * width, width, img.Height);
                 }
             }
             else
@@ -3810,56 +3981,56 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="row">The row.</param>
         /// <param name="raster">The RGBA raster.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
+        /// <returns><c>true</c> if the strip was successfully read and converted; otherwise,
+        /// <c>false</c></returns>
         /// <remarks>
         /// <para>
-        /// ReadRGBAStrip reads a single strip of a strip-based image into memory, storing
+        /// <b>ReadRGBAStrip</b> reads a single strip of a strip-based image into memory, storing
         /// the result in the user supplied RGBA <paramref name="raster"/>. If specified strip is
         /// the last strip, then it will only contain the portion of the strip that is actually
         /// within the image space. The raster is assumed to be an array of width times
         /// rowsperstrip 32-bit entries, where width is the width of the image
         /// (<see cref="TiffTag.IMAGEWIDTH"/>) and rowsperstrip is the maximum lines in a strip
         /// (<see cref="TiffTag.ROWSPERSTRIP"/>).
-        /// </para>
-        /// <para>
+        /// </para><para>
         /// The <paramref name="row"/> value should be the row of the first row in the strip
         /// (strip * rowsperstrip, zero based).
-        /// </para>
-        /// <para>
-        /// Note that the raster is assume to be organized such that the pixel at location (x, y)
-        /// is raster[y * width + x]; with the raster origin in the lower-left hand corner of the
-        /// strip. That is bottom to top organization. When reading a partial last strip in the
-        /// file the last line of the image will begin at the beginning of the buffer.
-        /// </para>
-        /// <para>
+        /// </para><para>
+        /// Note that the raster is assumed to be organized such that the pixel at location (x, y)
+        /// is <paramref name="raster"/>[y * width + x]; with the raster origin in the lower-left
+        /// hand corner of the strip. That is bottom to top organization. When reading a partial
+        /// last strip in the file the last line of the image will begin at the beginning of
+        /// the buffer.
+        /// </para><para>
         /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
         /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
         /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
         /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
-        /// </para>
-        /// <para>
-        /// See <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> for more details
-        /// on how various image types are converted to RGBA values.
-        /// </para>
-        /// <para>
+        /// </para><para>
+        /// See <see cref="TiffRgbaImage"/> for more details on how various image types are
+        /// converted to RGBA values.
+        /// </para><para>
         /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
         /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
-        /// </para>
-        /// <para>
+        /// </para><para>
         /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
         /// automatically scaled to 16-bits.
-        /// </para>
-        /// <para>
-        /// ReadRGBAStrip's main advantage over the similar
+        /// </para><para>
+        /// <b>ReadRGBAStrip</b>'s main advantage over the similar
         /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> function is that for
         /// large images a single buffer capable of holding the whole image doesn't need to be
         /// allocated, only enough for one strip. The <see cref="ReadRGBATile"/> function does a
         /// similar operation for tiled images.
-        /// </para>
-        /// <para>
+        /// </para><para>
+        /// <b>ReadRGBAStrip</b> is just a wrapper around the more general
+        /// <see cref="TiffRgbaImage"/> facilities.
+        /// </para><para>
         /// All error messages are directed to the current error handler.
-        /// </para>
-        /// </remarks>
+        /// </para></remarks>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="ReadRGBATile"/>
+        /// <seealso cref="RGBAImageOK"/>
         public bool ReadRGBAStrip(int row, int[] raster)
         {
             if (IsTiled())
@@ -3901,22 +4072,63 @@ namespace BitMiracle.LibTiff.Classic
             return false;
         }
 
+
         /// <summary>
-        /// Reads a whole tile off data from the file, and convert to RGBA form.
+        /// Reads a whole tile of a tile-based image, decodes it and converts it to RGBA format.
         /// </summary>
         /// <param name="col">The column.</param>
         /// <param name="row">The row.</param>
-        /// <param name="raster">The raster.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        /// <remarks>The returned RGBA data is organized from bottom to top of tile,
-        /// and may include zeroed areas if the tile extends off the image.</remarks>
+        /// <param name="raster">The RGBA raster.</param>
+        /// <returns><c>true</c> if the strip was successfully read and converted; otherwise,
+        /// <c>false</c></returns>
+        /// <remarks>
+        /// <para><b>ReadRGBATile</b> reads a single tile of a tile-based image into memory,
+        /// storing the result in the user supplied RGBA <paramref name="raster"/>. The raster is
+        /// assumed to be an array of width times length 32-bit entries, where width is the width
+        /// of the tile (<see cref="TiffTag.TILEWIDTH"/>) and length is the height of a tile
+        /// (<see cref="TiffTag.TILELENGTH"/>).
+        /// </para><para>
+        /// The <paramref name="col"/> and <paramref name="row"/> values are the offsets from the
+        /// top left corner of the image to the top left corner of the tile to be read. They must
+        /// be an exact multiple of the tile width and length.
+        /// </para><para>
+        /// Note that the raster is assumed to be organized such that the pixel at location (x, y)
+        /// is <paramref name="raster"/>[y * width + x]; with the raster origin in the lower-left
+        /// hand corner of the tile. That is bottom to top organization. Edge tiles which partly
+        /// fall off the image will be filled out with appropriate zeroed areas.
+        /// </para><para>
+        /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
+        /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
+        /// <see cref="Tiff.GetA"/> should be used to access individual samples. Images without
+        /// Associated Alpha matting information have a constant Alpha of 1.0 (255).
+        /// </para><para>
+        /// See <see cref="TiffRgbaImage"/> for more details on how various image types are
+        /// converted to RGBA values.
+        /// </para><para>
+        /// Samples must be either 1, 2, 4, 8, or 16 bits. Colorimetric samples/pixel must be
+        /// either 1, 3, or 4 (i.e. SamplesPerPixel minus ExtraSamples).
+        /// </para><para>
+        /// Palette image colormaps that appear to be incorrectly written as 8-bit values are
+        /// automatically scaled to 16-bits.
+        /// </para><para>
+        /// <b>ReadRGBATile</b>'s main advantage over the similar
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> function is that for
+        /// large images a single buffer capable of holding the whole image doesn't need to be
+        /// allocated, only enough for one tile. The <see cref="ReadRGBAStrip"/> function does a
+        /// similar operation for stripped images.
+        /// </para><para>
+        /// <b>ReadRGBATile</b> is just a wrapper around the more general
+        /// <see cref="TiffRgbaImage"/> facilities.
+        /// </para><para>
+        /// All error messages are directed to the current error handler.
+        /// </para></remarks>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
+        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="ReadRGBAStrip"/>
+        /// <seealso cref="RGBAImageOK"/>
         public bool ReadRGBATile(int col, int row, int[] raster)
         {
-            /*
-             * Verify that our request is legal - on a tile file, and on a
-             * tile boundary.
-             */
-
+            // Verify that our request is legal - on a tile file, and on a tile boundary.
             if (!IsTiled())
             {
                 ErrorExt(this, m_clientdata, FileName(), "Can't use ReadRGBATile() with stripped file.");
@@ -3934,9 +4146,7 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            /*
-             * Setup the RGBA reader.
-             */
+            // Setup the RGBA reader.
             string emsg;
             TiffRgbaImage img = TiffRgbaImage.Create(this, false, out emsg);
             if (!RGBAImageOK(out emsg) || img == null)
@@ -3945,12 +4155,9 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            /*
-             * The TIFFRGBAImageGet() function doesn't allow us to get off the
-             * edge of the image, even to fill an otherwise valid tile.  So we
-             * figure out how much we can read, and fix up the tile buffer to
-             * a full tile configuration afterwards.
-             */
+            // The TiffRgbaImage.Get() function doesn't allow us to get off the edge of the
+            // image, even to fill an otherwise valid tile. So we figure out how much we can read,
+            // and fix up the tile buffer to a full tile configuration afterwards.
             int read_ysize;
             if (row + tile_ysize > img.Height)
                 read_ysize = img.Height - row;
@@ -3963,23 +4170,15 @@ namespace BitMiracle.LibTiff.Classic
             else
                 read_xsize = tile_xsize;
 
-            /*
-             * Read the chunk of imagery.
-             */
-
+            // Read the chunk of imagery.
             img.row_offset = row;
             img.col_offset = col;
 
             bool ok = img.Get(raster, 0, read_xsize, read_ysize);
 
-            /*
-             * If our read was incomplete we will need to fix up the tile by
-             * shifting the data around as if a full tile of data is being returned.
-             *
-             * This is all the more complicated because the image is organized in
-             * bottom to top format. 
-             */
-
+            // If our read was incomplete we will need to fix up the tile by shifting the data
+            // around as if a full tile of data is being returned. This is all the more
+            // complicated because the image is organized in bottom to top format. 
             if (read_xsize == tile_xsize && read_ysize == tile_ysize)
                 return ok;
 
@@ -3998,22 +4197,29 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Check the image to see if 
-        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>
-        /// can deal with it.
+        /// Check the image to see if it can be converted to RGBA format.
         /// </summary>
-        /// <param name="emsg">The error message.</param>
-        /// <returns><c>true</c> if the image can
-        /// be handled by <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>. 
-        /// If <c>false</c> is returned, emsg contains the reason
-        /// why it is being rejected.</returns>
-        public bool RGBAImageOK(out string emsg)
+        /// <param name="errorMsg">The error message (if any) gets placed here.</param>
+        /// <returns><c>true</c> if the image can be converted to RGBA format; otherwise,
+        /// <c>false</c> is returned and <paramref name="errorMsg"/> contains the reason why it
+        /// is being rejected.</returns>
+        /// <remarks><para>
+        /// To convert the image to RGBA format please use
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>,
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>,
+        /// <see cref="ReadRGBAStrip"/> or <see cref="ReadRGBATile"/>
+        /// </para><para>
+        /// Convertible images should follow this rules: samples must be either 1, 2, 4, 8, or
+        /// 16 bits; colorimetric samples/pixel must be either 1, 3, or 4 (i.e. SamplesPerPixel
+        /// minus ExtraSamples).</para>
+        /// </remarks>
+        public bool RGBAImageOK(out string errorMsg)
         {
-            emsg = null;
+            errorMsg = null;
 
             if (!m_decodestatus)
             {
-                emsg = "Sorry, requested compression method is not configured";
+                errorMsg = "Sorry, requested compression method is not configured";
                 return false;
             }
 
@@ -4026,7 +4232,7 @@ namespace BitMiracle.LibTiff.Classic
                 case 16:
                     break;
                 default:
-                    emsg = string.Format(CultureInfo.InvariantCulture, "Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
+                    errorMsg = string.Format(CultureInfo.InvariantCulture, "Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
                     return false;
             }
 
@@ -4044,7 +4250,7 @@ namespace BitMiracle.LibTiff.Classic
                         photometric = Photometric.RGB;
                         break;
                     default:
-                        emsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", TiffRgbaImage.photoTag);
+                        errorMsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", TiffRgbaImage.photoTag);
                         return false;
                 }
             }
@@ -4061,31 +4267,26 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.PALETTE:
                     if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
                             TiffRgbaImage.photoTag, photometric, "Samples/pixel", m_dir.td_samplesperpixel,
                             m_dir.td_bitspersample);
 
                         return false;
                     }
-                    /*
-                     * We should likely validate that any extra samples are either
-                     * to be ignored, or are alpha, and if alpha we should try to use
-                     * them.  But for now we won't bother with this. 
-                     */
+                    // We should likely validate that any extra samples are either to be ignored,
+                    // or are alpha, and if alpha we should try to use them. But for now we won't
+                    // bother with this. 
                     break;
                 case Photometric.YCBCR:
-                    /*
-                    * TODO: if at all meaningful and useful, make more complete
-                    * support check here, or better still, refactor to let supporting
-                    * code decide whether there is support and what meaningfull
-                    * error to return
-                    */
+                    // TODO: if at all meaningful and useful, make more complete support check
+                    // here, or better still, refactor to let supporting code decide whether there
+                    // is support and what meaningfull error to return
                     break;
                 case Photometric.RGB:
                     if (colorchannels < 3)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle RGB image with {0}={1}",
                             "Color channels", colorchannels);
 
@@ -4097,13 +4298,13 @@ namespace BitMiracle.LibTiff.Classic
                     InkSet inkset = (InkSet)result[0].ToByte();
                     if (inkset != InkSet.CMYK)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle separated image with {0}={1}", "InkSet", inkset);
                         return false;
                     }
                     if (m_dir.td_samplesperpixel < 4)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle separated image with {0}={1}",
                             "Samples/pixel", m_dir.td_samplesperpixel);
                         return false;
@@ -4112,7 +4313,7 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.LOGL:
                     if (m_dir.td_compression != Compression.SGILOG)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, LogL data must have {0}={1}",
                             "Compression", Compression.SGILOG);
                         return false;
@@ -4122,7 +4323,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (m_dir.td_compression != Compression.SGILOG &&
                         m_dir.td_compression != Compression.SGILOG24)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, LogLuv data must have {0}={1} or {2}",
                             "Compression", Compression.SGILOG, Compression.SGILOG24);
                         return false;
@@ -4130,7 +4331,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     if (m_dir.td_planarconfig != PlanarConfig.CONTIG)
                     {
-                        emsg = string.Format(CultureInfo.InvariantCulture,
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle LogLuv images with {0}={1}",
                             "Planarconfiguration", m_dir.td_planarconfig);
                         return false;
@@ -4139,7 +4340,7 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.CIELAB:
                     break;
                 default:
-                    emsg = string.Format(CultureInfo.InvariantCulture,
+                    errorMsg = string.Format(CultureInfo.InvariantCulture,
                         "Sorry, can not handle image with {0}={1}",
                         TiffRgbaImage.photoTag, photometric);
                     return false;
