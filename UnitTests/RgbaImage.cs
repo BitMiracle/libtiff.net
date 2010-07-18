@@ -75,7 +75,20 @@ namespace UnitTests
                 return new string[]
                 {
                     "gray16-lzw-pc.tif",
-                    "tiger-palette-strip-01.tif"
+                    "tiger-palette-strip-01.tif",
+                    "chevron.tif",
+                    "chevron-separate.tif",
+                    "flower-rgb-contig-16-unassoc-alpha.tif",
+                    "flower-rgb-contig-16-assoc-alpha.tif",
+                    "flower-rgb-planar-16-unassoc-alpha.tif",
+                    "flower-rgb-planar-16-assoc-alpha.tif",
+                    "strike-separate.tif",
+                    "flower-ycbcr-contig-08.tif",
+                    "flower-ycbcr-separate-08.tif",
+                    "flower-ycbcr12-contig-08.tif",
+                    "flower-ycbcr41-contig-08.tif",
+                    "flower-ycbcr42-contig-08.tif",
+                    "flower-ycbcr44-contig-08.tif",
                 };
             }
         }

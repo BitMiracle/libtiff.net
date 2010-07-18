@@ -1699,19 +1699,17 @@ namespace BitMiracle.LibTiff.Classic
             int[][] PALmap = img.PALmap;
             int samplesperpixel = img.samplesperpixel;
 
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
                 {
-                    raster[cpPos] = PALmap[pp[ppPos]][0];
-                    cpPos++;
-                    ppPos += samplesperpixel;
+                    raster[rasterOffset] = PALmap[pp[ppOffset]][0];
+                    rasterOffset++;
+                    ppOffset += samplesperpixel;
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -1723,8 +1721,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] PALmap = img.PALmap;
             fromskew /= 2;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+            
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -1732,26 +1729,26 @@ namespace BitMiracle.LibTiff.Classic
                 int _x;
                 for (_x = width; _x >= 2; _x -= 2)
                 {
-                    bw = PALmap[pp[ppPos]];
-                    ppPos++;
+                    bw = PALmap[pp[ppOffset]];
+                    ppOffset++;
                     for (int rc = 0; rc < 2; rc++)
                     {
-                        raster[cpPos] = bw[rc];
-                        cpPos++;
+                        raster[rasterOffset] = bw[rc];
+                        rasterOffset++;
                     }
                 }
 
                 if (_x != 0)
                 {
-                    bw = PALmap[pp[ppPos]];
-                    ppPos++;
+                    bw = PALmap[pp[ppOffset]];
+                    ppOffset++;
 
-                    raster[cpPos] = bw[0];
-                    cpPos++;
+                    raster[rasterOffset] = bw[0];
+                    rasterOffset++;
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -1763,8 +1760,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] PALmap = img.PALmap;
             fromskew /= 4;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+            
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -1772,32 +1768,32 @@ namespace BitMiracle.LibTiff.Classic
                 int _x;
                 for (_x = width; _x >= 4; _x -= 4)
                 {
-                    bw = PALmap[pp[ppPos]];
-                    ppPos++;
+                    bw = PALmap[pp[ppOffset]];
+                    ppOffset++;
                     for (int rc = 0; rc < 4; rc++)
                     {
-                        raster[cpPos] = bw[rc];
-                        cpPos++;
+                        raster[rasterOffset] = bw[rc];
+                        rasterOffset++;
                     }
                 }
 
                 if (_x > 0)
                 {
-                    bw = PALmap[pp[ppPos]];
-                    ppPos++;
+                    bw = PALmap[pp[ppOffset]];
+                    ppOffset++;
 
                     if (_x <= 3 && _x > 0)
                     {
                         for (int i = 0; i < _x; i++)
                         {
-                            raster[cpPos] = bw[i];
-                            cpPos++;
+                            raster[rasterOffset] = bw[i];
+                            rasterOffset++;
                         }
                     }
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -1810,9 +1806,6 @@ namespace BitMiracle.LibTiff.Classic
             int[][] PALmap = img.PALmap;
             fromskew /= 8;
 
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
             while (height-- > 0)
             {
                 int[] bw;
@@ -1821,27 +1814,27 @@ namespace BitMiracle.LibTiff.Classic
                 int _x;
                 for (_x = width; _x >= 8; _x -= 8)
                 {
-                    bw = PALmap[pp[ppPos++]];
+                    bw = PALmap[pp[ppOffset++]];
                     bwPos = 0;
 
                     for (int i = 0; i < 8; i++)
-                        raster[cpPos++] = bw[bwPos++];
+                        raster[rasterOffset++] = bw[bwPos++];
                 }
 
                 if (_x > 0)
                 {
-                    bw = PALmap[pp[ppPos++]];
+                    bw = PALmap[pp[ppOffset++]];
                     bwPos = 0;
 
                     if (_x <= 7 && _x > 0)
                     {
                         for (int i = 0; i < _x; i++)
-                            raster[cpPos++] = bw[bwPos++];
+                            raster[rasterOffset++] = bw[bwPos++];
                     }
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -1853,19 +1846,18 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             int[][] BWmap = img.BWmap;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
                 {
-                    raster[cpPos] = BWmap[pp[ppPos]][0];
-                    cpPos++;
-                    ppPos += samplesperpixel;
+                    raster[rasterOffset] = BWmap[pp[ppOffset]][0];
+                    rasterOffset++;
+                    ppOffset += samplesperpixel;
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -1877,25 +1869,23 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             int[][] BWmap = img.BWmap;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+
             while (height-- > 0)
             {
-                short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length - ppPos);
+                short[] wp = Tiff.ByteArrayToShorts(pp, ppOffset, pp.Length - ppOffset);
                 int wpPos = 0;
 
                 for (x = width; x-- > 0; )
                 {
                     // use high order byte of 16bit value
-
-                    raster[cpPos] = BWmap[(wp[wpPos] & 0xffff) >> 8][0];
-                    cpPos++;
-                    ppPos += 2 * samplesperpixel;
+                    raster[rasterOffset] = BWmap[(wp[wpPos] & 0xffff) >> 8][0];
+                    rasterOffset++;
+                    ppOffset += 2 * samplesperpixel;
                     wpPos += samplesperpixel;
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -1907,8 +1897,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] BWmap = img.BWmap;
             fromskew /= 8;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -1916,33 +1905,33 @@ namespace BitMiracle.LibTiff.Classic
                 int _x;
                 for (_x = width; _x >= 8; _x -= 8)
                 {
-                    bw = BWmap[pp[ppPos]];
-                    ppPos++;
+                    bw = BWmap[pp[ppOffset]];
+                    ppOffset++;
 
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        raster[cpPos] = bw[rc];
-                        cpPos++;
+                        raster[rasterOffset] = bw[rc];
+                        rasterOffset++;
                     }
                 }
 
                 if (_x > 0)
                 {
-                    bw = BWmap[pp[ppPos]];
-                    ppPos++;
+                    bw = BWmap[pp[ppOffset]];
+                    ppOffset++;
 
                     if (_x <= 7 && _x > 0)
                     {
                         for (int i = 0; i < _x; i++)
                         {
-                            raster[cpPos] = bw[i];
-                            cpPos++;
+                            raster[rasterOffset] = bw[i];
+                            rasterOffset++;
                         }
                     }
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -1954,8 +1943,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] BWmap = img.BWmap;
             fromskew /= 4;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -1963,32 +1951,32 @@ namespace BitMiracle.LibTiff.Classic
                 int _x;
                 for (_x = width; _x >= 4; _x -= 4)
                 {
-                    bw = BWmap[pp[ppPos]];
-                    ppPos++;
+                    bw = BWmap[pp[ppOffset]];
+                    ppOffset++;
                     for (int rc = 0; rc < 4; rc++)
                     {
-                        raster[cpPos] = bw[rc];
-                        cpPos++;
+                        raster[rasterOffset] = bw[rc];
+                        rasterOffset++;
                     }
                 }
 
                 if (_x > 0)
                 {
-                    bw = BWmap[pp[ppPos]];
-                    ppPos++;
+                    bw = BWmap[pp[ppOffset]];
+                    ppOffset++;
 
                     if (_x <= 3 && _x > 0)
                     {
                         for (int i = 0; i < _x; i++)
                         {
-                            raster[cpPos] = bw[i];
-                            cpPos++;
+                            raster[rasterOffset] = bw[i];
+                            rasterOffset++;
                         }
                     }
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -2000,8 +1988,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] BWmap = img.BWmap;
             fromskew /= 2;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+            
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -2009,26 +1996,26 @@ namespace BitMiracle.LibTiff.Classic
                 int _x;
                 for (_x = width; _x >= 2; _x -= 2)
                 {
-                    bw = BWmap[pp[ppPos]];
-                    ppPos++;
+                    bw = BWmap[pp[ppOffset]];
+                    ppOffset++;
                     for (int rc = 0; rc < 2; rc++)
                     {
-                        raster[cpPos] = bw[rc];
-                        cpPos++;
+                        raster[rasterOffset] = bw[rc];
+                        rasterOffset++;
                     }
                 }
 
                 if (_x != 0)
                 {
-                    bw = BWmap[pp[ppPos]];
-                    ppPos++;
+                    bw = BWmap[pp[ppOffset]];
+                    ppOffset++;
 
-                    raster[cpPos] = bw[0];
-                    cpPos++;
+                    raster[rasterOffset] = bw[0];
+                    rasterOffset++;
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -2040,8 +2027,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+            
             while (height-- > 0)
             {
                 int _x;
@@ -2049,9 +2035,9 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        raster[cpPos] = PACK(pp[ppPos], pp[ppPos + 1], pp[ppPos + 2]);
-                        cpPos++;
-                        ppPos += samplesperpixel;
+                        raster[rasterOffset] = PACK(pp[ppOffset], pp[ppOffset + 1], pp[ppOffset + 2]);
+                        rasterOffset++;
+                        ppOffset += samplesperpixel;
                     }
                 }
 
@@ -2061,15 +2047,15 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            raster[cpPos] = PACK(pp[ppPos], pp[ppPos + 1], pp[ppPos + 2]);
-                            cpPos++;
-                            ppPos += samplesperpixel;
+                            raster[rasterOffset] = PACK(pp[ppOffset], pp[ppOffset + 1], pp[ppOffset + 2]);
+                            rasterOffset++;
+                            ppOffset += samplesperpixel;
                         }
                     }
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -2081,8 +2067,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
+
             while (height-- > 0)
             {
                 int _x;
@@ -2090,9 +2075,9 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        raster[cpPos] = PACK4(pp[ppPos], pp[ppPos + 1], pp[ppPos + 2], pp[ppPos + 3]);
-                        cpPos++;
-                        ppPos += samplesperpixel;
+                        raster[rasterOffset] = PACK4(pp[ppOffset], pp[ppOffset + 1], pp[ppOffset + 2], pp[ppOffset + 3]);
+                        rasterOffset++;
+                        ppOffset += samplesperpixel;
                     }
                 }
 
@@ -2102,15 +2087,15 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            raster[cpPos] = PACK4(pp[ppPos], pp[ppPos + 1], pp[ppPos + 2], pp[ppPos + 3]);
-                            cpPos++;
-                            ppPos += samplesperpixel;
+                            raster[rasterOffset] = PACK4(pp[ppOffset], pp[ppOffset + 1], pp[ppOffset + 2], pp[ppOffset + 3]);
+                            rasterOffset++;
+                            ppOffset += samplesperpixel;
                         }
                     }
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -2122,23 +2107,21 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
                 {
-                    int a = pp[ppPos + 3];
-                    int r = (pp[ppPos] * a + 127) / 255;
-                    int g = (pp[ppPos + 1] * a + 127) / 255;
-                    int b = (pp[ppPos + 2] * a + 127) / 255;
-                    raster[cpPos] = PACK4(r, g, b, a);
-                    cpPos++;
-                    ppPos += samplesperpixel;
+                    int a = pp[ppOffset + 3];
+                    int r = (pp[ppOffset] * a + 127) / 255;
+                    int g = (pp[ppOffset + 1] * a + 127) / 255;
+                    int b = (pp[ppOffset + 2] * a + 127) / 255;
+                    raster[rasterOffset] = PACK4(r, g, b, a);
+                    rasterOffset++;
+                    ppOffset += samplesperpixel;
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -2149,23 +2132,21 @@ namespace BitMiracle.LibTiff.Classic
             int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
             fromskew *= samplesperpixel;
 
-            short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
+            short[] wp = Tiff.ByteArrayToShorts(pp, ppOffset, pp.Length);
             int wpPos = 0;
 
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
                 {
-                    raster[cpPos] = PACKW(wp[wpPos], wp[wpPos + 1], wp[wpPos + 2]);
-                    cpPos++;
+                    raster[rasterOffset] = PACKW(wp[wpPos], wp[wpPos + 1], wp[wpPos + 2]);
+                    rasterOffset++;
                     wpPos += samplesperpixel;
                 }
 
-                cpPos += toskew;
+                rasterOffset += toskew;
                 wpPos += fromskew;
             }
         }
@@ -2177,10 +2158,8 @@ namespace BitMiracle.LibTiff.Classic
             int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             int samplesperpixel = img.samplesperpixel;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
 
-            short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
+            short[] wp = Tiff.ByteArrayToShorts(pp, ppOffset, pp.Length);
             int wpPos = 0;
 
             fromskew *= samplesperpixel;
@@ -2188,12 +2167,12 @@ namespace BitMiracle.LibTiff.Classic
             {
                 for (x = width; x-- > 0; )
                 {
-                    raster[cpPos] = PACKW4(wp[wpPos], wp[wpPos + 1], wp[wpPos + 2], wp[wpPos + 3]);
-                    cpPos++;
+                    raster[rasterOffset] = PACKW4(wp[wpPos], wp[wpPos + 1], wp[wpPos + 2], wp[wpPos + 3]);
+                    rasterOffset++;
                     wpPos += samplesperpixel;
                 }
 
-                cpPos += toskew;
+                rasterOffset += toskew;
                 wpPos += fromskew;
             }
         }
@@ -2207,10 +2186,7 @@ namespace BitMiracle.LibTiff.Classic
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
 
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
-            short[] wp = Tiff.ByteArrayToShorts(pp, ppPos, pp.Length);
+            short[] wp = Tiff.ByteArrayToShorts(pp, ppOffset, pp.Length);
             int wpPos = 0;
 
             while (height-- > 0)
@@ -2221,12 +2197,12 @@ namespace BitMiracle.LibTiff.Classic
                     int r = (W2B(wp[wpPos]) * a + 127) / 255;
                     int g = (W2B(wp[wpPos + 1]) * a + 127) / 255;
                     int b = (W2B(wp[wpPos + 2]) * a + 127) / 255;
-                    raster[cpPos] = PACK4(r, g, b, a);
-                    cpPos++;
+                    raster[rasterOffset] = PACK4(r, g, b, a);
+                    rasterOffset++;
                     wpPos += samplesperpixel;
                 }
 
-                cpPos += toskew;
+                rasterOffset += toskew;
                 wpPos += fromskew;
             }
         }
@@ -2241,9 +2217,6 @@ namespace BitMiracle.LibTiff.Classic
             int samplesperpixel = img.samplesperpixel;
             fromskew *= samplesperpixel;
 
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
             while (height-- > 0)
             {
                 int _x;
@@ -2251,13 +2224,13 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        short k = (short)(255 - pp[ppPos + 3]);
-                        short r = (short)((k * (255 - pp[ppPos])) / 255);
-                        short g = (short)((k * (255 - pp[ppPos + 1])) / 255);
-                        short b = (short)((k * (255 - pp[ppPos + 2])) / 255);
-                        raster[cpPos] = PACK(r, g, b);
-                        cpPos++;
-                        ppPos += samplesperpixel;
+                        short k = (short)(255 - pp[ppOffset + 3]);
+                        short r = (short)((k * (255 - pp[ppOffset])) / 255);
+                        short g = (short)((k * (255 - pp[ppOffset + 1])) / 255);
+                        short b = (short)((k * (255 - pp[ppOffset + 2])) / 255);
+                        raster[rasterOffset] = PACK(r, g, b);
+                        rasterOffset++;
+                        ppOffset += samplesperpixel;
                     }
                 }
 
@@ -2267,50 +2240,19 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            short k = (short)(255 - pp[ppPos + 3]);
-                            short r = (short)((k * (255 - pp[ppPos])) / 255);
-                            short g = (short)((k * (255 - pp[ppPos + 1])) / 255);
-                            short b = (short)((k * (255 - pp[ppPos + 2])) / 255);
-                            raster[cpPos] = PACK(r, g, b);
-                            cpPos++;
-                            ppPos += samplesperpixel;
+                            short k = (short)(255 - pp[ppOffset + 3]);
+                            short r = (short)((k * (255 - pp[ppOffset])) / 255);
+                            short g = (short)((k * (255 - pp[ppOffset + 1])) / 255);
+                            short b = (short)((k * (255 - pp[ppOffset + 2])) / 255);
+                            raster[rasterOffset] = PACK(r, g, b);
+                            rasterOffset++;
+                            ppOffset += samplesperpixel;
                         }
                     }
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
-            }
-        }
-
-        /// <summary>
-        /// 8-bit packed CMYK samples w/Map => RGB
-        /// NB: The conversion of CMYK->RGB is *very* crude.
-        /// </summary>
-        private static void putRGBcontig8bitCMYKMaptile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
-        {
-            int samplesperpixel = img.samplesperpixel;
-            byte[] Map = img.Map;
-            fromskew *= samplesperpixel;
-
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-            while (height-- > 0)
-            {
-                for (x = width; x-- > 0; )
-                {
-                    short k = (short)(255 - pp[ppPos + 3]);
-                    short r = (short)((k * (255 - pp[ppPos])) / 255);
-                    short g = (short)((k * (255 - pp[ppPos + 1])) / 255);
-                    short b = (short)((k * (255 - pp[ppPos + 2])) / 255);
-                    raster[cpPos] = PACK(Map[r], Map[g], Map[b]);
-                    cpPos++;
-                    ppPos += samplesperpixel;
-                }
-
-                ppPos += fromskew;
-                cpPos += toskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
         }
 
@@ -2344,428 +2286,45 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 8-bit packed YCbCr samples w/ 4,4 subsampling => RGB
-        /// </summary>
-        private static void putcontig8bitYCbCr44tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
-        {
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
-            int cp1 = cpPos + width + toskew;
-            int cp2 = cp1 + width + toskew;
-            int cp3 = cp2 + width + toskew;
-            int incr = 3 * width + 4 * toskew;
-
-            // adjust fromskew
-            fromskew = (fromskew * 18) / 4;
-            if ((height & 3) == 0 && (width & 3) == 0)
-            {
-                for (; height >= 4; height -= 4)
-                {
-                    x = width >> 2;
-                    do
-                    {
-                        int Cb = pp[ppPos + 16];
-                        int Cr = pp[ppPos + 17];
-
-                        img.YCbCrtoRGB(out raster[cpPos], pp[ppPos + 0], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cpPos + 2], pp[ppPos + 2], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cpPos + 3], pp[ppPos + 3], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 0], pp[ppPos + 4], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 1], pp[ppPos + 5], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 2], pp[ppPos + 6], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 3], pp[ppPos + 7], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp2 + 0], pp[ppPos + 8], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp2 + 1], pp[ppPos + 9], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp2 + 2], pp[ppPos + 10], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp2 + 3], pp[ppPos + 11], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp3 + 0], pp[ppPos + 12], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp3 + 1], pp[ppPos + 13], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp3 + 2], pp[ppPos + 14], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp3 + 3], pp[ppPos + 15], Cb, Cr);
-
-                        cpPos += 4;
-                        cp1 += 4;
-                        cp2 += 4;
-                        cp3 += 4;
-                        ppPos += 18;
-                    }
-                    while (--x != 0);
-
-                    cpPos += incr;
-                    cp1 += incr;
-                    cp2 += incr;
-                    cp3 += incr;
-                    ppPos += fromskew;
-                }
-            }
-            else
-            {
-                while (height > 0)
-                {
-                    for (x = width; x > 0; )
-                    {
-                        int Cb = pp[ppPos + 16];
-                        int Cr = pp[ppPos + 17];
-
-                        bool h_goOn = false;
-                        bool x_goOn = false;
-
-                        // order of if's is important
-                        if (x < 1 || x > 3)
-                        {
-                            // order of if's is important
-                            h_goOn = false;
-                            if (height < 1 || height > 3)
-                            {
-                                img.YCbCrtoRGB(out raster[cp3 + 3], pp[ppPos + 15], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 3 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp2 + 3], pp[ppPos + 11], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 2 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp1 + 3], pp[ppPos + 7], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[cpPos + 3], pp[ppPos + 3], Cb, Cr);
-
-                            x_goOn = true;
-                        }
-
-                        if (x == 3 || x_goOn)
-                        {
-                            // order of if's is important
-                            h_goOn = false;
-                            if (height < 1 || height > 3)
-                            {
-                                img.YCbCrtoRGB(out raster[cp3 + 2], pp[ppPos + 14], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 3 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp2 + 2], pp[ppPos + 10], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 2 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp1 + 2], pp[ppPos + 6], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[cpPos + 2], pp[ppPos + 2], Cb, Cr);
-
-                            x_goOn = true;
-                        }
-
-                        if (x == 2 || x_goOn)
-                        {
-                            // order of if's is important
-                            h_goOn = false;
-                            if (height < 1 || height > 3)
-                            {
-                                img.YCbCrtoRGB(out raster[cp3 + 1], pp[ppPos + 13], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 3 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp2 + 1], pp[ppPos + 9], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 2 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp1 + 1], pp[ppPos + 5], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-                        }
-
-                        if (x == 1 || x_goOn)
-                        {
-                            // order of if's is important
-                            h_goOn = false;
-                            if (height < 1 || height > 3)
-                            {
-                                img.YCbCrtoRGB(out raster[cp3 + 0], pp[ppPos + 12], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 3 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp2 + 0], pp[ppPos + 8], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 2 || h_goOn)
-                            {
-                                img.YCbCrtoRGB(out raster[cp1 + 0], pp[ppPos + 4], Cb, Cr);
-                                h_goOn = true;
-                            }
-
-                            if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                        }
-
-                        if (x < 4)
-                        {
-                            cpPos += x;
-                            cp1 += x;
-                            cp2 += x;
-                            cp3 += x;
-                            x = 0;
-                        }
-                        else
-                        {
-                            cpPos += 4;
-                            cp1 += 4;
-                            cp2 += 4;
-                            cp3 += 4;
-                            x -= 4;
-                        }
-
-                        ppPos += 18;
-                    }
-
-                    if (height <= 4)
-                        break;
-
-                    height -= 4;
-                    cpPos += incr;
-                    cp1 += incr;
-                    cp2 += incr;
-                    cp3 += incr;
-                    ppPos += fromskew;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 8-bit packed YCbCr samples w/ 4,2 subsampling => RGB
-        /// </summary>
-        private static void putcontig8bitYCbCr42tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
-        {
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
-            int cp1 = cpPos + width + toskew;
-            int incr = 2 * toskew + width;
-
-            fromskew = (fromskew * 10) / 4;
-            if ((height & 3) == 0 && (width & 1) == 0)
-            {
-                for (; height >= 2; height -= 2)
-                {
-                    x = width >> 2;
-                    do
-                    {
-                        int Cb = pp[ppPos + 8];
-                        int Cr = pp[ppPos + 9];
-
-                        img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cpPos + 2], pp[ppPos + 2], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cpPos + 3], pp[ppPos + 3], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 0], pp[ppPos + 4], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 1], pp[ppPos + 5], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 2], pp[ppPos + 6], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[cp1 + 3], pp[ppPos + 7], Cb, Cr);
-
-                        cpPos += 4;
-                        cp1 += 4;
-                        ppPos += 10;
-                    }
-                    while (--x != 0);
-
-                    cpPos += incr;
-                    cp1 += incr;
-                    ppPos += fromskew;
-                }
-            }
-            else
-            {
-                while (height > 0)
-                {
-                    for (x = width; x > 0; )
-                    {
-                        int Cb = pp[ppPos + 8];
-                        int Cr = pp[ppPos + 9];
-
-                        bool x_goOn = false;
-                        if (x < 1 || x > 3)
-                        {
-                            if (height != 1)
-                                img.YCbCrtoRGB(out raster[cp1 + 3], pp[ppPos + 7], Cb, Cr);
-
-                            img.YCbCrtoRGB(out raster[cpPos + 3], pp[ppPos + 3], Cb, Cr);
-                            x_goOn = true;
-                        }
-
-                        if (x == 3 || x_goOn)
-                        {
-                            if (height != 1)
-                                img.YCbCrtoRGB(out raster[cp1 + 2], pp[ppPos + 6], Cb, Cr);
-
-                            img.YCbCrtoRGB(out raster[cpPos + 2], pp[ppPos + 2], Cb, Cr);
-                            x_goOn = true;
-                        }
-
-                        if (x == 2 || x_goOn)
-                        {
-                            if (height != 1)
-                                img.YCbCrtoRGB(out raster[cp1 + 1], pp[ppPos + 5], Cb, Cr);
-
-                            img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-                            x_goOn = true;
-                        }
-
-                        if (x == 1 || x_goOn)
-                        {
-                            if (height != 1)
-                                img.YCbCrtoRGB(out raster[cp1 + 0], pp[ppPos + 4], Cb, Cr);
-
-                            img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                        }
-
-                        if (x < 4)
-                        {
-                            cpPos += x;
-                            cp1 += x;
-                            x = 0;
-                        }
-                        else
-                        {
-                            cpPos += 4;
-                            cp1 += 4;
-                            x -= 4;
-                        }
-
-                        ppPos += 10;
-                    }
-
-                    if (height <= 2)
-                        break;
-
-                    height -= 2;
-                    cpPos += incr;
-                    cp1 += incr;
-                    ppPos += fromskew;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 8-bit packed YCbCr samples w/ 4,1 subsampling => RGB
-        /// </summary>
-        private static void putcontig8bitYCbCr41tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
-        {
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
-            // XXX adjust fromskew
-            do
-            {
-                x = width >> 2;
-                do
-                {
-                    int Cb = pp[ppPos + 4];
-                    int Cr = pp[ppPos + 5];
-
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cpPos + 2], pp[ppPos + 2], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cpPos + 3], pp[ppPos + 3], Cb, Cr);
-
-                    cpPos += 4;
-                    ppPos += 6;
-                }
-                while (--x != 0);
-
-                if ((width & 3) != 0)
-                {
-                    int Cb = pp[ppPos + 4];
-                    int Cr = pp[ppPos + 5];
-
-                    int xx = width & 3;
-                    if (xx == 3)
-                        img.YCbCrtoRGB(out raster[cpPos + 2], pp[ppPos + 2], Cb, Cr);
-
-                    if (xx == 3 || xx == 2)
-                        img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-
-                    if (xx == 3 || xx == 2 || xx == 1)
-                        img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-
-                    cpPos += xx;
-                    ppPos += 6;
-                }
-
-                cpPos += toskew;
-                ppPos += fromskew;
-            }
-            while (--height != 0);
-        }
-
-        /// <summary>
         /// 8-bit packed YCbCr samples w/ 2,2 subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr22tile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew / 2) * 6;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
-            int cp2 = cpPos + width + toskew;
+            int rasterOffset2 = rasterOffset + width + toskew;
 
             while (height >= 2)
             {
                 x = width;
                 while (x >= 2)
                 {
-                    int Cb = pp[ppPos + 4];
-                    int Cr = pp[ppPos + 5];
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cp2 + 0], pp[ppPos + 2], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cp2 + 1], pp[ppPos + 3], Cb, Cr);
-                    cpPos += 2;
-                    cp2 += 2;
-                    ppPos += 6;
+                    int Cb = pp[ppOffset + 4];
+                    int Cr = pp[ppOffset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 2], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 3], Cb, Cr);
+                    rasterOffset += 2;
+                    rasterOffset2 += 2;
+                    ppOffset += 6;
                     x -= 2;
                 }
 
                 if (x == 1)
                 {
-                    int Cb = pp[ppPos + 4];
-                    int Cr = pp[ppPos + 5];
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cp2 + 0], pp[ppPos + 2], Cb, Cr);
-                    cpPos++;
-                    cp2++;
-                    ppPos += 6;
+                    int Cb = pp[ppOffset + 4];
+                    int Cr = pp[ppOffset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 2], Cb, Cr);
+                    rasterOffset++;
+                    rasterOffset2++;
+                    ppOffset += 6;
                 }
 
-                cpPos += toskew * 2 + width;
-                cp2 += toskew * 2 + width;
-                ppPos += fromskew;
+                rasterOffset += toskew * 2 + width;
+                rasterOffset2 += toskew * 2 + width;
+                ppOffset += fromskew;
                 height -= 2;
             }
 
@@ -2774,21 +2333,21 @@ namespace BitMiracle.LibTiff.Classic
                 x = width;
                 while (x >= 2)
                 {
-                    int Cb = pp[ppPos + 4];
-                    int Cr = pp[ppPos + 5];
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
-                    cpPos += 2;
-                    cp2 += 2;
-                    ppPos += 6;
+                    int Cb = pp[ppOffset + 4];
+                    int Cr = pp[ppOffset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                    rasterOffset += 2;
+                    rasterOffset2 += 2;
+                    ppOffset += 6;
                     x -= 2;
                 }
 
                 if (x == 1)
                 {
-                    int Cb = pp[ppPos + 4];
-                    int Cr = pp[ppPos + 5];
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
+                    int Cb = pp[ppOffset + 4];
+                    int Cr = pp[ppOffset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
                 }
             }
         }
@@ -2800,38 +2359,407 @@ namespace BitMiracle.LibTiff.Classic
             int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew * 4) / 2;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
 
             do
             {
                 x = width >> 1;
                 do
                 {
-                    int Cb = pp[ppPos + 2];
-                    int Cr = pp[ppPos + 3];
+                    int Cb = pp[ppOffset + 2];
+                    int Cr = pp[ppOffset + 3];
 
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cpPos + 1], pp[ppPos + 1], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
 
-                    cpPos += 2;
-                    ppPos += 4;
+                    rasterOffset += 2;
+                    ppOffset += 4;
                 }
                 while (--x != 0);
 
                 if ((width & 1) != 0)
                 {
-                    int Cb = pp[ppPos + 2];
-                    int Cr = pp[ppPos + 3];
+                    int Cb = pp[ppOffset + 2];
+                    int Cr = pp[ppOffset + 3];
 
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
 
-                    cpPos += 1;
-                    ppPos += 4;
+                    rasterOffset += 1;
+                    ppOffset += 4;
                 }
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
+            }
+            while (--height != 0);
+        }
+
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 4,4 subsampling => RGB
+        /// </summary>
+        private static void putcontig8bitYCbCr44tile(TiffRgbaImage img, int[] raster, int rasterOffset,
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+        {
+            int rasterOffset1 = rasterOffset + width + toskew;
+            int rasterOffset2 = rasterOffset1 + width + toskew;
+            int rasterOffset3 = rasterOffset2 + width + toskew;
+            int incr = 3 * width + 4 * toskew;
+
+            // adjust fromskew
+            fromskew = (fromskew * 18) / 4;
+            if ((height & 3) == 0 && (width & 3) == 0)
+            {
+                for (; height >= 4; height -= 4)
+                {
+                    x = width >> 2;
+                    do
+                    {
+                        int Cb = pp[ppOffset + 16];
+                        int Cr = pp[ppOffset + 17];
+
+                        img.YCbCrtoRGB(out raster[rasterOffset], pp[ppOffset + 0], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 0], pp[ppOffset + 4], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 1], pp[ppOffset + 5], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 2], pp[ppOffset + 6], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 3], pp[ppOffset + 7], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 8], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 9], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 10], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 11], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 0], pp[ppOffset + 12], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 1], pp[ppOffset + 13], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 2], pp[ppOffset + 14], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 3], pp[ppOffset + 15], Cb, Cr);
+
+                        rasterOffset += 4;
+                        rasterOffset1 += 4;
+                        rasterOffset2 += 4;
+                        rasterOffset3 += 4;
+                        ppOffset += 18;
+                    }
+                    while (--x != 0);
+
+                    rasterOffset += incr;
+                    rasterOffset1 += incr;
+                    rasterOffset2 += incr;
+                    rasterOffset3 += incr;
+                    ppOffset += fromskew;
+                }
+            }
+            else
+            {
+                while (height > 0)
+                {
+                    for (x = width; x > 0; )
+                    {
+                        int Cb = pp[ppOffset + 16];
+                        int Cr = pp[ppOffset + 17];
+
+                        bool h_goOn = false;
+                        bool x_goOn = false;
+
+                        // order of if's is important
+                        if (x < 1 || x > 3)
+                        {
+                            // order of if's is important
+                            h_goOn = false;
+                            if (height < 1 || height > 3)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 3], pp[ppOffset + 15], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 3 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 11], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 2 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 3], pp[ppOffset + 7], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 1 || h_goOn)
+                                img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+
+                            x_goOn = true;
+                        }
+
+                        if (x == 3 || x_goOn)
+                        {
+                            // order of if's is important
+                            h_goOn = false;
+                            if (height < 1 || height > 3)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 2], pp[ppOffset + 14], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 3 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 10], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 2 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 2], pp[ppOffset + 6], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 1 || h_goOn)
+                                img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+
+                            x_goOn = true;
+                        }
+
+                        if (x == 2 || x_goOn)
+                        {
+                            // order of if's is important
+                            h_goOn = false;
+                            if (height < 1 || height > 3)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 1], pp[ppOffset + 13], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 3 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 9], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 2 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 1], pp[ppOffset + 5], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 1 || h_goOn)
+                                img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                        }
+
+                        if (x == 1 || x_goOn)
+                        {
+                            // order of if's is important
+                            h_goOn = false;
+                            if (height < 1 || height > 3)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 0], pp[ppOffset + 12], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 3 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 8], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 2 || h_goOn)
+                            {
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 0], pp[ppOffset + 4], Cb, Cr);
+                                h_goOn = true;
+                            }
+
+                            if (height == 1 || h_goOn)
+                                img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                        }
+
+                        if (x < 4)
+                        {
+                            rasterOffset += x;
+                            rasterOffset1 += x;
+                            rasterOffset2 += x;
+                            rasterOffset3 += x;
+                            x = 0;
+                        }
+                        else
+                        {
+                            rasterOffset += 4;
+                            rasterOffset1 += 4;
+                            rasterOffset2 += 4;
+                            rasterOffset3 += 4;
+                            x -= 4;
+                        }
+
+                        ppOffset += 18;
+                    }
+
+                    if (height <= 4)
+                        break;
+
+                    height -= 4;
+                    rasterOffset += incr;
+                    rasterOffset1 += incr;
+                    rasterOffset2 += incr;
+                    rasterOffset3 += incr;
+                    ppOffset += fromskew;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 4,2 subsampling => RGB
+        /// </summary>
+        private static void putcontig8bitYCbCr42tile(TiffRgbaImage img, int[] raster, int rasterOffset,
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+        {
+            int rasterOffset2 = rasterOffset + width + toskew;
+            int incr = 2 * toskew + width;
+
+            fromskew = (fromskew * 10) / 4;
+            if ((height & 3) == 0 && (width & 1) == 0)
+            {
+                for (; height >= 2; height -= 2)
+                {
+                    x = width >> 2;
+                    do
+                    {
+                        int Cb = pp[ppOffset + 8];
+                        int Cr = pp[ppOffset + 9];
+
+                        img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 4], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 5], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 6], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 7], Cb, Cr);
+
+                        rasterOffset += 4;
+                        rasterOffset2 += 4;
+                        ppOffset += 10;
+                    }
+                    while (--x != 0);
+
+                    rasterOffset += incr;
+                    rasterOffset2 += incr;
+                    ppOffset += fromskew;
+                }
+            }
+            else
+            {
+                while (height > 0)
+                {
+                    for (x = width; x > 0; )
+                    {
+                        int Cb = pp[ppOffset + 8];
+                        int Cr = pp[ppOffset + 9];
+
+                        bool x_goOn = false;
+                        if (x < 1 || x > 3)
+                        {
+                            if (height != 1)
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 7], Cb, Cr);
+
+                            img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+                            x_goOn = true;
+                        }
+
+                        if (x == 3 || x_goOn)
+                        {
+                            if (height != 1)
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 6], Cb, Cr);
+
+                            img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+                            x_goOn = true;
+                        }
+
+                        if (x == 2 || x_goOn)
+                        {
+                            if (height != 1)
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 5], Cb, Cr);
+
+                            img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                            x_goOn = true;
+                        }
+
+                        if (x == 1 || x_goOn)
+                        {
+                            if (height != 1)
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 4], Cb, Cr);
+
+                            img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                        }
+
+                        if (x < 4)
+                        {
+                            rasterOffset += x;
+                            rasterOffset2 += x;
+                            x = 0;
+                        }
+                        else
+                        {
+                            rasterOffset += 4;
+                            rasterOffset2 += 4;
+                            x -= 4;
+                        }
+
+                        ppOffset += 10;
+                    }
+
+                    if (height <= 2)
+                        break;
+
+                    height -= 2;
+                    rasterOffset += incr;
+                    rasterOffset2 += incr;
+                    ppOffset += fromskew;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 8-bit packed YCbCr samples w/ 4,1 subsampling => RGB
+        /// </summary>
+        private static void putcontig8bitYCbCr41tile(TiffRgbaImage img, int[] raster, int rasterOffset,
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+        {
+            // XXX adjust fromskew
+            do
+            {
+                x = width >> 2;
+                do
+                {
+                    int Cb = pp[ppOffset + 4];
+                    int Cr = pp[ppOffset + 5];
+
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+
+                    rasterOffset += 4;
+                    ppOffset += 6;
+                }
+                while (--x != 0);
+
+                if ((width & 3) != 0)
+                {
+                    int Cb = pp[ppOffset + 4];
+                    int Cr = pp[ppOffset + 5];
+
+                    int xx = width & 3;
+                    if (xx == 3)
+                        img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+
+                    if (xx == 3 || xx == 2)
+                        img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+
+                    if (xx == 3 || xx == 2 || xx == 1)
+                        img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+
+                    rasterOffset += xx;
+                    ppOffset += 6;
+                }
+
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
             while (--height != 0);
         }
@@ -2842,26 +2770,23 @@ namespace BitMiracle.LibTiff.Classic
         private static void putcontig8bitYCbCr11tile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-
             fromskew *= 3;
             do
             {
                 x = width; // was x = w >> 1; patched 2000/09/25 warmerda@home.com
                 do
                 {
-                    int Cb = pp[ppPos + 1];
-                    int Cr = pp[ppPos + 2];
+                    int Cb = pp[ppOffset + 1];
+                    int Cr = pp[ppOffset + 2];
 
-                    img.YCbCrtoRGB(out raster[cpPos], pp[ppPos + 0], Cb, Cr);
-                    cpPos++;
-                    ppPos += 3;
+                    img.YCbCrtoRGB(out raster[rasterOffset], pp[ppOffset + 0], Cb, Cr);
+                    rasterOffset++;
+                    ppOffset += 3;
                 }
                 while (--x != 0);
 
-                cpPos += toskew;
-                ppPos += fromskew;
+                rasterOffset += toskew;
+                ppOffset += fromskew;
             }
             while (--height != 0);
         }
@@ -2873,26 +2798,25 @@ namespace BitMiracle.LibTiff.Classic
             int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
         {
             fromskew = (fromskew / 2) * 4;
-            int cpPos = rasterOffset;
-            int ppPos = ppOffset;
-            int cp2 = cpPos + width + toskew;
+            int rasterOffset2 = rasterOffset + width + toskew;
+
             while (height >= 2)
             {
                 x = width;
                 do
                 {
-                    int Cb = pp[ppPos + 2];
-                    int Cr = pp[ppPos + 3];
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[cp2 + 0], pp[ppPos + 1], Cb, Cr);
-                    cpPos++;
-                    cp2++;
-                    ppPos += 4;
+                    int Cb = pp[ppOffset + 2];
+                    int Cr = pp[ppOffset + 3];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 1], Cb, Cr);
+                    rasterOffset++;
+                    rasterOffset2++;
+                    ppOffset += 4;
                 } while (--x != 0);
 
-                cpPos += toskew * 2 + width;
-                cp2 += toskew * 2 + width;
-                ppPos += fromskew;
+                rasterOffset += toskew * 2 + width;
+                rasterOffset2 += toskew * 2 + width;
+                ppOffset += fromskew;
                 height -= 2;
             }
 
@@ -2901,19 +2825,19 @@ namespace BitMiracle.LibTiff.Classic
                 x = width;
                 do
                 {
-                    int Cb = pp[ppPos + 2];
-                    int Cr = pp[ppPos + 3];
-                    img.YCbCrtoRGB(out raster[cpPos + 0], pp[ppPos + 0], Cb, Cr);
-                    cpPos++;
-                    ppPos += 4;
+                    int Cb = pp[ppOffset + 2];
+                    int Cr = pp[ppOffset + 3];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    rasterOffset++;
+                    ppOffset += 4;
                 } while (--x != 0);
             }
         }
 
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Separated cases
         //
-
 
         /// <summary>
         /// 8-bit unpacked samples => RGB
@@ -2922,11 +2846,6 @@ namespace BitMiracle.LibTiff.Classic
             int x, int y, int width, int height, int fromskew, int toskew,
             byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            int cpPos = rasterOffset;
-            int rPos = rOffset;
-            int gPos = gOffset;
-            int bPos = bOffset;
-
             while (height-- > 0)
             {
                 int _x;
@@ -2934,11 +2853,11 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        raster[cpPos] = PACK(rgba[rPos], rgba[gPos], rgba[bPos]);
-                        cpPos++;
-                        rPos++;
-                        gPos++;
-                        bPos++;
+                        raster[rasterOffset] = PACK(rgba[rOffset], rgba[gOffset], rgba[bOffset]);
+                        rasterOffset++;
+                        rOffset++;
+                        gOffset++;
+                        bOffset++;
                     }
                 }
 
@@ -2948,19 +2867,19 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            raster[cpPos] = PACK(rgba[rPos], rgba[gPos], rgba[bPos]);
-                            cpPos++;
-                            rPos++;
-                            gPos++;
-                            bPos++;
+                            raster[rasterOffset] = PACK(rgba[rOffset], rgba[gOffset], rgba[bOffset]);
+                            rasterOffset++;
+                            rOffset++;
+                            gOffset++;
+                            bOffset++;
                         }
                     }
                 }
 
-                rPos += fromskew;
-                gPos += fromskew;
-                bPos += fromskew;
-                cpPos += toskew;
+                rOffset += fromskew;
+                gOffset += fromskew;
+                bOffset += fromskew;
+                rasterOffset += toskew;
             }
         }
 
@@ -2971,11 +2890,6 @@ namespace BitMiracle.LibTiff.Classic
             int x, int y, int width, int height, int fromskew, int toskew,
             byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            int cpPos = rasterOffset;
-            int rPos = rOffset;
-            int gPos = gOffset;
-            int bPos = bOffset;
-            int aPos = aOffset;
             while (height-- > 0)
             {
                 int _x;
@@ -2983,12 +2897,12 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        raster[cpPos] = PACK4(rgba[rPos], rgba[gPos], rgba[bPos], rgba[aPos]);
-                        cpPos++;
-                        rPos++;
-                        gPos++;
-                        bPos++;
-                        aPos++;
+                        raster[rasterOffset] = PACK4(rgba[rOffset], rgba[gOffset], rgba[bOffset], rgba[aOffset]);
+                        rasterOffset++;
+                        rOffset++;
+                        gOffset++;
+                        bOffset++;
+                        aOffset++;
                     }
                 }
 
@@ -2998,22 +2912,22 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            raster[cpPos] = PACK4(rgba[rPos], rgba[gPos], rgba[bPos], rgba[aPos]);
-                            cpPos++;
-                            rPos++;
-                            gPos++;
-                            bPos++;
-                            aPos++;
+                            raster[rasterOffset] = PACK4(rgba[rOffset], rgba[gOffset], rgba[bOffset], rgba[aOffset]);
+                            rasterOffset++;
+                            rOffset++;
+                            gOffset++;
+                            bOffset++;
+                            aOffset++;
                         }
                     }
                 }
 
-                rPos += fromskew;
-                gPos += fromskew;
-                bPos += fromskew;
-                aPos += fromskew;
+                rOffset += fromskew;
+                gOffset += fromskew;
+                bOffset += fromskew;
+                aOffset += fromskew;
 
-                cpPos += toskew;
+                rasterOffset += toskew;
             }
         }
 
@@ -3024,33 +2938,28 @@ namespace BitMiracle.LibTiff.Classic
             int x, int y, int width, int height, int fromskew, int toskew,
             byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
-            int cpPos = rasterOffset;
-            int rPos = rOffset;
-            int gPos = gOffset;
-            int bPos = bOffset;
-            int aPos = aOffset;
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
                 {
-                    int av = rgba[aPos];
-                    int rv = (rgba[rPos] * av + 127) / 255;
-                    int gv = (rgba[gPos] * av + 127) / 255;
-                    int bv = (rgba[bPos] * av + 127) / 255;
-                    raster[cpPos] = PACK4(rv, gv, bv, av);
-                    cpPos++;
-                    rPos++;
-                    gPos++;
-                    bPos++;
-                    aPos++;
+                    int av = rgba[aOffset];
+                    int rv = (rgba[rOffset] * av + 127) / 255;
+                    int gv = (rgba[gOffset] * av + 127) / 255;
+                    int bv = (rgba[bOffset] * av + 127) / 255;
+                    raster[rasterOffset] = PACK4(rv, gv, bv, av);
+                    rasterOffset++;
+                    rOffset++;
+                    gOffset++;
+                    bOffset++;
+                    aOffset++;
                 }
 
-                rPos += fromskew;
-                gPos += fromskew;
-                bPos += fromskew;
-                aPos += fromskew;
+                rOffset += fromskew;
+                gOffset += fromskew;
+                bOffset += fromskew;
+                aOffset += fromskew;
 
-                cpPos += toskew;
+                rasterOffset += toskew;
             }
         }
 
@@ -3066,14 +2975,13 @@ namespace BitMiracle.LibTiff.Classic
             int wrPos = rOffset / sizeof(short);
             int wgPos = gOffset / sizeof(short);
             int wbPos = bOffset / sizeof(short);
-            int cpPos = rasterOffset;
 
             while (height-- > 0)
             {
                 for (x = 0; x < width; x++)
                 {
-                    raster[cpPos] = PACKW(wrgba[wrPos], wrgba[wgPos], wrgba[wbPos]);
-                    cpPos++;
+                    raster[rasterOffset] = PACKW(wrgba[wrPos], wrgba[wgPos], wrgba[wbPos]);
+                    rasterOffset++;
                     wrPos++;
                     wgPos++;
                     wbPos++;
@@ -3082,7 +2990,7 @@ namespace BitMiracle.LibTiff.Classic
                 wrPos += fromskew;
                 wgPos += fromskew;
                 wbPos += fromskew;
-                cpPos += toskew;
+                rasterOffset += toskew;
             }
         }
 
@@ -3099,14 +3007,13 @@ namespace BitMiracle.LibTiff.Classic
             int wgPos = gOffset / sizeof(short);
             int wbPos = bOffset / sizeof(short);
             int waPos = aOffset / sizeof(short);
-            int cpPos = rasterOffset;
 
             while (height-- > 0)
             {
                 for (x = 0; x < width; x++)
                 {
-                    raster[cpPos] = PACKW4(wrgba[wrPos], wrgba[wgPos], wrgba[wbPos], wrgba[waPos]);
-                    cpPos++;
+                    raster[rasterOffset] = PACKW4(wrgba[wrPos], wrgba[wgPos], wrgba[wbPos], wrgba[waPos]);
+                    rasterOffset++;
                     wrPos++;
                     wgPos++;
                     wbPos++;
@@ -3118,7 +3025,7 @@ namespace BitMiracle.LibTiff.Classic
                 wbPos += fromskew;
                 waPos += fromskew;
 
-                cpPos += toskew;
+                rasterOffset += toskew;
             }
         }
 
@@ -3135,7 +3042,6 @@ namespace BitMiracle.LibTiff.Classic
             int wgPos = gOffset / sizeof(short);
             int wbPos = bOffset / sizeof(short);
             int waPos = aOffset / sizeof(short);
-            int cpPos = rasterOffset;
 
             while (height-- > 0)
             {
@@ -3145,8 +3051,8 @@ namespace BitMiracle.LibTiff.Classic
                     int r = (W2B(wrgba[wrPos]) * a + 127) / 255;
                     int g = (W2B(wrgba[wgPos]) * a + 127) / 255;
                     int b = (W2B(wrgba[wbPos]) * a + 127) / 255;
-                    raster[cpPos] = PACK4(r, g, b, a);
-                    cpPos++;
+                    raster[rasterOffset] = PACK4(r, g, b, a);
+                    rasterOffset++;
                     wrPos++;
                     wgPos++;
                     wbPos++;
@@ -3158,7 +3064,7 @@ namespace BitMiracle.LibTiff.Classic
                 wbPos += fromskew;
                 waPos += fromskew;
 
-                cpPos += toskew;
+                rasterOffset += toskew;
             }
         }
 
@@ -3170,30 +3076,67 @@ namespace BitMiracle.LibTiff.Classic
             byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
         {
             // TODO: naming of input vars is still off, change obfuscating declaration inside define, or resolve obfuscation
-            int cpPos = rasterOffset;
-            int rPos = rOffset;
-            int gPos = gOffset;
-            int bPos = bOffset;
             while (height-- > 0)
             {
                 x = width;
                 do
                 {
                     int dr, dg, db;
-                    img.ycbcr.YCbCrtoRGB(rgba[rPos], rgba[gPos], rgba[bPos], out dr, out dg, out db);
+                    img.ycbcr.YCbCrtoRGB(rgba[rOffset], rgba[gOffset], rgba[bOffset], out dr, out dg, out db);
 
-                    raster[cpPos] = PACK(dr, dg, db);
-                    cpPos++;
-                    rPos++;
-                    gPos++;
-                    bPos++;
+                    raster[rasterOffset] = PACK(dr, dg, db);
+                    rasterOffset++;
+                    rOffset++;
+                    gOffset++;
+                    bOffset++;
                 } while (--x != 0);
 
-                rPos += fromskew;
-                gPos += fromskew;
-                bPos += fromskew;
+                rOffset += fromskew;
+                gOffset += fromskew;
+                bOffset += fromskew;
+                rasterOffset += toskew;
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Untested methods
+        //
+        // This methods are untested (and, probably, should be deleted).
+        //
+        // pickContigCase implicitly *excludes* putRGBcontig8bitCMYKMaptile from possible "put"
+        //                methods when it requires images to have Photometric.SEPARATED *and* 8-bit
+        //                samples *and* a Map to use putRGBcontig8bitCMYKMaptile. The problem is:
+        //                no Map is ever built for Photometric.SEPARATED *and* 8-bit samples.
+
+        /// <summary>
+        /// 8-bit packed CMYK samples w/Map => RGB
+        /// NB: The conversion of CMYK->RGB is *very* crude.
+        /// </summary>
+        private static void putRGBcontig8bitCMYKMaptile(TiffRgbaImage img, int[] raster, int rasterOffset,
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+        {
+            int samplesperpixel = img.samplesperpixel;
+            byte[] Map = img.Map;
+            fromskew *= samplesperpixel;
+
+            int cpPos = rasterOffset;
+            int ppPos = ppOffset;
+            while (height-- > 0)
+            {
+                for (x = width; x-- > 0; )
+                {
+                    short k = (short)(255 - pp[ppPos + 3]);
+                    short r = (short)((k * (255 - pp[ppPos])) / 255);
+                    short g = (short)((k * (255 - pp[ppPos + 1])) / 255);
+                    short b = (short)((k * (255 - pp[ppPos + 2])) / 255);
+                    raster[cpPos] = PACK(Map[r], Map[g], Map[b]);
+                    cpPos++;
+                    ppPos += samplesperpixel;
+                }
+
+                ppPos += fromskew;
                 cpPos += toskew;
             }
-        }        
+        }
     }
 }
