@@ -74,6 +74,7 @@ namespace UnitTests
             {
                 return new string[]
                 {
+                    "lab8-lzw.tif",
                     "gray16-lzw-pc.tif",
                     "tiger-palette-strip-01.tif",
                     "chevron.tif",
