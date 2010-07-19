@@ -177,6 +177,19 @@ namespace BitMiracle.LibTiff.Classic
         /// Delegate for "put" method (the method that is called to pack pixel data in the raster)
         /// used when converting contiguously packed samples.
         /// </summary>
+        /// <param name="img">An instance of the <see cref="TiffRgbaImage"/> class.</param>
+        /// <param name="raster">The raster (the buffer to place decoded image data to).</param>
+        /// <param name="rasterOffset">The zero-based byte offset in <paramref name="raster"/> at
+        /// which to begin storing decoded bytes.</param>
+        /// <param name="x">The x-coordinate of the first pixel in block of pixels to be decoded.</param>
+        /// <param name="y">The y-coordinate of the first pixel in block of pixels to be decoded.</param>
+        /// <param name="width">The block width.</param>
+        /// <param name="height">The block height.</param>
+        /// <param name="fromskew"></param>
+        /// <param name="toskew"></param>
+        /// <param name="buffer">The buffer with image data.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin reading image bytes.</param>
         /// <remarks><para>
         /// The image reading and conversion methods invoke "put" methods to copy/image/whatever
         /// tiles of raw image data. A default set of methods is provided to convert/copy raw
@@ -195,6 +208,25 @@ namespace BitMiracle.LibTiff.Classic
         /// Delegate for "put" method (the method that is called to pack pixel data in the raster)
         /// used when converting separated samples.
         /// </summary>
+        /// <param name="img">An instance of the <see cref="TiffRgbaImage"/> class.</param>
+        /// <param name="raster">The raster (the buffer to place decoded image data to).</param>
+        /// <param name="rasterOffset">The zero-based byte offset in <paramref name="raster"/> at
+        /// which to begin storing decoded bytes.</param>
+        /// <param name="x">The x-coordinate of the first pixel in block of pixels to be decoded.</param>
+        /// <param name="y">The y-coordinate of the first pixel in block of pixels to be decoded.</param>
+        /// <param name="width">The block width.</param>
+        /// <param name="height">The block height.</param>
+        /// <param name="fromskew"></param>
+        /// <param name="toskew"></param>
+        /// <param name="buffer">The buffer with image data.</param>
+        /// <param name="offset1">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin reading image bytes that constitute first sample plane.</param>
+        /// <param name="offset2">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin reading image bytes that constitute second sample plane.</param>
+        /// <param name="offset3">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin reading image bytes that constitute third sample plane.</param>
+        /// <param name="offset4">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin reading image bytes that constitute fourth sample plane.</param>
         /// <remarks><para>
         /// The image reading and conversion methods invoke "put" methods to copy/image/whatever
         /// tiles of raw image data. A default set of methods is provided to convert/copy raw
@@ -207,7 +239,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para></remarks>
         public delegate void PutSeparateDelegate(
             TiffRgbaImage img, int[] raster, int rasterOffset, int x, int y, int width, int height,
-            int fromskew, int toskew, byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset);
+            int fromskew, int toskew, byte[] buffer, int offset1, int offset2, int offset3, int offset4);
 
         /// <summary>
         /// Delegate for "get" method (the method that is called to produce RGBA raster).
@@ -2288,7 +2320,7 @@ namespace BitMiracle.LibTiff.Classic
         /// 8-bit packed YCbCr samples w/ 2,2 subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr22tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] buffer, int offset)
         {
             fromskew = (fromskew / 2) * 6;
             int rasterOffset2 = rasterOffset + width + toskew;
@@ -2298,32 +2330,32 @@ namespace BitMiracle.LibTiff.Classic
                 x = width;
                 while (x >= 2)
                 {
-                    int Cb = pp[ppOffset + 4];
-                    int Cr = pp[ppOffset + 5];
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 2], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 3], Cb, Cr);
+                    int Cb = buffer[offset + 4];
+                    int Cr = buffer[offset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], buffer[offset + 2], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 1], buffer[offset + 3], Cb, Cr);
                     rasterOffset += 2;
                     rasterOffset2 += 2;
-                    ppOffset += 6;
+                    offset += 6;
                     x -= 2;
                 }
 
                 if (x == 1)
                 {
-                    int Cb = pp[ppOffset + 4];
-                    int Cr = pp[ppOffset + 5];
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 2], Cb, Cr);
+                    int Cb = buffer[offset + 4];
+                    int Cr = buffer[offset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], buffer[offset + 2], Cb, Cr);
                     rasterOffset++;
                     rasterOffset2++;
-                    ppOffset += 6;
+                    offset += 6;
                 }
 
                 rasterOffset += toskew * 2 + width;
                 rasterOffset2 += toskew * 2 + width;
-                ppOffset += fromskew;
+                offset += fromskew;
                 height -= 2;
             }
 
@@ -2332,21 +2364,21 @@ namespace BitMiracle.LibTiff.Classic
                 x = width;
                 while (x >= 2)
                 {
-                    int Cb = pp[ppOffset + 4];
-                    int Cr = pp[ppOffset + 5];
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                    int Cb = buffer[offset + 4];
+                    int Cr = buffer[offset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
                     rasterOffset += 2;
                     rasterOffset2 += 2;
-                    ppOffset += 6;
+                    offset += 6;
                     x -= 2;
                 }
 
                 if (x == 1)
                 {
-                    int Cb = pp[ppOffset + 4];
-                    int Cr = pp[ppOffset + 5];
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    int Cb = buffer[offset + 4];
+                    int Cr = buffer[offset + 5];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
                 }
             }
         }
@@ -2355,7 +2387,7 @@ namespace BitMiracle.LibTiff.Classic
         /// 8-bit packed YCbCr samples w/ 2,1 subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr21tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] buffer, int offset)
         {
             fromskew = (fromskew * 4) / 2;
 
@@ -2364,30 +2396,30 @@ namespace BitMiracle.LibTiff.Classic
                 x = width >> 1;
                 do
                 {
-                    int Cb = pp[ppOffset + 2];
-                    int Cr = pp[ppOffset + 3];
+                    int Cb = buffer[offset + 2];
+                    int Cr = buffer[offset + 3];
 
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
 
                     rasterOffset += 2;
-                    ppOffset += 4;
+                    offset += 4;
                 }
                 while (--x != 0);
 
                 if ((width & 1) != 0)
                 {
-                    int Cb = pp[ppOffset + 2];
-                    int Cr = pp[ppOffset + 3];
+                    int Cb = buffer[offset + 2];
+                    int Cr = buffer[offset + 3];
 
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
 
                     rasterOffset += 1;
-                    ppOffset += 4;
+                    offset += 4;
                 }
 
                 rasterOffset += toskew;
-                ppOffset += fromskew;
+                offset += fromskew;
             }
             while (--height != 0);
         }
@@ -2396,7 +2428,7 @@ namespace BitMiracle.LibTiff.Classic
         /// 8-bit packed YCbCr samples w/ 4,4 subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr44tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] buffer, int offset)
         {
             int rasterOffset1 = rasterOffset + width + toskew;
             int rasterOffset2 = rasterOffset1 + width + toskew;
@@ -2412,31 +2444,31 @@ namespace BitMiracle.LibTiff.Classic
                     x = width >> 2;
                     do
                     {
-                        int Cb = pp[ppOffset + 16];
-                        int Cr = pp[ppOffset + 17];
+                        int Cb = buffer[offset + 16];
+                        int Cr = buffer[offset + 17];
 
-                        img.YCbCrtoRGB(out raster[rasterOffset], pp[ppOffset + 0], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset1 + 0], pp[ppOffset + 4], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset1 + 1], pp[ppOffset + 5], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset1 + 2], pp[ppOffset + 6], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset1 + 3], pp[ppOffset + 7], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 8], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 9], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 10], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 11], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset3 + 0], pp[ppOffset + 12], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset3 + 1], pp[ppOffset + 13], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset3 + 2], pp[ppOffset + 14], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset3 + 3], pp[ppOffset + 15], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset], buffer[offset + 0], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 2], buffer[offset + 2], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 3], buffer[offset + 3], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 0], buffer[offset + 4], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 1], buffer[offset + 5], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 2], buffer[offset + 6], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset1 + 3], buffer[offset + 7], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 0], buffer[offset + 8], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 1], buffer[offset + 9], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 2], buffer[offset + 10], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 3], buffer[offset + 11], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 0], buffer[offset + 12], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 1], buffer[offset + 13], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 2], buffer[offset + 14], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset3 + 3], buffer[offset + 15], Cb, Cr);
 
                         rasterOffset += 4;
                         rasterOffset1 += 4;
                         rasterOffset2 += 4;
                         rasterOffset3 += 4;
-                        ppOffset += 18;
+                        offset += 18;
                     }
                     while (--x != 0);
 
@@ -2444,7 +2476,7 @@ namespace BitMiracle.LibTiff.Classic
                     rasterOffset1 += incr;
                     rasterOffset2 += incr;
                     rasterOffset3 += incr;
-                    ppOffset += fromskew;
+                    offset += fromskew;
                 }
             }
             else
@@ -2453,8 +2485,8 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (x = width; x > 0; )
                     {
-                        int Cb = pp[ppOffset + 16];
-                        int Cr = pp[ppOffset + 17];
+                        int Cb = buffer[offset + 16];
+                        int Cr = buffer[offset + 17];
 
                         bool h_goOn = false;
                         bool x_goOn = false;
@@ -2466,24 +2498,24 @@ namespace BitMiracle.LibTiff.Classic
                             h_goOn = false;
                             if (height < 1 || height > 3)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset3 + 3], pp[ppOffset + 15], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 3], buffer[offset + 15], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 3 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 11], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 3], buffer[offset + 11], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 2 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset1 + 3], pp[ppOffset + 7], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 3], buffer[offset + 7], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset + 3], buffer[offset + 3], Cb, Cr);
 
                             x_goOn = true;
                         }
@@ -2494,24 +2526,24 @@ namespace BitMiracle.LibTiff.Classic
                             h_goOn = false;
                             if (height < 1 || height > 3)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset3 + 2], pp[ppOffset + 14], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 2], buffer[offset + 14], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 3 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 10], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 2], buffer[offset + 10], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 2 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset1 + 2], pp[ppOffset + 6], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 2], buffer[offset + 6], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset + 2], buffer[offset + 2], Cb, Cr);
 
                             x_goOn = true;
                         }
@@ -2522,24 +2554,24 @@ namespace BitMiracle.LibTiff.Classic
                             h_goOn = false;
                             if (height < 1 || height > 3)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset3 + 1], pp[ppOffset + 13], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 1], buffer[offset + 13], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 3 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 9], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 1], buffer[offset + 9], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 2 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset1 + 1], pp[ppOffset + 5], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 1], buffer[offset + 5], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
                         }
 
                         if (x == 1 || x_goOn)
@@ -2548,24 +2580,24 @@ namespace BitMiracle.LibTiff.Classic
                             h_goOn = false;
                             if (height < 1 || height > 3)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset3 + 0], pp[ppOffset + 12], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset3 + 0], buffer[offset + 12], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 3 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 8], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 0], buffer[offset + 8], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 2 || h_goOn)
                             {
-                                img.YCbCrtoRGB(out raster[rasterOffset1 + 0], pp[ppOffset + 4], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset1 + 0], buffer[offset + 4], Cb, Cr);
                                 h_goOn = true;
                             }
 
                             if (height == 1 || h_goOn)
-                                img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
                         }
 
                         if (x < 4)
@@ -2585,7 +2617,7 @@ namespace BitMiracle.LibTiff.Classic
                             x -= 4;
                         }
 
-                        ppOffset += 18;
+                        offset += 18;
                     }
 
                     if (height <= 4)
@@ -2596,7 +2628,7 @@ namespace BitMiracle.LibTiff.Classic
                     rasterOffset1 += incr;
                     rasterOffset2 += incr;
                     rasterOffset3 += incr;
-                    ppOffset += fromskew;
+                    offset += fromskew;
                 }
             }
         }
@@ -2605,7 +2637,7 @@ namespace BitMiracle.LibTiff.Classic
         /// 8-bit packed YCbCr samples w/ 4,2 subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr42tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] buffer, int offset)
         {
             int rasterOffset2 = rasterOffset + width + toskew;
             int incr = 2 * toskew + width;
@@ -2618,27 +2650,27 @@ namespace BitMiracle.LibTiff.Classic
                     x = width >> 2;
                     do
                     {
-                        int Cb = pp[ppOffset + 8];
-                        int Cr = pp[ppOffset + 9];
+                        int Cb = buffer[offset + 8];
+                        int Cr = buffer[offset + 9];
 
-                        img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 4], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 5], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 6], Cb, Cr);
-                        img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 7], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 2], buffer[offset + 2], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 3], buffer[offset + 3], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 0], buffer[offset + 4], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 1], buffer[offset + 5], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 2], buffer[offset + 6], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset2 + 3], buffer[offset + 7], Cb, Cr);
 
                         rasterOffset += 4;
                         rasterOffset2 += 4;
-                        ppOffset += 10;
+                        offset += 10;
                     }
                     while (--x != 0);
 
                     rasterOffset += incr;
                     rasterOffset2 += incr;
-                    ppOffset += fromskew;
+                    offset += fromskew;
                 }
             }
             else
@@ -2647,43 +2679,43 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (x = width; x > 0; )
                     {
-                        int Cb = pp[ppOffset + 8];
-                        int Cr = pp[ppOffset + 9];
+                        int Cb = buffer[offset + 8];
+                        int Cr = buffer[offset + 9];
 
                         bool x_goOn = false;
                         if (x < 1 || x > 3)
                         {
                             if (height != 1)
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 3], pp[ppOffset + 7], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 3], buffer[offset + 7], Cb, Cr);
 
-                            img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+                            img.YCbCrtoRGB(out raster[rasterOffset + 3], buffer[offset + 3], Cb, Cr);
                             x_goOn = true;
                         }
 
                         if (x == 3 || x_goOn)
                         {
                             if (height != 1)
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 2], pp[ppOffset + 6], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 2], buffer[offset + 6], Cb, Cr);
 
-                            img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+                            img.YCbCrtoRGB(out raster[rasterOffset + 2], buffer[offset + 2], Cb, Cr);
                             x_goOn = true;
                         }
 
                         if (x == 2 || x_goOn)
                         {
                             if (height != 1)
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 1], pp[ppOffset + 5], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 1], buffer[offset + 5], Cb, Cr);
 
-                            img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                            img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
                             x_goOn = true;
                         }
 
                         if (x == 1 || x_goOn)
                         {
                             if (height != 1)
-                                img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 4], Cb, Cr);
+                                img.YCbCrtoRGB(out raster[rasterOffset2 + 0], buffer[offset + 4], Cb, Cr);
 
-                            img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                            img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
                         }
 
                         if (x < 4)
@@ -2699,7 +2731,7 @@ namespace BitMiracle.LibTiff.Classic
                             x -= 4;
                         }
 
-                        ppOffset += 10;
+                        offset += 10;
                     }
 
                     if (height <= 2)
@@ -2708,7 +2740,7 @@ namespace BitMiracle.LibTiff.Classic
                     height -= 2;
                     rasterOffset += incr;
                     rasterOffset2 += incr;
-                    ppOffset += fromskew;
+                    offset += fromskew;
                 }
             }
         }
@@ -2717,7 +2749,7 @@ namespace BitMiracle.LibTiff.Classic
         /// 8-bit packed YCbCr samples w/ 4,1 subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr41tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] buffer, int offset)
         {
             // XXX adjust fromskew
             do
@@ -2725,40 +2757,40 @@ namespace BitMiracle.LibTiff.Classic
                 x = width >> 2;
                 do
                 {
-                    int Cb = pp[ppOffset + 4];
-                    int Cr = pp[ppOffset + 5];
+                    int Cb = buffer[offset + 4];
+                    int Cr = buffer[offset + 5];
 
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset + 3], pp[ppOffset + 3], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 2], buffer[offset + 2], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset + 3], buffer[offset + 3], Cb, Cr);
 
                     rasterOffset += 4;
-                    ppOffset += 6;
+                    offset += 6;
                 }
                 while (--x != 0);
 
                 if ((width & 3) != 0)
                 {
-                    int Cb = pp[ppOffset + 4];
-                    int Cr = pp[ppOffset + 5];
+                    int Cb = buffer[offset + 4];
+                    int Cr = buffer[offset + 5];
 
                     int xx = width & 3;
                     if (xx == 3)
-                        img.YCbCrtoRGB(out raster[rasterOffset + 2], pp[ppOffset + 2], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 2], buffer[offset + 2], Cb, Cr);
 
                     if (xx == 3 || xx == 2)
-                        img.YCbCrtoRGB(out raster[rasterOffset + 1], pp[ppOffset + 1], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 1], buffer[offset + 1], Cb, Cr);
 
                     if (xx == 3 || xx == 2 || xx == 1)
-                        img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                        img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
 
                     rasterOffset += xx;
-                    ppOffset += 6;
+                    offset += 6;
                 }
 
                 rasterOffset += toskew;
-                ppOffset += fromskew;
+                offset += fromskew;
             }
             while (--height != 0);
         }
@@ -2767,7 +2799,7 @@ namespace BitMiracle.LibTiff.Classic
         /// 8-bit packed YCbCr samples w/ no subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr11tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] buffer, int offset)
         {
             fromskew *= 3;
             do
@@ -2775,17 +2807,17 @@ namespace BitMiracle.LibTiff.Classic
                 x = width; // was x = w >> 1; patched 2000/09/25 warmerda@home.com
                 do
                 {
-                    int Cb = pp[ppOffset + 1];
-                    int Cr = pp[ppOffset + 2];
+                    int Cb = buffer[offset + 1];
+                    int Cr = buffer[offset + 2];
 
-                    img.YCbCrtoRGB(out raster[rasterOffset], pp[ppOffset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset], buffer[offset + 0], Cb, Cr);
                     rasterOffset++;
-                    ppOffset += 3;
+                    offset += 3;
                 }
                 while (--x != 0);
 
                 rasterOffset += toskew;
-                ppOffset += fromskew;
+                offset += fromskew;
             }
             while (--height != 0);
         }
@@ -2794,7 +2826,7 @@ namespace BitMiracle.LibTiff.Classic
         /// 8-bit packed YCbCr samples w/ 1,2 subsampling => RGB
         /// </summary>
         private static void putcontig8bitYCbCr12tile(TiffRgbaImage img, int[] raster, int rasterOffset,
-            int x, int y, int width, int height, int fromskew, int toskew, byte[] pp, int ppOffset)
+            int x, int y, int width, int height, int fromskew, int toskew, byte[] buffer, int offset)
         {
             fromskew = (fromskew / 2) * 4;
             int rasterOffset2 = rasterOffset + width + toskew;
@@ -2804,18 +2836,18 @@ namespace BitMiracle.LibTiff.Classic
                 x = width;
                 do
                 {
-                    int Cb = pp[ppOffset + 2];
-                    int Cr = pp[ppOffset + 3];
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
-                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], pp[ppOffset + 1], Cb, Cr);
+                    int Cb = buffer[offset + 2];
+                    int Cr = buffer[offset + 3];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
+                    img.YCbCrtoRGB(out raster[rasterOffset2 + 0], buffer[offset + 1], Cb, Cr);
                     rasterOffset++;
                     rasterOffset2++;
-                    ppOffset += 4;
+                    offset += 4;
                 } while (--x != 0);
 
                 rasterOffset += toskew * 2 + width;
                 rasterOffset2 += toskew * 2 + width;
-                ppOffset += fromskew;
+                offset += fromskew;
                 height -= 2;
             }
 
@@ -2824,11 +2856,11 @@ namespace BitMiracle.LibTiff.Classic
                 x = width;
                 do
                 {
-                    int Cb = pp[ppOffset + 2];
-                    int Cr = pp[ppOffset + 3];
-                    img.YCbCrtoRGB(out raster[rasterOffset + 0], pp[ppOffset + 0], Cb, Cr);
+                    int Cb = buffer[offset + 2];
+                    int Cr = buffer[offset + 3];
+                    img.YCbCrtoRGB(out raster[rasterOffset + 0], buffer[offset + 0], Cb, Cr);
                     rasterOffset++;
-                    ppOffset += 4;
+                    offset += 4;
                 } while (--x != 0);
             }
         }
@@ -2843,7 +2875,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private static void putRGBseparate8bittile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew,
-            byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+            byte[] buffer, int offset1, int offset2, int offset3, int offset4)
         {
             while (height-- > 0)
             {
@@ -2852,11 +2884,11 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        raster[rasterOffset] = PACK(rgba[rOffset], rgba[gOffset], rgba[bOffset]);
+                        raster[rasterOffset] = PACK(buffer[offset1], buffer[offset2], buffer[offset3]);
                         rasterOffset++;
-                        rOffset++;
-                        gOffset++;
-                        bOffset++;
+                        offset1++;
+                        offset2++;
+                        offset3++;
                     }
                 }
 
@@ -2866,18 +2898,18 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            raster[rasterOffset] = PACK(rgba[rOffset], rgba[gOffset], rgba[bOffset]);
+                            raster[rasterOffset] = PACK(buffer[offset1], buffer[offset2], buffer[offset3]);
                             rasterOffset++;
-                            rOffset++;
-                            gOffset++;
-                            bOffset++;
+                            offset1++;
+                            offset2++;
+                            offset3++;
                         }
                     }
                 }
 
-                rOffset += fromskew;
-                gOffset += fromskew;
-                bOffset += fromskew;
+                offset1 += fromskew;
+                offset2 += fromskew;
+                offset3 += fromskew;
                 rasterOffset += toskew;
             }
         }
@@ -2887,7 +2919,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private static void putRGBAAseparate8bittile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew,
-            byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+            byte[] buffer, int offset1, int offset2, int offset3, int offset4)
         {
             while (height-- > 0)
             {
@@ -2896,12 +2928,12 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     for (int rc = 0; rc < 8; rc++)
                     {
-                        raster[rasterOffset] = PACK4(rgba[rOffset], rgba[gOffset], rgba[bOffset], rgba[aOffset]);
+                        raster[rasterOffset] = PACK4(buffer[offset1], buffer[offset2], buffer[offset3], buffer[offset4]);
                         rasterOffset++;
-                        rOffset++;
-                        gOffset++;
-                        bOffset++;
-                        aOffset++;
+                        offset1++;
+                        offset2++;
+                        offset3++;
+                        offset4++;
                     }
                 }
 
@@ -2911,20 +2943,20 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         for (int i = _x; i > 0; i--)
                         {
-                            raster[rasterOffset] = PACK4(rgba[rOffset], rgba[gOffset], rgba[bOffset], rgba[aOffset]);
+                            raster[rasterOffset] = PACK4(buffer[offset1], buffer[offset2], buffer[offset3], buffer[offset4]);
                             rasterOffset++;
-                            rOffset++;
-                            gOffset++;
-                            bOffset++;
-                            aOffset++;
+                            offset1++;
+                            offset2++;
+                            offset3++;
+                            offset4++;
                         }
                     }
                 }
 
-                rOffset += fromskew;
-                gOffset += fromskew;
-                bOffset += fromskew;
-                aOffset += fromskew;
+                offset1 += fromskew;
+                offset2 += fromskew;
+                offset3 += fromskew;
+                offset4 += fromskew;
 
                 rasterOffset += toskew;
             }
@@ -2935,28 +2967,28 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private static void putRGBUAseparate8bittile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew,
-            byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+            byte[] buffer, int offset1, int offset2, int offset3, int offset4)
         {
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
                 {
-                    int av = rgba[aOffset];
-                    int rv = (rgba[rOffset] * av + 127) / 255;
-                    int gv = (rgba[gOffset] * av + 127) / 255;
-                    int bv = (rgba[bOffset] * av + 127) / 255;
+                    int av = buffer[offset4];
+                    int rv = (buffer[offset1] * av + 127) / 255;
+                    int gv = (buffer[offset2] * av + 127) / 255;
+                    int bv = (buffer[offset3] * av + 127) / 255;
                     raster[rasterOffset] = PACK4(rv, gv, bv, av);
                     rasterOffset++;
-                    rOffset++;
-                    gOffset++;
-                    bOffset++;
-                    aOffset++;
+                    offset1++;
+                    offset2++;
+                    offset3++;
+                    offset4++;
                 }
 
-                rOffset += fromskew;
-                gOffset += fromskew;
-                bOffset += fromskew;
-                aOffset += fromskew;
+                offset1 += fromskew;
+                offset2 += fromskew;
+                offset3 += fromskew;
+                offset4 += fromskew;
 
                 rasterOffset += toskew;
             }
@@ -2967,28 +2999,28 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private static void putRGBseparate16bittile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew,
-            byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+            byte[] buffer, int offset1, int offset2, int offset3, int offset4)
         {
-            short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
+            short[] wrgba = Tiff.ByteArrayToShorts(buffer, 0, buffer.Length);
 
-            int wrPos = rOffset / sizeof(short);
-            int wgPos = gOffset / sizeof(short);
-            int wbPos = bOffset / sizeof(short);
+            offset1 /= sizeof(short);
+            offset2 /= sizeof(short);
+            offset3 /= sizeof(short);
 
             while (height-- > 0)
             {
                 for (x = 0; x < width; x++)
                 {
-                    raster[rasterOffset] = PACKW(wrgba[wrPos], wrgba[wgPos], wrgba[wbPos]);
+                    raster[rasterOffset] = PACKW(wrgba[offset1], wrgba[offset2], wrgba[offset3]);
                     rasterOffset++;
-                    wrPos++;
-                    wgPos++;
-                    wbPos++;
+                    offset1++;
+                    offset2++;
+                    offset3++;
                 }
 
-                wrPos += fromskew;
-                wgPos += fromskew;
-                wbPos += fromskew;
+                offset1 += fromskew;
+                offset2 += fromskew;
+                offset3 += fromskew;
                 rasterOffset += toskew;
             }
         }
@@ -2998,31 +3030,31 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private static void putRGBAAseparate16bittile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew,
-            byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+            byte[] buffer, int offset1, int offset2, int offset3, int offset4)
         {
-            short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
+            short[] wrgba = Tiff.ByteArrayToShorts(buffer, 0, buffer.Length);
 
-            int wrPos = rOffset / sizeof(short);
-            int wgPos = gOffset / sizeof(short);
-            int wbPos = bOffset / sizeof(short);
-            int waPos = aOffset / sizeof(short);
+            offset1 /= sizeof(short);
+            offset2 /= sizeof(short);
+            offset3 /= sizeof(short);
+            offset4 /= sizeof(short);
 
             while (height-- > 0)
             {
                 for (x = 0; x < width; x++)
                 {
-                    raster[rasterOffset] = PACKW4(wrgba[wrPos], wrgba[wgPos], wrgba[wbPos], wrgba[waPos]);
+                    raster[rasterOffset] = PACKW4(wrgba[offset1], wrgba[offset2], wrgba[offset3], wrgba[offset4]);
                     rasterOffset++;
-                    wrPos++;
-                    wgPos++;
-                    wbPos++;
-                    waPos++;
+                    offset1++;
+                    offset2++;
+                    offset3++;
+                    offset4++;
                 }
 
-                wrPos += fromskew;
-                wgPos += fromskew;
-                wbPos += fromskew;
-                waPos += fromskew;
+                offset1 += fromskew;
+                offset2 += fromskew;
+                offset3 += fromskew;
+                offset4 += fromskew;
 
                 rasterOffset += toskew;
             }
@@ -3033,35 +3065,35 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private static void putRGBUAseparate16bittile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew,
-            byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+            byte[] buffer, int offset1, int offset2, int offset3, int offset4)
         {
-            short[] wrgba = Tiff.ByteArrayToShorts(rgba, 0, rgba.Length);
+            short[] wrgba = Tiff.ByteArrayToShorts(buffer, 0, buffer.Length);
 
-            int wrPos = rOffset / sizeof(short);
-            int wgPos = gOffset / sizeof(short);
-            int wbPos = bOffset / sizeof(short);
-            int waPos = aOffset / sizeof(short);
+            offset1 /= sizeof(short);
+            offset2 /= sizeof(short);
+            offset3 /= sizeof(short);
+            offset4 /= sizeof(short);
 
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
                 {
-                    int a = W2B(wrgba[waPos]);
-                    int r = (W2B(wrgba[wrPos]) * a + 127) / 255;
-                    int g = (W2B(wrgba[wgPos]) * a + 127) / 255;
-                    int b = (W2B(wrgba[wbPos]) * a + 127) / 255;
+                    int a = W2B(wrgba[offset4]);
+                    int r = (W2B(wrgba[offset1]) * a + 127) / 255;
+                    int g = (W2B(wrgba[offset2]) * a + 127) / 255;
+                    int b = (W2B(wrgba[offset3]) * a + 127) / 255;
                     raster[rasterOffset] = PACK4(r, g, b, a);
                     rasterOffset++;
-                    wrPos++;
-                    wgPos++;
-                    wbPos++;
-                    waPos++;
+                    offset1++;
+                    offset2++;
+                    offset3++;
+                    offset4++;
                 }
 
-                wrPos += fromskew;
-                wgPos += fromskew;
-                wbPos += fromskew;
-                waPos += fromskew;
+                offset1 += fromskew;
+                offset2 += fromskew;
+                offset3 += fromskew;
+                offset4 += fromskew;
 
                 rasterOffset += toskew;
             }
@@ -3072,7 +3104,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private static void putseparate8bitYCbCr11tile(TiffRgbaImage img, int[] raster, int rasterOffset,
             int x, int y, int width, int height, int fromskew, int toskew,
-            byte[] rgba, int rOffset, int gOffset, int bOffset, int aOffset)
+            byte[] buffer, int offset1, int offset2, int offset3, int offset4)
         {
             // TODO: naming of input vars is still off, change obfuscating declaration inside define, or resolve obfuscation
             while (height-- > 0)
@@ -3080,19 +3112,19 @@ namespace BitMiracle.LibTiff.Classic
                 x = width;
                 do
                 {
-                    int dr, dg, db;
-                    img.ycbcr.YCbCrtoRGB(rgba[rOffset], rgba[gOffset], rgba[bOffset], out dr, out dg, out db);
+                    int r, g, b;
+                    img.ycbcr.YCbCrtoRGB(buffer[offset1], buffer[offset2], buffer[offset3], out r, out g, out b);
 
-                    raster[rasterOffset] = PACK(dr, dg, db);
+                    raster[rasterOffset] = PACK(r, g, b);
                     rasterOffset++;
-                    rOffset++;
-                    gOffset++;
-                    bOffset++;
+                    offset1++;
+                    offset2++;
+                    offset3++;
                 } while (--x != 0);
 
-                rOffset += fromskew;
-                gOffset += fromskew;
-                bOffset += fromskew;
+                offset1 += fromskew;
+                offset2 += fromskew;
+                offset3 += fromskew;
                 rasterOffset += toskew;
             }
         }
