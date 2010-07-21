@@ -462,7 +462,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
             for (; thisrun < erun; thisrun += 2)
             {
                 int run = runs[thisrun];
-                if (x + run > lastx || run > lastx)
+
+                // should cast 'run' to unsigned in order to discard values bigger than int.MaxValue
+                // for such value 'run' become negative and following condition is not met
+                if ((uint)x + (uint)run > (uint)lastx || (uint)run > (uint)lastx)
                 {
                     runs[thisrun] = lastx - x;
                     run = runs[thisrun];
@@ -519,7 +522,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 }
 
                 run = runs[thisrun + 1];
-                if (x + run > lastx || run > lastx)
+
+                // should cast 'run' to unsigned in order to discard values bigger than int.MaxValue
+                // for such value 'run' become negative and following condition is not met
+                if ((uint)x + (uint)run > (uint)lastx || (uint)run > (uint)lastx)
                 {
                     runs[thisrun + 1] = lastx - x;
                     run = runs[thisrun + 1];

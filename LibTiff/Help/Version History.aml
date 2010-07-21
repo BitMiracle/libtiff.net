@@ -29,6 +29,10 @@
                                 Added relevant bug fixes from libtiff 3.9.4 to LibTiff.Net code.
                             </listItem>
                             <listItem>
+                                Fixed bugs in CCITT codec that caused exceptions during decoding
+                                of some images.
+                            </listItem>
+                            <listItem>
                                 Fixed bug with handling of RGBA images in Tiff2Pdf utility.
                             </listItem>
                             <listItem>
