@@ -138,5 +138,54 @@ namespace UnitTests
 
             image.Dispose();
         }
+
+        [Test]
+        public void ReadExifTags()
+        {
+            string path = System.IO.Path.Combine(TestCase.Folder, "dscf0013.tif");
+            using (Tiff image = Tiff.Open(path, "r"))
+            {
+                FieldValue[] exifIfd = image.GetField(TiffTag.EXIFIFD);
+                Assert.IsNotNull(exifIfd);
+                Assert.That(exifIfd.Length, Is.EqualTo(1));
+
+                int exifIFDOffset = exifIfd[0].ToInt();
+                Assert.That(exifIFDOffset, Is.EqualTo(640));
+
+                bool readSuccessful = image.ReadEXIFDirectory(exifIFDOffset);
+                Assert.That(readSuccessful);
+
+                FieldValue[] fnumber = image.GetField(TiffTag.EXIF_FNUMBER);
+                Assert.IsNotNull(fnumber);
+                Assert.That(fnumber.Length, Is.EqualTo(1));
+                Assert.AreEqual(3.4, fnumber[0].ToDouble(), 0.001);
+
+                FieldValue[] exposureProgram = image.GetField(TiffTag.EXIF_EXPOSUREPROGRAM);
+                Assert.IsNotNull(exposureProgram);
+                Assert.That(exposureProgram.Length, Is.EqualTo(1));
+                Assert.That(exposureProgram[0].ToString(), Is.EqualTo("2"));
+
+                FieldValue[] dateTimeOriginal = image.GetField(TiffTag.EXIF_DATETIMEORIGINAL);
+                Assert.IsNotNull(dateTimeOriginal);
+                Assert.That(dateTimeOriginal.Length, Is.EqualTo(1));
+                //The format is "YYYY:MM:DD HH:MM:SS", see DateTimeOriginal tag description
+                Assert.That(dateTimeOriginal[0].ToString(), Is.EqualTo("2004:11:10 00:00:31"));
+
+                FieldValue[] exifVersion = image.GetField(TiffTag.EXIF_EXIFVERSION);
+                Assert.IsNotNull(exifVersion);
+                Assert.That(exifVersion.Length, Is.EqualTo(1));
+                Assert.That(exifVersion[0].ToString(), Is.EqualTo("0210"));
+
+                FieldValue[] fileSource = image.GetField(TiffTag.EXIF_FILESOURCE);
+                Assert.IsNotNull(fileSource);
+                Assert.That(fileSource.Length, Is.EqualTo(1));
+                Assert.That(fileSource[0].ToByte(), Is.EqualTo(3));
+
+                FieldValue[] sceneType = image.GetField(TiffTag.EXIF_SCENETYPE);
+                Assert.IsNotNull(sceneType);
+                Assert.That(sceneType.Length, Is.EqualTo(1));
+                Assert.That(sceneType[0].ToByte(), Is.EqualTo(1));
+            }
+        }
     }
 }

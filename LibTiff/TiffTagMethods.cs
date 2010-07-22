@@ -510,6 +510,12 @@ namespace BitMiracle.LibTiff.Classic
                             // passed as arrays to SetField() function, but
                             // actually passed as a list of separate values.
                             // This behavior must be changed in the future!
+
+                            // Upd: This loop also processes some EXIF tags with
+                            // UNDEFINED type (like EXIF_FILESOURCE or EXIF_SCENETYPE)
+                            // In this case input value is string-based, so
+                            // in TiffType.UNDEFINED case we use FieldValue.GetBytes()[0]
+                            // construction instead of direct call of FieldValue.ToByte() method.
                             byte[] val = td.td_customValues[tvIndex].value;
                             int valPos = 0;
                             for (int i = 0; i < td.td_customValues[tvIndex].count; i++, valPos += tv_size)
@@ -518,7 +524,7 @@ namespace BitMiracle.LibTiff.Classic
                                 {
                                     case TiffType.BYTE:
                                     case TiffType.UNDEFINED:
-                                        val[valPos] = value[paramIndex + i].ToByte();
+                                        val[valPos] = value[paramIndex + i].GetBytes()[0];
                                         break;
                                     case TiffType.SBYTE:
                                         val[valPos] = value[paramIndex + i].ToByte();

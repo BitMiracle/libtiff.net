@@ -132,7 +132,7 @@ namespace BitMiracle.LibTiff.Classic
         /// If value is a byte array, then it gets converted to string using
         /// Latin1 encoding encoder.
         /// </returns>
-        public new string ToString()
+        public override string ToString()
         {
             if (m_value is byte[])
                 return Tiff.Latin1Encoding.GetString(m_value as byte[]);
