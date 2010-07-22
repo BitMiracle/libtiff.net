@@ -39,6 +39,9 @@
                                 Fixed bug with handling of multiple options in Tiff2Pdf utility.
                             </listItem>
                             <listItem>
+                                Fixed bug with reading EXIF metadata.
+                            </listItem>
+                            <listItem>
                                 Fixed bugs related to jpeg-in-tiff images.
                             </listItem>
                             <listItem>
