@@ -39,49 +39,132 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        public override bool CanEncode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can encode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can encode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanEncode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool CanDecode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can decode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can decode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanDecode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool DecodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeRow(byte[] buffer, int count, short plane)
         {
-            return PackBitsDecode(pp, cc, s);
+            return PackBitsDecode(buffer, count, plane);
         }
 
-        public override bool DecodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeStrip(byte[] buffer, int count, short plane)
         {
-            return PackBitsDecode(pp, cc, s);
+            return PackBitsDecode(buffer, count, plane);
         }
 
-        public override bool DecodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeTile(byte[] buffer, int count, short plane)
         {
-            return PackBitsDecode(pp, cc, s);
+            return PackBitsDecode(buffer, count, plane);
         }
 
-        public override bool PreEncode(short s)
+        /// <summary>
+        /// Prepares the encoder part of the codec for a encoding.
+        /// </summary>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully prepared its encoder part and ready
+        /// to encode data; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PreEncode</b> is called after <see cref="TiffCodec.SetupEncode"/> and before encoding.
+        /// </remarks>
+        public override bool PreEncode(short plane)
         {
-            return PackBitsPreEncode(s);
+            return PackBitsPreEncode(plane);
         }
 
-        public override bool EncodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeRow(byte[] buffer, int count, short plane)
         {
-            return PackBitsEncode(pp, 0, cc, s);
+            return PackBitsEncode(buffer, 0, count, plane);
         }
 
-        public override bool EncodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeStrip(byte[] buffer, int count, short plane)
         {
-            return PackBitsEncodeChunk(pp, cc, s);
+            return PackBitsEncodeChunk(buffer, count, plane);
         }
 
-        public override bool EncodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeTile(byte[] buffer, int count, short plane)
         {
-            return PackBitsEncodeChunk(pp, cc, s);
+            return PackBitsEncodeChunk(buffer, count, plane);
         }
 
         private bool PackBitsPreEncode(short s)

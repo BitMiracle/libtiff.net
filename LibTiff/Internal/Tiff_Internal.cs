@@ -379,7 +379,7 @@ namespace BitMiracle.LibTiff.Classic
                 c = m_builtInCodecs[0];
             }
 
-            m_decodestatus = c.CanDecode();
+            m_decodestatus = c.CanDecode;
             m_flags &= ~(TiffFlags.NOBITREV | TiffFlags.NOREADRAW);
 
             m_currentCodec = c;

@@ -99,62 +99,136 @@ namespace BitMiracle.LibTiff.Classic.Internal
         // WARNING: do not override this methods!
         //          please override their equivalents listed below
 
+        /// <summary>
+        /// Setups the decoder part of the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully setup its decoder part and can decode data;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>SetupDecode</b> is called once before
+        /// <see cref="TiffCodec.PreDecode"/>.</remarks>
         public override bool SetupDecode()
         {
             return PredictorSetupDecode();
         }
 
-        public override bool DecodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeRow(byte[] buffer, int count, short plane)
         {
             if (!m_passThruDecode)
-                return PredictorDecodeRow(pp, cc, s);
+                return PredictorDecodeRow(buffer, count, plane);
 
-            return predictor_decoderow(pp, cc, s);
+            return predictor_decoderow(buffer, count, plane);
         }
 
-        public override bool DecodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeStrip(byte[] buffer, int count, short plane)
         {
             if (!m_passThruDecode)
-                return PredictorDecodeTile(pp, cc, s);
+                return PredictorDecodeTile(buffer, count, plane);
 
-            return predictor_decodestrip(pp, cc, s);
+            return predictor_decodestrip(buffer, count, plane);
         }
 
-        public override bool DecodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeTile(byte[] buffer, int count, short plane)
         {
             if (!m_passThruDecode)
-                return PredictorDecodeTile(pp, cc, s);
+                return PredictorDecodeTile(buffer, count, plane);
 
-            return predictor_decodetile(pp, cc, s);
+            return predictor_decodetile(buffer, count, plane);
         }
 
+        /// <summary>
+        /// Setups the encoder part of the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully setup its encoder part and can encode data;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>SetupEncode</b> is called once before
+        /// <see cref="TiffCodec.PreEncode"/>.</remarks>
         public override bool SetupEncode()
         {
             return PredictorSetupEncode();
         }
 
-        public override bool EncodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeRow(byte[] buffer, int count, short plane)
         {
             if (!m_passThruEncode)
-                return PredictorEncodeRow(pp, cc, s);
+                return PredictorEncodeRow(buffer, count, plane);
 
-            return predictor_encoderow(pp, cc, s);
+            return predictor_encoderow(buffer, count, plane);
         }
 
-        public override bool EncodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeStrip(byte[] buffer, int count, short plane)
         {
             if (!m_passThruEncode)
-                return PredictorEncodeTile(pp, cc, s);
+                return PredictorEncodeTile(buffer, count, plane);
 
-            return predictor_encodestrip(pp, cc, s);
+            return predictor_encodestrip(buffer, count, plane);
         }
 
-        public override bool EncodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeTile(byte[] buffer, int count, short plane)
         {
             if (!m_passThruEncode)
-                return PredictorEncodeTile(pp, cc, s);
+                return PredictorEncodeTile(buffer, count, plane);
 
-            return predictor_encodetile(pp, cc, s);
+            return predictor_encodetile(buffer, count, plane);
         }
 
         //////////////////////////////////////////////////////////////////////////

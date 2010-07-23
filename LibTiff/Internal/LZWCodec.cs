@@ -141,31 +141,87 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        public override bool CanEncode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can encode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can encode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanEncode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool CanDecode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can decode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can decode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanDecode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool PreDecode(short s)
+        /// <summary>
+        /// Prepares the decoder part of the codec for a decoding.
+        /// </summary>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully prepared its decoder part and ready
+        /// to decode data; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PreDecode</b> is called after <see cref="TiffCodec.SetupDecode"/> and before decoding.
+        /// </remarks>
+        public override bool PreDecode(short plane)
         {
-            return LZWPreDecode(s);
+            return LZWPreDecode(plane);
         }
 
-        public override bool PreEncode(short s)
+        /// <summary>
+        /// Prepares the encoder part of the codec for a encoding.
+        /// </summary>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully prepared its encoder part and ready
+        /// to encode data; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PreEncode</b> is called after <see cref="TiffCodec.SetupEncode"/> and before encoding.
+        /// </remarks>
+        public override bool PreEncode(short plane)
         {
-            return LZWPreEncode(s);
+            return LZWPreEncode(plane);
         }
 
+        /// <summary>
+        /// Performs any actions after encoding required by the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if all post-encode actions succeeded; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PostEncode</b> is called after encoding and can be used to release any external
+        /// resources needed during encoding.
+        /// </remarks>
         public override bool PostEncode()
         {
             return LZWPostEncode();
         }
 
+        /// <summary>
+        /// Cleanups the state of the codec.
+        /// </summary>
+        /// <remarks>
+        /// 	<b>Cleanup</b> is called when codec is no longer needed (won't be used) and can be
+        /// used for example to restore tag methods that were substituted.</remarks>
         public override void Cleanup()
         {
             LZWCleanup();

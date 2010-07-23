@@ -271,7 +271,7 @@ namespace BitMiracle.LibTiff.Classic
             if (codec == null)
                 return false;
 
-            if (codec.CanEncode() != false || codec.CanDecode() != false)
+            if (codec.CanEncode != false || codec.CanDecode != false)
                 return true;
 
             return false;
@@ -5017,10 +5017,10 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="strip">The strip.</param>
         /// <param name="data">The data.</param>
-        /// <param name="cc">The size.</param>
+        /// <param name="count">The size.</param>
         /// <returns>The strip size.</returns>
         /// <remarks>Image length must be setup before writing.</remarks>
-        public int WriteEncodedStrip(int strip, byte[] data, int cc)
+        public int WriteEncodedStrip(int strip, byte[] data, int count)
         {
             const string module = "WriteEncodedStrip";
 
@@ -5082,9 +5082,9 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
 
             /* swab if needed - note that source buffer will be altered */
-            postDecode(data, cc);
+            postDecode(data, count);
 
-            if (!m_currentCodec.EncodeStrip(data, cc, sample))
+            if (!m_currentCodec.EncodeStrip(data, count, sample))
                 return 0;
 
             if (!m_currentCodec.PostEncode())
@@ -5098,7 +5098,7 @@ namespace BitMiracle.LibTiff.Classic
 
             m_rawcc = 0;
             m_rawcp = 0;
-            return cc;
+            return count;
         }
 
         /// <summary>
@@ -5106,10 +5106,10 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="strip">The strip.</param>
         /// <param name="data">The data.</param>
-        /// <param name="cc">The size.</param>
+        /// <param name="count">The size.</param>
         /// <returns>The strip size.</returns>
         /// <remarks>Image length must be setup before writing.</remarks>
-        public int WriteRawStrip(int strip, byte[] data, int cc)
+        public int WriteRawStrip(int strip, byte[] data, int count)
         {
             const string module = "WriteRawStrip";
 
@@ -5147,7 +5147,7 @@ namespace BitMiracle.LibTiff.Classic
 
             m_curstrip = strip;
             m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
-            return (appendToStrip(strip, data, cc) ? cc : -1);
+            return (appendToStrip(strip, data, count) ? count : -1);
         }
 
         /// <summary>
@@ -5155,7 +5155,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="tile">The tile.</param>
         /// <param name="data">The data.</param>
-        /// <param name="cc">The size.</param>
+        /// <param name="count">The size.</param>
         /// <returns>The tile size.</returns>
         /// <remarks>
         ///     <para>There must be space for the data. The function clamps 
@@ -5170,7 +5170,7 @@ namespace BitMiracle.LibTiff.Classic
         ///     does).
         ///     </para>
         /// </remarks>
-        public int WriteEncodedTile(int tile, byte[] data, int cc)
+        public int WriteEncodedTile(int tile, byte[] data, int count)
         {
             const string module = "WriteEncodedTile";
 
@@ -5226,13 +5226,13 @@ namespace BitMiracle.LibTiff.Classic
              * done so that callers can pass in some large number
              * (e.g. -1) and have the tile size used instead.
              */
-            if (cc < 1 || cc > m_tilesize)
-                cc = m_tilesize;
+            if (count < 1 || count > m_tilesize)
+                count = m_tilesize;
 
             /* swab if needed - note that source buffer will be altered */
-            postDecode(data, cc);
+            postDecode(data, count);
 
-            if (!m_currentCodec.EncodeTile(data, cc, sample))
+            if (!m_currentCodec.EncodeTile(data, count, sample))
                 return 0;
 
             if (!m_currentCodec.PostEncode())
@@ -5246,7 +5246,7 @@ namespace BitMiracle.LibTiff.Classic
 
             m_rawcc = 0;
             m_rawcp = 0;
-            return cc;
+            return count;
         }
 
         /// <summary>
@@ -5254,7 +5254,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="tile">The tile.</param>
         /// <param name="data">The data.</param>
-        /// <param name="cc">The cc.</param>
+        /// <param name="count">The count.</param>
         /// <returns>The tile size.</returns>
         /// <remarks>
         ///     <para>There must be space for the data; we don't check if strips overlap!</para>
@@ -5264,7 +5264,7 @@ namespace BitMiracle.LibTiff.Classic
         ///     does).
         ///     </para>
         /// </remarks>
-        public int WriteRawTile(int tile, byte[] data, int cc)
+        public int WriteRawTile(int tile, byte[] data, int count)
         {
             const string module = "WriteRawTile";
 
@@ -5277,7 +5277,7 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            return (appendToStrip(tile, data, cc) ? cc : -1);
+            return (appendToStrip(tile, data, count) ? count : -1);
         }
 
         /// <summary>

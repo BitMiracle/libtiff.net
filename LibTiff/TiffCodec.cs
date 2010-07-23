@@ -12,12 +12,15 @@
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// A CODEC is a software package that implements decoding,
-    /// encoding, or decoding+encoding of a compression algorithm.
-    /// The library provides a collection of builtin codecs.
-    /// More codecs may be registered through calls to the library
-    /// and/or the builtin implementations may be overridden.
+    /// Base class for all codecs within the library.
     /// </summary>
+    /// <remarks><para>
+    /// A codec is a class that implements decoding, encoding, or decoding and encoding of a
+    /// compression algorithm.
+    /// </para><para>
+    /// The library provides a collection of builtin codecs. More codecs may be registered
+    /// through calls to the library and/or the builtin implementations may be overridden.
+    /// </para></remarks>
 #if EXPOSE_LIBTIFF
     public
 #endif
@@ -29,7 +32,7 @@ namespace BitMiracle.LibTiff.Classic
         protected Tiff m_tif;
 
         /// <summary>
-        /// Compression scheme.
+        /// Compression scheme this codec impelements.
         /// </summary>
         protected internal Compression m_scheme;
 
@@ -41,37 +44,42 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Initializes a new instance of the <see cref="TiffCodec"/> class.
         /// </summary>
-        /// <param name="tif">The tif.</param>
-        /// <param name="scheme">The scheme.</param>
-        /// <param name="name">The name.</param>
+        /// <param name="tif">An instance of <see cref="Tiff"/> class.</param>
+        /// <param name="scheme">The compression scheme for the codec.</param>
+        /// <param name="name">The name of the codec.</param>
         public TiffCodec(Tiff tif, Compression scheme, string name)
         {
             m_scheme = scheme;
             m_tif = tif;
-
             m_name = name;
         }
 
         /// <summary>
-        /// Determines whether this instance can encode.
+        /// Gets a value indicating whether this codec can encode data.
         /// </summary>
-        /// <returns>
-        /// 	<c>true</c> if this instance can encode; otherwise, <c>false</c>.
-        /// </returns>
-        public virtual bool CanEncode()
+        /// <value>
+        /// <c>true</c> if this codec can encode data; otherwise, <c>false</c>.
+        /// </value>
+        public virtual bool CanEncode
         {
-            return false;
+            get
+            {
+                return false;
+            }
         }
 
         /// <summary>
-        /// Determines whether this instance can decode.
+        /// Gets a value indicating whether this codec can decode data.
         /// </summary>
-        /// <returns>
-        /// 	<c>true</c> if this instance can decode; otherwise, <c>false</c>.
-        /// </returns>
-        public virtual bool CanDecode()
+        /// <value>
+        /// <c>true</c> if this codec can decode data; otherwise, <c>false</c>.
+        /// </value>
+        public virtual bool CanDecode
         {
-            return false;
+            get
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -83,144 +91,174 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        // decode part
-
         /// <summary>
-        /// Setups the decode.
+        /// Setups the decoder part of the codec.
         /// </summary>
-        /// <returns></returns>
-        /// <remarks>Called once before <see cref="TiffCodec.PreDecode(System.Int16)"/>.</remarks>
+        /// <returns>
+        /// <c>true</c> if this codec successfully setup its decoder part and can decode data;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// <b>SetupDecode</b> is called once before
+        /// <see cref="PreDecode"/>.</remarks>
         public virtual bool SetupDecode()
         {
             return true;
         }
 
         /// <summary>
-        /// Called before decoding.
+        /// Prepares the decoder part of the codec for a decoding.
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        public virtual bool PreDecode(short s)
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns><c>true</c> if this codec successfully prepared its decoder part and ready
+        /// to decode data; otherwise, <c>false</c>.</returns>
+        /// <remarks>
+        /// <b>PreDecode</b> is called after <see cref="SetupDecode"/> and before decoding.
+        /// </remarks>
+        public virtual bool PreDecode(short plane)
         {
             return true;
         }
 
         /// <summary>
-        /// Decodes the row.
+        /// Decodes one row of image data.
         /// </summary>
-        /// <param name="pp">The pp.</param>
-        /// <param name="cc">The cc.</param>
-        /// <param name="s">The s.</param>
-        /// <returns><c>true</c> if decoded successfully.</returns>
-        public virtual bool DecodeRow(byte[] pp, int cc, short s)
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool DecodeRow(byte[] buffer, int count, short plane)
         {
             return noDecode("scanline");
         }
 
         /// <summary>
-        /// Decodes the strip.
+        /// Decodes one strip of image data.
         /// </summary>
-        /// <param name="pp">The pp.</param>
-        /// <param name="cc">The cc.</param>
-        /// <param name="s">The s.</param>
-        /// <returns><c>true</c> if decoded successfully.</returns>
-        public virtual bool DecodeStrip(byte[] pp, int cc, short s)
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool DecodeStrip(byte[] buffer, int count, short plane)
         {
             return noDecode("strip");
         }
 
         /// <summary>
-        /// Decodes the tile.
+        /// Decodes one tile of image data.
         /// </summary>
-        /// <param name="pp">The pp.</param>
-        /// <param name="cc">The cc.</param>
-        /// <param name="s">The s.</param>
-        /// <returns><c>true</c> if decoded successfully.</returns>
-        public virtual bool DecodeTile(byte[] pp, int cc, short s)
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool DecodeTile(byte[] buffer, int count, short plane)
         {
             return noDecode("tile");
         }
 
-        // encode part
-
         /// <summary>
-        /// Setups the encode.
+        /// Setups the encoder part of the codec.
         /// </summary>
-        /// <returns><c>true</c> if setup successfully.</returns>
-        /// <remarks>Called once before <see cref="TiffCodec.PreEncode(System.Int16)"/>.</remarks>
+        /// <returns>
+        /// <c>true</c> if this codec successfully setup its encoder part and can encode data;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// <b>SetupEncode</b> is called once before
+        /// <see cref="PreEncode"/>.</remarks>
         public virtual bool SetupEncode()
         {
             return true;
         }
 
         /// <summary>
-        /// Called before decoding.
+        /// Prepares the encoder part of the codec for a encoding.
         /// </summary>
-        /// <param name="s">s</param>
-        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
-        public virtual bool PreEncode(short s)
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns><c>true</c> if this codec successfully prepared its encoder part and ready
+        /// to encode data; otherwise, <c>false</c>.</returns>
+        /// <remarks>
+        /// <b>PreEncode</b> is called after <see cref="SetupEncode"/> and before encoding.
+        /// </remarks>
+        public virtual bool PreEncode(short plane)
         {
             return true;
         }
 
         /// <summary>
-        /// Called after encoding.
+        /// Performs any actions after encoding required by the codec.
         /// </summary>
-        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
+        /// <returns><c>true</c> if all post-encode actions succeeded; otherwise, <c>false</c></returns>
+        /// <remarks>
+        /// <b>PostEncode</b> is called after encoding and can be used to release any external 
+        /// resources needed during encoding.
+        /// </remarks>
         public virtual bool PostEncode()
         {
             return true;
         }
 
         /// <summary>
-        /// Encodes the row.
+        /// Encodes one row of image data.
         /// </summary>
-        /// <param name="pp">The pp.</param>
-        /// <param name="cc">The cc.</param>
-        /// <param name="s">The s.</param>
-        /// <returns><c>true</c> if encoded successfully.</returns>
-        public virtual bool EncodeRow(byte[] pp, int cc, short s)
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool EncodeRow(byte[] buffer, int count, short plane)
         {
             return noEncode("scanline");
         }
 
         /// <summary>
-        /// Encodes the strip.
+        /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="pp">The pp.</param>
-        /// <param name="cc">The cc.</param>
-        /// <param name="s">The s.</param>
-        /// <returns><c>true</c> if encoded successfully.</returns>
-        public virtual bool EncodeStrip(byte[] pp, int cc, short s)
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool EncodeStrip(byte[] buffer, int count, short plane)
         {
             return noEncode("strip");
         }
 
         /// <summary>
-        /// Encodes the tile.
+        /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="pp">The pp.</param>
-        /// <param name="cc">The cc.</param>
-        /// <param name="s">The s.</param>
-        /// <returns><c>true</c> if encoded successfully.</returns>
-        public virtual bool EncodeTile(byte[] pp, int cc, short s)
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool EncodeTile(byte[] buffer, int count, short plane)
         {
             return noEncode("tile");
         }
 
         /// <summary>
-        /// Closes this instance.
+        /// Flushes any internal data buffers and terminates current operation.
         /// </summary>
         public virtual void Close()
         {
         }
 
         /// <summary>
-        /// Seeks the specified offset in the current strip.
+        /// Seeks the specified row in the strip being processed.
         /// </summary>
-        /// <param name="offset">The offset.</param>
-        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
-        public virtual bool Seek(int offset)
+        /// <param name="row">The row to seek.</param>
+        /// <returns><c>true</c> if specified row was successfully found; otherwise, <c>false</c></returns>
+        public virtual bool Seek(int row)
         {
             Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                 "Compression algorithm does not support random access");
@@ -228,57 +266,57 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Cleanups state of this instance.
+        /// Cleanups the state of the codec.
         /// </summary>
+        /// <remarks>
+        /// <b>Cleanup</b> is called when codec is no longer needed (won't be used) and can be
+        /// used for example to restore tag methods that were substituted.</remarks>
         public virtual void Cleanup()
         {
         }
 
         /// <summary>
-        /// Calculates/constrains strip size
+        /// Calculates and/or constrains a strip size.
         /// </summary>
-        /// <param name="s">s</param>
-        /// <returns>Strip size</returns>
-        public virtual int DefStripSize(int s)
+        /// <param name="size">The proposed strip size (may be zero or negative).</param>
+        /// <returns>A strip size to use.</returns>
+        public virtual int DefStripSize(int size)
         {
-            if (s < 1)
+            if (size < 1)
             {
-                /*
-                * If RowsPerStrip is unspecified, try to break the
-                * image up into strips that are approximately
-                * STRIP_SIZE_DEFAULT bytes long.
-                */
+                // If RowsPerStrip is unspecified, try to break the image up into strips that are
+                // approximately STRIP_SIZE_DEFAULT bytes long.
                 int scanline = m_tif.ScanlineSize();
-                s = Tiff.STRIP_SIZE_DEFAULT / (scanline == 0 ? 1 : scanline);
-                if (s == 0)
+                size = Tiff.STRIP_SIZE_DEFAULT / (scanline == 0 ? 1 : scanline);
+                if (size == 0)
                 {
-                    /* very wide images */
-                    s = 1;
+                    // very wide images
+                    size = 1;
                 }
             }
 
-            return s;
+            return size;
         }
 
         /// <summary>
-        /// Calculate/constrain tile size
+        /// Calculate and/or constrains a tile size
         /// </summary>
-        /// <param name="tw">Output tile width.</param>
-        /// <param name="th">Output tile height.</param>
-        public virtual void DefTileSize(ref int tw, ref int th)
+        /// <param name="width">The proposed tile width upon the call / tile width to use after the call.</param>
+        /// <param name="height">The proposed tile height upon the call / tile height to use after the call.</param>
+        public virtual void DefTileSize(ref int width, ref int height)
         {
-            if (tw < 1)
-                tw = 256;
+            if (width < 1)
+                width = 256;
             
-            if (th < 1)
-                th = 256;
+            if (height < 1)
+                height = 256;
             
-            /* roundup to a multiple of 16 per the spec */
-            if ((tw & 0xf) != 0)
-                tw = Tiff.roundUp(tw, 16);
+            // roundup to a multiple of 16 per the spec
+            if ((width & 0xf) != 0)
+                width = Tiff.roundUp(width, 16);
 
-            if ((th & 0xf) != 0)
-                th = Tiff.roundUp(th, 16);
+            if ((height & 0xf) != 0)
+                height = Tiff.roundUp(height, 16);
         }
 
         private bool noEncode(string method)

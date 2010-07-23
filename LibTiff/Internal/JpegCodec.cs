@@ -170,102 +170,242 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        public override bool CanEncode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can encode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can encode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanEncode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool CanDecode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can decode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can decode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanDecode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
+        /// <summary>
+        /// Setups the decoder part of the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully setup its decoder part and can decode data;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>SetupDecode</b> is called once before
+        /// <see cref="PreDecode"/>.</remarks>
         public override bool SetupDecode()
         {
             return JPEGSetupDecode();
         }
 
-        public override bool PreDecode(short s)
+        /// <summary>
+        /// Prepares the decoder part of the codec for a decoding.
+        /// </summary>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully prepared its decoder part and ready
+        /// to decode data; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PreDecode</b> is called after <see cref="SetupDecode"/> and before decoding.
+        /// </remarks>
+        public override bool PreDecode(short plane)
         {
-            return JPEGPreDecode(s);
+            return JPEGPreDecode(plane);
         }
 
-        public override bool DecodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeRow(byte[] buffer, int count, short plane)
         {
             if (m_rawDecode)
-                return JPEGDecodeRaw(pp, cc, s);
+                return JPEGDecodeRaw(buffer, count, plane);
 
-            return JPEGDecode(pp, cc, s);
+            return JPEGDecode(buffer, count, plane);
         }
 
-        public override bool DecodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeStrip(byte[] buffer, int count, short plane)
         {
             if (m_rawDecode)
-                return JPEGDecodeRaw(pp, cc, s);
+                return JPEGDecodeRaw(buffer, count, plane);
 
-            return JPEGDecode(pp, cc, s);
+            return JPEGDecode(buffer, count, plane);
         }
 
-        public override bool DecodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeTile(byte[] buffer, int count, short plane)
         {
             if (m_rawDecode)
-                return JPEGDecodeRaw(pp, cc, s);
+                return JPEGDecodeRaw(buffer, count, plane);
 
-            return JPEGDecode(pp, cc, s);
+            return JPEGDecode(buffer, count, plane);
         }
 
+        /// <summary>
+        /// Setups the encoder part of the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully setup its encoder part and can encode data;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>SetupEncode</b> is called once before
+        /// <see cref="PreEncode"/>.</remarks>
         public override bool SetupEncode()
         {
             return JPEGSetupEncode();
         }
 
-        public override bool PreEncode(short s)
+        /// <summary>
+        /// Prepares the encoder part of the codec for a encoding.
+        /// </summary>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully prepared its encoder part and ready
+        /// to encode data; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PreEncode</b> is called after <see cref="SetupEncode"/> and before encoding.
+        /// </remarks>
+        public override bool PreEncode(short plane)
         {
-            return JPEGPreEncode(s);
+            return JPEGPreEncode(plane);
         }
 
+        /// <summary>
+        /// Performs any actions after encoding required by the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if all post-encode actions succeeded; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PostEncode</b> is called after encoding and can be used to release any external
+        /// resources needed during encoding.
+        /// </remarks>
         public override bool PostEncode()
         {
             return JPEGPostEncode();
         }
 
-        public override bool EncodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeRow(byte[] buffer, int count, short plane)
         {
             if (m_rawEncode)
-                return JPEGEncodeRaw(pp, cc, s);
+                return JPEGEncodeRaw(buffer, count, plane);
 
-            return JPEGEncode(pp, cc, s);
+            return JPEGEncode(buffer, count, plane);
         }
 
-        public override bool EncodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeStrip(byte[] buffer, int count, short plane)
         {
             if (m_rawEncode)
-                return JPEGEncodeRaw(pp, cc, s);
+                return JPEGEncodeRaw(buffer, count, plane);
 
-            return JPEGEncode(pp, cc, s);
+            return JPEGEncode(buffer, count, plane);
         }
 
-        public override bool EncodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeTile(byte[] buffer, int count, short plane)
         {
             if (m_rawEncode)
-                return JPEGEncodeRaw(pp, cc, s);
+                return JPEGEncodeRaw(buffer, count, plane);
 
-            return JPEGEncode(pp, cc, s);
+            return JPEGEncode(buffer, count, plane);
         }
 
+        /// <summary>
+        /// Cleanups the state of the codec.
+        /// </summary>
+        /// <remarks>
+        /// 	<b>Cleanup</b> is called when codec is no longer needed (won't be used) and can be
+        /// used for example to restore tag methods that were substituted.</remarks>
         public override void Cleanup()
         {
             JPEGCleanup();
         }
 
-        public override int DefStripSize(int s)
+        /// <summary>
+        /// Calculates and/or constrains a strip size.
+        /// </summary>
+        /// <param name="size">The proposed strip size (may be zero or negative).</param>
+        /// <returns>A strip size to use.</returns>
+        public override int DefStripSize(int size)
         {
-            return JPEGDefaultStripSize(s);
+            return JPEGDefaultStripSize(size);
         }
 
-        public override void DefTileSize(ref int tw, ref int th)
+        /// <summary>
+        /// Calculate and/or constrains a tile size
+        /// </summary>
+        /// <param name="width">The proposed tile width upon the call / tile width to use after the call.</param>
+        /// <param name="height">The proposed tile height upon the call / tile height to use after the call.</param>
+        public override void DefTileSize(ref int width, ref int height)
         {
-            JPEGDefaultTileSize(ref tw, ref th);
+            JPEGDefaultTileSize(ref width, ref height);
         }
 
         /*
@@ -1130,7 +1270,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     ++m_scancount;
                     m_tif.m_row += m_v_sampling;
 
-                    /* increment/decrement of buf and cc is still incorrect,
+                    /* increment/decrement of buf and count is still incorrect,
                      * but should not matter
                      * TODO: resolve this
                      */

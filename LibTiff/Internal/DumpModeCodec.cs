@@ -30,50 +30,129 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        public override bool CanEncode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can encode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can encode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanEncode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool CanDecode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can decode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can decode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanDecode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool DecodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeRow(byte[] buffer, int count, short plane)
         {
-            return DumpModeDecode(pp, cc, s);
+            return DumpModeDecode(buffer, count, plane);
         }
 
-        public override bool DecodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeStrip(byte[] buffer, int count, short plane)
         {
-            return DumpModeDecode(pp, cc, s);
+            return DumpModeDecode(buffer, count, plane);
         }
 
-        public override bool DecodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeTile(byte[] buffer, int count, short plane)
         {
-            return DumpModeDecode(pp, cc, s);
+            return DumpModeDecode(buffer, count, plane);
         }
 
-        public override bool EncodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeRow(byte[] buffer, int count, short plane)
         {
-            return DumpModeEncode(pp, cc, s);
+            return DumpModeEncode(buffer, count, plane);
         }
 
-        public override bool EncodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeStrip(byte[] buffer, int count, short plane)
         {
-            return DumpModeEncode(pp, cc, s);
+            return DumpModeEncode(buffer, count, plane);
         }
 
-        public override bool EncodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeTile(byte[] buffer, int count, short plane)
         {
-            return DumpModeEncode(pp, cc, s);
+            return DumpModeEncode(buffer, count, plane);
         }
 
-        public override bool Seek(int off)
+        /// <summary>
+        /// Seeks the specified row in the strip being processed.
+        /// </summary>
+        /// <param name="row">The row to seek.</param>
+        /// <returns>
+        /// 	<c>true</c> if specified row was successfully found; otherwise, <c>false</c>
+        /// </returns>
+        public override bool Seek(int row)
         {
-            m_tif.m_rawcp += off * m_tif.m_scanlinesize;
-            m_tif.m_rawcc -= off * m_tif.m_scanlinesize;
+            m_tif.m_rawcp += row * m_tif.m_scanlinesize;
+            m_tif.m_rawcc -= row * m_tif.m_scanlinesize;
             return true;
         }
         

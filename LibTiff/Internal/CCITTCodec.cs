@@ -215,14 +215,32 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return false;
         }
 
-        public override bool CanEncode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can encode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can encode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanEncode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
-        public override bool CanDecode()
+        /// <summary>
+        /// Gets a value indicating whether this codec can decode data.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this codec can decode data; otherwise, <c>false</c>.
+        /// </value>
+        public override bool CanDecode
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
         public override bool SetupDecode()
@@ -231,23 +249,31 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return setupState();
         }
 
-        public override bool PreDecode(short s)
+        /// <summary>
+        /// Prepares the decoder part of the codec for a decoding.
+        /// </summary>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully prepared its decoder part and ready
+        /// to decode data; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PreDecode</b> is called after <see cref="SetupDecode"/> and before decoding.
+        /// </remarks>
+        public override bool PreDecode(short plane)
         {
-            m_bit = 0; /* force initial read */
+            m_bit = 0; // force initial read
             m_data = 0;
-            m_EOLcnt = 0; /* force initial scan for EOL */
+            m_EOLcnt = 0; // force initial scan for EOL
 
-            /*
-            * Decoder assumes lsb-to-msb bit order.  Note that we select
-            * this here rather than in setupState so that viewers can
-            * hold the image open, fiddle with the FillOrder tag value,
-            * and then re-decode the image.  Otherwise they'd need to close
-            * and open the image to get the state reset.
-            */
+            // Decoder assumes lsb-to-msb bit order. Note that we select this here rather than in
+            // setupState so that viewers can hold the image open, fiddle with the FillOrder tag
+            // value, and then re-decode the image. Otherwise they'd need to close and open the
+            // image to get the state reset.
             m_bitmap = Tiff.GetBitRevTable(m_tif.m_dir.td_fillorder != FillOrder.LSB2MSB);
             if (m_refruns >= 0)
             {
-                /* init reference line to white */
+                // init reference line to white
                 m_runs[m_refruns] = m_rowpixels;
                 m_runs[m_refruns + 1] = 0;
             }
@@ -256,40 +282,88 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        public override bool DecodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeRow(byte[] buffer, int count, short plane)
         {
             switch (m_decoder)
             {
                 case Decoder.useFax3_1DDecoder:
-                    return Fax3Decode1D(pp, cc);
+                    return Fax3Decode1D(buffer, count);
                 case Decoder.useFax3_2DDecoder:
-                    return Fax3Decode2D(pp, cc);
+                    return Fax3Decode2D(buffer, count);
                 case Decoder.useFax4Decoder:
-                    return Fax4Decode(pp, cc);
+                    return Fax4Decode(buffer, count);
                 case Decoder.useFax3RLEDecoder:
-                    return Fax3DecodeRLE(pp, cc);
+                    return Fax3DecodeRLE(buffer, count);
             }
 
             return false;
         }
 
-        public override bool DecodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeStrip(byte[] buffer, int count, short plane)
         {
-            return DecodeRow(pp, cc, s);
+            return DecodeRow(buffer, count, plane);
         }
 
-        public override bool DecodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Decodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be decoded.</param>
+        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool DecodeTile(byte[] buffer, int count, short plane)
         {
-            return DecodeRow(pp, cc, s);
+            return DecodeRow(buffer, count, plane);
         }
 
+        /// <summary>
+        /// Setups the encoder part of the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully setup its encoder part and can encode data;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>SetupEncode</b> is called once before
+        /// <see cref="PreEncode"/>.</remarks>
         public override bool SetupEncode()
         {
             // same for all types
             return setupState();
         }
 
-        public override bool PreEncode(short s)
+        /// <summary>
+        /// Prepares the encoder part of the codec for a encoding.
+        /// </summary>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if this codec successfully prepared its encoder part and ready
+        /// to encode data; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PreEncode</b> is called after <see cref="SetupEncode"/> and before encoding.
+        /// </remarks>
+        public override bool PreEncode(short plane)
         {
             m_bit = 8;
             m_data = 0;
@@ -335,6 +409,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
+        /// <summary>
+        /// Performs any actions after encoding required by the codec.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if all post-encode actions succeeded; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// 	<b>PostEncode</b> is called after encoding and can be used to release any external
+        /// resources needed during encoding.
+        /// </remarks>
         public override bool PostEncode()
         {
             if (m_encodingFax4)
@@ -343,24 +427,54 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return Fax3PostEncode();
         }
 
-        public override bool EncodeRow(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one row of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeRow(byte[] buffer, int count, short plane)
         {
             if (m_encodingFax4)
-                return Fax4Encode(pp, cc);
+                return Fax4Encode(buffer, count);
 
-            return Fax3Encode(pp, cc);
+            return Fax3Encode(buffer, count);
         }
 
-        public override bool EncodeStrip(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one strip of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeStrip(byte[] buffer, int count, short plane)
         {
-            return EncodeRow(pp, cc, s);
+            return EncodeRow(buffer, count, plane);
         }
 
-        public override bool EncodeTile(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encodes one tile of image data.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="plane">The zero-based sample plane index.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool EncodeTile(byte[] buffer, int count, short plane)
         {
-            return EncodeRow(pp, cc, s);
+            return EncodeRow(buffer, count, plane);
         }
 
+        /// <summary>
+        /// Flushes any internal data buffers and terminates current operation.
+        /// </summary>
         public override void Close()
         {
             if ((m_mode & FaxMode.NORTC) == 0)
@@ -385,6 +499,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
+        /// <summary>
+        /// Cleanups the state of the codec.
+        /// </summary>
+        /// <remarks>
+        /// 	<b>Cleanup</b> is called when codec is no longer needed (won't be used) and can be
+        /// used for example to restore tag methods that were substituted.</remarks>
         public override void Cleanup()
         {
             m_tif.m_tagmethods = m_parentTagMethods;
