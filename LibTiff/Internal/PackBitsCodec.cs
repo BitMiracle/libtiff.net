@@ -70,8 +70,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Decodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer with image data to be decoded.</param>
-        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
@@ -84,8 +85,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Decodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer with image data to be decoded.</param>
-        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
@@ -98,8 +100,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Decodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer with image data to be decoded.</param>
-        /// <param name="count">The maximum number of bytes to decode.</param>
+        /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
@@ -128,8 +131,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer with image data to be encoded.</param>
-        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="count">The maximum number of encoded bytes that can be placed
+        /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
@@ -142,8 +146,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer with image data to be encoded.</param>
-        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="count">The maximum number of encoded bytes that can be placed
+        /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
@@ -156,8 +161,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer with image data to be encoded.</param>
-        /// <param name="count">The maximum number of bytes to encode.</param>
+        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="count">The maximum number of encoded bytes that can be placed
+        /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
