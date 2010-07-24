@@ -62,45 +62,51 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// Decodes one row of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeRow(byte[] buffer, int count, short plane)
+        public override bool DecodeRow(byte[] buffer, int offset, int count, short plane)
         {
-            return DumpModeDecode(buffer, count, plane);
+            return DumpModeDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one strip of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeStrip(byte[] buffer, int count, short plane)
+        public override bool DecodeStrip(byte[] buffer, int offset, int count, short plane)
         {
-            return DumpModeDecode(buffer, count, plane);
+            return DumpModeDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one tile of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeTile(byte[] buffer, int count, short plane)
+        public override bool DecodeTile(byte[] buffer, int offset, int count, short plane)
         {
-            return DumpModeDecode(buffer, count, plane);
+            return DumpModeDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -191,21 +197,21 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        /*
-        * Decode a hunk of pixels.
-        */
-        private bool DumpModeDecode(byte[] buf, int cc, short s)
+        /// <summary>
+        /// Decode a hunk of pixels.
+        /// </summary>
+        private bool DumpModeDecode(byte[] buffer, int offset, int count, short plane)
         {
-            if (m_tif.m_rawcc < cc)
+            if (m_tif.m_rawcc < count)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                     "DumpModeDecode: Not enough data for scanline {0}", m_tif.m_row);
                 return false;
             }
 
-            Array.Copy(m_tif.m_rawdata, m_tif.m_rawcp, buf, 0, cc);
-            m_tif.m_rawcp += cc;
-            m_tif.m_rawcc -= cc;
+            Array.Copy(m_tif.m_rawdata, m_tif.m_rawcp, buffer, offset, count);
+            m_tif.m_rawcp += count;
+            m_tif.m_rawcc -= count;
             return true;
         }
     }

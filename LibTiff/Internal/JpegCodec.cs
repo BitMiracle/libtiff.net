@@ -233,54 +233,60 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// Decodes one row of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeRow(byte[] buffer, int count, short plane)
+        public override bool DecodeRow(byte[] buffer, int offset, int count, short plane)
         {
             if (m_rawDecode)
-                return JPEGDecodeRaw(buffer, count, plane);
+                return JPEGDecodeRaw(buffer, offset, count, plane);
 
-            return JPEGDecode(buffer, count, plane);
+            return JPEGDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one strip of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeStrip(byte[] buffer, int count, short plane)
+        public override bool DecodeStrip(byte[] buffer, int offset, int count, short plane)
         {
             if (m_rawDecode)
-                return JPEGDecodeRaw(buffer, count, plane);
+                return JPEGDecodeRaw(buffer, offset, count, plane);
 
-            return JPEGDecode(buffer, count, plane);
+            return JPEGDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one tile of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeTile(byte[] buffer, int count, short plane)
+        public override bool DecodeTile(byte[] buffer, int offset, int count, short plane)
         {
             if (m_rawDecode)
-                return JPEGDecodeRaw(buffer, count, plane);
+                return JPEGDecodeRaw(buffer, offset, count, plane);
 
-            return JPEGDecode(buffer, count, plane);
+            return JPEGDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -1161,23 +1167,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return n;
         }
 
-        /*
-        * Decode a chunk of pixels.
-        * "Standard" case: returned data is not downsampled.
-        */
-        private bool JPEGDecode(byte[] buf, int cc, short s)
+        /// <summary>
+        /// Decode a chunk of pixels.
+        /// "Standard" case: returned data is not downsampled.
+        /// </summary>
+        private bool JPEGDecode(byte[] buffer, int offset, int count, short plane)
         {
-            int nrows = cc / m_bytesperline;
-            if ((cc % m_bytesperline) != 0)
+            int nrows = count / m_bytesperline;
+            if ((count % m_bytesperline) != 0)
                 Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "fractional scanline not read");
 
             if (nrows > (int)m_decompression.Image_height)
                 nrows = m_decompression.Image_height;
 
-            /* data is expected to be read in multiples of a scanline */
+            // data is expected to be read in multiples of a scanline
             if (nrows != 0)
             {
-                int bufOffset = 0;
                 byte[][] bufptr = new byte[1][];
                 bufptr[0] = new byte[m_bytesperline];
                 do
@@ -1188,34 +1193,33 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
 
                     ++m_tif.m_row;
-                    Array.Copy(bufptr[0], 0, buf, bufOffset, m_bytesperline);
-                    bufOffset += m_bytesperline;
-                    cc -= m_bytesperline;
+                    Array.Copy(bufptr[0], 0, buffer, offset, m_bytesperline);
+                    offset += m_bytesperline;
+                    count -= m_bytesperline;
                 }
                 while (--nrows > 0);
             }
 
-            /* Close down the decompressor if we've finished the strip or tile. */
+            // Close down the decompressor if we've finished the strip or tile.
             return m_decompression.Output_scanline < m_decompression.Output_height || TIFFjpeg_finish_decompress();
         }
 
-        /*
-        * Decode a chunk of pixels.
-        * Returned data is downsampled per sampling factors.
-        */
-        private bool JPEGDecodeRaw(byte[] buf, int cc, short s)
+        /// <summary>
+        /// Decode a chunk of pixels. 
+        /// Returned data is downsampled per sampling factors.
+        /// </summary>
+        private bool JPEGDecodeRaw(byte[] buffer, int offset, int count, short plane)
         {
-            /* data is expected to be read in multiples of a scanline */
+            // data is expected to be read in multiples of a scanline
             int nrows = m_decompression.Image_height;
             if (nrows != 0)
             {
-                /* Cb,Cr both have sampling factors 1, so this is correct */
+                // Cb,Cr both have sampling factors 1, so this is correct
                 int clumps_per_line = m_decompression.Comp_info[1].Downsampled_width;
 
-                int bufOffset = 0;
                 do
                 {
-                    /* Reload downsampled-data buffer if needed */
+                    // Reload downsampled-data buffer if needed
                     if (m_scancount >= JpegConstants.DCTSIZE)
                     {
                         int n = m_decompression.Max_v_samp_factor * JpegConstants.DCTSIZE;
@@ -1225,11 +1229,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         m_scancount = 0;
                     }
 
-                    /*
-                     * Fastest way to unseparate data is to make one pass
-                     * over the scanline for each row of each component.
-                     */
-                    int clumpoffset = 0; /* first sample in clump */
+                    // Fastest way to unseparate data is to make one pass over the scanline for
+                    // each row of each component.
+                    int clumpoffset = 0; // first sample in clump
                     for (int ci = 0; ci < m_decompression.Num_components; ci++)
                     {
                         int hsamp = m_decompression.Comp_info[ci].H_samp_factor;
@@ -1240,28 +1242,28 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             byte[] inBuf = m_ds_buffer[ci][m_scancount * vsamp + ypos];
                             int inptr = 0;
 
-                            int outptr = bufOffset + clumpoffset;
-                            if (outptr >= buf.Length)
+                            int outptr = offset + clumpoffset;
+                            if (outptr >= buffer.Length)
                                 break;
 
                             if (hsamp == 1)
                             {
-                                /* fast path for at least Cb and Cr */
+                                // fast path for at least Cb and Cr
                                 for (int nclump = clumps_per_line; nclump-- > 0; )
                                 {
-                                    buf[outptr] = inBuf[inptr];
+                                    buffer[outptr] = inBuf[inptr];
                                     inptr++;
                                     outptr += m_samplesperclump;
                                 }
                             }
                             else
                             {
-                                /* general case */
+                                // general case
                                 for (int nclump = clumps_per_line; nclump-- > 0; )
                                 {
                                     for (int xpos = 0; xpos < hsamp; xpos++)
                                     {
-                                        buf[outptr + xpos] = inBuf[inptr];
+                                        buffer[outptr + xpos] = inBuf[inptr];
                                         inptr++;
                                     }
 
@@ -1276,18 +1278,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     ++m_scancount;
                     m_tif.m_row += m_v_sampling;
 
-                    /* increment/decrement of buf and count is still incorrect,
-                     * but should not matter
-                     * TODO: resolve this
-                     */
-                    bufOffset += m_bytesperline;
-                    cc -= m_bytesperline;
+                    // increment/decrement of buffer and count is still incorrect, but should not matter
+                    // TODO: resolve this
+                    offset += m_bytesperline;
+                    count -= m_bytesperline;
                     nrows -= m_v_sampling;
                 }
                 while (nrows > 0);
             }
 
-            /* Close down the decompressor if done. */
+            // Close down the decompressor if done.
             return m_decompression.Output_scanline < m_decompression.Output_height || TIFFjpeg_finish_decompress();
         }
 

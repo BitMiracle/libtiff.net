@@ -3570,7 +3570,7 @@ namespace BitMiracle.LibTiff.Classic
             if (e)
             {
                 // Decompress desired row into user buffer.
-                e = m_currentCodec.DecodeRow(buf, m_scanlinesize, sample);
+                e = m_currentCodec.DecodeRow(buf, 0, m_scanlinesize, sample);
 
                 // we are now poised at the beginning of the next row
                 m_row = row + 1;
@@ -4764,7 +4764,7 @@ namespace BitMiracle.LibTiff.Classic
             byte[] tempBuf = new byte[count];
             Array.Copy(buffer, offset, tempBuf, 0, count);
 
-            if (fillTile(tile) && m_currentCodec.DecodeTile(tempBuf, count, (short)(tile / m_dir.td_stripsperimage)))
+            if (fillTile(tile) && m_currentCodec.DecodeTile(tempBuf, 0, count, (short)(tile / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, count);
                 Array.Copy(tempBuf, 0, buffer, offset, count);
@@ -4948,7 +4948,7 @@ namespace BitMiracle.LibTiff.Classic
             byte[] tempBuf = new byte[count];
             Array.Copy(buffer, offset, tempBuf, 0, count);
 
-            if (fillStrip(strip) && m_currentCodec.DecodeStrip(tempBuf, count, (short)(strip / m_dir.td_stripsperimage)))
+            if (fillStrip(strip) && m_currentCodec.DecodeStrip(tempBuf, 0, count, (short)(strip / m_dir.td_stripsperimage)))
             {
                 postDecode(tempBuf, count);
                 Array.Copy(tempBuf, 0, buffer, offset, count);

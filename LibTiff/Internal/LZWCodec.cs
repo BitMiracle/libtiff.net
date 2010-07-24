@@ -235,28 +235,28 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return LZWSetupDecode();
         }
 
-        public override bool predictor_decoderow(byte[] pp, int cc, short s)
+        public override bool predictor_decoderow(byte[] buffer, int offset, int count, short plane)
         {
             if (m_compatDecode)
-                return LZWDecodeCompat(pp, cc, s);
+                return LZWDecodeCompat(buffer, offset, count, plane);
 
-            return LZWDecode(pp, cc, s);
+            return LZWDecode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_decodestrip(byte[] pp, int cc, short s)
+        public override bool predictor_decodestrip(byte[] buffer, int offset, int count, short plane)
         {
             if (m_compatDecode)
-                return LZWDecodeCompat(pp, cc, s);
+                return LZWDecodeCompat(buffer, offset, count, plane);
 
-            return LZWDecode(pp, cc, s);
+            return LZWDecode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_decodetile(byte[] pp, int cc, short s)
+        public override bool predictor_decodetile(byte[] buffer, int offset, int count, short plane)
         {
             if (m_compatDecode)
-                return LZWDecodeCompat(pp, cc, s);
+                return LZWDecodeCompat(buffer, offset, count, plane);
 
-            return LZWDecode(pp, cc, s);
+            return LZWDecode(buffer, offset, count, plane);
         }
 
         public override bool predictor_setupencode()
@@ -364,70 +364,60 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        private bool LZWDecode(byte[] op0, int occ0, short s)
+        private bool LZWDecode(byte[] buffer, int offset, int count, short plane)
         {
             Debug.Assert(m_dec_codetab != null);
 
-            int occ = occ0;
-            int op = 0;
-
-            /*
-             * Restart interrupted output operation.
-             */
+            // Restart interrupted output operation.
             if (m_dec_restart != 0)
             {
                 int codep = m_dec_codep;
                 int residue = m_dec_codetab[codep].length - m_dec_restart;
-                if (residue > occ)
+                if (residue > count)
                 {
-                    /*
-                     * Residue from previous decode is sufficient
-                     * to satisfy decode request.  Skip to the
-                     * start of the decoded string, place decoded
-                     * values in the output buffer, and return.
-                     */
-                    m_dec_restart += occ;
+                    // Residue from previous decode is sufficient to satisfy decode request. Skip
+                    // to the start of the decoded string, place decoded values in the output
+                    // buffer, and return.
+                    m_dec_restart += count;
 
                     do
                     {
                         codep = m_dec_codetab[codep].next;
                     }
-                    while (--residue > occ && codep != -1);
+                    while (--residue > count && codep != -1);
 
                     if (codep != -1)
                     {
-                        int tp = occ;
+                        int tp = count;
                         do
                         {
                             tp--;
-                            op0[op + tp] = m_dec_codetab[codep].value;
+                            buffer[offset + tp] = m_dec_codetab[codep].value;
                             codep = m_dec_codetab[codep].next;
                         }
-                        while (--occ != 0 && codep != -1);
+                        while (--count != 0 && codep != -1);
                     }
 
                     return true;
                 }
 
-                /*
-                 * Residue satisfies only part of the decode request.
-                 */
-                op += residue;
-                occ -= residue;
+                // Residue satisfies only part of the decode request.
+                offset += residue;
+                count -= residue;
                 int ttp = 0;
                 do
                 {
                     --ttp;
                     int t = m_dec_codetab[codep].value;
                     codep = m_dec_codetab[codep].next;
-                    op0[op + ttp] = (byte)t;
+                    buffer[offset + ttp] = (byte)t;
                 }
                 while (--residue != 0 && codep != -1);
 
                 m_dec_restart = 0;
             }
 
-            while (occ > 0)
+            while (count > 0)
             {
                 short code;
                 NextCode(out code, false);
@@ -454,18 +444,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
                     }
 
-                    op0[op] = (byte)code;
-                    op++;
-                    occ--;
+                    buffer[offset] = (byte)code;
+                    offset++;
+                    count--;
                     m_dec_oldcodep = code;
                     continue;
                 }
 
                 int codep = code;
 
-                /*
-                 * Add the new entry to the code table.
-                 */
+                // Add the new entry to the code table.
                 if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
@@ -489,7 +477,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 {
                     if (++m_nbits > BITS_MAX)
                     {
-                        /* should not happen */
+                        // should not happen
                         m_nbits = BITS_MAX;
                     }
 
@@ -500,10 +488,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_dec_oldcodep = code;
                 if (code >= 256)
                 {
-                    /*
-                     * Code maps to a string, copy string
-                     * value to output (written in reverse).
-                     */
+                    // Code maps to a string, copy string value to output (written in reverse).
                     if (m_dec_codetab[codep].length == 0)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
@@ -512,32 +497,29 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
                     }
 
-                    if (m_dec_codetab[codep].length > occ)
+                    if (m_dec_codetab[codep].length > count)
                     {
-                        /*
-                         * String is too long for decode buffer,
-                         * locate portion that will fit, copy to
-                         * the decode buffer, and setup restart
-                         * logic for the next decoding call.
-                         */
+                        // String is too long for decode buffer, locate portion that will fit,
+                        // copy to the decode buffer, and setup restart logic for the next
+                        // decoding call.
                         m_dec_codep = code;
                         do
                         {
                             codep = m_dec_codetab[codep].next;
                         }
-                        while (codep != -1 && m_dec_codetab[codep].length > occ);
+                        while (codep != -1 && m_dec_codetab[codep].length > count);
 
                         if (codep != -1)
                         {
-                            m_dec_restart = occ;
-                            int tp = occ;
+                            m_dec_restart = count;
+                            int tp = count;
                             do
                             {
                                 tp--;
-                                op0[op + tp] = m_dec_codetab[codep].value;
+                                buffer[offset + tp] = m_dec_codetab[codep].value;
                                 codep = m_dec_codetab[codep].next;
                             }
-                            while (--occ != 0 && codep != -1);
+                            while (--count != 0 && codep != -1);
 
                             if (codep != -1)
                                 codeLoop();
@@ -552,7 +534,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         --ttp;
                         int t = m_dec_codetab[codep].value;
                         codep = m_dec_codetab[codep].next;
-                        op0[op + ttp] = (byte)t;
+                        buffer[offset + ttp] = (byte)t;
                     }
                     while (codep != -1 && ttp > 0);
 
@@ -561,80 +543,70 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         codeLoop();
                         break;
                     }
-                    
-                    op += len;
-                    occ -= len;
+
+                    offset += len;
+                    count -= len;
                 }
                 else
                 {
-                    op0[op] = (byte)code;
-                    op++;
-                    occ--;
+                    buffer[offset] = (byte)code;
+                    offset++;
+                    count--;
                 }
             }
 
-            if (occ > 0)
+            if (count > 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                     "LZWDecode: Not enough data at scanline {0} (short {1} bytes)",
-                    m_tif.m_row, occ);
+                    m_tif.m_row, count);
                 return false;
             }
 
             return true;
         }
 
-        private bool LZWDecodeCompat(byte[] op0, int occ0, short s)
+        private bool LZWDecodeCompat(byte[] buffer, int offset, int count, short plane)
         {
-            int occ = occ0;
-            int op = 0;
-
-            /*
-             * Restart interrupted output operation.
-             */
+            // Restart interrupted output operation.
             if (m_dec_restart != 0)
             {
                 int residue;
 
                 int codep = m_dec_codep;
                 residue = m_dec_codetab[codep].length - m_dec_restart;
-                if (residue > occ)
+                if (residue > count)
                 {
-                    /*
-                     * Residue from previous decode is sufficient
-                     * to satisfy decode request.  Skip to the
-                     * start of the decoded string, place decoded
-                     * values in the output buffer, and return.
-                     */
-                    m_dec_restart += occ;
+                    // Residue from previous decode is sufficient to satisfy decode request.
+                    // Skip to the start of the decoded string, place decoded values in the output
+                    // buffer, and return.
+                    m_dec_restart += count;
                     do
                     {
                         codep = m_dec_codetab[codep].next;
                     }
-                    while (--residue > occ);
-                    
-                    int tp = occ;
+                    while (--residue > count);
+
+                    int tp = count;
                     do
                     {
                         --tp;
-                        op0[op + tp] = m_dec_codetab[codep].value;
+                        buffer[offset + tp] = m_dec_codetab[codep].value;
                         codep = m_dec_codetab[codep].next;
                     }
-                    while (--occ != 0);
+                    while (--count != 0);
 
                     return true;
                 }
 
-                /*
-                 * Residue satisfies only part of the decode request.
-                 */
-                op += residue;
-                occ -= residue;
+                // Residue satisfies only part of the decode request.
+                offset += residue;
+                count -= residue;
                 int ttp = 0;
                 do
                 {
                     --ttp;
-                    op0[op + ttp] = m_dec_codetab[codep].value;
+                    buffer[offset + ttp] = m_dec_codetab[codep].value;
                     codep = m_dec_codetab[codep].next;
                 }
                 while (--residue != 0);
@@ -642,7 +614,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_dec_restart = 0;
             }
 
-            while (occ > 0)
+            while (count > 0)
             {
                 short code;
                 NextCode(out code, true);
@@ -669,18 +641,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
                     }
 
-                    op0[op] = (byte)code;
-                    op++;
-                    occ--;
+                    buffer[offset] = (byte)code;
+                    offset++;
+                    count--;
                     m_dec_oldcodep = code;
                     continue;
                 }
 
                 int codep = code;
 
-                /*
-                 * Add the new entry to the code table.
-                 */
+                // Add the new entry to the code table.
                 if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
@@ -703,7 +673,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 {
                     if (++m_nbits > BITS_MAX)
                     {
-                        /* should not happen */
+                        // should not happen
                         m_nbits = BITS_MAX;
                     }
                     m_dec_nbitsmask = MAXCODE(m_nbits);
@@ -713,12 +683,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_dec_oldcodep = code;
                 if (code >= 256)
                 {
-                    int op_orig = op;
+                    int op_orig = offset;
 
-                    /*
-                     * Code maps to a string, copy string
-                     * value to output (written in reverse).
-                     */
+                    // Code maps to a string, copy string value to output (written in reverse).
                     if (m_dec_codetab[codep].length == 0)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
@@ -727,58 +694,55 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
                     }
 
-                    if (m_dec_codetab[codep].length > occ)
+                    if (m_dec_codetab[codep].length > count)
                     {
-                        /*
-                         * String is too long for decode buffer,
-                         * locate portion that will fit, copy to
-                         * the decode buffer, and setup restart
-                         * logic for the next decoding call.
-                         */
+                        // String is too long for decode buffer, locate portion that will fit,
+                        // copy to the decode buffer, and setup restart logic for the next
+                        // decoding call.
                         m_dec_codep = code;
                         do
                         {
                             codep = m_dec_codetab[codep].next;
                         }
-                        while (m_dec_codetab[codep].length > occ);
+                        while (m_dec_codetab[codep].length > count);
 
-                        m_dec_restart = occ;
-                        int tp = occ;
+                        m_dec_restart = count;
+                        int tp = count;
                         do
                         {
                             --tp;
-                            op0[op + tp] = m_dec_codetab[codep].value;
+                            buffer[offset + tp] = m_dec_codetab[codep].value;
                             codep = m_dec_codetab[codep].next;
                         }
-                        while (--occ != 0);
+                        while (--count != 0);
 
                         break;
                     }
 
-                    op += m_dec_codetab[codep].length;
-                    occ -= m_dec_codetab[codep].length;
-                    int ttp = op;
+                    offset += m_dec_codetab[codep].length;
+                    count -= m_dec_codetab[codep].length;
+                    int ttp = offset;
                     do
                     {
                         --ttp;
-                        op0[ttp] = m_dec_codetab[codep].value;
+                        buffer[ttp] = m_dec_codetab[codep].value;
                         codep = m_dec_codetab[codep].next;
                     }
                     while (codep != -1 && ttp > op_orig);
                 }
                 else
                 {
-                    op0[op] = (byte)code;
-                    op++;
-                    occ--;
+                    buffer[offset] = (byte)code;
+                    offset++;
+                    count--;
                 }
             }
 
-            if (occ > 0)
+            if (count > 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                     "LZWDecodeCompat: Not enough data at scanline {0} (short {1} bytes)",
-                    m_tif.m_row, occ);
+                    m_tif.m_row, count);
                 return false;
             }
 

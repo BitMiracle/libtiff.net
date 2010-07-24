@@ -286,24 +286,26 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// Decodes one row of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeRow(byte[] buffer, int count, short plane)
+        public override bool DecodeRow(byte[] buffer, int offset, int count, short plane)
         {
             switch (m_decoder)
             {
                 case Decoder.useFax3_1DDecoder:
-                    return Fax3Decode1D(buffer, count);
+                    return Fax3Decode1D(buffer, offset, count);
                 case Decoder.useFax3_2DDecoder:
-                    return Fax3Decode2D(buffer, count);
+                    return Fax3Decode2D(buffer, offset, count);
                 case Decoder.useFax4Decoder:
-                    return Fax4Decode(buffer, count);
+                    return Fax4Decode(buffer, offset, count);
                 case Decoder.useFax3RLEDecoder:
-                    return Fax3DecodeRLE(buffer, count);
+                    return Fax3DecodeRLE(buffer, offset, count);
             }
 
             return false;
@@ -313,30 +315,34 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// Decodes one strip of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeStrip(byte[] buffer, int count, short plane)
+        public override bool DecodeStrip(byte[] buffer, int offset, int count, short plane)
         {
-            return DecodeRow(buffer, count, plane);
+            return DecodeRow(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one tile of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeTile(byte[] buffer, int count, short plane)
+        public override bool DecodeTile(byte[] buffer, int offset, int count, short plane)
         {
-            return DecodeRow(buffer, count, plane);
+            return DecodeRow(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -1289,17 +1295,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 (m_tif.IsTiled() ? m_tif.m_curtile : m_tif.m_curstrip), m_a0);
         }
 
-        /*
-        * Decode the requested amount of G3 1D-encoded data.
-        */
-        private bool Fax3Decode1D(byte[] buf, int occ)
+        /// <summary>
+        /// Decode the requested amount of G3 1D-encoded data.
+        /// </summary>
+        private bool Fax3Decode1D(byte[] buffer, int offset, int count)
         {
             const string module = "Fax3Decode1D";
     
-            /* current row's run array */
+            // current row's run array
             m_thisrun = m_curruns;
-            int startOffset = 0;
-            while (occ > 0)
+            while (count > 0)
             {
                 m_a0 = 0;
                 m_RunLength = 0;
@@ -1307,7 +1312,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 if (!SYNC_EOL())
                 {
-                    /* premature EOF */
+                    // premature EOF
                     CLEANUP_RUNS(module);
                 }
                 else
@@ -1315,31 +1320,30 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     bool expandSucceeded = EXPAND1D(module);
                     if (expandSucceeded)
                     {
-                        fill(buf, startOffset, m_runs, m_thisrun, m_pa, m_rowpixels);
-                        startOffset += m_rowbytes;
-                        occ -= m_rowbytes;
+                        fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                        offset += m_rowbytes;
+                        count -= m_rowbytes;
                         m_line++;
                         continue;
                     }
                 }
 
-                /* premature EOF */
-                fill(buf, startOffset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                // premature EOF
+                fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
                 return false;
             }
 
             return true;
         }
 
-        /*
-        * Decode the requested amount of G3 2D-encoded data.
-        */
-        private bool Fax3Decode2D(byte[] buf, int occ)
+        /// <summary>
+        /// Decode the requested amount of G3 2D-encoded data.
+        /// </summary>
+        private bool Fax3Decode2D(byte[] buffer, int offset, int count)
         {
             const string module = "Fax3Decode2D";
-            int startOffset = 0;
 
-            while (occ > 0)
+            while (count > 0)
             {
                 m_a0 = 0;
                 m_RunLength = 0;
@@ -1355,11 +1359,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 if (!prematureEOF)
                 {
-                    int is1D = GetBits(1); /* 1D/2D-encoding tag bit */
+                    int is1D = GetBits(1); // 1D/2D-encoding tag bit
                     ClrBits(1);
                     m_pb = m_refruns;
                     int b1 = m_runs[m_pb];
-                    m_pb++; /* next change on prev line */
+                    m_pb++; // next change on prev line
 
                     bool expandSucceeded = false;
                     if (is1D != 0)
@@ -1369,23 +1373,23 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     if (expandSucceeded)
                     {
-                        fill(buf, startOffset, m_runs, m_thisrun, m_pa, m_rowpixels);
-                        SETVALUE(0); /* imaginary change for reference */
+                        fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                        SETVALUE(0); // imaginary change for reference
                         SWAP(ref m_curruns, ref m_refruns);
-                        startOffset += m_rowbytes;
-                        occ -= m_rowbytes;
+                        offset += m_rowbytes;
+                        count -= m_rowbytes;
                         m_line++;
                         continue;
                     }
                 }
                 else
                 {
-                    /* premature EOF */
+                    // premature EOF
                     CLEANUP_RUNS(module);
                 }
 
-                /* premature EOF */
-                fill(buf, startOffset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                // premature EOF
+                fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
                 return false;
             }
 
@@ -2196,17 +2200,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 FaxMode.NORTC | FaxMode.NOEOL | FaxMode.WORDALIGN);
         }
 
-        /*
-        * Decode the requested amount of RLE-encoded data.
-        */
-        private bool Fax3DecodeRLE(byte[] buf, int occ)
+        /// <summary>
+        /// Decode the requested amount of RLE-encoded data.
+        /// </summary>
+        private bool Fax3DecodeRLE(byte[] buffer, int offset, int count)
         {
             const string module = "Fax3DecodeRLE";
 
-            int thisrun = m_curruns; /* current row's run array */
-            int startOffset = 0;
+            int thisrun = m_curruns; // current row's run array
 
-            while (occ > 0)
+            while (count > 0)
             {
                 m_a0 = 0;
                 m_RunLength = 0;
@@ -2215,11 +2218,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 bool expandSucceeded = EXPAND1D(module);
                 if (expandSucceeded)
                 {
-                    fill(buf, startOffset, m_runs, thisrun, m_pa, m_rowpixels);
+                    fill(buffer, offset, m_runs, thisrun, m_pa, m_rowpixels);
 
-                    /*
-                     * Cleanup at the end of the row.
-                     */
+                    // Cleanup at the end of the row.
                     if ((m_mode & FaxMode.BYTEALIGN) != 0)
                     {
                         int n = m_bit - (m_bit & ~7);
@@ -2233,14 +2234,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             m_tif.m_rawcp++;
                     }
 
-                    startOffset += m_rowbytes;
-                    occ -= m_rowbytes;
+                    offset += m_rowbytes;
+                    count -= m_rowbytes;
                     m_line++;
                     continue;
                 }
 
-                /* premature EOF */
-                fill(buf, startOffset, m_runs, thisrun, m_pa, m_rowpixels);
+                // premature EOF
+                fill(buffer, offset, m_runs, thisrun, m_pa, m_rowpixels);
                 return false;
             }
 
@@ -2268,15 +2269,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return m_tif.SetField(TiffTag.FAXMODE, FaxMode.NORTC);
         }
 
-        /*
-        * Decode the requested amount of G4-encoded data.
-        */
-        private bool Fax4Decode(byte[] buf, int occ)
+        /// <summary>
+        /// Decode the requested amount of G4-encoded data.
+        /// </summary>
+        private bool Fax4Decode(byte[] buffer, int offset, int count)
         {
             const string module = "Fax4Decode";
-            int startOffset = 0;
 
-            while (occ > 0)
+            while (count > 0)
             {
                 m_a0 = 0;
                 m_RunLength = 0;
@@ -2284,7 +2284,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_pa = m_curruns;
                 m_pb = m_refruns;
                 int b1 = m_runs[m_pb];
-                m_pb++; /* next change on prev line */
+                m_pb++; // next change on prev line
 
                 bool expandSucceeded = EXPAND2D(module, b1);
                 if (expandSucceeded && m_EOLcnt != 0)
@@ -2292,18 +2292,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 if (expandSucceeded)
                 {
-                    fill(buf, startOffset, m_runs, m_thisrun, m_pa, m_rowpixels);
-                    SETVALUE(0); /* imaginary change for reference */
+                    fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                    SETVALUE(0); // imaginary change for reference
                     SWAP(ref m_curruns, ref m_refruns);
-                    startOffset += m_rowbytes;
-                    occ -= m_rowbytes;
+                    offset += m_rowbytes;
+                    count -= m_rowbytes;
                     m_line++;
                     continue;
                 }
 
                 NeedBits16(13);
                 ClrBits(13);
-                fill(buf, startOffset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
                 return false;
             }
 

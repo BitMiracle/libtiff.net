@@ -118,54 +118,60 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// Decodes one row of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeRow(byte[] buffer, int count, short plane)
+        public override bool DecodeRow(byte[] buffer, int offset, int count, short plane)
         {
             if (!m_passThruDecode)
-                return PredictorDecodeRow(buffer, count, plane);
+                return PredictorDecodeRow(buffer, offset, count, plane);
 
-            return predictor_decoderow(buffer, count, plane);
+            return predictor_decoderow(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one strip of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeStrip(byte[] buffer, int count, short plane)
+        public override bool DecodeStrip(byte[] buffer, int offset, int count, short plane)
         {
             if (!m_passThruDecode)
-                return PredictorDecodeTile(buffer, count, plane);
+                return PredictorDecodeTile(buffer, offset, count, plane);
 
-            return predictor_decodestrip(buffer, count, plane);
+            return predictor_decodestrip(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one tile of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeTile(byte[] buffer, int count, short plane)
+        public override bool DecodeTile(byte[] buffer, int offset, int count, short plane)
         {
             if (!m_passThruDecode)
-                return PredictorDecodeTile(buffer, count, plane);
+                return PredictorDecodeTile(buffer, offset, count, plane);
 
-            return predictor_decodetile(buffer, count, plane);
+            return predictor_decodetile(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -246,19 +252,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return base.SetupDecode();
         }
 
-        public virtual bool predictor_decoderow(byte[] pp, int cc, short s)
+        public virtual bool predictor_decoderow(byte[] buffer, int offset, int count, short plane)
         {
-            return base.DecodeRow(pp, cc, s);
+            return base.DecodeRow(buffer, offset, count, plane);
         }
 
-        public virtual bool predictor_decodestrip(byte[] pp, int cc, short s)
+        public virtual bool predictor_decodestrip(byte[] buffer, int offset, int count, short plane)
         {
-            return base.DecodeStrip(pp, cc, s);
+            return base.DecodeStrip(buffer, offset, count, plane);
         }
 
-        public virtual bool predictor_decodetile(byte[] pp, int cc, short s)
+        public virtual bool predictor_decodetile(byte[] buffer, int offset, int count, short plane)
         {
-            return base.DecodeTile(pp, cc, s);
+            return base.DecodeTile(buffer, offset, count, plane);
         }
 
         public virtual bool predictor_setupencode()
@@ -801,41 +807,38 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
                 
-        /*
-        * Decode a scanline and apply the predictor routine.
-        */
-        private bool PredictorDecodeRow(byte[] op0, int occ0, short s)
+        /// <summary>
+        /// Decode a scanline and apply the predictor routine.
+        /// </summary>
+        private bool PredictorDecodeRow(byte[] buffer, int offset, int count, short plane)
         {
             Debug.Assert(m_predictorType != PredictorType.ptNone);
 
-            if (predictor_decoderow(op0, occ0, s))
+            if (predictor_decoderow(buffer, offset, count, plane))
             {
-                predictorFunc(op0, 0, occ0);
+                predictorFunc(buffer, offset, count);
                 return true;
             }
 
             return false;
         }
 
-        /*
-        * Decode a tile/strip and apply the predictor routine.
-        * Note that horizontal differencing must be done on a
-        * row-by-row basis.  The width of a "row" has already
-        * been calculated at pre-decode time according to the
-        * strip/tile dimensions.
-        */
-        private bool PredictorDecodeTile(byte[] op0, int occ0, short s)
+        /// <summary>
+        /// Decode a tile/strip and apply the predictor routine. Note that horizontal differencing
+        /// must be done on a row-by-row basis. The width of a "row" has already been calculated
+        /// at pre-decode time according to the strip/tile dimensions.
+        /// </summary>
+        private bool PredictorDecodeTile(byte[] buffer, int offset, int count, short plane)
         {
-            if (predictor_decodetile(op0, occ0, s))
+            if (predictor_decodetile(buffer, offset, count, plane))
             {
                 Debug.Assert(rowsize > 0);
                 Debug.Assert(m_predictorType != PredictorType.ptNone);
 
-                int offset = 0;
-                while (occ0 > 0)
+                while (count > 0)
                 {
-                    predictorFunc(op0, offset, rowsize);
-                    occ0 -= rowsize;
+                    predictorFunc(buffer, offset, rowsize);
+                    count -= rowsize;
                     offset += rowsize;
                 }
 

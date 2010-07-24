@@ -124,13 +124,15 @@ namespace BitMiracle.LibTiff.Classic
         /// Decodes one row of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool DecodeRow(byte[] buffer, int count, short plane)
+        public virtual bool DecodeRow(byte[] buffer, int offset, int count, short plane)
         {
             return noDecode("scanline");
         }
@@ -139,13 +141,15 @@ namespace BitMiracle.LibTiff.Classic
         /// Decodes one strip of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool DecodeStrip(byte[] buffer, int count, short plane)
+        public virtual bool DecodeStrip(byte[] buffer, int offset, int count, short plane)
         {
             return noDecode("strip");
         }
@@ -154,13 +158,15 @@ namespace BitMiracle.LibTiff.Classic
         /// Decodes one tile of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool DecodeTile(byte[] buffer, int count, short plane)
+        public virtual bool DecodeTile(byte[] buffer, int offset, int count, short plane)
         {
             return noDecode("tile");
         }

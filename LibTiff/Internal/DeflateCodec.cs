@@ -172,19 +172,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return ZIPSetupDecode();
         }
 
-        public override bool predictor_decoderow(byte[] pp, int cc, short s)
+        public override bool predictor_decoderow(byte[] buffer, int offset, int count, short plane)
         {
-            return ZIPDecode(pp, cc, s);
+            return ZIPDecode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_decodestrip(byte[] pp, int cc, short s)
+        public override bool predictor_decodestrip(byte[] buffer, int offset, int count, short plane)
         {
-            return ZIPDecode(pp, cc, s);
+            return ZIPDecode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_decodetile(byte[] pp, int cc, short s)
+        public override bool predictor_decodetile(byte[] buffer, int offset, int count, short plane)
         {
-            return ZIPDecode(pp, cc, s);
+            return ZIPDecode(buffer, offset, count, plane);
         }
 
         public override bool predictor_setupencode()
@@ -223,14 +223,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        private bool ZIPDecode(byte[] op, int occ, short s)
+        private bool ZIPDecode(byte[] buffer, int offset, int count, short plane)
         {
             const string module = "ZIPDecode";
 
             Debug.Assert(m_state == ZSTATE_INIT_DECODE);
-            m_stream.next_out = op;
-            m_stream.next_out_index = 0;
-            m_stream.avail_out = occ;
+            m_stream.next_out = buffer;
+            m_stream.next_out_index = offset;
+            m_stream.avail_out = count;
             do
             {
                 int state = m_stream.inflate(zlibConst.Z_PARTIAL_FLUSH);

@@ -71,45 +71,51 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// Decodes one row of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeRow(byte[] buffer, int count, short plane)
+        public override bool DecodeRow(byte[] buffer, int offset, int count, short plane)
         {
-            return PackBitsDecode(buffer, count, plane);
+            return PackBitsDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one strip of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeStrip(byte[] buffer, int count, short plane)
+        public override bool DecodeStrip(byte[] buffer, int offset, int count, short plane)
         {
-            return PackBitsDecode(buffer, count, plane);
+            return PackBitsDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Decodes one tile of image data.
         /// </summary>
         /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
         /// <param name="count">The maximum number of decoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool DecodeTile(byte[] buffer, int count, short plane)
+        public override bool DecodeTile(byte[] buffer, int offset, int count, short plane)
         {
-            return PackBitsDecode(buffer, count, plane);
+            return PackBitsDecode(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -397,67 +403,63 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        private bool PackBitsDecode(byte[] op, int occ, short s)
+        private bool PackBitsDecode(byte[] buffer, int offset, int count, short plane)
         {
             int bp = m_tif.m_rawcp;
             int cc = m_tif.m_rawcc;
-            int opPos = 0;
-            while (cc > 0 && occ > 0)
+            while (cc > 0 && count > 0)
             {
                 int n = m_tif.m_rawdata[bp];
                 bp++;
                 cc--;
 
-                /*
-                 * Watch out for compilers that
-                 * don't sign extend chars...
-                 */
+                // Watch out for compilers that don't sign extend chars...
                 if (n >= 128)
                     n -= 256;
 
                 if (n < 0)
                 {
-                    /* replicate next byte (-n + 1) times */
+                    // replicate next byte (-n + 1) times
                     if (n == -128)
                     {
-                        /* nop */
+                        // nop
                         continue;
                     }
 
                     n = -n + 1;
-                    if (occ < n)
+                    if (count < n)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                             "PackBitsDecode: discarding {0} bytes to avoid buffer overrun",
-                            n - occ);
+                            n - count);
 
-                        n = occ;
+                        n = count;
                     }
-                    occ -= n;
+                    count -= n;
                     int b = m_tif.m_rawdata[bp];
                     bp++;
                     cc--;
                     while (n-- > 0)
                     {
-                        op[opPos] = (byte)b;
-                        opPos++;
+                        buffer[offset] = (byte)b;
+                        offset++;
                     }
                 }
                 else
                 {
-                    /* copy next (n + 1) bytes literally */
-                    if (occ < n + 1)
+                    // copy next (n + 1) bytes literally
+                    if (count < n + 1)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                             "PackBitsDecode: discarding {0} bytes to avoid buffer overrun",
-                            n - occ + 1);
+                            n - count + 1);
 
-                        n = occ - 1;
+                        n = count - 1;
                     }
 
-                    Array.Copy(m_tif.m_rawdata, bp, op, opPos, ++n);
-                    opPos += n;
-                    occ -= n;
+                    Array.Copy(m_tif.m_rawdata, bp, buffer, offset, ++n);
+                    offset += n;
+                    count -= n;
                     bp += n;
                     cc -= n;
                 }
@@ -465,7 +467,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             m_tif.m_rawcp = bp;
             m_tif.m_rawcc = cc;
-            if (occ > 0)
+            if (count > 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                     "PackBitsDecode: Not enough data for scanline {0}", m_tif.m_row);
