@@ -324,7 +324,7 @@ namespace BitMiracle.LibTiff.Classic
             return m_currentCodec.PreDecode((short)(tile / m_dir.td_stripsperimage));
         }
 
-        private bool checkRead(int tiles)
+        private bool checkRead(bool tiles)
         {
             if (m_mode == O_WRONLY)
             {
@@ -332,13 +332,11 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            int temp = 0;
-            if (IsTiled())
-                temp = 1;
-
-            if ((tiles ^ temp) != 0)
+            if (tiles ^ IsTiled())
             {
-                ErrorExt(this, m_clientdata, m_name, tiles != 0 ? "Can not read tiles from a stripped image": "Can not read scanlines from a tiled image");
+                ErrorExt(this, m_clientdata, m_name, tiles ?
+                    "Can not read tiles from a stripped image" :
+                    "Can not read scanlines from a tiled image");
                 return false;
             }
 

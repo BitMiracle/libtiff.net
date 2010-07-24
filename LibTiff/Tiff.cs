@@ -9,6 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
+/*
+ * Tile-oriented Read Support
+ * Contributed by Nancy Cam (Silicon Graphics).
+ */
+
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -3647,7 +3652,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public bool ReadScanline(byte[] buffer, int offset, int row, short plane)
         {
-            if (!checkRead(0))
+            if (!checkRead(false))
                 return false;
 
             bool e = seek(row, plane);
@@ -4899,28 +4904,45 @@ namespace BitMiracle.LibTiff.Classic
             return ntiles;
         }
 
-        /*
-        * Tile-oriented Read Support
-        * Contributed by Nancy Cam (Silicon Graphics).
-        */
-
         /// <summary>
-        /// Reads and decompresses a tile of data.
+        /// Reads and decodes a tile of data from an open TIFF file/stream.
         /// </summary>
-        /// <param name="buf">The buffer.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="x">The x.</param>
-        /// <param name="y">The y.</param>
-        /// <param name="z">The z.</param>
-        /// <param name="s">The s.</param>
-        /// <returns>The tile size.</returns>
-        /// <remarks>The tile is selected by the (x,y,z,s) coordinates.</remarks>
-        public int ReadTile(byte[] buf, int offset, int x, int y, int z, short s)
+        /// <param name="buffer">The buffer to place read and decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin storing read and decoded bytes.</param>
+        /// <param name="x">The x-coordinate of the pixel within a tile to be read and decoded.</param>
+        /// <param name="y">The y-coordinate of the pixel within a tile to be read and decoded.</param>
+        /// <param name="z">The z-coordinate of the pixel within a tile to be read and decoded.</param>
+        /// <param name="plane">The zero-based index of the sample plane.</param>
+        /// <returns>The number of bytes in the decoded tile or <c>-1</c> if an error occurred.</returns>
+        /// <remarks>
+        /// <para>
+        /// The tile to read and decode is selected by the (x, y, z, plane) coordinates (i.e.
+        /// <b>ReadTile</b> returns the data for the tile containing the specified coordinates.
+        /// The data placed in <paramref name="buffer"/> are returned decompressed and, typically,
+        /// in the native byte- and bit-ordering, but are otherwise packed (see further below).
+        /// The buffer must be large enough to hold an entire tile of data. Applications should
+        /// call the <see cref="TileSize"/> to find out the size (in bytes) of a tile buffer.
+        /// The <paramref name="x"/> and <paramref name="y"/> parameters are always used by
+        /// <b>ReadTile</b>. The <paramref name="z"/> parameter is used if the image is deeper
+        /// than 1 slice (a value of <see cref="TiffTag.IMAGEDEPTH"/> &gt; 1). In other cases the
+        /// value of <paramref name="z"/> is ignored. The <paramref name="plane"/> parameter is
+        /// used only if data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE). In other
+        /// cases the value of <paramref name="plane"/> is ignored.
+        /// </para><para>
+        /// The library attempts to hide bit- and byte-ordering differences between the image and
+        /// the native machine by converting data to the native machine order. Bit reversal is
+        /// done if the value of <see cref="TiffTag.FILLORDER"/> tag is opposite to the native
+        /// machine bit order. 16- and 32-bit samples are automatically byte-swapped if the file
+        /// was written with a byte order opposite to the native machine byte order.
+        /// </para></remarks>
+        public int ReadTile(byte[] buffer, int offset, int x, int y, int z, short plane)
         {
-            if (!checkRead(1) || !CheckTile(x, y, z, s))
+            if (!checkRead(true) || !CheckTile(x, y, z, plane))
                 return -1;
 
-            return ReadEncodedTile(ComputeTile(x, y, z, s), buf, offset, -1);
+            return ReadEncodedTile(ComputeTile(x, y, z, plane), buffer, offset, -1);
         }
 
         /// <summary>
@@ -4954,7 +4976,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public int ReadEncodedTile(int tile, byte[] buffer, int offset, int count)
         {
-            if (!checkRead(1))
+            if (!checkRead(true))
                 return -1;
 
             if (tile >= m_dir.td_nstrips)
@@ -5003,7 +5025,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             const string module = "ReadRawTile";
 
-            if (!checkRead(1))
+            if (!checkRead(true))
                 return -1;
 
             if (tile >= m_dir.td_nstrips)
@@ -5026,27 +5048,71 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Writes and compress a tile of data.
+        /// Encodes and writes a tile of data to an open TIFF file/stream.
         /// </summary>
-        /// <param name="buf">The buf.</param>
-        /// <param name="x">The x.</param>
-        /// <param name="y">The y.</param>
-        /// <param name="z">The z.</param>
-        /// <param name="s">The s.</param>
-        /// <returns>The tile size.</returns>
-        /// <remarks>The tile is selected by the (x,y,z,s) coordinates.</remarks>
-        public int WriteTile(byte[] buf, int x, int y, int z, short s)
+        /// <overloads>Encodes and writes a tile of data to an open TIFF file/stream.</overloads>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="x">The x-coordinate of the pixel within a tile to be encoded and written.</param>
+        /// <param name="y">The y-coordinate of the pixel within a tile to be encoded and written.</param>
+        /// <param name="z">The z-coordinate of the pixel within a tile to be encoded and written.</param>
+        /// <param name="plane">The zero-based index of the sample plane.</param>
+        /// <returns>
+        /// The number of encoded and written bytes or <c>-1</c> if an error occurred.
+        /// </returns>
+        /// <remarks>
+        /// The tile to place encoded data is selected by the (x, y, z, plane) coordinates (i.e.
+        /// <b>WriteTile</b> writes data to the tile containing the specified coordinates.
+        /// <b>WriteTile</b> (potentially) encodes the data <paramref name="buffer"/> and writes
+        /// it to open file/stream. The buffer must contain an entire tile of data. Applications
+        /// should call the <see cref="TileSize"/> to find out the size (in bytes) of a tile buffer.
+        /// The <paramref name="x"/> and <paramref name="y"/> parameters are always used by
+        /// <b>WriteTile</b>. The <paramref name="z"/> parameter is used if the image is deeper
+        /// than 1 slice (a value of <see cref="TiffTag.IMAGEDEPTH"/> &gt; 1). In other cases the
+        /// value of <paramref name="z"/> is ignored. The <paramref name="plane"/> parameter is
+        /// used only if data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE). In other
+        /// cases the value of <paramref name="plane"/> is ignored.
+        /// </remarks>
+        public int WriteTile(byte[] buffer, int x, int y, int z, short plane)
         {
-            if (!CheckTile(x, y, z, s))
+            return WriteTile(buffer, 0, x, y, z, plane);
+        }
+
+        /// <summary>
+        /// Encodes and writes a tile of data to an open TIFF file/stream.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin reading bytes to be encoded and written.</param>
+        /// <param name="x">The x-coordinate of the pixel within a tile to be encoded and written.</param>
+        /// <param name="y">The y-coordinate of the pixel within a tile to be encoded and written.</param>
+        /// <param name="z">The z-coordinate of the pixel within a tile to be encoded and written.</param>
+        /// <param name="plane">The zero-based index of the sample plane.</param>
+        /// <returns>The number of encoded and written bytes or <c>-1</c> if an error occurred.</returns>
+        /// <remarks>
+        /// <para>
+        /// The tile to place encoded data is selected by the (x, y, z, plane) coordinates (i.e.
+        /// <b>WriteTile</b> writes data to the tile containing the specified coordinates.
+        /// <b>WriteTile</b> (potentially) encodes the data <paramref name="buffer"/> and writes
+        /// it to open file/stream. The buffer must contain an entire tile of data. Applications
+        /// should call the <see cref="TileSize"/> to find out the size (in bytes) of a tile buffer.
+        /// The <paramref name="x"/> and <paramref name="y"/> parameters are always used by
+        /// <b>WriteTile</b>. The <paramref name="z"/> parameter is used if the image is deeper
+        /// than 1 slice (a value of <see cref="TiffTag.IMAGEDEPTH"/> &gt; 1). In other cases the
+        /// value of <paramref name="z"/> is ignored. The <paramref name="plane"/> parameter is
+        /// used only if data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE). In other
+        /// cases the value of <paramref name="plane"/> is ignored.
+        /// </para></remarks>
+        public int WriteTile(byte[] buffer, int offset, int x, int y, int z, short plane)
+        {
+            if (!CheckTile(x, y, z, plane))
                 return -1;
 
-            /*
-             * NB: A tile size of -1 is used instead of m_tilesize knowing
-             *     that WriteEncodedTile will clamp this to the tile size.
-             *     This is done because the tile size may not be defined until
-             *     after the output buffer is setup in WriteBufferSetup.
-             */
-            return WriteEncodedTile(ComputeTile(x, y, z, s), buf, -1);
+            // NB: A tile size of -1 is used instead of m_tilesize knowing that WriteEncodedTile
+            //     will clamp this to the tile size. This is done because the tile size may not be
+            //     defined until after the output buffer is setup in WriteBufferSetup.
+            return WriteEncodedTile(ComputeTile(x, y, z, plane), buffer, offset, -1);
         }
 
         /// <summary>
@@ -5119,7 +5185,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public int ReadEncodedStrip(int strip, byte[] buffer, int offset, int count)
         {
-            if (!checkRead(0))
+            if (!checkRead(false))
                 return -1;
 
             if (strip >= m_dir.td_nstrips)
@@ -5183,7 +5249,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             const string module = "ReadRawStrip";
 
-            if (!checkRead(0))
+            if (!checkRead(false))
                 return -1;
 
             if (strip >= m_dir.td_nstrips)
@@ -5350,26 +5416,77 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Encodes the supplied data and write it to the specified tile.
+        /// Encodes and writes a tile of data to an open TIFF file/stream.
         /// </summary>
-        /// <param name="tile">The tile.</param>
-        /// <param name="data">The data.</param>
-        /// <param name="count">The size.</param>
-        /// <returns>The tile size.</returns>
+        /// <overloads>Encodes and writes a tile of data to an open TIFF file/stream.</overloads>
+        /// <param name="tile">The zero-based index of the tile to write.</param>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="count">The maximum number of tile bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>
+        /// The number of encoded and written bytes or <c>-1</c> if an error occurred.
+        /// </returns>
+        /// <remarks><para>
+        /// <b>WriteEncodedTile</b> encodes <paramref name="count"/> bytes of raw data from
+        /// <paramref name="buffer"/> and append the result to the end of the specified tile. Note
+        /// that the value of <paramref name="tile"/> is a "raw tile number". That is, the caller
+        /// must take into account whether or not the data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeTile"/> automatically does this when converting an (x, y, z, plane)
+        /// coordinate quadruple to a tile number.
+        /// </para><para>
+        /// There must be space for the data. The function clamps individual writes to a tile to
+        /// the tile size, but does not (and can not) check that multiple writes to the same tile
+        /// were performed.
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteEncodedTile</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// </para><para>
+        /// The library writes encoded data using the native machine byte order. Correctly
+        /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
+        /// process image data with value of <see cref="TiffTag.BITSPERSAMPLE"/> tag greater
+        /// than 8.
+        /// </para></remarks>
+        public int WriteEncodedTile(int tile, byte[] buffer, int count)
+        {
+            return WriteEncodedTile(tile, buffer, 0, count);
+        }
+
+        /// <summary>
+        /// Encodes and writes a tile of data to an open TIFF file/stream.
+        /// </summary>
+        /// <param name="tile">The zero-based index of the tile to write.</param>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin reading bytes to be encoded and written.</param>
+        /// <param name="count">The maximum number of tile bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>The number of encoded and written bytes or <c>-1</c> if an error occurred.</returns>
         /// <remarks>
-        ///     <para>There must be space for the data. The function clamps 
-        ///     individual writes to a tile to the tile size, but does not 
-        ///     (and can not) check that multiple writes to the same tile 
-        ///     do not write more than tile size data.
-        ///     </para>
-        ///     <para>Image length must be setup before writing; this 
-        ///     interface does not support automatically growing the 
-        ///     image on each write (as 
-        ///     <see cref="M:BitMiracle.LibTiff.Classic.Tiff.WriteScanline(System.Byte[],System.Int32,System.Int16)">WriteScanline</see>
-        ///     does).
-        ///     </para>
-        /// </remarks>
-        public int WriteEncodedTile(int tile, byte[] data, int count)
+        /// <para>
+        /// <b>WriteEncodedTile</b> encodes <paramref name="count"/> bytes of raw data from
+        /// <paramref name="buffer"/> and append the result to the end of the specified tile. Note
+        /// that the value of <paramref name="tile"/> is a "raw tile number". That is, the caller
+        /// must take into account whether or not the data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeTile"/> automatically does this when converting an (x, y, z, plane)
+        /// coordinate quadruple to a tile number.
+        /// </para><para>
+        /// There must be space for the data. The function clamps individual writes to a tile to
+        /// the tile size, but does not (and can not) check that multiple writes to the same tile
+        /// were performed.
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteEncodedTile</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// </para><para>
+        /// The library writes encoded data using the native machine byte order. Correctly
+        /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
+        /// process image data with value of <see cref="TiffTag.BITSPERSAMPLE"/> tag greater
+        /// than 8.
+        /// </para></remarks>
+        public int WriteEncodedTile(int tile, byte[] buffer, int offset, int count)
         {
             const string module = "WriteEncodedTile";
 
@@ -5382,11 +5499,8 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            /*
-             * Handle delayed allocation of data buffer.  This
-             * permits it to be sized more intelligently (using
-             * directory information).
-             */
+            // Handle delayed allocation of data buffer. This permits it to be sized more
+            // intelligently (using directory information).
             bufferCheck();
 
             m_curtile = tile;
@@ -5396,14 +5510,11 @@ namespace BitMiracle.LibTiff.Classic
 
             if (m_dir.td_stripbytecount[tile] > 0)
             {
-                /* this forces appendToStrip() to do a seek */
+                // this forces appendToStrip() to do a seek
                 m_curoff = 0;
             }
 
-            /* 
-             * Compute tiles per row & per column to compute
-             * current row and column
-             */
+            // Compute tiles per row & per column to compute current row and column
             m_row = (tile % howMany(m_dir.td_imagelength, m_dir.td_tilelength)) * m_dir.td_tilelength;
             m_col = (tile % howMany(m_dir.td_imagewidth, m_dir.td_tilewidth)) * m_dir.td_tilewidth;
 
@@ -5420,18 +5531,15 @@ namespace BitMiracle.LibTiff.Classic
             if (!m_currentCodec.PreEncode(sample))
                 return -1;
 
-            /*
-             * Clamp write amount to the tile size.  This is mostly
-             * done so that callers can pass in some large number
-             * (e.g. -1) and have the tile size used instead.
-             */
+            // Clamp write amount to the tile size. This is mostly done so that callers can pass
+            // in some large number (e.g. -1) and have the tile size used instead.
             if (count < 1 || count > m_tilesize)
                 count = m_tilesize;
 
-            /* swab if needed - note that source buffer will be altered */
-            postDecode(data, 0, count);
+            // swab if needed - note that source buffer will be altered
+            postDecode(buffer, offset, count);
 
-            if (!m_currentCodec.EncodeTile(data, 0, count, sample))
+            if (!m_currentCodec.EncodeTile(buffer, offset, count, sample))
                 return 0;
 
             if (!m_currentCodec.PostEncode())
