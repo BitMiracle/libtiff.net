@@ -2450,7 +2450,8 @@ namespace BitMiracle.LibTiff.Classic
         /// same.</returns>
         /// <remarks><para>
         /// Note that <see cref="ReadTile"/>, <see cref="ReadEncodedTile"/>,
-        /// <see cref="ReadEncodedStrip"/> and <see cref="O:ReadScanline"/> methods already
+        /// <see cref="ReadEncodedStrip"/> and
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadScanline"/> methods already
         /// normally perform byte swapping to local host order if needed.
         /// </para><para>
         /// Also note that <see cref="ReadRawTile"/> and <see cref="ReadRawStrip"/> do not
@@ -3560,7 +3561,7 @@ namespace BitMiracle.LibTiff.Classic
         /// entire scanline of data. Applications should call the <see cref="ScanlineSize"/>
         /// to find out the size (in bytes) of a scanline buffer. Applications should use
         /// <see cref="ReadScanline(byte[], int, short)"/> or
-        /// <see cref="ReadScanline(byte[], int, int, short)"/> specifying corect sample plane if
+        /// <see cref="ReadScanline(byte[], int, int, short)"/> and specify correct sample plane if
         /// image data are organized in separate planes
         /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
         /// </para>
@@ -3666,27 +3667,150 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Writes the scanline.
+        /// Encodes and writes a scanline of data to an open TIFF file/stream.
         /// </summary>
-        /// <overloads>
-        /// Writes the scanline.
-        /// </overloads>
-        /// <param name="buffer">The buffer.</param>
-        /// <param name="row">The row.</param>
-        /// <returns><c>true</c> if written successfully; otherwise, <c>false</c></returns>
+        /// <overloads>Encodes and writes a scanline of data to an open TIFF file/stream.</overloads>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="row">The zero-based index of scanline (row) to place encoded data at.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data were encoded and written successfully; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteScanline</b> encodes and writes to a file at the specified
+        /// <paramref name="row"/>. Applications should use
+        /// <see cref="WriteScanline(byte[], int, short)"/> or
+        /// <see cref="WriteScanline(byte[], int, int, short)"/> and specify correct sample plane
+        /// parameter if image data in a file/stream is organized in separate planes (i.e
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// </para><para>
+        /// The data are assumed to be uncompressed and in the native bit- and byte-order of the
+        /// host machine. The data written to the file is compressed according to the compression
+        /// scheme of the current TIFF directory (see further below). If the current scanline is
+        /// past the end of the current subfile, the value of <see cref="TiffTag.IMAGELENGTH"/>
+        /// tag is automatically increased to include the scanline (except for
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE, where the
+        /// <see cref="TiffTag.IMAGELENGTH"/> tag cannot be changed once the first data are
+        /// written). If the <see cref="TiffTag.IMAGELENGTH"/> is increased, the values of
+        /// <see cref="TiffTag.STRIPOFFSETS"/> and <see cref="TiffTag.STRIPBYTECOUNTS"/> tags are
+        /// similarly enlarged to reflect data written past the previous end of image.
+        /// </para><para>
+        /// The library writes encoded data using the native machine byte order. Correctly
+        /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
+        /// process image data with value of <see cref="TiffTag.BITSPERSAMPLE"/> tag greater
+        /// than 8. The library attempts to hide bit-ordering differences between the image and
+        /// the native machine by converting data from the native machine order.
+        /// </para><para>
+        /// Once data are written to a file/stream for the current directory, the values of
+        /// certain tags may not be altered; see
+        /// <a href="54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// value(s) data types"</a> for more information.
+        /// </para><para>
+        /// It is not possible to write scanlines to a file/stream that uses a tiled organization.
+        /// The <see cref="IsTiled"/> can be used to determine if the file/stream is organized as
+        /// tiles or strips.
+        /// </para></remarks>
         public bool WriteScanline(byte[] buffer, int row)
         {
-            return WriteScanline(buffer, row, 0);
+            return WriteScanline(buffer, 0, row, 0);
         }
 
         /// <summary>
-        /// Writes the scanline.
+        /// Encodes and writes a scanline of data to an open TIFF file/stream.
         /// </summary>
-        /// <param name="buffer">The buffer.</param>
-        /// <param name="row">The row.</param>
-        /// <param name="plane">The sample.</param>
-        /// <returns><c>true</c> if written successfully; otherwise, <c>false</c></returns>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="row">The zero-based index of scanline (row) to place encoded data at.</param>
+        /// <param name="plane">The zero-based index of the sample plane.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data were encoded and written successfully; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteScanline</b> encodes and writes to a file at the specified
+        /// <paramref name="row"/> and specified sample plane <paramref name="plane"/>.
+        /// Applications may use <see cref="WriteScanline(byte[], int)"/> or specify 0 for
+        /// <paramref name="plane"/> parameter if image data in a file/stream is contiguous (i.e
+        /// not organized in separate planes,
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.CONTIG).
+        /// </para><para>
+        /// The data are assumed to be uncompressed and in the native bit- and byte-order of the
+        /// host machine. The data written to the file is compressed according to the compression
+        /// scheme of the current TIFF directory (see further below). If the current scanline is
+        /// past the end of the current subfile, the value of <see cref="TiffTag.IMAGELENGTH"/>
+        /// tag is automatically increased to include the scanline (except for
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE, where the
+        /// <see cref="TiffTag.IMAGELENGTH"/> tag cannot be changed once the first data are
+        /// written). If the <see cref="TiffTag.IMAGELENGTH"/> is increased, the values of
+        /// <see cref="TiffTag.STRIPOFFSETS"/> and <see cref="TiffTag.STRIPBYTECOUNTS"/> tags are
+        /// similarly enlarged to reflect data written past the previous end of image.
+        /// </para><para>
+        /// The library writes encoded data using the native machine byte order. Correctly
+        /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
+        /// process image data with value of <see cref="TiffTag.BITSPERSAMPLE"/> tag greater
+        /// than 8. The library attempts to hide bit-ordering differences between the image and
+        /// the native machine by converting data from the native machine order.
+        /// </para><para>
+        /// Once data are written to a file/stream for the current directory, the values of
+        /// certain tags may not be altered; see
+        /// <a href="54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// value(s) data types"</a> for more information.
+        /// </para><para>
+        /// It is not possible to write scanlines to a file/stream that uses a tiled organization.
+        /// The <see cref="IsTiled"/> can be used to determine if the file/stream is organized as
+        /// tiles or strips.
+        /// </para></remarks>
         public bool WriteScanline(byte[] buffer, int row, short plane)
+        {
+            return WriteScanline(buffer, 0, row, plane);
+        }
+
+        /// <summary>
+        /// Encodes and writes a scanline of data to an open TIFF file/stream.
+        /// </summary>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin reading bytes.</param>
+        /// <param name="row">The zero-based index of scanline (row) to place encoded data at.</param>
+        /// <param name="plane">The zero-based index of the sample plane.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data were encoded and written successfully; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteScanline</b> encodes and writes to a file at the specified
+        /// <paramref name="row"/> and specified sample plane <paramref name="plane"/>.
+        /// Applications may use <see cref="WriteScanline(byte[], int)"/> or specify 0 for
+        /// <paramref name="plane"/> parameter if image data in a file/stream is contiguous (i.e
+        /// not organized in separate planes,
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.CONTIG).
+        /// </para><para>
+        /// The data are assumed to be uncompressed and in the native bit- and byte-order of the
+        /// host machine. The data written to the file is compressed according to the compression
+        /// scheme of the current TIFF directory (see further below). If the current scanline is
+        /// past the end of the current subfile, the value of <see cref="TiffTag.IMAGELENGTH"/>
+        /// tag is automatically increased to include the scanline (except for
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.CONTIG, where the
+        /// <see cref="TiffTag.IMAGELENGTH"/> tag cannot be changed once the first data are
+        /// written). If the <see cref="TiffTag.IMAGELENGTH"/> is increased, the values of
+        /// <see cref="TiffTag.STRIPOFFSETS"/> and <see cref="TiffTag.STRIPBYTECOUNTS"/> tags are
+        /// similarly enlarged to reflect data written past the previous end of image.
+        /// </para><para>
+        /// The library writes encoded data using the native machine byte order. Correctly
+        /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
+        /// process image data with value of <see cref="TiffTag.BITSPERSAMPLE"/> tag greater
+        /// than 8. The library attempts to hide bit-ordering differences between the image and
+        /// the native machine by converting data from the native machine order.
+        /// </para><para>
+        /// Once data are written to a file/stream for the current directory, the values of
+        /// certain tags may not be altered; see 
+        /// <a href = "54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// value(s) data types"</a> for more information.
+        /// </para><para>
+        /// It is not possible to write scanlines to a file/stream that uses a tiled organization.
+        /// The <see cref="IsTiled"/> can be used to determine if the file/stream is organized as
+        /// tiles or strips.
+        /// </para></remarks>
+        public bool WriteScanline(byte[] buffer, int offset, int row, short plane)
         {
             const string module = "WriteScanline";
 
@@ -3805,9 +3929,9 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             // swab if needed - note that source buffer will be altered
-            postDecode(buffer, 0, m_scanlinesize);
+            postDecode(buffer, offset, m_scanlinesize);
 
-            bool status = m_currentCodec.EncodeRow(buffer, 0, m_scanlinesize, plane);
+            bool status = m_currentCodec.EncodeRow(buffer, offset, m_scanlinesize, plane);
 
             // we are now poised at the beginning of the next row
             m_row = row + 1;
@@ -5491,6 +5615,16 @@ namespace BitMiracle.LibTiff.Classic
                 wp[i] = (short)(cp[0] & 0xFF);
                 wp[i] += (short)((cp[1] & 0xFF) << 8);
             }
+        }
+
+        /// <summary>
+        /// Swaps the array of triples.
+        /// </summary>
+        /// <param name="buffer">The array of triples.</param>
+        /// <param name="count">The array length.</param>
+        public static void SwabArrayOfTriples(byte[] buffer, int count)
+        {
+            SwabArrayOfTriples(buffer, 0, count);
         }
 
         /// <summary>

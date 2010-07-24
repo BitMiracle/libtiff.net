@@ -107,21 +107,17 @@ namespace UnitTests
                     tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
 
                     int tiffStride = tif.ScanlineSize();
-                    int rasterStride = raster.Length / bmp.Height;
-
-                    Assert.False(tiffStride > rasterStride);
+                    int stride = raster.Length / bmp.Height;
 
                     // raster stride MAY be bigger than TIFF stride (due to padding in raster bits)
-                    byte[] scanLine = new byte[tiffStride];
+                    Assert.False(tiffStride > stride);
 
-                    for (int i = 0, rasterPos = 0; i < bmp.Height; i++)
+                    for (int i = 0, offset = 0; i < bmp.Height; i++)
                     {
-                        System.Buffer.BlockCopy(raster, rasterPos, scanLine, 0, tiffStride);
-
-                        bool res = tif.WriteScanline(scanLine, i);
+                        bool res = tif.WriteScanline(raster, offset, i, 0);
                         Assert.IsTrue(res);
 
-                        rasterPos += rasterStride;
+                        offset += stride;
                     }
                 }
             }

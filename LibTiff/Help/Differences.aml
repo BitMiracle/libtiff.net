@@ -134,7 +134,9 @@
                                     TIFF.tif_decoderow
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.TiffCodec.DecodeRow(System.Byte[],System.Int32,System.Int16)</codeEntityReference>
+                                    <codeEntityReference>
+                                        M:BitMiracle.LibTiff.Classic.TiffCodec.DecodeRow(System.Byte[],System.Int32,System.Int32,System.Int16)
+                                    </codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -142,7 +144,9 @@
                                     TIFF.tif_decodestrip
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.TiffCodec.DecodeStrip(System.Byte[],System.Int32,System.Int16)</codeEntityReference>
+                                    <codeEntityReference>
+                                        M:BitMiracle.LibTiff.Classic.TiffCodec.DecodeStrip(System.Byte[],System.Int32,System.Int32,System.Int16)
+                                    </codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -150,7 +154,9 @@
                                     TIFF.tif_decodetile
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.TiffCodec.DecodeTile(System.Byte[],System.Int32,System.Int16)</codeEntityReference>
+                                    <codeEntityReference>
+                                        M:BitMiracle.LibTiff.Classic.TiffCodec.DecodeTile(System.Byte[],System.Int32,System.Int32,System.Int16)
+                                    </codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -174,7 +180,9 @@
                                     TIFF.tif_encoderow
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.TiffCodec.EncodeRow(System.Byte[],System.Int32,System.Int16)</codeEntityReference>
+                                    <codeEntityReference>
+                                        M:BitMiracle.LibTiff.Classic.TiffCodec.EncodeRow(System.Byte[],System.Int32,System.Int32,System.Int16)
+                                    </codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -182,7 +190,9 @@
                                     TIFF.tif_encodestrip
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.TiffCodec.EncodeStrip(System.Byte[],System.Int32,System.Int16)</codeEntityReference>
+                                    <codeEntityReference>
+                                        M:BitMiracle.LibTiff.Classic.TiffCodec.EncodeStrip(System.Byte[],System.Int32,System.Int32,System.Int16)
+                                    </codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -190,7 +200,9 @@
                                     TIFF.tif_encodetile
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.TiffCodec.EncodeTile(System.Byte[],System.Int32,System.Int16)</codeEntityReference>
+                                    <codeEntityReference>
+                                        M:BitMiracle.LibTiff.Classic.TiffCodec.EncodeTile(System.Byte[],System.Int32,System.Int32,System.Int16)
+                                    </codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -1135,7 +1147,9 @@
                                     TIFFSwabArrayOfTriples
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.SwabArrayOfTriples(System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>
+                                        Overload:BitMiracle.LibTiff.Classic.Tiff.SwabArrayOfTriples
+                                    </codeEntityReference>
                                 </entry>
                             </row>
                             <row>

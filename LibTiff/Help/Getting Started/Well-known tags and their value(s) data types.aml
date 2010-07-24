@@ -49,7 +49,7 @@
                 <entry>TiffTag.BITSPERSAMPLE</entry>
                 <entry>1</entry>
                 <entry>System.Int16</entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -78,7 +78,7 @@
                         T:BitMiracle.LibTiff.Classic.Compression
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -134,7 +134,10 @@
                         </codeEntityReference>[]
                     </para>
                 </entry>
-                <entry>count &amp; types array</entry>
+                <entry>
+                    <para>count &amp; types array</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -156,7 +159,10 @@
                         T:BitMiracle.LibTiff.Classic.FaxMode
                     </codeEntityReference>
                 </entry>
-                <entry>G3/G4 compression pseudo-tag</entry>
+                <entry>
+                    <para>G3/G4 compression pseudo-tag</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -167,7 +173,7 @@
                         T:BitMiracle.LibTiff.Classic.FillOrder
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -178,7 +184,7 @@
                         T:BitMiracle.LibTiff.Classic.Group3Opt
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -189,7 +195,7 @@
                         T:BitMiracle.LibTiff.Classic.Group3Opt
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -227,7 +233,7 @@
                 <entry>TiffTag.IMAGEDEPTH</entry>
                 <entry>1</entry>
                 <entry>System.Int32</entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -248,7 +254,7 @@
                 <entry>TiffTag.IMAGEWIDTH</entry>
                 <entry>1</entry>
                 <entry>System.Int32</entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -266,7 +272,7 @@
                         T:BitMiracle.LibTiff.Classic.InkSet
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -277,7 +283,10 @@
                         T:BitMiracle.LibTiff.Classic.JpegColorMode
                     </codeEntityReference>
                 </entry>
-                <entry>JPEG pseudo-tag</entry>
+                <entry>
+                    <para>JPEG pseudo-tag</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -294,7 +303,10 @@
                     <para>System.Int32</para>
                     <para>System.Byte[]</para>
                 </entry>
-                <entry>count &amp; tables</entry>
+                <entry>
+                    <para>count &amp; tables</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -305,7 +317,10 @@
                         T:BitMiracle.LibTiff.Classic.JpegTablesMode
                     </codeEntityReference>
                 </entry>
-                <entry>JPEG pseudo-tag</entry>
+                <entry>
+                    <para>JPEG pseudo-tag</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -319,7 +334,7 @@
                 <entry>TiffTag.MATTEING</entry>
                 <entry>1</entry>
                 <entry>System.Int16</entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -397,7 +412,7 @@
                         T:BitMiracle.LibTiff.Classic.PlanarConfig
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -408,7 +423,7 @@
                         T:BitMiracle.LibTiff.Classic.Predictor
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -422,7 +437,10 @@
                 <entry>TiffTag.REFERENCEBLACKWHITE</entry>
                 <entry>1</entry>
                 <entry>System.Single[]</entry>
-                <entry>The array contains (2 * SamplesPerPixel) elements</entry>
+                <entry>
+                    <para>The array contains (2 * SamplesPerPixel) elements</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -450,7 +468,10 @@
                 <entry>TiffTag.ROWSPERSTRIP</entry>
                 <entry>1</entry>
                 <entry>System.Int32</entry>
-                <entry></entry>
+                <entry>
+                    <para>must be &gt; 0</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -461,14 +482,17 @@
                         T:BitMiracle.LibTiff.Classic.SampleFormat
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
                 <entry>TiffTag.SAMPLESPERPIXEL</entry>
                 <entry>1</entry>
                 <entry>System.Int16</entry>
-                <entry></entry>
+                <entry>
+                    <para>must be &lt;= 4</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -496,7 +520,7 @@
                 <entry>TiffTag.STONITS</entry>
                 <entry>1</entry>
                 <entry>System.Double[]</entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
@@ -563,14 +587,17 @@
                 <entry>TiffTag.TILEDEPTH</entry>
                 <entry>1</entry>
                 <entry>System.Int32</entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
                 <entry>TiffTag.TILELENGTH</entry>
                 <entry>1</entry>
                 <entry>System.Int32</entry>
-                <entry></entry>
+                <entry>
+                    <para>must be a multiple of 8</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -584,7 +611,10 @@
                 <entry>TiffTag.TILEWIDTH</entry>
                 <entry>1</entry>
                 <entry>System.Int32</entry>
-                <entry></entry>
+                <entry>
+                    <para>must be a multiple of 8</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -638,7 +668,10 @@
                 <entry>TiffTag.YCBCRCOEFFICIENTS</entry>
                 <entry>1</entry>
                 <entry>System.Single[]</entry>
-                <entry>The array contains 3 elements</entry>
+                <entry>
+                    <para>The array contains 3 elements</para>
+                    <para>Tag may not have its values changed once data is written to file/stream.</para>
+                </entry>
             </row>
 
             <row>
@@ -649,14 +682,14 @@
                         T:BitMiracle.LibTiff.Classic.YCbCrPosition
                     </codeEntityReference>
                 </entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
                 <entry>TiffTag.YCBCRSUBSAMPLING</entry>
                 <entry>2</entry>
                 <entry>System.Int16</entry>
-                <entry></entry>
+                <entry>Tag may not have its values changed once data is written to file/stream.</entry>
             </row>
 
             <row>
