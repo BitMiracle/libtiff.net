@@ -351,7 +351,7 @@ namespace BitMiracle.LibTiff.Classic
                         break;
                     
                     case TiffType.DOUBLE:
-                        swab64BitData(cp, cc);
+                        swab64BitData(cp, 0, cc);
                         break;
                 }
             }

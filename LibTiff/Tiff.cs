@@ -3576,7 +3576,7 @@ namespace BitMiracle.LibTiff.Classic
                 m_row = row + 1;
 
                 if (e)
-                    postDecode(buf, m_scanlinesize);
+                    postDecode(buf, 0, m_scanlinesize);
             }
 
             return e;
@@ -3722,7 +3722,7 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             // swab if needed - note that source buffer will be altered
-            postDecode(buf, m_scanlinesize);
+            postDecode(buf, 0, m_scanlinesize);
 
             bool status = m_currentCodec.EncodeRow(buf, 0, m_scanlinesize, sample);
 
@@ -4761,13 +4761,9 @@ namespace BitMiracle.LibTiff.Classic
             else if (count > m_tilesize)
                 count = m_tilesize;
 
-            byte[] tempBuf = new byte[count];
-            Array.Copy(buffer, offset, tempBuf, 0, count);
-
-            if (fillTile(tile) && m_currentCodec.DecodeTile(tempBuf, 0, count, (short)(tile / m_dir.td_stripsperimage)))
+            if (fillTile(tile) && m_currentCodec.DecodeTile(buffer, offset, count, (short)(tile / m_dir.td_stripsperimage)))
             {
-                postDecode(tempBuf, count);
-                Array.Copy(tempBuf, 0, buffer, offset, count);
+                postDecode(buffer, offset, count);
                 return count;
             }
 
@@ -4945,13 +4941,9 @@ namespace BitMiracle.LibTiff.Classic
             else if (count > stripsize)
                 count = stripsize;
 
-            byte[] tempBuf = new byte[count];
-            Array.Copy(buffer, offset, tempBuf, 0, count);
-
-            if (fillStrip(strip) && m_currentCodec.DecodeStrip(tempBuf, 0, count, (short)(strip / m_dir.td_stripsperimage)))
+            if (fillStrip(strip) && m_currentCodec.DecodeStrip(buffer, offset, count, (short)(strip / m_dir.td_stripsperimage)))
             {
-                postDecode(tempBuf, count);
-                Array.Copy(tempBuf, 0, buffer, offset, count);
+                postDecode(buffer, offset, count);
                 return count;
             }
 
@@ -5082,7 +5074,7 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
 
             /* swab if needed - note that source buffer will be altered */
-            postDecode(data, count);
+            postDecode(data, 0, count);
 
             if (!m_currentCodec.EncodeStrip(data, 0, count, sample))
                 return 0;
@@ -5230,7 +5222,7 @@ namespace BitMiracle.LibTiff.Classic
                 count = m_tilesize;
 
             /* swab if needed - note that source buffer will be altered */
-            postDecode(data, count);
+            postDecode(data, 0, count);
 
             if (!m_currentCodec.EncodeTile(data, 0, count, sample))
                 return 0;
@@ -5421,18 +5413,18 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Swaps the array of triples.
         /// </summary>
-        /// <param name="tp">The array of triples.</param>
-        /// <param name="n">The array length.</param>
-        public static void SwabArrayOfTriples(byte[] tp, int n)
+        /// <param name="buffer">The array of triples.</param>
+        /// <param name="offset">The offset into <paramref name="buffer"/>.</param>
+        /// <param name="count">The array length.</param>
+        public static void SwabArrayOfTriples(byte[] buffer, int offset, int count)
         {
             // XXX unroll loop some
-            int tpPos = 0;
-            while (n-- > 0)
+            while (count-- > 0)
             {
-                byte t = tp[tpPos + 2];
-                tp[tpPos + 2] = tp[tpPos];
-                tp[tpPos] = t;
-                tpPos += 3;
+                byte t = buffer[offset + 2];
+                buffer[offset + 2] = buffer[offset];
+                buffer[offset] = t;
+                offset += 3;
             }
         }
 

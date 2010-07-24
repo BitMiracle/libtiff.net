@@ -345,48 +345,48 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        private static void swab16BitData(byte[] buf, int cc)
+        private static void swab16BitData(byte[] buffer, int offset, int count)
         {
-            Debug.Assert((cc & 1) == 0);
-            short[] swabee = ByteArrayToShorts(buf, 0, cc);
-            SwabArrayOfShort(swabee, cc / 2);
-            ShortsToByteArray(swabee, 0, cc / 2, buf, 0);
+            Debug.Assert((count & 1) == 0);
+            short[] swabee = ByteArrayToShorts(buffer, offset, count);
+            SwabArrayOfShort(swabee, count / 2);
+            ShortsToByteArray(swabee, 0, count / 2, buffer, offset);
         }
 
-        private static void swab24BitData(byte[] buf, int cc)
+        private static void swab24BitData(byte[] buffer, int offset, int count)
         {
-            Debug.Assert((cc % 3) == 0);
-            SwabArrayOfTriples(buf, cc / 3);
+            Debug.Assert((count % 3) == 0);
+            SwabArrayOfTriples(buffer, offset, count / 3);
         }
 
-        private static void swab32BitData(byte[] buf, int cc)
+        private static void swab32BitData(byte[] buffer, int offset, int count)
         {
-            Debug.Assert((cc & 3) == 0);
-            int[] swabee = ByteArrayToInts(buf, 0, cc);
-            SwabArrayOfLong(swabee, cc / 4);
-            IntsToByteArray(swabee, 0, cc / 4, buf, 0);
+            Debug.Assert((count & 3) == 0);
+            int[] swabee = ByteArrayToInts(buffer, offset, count);
+            SwabArrayOfLong(swabee, count / 4);
+            IntsToByteArray(swabee, 0, count / 4, buffer, offset);
         }
 
-        private static void swab64BitData(byte[] buf, int cc)
+        private static void swab64BitData(byte[] buffer, int offset, int count)
         {
-            Debug.Assert((cc & 7) == 0);
+            Debug.Assert((count & 7) == 0);
 
-            int doubleCount = cc / 8;
+            int doubleCount = count / 8;
             double[] doubles = new double[doubleCount];
-            int byteOffset = 0;
+            int byteOffset = offset;
             for (int i = 0; i < doubleCount; i++)
             {
-                doubles[i] = BitConverter.ToDouble(buf, byteOffset);
+                doubles[i] = BitConverter.ToDouble(buffer, byteOffset);
                 byteOffset += 8;
             }
 
             SwabArrayOfDouble(doubles, doubleCount);
 
-            byteOffset = 0;
+            byteOffset = offset;
             for (int i = 0; i < doubleCount; i++)
             {
                 byte[] bytes = BitConverter.GetBytes(doubles[i]);
-                Array.Copy(bytes, 0, buf, byteOffset, bytes.Length);
+                Array.Copy(bytes, 0, buffer, byteOffset, bytes.Length);
                 byteOffset += bytes.Length;
             }
         }

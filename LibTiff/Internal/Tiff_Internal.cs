@@ -386,22 +386,24 @@ namespace BitMiracle.LibTiff.Classic
             return c.Init();
         }
 
-        /* post decoding routine */  
-        private void postDecode(byte[] buf, int cc)
+        /// <summary>
+        /// post decoding routine
+        /// </summary>
+        private void postDecode(byte[] buffer, int offset, int count)
         {
             switch (m_postDecodeMethod)
             {
                 case PostDecodeMethodType.pdmSwab16Bit:
-                    swab16BitData(buf, cc);
+                    swab16BitData(buffer, offset, count);
                     break;
                 case PostDecodeMethodType.pdmSwab24Bit:
-                    swab24BitData(buf, cc);
+                    swab24BitData(buffer, offset, count);
                     break;
                 case PostDecodeMethodType.pdmSwab32Bit:
-                    swab32BitData(buf, cc);
+                    swab32BitData(buffer, offset, count);
                     break;
                 case PostDecodeMethodType.pdmSwab64Bit:
-                    swab64BitData(buf, cc);
+                    swab64BitData(buffer, offset, count);
                     break;
             }
         }
