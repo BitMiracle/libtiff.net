@@ -264,19 +264,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return LZWSetupEncode();
         }
 
-        public override bool predictor_encoderow(byte[] pp, int cc, short s)
+        public override bool predictor_encoderow(byte[] buffer, int offset, int count, short plane)
         {
-            return LZWEncode(pp, cc, s);
+            return LZWEncode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_encodestrip(byte[] pp, int cc, short s)
+        public override bool predictor_encodestrip(byte[] buffer, int offset, int count, short plane)
         {
-            return LZWEncode(pp, cc, s);
+            return LZWEncode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_encodetile(byte[] pp, int cc, short s)
+        public override bool predictor_encodetile(byte[] buffer, int offset, int count, short plane)
         {
-            return LZWEncode(pp, cc, s);
+            return LZWEncode(buffer, offset, count, plane);
         }
 
         private bool LZWSetupDecode()
@@ -814,50 +814,42 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        /*
-        * Encode a chunk of pixels.
-        *
-        * Uses an open addressing double hashing (no chaining) on the 
-        * prefix code/next character combination.  We do a variant of
-        * Knuth's algorithm D (vol. 3, sec. 6.4) along with G. Knott's
-        * relatively-prime secondary probe.  Here, the modular division
-        * first probe is gives way to a faster exclusive-or manipulation. 
-        * Also do block compression with an adaptive reset, whereby the
-        * code table is cleared when the compression ratio decreases,
-        * but after the table fills.  The variable-length output codes
-        * are re-sized at this point, and a CODE_CLEAR is generated
-        * for the decoder. 
-        */
-        private bool LZWEncode(byte[] bp, int cc, short s)
+        /// <summary>
+        /// Encode a chunk of pixels.
+        /// </summary>
+        /// <remarks>
+        /// Uses an open addressing double hashing (no chaining) on the prefix code/next character
+        /// combination. We do a variant of Knuth's algorithm D (vol. 3, sec. 6.4) along with
+        /// G. Knott's relatively-prime secondary probe. Here, the modular division first probe is
+        /// gives way to a faster exclusive-or manipulation. Also do block compression with an
+        /// adaptive reset, whereby the code table is cleared when the compression ratio
+        /// decreases, but after the table fills. The variable-length output codes are re-sized at
+        /// this point, and a CODE_CLEAR is generated for the decoder. 
+        /// </remarks>
+        private bool LZWEncode(byte[] buffer, int offset, int count, short plane)
         {
             Debug.Assert(m_enc_hashtab != null);
-            int bpPos = 0;
-            if (m_enc_oldcode == -1 && cc > 0)
+            if (m_enc_oldcode == -1 && count > 0)
             {
-                /*
-                 * NB: This is safe because it can only happen
-                 *     at the start of a strip where we know there
-                 *     is space in the data buffer.
-                 */
+                // NB: This is safe because it can only happen at the start of a strip where we
+                //     know there is space in the data buffer.
                 PutNextCode(CODE_CLEAR);
-                m_enc_oldcode = bp[bpPos];
-                bpPos++;
-                cc--;
+                m_enc_oldcode = buffer[offset];
+                offset++;
+                count--;
                 m_enc_incount++;
             }
 
-            while (cc > 0)
+            while (count > 0)
             {
-                int c = bp[bpPos];
-                bpPos++;
-                cc--;
+                int c = buffer[offset];
+                offset++;
+                count--;
                 m_enc_incount++;
                 int fcode = (c << BITS_MAX) + m_enc_oldcode;
-                int h = (c << HSHIFT) ^ m_enc_oldcode; /* xor hashing */
+                int h = (c << HSHIFT) ^ m_enc_oldcode; // xor hashing
 
-                /*
-                 * Check hash index for an overflow.
-                 */
+                // Check hash index for an overflow.
                 if (h >= HSIZE)
                     h -= HSIZE;
 
@@ -871,9 +863,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 if (m_enc_hashtab[h].hash >= 0)
                 {
-                    /*
-                     * Primary hash failed, check secondary hash.
-                     */
+                    // Primary hash failed, check secondary hash.
                     int disp = HSIZE - h;
                     if (h == 0)
                         disp = 1;
@@ -895,15 +885,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 if (!hit)
                 {
-                    /*
-                     * New entry, emit code and add to table.
-                     */
-                    /*
-                     * Verify there is space in the buffer for the code
-                     * and any potential Clear code that might be emitted
-                     * below.  The value of limit is setup so that there
-                     * are at least 4 bytes free--room for 2 codes.
-                     */
+                    // New entry, emit code and add to table.
+                    // Verify there is space in the buffer for the code and any potential Clear
+                    // code that might be emitted below. The value of limit is setup so that there
+                    // are at least 4 bytes free - room for 2 codes.
                     if (m_tif.m_rawcp > m_enc_rawlimit)
                     {
                         m_tif.m_rawcc = m_tif.m_rawcp;
@@ -918,7 +903,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     m_enc_hashtab[h].hash = fcode;
                     if (m_free_ent == CODE_MAX - 1)
                     {
-                        /* table is full, emit clear code and reset */
+                        // table is full, emit clear code and reset
                         cl_hash();
                         m_enc_ratio = 0;
                         m_enc_incount = 0;
@@ -930,10 +915,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     }
                     else
                     {
-                        /*
-                         * If the next entry is going to be too big for
-                         * the code size, then increase it, if possible.
-                         */
+                        // If the next entry is going to be too big for the code size, then
+                        // increase it, if possible.
                         if (m_free_ent > m_maxcode)
                         {
                             m_nbits++;
@@ -942,18 +925,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         }
                         else if (m_enc_incount >= m_enc_checkpoint)
                         {
-                            /*
-                             * Check compression ratio and, if things seem
-                             * to be slipping, clear the hash table and
-                             * reset state.  The compression ratio is a
-                             * 24+8-bit fractional number.
-                             */
+                            // Check compression ratio and, if things seem to be slipping, clear
+                            // the hash table and reset state. The compression ratio is
+                            // a 24 + 8-bit fractional number.
                             m_enc_checkpoint = m_enc_incount + CHECK_GAP;
 
                             int rat;
                             if (m_enc_incount > 0x007fffff)
                             {
-                                /* NB: shift will overflow */
+                                // NB: shift will overflow
                                 rat = m_enc_outcount >> 8;
                                 rat = (rat == 0 ? 0x7fffffff : m_enc_incount / rat);
                             }

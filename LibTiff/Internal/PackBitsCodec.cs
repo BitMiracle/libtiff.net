@@ -73,7 +73,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -90,7 +90,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -107,7 +107,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -137,46 +137,52 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeRow(byte[] buffer, int count, short plane)
+        public override bool EncodeRow(byte[] buffer, int offset, int count, short plane)
         {
-            return PackBitsEncode(buffer, 0, count, plane);
+            return PackBitsEncode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeStrip(byte[] buffer, int count, short plane)
+        public override bool EncodeStrip(byte[] buffer, int offset, int count, short plane)
         {
-            return PackBitsEncodeChunk(buffer, count, plane);
+            return PackBitsEncodeChunk(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeTile(byte[] buffer, int count, short plane)
+        public override bool EncodeTile(byte[] buffer, int offset, int count, short plane)
         {
-            return PackBitsEncodeChunk(buffer, count, plane);
+            return PackBitsEncodeChunk(buffer, offset, count, plane);
         }
 
         private bool PackBitsPreEncode(short s)
@@ -377,27 +383,24 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        /*
-        * Encode a rectangular chunk of pixels.  We break it up
-        * into row-sized pieces to insure that encoded runs do
-        * not span rows.  Otherwise, there can be problems with
-        * the decoder if data is read, for example, by scanlines
-        * when it was encoded by strips.
-        */
-        private bool PackBitsEncodeChunk(byte[] bp, int cc, short s)
+        /// <summary>
+        /// Encode a rectangular chunk of pixels. We break it up into row-sized pieces to insure
+        /// that encoded runs do not span rows. Otherwise, there can be problems with the decoder
+        /// if data is read, for example, by scanlines when it was encoded by strips.
+        /// </summary>
+        private bool PackBitsEncodeChunk(byte[] buffer, int offset, int count, short plane)
         {
-            int offset = 0;
-            while (cc > 0)
+            while (count > 0)
             {
                 int chunk = m_rowsize;
-                if (cc < chunk)
-                    chunk = cc;
+                if (count < chunk)
+                    chunk = count;
 
-                if (!PackBitsEncode(bp, offset, chunk, s))
+                if (!PackBitsEncode(buffer, offset, chunk, plane))
                     return false;
 
                 offset += chunk;
-                cc -= chunk;
+                count -= chunk;
             }
 
             return true;

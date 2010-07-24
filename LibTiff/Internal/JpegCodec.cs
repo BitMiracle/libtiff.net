@@ -235,7 +235,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -255,7 +255,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -275,7 +275,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -338,55 +338,61 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeRow(byte[] buffer, int count, short plane)
+        public override bool EncodeRow(byte[] buffer, int offset, int count, short plane)
         {
             if (m_rawEncode)
-                return JPEGEncodeRaw(buffer, count, plane);
+                return JPEGEncodeRaw(buffer, offset, count, plane);
 
-            return JPEGEncode(buffer, count, plane);
+            return JPEGEncode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeStrip(byte[] buffer, int count, short plane)
+        public override bool EncodeStrip(byte[] buffer, int offset, int count, short plane)
         {
             if (m_rawEncode)
-                return JPEGEncodeRaw(buffer, count, plane);
+                return JPEGEncodeRaw(buffer, offset, count, plane);
 
-            return JPEGEncode(buffer, count, plane);
+            return JPEGEncode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeTile(byte[] buffer, int count, short plane)
+        public override bool EncodeTile(byte[] buffer, int offset, int count, short plane)
         {
             if (m_rawEncode)
-                return JPEGEncodeRaw(buffer, count, plane);
+                return JPEGEncodeRaw(buffer, offset, count, plane);
 
-            return JPEGEncode(buffer, count, plane);
+            return JPEGEncode(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -1291,67 +1297,64 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return m_decompression.Output_scanline < m_decompression.Output_height || TIFFjpeg_finish_decompress();
         }
 
-        /*
-        * Encode a chunk of pixels.
-        * "Standard" case: incoming data is not downsampled.
-        */
-        private bool JPEGEncode(byte[] buf, int cc, short s)
+        /// <summary>
+        /// Encode a chunk of pixels.
+        /// "Standard" case: incoming data is not downsampled.
+        /// </summary>
+        private bool JPEGEncode(byte[] buffer, int offset, int count, short plane)
         {
-            /* data is expected to be supplied in multiples of a scanline */
-            int nrows = cc / m_bytesperline;
-            if ((cc % m_bytesperline) != 0)
+            // data is expected to be supplied in multiples of a scanline
+            int nrows = count / m_bytesperline;
+            if ((count % m_bytesperline) != 0)
                 Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "fractional scanline discarded");
 
-            /* The last strip will be limited to image size */
+            // The last strip will be limited to image size
             if (!m_tif.IsTiled() && m_tif.m_row + nrows > m_tif.m_dir.td_imagelength)
                 nrows = m_tif.m_dir.td_imagelength - m_tif.m_row;
 
             byte[][] bufptr = new byte[1][];
             bufptr[0] = new byte[m_bytesperline];
-            int bufOffset = 0;
             while (nrows-- > 0)
             {
-                Array.Copy(buf, bufOffset, bufptr[0], 0, m_bytesperline);
+                Array.Copy(buffer, offset, bufptr[0], 0, m_bytesperline);
                 if (TIFFjpeg_write_scanlines(bufptr, 1) != 1)
                     return false;
 
                 if (nrows > 0)
                     m_tif.m_row++;
 
-                bufOffset += m_bytesperline;
+                offset += m_bytesperline;
             }
 
             return true;
         }
 
-        /*
-        * Encode a chunk of pixels.
-        * Incoming data is expected to be downsampled per sampling factors.
-        */
-        private bool JPEGEncodeRaw(byte[] buf, int cc, short s)
+        /// <summary>
+        /// Encode a chunk of pixels.
+        /// Incoming data is expected to be downsampled per sampling factors.
+        /// </summary>
+        private bool JPEGEncodeRaw(byte[] buffer, int offset, int count, short plane)
         {
-            /* data is expected to be supplied in multiples of a clumpline */
-            /* a clumpline is equivalent to v_sampling desubsampled scanlines */
-            /* TODO: the following calculation of bytesperclumpline, should substitute 
-             * calculation of bytesperline, except that it is per v_sampling lines */
+            // data is expected to be supplied in multiples of a clumpline
+            // a clumpline is equivalent to v_sampling desubsampled scanlines
+
+            // TODO: the following calculation of bytesperclumpline, should substitute
+            //       calculation of bytesperline, except that it is per v_sampling lines
             int bytesperclumpline = (((m_compression.Image_width + m_h_sampling - 1) / m_h_sampling) *
                 (m_h_sampling * m_v_sampling + 2) * m_compression.Data_precision + 7) / 8;
 
-            int nrows = (cc / bytesperclumpline) * m_v_sampling;
-            if ((cc % bytesperclumpline) != 0)
+            int nrows = (count / bytesperclumpline) * m_v_sampling;
+            if ((count % bytesperclumpline) != 0)
                 Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "fractional scanline discarded");
 
-            /* Cb,Cr both have sampling factors 1, so this is correct */
+            // Cb,Cr both have sampling factors 1, so this is correct
             int clumps_per_line = m_compression.Component_info[1].Downsampled_width;
 
-            int bufOffset = 0;
             while (nrows > 0)
             {
-                /*
-                 * Fastest way to separate the data is to make one pass
-                 * over the scanline for each row of each component.
-                 */
-                int clumpoffset = 0; /* first sample in clump */
+                // Fastest way to separate the data is to make one pass over the scanline for
+                // each row of each component.
+                int clumpoffset = 0; // first sample in clump
                 for (int ci = 0; ci < m_compression.Num_components; ci++)
                 {
                     jpeg_component_info compptr = m_compression.Component_info[ci];
@@ -1360,29 +1363,29 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     int padding = compptr.Width_in_blocks * JpegConstants.DCTSIZE - clumps_per_line * hsamp;
                     for (int ypos = 0; ypos < vsamp; ypos++)
                     {
-                        int inptr = bufOffset + clumpoffset;
+                        int inptr = offset + clumpoffset;
 
                         byte[] outbuf = m_ds_buffer[ci][m_scancount * vsamp + ypos];
                         int outptr = 0;
 
                         if (hsamp == 1)
                         {
-                            /* fast path for at least Cb and Cr */
+                            // fast path for at least Cb and Cr
                             for (int nclump = clumps_per_line; nclump-- > 0; )
                             {
-                                outbuf[outptr] = buf[inptr];
+                                outbuf[outptr] = buffer[inptr];
                                 outptr++;
                                 inptr += m_samplesperclump;
                             }
                         }
                         else
                         {
-                            /* general case */
+                            // general case
                             for (int nclump = clumps_per_line; nclump-- > 0; )
                             {
                                 for (int xpos = 0; xpos < hsamp; xpos++)
                                 {
-                                    outbuf[outptr] = buf[inptr + xpos];
+                                    outbuf[outptr] = buffer[inptr + xpos];
                                     outptr++;
                                 }
 
@@ -1390,7 +1393,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             }
                         }
 
-                        /* pad each scanline as needed */
+                        // pad each scanline as needed
                         for (int xpos = 0; xpos < padding; xpos++)
                         {
                             outbuf[outptr] = outbuf[outptr - 1];
@@ -1412,7 +1415,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 }
 
                 m_tif.m_row += m_v_sampling;
-                bufOffset += m_bytesperline;
+                offset += m_bytesperline;
                 nrows -= m_v_sampling;
             }
 

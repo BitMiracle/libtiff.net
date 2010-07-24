@@ -64,7 +64,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -81,7 +81,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -98,7 +98,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -112,46 +112,52 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeRow(byte[] buffer, int count, short plane)
+        public override bool EncodeRow(byte[] buffer, int offset, int count, short plane)
         {
-            return DumpModeEncode(buffer, count, plane);
+            return DumpModeEncode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeStrip(byte[] buffer, int count, short plane)
+        public override bool EncodeStrip(byte[] buffer, int offset, int count, short plane)
         {
-            return DumpModeEncode(buffer, count, plane);
+            return DumpModeEncode(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeTile(byte[] buffer, int count, short plane)
+        public override bool EncodeTile(byte[] buffer, int offset, int count, short plane)
         {
-            return DumpModeEncode(buffer, count, plane);
+            return DumpModeEncode(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -168,28 +174,27 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
         
-        /*
-        * Encode a hunk of pixels.
-        */
-        private bool DumpModeEncode(byte[] pp, int cc, short s)
+        /// <summary>
+        /// Encode a hunk of pixels.
+        /// </summary>
+        private bool DumpModeEncode(byte[] buffer, int offset, int count, short plane)
         {
-            int ppPos = 0;
-            while (cc > 0)
+            while (count > 0)
             {
                 int n;
 
-                n = cc;
+                n = count;
                 if (m_tif.m_rawcc + n > m_tif.m_rawdatasize)
                     n = m_tif.m_rawdatasize - m_tif.m_rawcc;
 
                 Debug.Assert(n > 0);
 
-                Array.Copy(pp, ppPos, m_tif.m_rawdata, m_tif.m_rawcp, n);
+                Array.Copy(buffer, offset, m_tif.m_rawdata, m_tif.m_rawcp, n);
                 m_tif.m_rawcp += n;
                 m_tif.m_rawcc += n;
 
-                ppPos += n;
-                cc -= n;
+                offset += n;
+                count -= n;
                 if (m_tif.m_rawcc >= m_tif.m_rawdatasize && !m_tif.flushData1())
                     return false;
             }

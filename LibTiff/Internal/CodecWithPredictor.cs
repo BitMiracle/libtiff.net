@@ -120,7 +120,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -140,7 +140,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -160,7 +160,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -192,55 +192,61 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeRow(byte[] buffer, int count, short plane)
+        public override bool EncodeRow(byte[] buffer, int offset, int count, short plane)
         {
             if (!m_passThruEncode)
-                return PredictorEncodeRow(buffer, count, plane);
+                return PredictorEncodeRow(buffer, offset, count, plane);
 
-            return predictor_encoderow(buffer, count, plane);
+            return predictor_encoderow(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeStrip(byte[] buffer, int count, short plane)
+        public override bool EncodeStrip(byte[] buffer, int offset, int count, short plane)
         {
             if (!m_passThruEncode)
-                return PredictorEncodeTile(buffer, count, plane);
+                return PredictorEncodeTile(buffer, offset, count, plane);
 
-            return predictor_encodestrip(buffer, count, plane);
+            return predictor_encodestrip(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeTile(byte[] buffer, int count, short plane)
+        public override bool EncodeTile(byte[] buffer, int offset, int count, short plane)
         {
             if (!m_passThruEncode)
-                return PredictorEncodeTile(buffer, count, plane);
+                return PredictorEncodeTile(buffer, offset, count, plane);
 
-            return predictor_encodetile(buffer, count, plane);
+            return predictor_encodetile(buffer, offset, count, plane);
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -272,19 +278,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return base.SetupEncode();
         }
 
-        public virtual bool predictor_encoderow(byte[] pp, int cc, short s)
+        public virtual bool predictor_encoderow(byte[] buffer, int offset, int count, short plane)
         {
-            return base.EncodeRow(pp, cc, s);
+            return base.EncodeRow(buffer, offset, count, plane);
         }
 
-        public virtual bool predictor_encodestrip(byte[] pp, int cc, short s)
+        public virtual bool predictor_encodestrip(byte[] buffer, int offset, int count, short plane)
         {
-            return base.EncodeStrip(pp, cc, s);
+            return base.EncodeStrip(buffer, offset, count, plane);
         }
 
-        public virtual bool predictor_encodetile(byte[] pp, int cc, short s)
+        public virtual bool predictor_encodetile(byte[] buffer, int offset, int count, short plane)
         {
-            return base.EncodeTile(pp, cc, s);
+            return base.EncodeTile(buffer, offset, count, plane);
         }
 
         public Predictor GetPredictorValue()
@@ -848,31 +854,28 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return false;
         }
 
-        private bool PredictorEncodeRow(byte[] op0, int occ0, short s)
+        private bool PredictorEncodeRow(byte[] buffer, int offset, int count, short plane)
         {
             Debug.Assert(m_predictorType != PredictorType.ptNone);
 
-            /* XXX horizontal differencing alters user's data XXX */
-            predictorFunc(op0, 0, occ0);
-            return predictor_encoderow(op0, occ0, s);
+            // XXX horizontal differencing alters user's data XXX
+            predictorFunc(buffer, offset, count);
+            return predictor_encoderow(buffer, offset, count, plane);
         }
 
-        private bool PredictorEncodeTile(byte[] op0, int occ0, short s)
+        private bool PredictorEncodeTile(byte[] buffer, int offset, int count, short plane)
         {
             Debug.Assert(m_predictorType != PredictorType.ptNone);
 
-            /* 
-            * Do predictor manipulation in a working buffer to avoid altering
-            * the callers buffer. http://trac.osgeo.org/gdal/ticket/1965
-            */
-            byte[] working_copy = new byte[occ0];
-            Array.Copy(op0, working_copy, occ0);
+            // Do predictor manipulation in a working buffer to avoid altering
+            // the callers buffer. http://trac.osgeo.org/gdal/ticket/1965
+            byte[] working_copy = new byte[count];
+            Array.Copy(buffer, working_copy, count);
 
             Debug.Assert(rowsize > 0);
-            Debug.Assert((occ0 % rowsize) == 0);
+            Debug.Assert((count % rowsize) == 0);
 
-            int cc = occ0;
-            int offset = 0;
+            int cc = count;
             while (cc > 0)
             {
                 predictorFunc(working_copy, offset, rowsize);
@@ -880,8 +883,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 offset += rowsize;
             }
 
-            bool result_code = predictor_encodetile(working_copy, occ0, s);
-            return result_code;
+            return predictor_encodetile(working_copy, 0, count, plane);
         }
 
         private bool PredictorSetupDecode()

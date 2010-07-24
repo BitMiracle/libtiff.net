@@ -126,7 +126,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -143,7 +143,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -160,7 +160,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -216,14 +216,16 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Encodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool EncodeRow(byte[] buffer, int count, short plane)
+        public virtual bool EncodeRow(byte[] buffer, int offset, int count, short plane)
         {
             return noEncode("scanline");
         }
@@ -231,14 +233,16 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool EncodeStrip(byte[] buffer, int count, short plane)
+        public virtual bool EncodeStrip(byte[] buffer, int offset, int count, short plane)
         {
             return noEncode("strip");
         }
@@ -246,14 +250,16 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool EncodeTile(byte[] buffer, int count, short plane)
+        public virtual bool EncodeTile(byte[] buffer, int offset, int count, short plane)
         {
             return noEncode("tile");
         }

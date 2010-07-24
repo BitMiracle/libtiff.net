@@ -189,8 +189,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private int m_maxk; /* max #rows that can be 2d encoded */
         private int m_line;
 
-        private byte[] m_bp; // pointer to data to encode
-        private int m_bpPos;   // current position in m_bp
+        private byte[] m_buffer; // buffer with data to encode
+        private int m_offset;   // current position in m_buffer
 
         public CCITTCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
@@ -288,7 +288,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -317,7 +317,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -334,7 +334,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="count">The maximum number of decoded bytes that can be placed
+        /// <param name="count">The number of decoded bytes that should be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
@@ -439,49 +439,55 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// Encodes one row of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeRow(byte[] buffer, int count, short plane)
+        public override bool EncodeRow(byte[] buffer, int offset, int count, short plane)
         {
             if (m_encodingFax4)
-                return Fax4Encode(buffer, count);
+                return Fax4Encode(buffer, offset, count);
 
-            return Fax3Encode(buffer, count);
+            return Fax3Encode(buffer, offset, count);
         }
 
         /// <summary>
         /// Encodes one strip of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeStrip(byte[] buffer, int count, short plane)
+        public override bool EncodeStrip(byte[] buffer, int offset, int count, short plane)
         {
-            return EncodeRow(buffer, count, plane);
+            return EncodeRow(buffer, offset, count, plane);
         }
 
         /// <summary>
         /// Encodes one tile of image data.
         /// </summary>
-        /// <param name="buffer">The buffer to place encoded image data to.</param>
+        /// <param name="buffer">The buffer with image data to be encoded.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
         /// to <paramref name="buffer"/></param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
         /// </returns>
-        public override bool EncodeTile(byte[] buffer, int count, short plane)
+        public override bool EncodeTile(byte[] buffer, int offset, int count, short plane)
         {
-            return EncodeRow(buffer, count, plane);
+            return EncodeRow(buffer, offset, count, plane);
         }
 
         /// <summary>
@@ -1406,13 +1412,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
             int bs = 0;
             for ( ; ; )
             {
-                int span = find0span(m_bp, m_bpPos, bs, m_rowpixels); /* white span */
+                int span = find0span(m_buffer, m_offset, bs, m_rowpixels); /* white span */
                 putspan(span, false);
                 bs += span;
                 if (bs >= m_rowpixels)
                     break;
 
-                span = find1span(m_bp, m_bpPos, bs, m_rowpixels); /* black span */
+                span = find1span(m_buffer, m_offset, bs, m_rowpixels); /* black span */
                 putspan(span, true);
                 bs += span;
                 if (bs >= m_rowpixels)
@@ -1441,7 +1447,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private bool Fax3Encode2DRow()
         {
             int a0 = 0;
-            int a1 = (Fax3Encode2DRow_Pixel(m_bp, m_bpPos, 0) != 0 ? 0 : finddiff(m_bp, m_bpPos, 0, m_rowpixels, 0));
+            int a1 = (Fax3Encode2DRow_Pixel(m_buffer, m_offset, 0) != 0 ? 0 : finddiff(m_buffer, m_offset, 0, m_rowpixels, 0));
             int b1 = (Fax3Encode2DRow_Pixel(m_refline, 0, 0) != 0 ? 0 : finddiff(m_refline, 0, 0, m_rowpixels, 0));
 
             for (; ; )
@@ -1453,10 +1459,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     if (!(-3 <= d && d <= 3))
                     {
                         /* horizontal mode */
-                        int a2 = finddiff2(m_bp, m_bpPos, a1, m_rowpixels, Fax3Encode2DRow_Pixel(m_bp, m_bpPos, a1));
+                        int a2 = finddiff2(m_buffer, m_offset, a1, m_rowpixels, Fax3Encode2DRow_Pixel(m_buffer, m_offset, a1));
                         putcode(m_horizcode);
 
-                        if (a0 + a1 == 0 || Fax3Encode2DRow_Pixel(m_bp, m_bpPos, a0) == 0)
+                        if (a0 + a1 == 0 || Fax3Encode2DRow_Pixel(m_buffer, m_offset, a0) == 0)
                         {
                             putspan(a1 - a0, false);
                             putspan(a2 - a1, true);
@@ -1486,16 +1492,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 if (a0 >= m_rowpixels)
                     break;
 
-                a1 = finddiff(m_bp, m_bpPos, a0, m_rowpixels, Fax3Encode2DRow_Pixel(m_bp, m_bpPos, a0));
+                a1 = finddiff(m_buffer, m_offset, a0, m_rowpixels, Fax3Encode2DRow_Pixel(m_buffer, m_offset, a0));
 
-                int color = Fax3Encode2DRow_Pixel(m_bp, m_bpPos, a0);
+                int color = Fax3Encode2DRow_Pixel(m_buffer, m_offset, a0);
                 if (color == 0)
                     color = 1;
                 else
                     color = 0;
 
                 b1 = finddiff(m_refline, 0, a0, m_rowpixels, color);
-                b1 = finddiff(m_refline, 0, b1, m_rowpixels, Fax3Encode2DRow_Pixel(m_bp, m_bpPos, a0));
+                b1 = finddiff(m_refline, 0, b1, m_rowpixels, Fax3Encode2DRow_Pixel(m_buffer, m_offset, a0));
             }
 
             return true;
@@ -1506,15 +1512,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return ((buf[bufOffset + (ix >> 3)] >> (7 - (ix & 7))) & 1);
         }
 
-        /*
-        * Encode a buffer of pixels.
-        */
-        private bool Fax3Encode(byte[] bp, int cc)
+        /// <summary>
+        /// Encode a buffer of pixels.
+        /// </summary>
+        private bool Fax3Encode(byte[] buffer, int offset, int count)
         {
-            m_bp = bp;
-            m_bpPos = 0;
+            m_buffer = buffer;
+            m_offset = offset;
 
-            while (cc > 0)
+            while (count > 0)
             {
                 if ((m_mode & FaxMode.NOEOL) == 0)
                     Fax3PutEOL();
@@ -1542,7 +1548,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         m_k = m_maxk - 1;
                     }
                     else
-                        Array.Copy(m_bp, m_bpPos, m_refline, 0, m_rowbytes);
+                        Array.Copy(m_buffer, m_offset, m_refline, 0, m_rowbytes);
                 }
                 else
                 {
@@ -1550,8 +1556,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
                 }
 
-                m_bpPos += m_rowbytes;
-                cc -= m_rowbytes;
+                m_offset += m_rowbytes;
+                count -= m_rowbytes;
             }
 
             return true;
@@ -2310,22 +2316,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        /*
-        * Encode the requested amount of data.
-        */
-        private bool Fax4Encode(byte[] bp, int cc)
+        /// <summary>
+        /// Encode the requested amount of data.
+        /// </summary>
+        private bool Fax4Encode(byte[] buffer, int offset, int count)
         {
-            m_bp = bp;
-            m_bpPos = 0;
+            m_buffer = buffer;
+            m_offset = offset;
 
-            while (cc > 0)
+            while (count > 0)
             {
                 if (!Fax3Encode2DRow())
                     return false;
 
-                Array.Copy(m_bp, m_bpPos, m_refline, 0, m_rowbytes);
-                m_bpPos += m_rowbytes;
-                cc -= m_rowbytes;
+                Array.Copy(m_buffer, m_offset, m_refline, 0, m_rowbytes);
+                m_offset += m_rowbytes;
+                count -= m_rowbytes;
             }
 
             return true;
@@ -2333,7 +2339,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private bool Fax4PostEncode()
         {
-            /* terminate strip w/ EOFB */
+            // terminate strip w/ EOFB
             putBits(EOL_CODE, 12);
             putBits(EOL_CODE, 12);
 

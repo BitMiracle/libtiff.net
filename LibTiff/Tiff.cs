@@ -3724,7 +3724,7 @@ namespace BitMiracle.LibTiff.Classic
             // swab if needed - note that source buffer will be altered
             postDecode(buf, m_scanlinesize);
 
-            bool status = m_currentCodec.EncodeRow(buf, m_scanlinesize, sample);
+            bool status = m_currentCodec.EncodeRow(buf, 0, m_scanlinesize, sample);
 
             // we are now poised at the beginning of the next row
             m_row = row + 1;
@@ -5084,7 +5084,7 @@ namespace BitMiracle.LibTiff.Classic
             /* swab if needed - note that source buffer will be altered */
             postDecode(data, count);
 
-            if (!m_currentCodec.EncodeStrip(data, count, sample))
+            if (!m_currentCodec.EncodeStrip(data, 0, count, sample))
                 return 0;
 
             if (!m_currentCodec.PostEncode())
@@ -5232,7 +5232,7 @@ namespace BitMiracle.LibTiff.Classic
             /* swab if needed - note that source buffer will be altered */
             postDecode(data, count);
 
-            if (!m_currentCodec.EncodeTile(data, count, sample))
+            if (!m_currentCodec.EncodeTile(data, 0, count, sample))
                 return 0;
 
             if (!m_currentCodec.PostEncode())

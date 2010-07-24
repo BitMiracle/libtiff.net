@@ -192,19 +192,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return ZIPSetupEncode();
         }
 
-        public override bool predictor_encoderow(byte[] pp, int cc, short s)
+        public override bool predictor_encoderow(byte[] buffer, int offset, int count, short plane)
         {
-            return ZIPEncode(pp, cc, s);
+            return ZIPEncode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_encodestrip(byte[] pp, int cc, short s)
+        public override bool predictor_encodestrip(byte[] buffer, int offset, int count, short plane)
         {
-            return ZIPEncode(pp, cc, s);
+            return ZIPEncode(buffer, offset, count, plane);
         }
 
-        public override bool predictor_encodetile(byte[] pp, int cc, short s)
+        public override bool predictor_encodetile(byte[] buffer, int offset, int count, short plane)
         {
-            return ZIPEncode(pp, cc, s);
+            return ZIPEncode(buffer, offset, count, plane);
         }
 
         private void ZIPCleanup()
@@ -269,18 +269,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        /*
-        * Encode a chunk of pixels.
-        */
-        private bool ZIPEncode(byte[] bp, int cc, short s)
+        /// <summary>
+        /// Encode a chunk of pixels.
+        /// </summary>
+        private bool ZIPEncode(byte[] buffer, int offset, int count, short plane)
         {
             const string module = "ZIPEncode";
 
             Debug.Assert(m_state == ZSTATE_INIT_ENCODE);
 
-            m_stream.next_in = bp;
-            m_stream.next_in_index = 0;
-            m_stream.avail_in = cc;
+            m_stream.next_in = buffer;
+            m_stream.next_in_index = offset;
+            m_stream.avail_in = count;
             do
             {
                 if (m_stream.deflate(zlibConst.Z_NO_FLUSH) != zlibConst.Z_OK)
