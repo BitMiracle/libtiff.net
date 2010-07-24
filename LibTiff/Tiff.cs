@@ -3541,42 +3541,125 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Reads the scanline.
+        /// Reads and decodes a scanline of data from an open TIFF file/stream.
         /// </summary>
         /// <overloads>
-        /// Reads the scanline.
+        /// Reads and decodes a scanline of data from an open TIFF file/stream.
         /// </overloads>
-        /// <param name="buf">The buffer.</param>
-        /// <param name="row">The row.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        public bool ReadScanline(byte[] buf, int row)
+        /// <param name="buffer">The buffer to place read and decoded image data to.</param>
+        /// <param name="row">The zero-based index of scanline (row) to read.</param>
+        /// <returns>
+        /// <c>true</c> if image data were read and decoded successfully; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <b>ReadScanline</b> reads the data for the specified <paramref name="row"/> into the
+        /// user supplied data buffer <paramref name="buffer"/>. The data are returned
+        /// decompressed and, in the native byte- and bit-ordering, but are otherwise packed
+        /// (see further below). The <paramref name="buffer"/> must be large enough to hold an
+        /// entire scanline of data. Applications should call the <see cref="ScanlineSize"/>
+        /// to find out the size (in bytes) of a scanline buffer. Applications should use
+        /// <see cref="ReadScanline(byte[], int, short)"/> or
+        /// <see cref="ReadScanline(byte[], int, int, short)"/> specifying corect sample plane if
+        /// image data are organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// </para>
+        /// <para>
+        /// The library attempts to hide bit- and byte-ordering differences between the image and
+        /// the native machine by converting data to the native machine order. Bit reversal is
+        /// done if the value of <see cref="TiffTag.FILLORDER"/> tag is opposite to the native
+        /// machine bit order. 16- and 32-bit samples are automatically byte-swapped if the file
+        /// was written with a byte order opposite to the native machine byte order.
+        /// </para>
+        /// </remarks>
+        public bool ReadScanline(byte[] buffer, int row)
         {
-            return ReadScanline(buf, row, 0);
+            return ReadScanline(buffer, 0, row, 0);
         }
 
         /// <summary>
-        /// Reads the scanline.
+        /// Reads and decodes a scanline of data from an open TIFF file/stream.
         /// </summary>
-        /// <param name="buf">The buffer.</param>
-        /// <param name="row">The row.</param>
-        /// <param name="sample">The sample.</param>
-        /// <returns><c>true</c> if read successfully; otherwise, <c>false</c></returns>
-        public bool ReadScanline(byte[] buf, int row, short sample)
+        /// <param name="buffer">The buffer to place read and decoded image data to.</param>
+        /// <param name="row">The zero-based index of scanline (row) to read.</param>
+        /// <param name="plane">The zero-based index of the sample plane.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data were read and decoded successfully; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <b>ReadScanline</b> reads the data for the specified <paramref name="row"/> and
+        /// specified sample plane <paramref name="plane"/> into the user supplied data buffer
+        /// <paramref name="buffer"/>. The data are returned decompressed and, in the native
+        /// byte- and bit-ordering, but are otherwise packed (see further below). The
+        /// <paramref name="buffer"/> must be large enough to hold an entire scanline of data.
+        /// Applications should call the <see cref="ScanlineSize"/> to find out the size (in
+        /// bytes) of a scanline buffer. Applications may use
+        /// <see cref="ReadScanline(byte[], int)"/> or specify 0 for <paramref name="plane"/>
+        /// parameter if image data is contiguous (i.e not organized in separate planes, 
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.CONTIG).
+        /// </para>
+        /// <para>
+        /// The library attempts to hide bit- and byte-ordering differences between the image and
+        /// the native machine by converting data to the native machine order. Bit reversal is
+        /// done if the value of <see cref="TiffTag.FILLORDER"/> tag is opposite to the native
+        /// machine bit order. 16- and 32-bit samples are automatically byte-swapped if the file
+        /// was written with a byte order opposite to the native machine byte order.
+        /// </para>
+        /// </remarks>
+        public bool ReadScanline(byte[] buffer, int row, short plane)
+        {
+            return ReadScanline(buffer, 0, row, plane);
+        }
+
+        /// <summary>
+        /// Reads and decodes a scanline of data from an open TIFF file/stream.
+        /// </summary>
+        /// <param name="buffer">The buffer to place read and decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin storing read and decoded bytes.</param>
+        /// <param name="row">The zero-based index of scanline (row) to read.</param>
+        /// <param name="plane">The zero-based index of the sample plane.</param>
+        /// <returns>
+        /// 	<c>true</c> if image data were read and decoded successfully; otherwise, <c>false</c>
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <b>ReadScanline</b> reads the data for the specified <paramref name="row"/> and
+        /// specified sample plane <paramref name="plane"/> into the user supplied data buffer
+        /// <paramref name="buffer"/>. The data are returned decompressed and, in the native
+        /// byte- and bit-ordering, but are otherwise packed (see further below). The
+        /// <paramref name="buffer"/> must be large enough to hold an entire scanline of data.
+        /// Applications should call the <see cref="ScanlineSize"/> to find out the size (in
+        /// bytes) of a scanline buffer. Applications may use
+        /// <see cref="ReadScanline(byte[], int)"/> or specify 0 for <paramref name="plane"/>
+        /// parameter if image data is contiguous (i.e not organized in separate planes,
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.CONTIG).
+        /// </para>
+        /// <para>
+        /// The library attempts to hide bit- and byte-ordering differences between the image and
+        /// the native machine by converting data to the native machine order. Bit reversal is
+        /// done if the value of <see cref="TiffTag.FILLORDER"/> tag is opposite to the native
+        /// machine bit order. 16- and 32-bit samples are automatically byte-swapped if the file
+        /// was written with a byte order opposite to the native machine byte order.
+        /// </para>
+        /// </remarks>
+        public bool ReadScanline(byte[] buffer, int offset, int row, short plane)
         {
             if (!checkRead(0))
                 return false;
 
-            bool e = seek(row, sample);
+            bool e = seek(row, plane);
             if (e)
             {
                 // Decompress desired row into user buffer.
-                e = m_currentCodec.DecodeRow(buf, 0, m_scanlinesize, sample);
+                e = m_currentCodec.DecodeRow(buffer, offset, m_scanlinesize, plane);
 
                 // we are now poised at the beginning of the next row
                 m_row = row + 1;
 
                 if (e)
-                    postDecode(buf, 0, m_scanlinesize);
+                    postDecode(buffer, offset, m_scanlinesize);
             }
 
             return e;
@@ -3588,22 +3671,22 @@ namespace BitMiracle.LibTiff.Classic
         /// <overloads>
         /// Writes the scanline.
         /// </overloads>
-        /// <param name="buf">The buffer.</param>
+        /// <param name="buffer">The buffer.</param>
         /// <param name="row">The row.</param>
         /// <returns><c>true</c> if written successfully; otherwise, <c>false</c></returns>
-        public bool WriteScanline(byte[] buf, int row)
+        public bool WriteScanline(byte[] buffer, int row)
         {
-            return WriteScanline(buf, row, 0);
+            return WriteScanline(buffer, row, 0);
         }
 
         /// <summary>
         /// Writes the scanline.
         /// </summary>
-        /// <param name="buf">The buffer.</param>
+        /// <param name="buffer">The buffer.</param>
         /// <param name="row">The row.</param>
-        /// <param name="sample">The sample.</param>
+        /// <param name="plane">The sample.</param>
         /// <returns><c>true</c> if written successfully; otherwise, <c>false</c></returns>
-        public bool WriteScanline(byte[] buf, int row, short sample)
+        public bool WriteScanline(byte[] buffer, int row, short plane)
         {
             const string module = "WriteScanline";
 
@@ -3633,15 +3716,15 @@ namespace BitMiracle.LibTiff.Classic
             int strip;
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
             {
-                if (sample >= m_dir.td_samplesperpixel)
+                if (plane >= m_dir.td_samplesperpixel)
                 {
                     ErrorExt(this, m_clientdata, m_name,
-                        "{0}: Sample out of range, max {1}", sample, m_dir.td_samplesperpixel);
+                        "{0}: Sample out of range, max {1}", plane, m_dir.td_samplesperpixel);
                     return false;
                 }
 
                 if (m_dir.td_rowsperstrip != -1)
-                    strip = sample * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
+                    strip = plane * m_dir.td_stripsperimage + row / m_dir.td_rowsperstrip;
                 else
                     strip = 0;
             }
@@ -3696,7 +3779,7 @@ namespace BitMiracle.LibTiff.Classic
                     m_curoff = 0;
                 }
 
-                if (!m_currentCodec.PreEncode(sample))
+                if (!m_currentCodec.PreEncode(plane))
                     return false;
 
                 m_flags |= TiffFlags.POSTENCODE;
@@ -3722,9 +3805,9 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             // swab if needed - note that source buffer will be altered
-            postDecode(buf, 0, m_scanlinesize);
+            postDecode(buffer, 0, m_scanlinesize);
 
-            bool status = m_currentCodec.EncodeRow(buf, 0, m_scanlinesize, sample);
+            bool status = m_currentCodec.EncodeRow(buffer, 0, m_scanlinesize, plane);
 
             // we are now poised at the beginning of the next row
             m_row = row + 1;

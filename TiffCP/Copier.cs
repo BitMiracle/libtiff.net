@@ -1117,23 +1117,20 @@ namespace BitMiracle.TiffCP
                 imagelength, imagewidth, spp);
         }
 
-        bool readContigStripsIntoBuffer(Tiff inImage, byte[] buf, int imagelength, int imagewidth, short spp)
+        bool readContigStripsIntoBuffer(Tiff inImage, byte[] buffer, int imagelength, int imagewidth, short spp)
         {
             int scanlinesize = inImage.ScanlineSize();
-            byte[] scanline = new byte[scanlinesize];
-
-            int bufp = 0;
+            int offset = 0;
 
             for (int row = 0; row < imagelength; row++)
             {
-                if (!inImage.ReadScanline(scanline, row, 0) && !m_ignore)
+                if (!inImage.ReadScanline(buffer, offset, row, 0) && !m_ignore)
                 {
                     Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
                     return false;
                 }
 
-                Array.Copy(scanline, 0, buf, bufp, scanlinesize);
-                bufp += scanlinesize;
+                offset += scanlinesize;
             }
 
             return true;
