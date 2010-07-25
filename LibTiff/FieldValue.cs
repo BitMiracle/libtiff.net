@@ -165,83 +165,49 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     short[] temp = m_value as short[];
                     byte[] result = new byte[temp.Length * sizeof(short)];
-                    int resultOffset = 0;
-                    for (int i = 0; i < temp.Length; i++)
-                    {
-                        byte[] bytes = BitConverter.GetBytes(temp[i]);
-                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
-                        resultOffset += bytes.Length;
-                    }
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
                     return result;
                 }
                 else if (m_value is ushort[])
                 {
                     ushort[] temp = m_value as ushort[];
                     byte[] result = new byte[temp.Length * sizeof(ushort)];
-                    int resultOffset = 0;
-                    for (int i = 0; i < temp.Length; i++)
-                    {
-                        byte[] bytes = BitConverter.GetBytes(temp[i]);
-                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
-                        resultOffset += bytes.Length;
-                    }
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
                     return result;
                 }
                 else if (m_value is int[])
                 {
                     int[] temp = m_value as int[];
                     byte[] result = new byte[temp.Length * sizeof(int)];
-                    int resultOffset = 0;
-                    for (int i = 0; i < temp.Length; i++)
-                    {
-                        byte[] bytes = BitConverter.GetBytes(temp[i]);
-                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
-                        resultOffset += bytes.Length;
-                    }
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
                     return result;
                 }
                 else if (m_value is uint[])
                 {
                     uint[] temp = m_value as uint[];
                     byte[] result = new byte[temp.Length * sizeof(uint)];
-                    int resultOffset = 0;
-                    for (int i = 0; i < temp.Length; i++)
-                    {
-                        byte[] bytes = BitConverter.GetBytes(temp[i]);
-                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
-                        resultOffset += bytes.Length;
-                    }
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
                     return result;
                 }
                 else if (m_value is float[])
                 {
                     float[] temp = m_value as float[];
                     byte[] result = new byte[temp.Length * sizeof(float)];
-                    int resultOffset = 0;
-                    for (int i = 0; i < temp.Length; i++)
-                    {
-                        byte[] bytes = BitConverter.GetBytes(temp[i]);
-                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
-                        resultOffset += bytes.Length;
-                    }
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
                     return result;
                 }
                 else if (m_value is double[])
                 {
                     double[] temp = m_value as double[];
                     byte[] result = new byte[temp.Length * sizeof(double)];
-                    int resultOffset = 0;
-                    for (int i = 0; i < temp.Length; i++)
-                    {
-                        byte[] bytes = BitConverter.GetBytes(temp[i]);
-                        Array.Copy(bytes, 0, result, resultOffset, bytes.Length);
-                        resultOffset += bytes.Length;
-                    }
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
                     return result;
                 }
             }
             else if (m_value is string)
+            {
                 return Tiff.Latin1Encoding.GetBytes(m_value as string);
+            }
 
             return null;
         }

@@ -516,10 +516,7 @@ namespace BitMiracle.LibTiff.Classic
             byte[] b = new byte[cc];
             int read = fetchData(dir, b);
             if (read != 0)
-            {
-                short[] u = ByteArrayToShorts(b, 0, read);
-                Array.Copy(u, v, u.Length);
-            }
+                Buffer.BlockCopy(b, 0, v, 0, b.Length);
 
             return (read != 0);
         }
@@ -573,17 +570,14 @@ namespace BitMiracle.LibTiff.Classic
             byte[] b = new byte[cc];
             int read = fetchData(dir, b);
             if (read != 0)
-            {
-                int[] u = ByteArrayToInts(b, 0, read);
-                Array.Copy(u, v, u.Length);
-            }
+                Buffer.BlockCopy(b, 0, v, 0, b.Length);
 
             return (read != 0);
         }
 
-        /*
-        * Fetch an array of RATIONAL or SRATIONAL values.
-        */
+        /// <summary>
+        /// Fetch an array of RATIONAL or SRATIONAL values.
+        /// </summary>
         private bool fetchRationalArray(TiffDirEntry dir, float[] v)
         {
             Debug.Assert(sizeof(float) == sizeof(int));

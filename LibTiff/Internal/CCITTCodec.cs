@@ -1548,7 +1548,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         m_k = m_maxk - 1;
                     }
                     else
-                        Array.Copy(m_buffer, m_offset, m_refline, 0, m_rowbytes);
+                    {
+                        Buffer.BlockCopy(m_buffer, m_offset, m_refline, 0, m_rowbytes);
+                    }
                 }
                 else
                 {
@@ -2329,7 +2331,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 if (!Fax3Encode2DRow())
                     return false;
 
-                Array.Copy(m_buffer, m_offset, m_refline, 0, m_rowbytes);
+                Buffer.BlockCopy(m_buffer, m_offset, m_refline, 0, m_rowbytes);
                 m_offset += m_rowbytes;
                 count -= m_rowbytes;
             }

@@ -318,20 +318,20 @@ namespace BitMiracle.LibTiff.Classic
         /// the new array.
         /// </summary>
         /// <param name="array">The existing array.</param>
-        /// <param name="newElementCount">The number of elements in new array.</param>
+        /// <param name="size">The number of elements in new array.</param>
         /// <returns>
         /// The new byte array of specified size with data from the existing array.
         /// </returns>
         /// <remarks>Size of the array is in elements, not bytes.</remarks>
         /// <overloads>Allocates new array of specified size and copies data from the existing to
         /// the new array.</overloads>
-        public static byte[] Realloc(byte[] array, int newElementCount)
+        public static byte[] Realloc(byte[] array, int size)
         {
-            byte[] newArray = new byte[newElementCount];
+            byte[] newArray = new byte[size];
             if (array != null)
             {
-                int copyLength = Math.Min(array.Length, newElementCount);
-                Array.Copy(array, newArray, copyLength);
+                int copyLength = Math.Min(array.Length, size);
+                Buffer.BlockCopy(array, 0, newArray, 0, copyLength);
             }
 
             return newArray;
@@ -342,18 +342,18 @@ namespace BitMiracle.LibTiff.Classic
         /// the new array.
         /// </summary>
         /// <param name="array">The existing array.</param>
-        /// <param name="newElementCount">The number of elements in new array.</param>
+        /// <param name="size">The number of elements in new array.</param>
         /// <returns>
         /// The new integer array of specified size with data from the existing array.
         /// </returns>
         /// <remarks>Size of the array is in elements, not bytes.</remarks>
-        public static int[] Realloc(int[] array, int newElementCount)
+        public static int[] Realloc(int[] array, int size)
         {
-            int[] newArray = new int[newElementCount];
+            int[] newArray = new int[size];
             if (array != null)
             {
-                int copyLength = Math.Min(array.Length, newElementCount);
-                Array.Copy(array, newArray, copyLength);
+                int copyLength = Math.Min(array.Length, size);
+                Buffer.BlockCopy(array, 0, newArray, 0, copyLength * sizeof(int));
             }
 
             return newArray;
@@ -2046,7 +2046,7 @@ namespace BitMiracle.LibTiff.Classic
 
             // Setup external form of directory entries and write data items.
             int[] fields = new int[FieldBit.SetLongs];
-            Array.Copy(m_dir.td_fieldsset, fields, FieldBit.SetLongs);
+            Buffer.BlockCopy(m_dir.td_fieldsset, 0, fields, 0, FieldBit.SetLongs * sizeof(int));
 
             for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
             {
@@ -3522,8 +3522,8 @@ namespace BitMiracle.LibTiff.Classic
                         byte[] first = result[0].ToByteArray();
                         byte[] second = result[1].ToByteArray();
 
-                        Array.Copy(first, raw_data, first.Length);
-                        Array.Copy(second, 0, raw_data, dataSize(fip.Type), second.Length);
+                        Buffer.BlockCopy(first, 0, raw_data, 0, first.Length);
+                        Buffer.BlockCopy(second, 0, raw_data, dataSize(fip.Type), second.Length);
                     }
                 }
 
@@ -5861,8 +5861,8 @@ namespace BitMiracle.LibTiff.Classic
             lp[0] = lp[1];
             lp[1] = t;
 
-            Array.Copy(BitConverter.GetBytes(lp[0]), bytes, 0);
-            Array.Copy(BitConverter.GetBytes(lp[1]), bytes, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(lp[0]), 0, bytes, 0, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(lp[1]), 0, bytes, sizeof(int), sizeof(int));
             dp = BitConverter.ToDouble(bytes, 0);
         }
 
@@ -5989,7 +5989,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             byte[] bytes = new byte[n * sizeof(double)];
             for (int i = 0, j = offset; i < n; i++, j++)
-                Array.Copy(BitConverter.GetBytes(dp[j]), 0, bytes, i * sizeof(double), sizeof(double));
+                Buffer.BlockCopy(BitConverter.GetBytes(dp[j]), 0, bytes, i * sizeof(double), sizeof(double));
 
             int[] lp = ByteArrayToInts(bytes, 0, n * sizeof(double));
             SwabArrayOfLong(lp, n + n);

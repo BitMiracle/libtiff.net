@@ -327,39 +327,39 @@ namespace BitMiracle.LibTiff.Classic
             lp += (uint)(cp[3] << 24);
         }
 
-        internal static uint[] Realloc(uint[] oldBuffer, int elementCount, int newElementCount)
+        internal static uint[] Realloc(uint[] buffer, int elementCount, int newElementCount)
         {
             uint[] newBuffer = new uint[newElementCount];
-            if (oldBuffer != null)
+            if (buffer != null)
             {
                 int copyLength = Math.Min(elementCount, newElementCount);
-                Array.Copy(oldBuffer, newBuffer, copyLength);
+                Buffer.BlockCopy(buffer, 0, newBuffer, 0, copyLength * sizeof(uint));
             }
 
             return newBuffer;
         }
 
-        internal static TiffFieldInfo[] Realloc(TiffFieldInfo[] oldBuffer, int elementCount, int newElementCount)
+        internal static TiffFieldInfo[] Realloc(TiffFieldInfo[] buffer, int elementCount, int newElementCount)
         {
             TiffFieldInfo[] newBuffer = new TiffFieldInfo [newElementCount];
 
-            if (oldBuffer != null)
+            if (buffer != null)
             {
                 int copyLength = Math.Min(elementCount, newElementCount);
-                Array.Copy(oldBuffer, newBuffer, copyLength);
+                Array.Copy(buffer, newBuffer, copyLength);
             }
 
             return newBuffer;
         }
 
-        internal static TiffTagValue[] Realloc(TiffTagValue[] oldBuffer, int elementCount, int newElementCount)
+        internal static TiffTagValue[] Realloc(TiffTagValue[] buffer, int elementCount, int newElementCount)
         {
             TiffTagValue[] newBuffer = new TiffTagValue[newElementCount];
 
-            if (oldBuffer != null)
+            if (buffer != null)
             {
                 int copyLength = Math.Min(elementCount, newElementCount);
-                Array.Copy(oldBuffer, newBuffer, copyLength);
+                Array.Copy(buffer, newBuffer, copyLength);
             }
 
             return newBuffer;

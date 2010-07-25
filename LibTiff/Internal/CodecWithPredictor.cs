@@ -775,30 +775,30 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        /*
-        * Floating point predictor differencing routine.
-        */
-        private void fpDiff(byte[] cp0, int offset, int cc)
+        /// <summary>
+        /// Floating point predictor differencing routine.
+        /// </summary>
+        private void fpDiff(byte[] buffer, int offset, int count)
         {
-            byte[] tmp = new byte [cc];
-            Array.Copy(cp0, offset, tmp, 0, cc);
+            byte[] tmp = new byte [count];
+            Buffer.BlockCopy(buffer, offset, tmp, 0, count);
 
             int bps = m_tif.m_dir.td_bitspersample / 8;
-            int wc = cc / bps;
-            for (int count = 0; count < wc; count++)
+            int wc = count / bps;
+            for (int c = 0; c < wc; c++)
             {
                 for (int b = 0; b < bps; b++)
-                    cp0[offset + (bps - b - 1) * wc + count] = tmp[bps * count + b];
+                    buffer[offset + (bps - b - 1) * wc + c] = tmp[bps * c + b];
             }
 
-            int cp = offset + cc - stride - 1;
-            for (int count = cc; count > stride; count -= stride)
+            int cp = offset + count - stride - 1;
+            for (int c = count; c > stride; c -= stride)
             {
                 if (stride > 4 || stride < 0)
                 {
                     for (int i = stride - 4; i > 0; i--)
                     {
-                        cp0[cp + stride] -= cp0[cp];
+                        buffer[cp + stride] -= buffer[cp];
                         cp--;
                     }
                 }
@@ -806,7 +806,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 {
                     for (int i = stride; i > 0; i--)
                     {
-                        cp0[cp + stride] -= cp0[cp];
+                        buffer[cp + stride] -= buffer[cp];
                         cp--;
                     }
                 }
