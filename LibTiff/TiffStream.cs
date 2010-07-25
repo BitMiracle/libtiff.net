@@ -44,14 +44,15 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="fd">Stream object.</param>
         /// <param name="buf">Data buffer.</param>
+        /// <param name="offset">The offset.</param>
         /// <param name="size">Bytes to write.</param>
-        public virtual void Write(object fd, byte[] buf, int size)
+        public virtual void Write(object fd, byte[] buf, int offset, int size)
         {
             Stream s = fd as Stream;
             if (s == null)
                 throw new ArgumentException("Can't get stream to write to");
             
-            s.Write(buf, 0, size);
+            s.Write(buf, offset, size);
         }
 
         /// <summary>

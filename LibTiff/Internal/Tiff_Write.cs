@@ -42,20 +42,15 @@ namespace BitMiracle.LibTiff.Classic
                 WriteBufferSetup(null, -1);
         }
 
-        private void writeFile(byte[] buf, int size)
-        {
-            m_stream.Write(m_clientdata, buf, size);
-        }
-
-        private bool writeOK(byte[] buf, int size)
+        private bool writeOK(byte[] buffer, int offset, int count)
         {
             try
             {
-                writeFile(buf, size);
+                m_stream.Write(m_clientdata, buffer, offset, count);
             }
             catch (Exception)
             {
-                Tiff.Warning(this, "writeOK", "Failed to write {0} bytes", size);
+                Tiff.Warning(this, "writeOK", "Failed to write {0} bytes", count);
                 return false;
             }
 
@@ -104,7 +99,7 @@ namespace BitMiracle.LibTiff.Classic
             cp[0] = (byte)value;
             cp[1] = (byte)(value >> 8);
 
-            return writeOK(cp, 2);
+            return writeOK(cp, 0, 2);
         }
 
         private bool writeIntOK(int value)
@@ -115,7 +110,7 @@ namespace BitMiracle.LibTiff.Classic
             cp[2] = (byte)(value >> 16);
             cp[3] = (byte)(value >> 24);
 
-            return writeOK(cp, 4);
+            return writeOK(cp, 0, 4);
         }
 
         private bool isUnspecified(int f)
@@ -142,14 +137,17 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Appends the data to the specified strip.
         /// </summary>
-        private bool appendToStrip(int strip, byte[] data, int cc)
+        private bool appendToStrip(int strip, byte[] buffer, int offset, int count)
         {
             const string module = "appendToStrip";
 
             if (m_dir.td_stripoffset[strip] == 0 || m_curoff == 0)
             {
                 Debug.Assert(m_dir.td_nstrips > 0);
-                if (m_dir.td_stripbytecount[strip] != 0 && m_dir.td_stripoffset[strip] != 0 && m_dir.td_stripbytecount[strip] >= cc)
+
+                if (m_dir.td_stripbytecount[strip] != 0 &&
+                    m_dir.td_stripoffset[strip] != 0 &&
+                    m_dir.td_stripbytecount[strip] >= count)
                 {
                     // There is already tile data on disk, and the new tile 
                     // data we have to will fit in the same space. The only
@@ -175,14 +173,14 @@ namespace BitMiracle.LibTiff.Classic
                 m_dir.td_stripbytecount[strip] = 0;
             }
 
-            if (!writeOK(data, cc))
+            if (!writeOK(buffer, offset, count))
             {
                 ErrorExt(this, m_clientdata, module, "Write error at scanline {0}", m_row);
                 return false;
             }
 
-            m_curoff += (uint)cc;
-            m_dir.td_stripbytecount[strip] += (uint)cc;
+            m_curoff += (uint)count;
+            m_dir.td_stripbytecount[strip] += (uint)count;
             return true;
         }
 
@@ -198,7 +196,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TiffFlags.NOBITREV) != TiffFlags.NOBITREV)
                     ReverseBits(m_rawdata, m_rawcc);
 
-                if (!appendToStrip(IsTiled() ? m_curtile : m_curstrip, m_rawdata, m_rawcc))
+                if (!appendToStrip(IsTiled() ? m_curtile : m_curstrip, m_rawdata, 0, m_rawcc))
                     return false;
 
                 m_rawcc = 0;

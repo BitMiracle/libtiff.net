@@ -23,7 +23,7 @@ namespace BitMiracle.Tiff2Pdf
             return -1;
         }
 
-        public override void Write(object fd, byte[] buf, int size)
+        public override void Write(object fd, byte[] buf, int offset, int size)
         {
             T2P t2p = fd as T2P;
             if (t2p == null)
@@ -31,7 +31,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if (!t2p.m_outputdisable && t2p.m_outputfile != null)
             {
-                t2p.m_outputfile.Write(buf, 0, size);
+                t2p.m_outputfile.Write(buf, offset, size);
                 t2p.m_outputwritten += size;
             }
         }

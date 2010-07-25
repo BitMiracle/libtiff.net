@@ -3600,7 +3600,7 @@ namespace BitMiracle.Tiff2Pdf
             if (stream != null)
             {
                 object client = m_output.Clientdata();
-                stream.Write(client, data, size);
+                stream.Write(client, data, 0, size);
                 return size;
             }
 

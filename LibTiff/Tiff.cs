@@ -5060,6 +5060,7 @@ namespace BitMiracle.LibTiff.Classic
         /// The number of encoded and written bytes or <c>-1</c> if an error occurred.
         /// </returns>
         /// <remarks>
+        /// <para>
         /// The tile to place encoded data is selected by the (x, y, z, plane) coordinates (i.e.
         /// <b>WriteTile</b> writes data to the tile containing the specified coordinates.
         /// <b>WriteTile</b> (potentially) encodes the data <paramref name="buffer"/> and writes
@@ -5072,7 +5073,11 @@ namespace BitMiracle.LibTiff.Classic
         /// used only if data are organized in separate planes
         /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE). In other
         /// cases the value of <paramref name="plane"/> is ignored.
-        /// </remarks>
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteTile</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// </para></remarks>
         public int WriteTile(byte[] buffer, int x, int y, int z, short plane)
         {
             return WriteTile(buffer, 0, x, y, z, plane);
@@ -5103,6 +5108,10 @@ namespace BitMiracle.LibTiff.Classic
         /// used only if data are organized in separate planes
         /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE). In other
         /// cases the value of <paramref name="plane"/> is ignored.
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteTile</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
         /// </para></remarks>
         public int WriteTile(byte[] buffer, int offset, int x, int y, int z, short plane)
         {
@@ -5299,9 +5308,13 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to
         /// a strip index.
         /// </para><para>
-        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
-        /// writing; <b>WriteEncodedStrip</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// If there is no space for the strip, the value of <see cref="TiffTag.IMAGELENGTH"/>
+        /// tag is automatically increased to include the strip (except for
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE, where the
+        /// <see cref="TiffTag.IMAGELENGTH"/> tag cannot be changed once the first data are
+        /// written). If the <see cref="TiffTag.IMAGELENGTH"/> is increased, the values of
+        /// <see cref="TiffTag.STRIPOFFSETS"/> and <see cref="TiffTag.STRIPBYTECOUNTS"/> tags are
+        /// similarly enlarged to reflect data written past the previous end of image.
         /// </para><para>
         /// The library writes encoded data using the native machine byte order. Correctly
         /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
@@ -5334,9 +5347,13 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to
         /// a strip index.
         /// </para><para>
-        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
-        /// writing; <b>WriteEncodedStrip</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// If there is no space for the strip, the value of <see cref="TiffTag.IMAGELENGTH"/>
+        /// tag is automatically increased to include the strip (except for
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE, where the
+        /// <see cref="TiffTag.IMAGELENGTH"/> tag cannot be changed once the first data are
+        /// written). If the <see cref="TiffTag.IMAGELENGTH"/> is increased, the values of
+        /// <see cref="TiffTag.STRIPOFFSETS"/> and <see cref="TiffTag.STRIPBYTECOUNTS"/> tags are
+        /// similarly enlarged to reflect data written past the previous end of image.
         /// </para><para>
         /// The library writes encoded data using the native machine byte order. Correctly
         /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
@@ -5408,7 +5425,7 @@ namespace BitMiracle.LibTiff.Classic
             if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TiffFlags.NOBITREV) != TiffFlags.NOBITREV)
                 ReverseBits(m_rawdata, m_rawcc);
 
-            if (m_rawcc > 0 && !appendToStrip(strip, m_rawdata, m_rawcc))
+            if (m_rawcc > 0 && !appendToStrip(strip, m_rawdata, 0, m_rawcc))
                 return -1;
 
             m_rawcc = 0;
@@ -5417,29 +5434,80 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Writes the supplied data to the specified strip.
+        /// Writes a strip of raw data to an open TIFF file/stream.
         /// </summary>
-        /// <param name="strip">The strip.</param>
-        /// <param name="data">The data.</param>
-        /// <param name="count">The size.</param>
-        /// <returns>The strip size.</returns>
-        /// <remarks>Image length must be setup before writing.</remarks>
-        public int WriteRawStrip(int strip, byte[] data, int count)
+        /// <overloads>Writes a strip of raw data to an open TIFF file/stream.</overloads>
+        /// <param name="strip">The zero-based index of the strip to write.</param>
+        /// <param name="buffer">The buffer with raw image data to be written.</param>
+        /// <param name="count">The maximum number of strip bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>
+        /// The number of written bytes or <c>-1</c> if an error occurred.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteRawStrip</b> appends <paramref name="count"/> bytes of raw data from
+        /// <paramref name="buffer"/> to the specified strip; replacing any
+        /// previously written data. Note that the value of <paramref name="strip"/> is a "raw
+        /// strip number". That is, the caller must take into account whether or not the data are
+        /// organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to
+        /// a strip index.
+        /// </para><para>
+        /// If there is no space for the strip, the value of <see cref="TiffTag.IMAGELENGTH"/>
+        /// tag is automatically increased to include the strip (except for
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE, where the
+        /// <see cref="TiffTag.IMAGELENGTH"/> tag cannot be changed once the first data are
+        /// written). If the <see cref="TiffTag.IMAGELENGTH"/> is increased, the values of
+        /// <see cref="TiffTag.STRIPOFFSETS"/> and <see cref="TiffTag.STRIPBYTECOUNTS"/> tags are
+        /// similarly enlarged to reflect data written past the previous end of image.
+        /// </para></remarks>
+        public int WriteRawStrip(int strip, byte[] buffer, int count)
+        {
+            return WriteRawStrip(strip, buffer, 0, count);
+        }
+
+        /// <summary>
+        /// Writes a strip of raw data to an open TIFF file/stream.
+        /// </summary>
+        /// <param name="strip">The zero-based index of the strip to write.</param>
+        /// <param name="buffer">The buffer with raw image data to be written.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin reading bytes to be written.</param>
+        /// <param name="count">The maximum number of strip bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>The number of written bytes or <c>-1</c> if an error occurred.</returns>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteRawStrip</b> appends <paramref name="count"/> bytes of raw data from
+        /// <paramref name="buffer"/> to the specified strip; replacing any
+        /// previously written data. Note that the value of <paramref name="strip"/> is a "raw
+        /// strip number". That is, the caller must take into account whether or not the data are
+        /// organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to
+        /// a strip index.
+        /// </para><para>
+        /// If there is no space for the strip, the value of <see cref="TiffTag.IMAGELENGTH"/>
+        /// tag is automatically increased to include the strip (except for
+        /// <see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE, where the
+        /// <see cref="TiffTag.IMAGELENGTH"/> tag cannot be changed once the first data are
+        /// written). If the <see cref="TiffTag.IMAGELENGTH"/> is increased, the values of
+        /// <see cref="TiffTag.STRIPOFFSETS"/> and <see cref="TiffTag.STRIPBYTECOUNTS"/> tags are
+        /// similarly enlarged to reflect data written past the previous end of image.
+        /// </para></remarks>
+        public int WriteRawStrip(int strip, byte[] buffer, int offset, int count)
         {
             const string module = "WriteRawStrip";
 
             if (!writeCheckStrips(module))
                 return -1;
 
-            /*
-             * Check strip array to make sure there's space.
-             * We don't support dynamically growing files that
-             * have data organized in separate bitplanes because
-             * it's too painful.  In that case we require that
-             * the imagelength be set properly before the first
-             * write (so that the strips array will be fully
-             * allocated above).
-             */
+            // Check strip array to make sure there's space. We don't support dynamically growing
+            // files that have data organized in separate bitplanes because it's too painful.
+            // In that case we require that the imagelength be set properly before the first write
+            // (so that the strips array will be fully allocated above).
             if (strip >= m_dir.td_nstrips)
             {
                 if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
@@ -5448,11 +5516,8 @@ namespace BitMiracle.LibTiff.Classic
                     return -1;
                 }
 
-                /*
-                 * Watch out for a growing image.  The value of
-                 * strips/image will initially be 1 (since it
-                 * can't be deduced until the imagelength is known).
-                 */
+                // Watch out for a growing image. The value of strips/image will initially be 1
+                // (since it can't be deduced until the imagelength is known).
                 if (strip >= m_dir.td_stripsperimage)
                     m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
 
@@ -5462,7 +5527,7 @@ namespace BitMiracle.LibTiff.Classic
 
             m_curstrip = strip;
             m_row = (strip % m_dir.td_stripsperimage) * m_dir.td_rowsperstrip;
-            return (appendToStrip(strip, data, count) ? count : -1);
+            return (appendToStrip(strip, buffer, offset, count) ? count : -1);
         }
 
         /// <summary>
@@ -5598,7 +5663,7 @@ namespace BitMiracle.LibTiff.Classic
             if (!isFillOrder(m_dir.td_fillorder) && (m_flags & TiffFlags.NOBITREV) != TiffFlags.NOBITREV)
                 ReverseBits(m_rawdata, m_rawcc);
 
-            if (m_rawcc > 0 && !appendToStrip(tile, m_rawdata, m_rawcc))
+            if (m_rawcc > 0 && !appendToStrip(tile, m_rawdata, 0, m_rawcc))
                 return -1;
 
             m_rawcc = 0;
@@ -5630,11 +5695,12 @@ namespace BitMiracle.LibTiff.Classic
 
             if (tile >= m_dir.td_nstrips)
             {
-                ErrorExt(this, m_clientdata, module, "{0}: Tile {1} out of range, max {2}", m_name, tile, m_dir.td_nstrips);
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: Tile {1} out of range, max {2}", m_name, tile, m_dir.td_nstrips);
                 return -1;
             }
 
-            return (appendToStrip(tile, data, count) ? count : -1);
+            return (appendToStrip(tile, data, 0, count) ? count : -1);
         }
 
         /// <summary>

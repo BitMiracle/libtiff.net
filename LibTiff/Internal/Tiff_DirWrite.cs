@@ -1100,13 +1100,13 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Writes a contiguous directory item.
         /// </summary>
-        private bool writeData(ref TiffDirEntry dir, byte[] cp, int cc)
+        private bool writeData(ref TiffDirEntry dir, byte[] buffer, int count)
         {
             dir.tdir_offset = m_dataoff;
-            cc = (int)dir.tdir_count * DataWidth(dir.tdir_type);
-            if (seekOK(dir.tdir_offset) && writeOK(cp, cc))
+            count = (int)dir.tdir_count * DataWidth(dir.tdir_type);
+            if (seekOK(dir.tdir_offset) && writeOK(buffer, 0, count))
             {
-                m_dataoff += (uint)((cc + 1) & ~1);
+                m_dataoff += (uint)((count + 1) & ~1);
                 return true;
             }
 
