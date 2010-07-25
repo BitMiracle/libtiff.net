@@ -460,7 +460,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         n = count - 1;
                     }
 
-                    Array.Copy(m_tif.m_rawdata, bp, buffer, offset, ++n);
+                    Buffer.BlockCopy(m_tif.m_rawdata, bp, buffer, offset, ++n);
                     offset += n;
                     count -= n;
                     bp += n;

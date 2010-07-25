@@ -384,7 +384,7 @@ namespace BitMiracle.LibTiff.Classic
             for (int i = 0; i < doubleCount; i++)
             {
                 byte[] bytes = BitConverter.GetBytes(doubles[i]);
-                Array.Copy(bytes, 0, buffer, byteOffset, bytes.Length);
+                Buffer.BlockCopy(bytes, 0, buffer, byteOffset, bytes.Length);
                 byteOffset += bytes.Length;
             }
         }

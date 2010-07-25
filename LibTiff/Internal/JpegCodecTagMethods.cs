@@ -28,24 +28,24 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     int v32 = ap[0].ToInt();
                     if (v32 == 0)
                     {
-                        /* XXX */
+                        // XXX
                         return false;
                     }
 
                     sp.m_jpegtables = new byte [v32];
-                    Array.Copy(ap[1].ToByteArray(), sp.m_jpegtables, v32);
+                    Buffer.BlockCopy(ap[1].ToByteArray(), 0, sp.m_jpegtables, 0, v32);
                     sp.m_jpegtables_length = v32;
                     tif.setFieldBit(JpegCodec.FIELD_JPEGTABLES);
                     break;
 
                 case TiffTag.JPEGQUALITY:
                     sp.m_jpegquality = ap[0].ToInt();
-                    return true; /* pseudo tag */
+                    return true; // pseudo tag
 
                 case TiffTag.JPEGCOLORMODE:
                     sp.m_jpegcolormode = (JpegColorMode)ap[0].ToShort();
                     sp.JPEGResetUpsampled();
-                    return true; /* pseudo tag */
+                    return true; // pseudo tag
 
                 case TiffTag.PHOTOMETRIC:
                     bool ret_value = base.SetField(tif, tag, ap);
@@ -54,12 +54,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 case TiffTag.JPEGTABLESMODE:
                     sp.m_jpegtablesmode = (JpegTablesMode)ap[0].ToShort();
-                    return true; /* pseudo tag */
+                    return true; // pseudo tag
                 
                 case TiffTag.YCBCRSUBSAMPLING:
-                    /* mark the fact that we have a real ycbcrsubsampling! */
+                    // mark the fact that we have a real ycbcrsubsampling!
                     sp.m_ycbcrsampling_fetched = true;
-                    /* should we be recomputing upsampling info here? */
+                    // should we be recomputing upsampling info here?
                     return base.SetField(tif, tag, ap);
                 
                 case TiffTag.FAXRECVPARAMS:

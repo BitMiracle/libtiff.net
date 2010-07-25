@@ -181,15 +181,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             while (count > 0)
             {
-                int n;
-
-                n = count;
+                int n = count;
                 if (m_tif.m_rawcc + n > m_tif.m_rawdatasize)
                     n = m_tif.m_rawdatasize - m_tif.m_rawcc;
 
                 Debug.Assert(n > 0);
 
-                Array.Copy(buffer, offset, m_tif.m_rawdata, m_tif.m_rawcp, n);
+                Buffer.BlockCopy(buffer, offset, m_tif.m_rawdata, m_tif.m_rawcp, n);
                 m_tif.m_rawcp += n;
                 m_tif.m_rawcc += n;
 
@@ -214,7 +212,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return false;
             }
 
-            Array.Copy(m_tif.m_rawdata, m_tif.m_rawcp, buffer, offset, count);
+            Buffer.BlockCopy(m_tif.m_rawdata, m_tif.m_rawcp, buffer, offset, count);
             m_tif.m_rawcp += count;
             m_tif.m_rawcc -= count;
             return true;

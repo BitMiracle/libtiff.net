@@ -48,10 +48,10 @@ namespace BitMiracle.LibTiff.Classic
             if (td.td_samplesperpixel - td.td_extrasamples > 1)
             {
                 tf[1] = new short [n];
-                Array.Copy(tf[0], tf[1], tf[0].Length);
+                Buffer.BlockCopy(tf[0], 0, tf[1], 0, tf[0].Length * sizeof(short));
 
                 tf[2] = new short [n];
-                Array.Copy(tf[0], tf[2], tf[0].Length);
+                Buffer.BlockCopy(tf[0], 0, tf[2], 0, tf[0].Length * sizeof(short));
             }
 
             return true;
@@ -59,25 +59,19 @@ namespace BitMiracle.LibTiff.Classic
 
         private static void defaultRefBlackWhite(TiffDirectory td)
         {
-            int i;
-
             td.td_refblackwhite = new float[6];
             if (td.td_photometric == Photometric.YCBCR)
             {
-                /*
-                 * YCbCr (Class Y) images must have the ReferenceBlackWhite
-                 * tag set. Fix the broken images, which lacks that tag.
-                 */
+                // YCbCr (Class Y) images must have the ReferenceBlackWhite tag set. Fix the
+                // broken images, which lacks that tag.
                 td.td_refblackwhite[0] = 0.0F;
                 td.td_refblackwhite[1] = td.td_refblackwhite[3] = td.td_refblackwhite[5] = 255.0F;
                 td.td_refblackwhite[2] = td.td_refblackwhite[4] = 128.0F;
             }
             else
             {
-                /*
-                 * Assume RGB (Class R)
-                 */
-                for (i = 0; i < 3; i++)
+                // Assume RGB (Class R)
+                for (int i = 0; i < 3; i++)
                 {
                     td.td_refblackwhite[2 * i + 0] = 0;
                     td.td_refblackwhite[2 * i + 1] = (float)((1L << td.td_bitspersample) - 1L);
@@ -85,27 +79,27 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
-        internal static int readInt(byte[] b, int byteStartOffset)
+        internal static int readInt(byte[] buffer, int offset)
         {
-            int value = b[byteStartOffset++] & 0xFF;
-            value += (b[byteStartOffset++] & 0xFF) << 8;
-            value += (b[byteStartOffset++] & 0xFF) << 16;
-            value += b[byteStartOffset++] << 24;
+            int value = buffer[offset++] & 0xFF;
+            value += (buffer[offset++] & 0xFF) << 8;
+            value += (buffer[offset++] & 0xFF) << 16;
+            value += buffer[offset++] << 24;
             return value;
         }
 
-        internal static void writeInt(int value, byte[] b, int byteStartOffset)
+        internal static void writeInt(int value, byte[] buffer, int offset)
         {
-            b[byteStartOffset++] = (byte)value;
-            b[byteStartOffset++] = (byte)(value >> 8);
-            b[byteStartOffset++] = (byte)(value >> 16);
-            b[byteStartOffset++] = (byte)(value >> 24);
+            buffer[offset++] = (byte)value;
+            buffer[offset++] = (byte)(value >> 8);
+            buffer[offset++] = (byte)(value >> 16);
+            buffer[offset++] = (byte)(value >> 24);
         }
 
-        internal static short readShort(byte[] b, int byteStartOffset)
+        internal static short readShort(byte[] buffer, int offset)
         {
-            short value = (short)(b[byteStartOffset] & 0xFF);
-            value += (short)((b[byteStartOffset + 1] & 0xFF) << 8);
+            short value = (short)(buffer[offset] & 0xFF);
+            value += (short)((buffer[offset + 1] & 0xFF) << 8);
             return value;
         }
 

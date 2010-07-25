@@ -144,7 +144,7 @@ namespace BitMiracle.LibTiff.Classic
 
             // Setup external form of directory entries and write data items.
             int[] fields = new int[FieldBit.SetLongs];
-            Array.Copy(m_dir.td_fieldsset, fields, FieldBit.SetLongs);
+            Buffer.BlockCopy(m_dir.td_fieldsset, 0, fields, 0, FieldBit.SetLongs * sizeof(int));
 
             // Write out ExtraSamples tag only if extra samples are present in the data.
             if (fieldSet(fields, FieldBit.ExtraSamples) && m_dir.td_extrasamples == 0)
@@ -152,7 +152,7 @@ namespace BitMiracle.LibTiff.Classic
                 resetFieldBit(fields, FieldBit.ExtraSamples);
                 nfields--;
                 dirsize -= TiffDirEntry.SizeInBytes;
-            } /*XXX*/
+            } // XXX
 
             for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
             {
@@ -631,7 +631,7 @@ namespace BitMiracle.LibTiff.Classic
                         // add zero ('\0') at the end of the byte array
                         byte[] stringBytes = Latin1Encoding.GetBytes(cp);
                         byte[] totalBytes = new byte[stringBytes.Length + 1];
-                        Array.Copy(stringBytes, totalBytes, stringBytes.Length);
+                        Buffer.BlockCopy(stringBytes, 0, totalBytes, 0, stringBytes.Length);
 
                         dir.tdir_count = totalBytes.Length;
                         if (!writeByteArray(ref dir, totalBytes))
@@ -1152,21 +1152,15 @@ namespace BitMiracle.LibTiff.Classic
             return writeData(ref dir, ints, cc);
         }
 
-        private bool writeData(ref TiffDirEntry dir, double[] cp, int cc)
+        private bool writeData(ref TiffDirEntry dir, double[] buffer, int count)
         {
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabArrayOfDouble(cp, cc);
+                SwabArrayOfDouble(buffer, count);
 
-            int byteOffset = 0;
-            byte[] bytes = new byte[cc * sizeof(double)];
-            for (int i = 0; i < cc; i++)
-            {
-                byte[] result = BitConverter.GetBytes(cp[i]);
-                Array.Copy(result, 0, bytes, byteOffset, result.Length);
-                byteOffset += result.Length;
-            }
+            byte[] bytes = new byte[count * sizeof(double)];
+            Buffer.BlockCopy(buffer, 0, bytes, 0, bytes.Length);
 
-            return writeData(ref dir, bytes, cc * sizeof(double));
+            return writeData(ref dir, bytes, count * sizeof(double));
         }
 
         /// <summary>

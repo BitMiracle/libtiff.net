@@ -831,25 +831,21 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        /*
-        * Finish up at the end of a strip or tile.
-        */
+        /// <summary>
+        /// Finish up at the end of a strip or tile.
+        /// </summary>
+        /// <returns></returns>
         private bool JPEGPostEncode()
         {
             if (m_scancount > 0)
             {
-                /*
-                 * Need to emit a partial bufferload of downsampled data.
-                 * Pad the data vertically.
-                 */
+                // Need to emit a partial bufferload of downsampled data. Pad the data vertically.
                 for (int ci = 0; ci < m_compression.Num_components; ci++)
                 {
                     int vsamp = m_compression.Component_info[ci].V_samp_factor;
                     int row_width = m_compression.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE * sizeof(byte);
                     for (int ypos = m_scancount * vsamp; ypos < JpegConstants.DCTSIZE * vsamp; ypos++)
-                    {
-                        Array.Copy(m_ds_buffer[ci][ypos - 1], m_ds_buffer[ci][ypos], row_width);
-                    }
+                        Buffer.BlockCopy(m_ds_buffer[ci][ypos - 1], 0, m_ds_buffer[ci][ypos], 0, row_width);
                 }
 
                 int n = m_compression.Max_v_samp_factor * JpegConstants.DCTSIZE;
@@ -1199,7 +1195,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
 
                     ++m_tif.m_row;
-                    Array.Copy(bufptr[0], 0, buffer, offset, m_bytesperline);
+                    Buffer.BlockCopy(bufptr[0], 0, buffer, offset, m_bytesperline);
                     offset += m_bytesperline;
                     count -= m_bytesperline;
                 }
@@ -1316,7 +1312,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             bufptr[0] = new byte[m_bytesperline];
             while (nrows-- > 0)
             {
-                Array.Copy(buffer, offset, bufptr[0], 0, m_bytesperline);
+                Buffer.BlockCopy(buffer, offset, bufptr[0], 0, m_bytesperline);
                 if (TIFFjpeg_write_scanlines(bufptr, 1) != 1)
                     return false;
 

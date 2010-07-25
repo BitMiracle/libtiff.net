@@ -767,7 +767,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
 
             byte[] tmp = new byte[cc];
-            Array.Copy(cp0, offset, tmp, 0, cc);
+            Buffer.BlockCopy(cp0, offset, tmp, 0, cc);
             for (count = 0; count < wc; count++)
             {
                 for (int b = 0; b < bps; b++)
@@ -870,7 +870,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             // Do predictor manipulation in a working buffer to avoid altering
             // the callers buffer. http://trac.osgeo.org/gdal/ticket/1965
             byte[] working_copy = new byte[count];
-            Array.Copy(buffer, working_copy, count);
+            Buffer.BlockCopy(buffer, 0, working_copy, 0, count);
 
             Debug.Assert(rowsize > 0);
             Debug.Assert((count % rowsize) == 0);

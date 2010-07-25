@@ -437,9 +437,9 @@ namespace BitMiracle.LibTiff.Classic
                     img.greencmap = new short[n_color];
                     img.bluecmap = new short[n_color];
 
-                    Array.Copy(red_orig, img.redcmap, n_color);
-                    Array.Copy(green_orig, img.greencmap, n_color);
-                    Array.Copy(blue_orig, img.bluecmap, n_color);
+                    Buffer.BlockCopy(red_orig, 0, img.redcmap, 0, n_color * sizeof(short));
+                    Buffer.BlockCopy(green_orig, 0, img.greencmap, 0, n_color * sizeof(short));
+                    Buffer.BlockCopy(blue_orig, 0, img.bluecmap, 0, n_color * sizeof(short));
 
                     if (planarconfig == PlanarConfig.CONTIG &&
                         img.samplesperpixel != 1 && img.bitspersample < 8)

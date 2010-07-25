@@ -4399,14 +4399,14 @@ namespace BitMiracle.LibTiff.Classic
 
             for (int i_row = 0; i_row < read_ysize; i_row++)
             {
-                Array.Copy(raster, (read_ysize - i_row - 1) * read_xsize, raster, (tile_ysize - i_row - 1) * tile_xsize, read_xsize);
+                Buffer.BlockCopy(raster, (read_ysize - i_row - 1) * read_xsize,
+                    raster, (tile_ysize - i_row - 1) * tile_xsize, read_xsize * sizeof(int));
+
                 Array.Clear(raster, (tile_ysize - i_row - 1) * tile_xsize + read_xsize, tile_xsize - read_xsize);
             }
 
             for (int i_row = read_ysize; i_row < tile_ysize; i_row++)
-            {
                 Array.Clear(raster, (tile_ysize - i_row - 1) * tile_xsize, tile_xsize);
-            }
 
             return ok;
         }
