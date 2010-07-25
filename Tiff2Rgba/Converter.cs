@@ -115,9 +115,7 @@ namespace BitMiracle.Tiff2Rgba
             outImage.SetField(TiffTag.TILEWIDTH, tile_width);
             outImage.SetField(TiffTag.TILELENGTH, tile_height);
 
-            /*
-             * Allocate tile buffer
-             */
+            // Allocate tile buffer
             int raster_size = multiply(tile_width, tile_height);
             int rasterByteSize = multiply(raster_size, sizeof(int));
             if (raster_size == 0 || rasterByteSize == 0)
@@ -130,40 +128,32 @@ namespace BitMiracle.Tiff2Rgba
             int[] raster = new int[raster_size];
             byte[] rasterBytes = new byte[rasterByteSize];
 
-            /*
-             * Allocate a scanline buffer for swapping during the vertical
-             * mirroring pass.  (Request can't overflow given prior checks.)
-             */
+            // Allocate a scanline buffer for swapping during the vertical mirroring pass.
+            // (Request can't overflow given prior checks.)
             int[] wrk_line = new int[tile_width];
 
-            /*
-             * Loop over the tiles.
-             */
+            // Loop over the tiles.
             for (int row = 0; row < height; row += tile_height)
             {
                 for (int col = 0; col < width; col += tile_width)
                 {
-                    /* Read the tile into an RGBA array */
+                    // Read the tile into an RGBA array
                     if (!inImage.ReadRGBATile(col, row, raster))
                         return false;
 
-                    /*
-                     * For some reason the ReadRGBATile() function chooses the
-                     * lower left corner as the origin.  Vertically mirror scanlines.
-                     */
+                    // For some reason the ReadRGBATile() function chooses the lower left corner
+                    // as the origin. Vertically mirror scanlines.
                     for (int i_row = 0; i_row < tile_height / 2; i_row++)
                     {
-                        int topIndex = tile_width * i_row;
-                        int bottomIndex = tile_width * (tile_height - i_row - 1);
+                        int topIndex = tile_width * i_row * sizeof(int);
+                        int bottomIndex = tile_width * (tile_height - i_row - 1) * sizeof(int);
 
-                        Array.Copy(raster, topIndex, wrk_line, 0, tile_width);
-                        Array.Copy(raster, bottomIndex, raster, topIndex, tile_width);
-                        Array.Copy(wrk_line, 0, raster, bottomIndex, tile_width);
+                        Buffer.BlockCopy(raster, topIndex, wrk_line, 0, tile_width * sizeof(int));
+                        Buffer.BlockCopy(raster, bottomIndex, raster, topIndex, tile_width * sizeof(int));
+                        Buffer.BlockCopy(wrk_line, 0, raster, bottomIndex, tile_width * sizeof(int));
                     }
 
-                    /*
-                     * Write out the result in a tile.
-                     */
+                    // Write out the result in a tile.
                     int tile = outImage.ComputeTile(col, row, 0, 0);
                     Buffer.BlockCopy(raster, 0, rasterBytes, 0, rasterByteSize);
                     if (outImage.WriteEncodedTile(tile, rasterBytes, rasterByteSize) == -1)
@@ -186,9 +176,7 @@ namespace BitMiracle.Tiff2Rgba
             m_rowsPerStrip = result[0].ToInt();
             outImage.SetField(TiffTag.ROWSPERSTRIP, m_rowsPerStrip);
 
-            /*
-             * Allocate strip buffer
-             */
+            // Allocate strip buffer
             int raster_size = multiply(width, m_rowsPerStrip);
             int rasterByteSize = multiply(raster_size, sizeof(int));
             if (raster_size == 0 || rasterByteSize == 0)
@@ -201,47 +189,37 @@ namespace BitMiracle.Tiff2Rgba
             int[] raster = new int[raster_size];
             byte[] rasterBytes = new byte[rasterByteSize];
 
-            /*
-             * Allocate a scanline buffer for swapping during the vertical
-             * mirroring pass.  (Request can't overflow given prior checks.)
-             */
+            // Allocate a scanline buffer for swapping during the vertical mirroring pass.
+            // (Request can't overflow given prior checks.)
             int[] wrk_line = new int[width];
 
-            /*
-             * Loop over the strips.
-             */
+            // Loop over the strips.
             for (int row = 0; row < height; row += m_rowsPerStrip)
             {
-                /* Read the strip into an RGBA array */
+                // Read the strip into an RGBA array
                 if (!inImage.ReadRGBAStrip(row, raster))
                     return false;
 
-                /*
-                 * Figure out the number of scanlines actually in this strip.
-                 */
+                // Figure out the number of scanlines actually in this strip.
                 int rows_to_write;
                 if (row + m_rowsPerStrip > height)
                     rows_to_write = height - row;
                 else
                     rows_to_write = m_rowsPerStrip;
 
-                /*
-                 * For some reason the TIFFReadRGBAStrip() function chooses the
-                 * lower left corner as the origin.  Vertically mirror scanlines.
-                 */
+                // For some reason the TIFFReadRGBAStrip() function chooses the lower left corner
+                // as the origin. Vertically mirror scanlines.
                 for (int i_row = 0; i_row < rows_to_write / 2; i_row++)
                 {
-                    int topIndex = width * i_row;
-                    int bottomIndex = width * (rows_to_write - i_row - 1);
+                    int topIndex = width * i_row * sizeof(int);
+                    int bottomIndex = width * (rows_to_write - i_row - 1) * sizeof(int);
 
-                    Array.Copy(raster, topIndex, wrk_line, 0, width);
-                    Array.Copy(raster, bottomIndex, raster, topIndex, width);
-                    Array.Copy(wrk_line, 0, raster, bottomIndex, width);
+                    Buffer.BlockCopy(raster, topIndex, wrk_line, 0, width * sizeof(int));
+                    Buffer.BlockCopy(raster, bottomIndex, raster, topIndex, width * sizeof(int));
+                    Buffer.BlockCopy(wrk_line, 0, raster, bottomIndex, width * sizeof(int));
                 }
 
-                /*
-                 * Write out the result in a strip
-                 */
+                // Write out the result in a strip
                 int bytesToWrite = rows_to_write * width * sizeof(int);
                 Buffer.BlockCopy(raster, 0, rasterBytes, 0, bytesToWrite);
                 if (outImage.WriteEncodedStrip(row / m_rowsPerStrip, rasterBytes, bytesToWrite) == -1)
