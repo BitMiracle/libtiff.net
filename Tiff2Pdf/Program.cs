@@ -297,7 +297,7 @@ namespace BitMiracle.Tiff2Pdf
                             t2p.m_pdf_datetime[1] = (byte)':';
 
                             bytes = T2P.Latin1Encoding.GetBytes(optarg);
-                            Array.Copy(bytes, 0, t2p.m_pdf_datetime, 2, Math.Min(bytes.Length, 14));
+                            Buffer.BlockCopy(bytes, 0, t2p.m_pdf_datetime, 2, Math.Min(bytes.Length, 14));
                         }
 
                         argn++;

@@ -499,7 +499,7 @@ namespace BitMiracle.LibTiff.Classic
                             fip.Tag != TiffTag.DOTRANGE)
                         {
                             byte[] apBytes = value[paramIndex++].GetBytes();
-                            Array.Copy(apBytes, td.td_customValues[tvIndex].value, apBytes.Length);
+                            Buffer.BlockCopy(apBytes, 0, td.td_customValues[tvIndex].value, 0, apBytes.Length);
                         }
                         else
                         {
@@ -530,25 +530,25 @@ namespace BitMiracle.LibTiff.Classic
                                         val[valPos] = value[paramIndex + i].ToByte();
                                         break;
                                     case TiffType.SHORT:
-                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
+                                        Buffer.BlockCopy(BitConverter.GetBytes(value[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.SSHORT:
-                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
+                                        Buffer.BlockCopy(BitConverter.GetBytes(value[paramIndex + i].ToShort()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.LONG:
                                     case TiffType.IFD:
-                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
+                                        Buffer.BlockCopy(BitConverter.GetBytes(value[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.SLONG:
-                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
+                                        Buffer.BlockCopy(BitConverter.GetBytes(value[paramIndex + i].ToInt()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.RATIONAL:
                                     case TiffType.SRATIONAL:
                                     case TiffType.FLOAT:
-                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToFloat()), 0, val, valPos, tv_size);
+                                        Buffer.BlockCopy(BitConverter.GetBytes(value[paramIndex + i].ToFloat()), 0, val, valPos, tv_size);
                                         break;
                                     case TiffType.DOUBLE:
-                                        Array.Copy(BitConverter.GetBytes(value[paramIndex + i].ToDouble()), 0, val, valPos, tv_size);
+                                        Buffer.BlockCopy(BitConverter.GetBytes(value[paramIndex + i].ToDouble()), 0, val, valPos, tv_size);
                                         break;
                                     default:
                                         Array.Clear(val, valPos, tv_size);
@@ -858,7 +858,7 @@ namespace BitMiracle.LibTiff.Classic
                                 {
                                     // cut unwanted zero at the end
                                     value = new byte[Math.Max(tv.value.Length - 1, 0)];
-                                    Array.Copy(tv.value, value, value.Length);
+                                    Buffer.BlockCopy(tv.value, 0, value, 0, value.Length);
                                 }
 
                                 result[0].Set(value);

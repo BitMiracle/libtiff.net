@@ -1351,7 +1351,7 @@ namespace BitMiracle.Tiff2Pdf
                         byte[] jpt = result[1].ToByteArray();
                         if (count > 4)
                         {
-                            Array.Copy(jpt, buffer, count);
+                            Buffer.BlockCopy(jpt, 0, buffer, 0, count);
                             bufferoffset += count - 2;
                         }
                     }
@@ -1653,7 +1653,7 @@ namespace BitMiracle.Tiff2Pdf
                         byte[] jpt = result[1].ToByteArray();
                         if (count > 0)
                         {
-                            Array.Copy(jpt, buffer, count);
+                            Buffer.BlockCopy(jpt, 0, buffer, 0, count);
                             bufferoffset += count - 2;
                             table_end[0] = buffer[bufferoffset - 2];
                             table_end[1] = buffer[bufferoffset - 1];
@@ -1977,7 +1977,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(m_pdf_creator) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(m_pdf_creator, buf, 511);
+                        Buffer.BlockCopy(m_pdf_creator, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Creator ");
@@ -1995,7 +1995,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(info) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(info, buf, 511);
+                        Buffer.BlockCopy(info, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Creator ");
@@ -2012,7 +2012,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(m_pdf_author) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(m_pdf_author, buf, 511);
+                        Buffer.BlockCopy(m_pdf_author, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Author ");
@@ -2030,7 +2030,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(info) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(info, buf, 511);
+                        Buffer.BlockCopy(info, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Author ");
@@ -2047,7 +2047,7 @@ namespace BitMiracle.Tiff2Pdf
                         if (strlen(info) > 511)
                         {
                             buf = new byte[512];
-                            Array.Copy(info, buf, 511);
+                            Buffer.BlockCopy(info, 0, buf, 0, 511);
                         }
 
                         written += writeToFile("/Author ");
@@ -2065,7 +2065,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(m_pdf_title) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(m_pdf_title, buf, 511);
+                        Buffer.BlockCopy(m_pdf_title, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Title ");
@@ -2083,7 +2083,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(info) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(info, buf, 511);
+                        Buffer.BlockCopy(info, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Title ");
@@ -2100,7 +2100,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(m_pdf_subject) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(m_pdf_subject, buf, 511);
+                        Buffer.BlockCopy(m_pdf_subject, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Subject ");
@@ -2118,7 +2118,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(info) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(info, buf, 511);
+                        Buffer.BlockCopy(info, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Subject ");
@@ -2135,7 +2135,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (strlen(m_pdf_keywords) > 511)
                     {
                         buf = new byte[512];
-                        Array.Copy(m_pdf_keywords, buf, 511);
+                        Buffer.BlockCopy(m_pdf_keywords, 0, buf, 0, 511);
                     }
 
                     written += writeToFile("/Keywords ");
@@ -3027,7 +3027,7 @@ namespace BitMiracle.Tiff2Pdf
                     case 0xca:
                         if (no == 0)
                         {
-                            Array.Copy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
+                            Buffer.BlockCopy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
                             
                             short v_samp = 1;
                             short h_samp = 1;
@@ -3064,7 +3064,7 @@ namespace BitMiracle.Tiff2Pdf
 
                     case 0xc4:
                     case 0xdb:
-                        Array.Copy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
+                        Buffer.BlockCopy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
                         bufferoffset += strip[i + 2] + 2;
                         i += strip[i + 2] + 2;
                         break;
@@ -3072,7 +3072,7 @@ namespace BitMiracle.Tiff2Pdf
                     case 0xda:
                         if (no == 0)
                         {
-                            Array.Copy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
+                            Buffer.BlockCopy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
                             bufferoffset += strip[i + 2] + 2;
                             i += strip[i + 2] + 2;
                         }
@@ -3083,7 +3083,7 @@ namespace BitMiracle.Tiff2Pdf
                             i += strip[i + 2] + 2;
                         }
 
-                        Array.Copy(strip, i - 1, buffer, bufferoffset, striplength - i - 1);
+                        Buffer.BlockCopy(strip, i - 1, buffer, bufferoffset, striplength - i - 1);
                         bufferoffset += striplength - i - 1;
                         return true;
 
@@ -3117,15 +3117,15 @@ namespace BitMiracle.Tiff2Pdf
             return (i * 3);
         }
         
-        /*
-        * This functions converts in place a buffer of RGBA interleaved data
-        * into RGB interleaved data, discarding A.
-        */
+        /// <summary>
+        /// This functions converts in place a buffer of RGBA interleaved data
+        /// into RGB interleaved data, discarding A.
+        /// </summary>
         private static int sample_rgbaa_to_rgb(byte[] data, int samplecount)
         {
             int i = 0;
             for ( ; i < samplecount; i++)
-                Array.Copy(data, i * 4, data, i * 3, 3);
+                Buffer.BlockCopy(data, i * 4, data, i * 3, 3);
 
             return (i * 3);
         }
@@ -3190,15 +3190,15 @@ namespace BitMiracle.Tiff2Pdf
             t2p.m_outputdisable = false;
         }
 
-        /*
-        This functions converts a tilewidth x tilelength buffer of samples into an edgetilewidth x 
-        tilelength buffer of samples.
-        */
+        /// <summary>
+        /// This functions converts a tilewidth x tilelength buffer of samples into
+        /// an edgetilewidth x tilelength buffer of samples.
+        /// </summary>
         private static void tile_collapse_left(byte[] buffer, int scanwidth, int tilewidth, int edgetilewidth, int tilelength)
         {
             int edgescanwidth = (scanwidth * edgetilewidth + tilewidth - 1) / tilewidth;
             for (int i = 0; i < tilelength; i++)
-                Array.Copy(buffer, scanwidth * i, buffer, edgescanwidth * i, edgescanwidth);
+                Buffer.BlockCopy(buffer, scanwidth * i, buffer, edgescanwidth * i, edgescanwidth);
         }
 
         private static string encodeOctalString(byte value)
