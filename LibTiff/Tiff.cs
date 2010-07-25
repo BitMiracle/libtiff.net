@@ -5672,21 +5672,68 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Writes the supplied data to the specified strip.
+        /// Writes a tile of raw data to an open TIFF file/stream.
         /// </summary>
-        /// <param name="tile">The tile.</param>
-        /// <param name="data">The data.</param>
-        /// <param name="count">The count.</param>
-        /// <returns>The tile size.</returns>
+        /// <overloads>Writes a tile of raw data to an open TIFF file/stream.</overloads>
+        /// <param name="tile">The zero-based index of the tile to write.</param>
+        /// <param name="buffer">The buffer with raw image data to be written.</param>
+        /// <param name="count">The maximum number of tile bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>
+        /// The number of written bytes or <c>-1</c> if an error occurred.
+        /// </returns>
         /// <remarks>
-        ///     <para>There must be space for the data; we don't check if strips overlap!</para>
-        ///     <para>Image length must be setup before writing; this interface does not 
-        ///     support automatically growing the image on each write (as 
-        ///     <see cref="M:BitMiracle.LibTiff.Classic.Tiff.WriteScanline(System.Byte[],System.Int32,System.Int16)">WriteScanline</see>
-        ///     does).
-        ///     </para>
-        /// </remarks>
-        public int WriteRawTile(int tile, byte[] data, int count)
+        /// <para>
+        /// <b>WriteRawTile</b> appends <paramref name="count"/> bytes of raw data to the end of
+        /// the specified tile. Note that the value of <paramref name="tile"/> is a "raw tile
+        /// number". That is, the caller must take into account whether or not the data are
+        /// organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeTile"/> automatically does this when converting an (x, y, z, plane)
+        /// coordinate quadruple to a tile number.
+        /// </para><para>
+        /// There must be space for the data. The function clamps individual writes to a tile to
+        /// the tile size, but does not (and can not) check that multiple writes to the same tile
+        /// were performed.
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteRawTile</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// </para></remarks>
+        public int WriteRawTile(int tile, byte[] buffer, int count)
+        {
+            return WriteRawTile(tile, buffer, 0, count);
+        }
+
+        /// <summary>
+        /// Writes a tile of raw data to an open TIFF file/stream.
+        /// </summary>
+        /// <param name="tile">The zero-based index of the tile to write.</param>
+        /// <param name="buffer">The buffer with raw image data to be written.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin reading bytes to be written.</param>
+        /// <param name="count">The maximum number of tile bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>The number of written bytes or <c>-1</c> if an error occurred.</returns>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteRawTile</b> appends <paramref name="count"/> bytes of raw data to the end of
+        /// the specified tile. Note that the value of <paramref name="tile"/> is a "raw tile
+        /// number". That is, the caller must take into account whether or not the data are
+        /// organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeTile"/> automatically does this when converting an (x, y, z, plane)
+        /// coordinate quadruple to a tile number.
+        /// </para><para>
+        /// There must be space for the data. The function clamps individual writes to a tile to
+        /// the tile size, but does not (and can not) check that multiple writes to the same tile
+        /// were performed.
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteRawTile</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// </para></remarks>
+        public int WriteRawTile(int tile, byte[] buffer, int offset, int count)
         {
             const string module = "WriteRawTile";
 
@@ -5700,7 +5747,7 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            return (appendToStrip(tile, data, 0, count) ? count : -1);
+            return (appendToStrip(tile, buffer, offset, count) ? count : -1);
         }
 
         /// <summary>
@@ -5820,24 +5867,35 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
+        /// Swabs the array of short.
+        /// </summary>
+        /// <param name="wp">The wp.</param>
+        /// <param name="n">The n.</param>
+        public static void SwabArrayOfShort(short[] wp, int n)
+        {
+            SwabArrayOfShort(wp, 0, n);
+        }
+
+        /// <summary>
         /// Swaps the array of short.
         /// </summary>
         /// <param name="wp">The array of short numbers.</param>
+        /// <param name="offset">The offset.</param>
         /// <param name="n">The array length.</param>
-        public static void SwabArrayOfShort(short[] wp, int n)
+        public static void SwabArrayOfShort(short[] wp, int offset, int n)
         {
             byte[] cp = new byte[2];
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++, offset++)
             {
-                cp[0] = (byte)wp[i];
-                cp[1] = (byte)(wp[i] >> 8);
+                cp[0] = (byte)wp[offset];
+                cp[1] = (byte)(wp[offset] >> 8);
 
                 byte t = cp[1];
                 cp[1] = cp[0];
                 cp[0] = t;
 
-                wp[i] = (short)(cp[0] & 0xFF);
-                wp[i] += (short)((cp[1] & 0xFF) << 8);
+                wp[offset] = (short)(cp[0] & 0xFF);
+                wp[offset] += (short)((cp[1] & 0xFF) << 8);
             }
         }
 
@@ -5870,20 +5928,31 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
+        /// Swabs the array of long.
+        /// </summary>
+        /// <param name="lp">The lp.</param>
+        /// <param name="n">The n.</param>
+        public static void SwabArrayOfLong(int[] lp, int n)
+        {
+            SwabArrayOfLong(lp, 0, n);
+        }
+
+        /// <summary>
         /// Swaps the array of integers.
         /// </summary>
         /// <param name="lp">The array of integers.</param>
+        /// <param name="offset">The offset.</param>
         /// <param name="n">The array length.</param>
-        public static void SwabArrayOfLong(int[] lp, int n)
+        public static void SwabArrayOfLong(int[] lp, int offset, int n)
         {
             byte[] cp = new byte[4];
 
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++, offset++)
             {
-                cp[0] = (byte)lp[i];
-                cp[1] = (byte)(lp[i] >> 8);
-                cp[2] = (byte)(lp[i] >> 16);
-                cp[3] = (byte)(lp[i] >> 24);
+                cp[0] = (byte)lp[offset];
+                cp[1] = (byte)(lp[offset] >> 8);
+                cp[2] = (byte)(lp[offset] >> 16);
+                cp[3] = (byte)(lp[offset] >> 24);
 
                 byte t = cp[3];
                 cp[3] = cp[0];
@@ -5893,23 +5962,34 @@ namespace BitMiracle.LibTiff.Classic
                 cp[2] = cp[1];
                 cp[1] = t;
 
-                lp[i] = cp[0] & 0xFF;
-                lp[i] += (cp[1] & 0xFF) << 8;
-                lp[i] += (cp[2] & 0xFF) << 16;
-                lp[i] += cp[3] << 24;
+                lp[offset] = cp[0] & 0xFF;
+                lp[offset] += (cp[1] & 0xFF) << 8;
+                lp[offset] += (cp[2] & 0xFF) << 16;
+                lp[offset] += cp[3] << 24;
             }
+        }
+
+        /// <summary>
+        /// Swabs the array of double.
+        /// </summary>
+        /// <param name="dp">The dp.</param>
+        /// <param name="n">The n.</param>
+        public static void SwabArrayOfDouble(double[] dp, int n)
+        {
+            SwabArrayOfDouble(dp, 0, n);
         }
 
         /// <summary>
         /// Swabs the array of doubles.
         /// </summary>
         /// <param name="dp">The array of doubles.</param>
+        /// <param name="offset">The offset.</param>
         /// <param name="n">The array length.</param>
-        public static void SwabArrayOfDouble(double[] dp, int n)
+        public static void SwabArrayOfDouble(double[] dp, int offset, int n)
         {
             byte[] bytes = new byte[n * sizeof(double)];
-            for (int i = 0; i < n; i++)
-                Array.Copy(BitConverter.GetBytes(dp[i]), 0, bytes, i * sizeof(double), sizeof(double));
+            for (int i = 0, j = offset; i < n; i++, j++)
+                Array.Copy(BitConverter.GetBytes(dp[j]), 0, bytes, i * sizeof(double), sizeof(double));
 
             int[] lp = ByteArrayToInts(bytes, 0, n * sizeof(double));
             SwabArrayOfLong(lp, n + n);
@@ -5924,18 +6004,28 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             IntsToByteArray(lp, 0, n + n, bytes, 0);
-            for (int i = 0; i < n; i++)
-                dp[i] = BitConverter.ToDouble(bytes, i * sizeof(double));
+            for (int i = 0; i < n; i++, offset++)
+                dp[offset] = BitConverter.ToDouble(bytes, i * sizeof(double));
+        }
+
+        /// <summary>
+        /// Reverses the bits.
+        /// </summary>
+        /// <param name="cp">The cp.</param>
+        /// <param name="n">The n.</param>
+        public static void ReverseBits(byte[] cp, int n)
+        {
+            ReverseBits(cp, 0, n);
         }
 
         /// <summary>
         /// Reverses the bits.
         /// </summary>
         /// <param name="cp">The byte array.</param>
+        /// <param name="cpPos">The cp pos.</param>
         /// <param name="n">The array length.</param>
-        public static void ReverseBits(byte[] cp, int n)
+        public static void ReverseBits(byte[] cp, int cpPos, int n)
         {
-            int cpPos = 0;
             for (; n > 8; n -= 8)
             {
                 cp[cpPos + 0] = TIFFBitRevTable[cp[cpPos + 0]];
