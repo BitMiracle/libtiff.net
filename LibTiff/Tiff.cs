@@ -5278,29 +5278,82 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Encode the supplied data and write it to the specified strip.
+        /// Encodes and writes a strip of data to an open TIFF file/stream.
         /// </summary>
-        /// <param name="strip">The strip.</param>
-        /// <param name="data">The data.</param>
-        /// <param name="count">The size.</param>
-        /// <returns>The strip size.</returns>
-        /// <remarks>Image length must be setup before writing.</remarks>
-        public int WriteEncodedStrip(int strip, byte[] data, int count)
+        /// <param name="strip">The zero-based index of the strip to write.</param>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="count">The maximum number of strip bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>
+        /// The number of encoded and written bytes or <c>-1</c> if an error occurred.
+        /// </returns>
+        /// <overloads>Encodes and writes a strip of data to an open TIFF file/stream.</overloads>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteEncodedStrip</b> encodes <paramref name="count"/> bytes of raw data from
+        /// <paramref name="buffer"/> and append the result to the specified strip; replacing any
+        /// previously written data. Note that the value of <paramref name="strip"/> is a "raw
+        /// strip number". That is, the caller must take into account whether or not the data are
+        /// organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to
+        /// a strip index.
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteEncodedStrip</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// </para><para>
+        /// The library writes encoded data using the native machine byte order. Correctly
+        /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
+        /// process image data with value of <see cref="TiffTag.BITSPERSAMPLE"/> tag greater
+        /// than 8.
+        /// </para></remarks>
+        public int WriteEncodedStrip(int strip, byte[] buffer, int count)
+        {
+            return WriteEncodedStrip(strip, buffer, 0, count);
+        }
+
+        /// <summary>
+        /// Encodes and writes a strip of data to an open TIFF file/stream.
+        /// </summary>
+        /// <param name="strip">The zero-based index of the strip to write.</param>
+        /// <param name="buffer">The buffer with image data to be encoded and written.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin reading bytes to be encoded and written.</param>
+        /// <param name="count">The maximum number of strip bytes to be read from
+        /// <paramref name="buffer"/>.</param>
+        /// <returns>The number of encoded and written bytes or <c>-1</c> if an error occurred.</returns>
+        /// <remarks>
+        /// <para>
+        /// <b>WriteEncodedStrip</b> encodes <paramref name="count"/> bytes of raw data from
+        /// <paramref name="buffer"/> and append the result to the specified strip; replacing any
+        /// previously written data. Note that the value of <paramref name="strip"/> is a "raw
+        /// strip number". That is, the caller must take into account whether or not the data are
+        /// organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// <see cref="ComputeStrip"/> automatically does this when converting an (row, plane) to
+        /// a strip index.
+        /// </para><para>
+        /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
+        /// writing; <b>WriteEncodedStrip</b> does not support automatically growing the image on
+        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// </para><para>
+        /// The library writes encoded data using the native machine byte order. Correctly
+        /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
+        /// process image data with value of <see cref="TiffTag.BITSPERSAMPLE"/> tag greater
+        /// than 8.
+        /// </para></remarks>
+        public int WriteEncodedStrip(int strip, byte[] buffer, int offset, int count)
         {
             const string module = "WriteEncodedStrip";
 
             if (!writeCheckStrips(module))
                 return -1;
 
-            /*
-             * Check strip array to make sure there's space.
-             * We don't support dynamically growing files that
-             * have data organized in separate bitplanes because
-             * it's too painful.  In that case we require that
-             * the imagelength be set properly before the first
-             * write (so that the strips array will be fully
-             * allocated above).
-             */
+            // Check strip array to make sure there's space. We don't support dynamically growing
+            // files that have data organized in separate bitplanes because it's too painful.
+            // In that case we require that the imagelength be set properly before the first write
+            // (so that the strips array will be fully allocated above).
             if (strip >= m_dir.td_nstrips)
             {
                 if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
@@ -5315,11 +5368,8 @@ namespace BitMiracle.LibTiff.Classic
                 m_dir.td_stripsperimage = howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip);
             }
 
-            /*
-             * Handle delayed allocation of data buffer.  This
-             * permits it to be sized according to the directory
-             * info.
-             */
+            // Handle delayed allocation of data buffer. This permits it to be sized according to
+            // the directory info.
             bufferCheck();
 
             m_curstrip = strip;
@@ -5337,7 +5387,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (m_dir.td_stripbytecount[strip] > 0)
             {
-                /* this forces appendToStrip() to do a seek */
+                // this forces appendToStrip() to do a seek
                 m_curoff = 0;
             }
 
@@ -5346,10 +5396,10 @@ namespace BitMiracle.LibTiff.Classic
             if (!m_currentCodec.PreEncode(sample))
                 return -1;
 
-            /* swab if needed - note that source buffer will be altered */
-            postDecode(data, 0, count);
+            // swab if needed - note that source buffer will be altered
+            postDecode(buffer, offset, count);
 
-            if (!m_currentCodec.EncodeStrip(data, 0, count, sample))
+            if (!m_currentCodec.EncodeStrip(buffer, offset, count, sample))
                 return 0;
 
             if (!m_currentCodec.PostEncode())

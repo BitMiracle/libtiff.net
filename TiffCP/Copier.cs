@@ -1280,28 +1280,25 @@ namespace BitMiracle.TiffCP
             return true;
         }
 
-        static bool writeBufferToContigStrips(Tiff outImage, byte[] buf, int imagelength, int imagewidth, short spp)
+        static bool writeBufferToContigStrips(Tiff outImage, byte[] buffer, int imagelength, int imagewidth, short spp)
         {
             FieldValue[] result = outImage.GetFieldDefaulted(TiffTag.ROWSPERSTRIP);
             int rowsperstrip = result[0].ToInt();
 
             int strip = 0;
-            int bufPos = 0;
+            int offset = 0;
             for (int row = 0; row < imagelength; row += rowsperstrip)
             {
                 int nrows = (row + rowsperstrip > imagelength) ? imagelength - row : rowsperstrip;
                 int stripsize = outImage.VStripSize(nrows);
 
-                byte[] stripBuf = new byte[stripsize];
-                Array.Copy(buf, bufPos, stripBuf, 0, stripsize);
-
-                if (outImage.WriteEncodedStrip(strip++, stripBuf, stripsize) < 0)
+                if (outImage.WriteEncodedStrip(strip++, buffer, offset, stripsize) < 0)
                 {
                     Tiff.Error(outImage.FileName(), "Error, can't write strip {0}", strip - 1);
                     return false;
                 }
 
-                bufPos += stripsize;
+                offset += stripsize;
             }
 
             return true;

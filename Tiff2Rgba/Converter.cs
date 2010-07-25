@@ -310,13 +310,9 @@ namespace BitMiracle.Tiff2Rgba
             {
                 int bytes_per_pixel;
                 if (m_noAlpha)
-                {
                     bytes_per_pixel = 3;
-                }
                 else
-                {
                     bytes_per_pixel = 4;
-                }
 
                 int rows_to_write;
                 if (row + m_rowsPerStrip > height)
@@ -324,9 +320,9 @@ namespace BitMiracle.Tiff2Rgba
                 else
                     rows_to_write = m_rowsPerStrip;
 
-                byte[] stripBytes = new byte[bytes_per_pixel * rows_to_write * width];
-                Buffer.BlockCopy(rasterBytes, bytes_per_pixel * row * width, stripBytes, 0, stripBytes.Length);
-                if (outImage.WriteEncodedStrip(row / m_rowsPerStrip, stripBytes, stripBytes.Length) == -1)
+                int offset = bytes_per_pixel * row * width;
+                int count = bytes_per_pixel * rows_to_write * width;
+                if (outImage.WriteEncodedStrip(row / m_rowsPerStrip, rasterBytes, offset, count) == -1)
                     return false;
             }
 
