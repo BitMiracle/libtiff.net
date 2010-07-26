@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
- partial class Tiff : IDisposable
+    partial class Tiff : IDisposable
     {
         /// <summary>
         /// Support strip chopping (whether or not to convert single-strip 

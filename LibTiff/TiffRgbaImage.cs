@@ -55,7 +55,10 @@ namespace BitMiracle.LibTiff.Classic
     /// it is best to make a copy of an existing get method and modify it to suit the needs of an
     /// application. To setup custom "get" method please use <see cref="Get"/> property.</para>
     /// </remarks>
-    public class TiffRgbaImage
+#if EXPOSE_LIBTIFF
+    public
+#endif
+    class TiffRgbaImage
     {       
         internal const string photoTag = "PhotometricInterpretation";
 
