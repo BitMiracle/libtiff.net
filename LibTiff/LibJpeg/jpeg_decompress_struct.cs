@@ -135,7 +135,7 @@ namespace BitMiracle.LibJpeg.Classic
         internal bool m_CCIR601_sampling;  /* true=first samples are cosited */
 
         internal List<jpeg_marker_struct> m_marker_list; /* Head of list of saved markers */
-	
+    
         /* Remaining fields are known throughout decompressor, but generally
          * should not be touched by a surrounding application.
          */
@@ -145,7 +145,7 @@ namespace BitMiracle.LibJpeg.Classic
          */
         internal int m_max_h_samp_factor;  /* largest h_samp_factor */
         internal int m_max_v_samp_factor;  /* largest v_samp_factor */
-	
+    
         internal int m_min_DCT_scaled_size;    /* smallest DCT_scaled_size of any component */
 
         internal int m_total_iMCU_rows; /* # of iMCU rows in image */
@@ -296,12 +296,12 @@ namespace BitMiracle.LibJpeg.Classic
         /// <value>The list of loaded special markers.</value>
         /// <seealso href="81c88818-a5d7-4550-9ce5-024a768f7b1e.htm" target="_self">Special markers</seealso>
         public ReadOnlyCollection<jpeg_marker_struct> Marker_list
-	    {
-		    get
+        {
+            get
             {
                 return m_marker_list.AsReadOnly();
             }
-	    }
+        }
 
         /* Decompression processing parameters --- these fields must be set before
          * calling jpeg_start_decompress().  Note that jpeg_read_header() initializes
@@ -786,20 +786,20 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         /// <value>The data precision.</value>
         public int Data_precision
-	    {
-		    get { return m_data_precision; }
-		    //set { m_data_precision = value; }
-	    }
+        {
+            get { return m_data_precision; }
+            //set { m_data_precision = value; }
+        }
 
         /// <summary>
         /// Gets the largest vertical sample factor.
         /// </summary>
         /// <value>The largest vertical sample factor.</value>
         public int Max_v_samp_factor
-	    {
-		    get { return m_max_v_samp_factor; }
-		    //set { m_max_v_samp_factor = value; }
-	    }
+        {
+            get { return m_max_v_samp_factor; }
+            //set { m_max_v_samp_factor = value; }
+        }
 
         /// <summary>
         /// Gets the last read and unprocessed JPEG marker.
@@ -1487,7 +1487,10 @@ namespace BitMiracle.LibJpeg.Classic
                     if (dstinfo.m_quant_tbl_ptrs[tblno] == null)
                         dstinfo.m_quant_tbl_ptrs[tblno] = new JQUANT_TBL();
 
-                    Array.Copy(m_quant_tbl_ptrs[tblno].quantval, dstinfo.m_quant_tbl_ptrs[tblno].quantval, dstinfo.m_quant_tbl_ptrs[tblno].quantval.Length);
+                    Buffer.BlockCopy(m_quant_tbl_ptrs[tblno].quantval, 0,
+                        dstinfo.m_quant_tbl_ptrs[tblno].quantval, 0,
+                        dstinfo.m_quant_tbl_ptrs[tblno].quantval.Length * sizeof(short));
+
                     dstinfo.m_quant_tbl_ptrs[tblno].Sent_table = false;
                 }
             }

@@ -98,19 +98,19 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
-                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
+                Buffer.BlockCopy(input_array[source_row + row], 0, output_array[dest_row + row], 0, num_cols);
         }
 
         public static void jcopy_sample_rows(ComponentBuffer input_array, int source_row, ComponentBuffer output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
-                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
+                Buffer.BlockCopy(input_array[source_row + row], 0, output_array[dest_row + row], 0, num_cols);
         }
 
         public static void jcopy_sample_rows(byte[][] input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
-                Array.Copy(input_array[source_row + row], output_array[dest_row + row], num_cols);
+                Buffer.BlockCopy(input_array[source_row + row], 0, output_array[dest_row + row], 0, num_cols);
         }
     }
 }

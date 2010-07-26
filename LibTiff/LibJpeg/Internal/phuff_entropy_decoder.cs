@@ -40,7 +40,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             public void Assign(savable_state ss)
             {
                 EOBRUN = ss.EOBRUN;
-                Array.Copy(ss.last_dc_val, last_dc_val, last_dc_val.Length);
+                Buffer.BlockCopy(ss.last_dc_val, 0, last_dc_val, 0, last_dc_val.Length * sizeof(int));
             }
         }
 

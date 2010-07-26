@@ -113,11 +113,11 @@ namespace BitMiracle.LibJpeg.Classic
 
         /* ptrs to coefficient quantization tables, or null if not defined */
         internal JQUANT_TBL[] m_quant_tbl_ptrs = new JQUANT_TBL[JpegConstants.NUM_QUANT_TBLS];
-	
+    
         /* ptrs to Huffman coding tables, or null if not defined */
         internal JHUFF_TBL[] m_dc_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
         internal JHUFF_TBL[] m_ac_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
-	
+    
         /* The default value of scan_info is null, which causes a single-scan
          * sequential JPEG file to be emitted.  To create a multi-scan file,
          * set num_scans and scan_info to point to an array of scan definitions.
@@ -588,19 +588,19 @@ namespace BitMiracle.LibJpeg.Classic
         /// Gets the Huffman coding tables.
         /// </summary>
         /// <value>The Huffman coding tables or null if not defined.</value>
-	    public JHUFF_TBL[] Dc_huff_tbl_ptrs
-	    {
-		    get { return m_dc_huff_tbl_ptrs; }
-	    }
+        public JHUFF_TBL[] Dc_huff_tbl_ptrs
+        {
+            get { return m_dc_huff_tbl_ptrs; }
+        }
 
         /// <summary>
         /// Gets the Huffman coding tables.
         /// </summary>
         /// <value>The Huffman coding tables or null if not defined.</value>
         public JHUFF_TBL[] Ac_huff_tbl_ptrs
-	    {
-		    get { return m_ac_huff_tbl_ptrs; }
-	    }
+        {
+            get { return m_ac_huff_tbl_ptrs; }
+        }
 
         /// <summary>
         /// Gets the index of next scanline to be written to <see cref="jpeg_compress_struct.jpeg_write_scanlines"/>.
@@ -1796,7 +1796,7 @@ namespace BitMiracle.LibJpeg.Classic
                 htblptr = new JHUFF_TBL();
 
             /* Copy the number-of-symbols-of-each-code-length counts */
-            Array.Copy(bits, htblptr.Bits,htblptr.Bits.Length);
+            Buffer.BlockCopy(bits, 0, htblptr.Bits, 0, htblptr.Bits.Length);
 
             /* Validate the counts.  We do this here mainly so we can copy the right
             * number of symbols from the val[] array, without risking marching off
@@ -1809,7 +1809,7 @@ namespace BitMiracle.LibJpeg.Classic
             if (nsymbols < 1 || nsymbols> 256)
                 ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
-            Array.Copy(val, htblptr.Huffval, nsymbols);
+            Buffer.BlockCopy(val, 0, htblptr.Huffval, 0, nsymbols);
 
             /* Initialize sent_table false so table will be written to JPEG file. */
             htblptr.Sent_table = false;

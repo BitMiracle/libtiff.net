@@ -20,8 +20,8 @@ namespace BitMiracle.LibTiff.Classic
 
         public virtual int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
-            var tmp = GetChars(bytes, byteIndex, byteCount);
-            Array.Copy(tmp, 0, chars, charIndex, tmp.Length);
+            char[] tmp = GetChars(bytes, byteIndex, byteCount);
+            Buffer.BlockCopy(tmp, 0, chars, charIndex * sizeof(char), tmp.Length * sizeof(char));
             return tmp.Length;
         }
 
@@ -48,8 +48,8 @@ namespace BitMiracle.LibTiff.Classic
 
         public virtual int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
         {
-            var tmp = GetBytes(chars, charIndex, charCount);
-            Array.Copy(tmp, 0, bytes, byteIndex, tmp.Length);
+            byte[] tmp = GetBytes(chars, charIndex, charCount);
+            Buffer.BlockCopy(tmp, 0, bytes, byteIndex, tmp.Length);
             return tmp.Length;
         }
 

@@ -525,7 +525,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     {
                         /* Fetch current DCT block into workspace so we can modify it. */
                         JBLOCK workspace = new JBLOCK();
-                        Array.Copy(buffer[bufferIndex][0].data, workspace.data, workspace.data.Length);
+                        Buffer.BlockCopy(buffer[bufferIndex][0].data, 0, workspace.data, 0, workspace.data.Length * sizeof(short));
 
                         /* Update DC values */
                         if (block_num < last_block_column)

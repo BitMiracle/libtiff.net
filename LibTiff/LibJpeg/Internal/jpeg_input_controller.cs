@@ -299,7 +299,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 
                 /* OK, save away the quantization table */
                 JQUANT_TBL qtbl = new JQUANT_TBL();
-                Array.Copy(m_cinfo.m_quant_tbl_ptrs[qtblno].quantval, qtbl.quantval, qtbl.quantval.Length);
+                Buffer.BlockCopy(m_cinfo.m_quant_tbl_ptrs[qtblno].quantval, 0,
+                    qtbl.quantval, 0, qtbl.quantval.Length * sizeof(short));
                 qtbl.Sent_table = m_cinfo.m_quant_tbl_ptrs[qtblno].Sent_table;
                 componentInfo.quant_table = qtbl;
                 m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]] = componentInfo;
