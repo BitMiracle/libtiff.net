@@ -34,5 +34,39 @@ namespace UnitTests
                 Assert.AreEqual(expectedDataBase64, actualDataBase64);
             }
         }
+
+        [Test]
+		[Ignore]
+        public void TestWriteCustomDirectory()
+        {
+            using (Tiff image = Tiff.Open("TestWriteCustomDirectory.tif", "w"))
+            {
+                Assert.IsNotNull(image);
+
+                image.SetField(TiffTag.IMAGEWIDTH, 256);
+                image.SetField(TiffTag.IMAGELENGTH, 256);
+                image.SetField(TiffTag.BITSPERSAMPLE, 8);
+                image.SetField(TiffTag.SAMPLESPERPIXEL, 3);
+                image.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
+                image.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                image.SetField(TiffTag.ROWSPERSTRIP, 1);
+
+                long offset;
+                bool written = image.WriteCustomDirectory(out offset);
+                Assert.IsTrue(written);
+
+                byte[] color_ptr = new byte[256 * 3];
+                for (int i = 0; i < 256; i++)
+                {
+                    for (int j = 0; j < 256; j++)
+                    {
+                        color_ptr[j * 3 + 0] = (byte)i;
+                        color_ptr[j * 3 + 1] = (byte)i;
+                        color_ptr[j * 3 + 2] = (byte)i;
+                    }
+                    image.WriteScanline(color_ptr, i);
+                }
+            }
+        }
     }
 }
