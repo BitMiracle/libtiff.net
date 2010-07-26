@@ -586,7 +586,7 @@ namespace ComponentAce.Compression.Libs.zlib
 									}
 									else
 									{
-										Array.Copy(s.window, r, s.window, q, 2);
+										Buffer.BlockCopy(s.window, r, s.window, q, 2);
 										q += 2; r += 2; c -= 2;
 									}
 								}
@@ -614,7 +614,7 @@ namespace ComponentAce.Compression.Libs.zlib
 										}
 										else
 										{
-											Array.Copy(s.window, r, s.window, q, e);
+											Buffer.BlockCopy(s.window, r, s.window, q, e);
 											q += e; r += e; e = 0;
 										}
 										r = 0; // copy rest from start of window
@@ -632,7 +632,7 @@ namespace ComponentAce.Compression.Libs.zlib
 								}
 								else
 								{
-									Array.Copy(s.window, r, s.window, q, c);
+									Buffer.BlockCopy(s.window, r, s.window, q, c);
 									q += c; r += c; c = 0;
 								}
 								break;

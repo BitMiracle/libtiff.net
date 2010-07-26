@@ -315,7 +315,7 @@ namespace ComponentAce.Compression.Libs.zlib
 							t = n;
 						if (t > m)
 							t = m;
-						Array.Copy(z.next_in, p, window, q, t);
+						Buffer.BlockCopy(z.next_in, p, window, q, t);
 						p += t; n -= t;
 						q += t; m -= t;
 						if ((left -= t) != 0)
@@ -637,7 +637,7 @@ namespace ComponentAce.Compression.Libs.zlib
 		
 		internal void  set_dictionary(byte[] d, int start, int n)
 		{
-			Array.Copy(d, start, window, 0, n);
+			Buffer.BlockCopy(d, start, window, 0, n);
 			read = write = n;
 		}
 		
@@ -675,7 +675,7 @@ namespace ComponentAce.Compression.Libs.zlib
 				z.adler = check = z._adler.adler32(check, window, q, n);
 			
 			// copy as far as end of window
-			Array.Copy(window, q, z.next_out, p, n);
+			Buffer.BlockCopy(window, q, z.next_out, p, n);
 			p += n;
 			q += n;
 			
@@ -703,7 +703,7 @@ namespace ComponentAce.Compression.Libs.zlib
 					z.adler = check = z._adler.adler32(check, window, q, n);
 				
 				// copy
-				Array.Copy(window, q, z.next_out, p, n);
+				Buffer.BlockCopy(window, q, z.next_out, p, n);
 				p += n;
 				q += n;
 			}

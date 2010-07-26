@@ -48,12 +48,12 @@ namespace ComponentAce.Compression.Libs.zlib
     public
 #endif
     class ZStreamException : System.IO.IOException
-	{
-		public ZStreamException():base()
-		{
-		}
-		public ZStreamException(System.String s):base(s)
-		{
-		}
-	}
+    {
+        public ZStreamException():base()
+        {
+        }
+        public ZStreamException(System.String s):base(s)
+        {
+        }
+    }
 }

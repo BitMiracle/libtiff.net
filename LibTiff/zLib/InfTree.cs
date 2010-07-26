@@ -244,7 +244,7 @@ namespace ComponentAce.Compression.Libs.zlib
 							r[1] = (byte) l; // bits to dump before this table
 							j = SupportClass.URShift(i, (w - l));
 							r[2] = (int) (q - u[h - 1] - j); // offset to this table
-							Array.Copy(r, 0, hp, (u[h - 1] + j) * 3, 3); // connect to last table
+							Buffer.BlockCopy(r, 0, hp, (u[h - 1] + j) * 3 * sizeof(int), 3 * sizeof(int)); // connect to last table
 						}
 						else
 						{
@@ -273,7 +273,7 @@ namespace ComponentAce.Compression.Libs.zlib
 					f = 1 << (k - w);
 					for (j = SupportClass.URShift(i, w); j < z; j += f)
 					{
-						Array.Copy(r, 0, hp, (q + j) * 3, 3);
+						Buffer.BlockCopy(r, 0, hp, (q + j) * 3 * sizeof(int), 3 * sizeof(int));
 					}
 					
 					// backwards increment the k-bit code i
