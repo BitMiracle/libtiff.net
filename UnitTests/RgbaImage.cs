@@ -89,7 +89,7 @@ namespace UnitTests
                     "flower-ycbcr12-contig-08.tif",
                     "flower-ycbcr41-contig-08.tif",
                     "flower-ycbcr42-contig-08.tif",
-                    "flower-ycbcr44-contig-08.tif",
+                    "flower-ycbcr44-contig-08.tif",                    
                 };
             }
         }
@@ -104,6 +104,18 @@ namespace UnitTests
                 };
             }
         }
+
+        private static string[] ToRgbaZipFiles
+        {
+            get
+            {
+                return new string[]
+                {
+                    "gray16-lzw-pc.tif",
+                    "127.tif",
+                };
+            }
+        }        
 
         private static bool tryReadRGBAImage(string file)
         {
@@ -175,7 +187,7 @@ namespace UnitTests
             testTiff2Rgba(file, new string[] { "-c", "jpeg" }, "_rgba_jpeg");
         }
 
-        [Test, TestCaseSource("ToRgbaFiles")]
+        [Test, TestCaseSource("ToRgbaZipFiles")]
         public void TestTiff2RgbaZip(string file)
         {
             testTiff2Rgba(file, new string[] { "-c", "zip" }, "_rgba_zip");
