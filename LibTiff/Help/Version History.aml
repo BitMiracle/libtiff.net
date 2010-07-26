@@ -9,14 +9,26 @@
                     <content>
                         <list class="bullet">
                             <listItem>
+                                Cleaned up API a bit.
+                            </listItem>
+                            <listItem>
+                                Greatly improved the documentation.
+                            </listItem>
+                            <listItem>
+                                Changed the license for the library to the New BSD License.
+                            </listItem>
+                            <listItem>
+                                Speed optimizations have been made.
+                            </listItem>
+                            <listItem>
                                 Added new Tiff2Rgba program.
+                            </listItem>
+                            <listItem>
+                                Added Silverlight support (thanks to Michael Epner and San Chen)
                             </listItem>
                             <listItem>
                                 Added Silverlight test application that can be used as a sample
                                 (thanks to Michael Epner)
-                            </listItem>
-                            <listItem>
-                                Added Silverlight support (thanks to Michael Epner and San Chen)
                             </listItem>
                             <listItem>
                                 Added samples for various TIFF-related topics.
@@ -52,16 +64,7 @@
                             </listItem>
                             <listItem>
                                 Fixed bugs within ReadRGBAImage (thanks to San Chen)
-                            </listItem>
-                            <listItem>
-                                Cleaned up API a bit.
-                            </listItem>
-                            <listItem>
-                                Greatly improved the documentation.
-                            </listItem>
-                            <listItem>
-                                Changed the license for the library to New BSD License.
-                            </listItem>
+                            </listItem>                            
                         </list>
                     </content>
                 </section>
