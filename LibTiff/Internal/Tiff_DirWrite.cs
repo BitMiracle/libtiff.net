@@ -1116,16 +1116,15 @@ namespace BitMiracle.LibTiff.Classic
             return false;
         }
 
-        private bool writeData(ref TiffDirEntry dir, short[] cp, int cc)
+        private bool writeData(ref TiffDirEntry dir, short[] buffer, int count)
         {
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabArrayOfShort(cp, cc);
+                SwabArrayOfShort(buffer, count);
 
-            int byteCount = cc * sizeof(short);
+            int byteCount = count * sizeof(short);
             byte[] bytes = new byte [byteCount];
-            ShortsToByteArray(cp, 0, cc, bytes, 0);
-            bool res = writeData(ref dir, bytes, byteCount);
-            return res;
+            ShortsToByteArray(buffer, 0, count, bytes, 0);
+            return writeData(ref dir, bytes, byteCount);
         }
 
         private bool writeData(ref TiffDirEntry dir, int[] cp, int cc)

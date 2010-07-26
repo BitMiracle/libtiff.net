@@ -309,19 +309,19 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Fetches a contiguous directory item.
         /// </summary>
-        private int fetchData(TiffDirEntry dir, byte[] cp)
+        private int fetchData(TiffDirEntry dir, byte[] buffer)
         {
-            int w = DataWidth(dir.tdir_type);
-            int cc = (int)dir.tdir_count * w;
+            int width = DataWidth(dir.tdir_type);
+            int count = (int)dir.tdir_count * width;
 
             // Check for overflow.
-            if (dir.tdir_count == 0 || w == 0 || (cc / w) != dir.tdir_count)
+            if (dir.tdir_count == 0 || width == 0 || (count / width) != dir.tdir_count)
                 fetchFailed(dir);
 
             if (!seekOK(dir.tdir_offset))
                 fetchFailed(dir);
 
-            if (!readOK(cp, cc))
+            if (!readOK(buffer, count))
                 fetchFailed(dir);
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
@@ -330,33 +330,33 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     case TiffType.SHORT:
                     case TiffType.SSHORT:
-                        short[] s = ByteArrayToShorts(cp, 0, cc);
+                        short[] s = ByteArrayToShorts(buffer, 0, count);
                         SwabArrayOfShort(s, dir.tdir_count);
-                        ShortsToByteArray(s, 0, dir.tdir_count, cp, 0);
+                        ShortsToByteArray(s, 0, dir.tdir_count, buffer, 0);
                         break;
                     
                     case TiffType.LONG:
                     case TiffType.SLONG:
                     case TiffType.FLOAT:
-                        int[] l = ByteArrayToInts(cp, 0, cc);
+                        int[] l = ByteArrayToInts(buffer, 0, count);
                         SwabArrayOfLong(l, dir.tdir_count);
-                        IntsToByteArray(l, 0, dir.tdir_count, cp, 0);
+                        IntsToByteArray(l, 0, dir.tdir_count, buffer, 0);
                         break;
                     
                     case TiffType.RATIONAL:
                     case TiffType.SRATIONAL:
-                        int[] r = ByteArrayToInts(cp, 0, cc);
+                        int[] r = ByteArrayToInts(buffer, 0, count);
                         SwabArrayOfLong(r, 2 * dir.tdir_count);
-                        IntsToByteArray(r, 0, 2 * dir.tdir_count, cp, 0);
+                        IntsToByteArray(r, 0, 2 * dir.tdir_count, buffer, 0);
                         break;
                     
                     case TiffType.DOUBLE:
-                        swab64BitData(cp, 0, cc);
+                        swab64BitData(buffer, 0, count);
                         break;
                 }
             }
 
-            return cc;
+            return count;
         }
 
         /// <summary>

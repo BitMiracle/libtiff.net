@@ -5987,12 +5987,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="n">The array length.</param>
         public static void SwabArrayOfDouble(double[] dp, int offset, int n)
         {
-            byte[] bytes = new byte[n * sizeof(double)];
-            for (int i = 0, j = offset; i < n; i++, j++)
-                Buffer.BlockCopy(BitConverter.GetBytes(dp[j]), 0, bytes, i * sizeof(double), sizeof(double));
+            int[] lp = new int[n * sizeof(int) / sizeof(double)];
+            Buffer.BlockCopy(dp, 0, lp, 0, lp.Length * sizeof(int));
 
-            int[] lp = ByteArrayToInts(bytes, 0, n * sizeof(double));
-            SwabArrayOfLong(lp, n + n);
+            SwabArrayOfLong(lp, lp.Length);
 
             int lpPos = 0;
             while (n-- > 0)
@@ -6003,9 +6001,8 @@ namespace BitMiracle.LibTiff.Classic
                 lpPos += 2;
             }
 
-            IntsToByteArray(lp, 0, n + n, bytes, 0);
             for (int i = 0; i < n; i++, offset++)
-                dp[offset] = BitConverter.ToDouble(bytes, i * sizeof(double));
+                Buffer.BlockCopy(lp, 0, dp, 0, n * sizeof(double));
         }
 
         /// <summary>
@@ -6065,20 +6062,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The array of integers.</returns>
         public static int[] ByteArrayToInts(byte[] b, int byteStartOffset, int byteCount)
         {
-            int intCount = byteCount / 4;
+            int intCount = byteCount / sizeof(int);
             int[] integers = new int[intCount];
-
-            int byteStopPos = byteStartOffset + intCount * 4;
-            int intPos = 0;
-            for (int i = byteStartOffset; i < byteStopPos; )
-            {
-                int value = b[i++] & 0xFF;
-                value += (b[i++] & 0xFF) << 8;
-                value += (b[i++] & 0xFF) << 16;
-                value += b[i++] << 24;
-                integers[intPos++] = value;
-            }
-
+            Buffer.BlockCopy(b, byteStartOffset, integers, 0, intCount * sizeof(int));            
             return integers;
         }
 
@@ -6092,16 +6078,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="byteStartOffset">The start offset in byte array.</param>
         public static void IntsToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
-            int bytePos = byteStartOffset;
-            int intStopPos = intStartOffset + intCount;
-            for (int i = intStartOffset; i < intStopPos; i++)
-            {
-                int value = integers[i];
-                bytes[bytePos++] = (byte)value;
-                bytes[bytePos++] = (byte)(value >> 8);
-                bytes[bytePos++] = (byte)(value >> 16);
-                bytes[bytePos++] = (byte)(value >> 24);
-            }
+            Buffer.BlockCopy(integers, intStartOffset * sizeof(int), bytes, byteStartOffset, intCount * sizeof(int));
         }
 
         /// <summary>
@@ -6113,19 +6090,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The array of short.</returns>
         public static short[] ByteArrayToShorts(byte[] b, int byteStartOffset, int byteCount)
         {
-            int intCount = byteCount / 2;
-            short[] integers = new short[intCount];
-
-            int byteStopPos = byteStartOffset + intCount * 2;
-            int intPos = 0;
-            for (int i = byteStartOffset; i < byteStopPos; )
-            {
-                short value = (short)(b[i++] & 0xFF);
-                value += (short)((b[i++] & 0xFF) << 8);
-                integers[intPos++] = value;
-            }
-
-            return integers;
+            int shortCount = byteCount / sizeof(short);
+            short[] shorts = new short[shortCount];
+            Buffer.BlockCopy(b, byteStartOffset, shorts, 0, shortCount * sizeof(short));
+            return shorts;
         }
 
         /// <summary>
@@ -6138,14 +6106,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="byteStartOffset">The start offset in array of bytes.</param>
         public static void ShortsToByteArray(short[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
         {
-            int bytePos = byteStartOffset;
-            int intStopPos = intStartOffset + intCount;
-            for (int i = intStartOffset; i < intStopPos; i++)
-            {
-                short value = integers[i];
-                bytes[bytePos++] = (byte)value;
-                bytes[bytePos++] = (byte)(value >> 8);
-            }
+            Buffer.BlockCopy(integers, intStartOffset * sizeof(short), bytes, byteStartOffset, intCount * sizeof(short));
         }
     }
 }
