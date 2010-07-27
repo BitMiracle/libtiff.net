@@ -308,8 +308,16 @@ namespace BitMiracle.TiffCP
                             }
 
                             /* seek next image directory */
-                            if (!openSrcImage(ref inImage, fileAndPageNums, ref pageNumberIndex, comma))
-                                break;
+                            if (pageNumberIndex < fileAndPageNums.Length)
+                            {
+                                if (!openSrcImage(ref inImage, fileAndPageNums, ref pageNumberIndex, comma))
+                                    break;
+                            }
+                            else
+                            {
+                                if (!inImage.ReadDirectory())
+                                    break;
+                            }
                         }
                     }
                     finally
@@ -348,15 +356,16 @@ namespace BitMiracle.TiffCP
                 string pageNumStr = fileAndPageNums[pageNumberIndex];
                 if (pageNumStr.Length == 0)
                 {
-                    // position "after trailing comma". we should process all
-                    // remaining directories, so read next directory
+                    // position "after trailing comma". we should process all remaining
+                    // directories, so read next directory
+
                     return tif.ReadDirectory();
                 }
                 else
                 {
                     // parse page number and set appropriate image directory
                     short pageNum = short.Parse(pageNumStr);
-                    if (!tif.SetDirectory(pageNum))
+                    if (!tif.SetDirectory((short)(pageNum - 1)))
                     {
                         Console.Error.Write("{0}{1}{2} not found!\n", tif.FileName(), commaChar, pageNum);
                         return false;

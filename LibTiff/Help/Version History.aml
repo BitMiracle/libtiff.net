@@ -45,6 +45,9 @@
                                 of some images.
                             </listItem>
                             <listItem>
+                                Fixed bug with handling of multipage images and page specifiers in TiffCP utility.
+                            </listItem>
+                            <listItem>
                                 Fixed bug with handling of RGBA images in Tiff2Pdf utility.
                             </listItem>
                             <listItem>
