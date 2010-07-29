@@ -2024,12 +2024,15 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Return the number of bytes to read/write in a call to one of the
-        /// scanline-oriented i/o routines.
-        /// Note that this number may be 1/samples-per-pixel if data is
-        /// stored as separate planes.
+        /// Calculates the size in bytes of a row of data as it would be returned in a call to
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadScanline"/>, or as it would be
+        /// expected in a call to <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/>.
         /// </summary>
-        /// <returns>The number of bytes to read/write.</returns>
+        /// <returns>The size in bytes of a row of data.</returns>
+        /// <remarks><b>ScanlineSize</b> calculates size for one sample plane only. Please use
+        /// <see cref="RasterScanlineSize"/> if you want to get size in bytes of a complete
+        /// decoded and packed raster scanline.</remarks>
+        /// <seealso cref="RasterScanlineSize"/>
         public int ScanlineSize()
         {
             int scanline;
@@ -2056,18 +2059,21 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
             else
+            {
                 scanline = m_dir.td_imagewidth;
+            }
 
             return howMany8(multiply(scanline, m_dir.td_bitspersample, "ScanlineSize"));
         }
 
         /// <summary>
-        /// Return the number of bytes required to store a complete decoded and 
-        /// packed raster scanline.
+        /// Calculates the size in bytes of a complete decoded and packed raster scanline.
         /// </summary>
-        /// <returns>The number of bytes required to store a complete decoded and 
-        /// packed raster scanline (as opposed to the I/O size returned by ScanlineSize 
-        /// which may be less if data is store as separate planes).</returns>
+        /// <returns>The size in bytes of a complete decoded and packed raster scanline.</returns>
+        /// <remarks>The value returned by <b>RasterScanlineSize</b> may be different from the
+        /// value returned by <see cref="ScanlineSize"/> if data is stored as separate
+        /// planes (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// </remarks>
         public int RasterScanlineSize()
         {
             int scanline = multiply(m_dir.td_bitspersample, m_dir.td_imagewidth, "RasterScanlineSize");
@@ -2080,11 +2086,6 @@ namespace BitMiracle.LibTiff.Classic
             return multiply(howMany8(scanline), m_dir.td_samplesperpixel, "RasterScanlineSize");
         }
 
-        /*
-        * 
-        *
-        * 
-        */
         /// <summary>
         /// Compute the number bytes in a row-aligned strip.
         /// </summary>
@@ -2715,18 +2716,21 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Set the directory with specified number as the current directory.
+        /// Sets the directory with specified number as the current directory.
         /// </summary>
-        /// <param name="dirn">The directory number.</param>
-        /// <returns><c>true</c> if set successfully</returns>
-        /// <remarks>Directories are numbered starting at 0.</remarks>
-        public bool SetDirectory(short dirn)
+        /// <param name="number">The zero-based number of the directory to set as the
+        /// current directory.</param>
+        /// <returns><c>true</c> if the specified directory was set as current successfully;
+        /// otherwise, <c>false</c></returns>
+        /// <remarks><b>SetDirectory</b> changes the current directory and reads its contents with
+        /// <see cref="ReadDirectory"/>.</remarks>
+        public bool SetDirectory(short number)
         {
-            short n;
-            long dummyOff;
             uint nextdir = m_header.tiff_diroff;
-            for (n = dirn; n > 0 && nextdir != 0; n--)
+            short n;
+            for (n = number; n > 0 && nextdir != 0; n--)
             {
+                long dummyOff;
                 if (!advanceDirectory(ref nextdir, out dummyOff))
                     return false;
             }
@@ -2736,7 +2740,7 @@ namespace BitMiracle.LibTiff.Classic
             // Set curdir to the actual directory index. The -1 is because
             // ReadDirectory will increment m_curdir after successfully reading
             // the directory.
-            m_curdir = (short)(dirn - n - 1);
+            m_curdir = (short)(number - n - 1);
 
             // Reset m_dirnumber counter and start new list of seen directories.
             // We need this to prevent IFD loops.
@@ -2745,17 +2749,18 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Set the current directory to be the directory located at the
-        /// specified file offset.
+        /// Sets the directory at specified file/stream offset as the current directory.
         /// </summary>
-        /// <param name="diroff">The file offset of the directory to set
-        /// as current.</param>
-        /// <returns><c>true</c> if set successfully</returns>
-        /// <remarks>This method is used mainly to access directories linked
-        /// with the SubIFD tag (e.g. thumbnail images).</remarks>
-        public bool SetSubDirectory(long diroff)
+        /// <param name="offset">The offset from the beginnig of the file/stream to the directory
+        /// to set as the current directory.</param>
+        /// <returns><c>true</c> if the directory at specified file offset was set as current
+        /// successfully; otherwise, <c>false</c></returns>
+        /// <remarks><b>SetSubDirectory</b> acts like <see cref="SetDirectory"/>, except the
+        /// directory is specified as a file offset instead of an index; this is required for
+        /// accessing subdirectories linked through a SubIFD tag (e.g. thumbnail images).</remarks>        
+        public bool SetSubDirectory(long offset)
         {
-            m_nextdiroff = (uint)diroff;
+            m_nextdiroff = (uint)offset;
 
             // Reset m_dirnumber counter and start new list of seen directories.
             // We need this to prevent IFD loops.
@@ -2862,27 +2867,35 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Writes the directory.
+        /// Writes the contents of the current directory to the file and setup to create a new
+        /// subfile (page) in the same file.
         /// </summary>
-        /// <returns><c>true</c> if written successfully.</returns>
+        /// <returns><c>true</c> if the current directory was written successfully;
+        /// otherwise, <c>false</c></returns>
+        /// <remarks>Applications only need to call <b>WriteDirectory</b> when writing multiple
+        /// subfiles (pages) to a single TIFF file. <b>WriteDirectory</b> is automatically called
+        /// by <see cref="Close"/> and <see cref="Flush"/> to write a modified directory if the
+        /// file is open for writing.</remarks>
         public bool WriteDirectory()
         {
             return writeDirectory(true);
         }
 
-        /*
-        *   
-        */
         /// <summary>
-        /// Similar to <see cref="Tiff.WriteDirectory"/>, writes the directory out
-        /// but leaves all data structures in memory so that it can be written again.
+        /// Writes the current state of the TIFF directory into the file to make what is currently
+        /// in the file readable.
         /// </summary>
-        /// <returns><c>true</c> if written successfully.</returns>
-        /// <remarks>This will make a partially written TIFF file 
-        /// readable before it is successfully completed/closed.</remarks>
+        /// <returns><c>true</c> if the current directory was rewritten successfully;
+        /// otherwise, <c>false</c></returns>
+        /// <remarks>Unlike <see cref="WriteDirectory"/>, <b>CheckpointDirectory</b> does not free
+        /// up the directory data structures in memory, so they can be updated (as strips/tiles
+        /// are written) and written again. Reading such a partial file you will at worst get a
+        /// TIFF read error for the first strip/tile encountered that is incomplete, but you will
+        /// at least get all the valid data in the file before that. When the file is complete,
+        /// just use <see cref="WriteDirectory"/> as usual to finish it off cleanly.</remarks>
         public bool CheckpointDirectory()
         {
-            /* Setup the strips arrays, if they haven't already been. */
+            // Setup the strips arrays, if they haven't already been.
             if (m_dir.td_stripoffset == null)
                 SetupStrips();
 
@@ -2892,27 +2905,32 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Similar to <see cref="Tiff.WriteDirectory"/>, but if the directory has already
-        /// been written once, it is relocated to the end of the file, in case it
-        /// has changed in size.
-        /// </summary>
-        /// <returns><c>true</c> if written successfully.</returns>
-        /// <remarks>Note that this will result in the loss of the 
+        /// Rewrites the contents of the current directory to the file and setup to create a new
+        /// subfile (page) in the same file.
+        /// </summary>        
+        /// <returns><c>true</c> if the current directory was rewritten successfully;
+        /// otherwise, <c>false</c></returns>
+        /// <remarks>The <b>RewriteDirectory</b> operates similarly to <see cref="WriteDirectory"/>,
+        /// but can be called with directories previously read or written that already have an
+        /// established location in the file. It will rewrite the directory, but instead of place
+        /// it at it's old location (as <see cref="WriteDirectory"/> would) it will place them at
+        /// the end of the file, correcting the pointer from the preceeding directory or file
+        /// header to point to it's new location. This is particularly important in cases where
+        /// the size of the directory and pointed to data has grown, so it won’t fit in the space
+        /// available at the old location. Note that this will result in the loss of the 
         /// previously used directory space.</remarks>
         public bool RewriteDirectory()
         {
             const string module = "RewriteDirectory";
 
-            /* We don't need to do anything special if it hasn't been written. */
+            // We don't need to do anything special if it hasn't been written.
             if (m_diroff == 0)
                 return WriteDirectory();
 
-            /*
-             ** Find and zero the pointer to this directory, so that linkDirectory
-             ** will cause it to be added after this directories current pre-link.
-             */
+            // Find and zero the pointer to this directory, so that linkDirectory will cause it to
+            // be added after this directories current pre-link.
 
-            /* Is it the first directory in the file? */
+            // Is it the first directory in the file?
             if (m_header.tiff_diroff == m_diroff)
             {
                 m_header.tiff_diroff = 0;
@@ -2965,9 +2983,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
             }
 
-            /*
-             ** Now use WriteDirectory() normally.
-             */
+            // Now use WriteDirectory() normally.
             return WriteDirectory();
         }
 
