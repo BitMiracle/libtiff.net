@@ -2087,13 +2087,37 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Compute the number bytes in a row-aligned strip.
+        /// Computes the number of rows for a reasonable-sized strip according to the current
+        /// settings of the <see cref="TiffTag.IMAGEWIDTH"/>, <see cref="TiffTag.BITSPERSAMPLE"/>
+        /// and <see cref="TiffTag.SAMPLESPERPIXEL"/> tags and any compression-specific requirements.
         /// </summary>
-        /// <returns>The number bytes in a row-aligned strip</returns>
-        /// <remarks>Note that if the value of field corresponding to
-        /// <see cref="TiffTag.ROWSPERSTRIP"/> is larger than the recorded 
-        /// <see cref="TiffTag.IMAGELENGTH"/>, then the strip size is truncated 
-        /// to reflect the actual space required to hold the strip.
+        /// <param name="estimate">The esimated value (may be zero).</param>
+        /// <returns>The number of rows for a reasonable-sized strip according to the current
+        /// tag settings and compression-specific requirements.</returns>
+        /// <remarks>If the <paramref name="estimate"/> parameter is non-zero, then it is taken
+        /// as an estimate of the desired strip size and adjusted according to any
+        /// compression-specific requirements. The value returned by <b>DefaultStripSize</b> is
+        /// typically used to define the <see cref="TiffTag.ROWSPERSTRIP"/> tag. If there is no
+        /// any unusual requirements <b>DefaultStripSize</b> tries to create strips that have
+        /// approximately 8 kilobytes of uncompressed data.</remarks>
+        public int DefaultStripSize(int estimate)
+        {
+            return m_currentCodec.DefStripSize(estimate);
+        }
+
+        /// <summary>
+        /// Computes the number of bytes in a row-aligned strip.
+        /// </summary>
+        /// <returns>The number of bytes in a row-aligned strip</returns>
+        /// <remarks>
+        /// <para>
+        /// <b>StripSize</b> returns the equivalent size for a strip of data as it would be
+        /// returned in a call to <see cref="ReadEncodedStrip"/> or as it would be expected in a
+        /// call to <see cref="O:BitMiracle.Libtiff.Classic.Tiff.WriteEncodedStrip"/>.
+        /// </para><para>
+        /// If the value of the field corresponding to <see cref="TiffTag.ROWSPERSTRIP"/> is
+        /// larger than the recorded <see cref="TiffTag.IMAGELENGTH"/>, then the strip size is
+        /// truncated to reflect the actual space required to hold the strip.</para>
         /// </remarks>
         public int StripSize()
         {
@@ -2105,20 +2129,50 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Computes the number of bytes in a row-aligned strip with specified number of rows.
         /// </summary>
-        /// <param name="tile"></param>
-        /// <returns></returns>
-        public long RawTileSize(int tile)
+        /// <param name="rowCount">The number of rows in a strip.</param>
+        /// <returns>
+        /// The number of bytes in a row-aligned strip with specified number of rows.</returns>
+        public int VStripSize(int rowCount)
         {
-            // yes, one method for raw tile and strip sizes
-            return RawStripSize(tile);
+            if (rowCount == -1)
+                rowCount = m_dir.td_imagelength;
+
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG &&
+                m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
+            {
+                // Packed YCbCr data contain one Cb+Cr for every
+                // HorizontalSampling * VerticalSampling Y values.
+                // Must also roundup width and height when calculating since images that are not
+                // a multiple of the horizontal/vertical subsampling area include YCbCr data for
+                // the extended image.
+                FieldValue[] result = GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
+                short ycbcrsubsampling0 = result[0].ToShort();
+                short ycbcrsubsampling1 = result[1].ToShort();
+
+                int samplingarea = ycbcrsubsampling0 * ycbcrsubsampling1;
+                if (samplingarea == 0)
+                {
+                    ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
+                    return 0;
+                }
+
+                int w = roundUp(m_dir.td_imagewidth, ycbcrsubsampling0);
+                int scanline = howMany8(multiply(w, m_dir.td_bitspersample, "VStripSize"));
+                rowCount = roundUp(rowCount, ycbcrsubsampling1);
+                // NB: don't need howMany here 'cuz everything is rounded
+                scanline = multiply(rowCount, scanline, "VStripSize");
+                return summarize(scanline, multiply(2, scanline / samplingarea, "VStripSize"), "VStripSize");
+            }
+
+            return multiply(rowCount, ScanlineSize(), "VStripSize");
         }
 
         /// <summary>
-        /// Compute the number of bytes in a raw strip.
+        /// Computes the number of bytes in a raw (i.e. not decoded) strip.
         /// </summary>
-        /// <param name="strip">The index of strip.</param>
+        /// <param name="strip">The zero-based index of a strip.</param>
         /// <returns>The number of bytes in a raw strip.</returns>
         public long RawStripSize(int strip)
         {
@@ -2134,45 +2188,60 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Compute the number of bytes in a variable height, row-aligned strip.
+        /// Computes which strip contains the specified coordinates (row, plane).
         /// </summary>
-        /// <param name="nrows">The number of rows in a strip.</param>
-        /// <returns>The number of bytes in a variable height, row-aligned strip.</returns>
-        public int VStripSize(int nrows)
+        /// <param name="row">The row.</param>
+        /// <param name="plane">The sample plane.</param>
+        /// <returns>The number of the strip that contains the specified coordinates.</returns>
+        /// <remarks>
+        /// A valid strip number is always returned; out-of-range coordinate values are clamped to
+        /// the bounds of the image. The <paramref name="row"/> parameter is always used in
+        /// calculating a strip. The <paramref name="plane"/> parameter is used only if data are
+        /// organized in separate planes
+        /// (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// </remarks>
+        public int ComputeStrip(int row, short plane)
         {
-            if (nrows == -1)
-                nrows = m_dir.td_imagelength;
+            int strip = 0;
+            if (m_dir.td_rowsperstrip != -1)
+                strip = row / m_dir.td_rowsperstrip;
 
-            if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
             {
-                /*
-                 * Packed YCbCr data contain one Cb+Cr for every
-                 * HorizontalSampling * VerticalSampling Y values.
-                 * Must also roundup width and height when calculating
-                 * since images that are not a multiple of the
-                 * horizontal/vertical subsampling area include
-                 * YCbCr data for the extended image.
-                 */
-                FieldValue[] result = GetFieldDefaulted(TiffTag.YCBCRSUBSAMPLING);
-                short ycbcrsubsampling0 = result[0].ToShort();
-                short ycbcrsubsampling1 = result[1].ToShort();
-
-                int samplingarea = ycbcrsubsampling0 * ycbcrsubsampling1;
-                if (samplingarea == 0)
+                if (plane >= m_dir.td_samplesperpixel)
                 {
-                    ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
+                    ErrorExt(this, m_clientdata, m_name, "{0}: Sample out of range, max {1}", plane, m_dir.td_samplesperpixel);
                     return 0;
                 }
 
-                int w = roundUp(m_dir.td_imagewidth, ycbcrsubsampling0);
-                int scanline = howMany8(multiply(w, m_dir.td_bitspersample, "VStripSize"));
-                nrows = roundUp(nrows, ycbcrsubsampling1);
-                /* NB: don't need howMany here 'cuz everything is rounded */
-                scanline = multiply(nrows, scanline, "VStripSize");
-                return summarize(scanline, multiply(2, scanline / samplingarea, "VStripSize"), "VStripSize");
+                strip += plane * m_dir.td_stripsperimage;
             }
 
-            return multiply(nrows, ScanlineSize(), "VStripSize");
+            return strip;
+        }
+
+        /// <summary>
+        /// Retrives the number of strips in the image.
+        /// </summary>
+        /// <returns>The number of strips in the image.</returns>
+        public int NumberOfStrips()
+        {
+            int nstrips = (m_dir.td_rowsperstrip == -1 ? 1 : howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
+                nstrips = multiply(nstrips, m_dir.td_samplesperpixel, "NumberOfStrips");
+
+            return nstrips;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <returns></returns>
+        public long RawTileSize(int tile)
+        {
+            // yes, one method for raw tile and strip sizes
+            return RawStripSize(tile);
         }
 
         /// <summary>
@@ -2243,22 +2312,7 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             return multiply(tilesize, m_dir.td_tiledepth, "VTileSize");
-        }
-
-        /*
-        *   
-        */
-        /// <summary>
-        /// Computes a default strip size based on the image characteristics and a requested value.
-        /// </summary>
-        /// <param name="request">The requested value.</param>
-        /// <returns>The default strip size</returns>
-        /// <remarks>If the request is &lt;1 then we choose a 
-        /// strip size according to certain heuristics.</remarks>
-        public int DefaultStripSize(int request)
-        {
-            return m_currentCodec.DefStripSize(request);
-        }
+        }        
 
         /*
         *   If a
@@ -5021,45 +5075,6 @@ namespace BitMiracle.LibTiff.Classic
             //     will clamp this to the tile size. This is done because the tile size may not be
             //     defined until after the output buffer is setup in WriteBufferSetup.
             return WriteEncodedTile(ComputeTile(x, y, z, plane), buffer, offset, -1);
-        }
-
-        /// <summary>
-        /// Computes which strip a (row,sample) value is in.
-        /// </summary>
-        /// <param name="row">The row.</param>
-        /// <param name="sample">The sample.</param>
-        /// <returns>The number of strip.</returns>
-        public int ComputeStrip(int row, short sample)
-        {
-            int strip = 0;
-            if (m_dir.td_rowsperstrip != -1)
-                strip = row / m_dir.td_rowsperstrip;
-
-            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
-            {
-                if (sample >= m_dir.td_samplesperpixel)
-                {
-                    ErrorExt(this, m_clientdata, m_name, "{0}: Sample out of range, max {1}", sample, m_dir.td_samplesperpixel);
-                    return 0;
-                }
-
-                strip += sample * m_dir.td_stripsperimage;
-            }
-
-            return strip;
-        }
-
-        /// <summary>
-        /// Computes how many strips are in an image.
-        /// </summary>
-        /// <returns>The number of strips.</returns>
-        public int NumberOfStrips()
-        {
-            int nstrips = (m_dir.td_rowsperstrip == -1 ? 1 : howMany(m_dir.td_imagelength, m_dir.td_rowsperstrip));
-            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
-                nstrips = multiply(nstrips, m_dir.td_samplesperpixel, "NumberOfStrips");
-
-            return nstrips;
         }
 
         /// <summary>
