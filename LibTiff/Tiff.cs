@@ -2234,10 +2234,82 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// 
+        /// Computes the pixel width and height of a reasonable-sized tile suitable for setting
+        /// up the <see cref="TiffTag.TILEWIDTH"/> and <see cref="TiffTag.TILELENGTH"/> tags.
         /// </summary>
-        /// <param name="tile"></param>
-        /// <returns></returns>
+        /// <param name="width">The proposed tile width upon the call / tile width to use
+        /// after the call.</param>
+        /// <param name="height">The proposed tile height upon the call / tile height to use
+        /// after the call.</param>
+        /// <remarks>If the <paramref name="width"/> and <paramref name="height"/> values passed
+        /// in are non-zero, then they are adjusted to reflect any compression-specific
+        /// requirements. The returned width and height are constrained to be a multiple of
+        /// 16 pixels to conform with the TIFF specification.</remarks>
+        public void DefaultTileSize(ref int width, ref int height)
+        {
+            m_currentCodec.DefTileSize(ref width, ref height);
+        }
+
+        /// <summary>
+        /// Compute the number of bytes in a row-aligned tile.
+        /// </summary>
+        /// <returns>The number of bytes in a row-aligned tile.</returns>
+        /// <remarks><b>TileSize</b> returns the equivalent size for a tile of data as it would be
+        /// returned in a call to <see cref="ReadTile"/> or as it would be expected in a
+        /// call to <see cref="O:BitMiracle.Libtiff.Classic.Tiff.WriteTile"/>.
+        /// </remarks>
+        public int TileSize()
+        {
+            return VTileSize(m_dir.td_tilelength);
+        }
+
+        /// <summary>
+        /// Computes the number of bytes in a row-aligned tile with specified number of rows.
+        /// </summary>
+        /// <param name="rowCount">The number of rows in a tile.</param>
+        /// <returns>
+        /// The number of bytes in a row-aligned tile with specified number of rows.</returns>
+        public int VTileSize(int rowCount)
+        {
+            if (m_dir.td_tilelength == 0 || m_dir.td_tilewidth == 0 || m_dir.td_tiledepth == 0)
+                return 0;
+
+            int tilesize;
+            if (m_dir.td_planarconfig == PlanarConfig.CONTIG &&
+                m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
+            {
+                // Packed YCbCr data contain one Cb+Cr for every
+                // HorizontalSampling * VerticalSampling Y values.
+                // Must also roundup width and height when calculating since images that are not a
+                // multiple of the horizontal/vertical subsampling area include YCbCr data for
+                // the extended image.
+                int w = roundUp(m_dir.td_tilewidth, m_dir.td_ycbcrsubsampling[0]);
+                int rowsize = howMany8(multiply(w, m_dir.td_bitspersample, "VTileSize"));
+                int samplingarea = m_dir.td_ycbcrsubsampling[0] * m_dir.td_ycbcrsubsampling[1];
+                if (samplingarea == 0)
+                {
+                    ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
+                    return 0;
+                }
+
+                rowCount = roundUp(rowCount, m_dir.td_ycbcrsubsampling[1]);
+                // NB: don't need howMany here 'cuz everything is rounded
+                tilesize = multiply(rowCount, rowsize, "VTileSize");
+                tilesize = summarize(tilesize, multiply(2, tilesize / samplingarea, "VTileSize"), "VTileSize");
+            }
+            else
+            {
+                tilesize = multiply(rowCount, TileRowSize(), "VTileSize");
+            }
+
+            return multiply(tilesize, m_dir.td_tiledepth, "VTileSize");
+        }
+
+        /// <summary>
+        /// Computes the number of bytes in a raw (i.e. not decoded) tile.
+        /// </summary>
+        /// <param name="tile">The zero-based index of a tile.</param>
+        /// <returns>The number of bytes in a raw tile.</returns>
         public long RawTileSize(int tile)
         {
             // yes, one method for raw tile and strip sizes
@@ -2247,7 +2319,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Compute the number of bytes in each row of a tile.
         /// </summary>
-        /// <returns>The number of bytes in the each row of a tile.</returns>
+        /// <returns>The number of bytes in each row of a tile.</returns>
         public int TileRowSize()
         {
             if (m_dir.td_tilelength == 0 || m_dir.td_tilewidth == 0)
@@ -2261,72 +2333,123 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Compute the number of bytes in a row-aligned tile.
+        /// Computes which tile contains the specified coordinates (x, y, z, plane).
         /// </summary>
-        /// <returns>The number of bytes in a row-aligned tile.</returns>
-        public int TileSize()
+        /// <param name="x">The x-coordinate.</param>
+        /// <param name="y">The y-coordinate.</param>
+        /// <param name="z">The z-coordinate.</param>
+        /// <param name="plane">The sample plane.</param>
+        /// <returns>The number of the tile that contains the specified coordinates.</returns>
+        /// <remarks>
+        /// A valid tile number is always returned; out-of-range coordinate values are
+        /// clamped to the bounds of the image. The <paramref name="x"/> and <paramref name="y"/>
+        /// parameters are always used in calculating a tile. The <paramref name="z"/> parameter
+        /// is used if the image is deeper than 1 slice (<see cref="TiffTag.IMAGEDEPTH"/> &gt; 1).
+        /// The <paramref name="plane"/> parameter is used only if data are organized in separate
+        /// planes (<see cref="TiffTag.PLANARCONFIG"/> = <see cref="PlanarConfig"/>.SEPARATE).
+        /// </remarks>
+        public int ComputeTile(int x, int y, int z, short plane)
         {
-            return VTileSize(m_dir.td_tilelength);
+            if (m_dir.td_imagedepth == 1)
+                z = 0;
+
+            int dx = m_dir.td_tilewidth;
+            if (dx == -1)
+                dx = m_dir.td_imagewidth;
+
+            int dy = m_dir.td_tilelength;
+            if (dy == -1)
+                dy = m_dir.td_imagelength;
+
+            int dz = m_dir.td_tiledepth;
+            if (dz == -1)
+                dz = m_dir.td_imagedepth;
+
+            int tile = 1;
+            if (dx != 0 && dy != 0 && dz != 0)
+            {
+                int xpt = howMany(m_dir.td_imagewidth, dx);
+                int ypt = howMany(m_dir.td_imagelength, dy);
+                int zpt = howMany(m_dir.td_imagedepth, dz);
+
+                if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
+                    tile = (xpt * ypt * zpt) * plane + (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
+                else
+                    tile = (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
+            }
+
+            return tile;
         }
 
         /// <summary>
-        /// Computes the number of bytes in a variable length, row-aligned tile.
+        /// Checks whether the specified (x, y, z, plane) coordinates are within the bounds of
+        /// the image.
         /// </summary>
-        /// <param name="nrows">The number of rows in a tile.</param>
-        /// <returns>
-        /// The number of bytes in a variable length, row-aligned tile.
-        /// </returns>
-        public int VTileSize(int nrows)
+        /// <param name="x">The x-coordinate.</param>
+        /// <param name="y">The y-coordinate.</param>
+        /// <param name="z">The z-coordinate.</param>
+        /// <param name="plane">The sample plane.</param>
+        /// <returns><c>true</c> if the specified coordinates are within the bounds of the image;
+        /// otherwise, <c>false</c>.</returns>
+        /// <remarks>The <paramref name="x"/> parameter is checked against the value of the
+        /// <see cref="TiffTag.IMAGEWIDTH"/> tag. The <paramref name="y"/> parameter is checked
+        /// against the value of the <see cref="TiffTag.IMAGELENGTH"/> tag. The <paramref name="z"/>
+        /// parameter is checked against the value of the <see cref="TiffTag.IMAGEDEPTH"/> tag
+        /// (if defined). The <paramref name="plane"/> parameter is checked against the value of
+        /// the <see cref="TiffTag.SAMPLESPERPIXEL"/> tag if the data are organized in separate
+        /// planes.</remarks>
+        public bool CheckTile(int x, int y, int z, short plane)
         {
-            if (m_dir.td_tilelength == 0 || m_dir.td_tilewidth == 0 || m_dir.td_tiledepth == 0)
-                return 0;
-
-            int tilesize;
-            if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_photometric == Photometric.YCBCR && !IsUpSampled())
+            if (x >= m_dir.td_imagewidth)
             {
-                /*
-                 * Packed YCbCr data contain one Cb+Cr for every
-                 * HorizontalSampling*VerticalSampling Y values.
-                 * Must also roundup width and height when calculating
-                 * since images that are not a multiple of the
-                 * horizontal/vertical subsampling area include
-                 * YCbCr data for the extended image.
-                 */
-                int w = roundUp(m_dir.td_tilewidth, m_dir.td_ycbcrsubsampling[0]);
-                int rowsize = howMany8(multiply(w, m_dir.td_bitspersample, "VTileSize"));
-                int samplingarea = m_dir.td_ycbcrsubsampling[0] * m_dir.td_ycbcrsubsampling[1];
-                if (samplingarea == 0)
-                {
-                    ErrorExt(this, m_clientdata, m_name, "Invalid YCbCr subsampling");
-                    return 0;
-                }
-
-                nrows = roundUp(nrows, m_dir.td_ycbcrsubsampling[1]);
-                /* NB: don't need howMany here 'cuz everything is rounded */
-                tilesize = multiply(nrows, rowsize, "VTileSize");
-                tilesize = summarize(tilesize, multiply(2, tilesize / samplingarea, "VTileSize"), "VTileSize");
-            }
-            else
-            {
-                tilesize = multiply(nrows, TileRowSize(), "VTileSize");
+                ErrorExt(this, m_clientdata, m_name, "{0}: Col out of range, max {1}", x, m_dir.td_imagewidth - 1);
+                return false;
             }
 
-            return multiply(tilesize, m_dir.td_tiledepth, "VTileSize");
-        }        
+            if (y >= m_dir.td_imagelength)
+            {
+                ErrorExt(this, m_clientdata, m_name, "{0}: Row out of range, max {1}", y, m_dir.td_imagelength - 1);
+                return false;
+            }
 
-        /*
-        *   If a
-        * request is <1 then we choose a size according
-        * to certain heuristics.
-        */
+            if (z >= m_dir.td_imagedepth)
+            {
+                ErrorExt(this, m_clientdata, m_name, "{0}: Depth out of range, max {1}", z, m_dir.td_imagedepth - 1);
+                return false;
+            }
+
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE && plane >= m_dir.td_samplesperpixel)
+            {
+                ErrorExt(this, m_clientdata, m_name, "{0}: Sample out of range, max {1}", plane, m_dir.td_samplesperpixel - 1);
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
-        /// Computes a default tile size based on the image characteristics and a requested value.
+        /// Retrives the number of tiles in the image.
         /// </summary>
-        /// <param name="tw">Result tile width.</param>
-        /// <param name="th">Result tile height.</param>
-        public void DefaultTileSize(ref int tw, ref int th)
+        /// <returns>The number of tiles in the image.</returns>
+        public int NumberOfTiles()
         {
-            m_currentCodec.DefTileSize(ref tw, ref th);
+            int dx = m_dir.td_tilewidth;
+            if (dx == -1)
+                dx = m_dir.td_imagewidth;
+
+            int dy = m_dir.td_tilelength;
+            if (dy == -1)
+                dy = m_dir.td_imagelength;
+
+            int dz = m_dir.td_tiledepth;
+            if (dz == -1)
+                dz = m_dir.td_imagedepth;
+
+            int ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
+            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
+                ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
+
+            return ntiles;
         }
 
         /// <summary>
@@ -4749,112 +4872,6 @@ namespace BitMiracle.LibTiff.Classic
             TiffExtendProc prev = m_extender;
             m_extender = proc;
             return prev;
-        }
-
-        /*
-        * Compute which tile an (x,y,z,s) value is in.
-        */
-        /// <summary>
-        /// Computes which tile an (x,y,z,s) value is in.
-        /// </summary>
-        /// <param name="x">The x.</param>
-        /// <param name="y">The y.</param>
-        /// <param name="z">The z.</param>
-        /// <param name="s">The s.</param>
-        /// <returns>Which tile an (x,y,z,s) value is in.</returns>
-        public int ComputeTile(int x, int y, int z, short s)
-        {
-            if (m_dir.td_imagedepth == 1)
-                z = 0;
-
-            int dx = m_dir.td_tilewidth;
-            if (dx == -1)
-                dx = m_dir.td_imagewidth;
-
-            int dy = m_dir.td_tilelength;
-            if (dy == -1)
-                dy = m_dir.td_imagelength;
-
-            int dz = m_dir.td_tiledepth;
-            if (dz == -1)
-                dz = m_dir.td_imagedepth;
-
-            int tile = 1;
-            if (dx != 0 && dy != 0 && dz != 0)
-            {
-                int xpt = howMany(m_dir.td_imagewidth, dx);
-                int ypt = howMany(m_dir.td_imagelength, dy);
-                int zpt = howMany(m_dir.td_imagedepth, dz);
-
-                if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
-                    tile = (xpt * ypt * zpt) * s + (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
-                else
-                    tile = (xpt * ypt) * (z / dz) + xpt * (y / dy) + x / dx;
-            }
-
-            return tile;
-        }
-
-        /// <summary>
-        /// Checks an (x,y,z,s) coordinate against the image bounds.
-        /// </summary>
-        /// <param name="x">The x.</param>
-        /// <param name="y">The y.</param>
-        /// <param name="z">The z.</param>
-        /// <param name="s">The s.</param>
-        /// <returns><c>true</c> if values are correct.</returns>
-        public bool CheckTile(int x, int y, int z, short s)
-        {
-            if (x >= m_dir.td_imagewidth)
-            {
-                ErrorExt(this, m_clientdata, m_name, "{0}: Col out of range, max {1}", x, m_dir.td_imagewidth - 1);
-                return false;
-            }
-
-            if (y >= m_dir.td_imagelength)
-            {
-                ErrorExt(this, m_clientdata, m_name, "{0}: Row out of range, max {1}", y, m_dir.td_imagelength - 1);
-                return false;
-            }
-
-            if (z >= m_dir.td_imagedepth)
-            {
-                ErrorExt(this, m_clientdata, m_name, "{0}: Depth out of range, max {1}", z, m_dir.td_imagedepth - 1);
-                return false;
-            }
-
-            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE && s >= m_dir.td_samplesperpixel)
-            {
-                ErrorExt(this, m_clientdata, m_name, "{0}: Sample out of range, max {1}", s, m_dir.td_samplesperpixel - 1);
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Computes how many tiles are in an image.
-        /// </summary>
-        /// <returns>The number of tiles.</returns>
-        public int NumberOfTiles()
-        {
-            int dx = m_dir.td_tilewidth;
-            if (dx == -1)
-                dx = m_dir.td_imagewidth;
-
-            int dy = m_dir.td_tilelength;
-            if (dy == -1)
-                dy = m_dir.td_imagelength;
-
-            int dz = m_dir.td_tiledepth;
-            if (dz == -1)
-                dz = m_dir.td_imagedepth;
-
-            int ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
-            if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
-                ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
-
-            return ntiles;
         }
 
         /// <summary>
