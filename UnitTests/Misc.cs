@@ -36,7 +36,7 @@ namespace UnitTests
         }
 
         [Test]
-		[Ignore]
+        [Ignore]
         public void TestWriteCustomDirectory()
         {
             using (Tiff image = Tiff.Open("TestWriteCustomDirectory.tif", "w"))

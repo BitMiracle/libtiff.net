@@ -47,5 +47,18 @@ namespace UnitTests.TiffCP
         {
             performTest(new string[] { }, "1.tif", ",1,", "_afterPage1_converted");
         }
+
+        [Test]
+        public void test_page0and2ViaTwoInputImages()
+        {
+            Tester tester = new Tester();
+
+            string inputFile = Path.Combine(TestCase.Folder, Path.GetFileName("1.tif"));
+            string inputFile1 = inputFile + ",0";
+            string inputFile2 = inputFile + ",2";
+
+            string outputFile = TestCase.Folder + @"Output.Tiff\" + Path.GetFileName("1.tif") + "_page0and2_via_two_input_images.tif";
+            tester.Run(new string[] { inputFile1 }, inputFile2, outputFile);
+        }
     }
 }

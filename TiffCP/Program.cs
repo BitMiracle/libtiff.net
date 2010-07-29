@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 using BitMiracle.LibTiff.Classic;
 
@@ -90,178 +91,177 @@ namespace BitMiracle.TiffCP
         {
             Copier c = new Copier();
 
-            char[] mode = new char[10];
-            mode[0] = 'w';
-            int mp = 1;
+            StringBuilder mode = new StringBuilder();
+            mode.Append('w');
 
-            char comma = ','; /* (default) comma separator character */
-            FillOrder deffillorder = 0;
-            int deftilelength = -1;
-            int diroff = 0;
-            PlanarConfig defconfig = PlanarConfig.UNKNOWN;
-            int defrowsperstrip = 0;
-            int deftilewidth = -1;
+            char imageNumberSeparator = ','; // (default) comma separator character
+            FillOrder defaultFillOrder = 0;
+            int defaultTileLength = -1;
+            int initialDirectoryOffset = 0;
+            PlanarConfig defaultPlanarConfig = PlanarConfig.UNKNOWN;
+            int defaultRowsPerStrip = 0;
+            int defaultTileWidth = -1;
 
             int argn = 0;
-            using (TextWriter stderr = Console.Error)
+            for (; argn < args.Length; argn++)
             {
-                for (; argn < args.Length; argn++)
+                string option = args[argn];
+                if (option[0] == '-')
+                    option = option.Substring(1);
+                else
+                    break;
+
+                string optionArg = null;
+                if (argn < (args.Length - 1))
+                    optionArg = args[argn + 1];
+                    
+                switch (option[0])
                 {
-                    string arg = args[argn];
-                    if (arg[0] != '-')
-                        break;
-
-                    string optarg = null;
-                    if (argn < (args.Length - 1))
-                        optarg = args[argn + 1];
-
-                    arg = arg.Substring(1);
-                    switch (arg[0])
-                    {
-                        case ',':
-                            if (arg[1] != '=')
-                            {
-                                usage();
-                                return;
-                            }
-
-                            comma = arg[2];
-                            break;
-                        case 'b':
-                            /* this file is bias image subtracted from others */
-                            if (c.m_bias != null)
-                            {
-                                stderr.Write("Only 1 bias image may be specified\n");
-                                return;
-                            }
-
-                            string[] fileAndPageNums = args[argn + 1].Split(new char[] { comma });
-                            int pageNumberIndex = 1;
-                            openSrcImage(ref c.m_bias, fileAndPageNums, ref pageNumberIndex, comma);
-                            if (c.m_bias == null)
-                                return;
-
-                            if (c.m_bias.IsTiled())
-                            {
-                                stderr.Write("Bias image must be organized in strips\n");
-                                return;
-                            }
-
-                            FieldValue[] result = c.m_bias.GetField(TiffTag.SAMPLESPERPIXEL);
-                            short samples = result[0].ToShort();
-                            if (samples != 1)
-                            {
-                                stderr.Write("Bias image must be monochrome\n");
-                                return;
-                            }
-
-                            argn++;
-                            break;
-                        case 'a':
-                            /* append to output */
-                            mode[0] = 'a';
-                            break;
-                        case 'c':
-                            /* compression scheme */
-                            if (!c.ProcessCompressOptions(optarg))
-                            {
-                                usage();
-                                return;
-                            }
-
-                            argn++;
-                            break;
-                        case 'f':
-                            /* fill order */
-                            if (optarg == "lsb2msb")
-                                deffillorder = FillOrder.LSB2MSB;
-                            else if (optarg == "msb2lsb")
-                                deffillorder = FillOrder.MSB2LSB;
-                            else
-                            {
-                                usage();
-                                return;
-                            }
-
-                            argn++;
-                            break;
-                        case 'i':
-                            /* ignore errors */
-                            c.m_ignore = true;
-                            break;
-                        case 'l':
-                            /* tile length */
-                            c.m_outtiled = 1;
-                            deftilelength = int.Parse(optarg, CultureInfo.InvariantCulture);
-                            argn++;
-                            break;
-                        case 'o':
-                            /* initial directory offset */
-                            diroff = int.Parse(optarg, CultureInfo.InvariantCulture);
-                            break;
-                        case 'p':
-                            /* planar configuration */
-                            if (optarg == "separate")
-                                defconfig = PlanarConfig.SEPARATE;
-                            else if (optarg == "contig")
-                                defconfig = PlanarConfig.CONTIG;
-                            else
-                            {
-                                usage();
-                                return;
-                            }
-
-                            argn++;
-                            break;
-                        case 'r':
-                            /* rows/strip */
-                            defrowsperstrip = int.Parse(optarg, CultureInfo.InvariantCulture);
-                            argn++;
-                            break;
-                        case 's':
-                            /* generate stripped output */
-                            c.m_outtiled = 0;
-                            break;
-                        case 't':
-                            /* generate tiled output */
-                            c.m_outtiled = 1;
-                            break;
-                        case 'w':
-                            /* tile width */
-                            c.m_outtiled = 1;
-                            deftilewidth = int.Parse(optarg, CultureInfo.InvariantCulture);
-                            argn++;
-                            break;
-                        case 'B':
-                            mode[mp++] = 'b';
-                            break;
-                        case 'L':
-                            mode[mp++] = 'l';
-                            break;
-                        case 'M':
-                            mode[mp++] = 'm';
-                            break;
-                        case 'C':
-                            mode[mp++] = 'c';
-                            break;
-                        case 'x':
-                            c.m_pageInSeq = 1;
-                            break;
-                        case '?':
+                    case ',':
+                        if (option[1] != '=')
+                        {
                             usage();
                             return;
-                    }
+                        }
+
+                        imageNumberSeparator = option[2];
+                        break;
+                    case 'b':
+                        // this file is bias image subtracted from others
+                        if (c.m_bias != null)
+                        {
+                            Console.Error.Write("Only 1 bias image may be specified\n");
+                            return;
+                        }
+
+                        string biasName = args[argn + 1];
+                        c.m_bias = Tiff.Open(biasName, "r");
+                        if (c.m_bias == null)
+                        {
+                            Console.Error.WriteLine("Failed to open '{0}' as input.", biasName);
+                            return;
+                        }
+
+                        if (c.m_bias.IsTiled())
+                        {
+                            Console.Error.Write("Bias image must be organized in strips\n");
+                            return;
+                        }
+
+                        FieldValue[] result = c.m_bias.GetField(TiffTag.SAMPLESPERPIXEL);
+                        short samples = result[0].ToShort();
+                        if (samples != 1)
+                        {
+                            Console.Error.Write("Bias image must be monochrome\n");
+                            return;
+                        }
+
+                        argn++;
+                        break;
+                    case 'a':
+                        // append to output
+                        mode[0] = 'a';
+                        break;
+                    case 'c':
+                        // compression scheme
+                        if (!c.ProcessCompressOptions(optionArg))
+                        {
+                            usage();
+                            return;
+                        }
+
+                        argn++;
+                        break;
+                    case 'f':
+                        // fill order
+                        if (optionArg == "lsb2msb")
+                            defaultFillOrder = FillOrder.LSB2MSB;
+                        else if (optionArg == "msb2lsb")
+                            defaultFillOrder = FillOrder.MSB2LSB;
+                        else
+                        {
+                            usage();
+                            return;
+                        }
+
+                        argn++;
+                        break;
+                    case 'i':
+                        // ignore errors
+                        c.m_ignore = true;
+                        break;
+                    case 'l':
+                        // tile length
+                        c.m_outtiled = 1;
+                        defaultTileLength = int.Parse(optionArg, CultureInfo.InvariantCulture);
+                        argn++;
+                        break;
+                    case 'o':
+                        // initial directory offset
+                        initialDirectoryOffset = int.Parse(optionArg, CultureInfo.InvariantCulture);
+                        break;
+                    case 'p':
+                        // planar configuration
+                        if (optionArg == "separate")
+                            defaultPlanarConfig = PlanarConfig.SEPARATE;
+                        else if (optionArg == "contig")
+                            defaultPlanarConfig = PlanarConfig.CONTIG;
+                        else
+                        {
+                            usage();
+                            return;
+                        }
+
+                        argn++;
+                        break;
+                    case 'r':
+                        // rows/strip
+                        defaultRowsPerStrip = int.Parse(optionArg, CultureInfo.InvariantCulture);
+                        argn++;
+                        break;
+                    case 's':
+                        // generate stripped output
+                        c.m_outtiled = 0;
+                        break;
+                    case 't':
+                        // generate tiled output
+                        c.m_outtiled = 1;
+                        break;
+                    case 'w':
+                        // tile width
+                        c.m_outtiled = 1;
+                        defaultTileWidth = int.Parse(optionArg, CultureInfo.InvariantCulture);
+                        argn++;
+                        break;
+                    case 'B':
+                        mode.Append('b');
+                        break;
+                    case 'L':
+                        mode.Append('l');
+                        break;
+                    case 'M':
+                        mode.Append('m');
+                        break;
+                    case 'C':
+                        mode.Append('c');
+                        break;
+                    case 'x':
+                        c.m_pageInSeq = 1;
+                        break;
+                    case '?':
+                        usage();
+                        return;
                 }
             }
 
             if (args.Length - argn < 2)
             {
+                // there must be at least one input and one output image names after options
                 usage();
                 return;
             }
 
-            string smode = new string(mode, 0, mp);
-            using (Tiff outImage = Tiff.Open(args[args.Length - 1], smode))
+            using (Tiff outImage = Tiff.Open(args[args.Length - 1], mode.ToString()))
             {
                 if (outImage == null)
                 {
@@ -274,108 +274,86 @@ namespace BitMiracle.TiffCP
 
                 for (; argn < args.Length - 1; argn++)
                 {
-                    string[] fileAndPageNums = args[argn].Split(new char[] { comma });
-                    int pageNumberIndex = 1;
-                    Tiff inImage = null;
-                    try
+                    string[] fileAndPageNums = args[argn].Split(new char[] { imageNumberSeparator });
+                    
+                    using (Tiff inImage = Tiff.Open(fileAndPageNums[0], "r"))
                     {
-                        openSrcImage(ref inImage, fileAndPageNums, ref pageNumberIndex, comma);
                         if (inImage == null)
                             return;
 
-                        if (diroff != 0 && !inImage.SetSubDirectory(diroff))
+                        if (initialDirectoryOffset != 0 && !inImage.SetSubDirectory(initialDirectoryOffset))
                         {
-                            Tiff.Error(inImage.FileName(), "Error, setting subdirectory at 0x{0:x}", diroff);
+                            Tiff.Error(inImage.FileName(), "Error, setting subdirectory at 0x{0:x}", initialDirectoryOffset);
                             inImage.Dispose();
                             break;
                         }
 
-                        for ( ; ; )
+                        int initialPage = 0;
+                        int pageNumPos = 1;
+                        
+                        if (pageNumPos < fileAndPageNums.Length && !string.IsNullOrEmpty(fileAndPageNums[pageNumPos]))
+                            initialPage = int.Parse(fileAndPageNums[pageNumPos]);
+
+                        int totalPages = inImage.NumberOfDirectories();
+                        for (int i = initialPage; i < totalPages; )
                         {
-                            c.m_config = defconfig;
+                            c.m_config = defaultPlanarConfig;
                             c.m_compression = c.m_defcompression;
                             c.m_predictor = c.m_defpredictor;
-                            c.m_fillorder = deffillorder;
-                            c.m_rowsperstrip = defrowsperstrip;
-                            c.m_tilewidth = deftilewidth;
-                            c.m_tilelength = deftilelength;
+                            c.m_fillorder = defaultFillOrder;
+                            c.m_rowsperstrip = defaultRowsPerStrip;
+                            c.m_tilewidth = defaultTileWidth;
+                            c.m_tilelength = defaultTileLength;
                             c.m_g3opts = c.m_defg3opts;
 
-                            if (!c.Copy(inImage, outImage) || !outImage.WriteDirectory())
+                            if (!inImage.SetDirectory((short)i))
                             {
-                                inImage.Dispose();
+                                Console.Error.Write("{0}{1}{2} not found!\n",
+                                    inImage.FileName(), imageNumberSeparator, i);
                                 return;
                             }
 
-                            /* seek next image directory */
-                            if (pageNumberIndex < fileAndPageNums.Length)
+                            if (!c.Copy(inImage, outImage) || !outImage.WriteDirectory())
+                                return;
+
+                            // if we have at least one page specifier and current specifier is not empty.
+                            // specifier is empty when trailing separator used like this: "file,num,"
+                            if (pageNumPos < fileAndPageNums.Length && !string.IsNullOrEmpty(fileAndPageNums[pageNumPos]))
                             {
-                                if (!openSrcImage(ref inImage, fileAndPageNums, ref pageNumberIndex, comma))
+                                // move to next page specifier
+                                pageNumPos++;
+
+                                if (pageNumPos < fileAndPageNums.Length)
+                                {
+                                    // new page specifier position is valid
+
+                                    if (!string.IsNullOrEmpty(fileAndPageNums[pageNumPos]))
+                                    {
+                                        // new page specifier is not empty. use specified page number
+                                        i = int.Parse(fileAndPageNums[pageNumPos]);
+                                    }
+                                    else
+                                    {
+                                        // new page specifier is empty. just move to the next page
+                                        i++;
+                                    }
+                                }
+                                else
+                                {
+                                    // new page specifier position is invalid. done all pages.
                                     break;
+                                }
                             }
                             else
                             {
-                                if (!inImage.ReadDirectory())
-                                    break;
+                                // we have no page specifiers or current page specifier is empty
+                                // just move to the next page
+                                i++;
                             }
                         }
                     }
-                    finally
-                    {
-                        if (inImage != null)
-                            inImage.Dispose();
-                    }
                 }
             }
-        }
-
-        static bool openSrcImage(ref Tiff tif, string[] fileAndPageNums, ref int pageNumberIndex, char commaChar)
-        {
-            if (fileAndPageNums.Length == 0)
-                return false;
-
-            if (pageNumberIndex >= fileAndPageNums.Length && tif != null)
-            {
-                // we processed all images already
-                return false;
-            }
-
-            if (tif == null)
-                tif = Tiff.Open(fileAndPageNums[0], "r");
-
-            if (tif == null)
-            {
-                Console.Error.WriteLine("Failed to open '{0}' as input.", fileAndPageNums[0]);
-                return false;
-            }
-
-            if (fileAndPageNums.Length > 1)
-            {
-                // we have at least one page number specifier
-
-                string pageNumStr = fileAndPageNums[pageNumberIndex];
-                if (pageNumStr.Length == 0)
-                {
-                    // position "after trailing comma". we should process all remaining
-                    // directories, so read next directory
-
-                    return tif.ReadDirectory();
-                }
-                else
-                {
-                    // parse page number and set appropriate image directory
-                    short pageNum = short.Parse(pageNumStr);
-                    if (!tif.SetDirectory((short)(pageNum - 1)))
-                    {
-                        Console.Error.Write("{0}{1}{2} not found!\n", tif.FileName(), commaChar, pageNum);
-                        return false;
-                    }
-
-                    pageNumberIndex++;
-                }
-            }
-
-            return true;
         }
 
         static void usage()
