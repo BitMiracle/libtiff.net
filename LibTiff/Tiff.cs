@@ -5732,312 +5732,358 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Swaps the short.
+        /// Swaps the bytes in a single 16-bit item.
         /// </summary>
-        /// <param name="wp">The short number.</param>
-        public static void SwabShort(ref short wp)
+        /// <param name="value">The value to swap bytes in.</param>
+        public static void SwabShort(ref short value)
         {
-            byte[] cp = new byte[2];
-            cp[0] = (byte)wp;
-            cp[1] = (byte)(wp >> 8);
+            byte[] bytes = new byte[2];
+            bytes[0] = (byte)value;
+            bytes[1] = (byte)(value >> 8);
 
-            byte t = cp[1];
-            cp[1] = cp[0];
-            cp[0] = t;
+            byte temp = bytes[1];
+            bytes[1] = bytes[0];
+            bytes[0] = temp;
 
-            wp = (short)(cp[0] & 0xFF);
-            wp += (short)((cp[1] & 0xFF) << 8);
+            value = (short)(bytes[0] & 0xFF);
+            value += (short)((bytes[1] & 0xFF) << 8);
         }
 
         /// <summary>
-        /// Swaps the integer.
+        /// Swaps the bytes in a single 32-bit item.
         /// </summary>
-        /// <param name="lp">The integer number.</param>
-        public static void SwabLong(ref int lp)
+        /// <param name="value">The value to swap bytes in.</param>
+        public static void SwabLong(ref int value)
         {
-            byte[] cp = new byte[4];
-            cp[0] = (byte)lp;
-            cp[1] = (byte)(lp >> 8);
-            cp[2] = (byte)(lp >> 16);
-            cp[3] = (byte)(lp >> 24);
+            byte[] bytes = new byte[4];
+            bytes[0] = (byte)value;
+            bytes[1] = (byte)(value >> 8);
+            bytes[2] = (byte)(value >> 16);
+            bytes[3] = (byte)(value >> 24);
 
-            byte t = cp[3];
-            cp[3] = cp[0];
-            cp[0] = t;
+            byte temp = bytes[3];
+            bytes[3] = bytes[0];
+            bytes[0] = temp;
 
-            t = cp[2];
-            cp[2] = cp[1];
-            cp[1] = t;
+            temp = bytes[2];
+            bytes[2] = bytes[1];
+            bytes[1] = temp;
 
-            lp = cp[0] & 0xFF;
-            lp += (cp[1] & 0xFF) << 8;
-            lp += (cp[2] & 0xFF) << 16;
-            lp += cp[3] << 24;
+            value = bytes[0] & 0xFF;
+            value += (bytes[1] & 0xFF) << 8;
+            value += (bytes[2] & 0xFF) << 16;
+            value += bytes[3] << 24;
         }
 
         /// <summary>
-        /// Swaps the double.
+        /// Swaps the bytes in a single double-precision floating-point number.
         /// </summary>
-        /// <param name="dp">The double number.</param>
-        public static void SwabDouble(ref double dp)
+        /// <param name="value">The value to swap bytes in.</param>
+        public static void SwabDouble(ref double value)
         {
-            byte[] bytes = BitConverter.GetBytes(dp);
-            int[] lp = new int[2];
-            lp[0] = BitConverter.ToInt32(bytes, 0);
-            lp[0] = BitConverter.ToInt32(bytes, sizeof(int));
+            byte[] bytes = BitConverter.GetBytes(value);
+            int[] ints = new int[2];
+            ints[0] = BitConverter.ToInt32(bytes, 0);
+            ints[0] = BitConverter.ToInt32(bytes, sizeof(int));
 
-            SwabArrayOfLong(lp, 2);
+            SwabArrayOfLong(ints, 2);
 
-            int t = lp[0];
-            lp[0] = lp[1];
-            lp[1] = t;
+            int temp = ints[0];
+            ints[0] = ints[1];
+            ints[1] = temp;
 
-            Buffer.BlockCopy(BitConverter.GetBytes(lp[0]), 0, bytes, 0, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(lp[1]), 0, bytes, sizeof(int), sizeof(int));
-            dp = BitConverter.ToDouble(bytes, 0);
+            Buffer.BlockCopy(BitConverter.GetBytes(ints[0]), 0, bytes, 0, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(ints[1]), 0, bytes, sizeof(int), sizeof(int));
+            value = BitConverter.ToDouble(bytes, 0);
         }
 
         /// <summary>
-        /// Swabs the array of short.
+        /// Swaps the bytes in specified number of values in the array of 16-bit items.
         /// </summary>
-        /// <param name="wp">The wp.</param>
-        /// <param name="n">The n.</param>
-        public static void SwabArrayOfShort(short[] wp, int n)
+        /// <overloads>
+        /// Swaps the bytes in specified number of values in the array of 16-bit items.
+        /// </overloads>
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfShort(short[] array, int count)
         {
-            SwabArrayOfShort(wp, 0, n);
+            SwabArrayOfShort(array, 0, count);
         }
 
         /// <summary>
-        /// Swaps the array of short.
+        /// Swaps the bytes in specified number of values in the array of 16-bit items starting at
+        /// specified offset.
         /// </summary>
-        /// <param name="wp">The array of short numbers.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="n">The array length.</param>
-        public static void SwabArrayOfShort(short[] wp, int offset, int n)
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="array"/> at
+        /// which to begin swapping bytes.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfShort(short[] array, int offset, int count)
         {
-            byte[] cp = new byte[2];
-            for (int i = 0; i < n; i++, offset++)
+            byte[] bytes = new byte[2];
+            for (int i = 0; i < count; i++, offset++)
             {
-                cp[0] = (byte)wp[offset];
-                cp[1] = (byte)(wp[offset] >> 8);
+                bytes[0] = (byte)array[offset];
+                bytes[1] = (byte)(array[offset] >> 8);
 
-                byte t = cp[1];
-                cp[1] = cp[0];
-                cp[0] = t;
+                byte temp = bytes[1];
+                bytes[1] = bytes[0];
+                bytes[0] = temp;
 
-                wp[offset] = (short)(cp[0] & 0xFF);
-                wp[offset] += (short)((cp[1] & 0xFF) << 8);
+                array[offset] = (short)(bytes[0] & 0xFF);
+                array[offset] += (short)((bytes[1] & 0xFF) << 8);
             }
         }
 
         /// <summary>
-        /// Swaps the array of triples.
+        /// Swaps the bytes in specified number of values in the array of triples (24-bit items).
         /// </summary>
-        /// <param name="buffer">The array of triples.</param>
-        /// <param name="count">The array length.</param>
-        public static void SwabArrayOfTriples(byte[] buffer, int count)
+        /// <overloads>
+        /// Swaps the bytes in specified number of values in the array of triples (24-bit items).
+        /// </overloads>
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfTriples(byte[] array, int count)
         {
-            SwabArrayOfTriples(buffer, 0, count);
+            SwabArrayOfTriples(array, 0, count);
         }
 
         /// <summary>
-        /// Swaps the array of triples.
+        /// Swaps the bytes in specified number of values in the array of triples (24-bit items)
+        /// starting at specified offset.
         /// </summary>
-        /// <param name="buffer">The array of triples.</param>
-        /// <param name="offset">The offset into <paramref name="buffer"/>.</param>
-        /// <param name="count">The array length.</param>
-        public static void SwabArrayOfTriples(byte[] buffer, int offset, int count)
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="array"/> at
+        /// which to begin swapping bytes.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfTriples(byte[] array, int offset, int count)
         {
             // XXX unroll loop some
             while (count-- > 0)
             {
-                byte t = buffer[offset + 2];
-                buffer[offset + 2] = buffer[offset];
-                buffer[offset] = t;
+                byte t = array[offset + 2];
+                array[offset + 2] = array[offset];
+                array[offset] = t;
                 offset += 3;
             }
         }
 
         /// <summary>
-        /// Swabs the array of long.
+        /// Swaps the bytes in specified number of values in the array of 32-bit items.
         /// </summary>
-        /// <param name="lp">The lp.</param>
-        /// <param name="n">The n.</param>
-        public static void SwabArrayOfLong(int[] lp, int n)
+        /// <overloads>
+        /// Swaps the bytes in specified number of values in the array of 32-bit items.
+        /// </overloads>
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfLong(int[] array, int count)
         {
-            SwabArrayOfLong(lp, 0, n);
+            SwabArrayOfLong(array, 0, count);
         }
 
         /// <summary>
-        /// Swaps the array of integers.
+        /// Swaps the bytes in specified number of values in the array of 32-bit items
+        /// starting at specified offset.
         /// </summary>
-        /// <param name="lp">The array of integers.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="n">The array length.</param>
-        public static void SwabArrayOfLong(int[] lp, int offset, int n)
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="array"/> at
+        /// which to begin swapping bytes.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfLong(int[] array, int offset, int count)
         {
-            byte[] cp = new byte[4];
+            byte[] bytes = new byte[4];
 
-            for (int i = 0; i < n; i++, offset++)
+            for (int i = 0; i < count; i++, offset++)
             {
-                cp[0] = (byte)lp[offset];
-                cp[1] = (byte)(lp[offset] >> 8);
-                cp[2] = (byte)(lp[offset] >> 16);
-                cp[3] = (byte)(lp[offset] >> 24);
+                bytes[0] = (byte)array[offset];
+                bytes[1] = (byte)(array[offset] >> 8);
+                bytes[2] = (byte)(array[offset] >> 16);
+                bytes[3] = (byte)(array[offset] >> 24);
 
-                byte t = cp[3];
-                cp[3] = cp[0];
-                cp[0] = t;
+                byte temp = bytes[3];
+                bytes[3] = bytes[0];
+                bytes[0] = temp;
 
-                t = cp[2];
-                cp[2] = cp[1];
-                cp[1] = t;
+                temp = bytes[2];
+                bytes[2] = bytes[1];
+                bytes[1] = temp;
 
-                lp[offset] = cp[0] & 0xFF;
-                lp[offset] += (cp[1] & 0xFF) << 8;
-                lp[offset] += (cp[2] & 0xFF) << 16;
-                lp[offset] += cp[3] << 24;
+                array[offset] = bytes[0] & 0xFF;
+                array[offset] += (bytes[1] & 0xFF) << 8;
+                array[offset] += (bytes[2] & 0xFF) << 16;
+                array[offset] += bytes[3] << 24;
             }
         }
 
         /// <summary>
-        /// Swabs the array of double.
+        /// Swaps the bytes in specified number of values in the array of double-precision
+        /// floating-point numbers.
         /// </summary>
-        /// <param name="dp">The dp.</param>
-        /// <param name="n">The n.</param>
-        public static void SwabArrayOfDouble(double[] dp, int n)
+        /// <overloads>
+        /// Swaps the bytes in specified number of values in the array of double-precision
+        /// floating-point numbers.
+        /// </overloads>
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfDouble(double[] array, int count)
         {
-            SwabArrayOfDouble(dp, 0, n);
+            SwabArrayOfDouble(array, 0, count);
         }
 
         /// <summary>
-        /// Swabs the array of doubles.
+        /// Swaps the bytes in specified number of values in the array of double-precision
+        /// floating-point numbers starting at specified offset.
         /// </summary>
-        /// <param name="dp">The array of doubles.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="n">The array length.</param>
-        public static void SwabArrayOfDouble(double[] dp, int offset, int n)
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="array"/> at
+        /// which to begin swapping bytes.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
+        public static void SwabArrayOfDouble(double[] array, int offset, int count)
         {
-            int[] lp = new int[n * sizeof(int) / sizeof(double)];
-            Buffer.BlockCopy(dp, 0, lp, 0, lp.Length * sizeof(int));
+            int[] ints = new int[count * sizeof(int) / sizeof(double)];
+            Buffer.BlockCopy(array, offset * sizeof(double), ints, 0, ints.Length * sizeof(int));
 
-            SwabArrayOfLong(lp, lp.Length);
+            SwabArrayOfLong(ints, ints.Length);
 
-            int lpPos = 0;
-            while (n-- > 0)
+            int pos = 0;
+            while (count-- > 0)
             {
-                int t = lp[lpPos];
-                lp[lpPos] = lp[lpPos + 1];
-                lp[lpPos + 1] = t;
-                lpPos += 2;
+                int temp = ints[pos];
+                ints[pos] = ints[pos + 1];
+                ints[pos + 1] = temp;
+                pos += 2;
             }
 
-            for (int i = 0; i < n; i++, offset++)
-                Buffer.BlockCopy(lp, 0, dp, 0, n * sizeof(double));
+            Buffer.BlockCopy(ints, 0, array, offset * sizeof(double), ints.Length * sizeof(int));
         }
 
         /// <summary>
-        /// Reverses the bits.
+        /// Replaces specified number of bytes in <paramref name="buffer"/> with the
+        /// equivalent bit-reversed bytes.
         /// </summary>
-        /// <param name="cp">The cp.</param>
-        /// <param name="n">The n.</param>
-        public static void ReverseBits(byte[] cp, int n)
+        /// <overloads>
+        /// Replaces specified number of bytes in <paramref name="buffer"/> with the
+        /// equivalent bit-reversed bytes.
+        /// </overloads>
+        /// <param name="buffer">The buffer to replace bytes in.</param>
+        /// <param name="count">The number of bytes to process.</param>
+        /// <remarks>
+        /// This operation is performed with a lookup table, which can be retrieved using the
+        /// <see cref="GetBitRevTable"/> method.
+        /// </remarks>
+        public static void ReverseBits(byte[] buffer, int count)
         {
-            ReverseBits(cp, 0, n);
+            ReverseBits(buffer, 0, count);
         }
 
         /// <summary>
-        /// Reverses the bits.
+        /// Replaces specified number of bytes in <paramref name="buffer"/> with the
+        /// equivalent bit-reversed bytes starting at specified offset.
         /// </summary>
-        /// <param name="cp">The byte array.</param>
-        /// <param name="cpPos">The cp pos.</param>
-        /// <param name="n">The array length.</param>
-        public static void ReverseBits(byte[] cp, int cpPos, int n)
+        /// <param name="buffer">The buffer to replace bytes in.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="buffer"/> at
+        /// which to begin processing bytes.</param>
+        /// <param name="count">The number of bytes to process.</param>
+        /// <remarks>
+        /// This operation is performed with a lookup table, which can be retrieved using the
+        /// <see cref="GetBitRevTable"/> method.
+        /// </remarks>
+        public static void ReverseBits(byte[] buffer, int offset, int count)
         {
-            for (; n > 8; n -= 8)
+            for (; count > 8; count -= 8)
             {
-                cp[cpPos + 0] = TIFFBitRevTable[cp[cpPos + 0]];
-                cp[cpPos + 1] = TIFFBitRevTable[cp[cpPos + 1]];
-                cp[cpPos + 2] = TIFFBitRevTable[cp[cpPos + 2]];
-                cp[cpPos + 3] = TIFFBitRevTable[cp[cpPos + 3]];
-                cp[cpPos + 4] = TIFFBitRevTable[cp[cpPos + 4]];
-                cp[cpPos + 5] = TIFFBitRevTable[cp[cpPos + 5]];
-                cp[cpPos + 6] = TIFFBitRevTable[cp[cpPos + 6]];
-                cp[cpPos + 7] = TIFFBitRevTable[cp[cpPos + 7]];
-                cpPos += 8;
+                buffer[offset + 0] = TIFFBitRevTable[buffer[offset + 0]];
+                buffer[offset + 1] = TIFFBitRevTable[buffer[offset + 1]];
+                buffer[offset + 2] = TIFFBitRevTable[buffer[offset + 2]];
+                buffer[offset + 3] = TIFFBitRevTable[buffer[offset + 3]];
+                buffer[offset + 4] = TIFFBitRevTable[buffer[offset + 4]];
+                buffer[offset + 5] = TIFFBitRevTable[buffer[offset + 5]];
+                buffer[offset + 6] = TIFFBitRevTable[buffer[offset + 6]];
+                buffer[offset + 7] = TIFFBitRevTable[buffer[offset + 7]];
+                offset += 8;
             }
 
-            while (n-- > 0)
+            while (count-- > 0)
             {
-                cp[cpPos] = TIFFBitRevTable[cp[cpPos]];
-                cpPos++;
+                buffer[offset] = TIFFBitRevTable[buffer[offset]];
+                offset++;
             }
         }
 
         /// <summary>
-        /// Gets the bit reversal table.
+        /// Retrieves a bit reversal table.
         /// </summary>
-        /// <param name="reversed">if set to <c>true</c> reversed table will be retrieved.</param>
-        /// <returns>The reversal table.</returns>
+        /// <param name="reversed">if set to <c>true</c> then bit reversal table will be
+        /// retrieved; otherwise, the table that do not reverse bit values will be retrieved.</param>
+        /// <returns>The bit reversal table.</returns>
+        /// <remarks>If <paramref name="reversed"/> is <c>false</c> then the table that do not
+        /// reverse bit values will be retrieved. It is a lookup table that can be used as an
+        /// identity function; i.e. NoBitRevTable[n] == n.</remarks>
         public static byte[] GetBitRevTable(bool reversed)
         {
             return (reversed ? TIFFBitRevTable : TIFFNoBitRevTable);
         }
 
         /// <summary>
-        /// Converts byte array to array of integers.
+        /// Converts a byte buffer into array of 32-bit values.
         /// </summary>
-        /// <param name="b">The byte array.</param>
-        /// <param name="byteStartOffset">The start offset.</param>
-        /// <param name="byteCount">The byte count.</param>
-        /// <returns>The array of integers.</returns>
-        public static int[] ByteArrayToInts(byte[] b, int byteStartOffset, int byteCount)
+        /// <param name="buffer">The byte buffer.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="buffer"/> at
+        /// which to begin converting bytes.</param>
+        /// <param name="count">The number of bytes to convert.</param>
+        /// <returns>The array of 32-bit values.</returns>
+        public static int[] ByteArrayToInts(byte[] buffer, int offset, int count)
         {
-            int intCount = byteCount / sizeof(int);
+            int intCount = count / sizeof(int);
             int[] integers = new int[intCount];
-            Buffer.BlockCopy(b, byteStartOffset, integers, 0, intCount * sizeof(int));            
+            Buffer.BlockCopy(buffer, offset, integers, 0, intCount * sizeof(int));            
             return integers;
         }
 
         /// <summary>
-        /// Convert array of integers to array of bytes.
+        /// Converts array of 32-bit values into array of bytes.
         /// </summary>
-        /// <param name="integers">The array of integers.</param>
-        /// <param name="intStartOffset">The start offset.</param>
-        /// <param name="intCount">The number of integers.</param>
-        /// <param name="bytes">The byte array.</param>
-        /// <param name="byteStartOffset">The start offset in byte array.</param>
-        public static void IntsToByteArray(int[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        /// <param name="source">The array of 32-bit values.</param>
+        /// <param name="srcOffset">The zero-based offset in <paramref name="source"/> at
+        /// which to begin converting bytes.</param>
+        /// <param name="srcCount">The number of 32-bit values to convert.</param>
+        /// <param name="bytes">The byte array to store converted values at.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="bytes"/> at
+        /// which to begin storing converted values.</param>
+        public static void IntsToByteArray(int[] source, int srcOffset, int srcCount, byte[] bytes, int offset)
         {
-            Buffer.BlockCopy(integers, intStartOffset * sizeof(int), bytes, byteStartOffset, intCount * sizeof(int));
+            Buffer.BlockCopy(source, srcOffset * sizeof(int), bytes, offset, srcCount * sizeof(int));
         }
 
         /// <summary>
-        /// Convert array of bytes to array of shorts.
+        /// Converts a byte buffer into array of 16-bit values.
         /// </summary>
-        /// <param name="b">The byte array.</param>
-        /// <param name="byteStartOffset">The start offset.</param>
-        /// <param name="byteCount">The byte count.</param>
-        /// <returns>The array of short.</returns>
-        public static short[] ByteArrayToShorts(byte[] b, int byteStartOffset, int byteCount)
+        /// <param name="buffer">The byte buffer.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="buffer"/> at
+        /// which to begin converting bytes.</param>
+        /// <param name="count">The number of bytes to convert.</param>
+        /// <returns>The array of 16-bit values.</returns>
+        public static short[] ByteArrayToShorts(byte[] buffer, int offset, int count)
         {
-            int shortCount = byteCount / sizeof(short);
+            int shortCount = count / sizeof(short);
             short[] shorts = new short[shortCount];
-            Buffer.BlockCopy(b, byteStartOffset, shorts, 0, shortCount * sizeof(short));
+            Buffer.BlockCopy(buffer, offset, shorts, 0, shortCount * sizeof(short));
             return shorts;
         }
 
         /// <summary>
-        /// Converts array of shorts to array of bytes.
+        /// Converts array of 16-bit values into array of bytes.
         /// </summary>
-        /// <param name="integers">The array of integers.</param>
-        /// <param name="intStartOffset">The start offset.</param>
-        /// <param name="intCount">The integers count.</param>
-        /// <param name="bytes">The bytes array.</param>
-        /// <param name="byteStartOffset">The start offset in array of bytes.</param>
-        public static void ShortsToByteArray(short[] integers, int intStartOffset, int intCount, byte[] bytes, int byteStartOffset)
+        /// <param name="source">The array of 16-bit values.</param>
+        /// <param name="srcOffset">The zero-based offset in <paramref name="source"/> at
+        /// which to begin converting bytes.</param>
+        /// <param name="srcCount">The number of 16-bit values to convert.</param>
+        /// <param name="bytes">The byte array to store converted values at.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="bytes"/> at
+        /// which to begin storing converted values.</param>
+        public static void ShortsToByteArray(short[] source, int srcOffset, int srcCount, byte[] bytes, int offset)
         {
-            Buffer.BlockCopy(integers, intStartOffset * sizeof(short), bytes, byteStartOffset, intCount * sizeof(short));
+            Buffer.BlockCopy(source, srcOffset * sizeof(short), bytes, offset, srcCount * sizeof(short));
         }
     }
 }
