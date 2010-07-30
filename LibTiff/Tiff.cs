@@ -4673,54 +4673,54 @@ namespace BitMiracle.LibTiff.Classic
         /// to the <see cref="Console.Error"/>.
         /// </summary>
         /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
-        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <remarks>
         /// <para>
         /// The <paramref name="format"/> is a composite format string that uses the same format as
-        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter, if
         /// not <c>null</c>, is printed before the message; it typically is used to identify the
-        /// software module in which an error is detected.
+        /// method in which an error is detected.
         /// </para>
         /// <para>Applications that desire to capture control in the event of an error should use
-        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
         /// <overloads>
         /// Invokes the library-wide error handling methods to (normally) write an error message
         /// to the <see cref="Console.Error"/>.
         /// </overloads>
-        public static void Error(Tiff tif, string module, string format, params object[] args)
+        public static void Error(Tiff tif, string method, string format, params object[] args)
         {
             if (m_errorHandler == null)
                 return;
 
-            m_errorHandler.ErrorHandler(tif, module, format, args);
-            m_errorHandler.ErrorHandlerExt(tif, null, module, format, args);
+            m_errorHandler.ErrorHandler(tif, method, format, args);
+            m_errorHandler.ErrorHandlerExt(tif, null, method, format, args);
         }
 
         /// <summary>
         /// Invokes the library-wide error handling methods to (normally) write an error message
         /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <remarks>
         /// <para>
         /// The <paramref name="format"/> is a composite format string that uses the same format as
-        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter, if
         /// not <c>null</c>, is printed before the message; it typically is used to identify the
-        /// software module in which an error is detected.
+        /// method in which an error is detected.
         /// </para>
         /// <para>Applications that desire to capture control in the event of an error should use
-        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
-        public static void Error(string module, string format, params object[] args)
+        public static void Error(string method, string format, params object[] args)
         {
-            Error(null, module, format, args);
+            Error(null, method, format, args);
         }
 
         /// <summary>
@@ -4729,15 +4729,15 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
         /// <param name="clientData">The client data to be passed to error handler.</param>
-        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <remarks>
         /// <para>
         /// The <paramref name="format"/> is a composite format string that uses the same format as
-        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter, if
         /// not <c>null</c>, is printed before the message; it typically is used to identify the
-        /// software module in which an error is detected.
+        /// method in which an error is detected.
         /// </para>
         /// <para>
         /// The <paramref name="clientData"/> parameter can be anything you want. It will be passed
@@ -4745,20 +4745,20 @@ namespace BitMiracle.LibTiff.Classic
         /// error handlers may make use of it.
         /// </para>
         /// <para>Applications that desire to capture control in the event of an error should use
-        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
         /// <overloads>
         /// Invokes the library-wide error handling methods to (normally) write an error message
         /// to the <see cref="Console.Error"/> and passes client data to the error handler.
         /// </overloads>
-        public static void ErrorExt(Tiff tif, object clientData, string module, string format, params object[] args)
+        public static void ErrorExt(Tiff tif, object clientData, string method, string format, params object[] args)
         {
             if (m_errorHandler == null)
                 return;
 
-            m_errorHandler.ErrorHandler(tif, module, format, args);
-            m_errorHandler.ErrorHandlerExt(tif, clientData, module, format, args);
+            m_errorHandler.ErrorHandler(tif, method, format, args);
+            m_errorHandler.ErrorHandlerExt(tif, clientData, method, format, args);
         }
 
         /// <summary>
@@ -4766,15 +4766,15 @@ namespace BitMiracle.LibTiff.Classic
         /// to the <see cref="Console.Error"/>.
         /// </summary>
         /// <param name="clientData">The client data to be passed to error handler.</param>
-        /// <param name="module">The module where an error is detected.</param>
+        /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <remarks>
         /// <para>
         /// The <paramref name="format"/> is a composite format string that uses the same format as
-        /// <see cref="O:System.String.Format"/> method. The <paramref name="module"/> parameter, if
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter, if
         /// not <c>null</c>, is printed before the message; it typically is used to identify the
-        /// software module in which an error is detected.
+        /// method in which an error is detected.
         /// </para>
         /// <para>
         /// The <paramref name="clientData"/> parameter can be anything you want. It will be passed
@@ -4782,76 +4782,139 @@ namespace BitMiracle.LibTiff.Classic
         /// error handlers may make use of it.
         /// </para>
         /// <para>Applications that desire to capture control in the event of an error should use
-        /// <see cref="SetErrorHandler"/> to override the default error handler.
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
-        public static void ErrorExt(object clientData, string module, string format, params object[] args)
+        public static void ErrorExt(object clientData, string method, string format, params object[] args)
         {
-            ErrorExt(null, clientData, module, format, args);
+            ErrorExt(null, clientData, method, format, args);
         }
 
         /// <summary>
-        /// Forces the warning.
+        /// Invokes the library-wide warning handling methods to (normally) write a warning message
+        /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">The tif. Can be <c>null</c></param>
-        /// <param name="module">The module.</param>
-        /// <param name="format">The message format.</param>
-        /// <param name="args">The optional formatted message arguments.</param>
-        public static void Warning(Tiff tif, string module, string format, params object[] args)
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="method">The method in which a warning is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>
+        /// <para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter,
+        /// if not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// method in which a warning is detected.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of a warning should use
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
+        /// </para>
+        /// </remarks>
+        /// <overloads>
+        /// Invokes the library-wide warning handling methods to (normally) write a warning message
+        /// to the <see cref="Console.Error"/>.
+        /// </overloads>
+        public static void Warning(Tiff tif, string method, string format, params object[] args)
         {
             if (m_errorHandler == null)
                 return;
 
-            m_errorHandler.WarningHandler(tif, module, format, args);
-            m_errorHandler.WarningHandlerExt(tif, null, module, format, args);
+            m_errorHandler.WarningHandler(tif, method, format, args);
+            m_errorHandler.WarningHandlerExt(tif, null, method, format, args);
         }
 
         /// <summary>
-        /// Forces the warning.
+        /// Invokes the library-wide warning handling methods to (normally) write a warning message
+        /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="module">The module.</param>
-        /// <param name="format">The message format.</param>
-        /// <param name="args">The optional formatted message arguments.</param>
-        public static void Warning(string module, string format, params object[] args)
+        /// <param name="method">The method in which a warning is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks><para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter,
+        /// if not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// method in which a warning is detected.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of a warning should use
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
+        /// </para>
+        /// </remarks>
+        public static void Warning(string method, string format, params object[] args)
         {
-            Warning(null, module, format, args);
+            Warning(null, method, format, args);
         }
 
         /// <summary>
-        /// Forces the warning.
+        /// Invokes the library-wide warning handling methods to (normally) write a warning message
+        /// to the <see cref="Console.Error"/> and passes client data to the warning handler.
         /// </summary>
-        /// <param name="tif">The tif. Can be <c>null</c></param>
-        /// <param name="fd">The fd.</param>
-        /// <param name="module">The module.</param>
-        /// <param name="format">The message format.</param>
-        /// <param name="args">The optional formatted message arguments.</param>
-        public static void WarningExt(Tiff tif, object fd, string module, string format, params object[] args)
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="clientData">The client data to be passed to warning handler.</param>
+        /// <param name="method">The method in which a warning is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks>
+        /// <para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter, if
+        /// not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// method in which a warning is detected.
+        /// </para>
+        /// <para>
+        /// The <paramref name="clientData"/> parameter can be anything you want. It will be passed
+        /// unchanged to the warning handler. Default warning handler does not use it. Only custom
+        /// warning handlers may make use of it.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of a warning should use
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
+        /// </para>
+        /// </remarks>
+        /// <overloads>
+        /// Invokes the library-wide warning handling methods to (normally) write a warning message
+        /// to the <see cref="Console.Error"/> and passes client data to the warning handler.
+        /// </overloads>
+        public static void WarningExt(Tiff tif, object clientData, string method, string format, params object[] args)
         {
             if (m_errorHandler == null)
                 return;
 
-            m_errorHandler.WarningHandler(tif, module, format, args);
-            m_errorHandler.WarningHandlerExt(tif, fd, module, format, args);
+            m_errorHandler.WarningHandler(tif, method, format, args);
+            m_errorHandler.WarningHandlerExt(tif, clientData, method, format, args);
         }
 
         /// <summary>
-        /// Forces the warning.
+        /// Invokes the library-wide warning handling methods to (normally) write a warning message
+        /// to the <see cref="Console.Error"/> and passes client data to the warning handler.
         /// </summary>
-        /// <param name="fd">The fd.</param>
-        /// <param name="module">The module.</param>
-        /// <param name="format">The message format.</param>
-        /// <param name="args">The optional formatted message arguments.</param>
-        public static void WarningExt(object fd, string module, string format, params object[] args)
+        /// <param name="clientData">The client data to be passed to warning handler.</param>
+        /// <param name="method">The method in which a warning is detected.</param>
+        /// <param name="format">A composite format string (see Remarks).</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        /// <remarks><para>
+        /// The <paramref name="format"/> is a composite format string that uses the same format as
+        /// <see cref="O:System.String.Format"/> method. The <paramref name="method"/> parameter, if
+        /// not <c>null</c>, is printed before the message; it typically is used to identify the
+        /// method in which a warning is detected.
+        /// </para><para>
+        /// The <paramref name="clientData"/> parameter can be anything you want. It will be passed
+        /// unchanged to the warning handler. Default warning handler does not use it. Only custom
+        /// warning handlers may make use of it.
+        /// </para>
+        /// <para>Applications that desire to capture control in the event of a warning should use
+        /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
+        /// </para>
+        /// </remarks>
+        public static void WarningExt(object clientData, string method, string format, params object[] args)
         {
-            WarningExt(null, fd, module, format, args);
+            WarningExt(null, clientData, method, format, args);
         }
 
         /// <summary>
         /// Sets an instance of the <see cref="TiffErrorHandler"/> class as custom library-wide
-        /// error handler.
+        /// error and warning handler.
         /// </summary>
         /// <param name="errorHandler">An instance of the <see cref="TiffErrorHandler"/> class
-        /// to set as custom library-wide error handler.</param>
+        /// to set as custom library-wide error and warning handler.</param>
         /// <returns>
         /// Previous error handler or <c>null</c> if there was no error handler set.
         /// </returns>
