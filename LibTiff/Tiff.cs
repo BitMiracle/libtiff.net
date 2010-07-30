@@ -730,42 +730,42 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the number of elements in the tag list.
+        /// Gets the number of elements in the custom tag list.
         /// </summary>
-        /// <returns>The number of tags.</returns>
+        /// <returns>The number of elements in the custom tag list.</returns>
         public int GetTagListCount()
         {
             return m_dir.td_customValueCount;
         }
 
         /// <summary>
-        /// Gets the required tag.
+        /// Retrieves the custom tag with specified index.
         /// </summary>
-        /// <param name="tag_index">The index of required tag.</param>
-        /// <returns>The required tag.</returns>
-        public int GetTagListEntry(int tag_index)
+        /// <param name="index">The zero-based index of a custom tag to retrieve.</param>
+        /// <returns>The custom tag with specified index.</returns>
+        public int GetTagListEntry(int index)
         {
-            if (tag_index < 0 || tag_index >= m_dir.td_customValueCount)
+            if (index < 0 || index >= m_dir.td_customValueCount)
                 return -1;
             else
-                return (int)m_dir.td_customValues[tag_index].info.Tag;
+                return (int)m_dir.td_customValues[index].info.Tag;
         }
 
         /// <summary>
-        /// Merges the field data.
+        /// Merges given field information to existing one.
         /// </summary>
-        /// <param name="info">The array of field info.</param>
-        /// <param name="n">The number of merged items from array.</param>
-        public void MergeFieldInfo(TiffFieldInfo[] info, int n)
+        /// <param name="info">The array of <see cref="TiffFieldInfo"/> objects.</param>
+        /// <param name="count">The number of items to use from the <paramref name="info"/> array.</param>
+        public void MergeFieldInfo(TiffFieldInfo[] info, int count)
         {
             m_foundfield = null;
 
             if (m_nfields > 0)
-                m_fieldinfo = Realloc(m_fieldinfo, m_nfields, m_nfields + n);
+                m_fieldinfo = Realloc(m_fieldinfo, m_nfields, m_nfields + count);
             else
-                m_fieldinfo = new TiffFieldInfo[n];
+                m_fieldinfo = new TiffFieldInfo[count];
 
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < count; i++)
             {
                 TiffFieldInfo fip = FindFieldInfo(info[i].Tag, info[i].Type);
 
@@ -783,44 +783,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves field information for specified tag.
+        /// Retrieves field information for the specified tag.
         /// </summary>
-        /// <param name="tag">The tag.</param>
-        /// <param name="dt">The tiff type.</param>
-        /// <returns>The field information or <c>null</c> if the field isn't found.</returns>
-        public TiffFieldInfo FindFieldInfo(TiffTag tag, TiffType dt)
+        /// <param name="tag">The tag to retrieve field information for.</param>
+        /// <param name="type">The tiff data type to use us additional filter.</param>
+        /// <returns>The field information for specified tag with specified type or <c>null</c> if
+        /// the field information wasn't found.</returns>
+        public TiffFieldInfo FindFieldInfo(TiffTag tag, TiffType type)
         {
-            if (m_foundfield != null && m_foundfield.Tag == tag && (dt == TiffType.ANY || dt == m_foundfield.Type))
-                return m_foundfield;
-
-            /* If we are invoked with no field information, then just return. */
-            if (m_fieldinfo == null)
-                return null;
-
-            m_foundfield = null;
-
-            foreach (TiffFieldInfo info in m_fieldinfo)
-            {
-                if (info != null && info.Tag == tag && (dt == TiffType.ANY || dt == info.Type))
-                {
-                    m_foundfield = info;
-                    break;
-                }
-            }
-
-            return m_foundfield;
-        }
-
-        /// <summary>
-        /// Retrieves field information by field name.
-        /// </summary>
-        /// <param name="field_name">The field name.</param>
-        /// <param name="dt">The tiff type.</param>
-        /// <returns>The field information or <c>null</c> if the field isn't found.</returns>
-        public TiffFieldInfo FindFieldInfoByName(string field_name, TiffType dt)
-        {
-            if (m_foundfield != null && m_foundfield.Name == field_name &&
-                (dt == TiffType.ANY || dt == m_foundfield.Type))
+            if (m_foundfield != null && m_foundfield.Tag == tag &&
+                (type == TiffType.ANY || type == m_foundfield.Type))
             {
                 return m_foundfield;
             }
@@ -833,8 +805,7 @@ namespace BitMiracle.LibTiff.Classic
 
             foreach (TiffFieldInfo info in m_fieldinfo)
             {
-                if (info != null && info.Name == field_name &&
-                    (dt == TiffType.ANY || dt == info.Type))
+                if (info != null && info.Tag == tag && (type == TiffType.ANY || type == info.Type))
                 {
                     m_foundfield = info;
                     break;
@@ -845,10 +816,45 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves field information for specified tag.
+        /// Retrieves field information for the tag with specified name.
         /// </summary>
-        /// <param name="tag">The tag.</param>
-        /// <returns>The field information or <c>null</c> if the field isn't found.</returns>
+        /// <param name="name">The name of the tag to retrieve field information for.</param>
+        /// <param name="type">The tiff data type to use us additional filter.</param>
+        /// <returns>The field information for specified tag with specified type or <c>null</c> if
+        /// the field information wasn't found.</returns>
+        public TiffFieldInfo FindFieldInfoByName(string name, TiffType type)
+        {
+            if (m_foundfield != null && m_foundfield.Name == name &&
+                (type == TiffType.ANY || type == m_foundfield.Type))
+            {
+                return m_foundfield;
+            }
+
+            // If we are invoked with no field information, then just return.
+            if (m_fieldinfo == null)
+                return null;
+
+            m_foundfield = null;
+
+            foreach (TiffFieldInfo info in m_fieldinfo)
+            {
+                if (info != null && info.Name == name &&
+                    (type == TiffType.ANY || type == info.Type))
+                {
+                    m_foundfield = info;
+                    break;
+                }
+            }
+
+            return m_foundfield;
+        }
+
+        /// <summary>
+        /// Retrieves field information for the specified tag.
+        /// </summary>
+        /// <param name="tag">The tag to retrieve field information for.</param>
+        /// <returns>The field information for specified tag or <c>null</c> if
+        /// the field information wasn't found.</returns>
         public TiffFieldInfo FieldWithTag(TiffTag tag)
         {
             TiffFieldInfo fip = FindFieldInfo(tag, TiffType.ANY);
@@ -861,50 +867,53 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves field information by field name.
+        /// Retrieves field information for the tag with specified name.
         /// </summary>
-        /// <param name="field_name">The field name.</param>
-        /// <returns>The field information or <c>null</c> if the field isn't found.</returns>
-        public TiffFieldInfo FieldWithName(string field_name)
+        /// <param name="name">The name of the tag to retrieve field information for.</param>
+        /// <returns>The field information for specified tag or <c>null</c> if
+        /// the field information wasn't found.</returns>
+        public TiffFieldInfo FieldWithName(string name)
         {
-            TiffFieldInfo fip = FindFieldInfoByName(field_name, TiffType.ANY);
+            TiffFieldInfo fip = FindFieldInfoByName(name, TiffType.ANY);
             if (fip != null)
                 return fip;
 
-            ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag {0}", field_name);
+            ErrorExt(this, m_clientdata, "FieldWithName", "Internal error, unknown tag {0}", name);
             Debug.Assert(false);
             return null;
         }
 
         /// <summary>
-        /// Gets the tag methods.
+        /// Gets the currently used tag methods.
         /// </summary>
-        /// <returns>Tag methods.</returns>
+        /// <returns>The currently used tag methods.</returns>
         public TiffTagMethods GetTagMethods()
         {
             return m_tagmethods;
         }
 
         /// <summary>
-        /// Sets the tag methods.
+        /// Sets the new tag methods to use.
         /// </summary>
-        /// <param name="tagMethods">Tag methods.</param>
-        /// <returns>Previous tag methods.</returns>
-        public TiffTagMethods SetTagMethods(TiffTagMethods tagMethods)
+        /// <param name="methods">Tag methods.</param>
+        /// <returns>The previously used tag methods.</returns>
+        public TiffTagMethods SetTagMethods(TiffTagMethods methods)
         {
-            TiffTagMethods oldTagMethods = m_tagmethods;
+            TiffTagMethods prevTagMethods = m_tagmethods;
 
-            if (tagMethods != null)
-                m_tagmethods = tagMethods;
+            if (methods != null)
+                m_tagmethods = methods;
 
-            return oldTagMethods;
+            return prevTagMethods;
         }
 
         /// <summary>
-        /// Gets the information about client.
+        /// Gets the extra information with specified name associated with this <see cref="Tiff"/>.
         /// </summary>
-        /// <param name="name">Name</param>
-        /// <returns>Data</returns>
+        /// <param name="name">Name of the extra information to retrieve.</param>
+        /// <returns>The extra information with specified name associated with
+        /// this <see cref="Tiff"/> or <c>null</c> if extra information with specified
+        /// name was not found.</returns>
         public object GetClientInfo(string name)
         {
             // should get copy
@@ -920,10 +929,13 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Sets information about client.
+        /// Associates extra information with this <see cref="Tiff"/>.
         /// </summary>
-        /// <param name="data">Data</param>
-        /// <param name="name">Name</param>
+        /// <param name="data">The information to associate with this <see cref="Tiff"/>.</param>
+        /// <param name="name">The name (label) of the information.</param>
+        /// <remarks>If there is already an extra information with the name specified by
+        /// <paramref name="name"/> it will be replaced by the information specified by
+        /// <paramref name="data"/>.</remarks>
         public void SetClientInfo(object data, string name)
         {
             clientInfoLink link = m_clientinfo;
@@ -1329,11 +1341,12 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     if (!diroutoforderwarning)
                     {
-                        WarningExt(this, m_clientdata, module, "{0}: invalid TIFF directory; tags are not sorted in ascending order", m_name);
+                        WarningExt(this, m_clientdata, module,
+                            "{0}: invalid TIFF directory; tags are not sorted in ascending order", m_name);
                         diroutoforderwarning = true;
                     }
 
-                    fix = 0; /* O(n^2) */
+                    fix = 0; // O(n^2)
                 }
 
                 while (fix < m_nfields && m_fieldinfo[fix].Tag < dir[i].tdir_tag)
@@ -1359,14 +1372,17 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     if (fip.Type == TiffType.ANY)
                     {
-                        /* wildcard */
+                        // wildcard
                         break;
                     }
 
                     fip = m_fieldinfo[++fix];
                     if (fix >= m_nfields || fip.Tag != dir[i].tdir_tag)
                     {
-                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Name);
+                        WarningExt(this, m_clientdata, module,
+                            "{0}: wrong data type {1} for \"{2}\"; tag ignored",
+                            m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Name);
+
                         dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
@@ -1543,7 +1559,8 @@ namespace BitMiracle.LibTiff.Classic
 
             if (m_dir.td_nstrips == 0)
             {
-                ErrorExt(this, m_clientdata, module, "{0}: cannot handle zero number of {1}", m_name, IsTiled() ? "tiles" : "strips");
+                ErrorExt(this, m_clientdata, module,
+                    "{0}: cannot handle zero number of {1}", m_name, IsTiled() ? "tiles" : "strips");
                 return false;
             }
 
@@ -1708,34 +1725,44 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if (!fieldSet(FieldBit.Photometric))
                 {
-                    WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag is missing, assuming data is YCbCr");
+                    WarningExt(this, m_clientdata,
+                        "ReadDirectory", "Photometric tag is missing, assuming data is YCbCr");
+
                     if (!SetField(TiffTag.PHOTOMETRIC, Photometric.YCBCR))
                         return false;
                 }
                 else if (m_dir.td_photometric == Photometric.RGB)
                 {
                     m_dir.td_photometric = Photometric.YCBCR;
-                    WarningExt(this, m_clientdata, "ReadDirectory", "Photometric tag value assumed incorrect, assuming data is YCbCr instead of RGB");
+                    WarningExt(this, m_clientdata, "ReadDirectory",
+                        "Photometric tag value assumed incorrect, assuming data is YCbCr instead of RGB");
                 }
 
                 if (!fieldSet(FieldBit.BitsPerSample))
                 {
-                    WarningExt(this, m_clientdata, "ReadDirectory", "BitsPerSample tag is missing, assuming 8 bits per sample");
+                    WarningExt(this, m_clientdata, "ReadDirectory",
+                        "BitsPerSample tag is missing, assuming 8 bits per sample");
+
                     if (!SetField(TiffTag.BITSPERSAMPLE, 8))
                         return false;
                 }
 
                 if (!fieldSet(FieldBit.SamplesPerPixel))
                 {
-                    if ((m_dir.td_photometric == Photometric.RGB) || (m_dir.td_photometric == Photometric.YCBCR))
+                    if ((m_dir.td_photometric == Photometric.RGB) ||
+                        (m_dir.td_photometric == Photometric.YCBCR))
                     {
-                        WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 3");
+                        WarningExt(this, m_clientdata, "ReadDirectory",
+                            "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 3");
+                        
                         if (!SetField(TiffTag.SAMPLESPERPIXEL, 3))
                             return false;
                     }
-                    else if ((m_dir.td_photometric == Photometric.MINISWHITE) || (m_dir.td_photometric == Photometric.MINISBLACK))
+                    else if ((m_dir.td_photometric == Photometric.MINISWHITE) ||
+                        (m_dir.td_photometric == Photometric.MINISBLACK))
                     {
-                        WarningExt(this, m_clientdata, "ReadDirectory", "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 1");
+                        WarningExt(this, m_clientdata, "ReadDirectory",
+                            "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 1");
                         if (!SetField(TiffTag.SAMPLESPERPIXEL, 1))
                             return false;
                     }
@@ -1765,7 +1792,10 @@ namespace BitMiracle.LibTiff.Classic
                         return false;
                     }
 
-                    WarningExt(this, m_clientdata, module, "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
+                    WarningExt(this, m_clientdata, module,
+                        "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength",
+                        m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
+
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
@@ -1774,15 +1804,23 @@ namespace BitMiracle.LibTiff.Classic
                     // XXX: Plexus (and others) sometimes give a value of zero for a tag when
                     // they don't know what the correct value is! Try and handle the simple case
                     // of estimating the size of a one strip image.
-                    WarningExt(this, m_clientdata, module, "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
+                    WarningExt(this, m_clientdata, module,
+                        "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength",
+                        m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
+
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
-                else if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 2 && m_dir.td_compression == Compression.NONE && m_dir.td_stripbytecount[0] != m_dir.td_stripbytecount[1])
+                else if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 2 &&
+                    m_dir.td_compression == Compression.NONE &&
+                    m_dir.td_stripbytecount[0] != m_dir.td_stripbytecount[1])
                 {
                     // XXX: Some vendors fill StripByteCount array with absolutely wrong values
                     // (it can be equal to StripOffset array, for example). Catch this case here.
-                    WarningExt(this, m_clientdata, module, "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength", m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
+                    WarningExt(this, m_clientdata, module,
+                        "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength",
+                        m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
+
                     if (!estimateStripByteCounts(dir, dircount))
                         return false;
                 }
@@ -1861,26 +1899,28 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Read custom directory from the arbitrary offset.
+        /// Reads a custom directory from the arbitrary offset within file/stream.
         /// </summary>
-        /// <param name="diroff">Directory offset.</param>
-        /// <param name="info">Field info.</param>
-        /// <param name="n">The number of elements in field info array.</param>
-        /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
-        /// <remarks>The code is very similar to <see cref="Tiff.ReadDirectory"/>.</remarks>
-        public bool ReadCustomDirectory(long diroff, TiffFieldInfo[] info, int n)
+        /// <param name="offset">The directory offset.</param>
+        /// <param name="info">The array of <see cref="TiffFieldInfo"/> objects to merge to
+        /// existing field information.</param>
+        /// <param name="count">The number of items to use from
+        /// the <paramref name="info"/> array.</param>
+        /// <returns><c>true</c> if a custom directory was read successfully;
+        /// otherwise, <c>false</c></returns>
+        public bool ReadCustomDirectory(long offset, TiffFieldInfo[] info, int count)
         {
             const string module = "ReadCustomDirectory";
 
-            setupFieldInfo(info, n);
+            setupFieldInfo(info, count);
 
             uint dummyNextDirOff;
             TiffDirEntry[] dir;
-            short dircount = fetchDirectory((uint)diroff, out dir, out dummyNextDirOff);
+            short dircount = fetchDirectory((uint)offset, out dir, out dummyNextDirOff);
             if (dircount == 0)
             {
                 ErrorExt(this, m_clientdata, module,
-                    "{0}: Failed to read custom directory at offset {1}", m_name, diroff);
+                    "{0}: Failed to read custom directory at offset {1}", m_name, offset);
                 return false;
             }
 
@@ -1925,31 +1965,30 @@ namespace BitMiracle.LibTiff.Classic
                         fix++;
                 }
 
-                /*
-                 * null out old tags that we ignore.
-                 */
+                // null out old tags that we ignore.
                 if (m_fieldinfo[fix].Bit == FieldBit.Ignore)
                 {
                     dir[i].tdir_tag = TiffTag.IGNORE;
                     continue;
                 }
 
-                /*
-                 * Check data type.
-                 */
+                // Check data type.
                 TiffFieldInfo fip = m_fieldinfo[fix];
                 while (dir[i].tdir_type != fip.Type && fix < m_nfields)
                 {
                     if (fip.Type == TiffType.ANY)
                     {
-                        /* wildcard */
+                        // wildcard
                         break;
                     }
 
                     fip = m_fieldinfo[++fix];
                     if (fix >= m_nfields || fip.Tag != dir[i].tdir_tag)
                     {
-                        WarningExt(this, m_clientdata, module, "{0}: wrong data type {1} for \"{2}\"; tag ignored", m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Name);
+                        WarningExt(this, m_clientdata, module,
+                            "{0}: wrong data type {1} for \"{2}\"; tag ignored",
+                            m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Name);
+
                         dir[i].tdir_tag = TiffTag.IGNORE;
                         continue;
                     }
@@ -1970,9 +2009,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
                 }
 
-                /*
-                * EXIF tags which need to be specifically processed.
-                */
+                // EXIF tags which need to be specifically processed.
                 switch (dir[i].tdir_tag)
                 {
                     case TiffTag.EXIF_SUBJECTDISTANCE:
@@ -1988,15 +2025,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// EXIF is important special case of custom IFD, so we have a special function to read it.
+        /// Reads an EXIF directory from the given offset within file/stream.
         /// </summary>
-        /// <param name="diroff">Directory offset.</param>
-        /// <returns><c>true</c> if read successfully.</returns>
-        public bool ReadEXIFDirectory(long diroff)
+        /// <param name="offset">The directory offset.</param>
+        /// <returns><c>true</c> if an EXIF directory was read successfully; 
+        /// otherwise, <c>false</c></returns>
+        public bool ReadEXIFDirectory(long offset)
         {
             int exifFieldInfoCount;
             TiffFieldInfo[] exifFieldInfo = getExifFieldInfo(out exifFieldInfoCount);
-            return ReadCustomDirectory(diroff, exifFieldInfo, exifFieldInfoCount);
+            return ReadCustomDirectory(offset, exifFieldInfo, exifFieldInfoCount);
         }
 
         /// <summary>
@@ -2421,7 +2459,18 @@ namespace BitMiracle.LibTiff.Classic
             if (dz == -1)
                 dz = m_dir.td_imagedepth;
 
-            int ntiles = (dx == 0 || dy == 0 || dz == 0) ? 0 : multiply(multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"), howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
+            int ntiles;
+            if (dx == 0 || dy == 0 || dz == 0)
+            {
+                ntiles = 0;
+            }
+            else
+            {
+                ntiles = multiply(
+                    multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"),
+                    howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
+            }
+            
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
 
@@ -2429,24 +2478,24 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Returns the custom client data.
+        /// Returns the custom client data associated with this <see cref="Tiff"/>.
         /// </summary>
-        /// <returns>The client data.</returns>
+        /// <returns>The custom client data associated with this <see cref="Tiff"/>.</returns>
         public object Clientdata()
         {
             return m_clientdata;
         }
 
         /// <summary>
-        /// Sets the custom client data.
+        /// Asscociates a custom data with this <see cref="Tiff"/>.
         /// </summary>
-        /// <param name="newvalue">The client data.</param>
-        /// <returns>Previous value.</returns>
-        public object SetClientdata(object newvalue)
+        /// <param name="data">The data to associate.</param>
+        /// <returns>The previously associated data.</returns>
+        public object SetClientdata(object data)
         {
-            object m = m_clientdata;
-            m_clientdata = newvalue;
-            return m;
+            object prev = m_clientdata;
+            m_clientdata = data;
+            return prev;
         }
 
         /// <summary>
@@ -2566,7 +2615,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Gets the zero-based index of the current directory.
         /// </summary>
         /// <returns>The zero-based index of the current directory.</returns>
-        /// <remarks>The zero-based index returned by this method is is suitable for use with
+        /// <remarks>The zero-based index returned by this method is suitable for use with
         /// the <see cref="SetDirectory"/> method.
         /// </remarks>
         public short CurrentDirectory()
@@ -2590,9 +2639,9 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Returns file offset of the current directory.
+        /// Retrieves the file/stream offset of the current directory.
         /// </summary>
-        /// <returns>File offset of the current directory.</returns>
+        /// <returns>The file/stream offset of the current directory.</returns>
         public long CurrentDirOffset()
         {
             return m_diroff;
@@ -2747,59 +2796,47 @@ namespace BitMiracle.LibTiff.Classic
             return true;
         }
 
-        /*
-        *   In doing the latter
-        * we also "freeze" the state of the directory so
-        * that important information is not changed.
-        */
         /// <summary>
-        /// Verify file is writable and that the directory information is setup properly.
+        /// Verifies that file/stream is writable and that the directory information is
+        /// setup properly.
         /// </summary>
-        /// <param name="tiles">The number of tiles.</param>
-        /// <param name="module">The module.</param>
-        /// <returns><c>true</c> if checked successfully; otherwise, <c>false</c></returns>
-        public bool WriteCheck(int tiles, string module)
+        /// <param name="tiles">If set to <c>true</c> then ability to write tiles will be verified;
+        /// otherwise, ability to write strips will be verified.</param>
+        /// <param name="method">The name of the calling method.</param>
+        /// <returns><c>true</c> if file/stream is writeable and the directory information is
+        /// setup properly; otherwise, <c>false</c></returns>
+        public bool WriteCheck(bool tiles, string method)
         {
             if (m_mode == O_RDONLY)
             {
-                ErrorExt(this, m_clientdata, module, "{0}: File not open for writing", m_name);
+                ErrorExt(this, m_clientdata, method, "{0}: File not open for writing", m_name);
                 return false;
             }
 
-            int temp = 0;
-            if (IsTiled())
-                temp = 1;
-
-            if ((tiles ^ temp) != 0)
+            if (tiles ^ IsTiled())
             {
-                ErrorExt(this, m_clientdata, m_name, tiles != 0 ? "Can not write tiles to a stripped image" : "Can not write scanlines to a tiled image");
+                ErrorExt(this, m_clientdata, m_name,
+                    tiles ? "Can not write tiles to a stripped image" : "Can not write scanlines to a tiled image");
+
                 return false;
             }
 
-            /*
-             * On the first write verify all the required information
-             * has been setup and initialize any data structures that
-             * had to wait until directory information was set.
-             * Note that a lot of our work is assumed to remain valid
-             * because we disallow any of the important parameters
-             * from changing after we start writing (i.e. once
-             * BEENWRITING is set, TIFFSetField will only allow
-             * the image's length to be changed).
-             */
+            // On the first write verify all the required information has been setup and
+            // initialize any data structures that had to wait until directory information was set.
+            // Note that a lot of our work is assumed to remain valid because we disallow any of
+            // the important parameters from changing after we start writing (i.e. once
+            // BEENWRITING is set, SetField will only allow the image's length to be changed).
             if (!fieldSet(FieldBit.ImageDimensions))
             {
-                ErrorExt(this, m_clientdata, module, "{0}: Must set \"ImageWidth\" before writing data", m_name);
+                ErrorExt(this, m_clientdata, method, "{0}: Must set \"ImageWidth\" before writing data", m_name);
                 return false;
             }
 
             if (m_dir.td_samplesperpixel == 1)
             {
-                /* 
-                 * Planarconfiguration is irrelevant in case of single band
-                 * images and need not be included. We will set it anyway,
-                 * because this field is used in other parts of library even
-                 * in the single band case.
-                 */
+                // PlanarConfiguration is irrelevant in case of single band images and need not
+                // be included. We will set it anyway, because this field is used in other parts
+                // of library even in the single band case.
                 if (!fieldSet(FieldBit.PlanarConfig))
                     m_dir.td_planarconfig = PlanarConfig.CONTIG;
             }
@@ -2807,7 +2844,9 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if (!fieldSet(FieldBit.PlanarConfig))
                 {
-                    ErrorExt(this, m_clientdata, module, "{0}: Must set \"PlanarConfiguration\" before writing data", m_name);
+                    ErrorExt(this, m_clientdata, method,
+                        "{0}: Must set \"PlanarConfiguration\" before writing data", m_name);
+
                     return false;
                 }
             }
@@ -2815,7 +2854,9 @@ namespace BitMiracle.LibTiff.Classic
             if (m_dir.td_stripoffset == null && !SetupStrips())
             {
                 m_dir.td_nstrips = 0;
-                ErrorExt(this, m_clientdata, module, "{0}: No space for {1} arrays", m_name, IsTiled() ? "tile" : "strip");
+                ErrorExt(this, m_clientdata, method,
+                    "{0}: No space for {1} arrays", m_name, IsTiled() ? "tile" : "strip");
+
                 return false;
             }
 
@@ -2826,7 +2867,7 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Release storage associated with a directory.
+        /// Releases storage associated with current directory.
         /// </summary>
         public void FreeDirectory()
         {
@@ -2840,10 +2881,11 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Creates a new directory.
+        /// Creates a new directory within file/stream.
         /// </summary>
-        /// <remarks>The newly created directory will not exist on the file till
-        /// WriteDirectory(), Flush() or Close() is called.</remarks>
+        /// <remarks>The newly created directory will not exist on the file/stream till
+        /// <see cref="WriteDirectory"/>, <see cref="CheckpointDirectory"/>, <see cref="Flush"/>
+        /// or <see cref="Close"/> is called.</remarks>
         public void CreateDirectory()
         {
             // Should we automatically call WriteDirectory()
@@ -3036,7 +3078,7 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Writes the current state of the TIFF directory into the file to make what is currently
-        /// in the file readable.
+        /// in the file/stream readable.
         /// </summary>
         /// <returns><c>true</c> if the current directory was rewritten successfully;
         /// otherwise, <c>false</c></returns>

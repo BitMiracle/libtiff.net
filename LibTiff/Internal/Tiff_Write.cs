@@ -28,12 +28,12 @@ namespace BitMiracle.LibTiff.Classic
     {
         private bool writeCheckStrips(string module)
         {
-            return ((m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING || WriteCheck(0, module));
+            return ((m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING || WriteCheck(false, module));
         }
 
         private bool writeCheckTiles(string module)
         {
-            return ((m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING || WriteCheck(1, module));
+            return ((m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING || WriteCheck(true, module));
         }
 
         private void bufferCheck()
