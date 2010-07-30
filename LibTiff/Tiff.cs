@@ -2966,9 +2966,11 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Unlinks the specified directory from the directory chain.
         /// </summary>
-        /// <param name="dirn">The directory number.</param>
-        /// <returns><c>true</c> if unlinked successfully</returns>
-        public bool UnlinkDirectory(short dirn)
+        /// <param name="number">The zero-based number of the directory to unlink.</param>
+        /// <returns><c>true</c> if directory was unlinked successfully; otherwise, <c>false</c>.</returns>
+        /// <remarks><b>UnlinkDirectory</b> does not removes directory bytes from the file/stream.
+        /// It only makes them unused.</remarks>
+        public bool UnlinkDirectory(short number)
         {
             const string module = "UnlinkDirectory";
 
@@ -2983,12 +2985,12 @@ namespace BitMiracle.LibTiff.Classic
             // field we'll need to patch.
             uint nextdir = m_header.tiff_diroff;
             long off = sizeof(short) + sizeof(short);
-            for (int n = dirn - 1; n > 0; n--)
+            for (int n = number - 1; n > 0; n--)
             {
                 if (nextdir == 0)
                 {
                     ErrorExt(this, m_clientdata, module,
-                        "Directory {0} does not exist", dirn);
+                        "Directory {0} does not exist", number);
                     return false;
                 }
 
@@ -2996,19 +2998,14 @@ namespace BitMiracle.LibTiff.Classic
                     return false;
             }
 
-            /*
-             * Advance to the directory to be unlinked and fetch
-             * the offset of the directory that follows.
-             */
+            // Advance to the directory to be unlinked and fetch the offset of the directory
+            // that follows.
             long dummyOff;
             if (!advanceDirectory(ref nextdir, out dummyOff))
                 return false;
 
-            /*
-             * Go back and patch the link field of the preceding
-             * directory to point to the offset of the directory
-             * that follows.
-             */
+            // Go back and patch the link field of the preceding directory to point to the
+            // offset of the directory that follows.
             seekFile(off, SeekOrigin.Begin);
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                 SwabUInt(ref nextdir);
@@ -3019,13 +3016,9 @@ namespace BitMiracle.LibTiff.Classic
                 return false;
             }
 
-            /*
-             * Leave directory state setup safely.  We don't have
-             * facilities for doing inserting and removing directories,
-             * so it's safest to just invalidate everything.  This
-             * means that the caller can only append to the directory
-             * chain.
-             */
+            // Leave directory state setup safely. We don't have facilities for doing inserting
+            // and removing directories, so it's safest to just invalidate everything. This means
+            // that the caller can only append to the directory chain.
             m_currentCodec.Cleanup();
             if ((m_flags & TiffFlags.MYBUFFER) == TiffFlags.MYBUFFER && m_rawdata != null)
             {
@@ -3036,8 +3029,8 @@ namespace BitMiracle.LibTiff.Classic
             m_flags &= ~(TiffFlags.BEENWRITING | TiffFlags.BUFFERSETUP | TiffFlags.POSTENCODE);
             FreeDirectory();
             setupDefaultDirectory();
-            m_diroff = 0; /* force link on next write */
-            m_nextdiroff = 0; /* next write must be at end */
+            m_diroff = 0; // force link on next write
+            m_nextdiroff = 0; // next write must be at end
             m_curoff = 0;
             m_row = -1;
             m_curstrip = -1;
@@ -3045,14 +3038,28 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Records the value of a field in the internal directory structure.
+        /// Sets the value(s) of a tag in a TIFF file/stream open for writing.
         /// </summary>
         /// <param name="tag">The tag.</param>
-        /// <param name="value">The field value(s).</param>
-        /// <returns><c>true</c> if set successfully</returns>
-        /// <remarks>The field will be written to the file
-        /// when/if the directory structure is updated.
-        /// </remarks>
+        /// <param name="value">The tag value(s).</param>
+        /// <returns><c>true</c> if tag value(s) were set successfully; otherwise, <c>false</c>.</returns>
+        /// <remarks><para>
+        /// <b>SetField</b> sets the value of a tag or pseudo-tag in the current directory
+        /// associated with the open TIFF file/stream. To set the value of a field the file/stream
+        /// must have been previously opened for writing with <see cref="Open"/> or
+        /// <see cref="ClientOpen"/>; pseudo-tags can be set whether the file was opened for
+        /// reading or writing. The tag is identified by <paramref name="tag"/>.
+        /// The type and number of values in <paramref name="value"/> is dependent on the tag
+        /// being set. You may want to consult
+        /// <a href = "54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// value(s) data types"</a> to become familiar with exact data types and calling
+        /// conventions required for each tag supported by the library.
+        /// </para><para>
+        /// A pseudo-tag is a parameter that is used to control the operation of the library but
+        /// whose value is not read or written to the underlying file.
+        /// </para><para>
+        /// The field will be written to the file when/if the directory structure is updated.
+        /// </para></remarks>
         public bool SetField(TiffTag tag, params object[] value)
         {
             if (okToChangeTag(tag))
@@ -4541,7 +4548,8 @@ namespace BitMiracle.LibTiff.Classic
                 case 16:
                     break;
                 default:
-                    errorMsg = string.Format(CultureInfo.InvariantCulture, "Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
+                    errorMsg = string.Format(CultureInfo.InvariantCulture,
+                        "Sorry, can not handle images with {0}-bit samples", m_dir.td_bitspersample);
                     return false;
             }
 
@@ -4559,7 +4567,8 @@ namespace BitMiracle.LibTiff.Classic
                         photometric = Photometric.RGB;
                         break;
                     default:
-                        errorMsg = string.Format(CultureInfo.InvariantCulture, "Missing needed {0} tag", TiffRgbaImage.photoTag);
+                        errorMsg = string.Format(CultureInfo.InvariantCulture,
+                            "Missing needed {0} tag", TiffRgbaImage.photoTag);
                         return false;
                 }
             }
@@ -4574,7 +4583,8 @@ namespace BitMiracle.LibTiff.Classic
                 case Photometric.MINISWHITE:
                 case Photometric.MINISBLACK:
                 case Photometric.PALETTE:
-                    if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
+                    if (m_dir.td_planarconfig == PlanarConfig.CONTIG &&
+                        m_dir.td_samplesperpixel != 1 && m_dir.td_bitspersample < 8)
                     {
                         errorMsg = string.Format(CultureInfo.InvariantCulture,
                             "Sorry, can not handle contiguous data with {0}={1}, and {2}={3} and Bits/Sample={4}",
@@ -5768,13 +5778,13 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Sets the current write offset.
         /// </summary>
-        /// <param name="off">The write offset.</param>
-        /// <remarks>This should only be used to set the offset to a known
-        /// previous location (very carefully), or to 0 so that the next write
-        /// gets appended to the end of the file.</remarks>
-        public void SetWriteOffset(long off)
+        /// <param name="offset">The write offset.</param>
+        /// <remarks>This should only be used to set the offset to a known previous location
+        /// (very carefully), or to 0 so that the next write gets appended to the end of the file.
+        /// </remarks>
+        public void SetWriteOffset(long offset)
         {
-            m_curoff = (uint)off;
+            m_curoff = (uint)offset;
         }
 
         /// <summary>
