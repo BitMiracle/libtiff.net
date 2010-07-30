@@ -128,7 +128,7 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(fd, ",");
             }
 
-            fprintf(fd, "\n");
+            fprintf(fd, "\r\n");
         }
 
         private bool prettyPrintField(Stream fd, TiffTag tag, int value_count, object raw_data)

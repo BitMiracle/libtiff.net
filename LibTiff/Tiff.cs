@@ -3211,7 +3211,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="flags">The print (formatting) options.</param>
         public void PrintDirectory(Stream stream, TiffPrintFlags flags)
         {
-            fprintf(stream, "TIFF Directory at offset 0x{0:x} ({1})\n", m_diroff, m_diroff);
+            const string EndOfLine = "\r\n";
+
+            fprintf(stream, "TIFF Directory at offset 0x{0:x} ({1})" + EndOfLine, m_diroff, m_diroff);
 
             if (fieldSet(FieldBit.SubFileType))
             {
@@ -3232,7 +3234,7 @@ namespace BitMiracle.LibTiff.Classic
                 if ((m_dir.td_subfiletype & FileType.MASK) != 0)
                     fprintf(stream, "{0}transparency mask", sep);
 
-                fprintf(stream, " ({0} = 0x{1:x})\n", m_dir.td_subfiletype, m_dir.td_subfiletype);
+                fprintf(stream, " ({0} = 0x{1:x})" + EndOfLine, m_dir.td_subfiletype, m_dir.td_subfiletype);
             }
 
             if (fieldSet(FieldBit.ImageDimensions))
@@ -3240,7 +3242,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(stream, "  Image Width: {0} Image Length: {1}", m_dir.td_imagewidth, m_dir.td_imagelength);
                 if (fieldSet(FieldBit.ImageDepth))
                     fprintf(stream, " Image Depth: {0}", m_dir.td_imagedepth);
-                fprintf(stream, "\n");
+                fprintf(stream, EndOfLine);
             }
 
             if (fieldSet(FieldBit.TileDimensions))
@@ -3248,7 +3250,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(stream, "  Tile Width: {0} Tile Length: {1}", m_dir.td_tilewidth, m_dir.td_tilelength);
                 if (fieldSet(FieldBit.TileDepth))
                     fprintf(stream, " Tile Depth: {0}", m_dir.td_tiledepth);
-                fprintf(stream, "\n");
+                fprintf(stream, EndOfLine);
             }
 
             if (fieldSet(FieldBit.Resolution))
@@ -3272,14 +3274,14 @@ namespace BitMiracle.LibTiff.Classic
                             break;
                     }
                 }
-                fprintf(stream, "\n");
+                fprintf(stream, EndOfLine);
             }
 
             if (fieldSet(FieldBit.Position))
-                fprintf(stream, "  Position: {0:G}, {1:G}\n", m_dir.td_xposition, m_dir.td_yposition);
+                fprintf(stream, "  Position: {0:G}, {1:G}" + EndOfLine, m_dir.td_xposition, m_dir.td_yposition);
 
             if (fieldSet(FieldBit.BitsPerSample))
-                fprintf(stream, "  Bits/Sample: {0}\n", m_dir.td_bitspersample);
+                fprintf(stream, "  Bits/Sample: {0}" + EndOfLine, m_dir.td_bitspersample);
 
             if (fieldSet(FieldBit.SampleFormat))
             {
@@ -3287,25 +3289,25 @@ namespace BitMiracle.LibTiff.Classic
                 switch (m_dir.td_sampleformat)
                 {
                     case SampleFormat.VOID:
-                        fprintf(stream, "void\n");
+                        fprintf(stream, "void" + EndOfLine);
                         break;
                     case SampleFormat.INT:
-                        fprintf(stream, "signed integer\n");
+                        fprintf(stream, "signed integer" + EndOfLine);
                         break;
                     case SampleFormat.UINT:
-                        fprintf(stream, "unsigned integer\n");
+                        fprintf(stream, "unsigned integer" + EndOfLine);
                         break;
                     case SampleFormat.IEEEFP:
-                        fprintf(stream, "IEEE floating point\n");
+                        fprintf(stream, "IEEE floating point" + EndOfLine);
                         break;
                     case SampleFormat.COMPLEXINT:
-                        fprintf(stream, "complex signed integer\n");
+                        fprintf(stream, "complex signed integer" + EndOfLine);
                         break;
                     case SampleFormat.COMPLEXIEEEFP:
-                        fprintf(stream, "complex IEEE floating point\n");
+                        fprintf(stream, "complex IEEE floating point" + EndOfLine);
                         break;
                     default:
-                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_sampleformat, m_dir.td_sampleformat);
+                        fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_sampleformat, m_dir.td_sampleformat);
                         break;
                 }
             }
@@ -3315,28 +3317,28 @@ namespace BitMiracle.LibTiff.Classic
                 TiffCodec c = FindCodec(m_dir.td_compression);
                 fprintf(stream, "  Compression Scheme: ");
                 if (c != null)
-                    fprintf(stream, "{0}\n", c.m_name);
+                    fprintf(stream, "{0}" + EndOfLine, c.m_name);
                 else
-                    fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_compression, m_dir.td_compression);
+                    fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_compression, m_dir.td_compression);
             }
 
             if (fieldSet(FieldBit.Photometric))
             {
                 fprintf(stream, "  Photometric Interpretation: ");
                 if ((int)m_dir.td_photometric < photoNames.Length)
-                    fprintf(stream, "{0}\n", photoNames[(int)m_dir.td_photometric]);
+                    fprintf(stream, "{0}" + EndOfLine, photoNames[(int)m_dir.td_photometric]);
                 else
                 {
                     switch (m_dir.td_photometric)
                     {
                         case Photometric.LOGL:
-                            fprintf(stream, "CIE Log2(L)\n");
+                            fprintf(stream, "CIE Log2(L)" + EndOfLine);
                             break;
                         case Photometric.LOGLUV:
-                            fprintf(stream, "CIE Log2(L) (u',v')\n");
+                            fprintf(stream, "CIE Log2(L) (u',v')" + EndOfLine);
                             break;
                         default:
-                            fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_photometric, m_dir.td_photometric);
+                            fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_photometric, m_dir.td_photometric);
                             break;
                     }
                 }
@@ -3365,7 +3367,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     sep = ", ";
                 }
-                fprintf(stream, ">\n");
+                fprintf(stream, ">" + EndOfLine);
             }
 
             if (fieldSet(FieldBit.InkNames))
@@ -3379,7 +3381,7 @@ namespace BitMiracle.LibTiff.Classic
                     fprintf(stream, ", ");
                 }
 
-                fprintf(stream, "\n");
+                fprintf(stream, EndOfLine);
             }
 
             if (fieldSet(FieldBit.Thresholding))
@@ -3388,16 +3390,16 @@ namespace BitMiracle.LibTiff.Classic
                 switch (m_dir.td_threshholding)
                 {
                     case Threshold.BILEVEL:
-                        fprintf(stream, "bilevel art scan\n");
+                        fprintf(stream, "bilevel art scan" + EndOfLine);
                         break;
                     case Threshold.HALFTONE:
-                        fprintf(stream, "halftone or dithered scan\n");
+                        fprintf(stream, "halftone or dithered scan" + EndOfLine);
                         break;
                     case Threshold.ERRORDIFFUSE:
-                        fprintf(stream, "error diffused\n");
+                        fprintf(stream, "error diffused" + EndOfLine);
                         break;
                     default:
-                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_threshholding, m_dir.td_threshholding);
+                        fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_threshholding, m_dir.td_threshholding);
                         break;
                 }
             }
@@ -3408,13 +3410,13 @@ namespace BitMiracle.LibTiff.Classic
                 switch (m_dir.td_fillorder)
                 {
                     case FillOrder.MSB2LSB:
-                        fprintf(stream, "msb-to-lsb\n");
+                        fprintf(stream, "msb-to-lsb" + EndOfLine);
                         break;
                     case FillOrder.LSB2MSB:
-                        fprintf(stream, "lsb-to-msb\n");
+                        fprintf(stream, "lsb-to-msb" + EndOfLine);
                         break;
                     default:
-                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_fillorder, m_dir.td_fillorder);
+                        fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_fillorder, m_dir.td_fillorder);
                         break;
                 }
             }
@@ -3426,7 +3428,7 @@ namespace BitMiracle.LibTiff.Classic
                 FieldValue[] result = GetField(TiffTag.YCBCRSUBSAMPLING);
                 short subsampling0 = result[0].ToShort();
                 short subsampling1 = result[1].ToShort();
-                fprintf(stream, "  YCbCr Subsampling: {0}, {1}\n", subsampling0, subsampling1);
+                fprintf(stream, "  YCbCr Subsampling: {0}, {1}" + EndOfLine, subsampling0, subsampling1);
             }
 
             if (fieldSet(FieldBit.YCbCrPositioning))
@@ -3435,52 +3437,52 @@ namespace BitMiracle.LibTiff.Classic
                 switch (m_dir.td_ycbcrpositioning)
                 {
                     case YCbCrPosition.CENTERED:
-                        fprintf(stream, "centered\n");
+                        fprintf(stream, "centered" + EndOfLine);
                         break;
                     case YCbCrPosition.COSITED:
-                        fprintf(stream, "cosited\n");
+                        fprintf(stream, "cosited" + EndOfLine);
                         break;
                     default:
-                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_ycbcrpositioning, m_dir.td_ycbcrpositioning);
+                        fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_ycbcrpositioning, m_dir.td_ycbcrpositioning);
                         break;
                 }
             }
 
             if (fieldSet(FieldBit.HalftoneHints))
-                fprintf(stream, "  Halftone Hints: light {0} dark {1}\n", m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
+                fprintf(stream, "  Halftone Hints: light {0} dark {1}" + EndOfLine, m_dir.td_halftonehints[0], m_dir.td_halftonehints[1]);
 
             if (fieldSet(FieldBit.Orientation))
             {
                 fprintf(stream, "  Orientation: ");
                 if ((int)m_dir.td_orientation < orientNames.Length)
-                    fprintf(stream, "{0}\n", orientNames[(int)m_dir.td_orientation]);
+                    fprintf(stream, "{0}" + EndOfLine, orientNames[(int)m_dir.td_orientation]);
                 else
-                    fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_orientation, m_dir.td_orientation);
+                    fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_orientation, m_dir.td_orientation);
             }
 
             if (fieldSet(FieldBit.SamplesPerPixel))
-                fprintf(stream, "  Samples/Pixel: {0}\n", m_dir.td_samplesperpixel);
+                fprintf(stream, "  Samples/Pixel: {0}" + EndOfLine, m_dir.td_samplesperpixel);
 
             if (fieldSet(FieldBit.RowsPerStrip))
             {
                 fprintf(stream, "  Rows/Strip: ");
                 if (m_dir.td_rowsperstrip == -1)
-                    fprintf(stream, "(infinite)\n");
+                    fprintf(stream, "(infinite)" + EndOfLine);
                 else
-                    fprintf(stream, "{0}\n", m_dir.td_rowsperstrip);
+                    fprintf(stream, "{0}" + EndOfLine, m_dir.td_rowsperstrip);
             }
 
             if (fieldSet(FieldBit.MinSampleValue))
-                fprintf(stream, "  Min Sample Value: {0}\n", m_dir.td_minsamplevalue);
+                fprintf(stream, "  Min Sample Value: {0}" + EndOfLine, m_dir.td_minsamplevalue);
 
             if (fieldSet(FieldBit.MaxSampleValue))
-                fprintf(stream, "  Max Sample Value: {0}\n", m_dir.td_maxsamplevalue);
+                fprintf(stream, "  Max Sample Value: {0}" + EndOfLine, m_dir.td_maxsamplevalue);
 
             if (fieldSet(FieldBit.SMinSampleValue))
-                fprintf(stream, "  SMin Sample Value: {0:G}\n", m_dir.td_sminsamplevalue);
+                fprintf(stream, "  SMin Sample Value: {0:G}" + EndOfLine, m_dir.td_sminsamplevalue);
 
             if (fieldSet(FieldBit.SMaxSampleValue))
-                fprintf(stream, "  SMax Sample Value: {0:G}\n", m_dir.td_smaxsamplevalue);
+                fprintf(stream, "  SMax Sample Value: {0:G}" + EndOfLine, m_dir.td_smaxsamplevalue);
 
             if (fieldSet(FieldBit.PlanarConfig))
             {
@@ -3488,32 +3490,32 @@ namespace BitMiracle.LibTiff.Classic
                 switch (m_dir.td_planarconfig)
                 {
                     case PlanarConfig.CONTIG:
-                        fprintf(stream, "single image plane\n");
+                        fprintf(stream, "single image plane" + EndOfLine);
                         break;
                     case PlanarConfig.SEPARATE:
-                        fprintf(stream, "separate image planes\n");
+                        fprintf(stream, "separate image planes" + EndOfLine);
                         break;
                     default:
-                        fprintf(stream, "{0} (0x{1:x})\n", m_dir.td_planarconfig, m_dir.td_planarconfig);
+                        fprintf(stream, "{0} (0x{1:x})" + EndOfLine, m_dir.td_planarconfig, m_dir.td_planarconfig);
                         break;
                 }
             }
 
             if (fieldSet(FieldBit.PageNumber))
-                fprintf(stream, "  Page Number: {0}-{1}\n", m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
+                fprintf(stream, "  Page Number: {0}-{1}" + EndOfLine, m_dir.td_pagenumber[0], m_dir.td_pagenumber[1]);
 
             if (fieldSet(FieldBit.ColorMap))
             {
                 fprintf(stream, "  Color Map: ");
                 if ((flags & TiffPrintFlags.COLORMAP) != 0)
                 {
-                    fprintf(stream, "\n");
+                    fprintf(stream, "" + EndOfLine);
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
-                        fprintf(stream, "   {0,5}: {1,5} {2,5} {3,5}\n", l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
+                        fprintf(stream, "   {0,5}: {1,5} {2,5} {3,5}" + EndOfLine, l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
                 }
                 else
-                    fprintf(stream, "(present)\n");
+                    fprintf(stream, "(present)" + EndOfLine);
             }
 
             if (fieldSet(FieldBit.TransferFunction))
@@ -3521,18 +3523,18 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(stream, "  Transfer Function: ");
                 if ((flags & TiffPrintFlags.CURVES) != 0)
                 {
-                    fprintf(stream, "\n");
+                    fprintf(stream, "" + EndOfLine);
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
                     {
                         fprintf(stream, "    {0,2}: {0,5}", l, m_dir.td_transferfunction[0][l]);
                         for (short i = 1; i < m_dir.td_samplesperpixel; i++)
                             fprintf(stream, " {0,5}", m_dir.td_transferfunction[i][l]);
-                        fprintf(stream, "\n");
+                        fprintf(stream, "" + EndOfLine);
                     }
                 }
                 else
-                    fprintf(stream, "(present)\n");
+                    fprintf(stream, "(present)" + EndOfLine);
             }
 
             if (fieldSet(FieldBit.SubIFD) && m_dir.td_subifd != null)
@@ -3540,7 +3542,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(stream, "  SubIFD Offsets:");
                 for (short i = 0; i < m_dir.td_nsubifd; i++)
                     fprintf(stream, " {0,5}", m_dir.td_subifd[i]);
-                fprintf(stream, "\n");
+                fprintf(stream, "" + EndOfLine);
             }
 
             // Custom tag support.
@@ -3641,9 +3643,9 @@ namespace BitMiracle.LibTiff.Classic
 
             if ((flags & TiffPrintFlags.STRIPS) != 0 && fieldSet(FieldBit.StripOffsets))
             {
-                fprintf(stream, "  {0} {1}:\n", m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
+                fprintf(stream, "  {0} {1}:" + EndOfLine, m_dir.td_nstrips, IsTiled() ? "Tiles" : "Strips");
                 for (int s = 0; s < m_dir.td_nstrips; s++)
-                    fprintf(stream, "    {0,3}: [{0,8}, {0,8}]\n", s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
+                    fprintf(stream, "    {0,3}: [{0,8}, {0,8}]" + EndOfLine, s, m_dir.td_stripoffset[s], m_dir.td_stripbytecount[s]);
             }
         }
 
