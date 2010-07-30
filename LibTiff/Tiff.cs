@@ -20,7 +20,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Text;
 
 using BitMiracle.LibTiff.Classic.Internal;
 
@@ -39,72 +38,48 @@ namespace BitMiracle.LibTiff.Classic
     partial class Tiff : IDisposable
     {
         /// <summary>
-        /// Support strip chopping (whether or not to convert single-strip 
-        /// uncompressed images to mutiple strips of ~8Kb to reduce memory usage)
+        /// Delegate for LibTiff.Net extender method
         /// </summary>
-        internal const TiffFlags STRIPCHOP_DEFAULT = TiffFlags.STRIPCHOP;
-
-        /// <summary>
-        /// Treat extra sample as alpha (default enabled). The RGBA interface 
-        /// will treat a fourth sample with no EXTRASAMPLE_ value as being 
-        /// ASSOCALPHA. Many packages produce RGBA files but don't mark the 
-        /// alpha properly.
-        /// </summary>
-        internal const bool DEFAULT_EXTRASAMPLE_AS_ALPHA = true;
-
-        /// <summary>
-        /// Pick up YCbCr subsampling info from the JPEG data stream to support 
-        /// files lacking the tag (default enabled).
-        /// </summary>
-        internal const bool CHECK_JPEG_YCBCR_SUBSAMPLING = true;
-
-        internal const string TIFFLIB_VERSION_STR = "LibTiff.NET, Version {0}\nCopyright (C) 2008-2010, Bit Miracle.";
-
-        /// <summary>
-        /// TiffExtendProc
-        /// </summary>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class.</param>
+        /// <remarks>
+        /// <para>Extender method is usually used for registering custom tags.</para>
+        /// <para>To setup extender method that will be called upon creation of
+        /// each instance of <see cref="Tiff"/> object please use <see cref="SetTagExtender"/>
+        /// method.</para>
+        /// </remarks>
         public delegate void TiffExtendProc(Tiff tif);
 
         /// <summary>
-        /// To override the default routine used to image decoded spans one can use the pseudo
-        /// tag FAXFILLFUNC with an instance of this delegate.
+        /// Delegate for a method used to image decoded spans.        
         /// </summary>
-        /// <param name="buf">place to set the bits</param>
-        /// <param name="startOffset">index of first byte to process</param>
-        /// <param name="runs">the array of black and white run lengths (white then black)</param>
-        /// <param name="thisrun">current row's run array index</param>
-        /// <param name="erun">the index of last run in the array</param>
-        /// <param name="lastx">the width of the row in pixels</param>
-        /// <remarks>Fill routines can assume the run array has room for at least
-        /// <paramref name="lastx"/> runs and can overwrite data in the run array as
-        /// needed (e.g. to append zero runs to bring the count up to a nice multiple).</remarks>
-        public delegate void FaxFillFunc(byte[] buf, int startOffset, int[] runs, int thisrun, int erun, int lastx);
-
-        private const int TIFF_VERSION = 42;
-        private const int TIFF_BIGTIFF_VERSION = 43;
-
-        private const short TIFF_BIGENDIAN = 0x4d4d;
-        private const short TIFF_LITTLEENDIAN = 0x4949;
-        private const short MDI_LITTLEENDIAN = 0x5045;
-
-        // reference white
-        private const float D50_X0 = 96.4250F;
-        private const float D50_Y0 = 100.0F;
-        private const float D50_Z0 = 82.4680F;
-
-#if !SILVERLIGHT
-        internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
-#else
-        // Encoding.GetEncoding("Latin1") is not supported in Silverlight. Will throw exceptions at runtime.
-        internal static Enc28591 Latin1Encoding = new Enc28591();
-#endif
+        /// <param name="buffer">The buffer to place decoded image data to.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
+        /// which to begin storing decoded bytes.</param>
+        /// <param name="runs">The array of black and white run lengths (white then black)</param>
+        /// <param name="thisRunOffset">The zero-based offset in <paramref name="runs"/> array at
+        /// which current row's run begins.</param>
+        /// <param name="nextRunOffset">The zero-based offset in <paramref name="runs"/> array at
+        /// which next row's run begins.</param>
+        /// <param name="width">The width in pixels of the row.</param>
+        /// <remarks><para>
+        /// To override the default method used to image decoded spans please set
+        /// <see cref="TiffTag.FAXFILLFUNC"/> tag with an instance of this delegate.</para>
+        /// <para>
+        /// Fill methods can assume the <paramref name="runs"/> array has room for at least
+        /// <paramref name="width"/> runs and can overwrite data in the <paramref name="runs"/>
+        /// array as needed (e.g. to append zero runs to bring the count up to a nice multiple).
+        /// </para></remarks>
+        public delegate void FaxFillFunc(
+            byte[] buffer, int offset, int[] runs, int thisRunOffset, int nextRunOffset, int width);
+        
         /// <summary>
         /// Gets the library version string.
         /// </summary>
         /// <returns>The library version string.</returns>
         public static string GetVersion()
         {
-            return string.Format(CultureInfo.InvariantCulture, TIFFLIB_VERSION_STR, AssemblyVersion);
+            return string.Format(CultureInfo.InvariantCulture,
+                "LibTiff.Net, Version {0}\nCopyright (C) 2008-2010, Bit Miracle.", AssemblyVersion);
         }
 
         /// <summary>
@@ -127,44 +102,44 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the R component from ABGR form returned by 
-        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
+        /// Gets the R component from ABGR value returned by 
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
-        /// <param name="abgr">The ABGR.</param>
-        /// <returns>R component.</returns>
+        /// <param name="abgr">The ABGR value.</param>
+        /// <returns>The R component from ABGR value.</returns>
         public static int GetR(int abgr)
         {
             return (abgr & 0xff);
         }
 
         /// <summary>
-        /// Gets the G component from ABGR form returned by 
-        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
+        /// Gets the G component from ABGR value returned by 
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
-        /// <param name="abgr">The ABGR.</param>
-        /// <returns>G component.</returns>
+        /// <param name="abgr">The ABGR value.</param>
+        /// <returns>The G component from ABGR value.</returns>
         public static int GetG(int abgr)
         {
             return ((abgr >> 8) & 0xff);
         }
 
         /// <summary>
-        /// Gets the B component from ABGR form returned by 
-        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
+        /// Gets the B component from ABGR value returned by 
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
-        /// <param name="abgr">The ABGR.</param>
-        /// <returns>B component.</returns>
+        /// <param name="abgr">The ABGR value.</param>
+        /// <returns>The B component from ABGR value.</returns>
         public static int GetB(int abgr)
         {
             return ((abgr >> 16) & 0xff);
         }
 
         /// <summary>
-        /// Gets the A component from ABGR form returned by 
-        /// <see cref="M:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage(System.Int32,System.Int32,System.Int32[])">ReadRGBAImage</see>.
+        /// Gets the A component from ABGR value returned by 
+        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
-        /// <param name="abgr">The ABGR.</param>
-        /// <returns>A component.</returns>
+        /// <param name="abgr">The ABGR value.</param>
+        /// <returns>The A component from ABGR value.</returns>
         public static int GetA(int abgr)
         {
             return ((abgr >> 24) & 0xff);
@@ -191,17 +166,17 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public TiffCodec FindCodec(Compression scheme)
         {
-            for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
+            for (codecList list = m_registeredCodecs; list != null; list = list.next)
             {
-                if (cd.codec.m_scheme == scheme)
-                    return cd.codec;
+                if (list.codec.m_scheme == scheme)
+                    return list.codec;
             }
 
             for (int i = 0; m_builtInCodecs[i] != null; i++)
             {
-                TiffCodec c = m_builtInCodecs[i];
-                if (c.m_scheme == scheme)
-                    return c;
+                TiffCodec codec = m_builtInCodecs[i];
+                if (codec.m_scheme == scheme)
+                    return codec;
             }
 
             return null;
@@ -222,10 +197,10 @@ namespace BitMiracle.LibTiff.Classic
             if (codec == null)
                 throw new ArgumentNullException("codec");
 
-            codecList cd = new codecList();
-            cd.codec = codec;
-            cd.next = m_registeredCodecs;
-            m_registeredCodecs = cd;
+            codecList list = new codecList();
+            list.codec = codec;
+            list.next = m_registeredCodecs;
+            m_registeredCodecs = list;
         }
 
         /// <summary>
@@ -245,14 +220,14 @@ namespace BitMiracle.LibTiff.Classic
                 return;
             }
 
-            for (codecList cd = m_registeredCodecs; cd != null; cd = cd.next)
+            for (codecList list = m_registeredCodecs; list != null; list = list.next)
             {
-                if (cd.next != null)
+                if (list.next != null)
                 {
-                    if (cd.next.codec == codec)
+                    if (list.next.codec == codec)
                     {
-                        temp = cd.next.next;
-                        cd.next = temp;
+                        temp = list.next.next;
+                        list.next = temp;
                         return;
                     }
                 }
@@ -322,7 +297,6 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>
         /// The new byte array of specified size with data from the existing array.
         /// </returns>
-        /// <remarks>Size of the array is in elements, not bytes.</remarks>
         /// <overloads>Allocates new array of specified size and copies data from the existing to
         /// the new array.</overloads>
         public static byte[] Realloc(byte[] array, int size)
@@ -618,12 +592,16 @@ namespace BitMiracle.LibTiff.Classic
 
                 // Setup header and write.
 
-                tif.m_header.tiff_magic = (tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB ? TIFF_BIGENDIAN : TIFF_LITTLEENDIAN;
+                if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                    tif.m_header.tiff_magic = TIFF_BIGENDIAN;
+                else
+                    tif.m_header.tiff_magic = TIFF_LITTLEENDIAN;
+
                 tif.m_header.tiff_version = TIFF_VERSION;
                 if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                     SwabShort(ref tif.m_header.tiff_version);
 
-                tif.m_header.tiff_diroff = 0; /* filled in later */
+                tif.m_header.tiff_diroff = 0; // filled in later
 
                 tif.seekFile(0, SeekOrigin.Begin);
 
@@ -647,7 +625,9 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             // Setup the byte order handling.
-            if (tif.m_header.tiff_magic != TIFF_BIGENDIAN && tif.m_header.tiff_magic != TIFF_LITTLEENDIAN && tif.m_header.tiff_magic != MDI_LITTLEENDIAN)
+            if (tif.m_header.tiff_magic != TIFF_BIGENDIAN &&
+                tif.m_header.tiff_magic != TIFF_LITTLEENDIAN &&
+                tif.m_header.tiff_magic != MDI_LITTLEENDIAN)
             {
                 ErrorExt(tif, tif.m_clientdata, name,
                     "Not a TIFF or MDI file, bad magic number {0} (0x{1:x})",
@@ -670,7 +650,8 @@ namespace BitMiracle.LibTiff.Classic
             // magic number that doesn't change (stupid).
             if (tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
-                ErrorExt(tif, tif.m_clientdata, name, "This is a BigTIFF file.  This format not supported\nby this version of LibTiff.Net.");
+                ErrorExt(tif, tif.m_clientdata, name,
+                    "This is a BigTIFF file. This format not supported\nby this version of LibTiff.Net.");
                 tif.m_mode = O_RDONLY;
                 return null;
             }
@@ -731,7 +712,6 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public void Close()
         {
-            // Flush buffered data and directory (if dirty).
             Flush();
 
             m_stream.Close(m_clientdata);
@@ -748,10 +728,6 @@ namespace BitMiracle.LibTiff.Classic
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-        //
-        // Stuff, related to tag handling and creating custom tags.
-        //
 
         /// <summary>
         /// Gets the number of elements in the tag list.
@@ -4926,14 +4902,17 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Sets the tag extender.
+        /// Sets the tag extender method.
         /// </summary>
-        /// <param name="proc">The tag extender.</param>
-        /// <returns>Previous tag extender.</returns>
-        public static TiffExtendProc SetTagExtender(TiffExtendProc proc)
+        /// <param name="extender">The tag extender method.</param>
+        /// <returns>Previous tag extender method.</returns>
+        /// <remarks>
+        /// Extender method is called upon creation of each instance of <see cref="Tiff"/> object.
+        /// </remarks>
+        public static TiffExtendProc SetTagExtender(TiffExtendProc extender)
         {
             TiffExtendProc prev = m_extender;
-            m_extender = proc;
+            m_extender = extender;
             return prev;
         }
 

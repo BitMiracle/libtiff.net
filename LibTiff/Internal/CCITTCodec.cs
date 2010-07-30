@@ -588,37 +588,38 @@ namespace BitMiracle.LibTiff.Classic.Internal
         * runs generated during G3/G4 decoding.
         * The default run filler; made public for other decoders.
         */
-        private static void fax3FillRuns(byte[] buf, int startOffset, int[] runs, int thisrun, int erun, int lastx)
+        private static void fax3FillRuns(byte[] buffer, int offset, int[] runs,
+            int thisRunOffset, int nextRunOffset, int width)
         {
-            if (((erun - thisrun) & 1) != 0)
+            if (((nextRunOffset - thisRunOffset) & 1) != 0)
             {
-                runs[erun] = 0;
-                erun++;
+                runs[nextRunOffset] = 0;
+                nextRunOffset++;
             }
 
             int x = 0;
-            for (; thisrun < erun; thisrun += 2)
+            for (; thisRunOffset < nextRunOffset; thisRunOffset += 2)
             {
-                int run = runs[thisrun];
+                int run = runs[thisRunOffset];
 
                 // should cast 'run' to unsigned in order to discard values bigger than int.MaxValue
                 // for such value 'run' become negative and following condition is not met
-                if ((uint)x + (uint)run > (uint)lastx || (uint)run > (uint)lastx)
+                if ((uint)x + (uint)run > (uint)width || (uint)run > (uint)width)
                 {
-                    runs[thisrun] = lastx - x;
-                    run = runs[thisrun];
+                    runs[thisRunOffset] = width - x;
+                    run = runs[thisRunOffset];
                 }
 
                 if (run != 0)
                 {
-                    int cp = startOffset + (x >> 3);
+                    int cp = offset + (x >> 3);
                     int bx = x & 7;
                     if (run > 8 - bx)
                     {
                         if (bx != 0)
                         {
-                            /* align to byte boundary */
-                            buf[cp] &= (byte)(0xff << (8 - bx));
+                            // align to byte boundary
+                            buffer[cp] &= (byte)(0xff << (8 - bx));
                             cp++;
                             run -= 8 - bx;
                         }
@@ -626,15 +627,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         int n = run >> 3;
                         if (n != 0)
                         {
-                            /* multiple bytes to fill */
+                            // multiple bytes to fill
                             if ((n / sizeof(int)) > 1)
                             {
-                                /*
-                                 * Align to longword boundary and fill.
-                                 */
+                                // Align to longword boundary and fill.
                                 for ( ; n != 0 && !isLongAligned(cp); n--)
                                 {
-                                    buf[cp] = 0x00;
+                                    buffer[cp] = 0x00;
                                     cp++;
                                 }
 
@@ -643,42 +642,42 @@ namespace BitMiracle.LibTiff.Classic.Internal
                                 
                                 int stop = bytesToFill + cp;
                                 for ( ; cp < stop; cp++)
-                                    buf[cp] = 0;
+                                    buffer[cp] = 0;
                             }
 
-                            FILL(n, buf, ref cp, 0);
+                            FILL(n, buffer, ref cp, 0);
                             run &= 7;
                         }
 
                         if (run != 0)
-                            buf[cp] &= (byte)(0xff >> run);
+                            buffer[cp] &= (byte)(0xff >> run);
                     }
                     else
-                        buf[cp] &= (byte)(~(fillMasks[run] >> bx));
+                        buffer[cp] &= (byte)(~(fillMasks[run] >> bx));
 
-                    x += runs[thisrun];
+                    x += runs[thisRunOffset];
                 }
 
-                run = runs[thisrun + 1];
+                run = runs[thisRunOffset + 1];
 
                 // should cast 'run' to unsigned in order to discard values bigger than int.MaxValue
                 // for such value 'run' become negative and following condition is not met
-                if ((uint)x + (uint)run > (uint)lastx || (uint)run > (uint)lastx)
+                if ((uint)x + (uint)run > (uint)width || (uint)run > (uint)width)
                 {
-                    runs[thisrun + 1] = lastx - x;
-                    run = runs[thisrun + 1];
+                    runs[thisRunOffset + 1] = width - x;
+                    run = runs[thisRunOffset + 1];
                 }
                 
                 if (run != 0)
                 {
-                    int cp = startOffset + (x >> 3);
+                    int cp = offset + (x >> 3);
                     int bx = x & 7;
                     if (run > 8 - bx)
                     {
                         if (bx != 0)
                         {
-                            /* align to byte boundary */
-                            buf[cp] |= (byte)(0xff >> bx);
+                            // align to byte boundary
+                            buffer[cp] |= (byte)(0xff >> bx);
                             cp++;
                             run -= 8 - bx;
                         }
@@ -686,15 +685,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         int n = run >> 3;
                         if (n != 0)
                         {
-                            /* multiple bytes to fill */
+                            // multiple bytes to fill
                             if ((n / sizeof(int)) > 1)
                             {
-                                /*
-                                 * Align to longword boundary and fill.
-                                 */
+                                // Align to longword boundary and fill.
                                 for ( ; n != 0 && !isLongAligned(cp); n--)
                                 {
-                                    buf[cp] = 0xff;
+                                    buffer[cp] = 0xff;
                                     cp++;
                                 }
                                 
@@ -703,24 +700,24 @@ namespace BitMiracle.LibTiff.Classic.Internal
                                 
                                 int stop = bytesToFill + cp;
                                 for ( ; cp < stop; cp++)
-                                    buf[cp] = 0xff;
+                                    buffer[cp] = 0xff;
                             }
 
-                            FILL(n, buf, ref cp, 0xff);
+                            FILL(n, buffer, ref cp, 0xff);
                             run &= 7;
                         }
 
                         if (run != 0)
-                            buf[cp] |= (byte)(0xff00 >> run);
+                            buffer[cp] |= (byte)(0xff00 >> run);
                     }
                     else
-                        buf[cp] |= (byte)(fillMasks[run] >> bx);
+                        buffer[cp] |= (byte)(fillMasks[run] >> bx);
 
-                    x += runs[thisrun + 1];
+                    x += runs[thisRunOffset + 1];
                 }
             }
 
-            Debug.Assert(x == lastx);
+            Debug.Assert(x == width);
         }
 
         /*

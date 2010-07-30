@@ -11,6 +11,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 
 using BitMiracle.LibTiff.Classic.Internal;
 
@@ -21,7 +22,46 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     partial class Tiff
     {
+        private const int TIFF_VERSION = 42;
+        private const int TIFF_BIGTIFF_VERSION = 43;
+
+        private const short TIFF_BIGENDIAN = 0x4d4d;
+        private const short TIFF_LITTLEENDIAN = 0x4949;
+        private const short MDI_LITTLEENDIAN = 0x5045;
+
+        // reference white
+        private const float D50_X0 = 96.4250F;
+        private const float D50_Y0 = 100.0F;
+        private const float D50_Z0 = 82.4680F;
+
         internal const int STRIP_SIZE_DEFAULT = 8192;
+
+        /// <summary>
+        /// Support strip chopping (whether or not to convert single-strip 
+        /// uncompressed images to mutiple strips of ~8Kb to reduce memory usage)
+        /// </summary>
+        internal const TiffFlags STRIPCHOP_DEFAULT = TiffFlags.STRIPCHOP;
+
+        /// <summary>
+        /// Treat extra sample as alpha (default enabled). The RGBA interface 
+        /// will treat a fourth sample with no EXTRASAMPLE_ value as being 
+        /// ASSOCALPHA. Many packages produce RGBA files but don't mark the 
+        /// alpha properly.
+        /// </summary>
+        internal const bool DEFAULT_EXTRASAMPLE_AS_ALPHA = true;
+
+        /// <summary>
+        /// Pick up YCbCr subsampling info from the JPEG data stream to support 
+        /// files lacking the tag (default enabled).
+        /// </summary>
+        internal const bool CHECK_JPEG_YCBCR_SUBSAMPLING = true;
+
+#if !SILVERLIGHT
+        internal static Encoding Latin1Encoding = Encoding.GetEncoding("Latin1");
+#else
+        // Encoding.GetEncoding("Latin1") is not supported in Silverlight. Will throw exceptions at runtime.
+        internal static Enc28591 Latin1Encoding = new Enc28591();
+#endif        
 
         internal enum PostDecodeMethodType
         {
@@ -253,9 +293,9 @@ namespace BitMiracle.LibTiff.Classic
         private bool m_disposed;
         private Stream m_fileStream;
  
-        //
-        // Client Tag extension support (from Niles Ritter).
-        //
+        /// <summary>
+        /// Client Tag extension support (from Niles Ritter).
+        /// </summary>
         private static TiffExtendProc m_extender;
 
         /// <summary>
