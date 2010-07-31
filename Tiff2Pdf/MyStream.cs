@@ -18,41 +18,41 @@ namespace BitMiracle.Tiff2Pdf
 {
     class MyStream : TiffStream
     {
-        public override int Read(object fd, byte[] buf, int offset, int size)
+        public override int Read(object clientData, byte[] buffer, int offset, int count)
         {
             return -1;
         }
 
-        public override void Write(object fd, byte[] buf, int offset, int size)
+        public override void Write(object clientData, byte[] buffer, int offset, int count)
         {
-            T2P t2p = fd as T2P;
+            T2P t2p = clientData as T2P;
             if (t2p == null)
                 throw new ArgumentException();
 
             if (!t2p.m_outputdisable && t2p.m_outputfile != null)
             {
-                t2p.m_outputfile.Write(buf, offset, size);
-                t2p.m_outputwritten += size;
+                t2p.m_outputfile.Write(buffer, offset, count);
+                t2p.m_outputwritten += count;
             }
         }
 
-        public override long Seek(object fd, long off, SeekOrigin whence)
+        public override long Seek(object clientData, long offset, SeekOrigin origin)
         {
-            T2P t2p = fd as T2P;
+            T2P t2p = clientData as T2P;
             if (t2p == null)
                 throw new ArgumentException();
 
             if (!t2p.m_outputdisable && t2p.m_outputfile != null)
-                return t2p.m_outputfile.Seek(off, whence);
+                return t2p.m_outputfile.Seek(offset, origin);
 
-            return off;
+            return offset;
         }
 
-        public override void Close(object fd)
+        public override void Close(object clientData)
         {
         }
 
-        public override long Size(object fd)
+        public override long Size(object clientData)
         {
             return -1;
         }

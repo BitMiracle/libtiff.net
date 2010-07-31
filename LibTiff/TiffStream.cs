@@ -15,7 +15,7 @@ using System.IO;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Tiff stream.
+    /// A stream used by the LibTiff.Net for TIFF reading and writing.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -23,83 +23,94 @@ namespace BitMiracle.LibTiff.Classic
     class TiffStream
     {
         /// <summary>
-        /// Reads data from stream.
+        /// Reads a sequence of bytes from the stream and advances the position within the stream
+        /// by the number of bytes read.
         /// </summary>
-        /// <param name="fd">Stream object.</param>
-        /// <param name="buf">Data buffer.</param>
-        /// <param name="offset">Offset in buffer.</param>
-        /// <param name="size">Bytes to read.</param>
-        /// <returns>The number of read bytes.</returns>
-        public virtual int Read(object fd, byte[] buf, int offset, int size)
+        /// <param name="clientData">A client data (by default, an underlying stream).</param>
+        /// <param name="buffer">An array of bytes. When this method returns, the
+        /// <paramref name="buffer"/> contains the specified byte array with the values between
+        /// <paramref name="offset"/> and (<paramref name="offset"/> + <paramref name="count"/> - 1)
+        /// replaced by the bytes read from the current source.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin storing the data read from the current stream.</param>
+        /// <param name="count">The maximum number of bytes to be read from the current stream.</param>
+        /// <returns>The total number of bytes read into the <paramref name="buffer"/>. This can
+        /// be less than the number of bytes requested if that many bytes are not currently
+        /// available, or zero (0) if the end of the stream has been reached.</returns>
+        public virtual int Read(object clientData, byte[] buffer, int offset, int count)
         {
-            Stream s = fd as Stream;
-            if (s == null)
-                throw new ArgumentException("Can't get stream to read from");
+            Stream stream = clientData as Stream;
+            if (stream == null)
+                throw new ArgumentException("Can't get underlying stream to read from");
 
-            return s.Read(buf, offset, size);
+            return stream.Read(buffer, offset, count);
         }
 
         /// <summary>
-        /// Writes data to stream.
+        /// Writes a sequence of bytes to the current stream and advances the current position
+        /// within this stream by the number of bytes written.
         /// </summary>
-        /// <param name="fd">Stream object.</param>
-        /// <param name="buf">Data buffer.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="size">Bytes to write.</param>
-        public virtual void Write(object fd, byte[] buf, int offset, int size)
+        /// <param name="clientData">A client data (by default, an underlying stream).</param>
+        /// <param name="buffer">An array of bytes. This method copies <paramref name="count"/>
+        /// bytes from <paramref name="buffer"/> to the current stream.</param>
+        /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at which
+        /// to begin copying bytes to the current stream.</param>
+        /// <param name="count">The number of bytes to be written to the current stream.</param>
+        public virtual void Write(object clientData, byte[] buffer, int offset, int count)
         {
-            Stream s = fd as Stream;
-            if (s == null)
-                throw new ArgumentException("Can't get stream to write to");
+            Stream stream = clientData as Stream;
+            if (stream == null)
+                throw new ArgumentException("Can't get underlying stream to write to");
             
-            s.Write(buf, offset, size);
+            stream.Write(buffer, offset, count);
         }
 
         /// <summary>
-        /// Seeks stream.
+        /// Sets the position within the current stream.
         /// </summary>
-        /// <param name="fd">Stream object.</param>
-        /// <param name="off">Offset</param>
-        /// <param name="whence">Seek origin.</param>
-        /// <returns>The new position within stream.</returns>
-        public virtual long Seek(object fd, long off, SeekOrigin whence)
+        /// <param name="clientData">A client data (by default, an underlying stream).</param>
+        /// <param name="offset">A byte offset relative to the <paramref name="origin"/> parameter.</param>
+        /// <param name="origin">A value of type <see cref="System.IO.SeekOrigin"/> indicating the
+        /// reference point used to obtain the new position.</param>
+        /// <returns>The new position within the current stream.</returns>
+        public virtual long Seek(object clientData, long offset, SeekOrigin origin)
         {
-            /* we use this as a special code, so avoid accepting it */
-            if (off == -1)
+            // we use this as a special code, so avoid accepting it
+            if (offset == -1)
                 return -1; // was 0xFFFFFFFF
 
-            Stream s = fd as Stream;
-            if (s == null)
-                throw new ArgumentException("Can't get stream to seek in");
+            Stream stream = clientData as Stream;
+            if (stream == null)
+                throw new ArgumentException("Can't get underlying stream to seek in");
 
-            return s.Seek(off, whence);
+            return stream.Seek(offset, origin);
         }
 
         /// <summary>
-        /// Closes the stream.
+        /// Closes the current stream.
         /// </summary>
-        /// <param name="fd">Stream object.</param>
-        public virtual void Close(object fd)
+        /// <param name="clientData">A client data (by default, an underlying stream).</param>
+        public virtual void Close(object clientData)
         {
-            Stream s = fd as Stream;
-            if (s == null)
-                throw new ArgumentException("Can't get stream to close");
+            Stream stream = clientData as Stream;
+            if (stream == null)
+                throw new ArgumentException("Can't get underlying stream to close");
 
-            s.Close();
+            stream.Close();
         }
 
         /// <summary>
-        /// Retrieves a size of stream.
+        /// Gets the length in bytes of the stream.
         /// </summary>
-        /// <param name="fd">Stream object.</param>
-        /// <returns></returns>
-        public virtual long Size(object fd)
+        /// <param name="clientData">A client data (by default, an underlying stream).</param>
+        /// <returns>The length of the stream in bytes.</returns>
+        public virtual long Size(object clientData)
         {
-            Stream s = fd as Stream;
-            if (s == null)
-                throw new ArgumentException("Can't get stream to retrieve size from");
+            Stream stream = clientData as Stream;
+            if (stream == null)
+                throw new ArgumentException("Can't get underlying stream to retrieve size from");
 
-            return s.Length;
+            return stream.Length;
         }
     }
 }

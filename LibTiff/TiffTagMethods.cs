@@ -29,32 +29,35 @@ namespace BitMiracle.LibTiff.Classic
         // 
 
         /// <summary>
-        /// !untyped data
+        /// untyped data
         /// </summary>
         private const short DATATYPE_VOID = 0;
 
         /// <summary>
-        /// !signed integer data
+        /// signed integer data
         /// </summary>
         private const short DATATYPE_INT = 1;
 
         /// <summary>
-        /// !unsigned integer data
+        /// unsigned integer data
         /// </summary>
         private const short DATATYPE_UINT = 2;
 
         /// <summary>
-        /// !IEEE floating point data
+        /// IEEE floating point data
         /// </summary>
         private const short DATATYPE_IEEEFP = 3;
 
         /// <summary>
-        /// Sets the tag field.
+        /// Sets the value(s) of a tag in a TIFF file/stream open for writing.
         /// </summary>
-        /// <param name="tif">The tif.</param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class.</param>
         /// <param name="tag">The tag.</param>
-        /// <param name="value">The field value.</param>
-        /// <returns><c>true</c> if set successfully; otherwise, <c>false</c></returns>
+        /// <param name="value">The tag value(s).</param>
+        /// <returns>
+        /// <c>true</c> if tag value(s) were set successfully; otherwise, <c>false</c>.
+        /// </returns>
+        /// <seealso cref="Tiff.SetField"/>
         public virtual bool SetField(Tiff tif, TiffTag tag, FieldValue[] value)
         {
             const string module = "vsetfield";
@@ -81,13 +84,10 @@ namespace BitMiracle.LibTiff.Classic
                     break;
                 case TiffTag.BITSPERSAMPLE:
                     td.td_bitspersample = value[0].ToShort();
-                    /*
-                    * If the data require post-decoding processing to byte-swap
-                    * samples, set it up here.  Note that since tags are required
-                    * to be ordered, compression code can override this behavior
-                    * in the setup method if it wants to roll the post decoding
-                    * work in with its normal work.
-                    */
+                    // If the data require post-decoding processing to byte-swap samples, set it
+                    // up here. Note that since tags are required to be ordered, compression code
+                    // can override this behavior in the setup method if it wants to roll the post
+                    // decoding work in with its normal work.
                     if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                     {
                         if (td.td_bitspersample == 16)
@@ -100,7 +100,7 @@ namespace BitMiracle.LibTiff.Classic
                             tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab64Bit;
                         else if (td.td_bitspersample == 128)
                         {
-                            /* two 64's */
+                            // two 64's
                             tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab64Bit;
                         }
                     }
@@ -108,11 +108,8 @@ namespace BitMiracle.LibTiff.Classic
                 case TiffTag.COMPRESSION:
                     v = value[0].ToInt() & 0xffff;
                     Compression comp = (Compression)v;
-                    /*
-                    * If we're changing the compression scheme, the notify the
-                    * previous module so that it can cleanup any state it's
-                    * setup.
-                    */
+                    // If we're changing the compression scheme, then notify the previous module
+                    // so that it can cleanup any state it's setup.
                     if (tif.fieldSet(FieldBit.Compression))
                     {
                         if (td.td_compression == comp)
@@ -121,9 +118,7 @@ namespace BitMiracle.LibTiff.Classic
                         tif.m_currentCodec.Cleanup();
                         tif.m_flags &= ~TiffFlags.CODERSETUP;
                     }
-                    /*
-                    * Setup new compression routine state.
-                    */
+                    // Setup new compression scheme.
                     status = tif.setCompressionScheme(comp);
                     if (status)
                         td.td_compression = comp;
@@ -160,7 +155,7 @@ namespace BitMiracle.LibTiff.Classic
                         td.td_orientation = or;
                     break;
                 case TiffTag.SAMPLESPERPIXEL:
-                    /* XXX should cross check -- e.g. if pallette, then 1 */
+                    // XXX should cross check - e.g. if pallette, then 1
                     v = value[0].ToInt();
                     if (v == 0)
                     {
@@ -343,7 +338,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     td.td_sampleformat = sf;
 
-                    /*  Try to fix up the SWAB function for complex data. */
+                    // Try to fix up the SWAB function for complex data.
                     if (td.td_sampleformat == SampleFormat.COMPLEXINT &&
                         td.td_bitspersample == 32 && tif.m_postDecodeMethod == Tiff.PostDecodeMethodType.pdmSwab32Bit)
                     {
@@ -387,7 +382,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.REFERENCEBLACKWHITE:
-                    /* XXX should check for null range */
+                    // XXX should check for null range
                     Tiff.setFloatArray(out td.td_refblackwhite, value[0].ToFloatArray(), 6);
                     break;
                 case TiffTag.INKNAMES:
@@ -436,7 +431,8 @@ namespace BitMiracle.LibTiff.Classic
                     if (tvIndex == -1)
                     {
                         td.td_customValueCount++;
-                        TiffTagValue[] new_customValues = Tiff.Realloc(td.td_customValues, td.td_customValueCount - 1, td.td_customValueCount);
+                        TiffTagValue[] new_customValues = Tiff.Realloc(
+                            td.td_customValues, td.td_customValueCount - 1, td.td_customValueCount);
                         td.td_customValues = new_customValues;
 
                         tvIndex = td.td_customValueCount - 1;
@@ -590,11 +586,13 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Gets the field value by specified tag.
+        /// Gets the value(s) of a tag in an open TIFF file.
         /// </summary>
-        /// <param name="tif">The tif.</param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class.</param>
         /// <param name="tag">The tag.</param>
-        /// <returns>The field value.</returns>
+        /// <returns>The value(s) of a tag in an open TIFF file/stream as array of
+        /// <see cref="FieldValue"/> objects or <c>null</c> if there is no such tag set.</returns>
+        /// <seealso cref="Tiff.GetField"/>
         public virtual FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
             TiffDirectory td = tif.m_dir;
@@ -910,18 +908,19 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Prints the directory.
+        /// Prints formatted description of the contents of the current directory to the
+        /// specified stream using specified print (formatting) options.
         /// </summary>
-        /// <param name="tif">The tif.</param>
-        /// <param name="fd">The fd.</param>
-        /// <param name="flags">The flags.</param>
-        public virtual void PrintDir(Tiff tif, Stream fd, TiffPrintFlags flags)
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class.</param>
+        /// <param name="stream">The fd.</param>
+        /// <param name="flags">The print (formatting) options.</param>
+        public virtual void PrintDir(Tiff tif, Stream stream, TiffPrintFlags flags)
         {
         }
 
-        /*
-        * Install extra samples information.
-        */
+        /// <summary>
+        /// Install extra samples information.
+        /// </summary>
         private static bool setExtraSamples(TiffDirectory td, ref int v, FieldValue[] ap)
         {
             // XXX: Unassociated alpha data == 999 is a known Corel Draw bug, see below
