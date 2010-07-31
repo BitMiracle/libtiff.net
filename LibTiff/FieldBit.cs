@@ -12,9 +12,10 @@
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Field bits (flags) for tags. Field bits used to indicate fields that have been set
-    /// in a directory, and to reference fields when manipulating a directory.
+    /// Field bits (flags) for tags.
     /// </summary>
+    /// <remarks>Field bits used to indicate fields that have been set in a directory, and to
+    /// reference fields when manipulating a directory.</remarks>
 #if EXPOSE_LIBTIFF
     public
 #endif

@@ -8,13 +8,15 @@ using System;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Holds a value of Tiff tag.
-    /// Simply put, it is a wrapper around System.Object, that helps to deal with
+    /// Holds a value of a Tiff tag.
+    /// </summary>
+    /// <remarks>
+    /// <para>Simply put, it is a wrapper around System.Object, that helps to deal with
     /// unboxing and conversion of types a bit easier.
-    /// 
+    /// </para><para>
     /// Please take a look at:
     /// http://blogs.msdn.com/ericlippert/archive/2009/03/19/representation-and-identity.aspx
-    /// </summary>
+    /// </para></remarks>
 #if EXPOSE_LIBTIFF
     public
 #endif
@@ -128,10 +130,10 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to string.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// If value is a byte array, then it gets converted to string using
-        /// Latin1 encoding encoder.
+        /// A <see cref="System.String"/> that represents this instance.        
         /// </returns>
+        /// <remarks>If value is a byte array, then it gets converted to string using
+        /// Latin1 encoding encoder.</remarks>
         public override string ToString()
         {
             if (m_value is byte[])
@@ -143,14 +145,15 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Retrieves value converted to byte array.
         /// </summary>
-        /// <returns>If value is byte[] then it retrieved unaltered.
-        /// If value is short[], ushort[], int[], uint[], float[] or double[] then
-        /// each element of source array gets converted to byte and added to
-        /// resulting array.
-        /// If value is string then it gets converted to byte[] using Latin1
-        /// encoding encoder.
-        /// If value is of any other type then <c>null</c> is returned.
-        /// </returns>
+        /// <returns>Value converted to byte array.</returns>
+        /// <remarks>
+        /// <para>If value is byte array then it retrieved unaltered.</para>
+        /// <para>If value is array of short, ushort, int, uint, float or double values then this
+        /// array is converted to byte array</para><para>
+        /// If value is a string then it gets converted to byte array using Latin1 encoding
+        /// encoder.</para><para>
+        /// If value is of any other type then <c>null</c> is returned.</para>
+        /// </remarks>
         public byte[] GetBytes()
         {
             if (m_value == null)
@@ -213,16 +216,15 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves value converted to byte array.
+        /// Retrieves value converted to array of bytes.
         /// </summary>
-        /// <returns>If value is byte[] then it retrieved unaltered.
-        /// If value is short[], ushort[], int[] or uint[] then
-        /// each element of source array gets converted to byte and added to
-        /// resulting array.
-        /// If value is string then it gets converted to byte[] using Latin1
-        /// encoding encoder.
-        /// If value is of any other type then null is returned.
-        /// </returns>
+        /// <returns>Value converted to array of bytes.</returns>
+        /// <remarks><para>If value is array of bytes then it retrieved unaltered.</para>
+        /// <para>If value is array of short, ushort, int or uint values then each element of
+        /// field value gets converted to byte and added to resulting array.</para>
+        /// <para>If value is string then it gets converted to byte[] using Latin1 encoding
+        /// encoder.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
         public byte[] ToByteArray()
         {
             if (m_value == null)
@@ -277,17 +279,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves value converted to array of short.
+        /// Retrieves value converted to array of short values.
         /// </summary>
-        /// <returns>If value is short[] then it retrieved unaltered.
-        /// If value is byte[] then each pair of bytes is converted to
-        /// short and added to resulting array. If value contains odd amount of
-        /// bytes, then null is returned.
-        /// If value is ushort[], int[] or uint[] then
-        /// each element of source array gets converted to short and added to
-        /// resulting array.
-        /// If value is of any other type then null is returned.
-        /// </returns>
+        /// <returns>Value converted to array of short values.</returns>
+        /// <remarks><para>If value is array of short values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each pair of bytes is converted to short and
+        /// added to resulting array. If value contains odd amount of bytes, then null is
+        /// returned.</para><para>
+        /// If value is array of ushort, int or uint values then each element of field value gets
+        /// converted to short and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
         public short[] ToShortArray()
         {
             if (m_value == null)
@@ -350,17 +351,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves value converted to array of ushort.
+        /// Retrieves value converted to array of ushort values.
         /// </summary>
-        /// <returns>If value is ushort[] then it retrieved unaltered.
-        /// If value is byte[] then each pair of bytes is converted to
-        /// ushort and added to resulting array. If value contains odd amount of
-        /// bytes, then null is returned.
-        /// If value is short[], int[] or uint[] then
-        /// each element of source array gets converted to ushort and added to
-        /// resulting array.
-        /// If value is of any other type then null is returned.
-        /// </returns>
+        /// <returns>Value converted to array of ushort values.</returns>
+        /// <remarks><para>If value is array of ushort values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each pair of bytes is converted to ushort and
+        /// added to resulting array. If value contains odd amount of bytes, then null is
+        /// returned.</para><para>
+        /// If value is array of short, int or uint values then each element of field value gets
+        /// converted to ushort and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
 #if EXPOSE_LIBTIFF
         [CLSCompliant(false)]
 #endif
@@ -426,17 +426,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves value converted to array of int.
+        /// Retrieves value converted to array of int values.
         /// </summary>
-        /// <returns>If value is int[] then it retrieved unaltered.
-        /// If value is byte[] then each 4 bytes are converted to
-        /// int and added to resulting array. If value contains amount of
-        /// bytes that can't be divided by 4 without remainder, then null is returned.
-        /// If value is short[], ushort[] or uint[] then
-        /// each element of source array gets converted to int and added to
-        /// resulting array.
-        /// If value is of any other type then null is returned.
-        /// </returns>
+        /// <returns>Value converted to array of int values.</returns>
+        /// <remarks><para>If value is array of int values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each 4 bytes are converted to int and added to
+        /// resulting array. If value contains amount of bytes that can't be divided by 4 without
+        /// remainder, then null is returned.</para>
+        /// <para>If value is array of short, ushort or uint values then each element of
+        /// field value gets converted to int and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
         public int[] ToIntArray()
         {
             if (m_value == null)
@@ -499,17 +498,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves value converted to array of uint.
+        /// Retrieves value converted to array of uint values.
         /// </summary>
-        /// <returns>If value is uint[] then it retrieved unaltered.
-        /// If value is byte[] then each 4 bytes are converted to
-        /// uint and added to resulting array. If value contains amount of
-        /// bytes that can't be divided by 4 without remainder, then null is returned.
-        /// If value is short[], ushort[] or int[] then
-        /// each element of source array gets converted to uint and added to
-        /// resulting array.
-        /// If value is of any other type then null is returned.
-        /// </returns>
+        /// <returns>Value converted to array of uint values.</returns>
+        /// <remarks><para>If value is array of uint values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each 4 bytes are converted to uint and added to
+        /// resulting array. If value contains amount of bytes that can't be divided by 4 without
+        /// remainder, then null is returned.</para>
+        /// <para>If value is array of short, ushort or int values then each element of
+        /// field value gets converted to uint and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
 #if EXPOSE_LIBTIFF
         [CLSCompliant(false)]
 #endif
@@ -575,16 +573,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves value converted to array of float.
+        /// Retrieves value converted to array of float values.
         /// </summary>
-        /// <returns>If value is float[] then it retrieved unaltered.
-        /// If value is double[] then each element of source array gets
-        /// converted to float and added to resulting array.
-        /// If value is byte[] then each 4 bytes are converted to float
-        /// and added to resulting array. If value contains amount of
-        /// bytes that can't be divided by 4 without remainder, then null is returned.
-        /// If value is of any other type then null is returned.
-        /// </returns>
+        /// <returns>Value converted to array of float values.</returns>
+        /// <remarks><para>If value is array of float values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each 4 bytes are converted to float and added to
+        /// resulting array. If value contains amount of bytes that can't be divided by 4 without
+        /// remainder, then null is returned.</para>
+        /// <para>If value is array of double values then each element of field value gets
+        /// converted to float and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
         public float[] ToFloatArray()
         {
             if (m_value == null)
@@ -630,16 +628,16 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Retrieves value converted to array of double.
+        /// Retrieves value converted to array of double values.
         /// </summary>
-        /// <returns>If value is double[] then it retrieved unaltered.
-        /// If value is float[] then each element of source array gets
-        /// converted to double and added to resulting array.
-        /// If value is byte[] then each 8 bytes are converted to double
-        /// and added to resulting array. If value contains amount of
-        /// bytes that can't be divided by 8 without remainder, then null is returned.
-        /// If value is of any other type then null is returned.
-        /// </returns>
+        /// <returns>Value converted to array of double values.</returns>
+        /// <remarks><para>If value is array of double values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each 8 bytes are converted to double and added to
+        /// resulting array. If value contains amount of bytes that can't be divided by 8 without
+        /// remainder, then null is returned.</para>
+        /// <para>If value is array of float values then each element of field value gets
+        /// converted to double and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
         public double[] ToDoubleArray()
         {
             if (m_value == null)

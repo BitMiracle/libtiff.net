@@ -12,28 +12,17 @@
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Field info.
+    /// Represents a TIFF field information.
     /// </summary>
+    /// <remarks>
+    /// <b>TiffFieldInfo</b> describes a field. It provides information about field name, type,
+    /// number of values etc.
+    /// </remarks>
 #if EXPOSE_LIBTIFF
     public
 #endif
     class TiffFieldInfo
     {
-        /// <summary>
-        /// marker for variable length tags
-        /// </summary>
-        public const short Variable = -1;
-
-        /// <summary>
-        /// marker for SamplesPerPixel tags
-        /// </summary>
-        public const short Spp = -2;
-
-        /// <summary>
-        /// marker for int var-length tags
-        /// </summary>
-        public const short Variable2 = -3;
-
         private TiffTag m_tag;
         private short m_readCount;
         private short m_writeCount;
@@ -44,26 +33,37 @@ namespace BitMiracle.LibTiff.Classic
         private string m_name;
 
         /// <summary>
+        /// marker for variable length tags
+        /// </summary>
+        public const short Variable = -1;
+
+        /// <summary>
+        /// marker for SamplesPerPixel-bound tags
+        /// </summary>
+        public const short Spp = -2;
+
+        /// <summary>
+        /// marker for integer variable length tags
+        /// </summary>
+        public const short Variable2 = -3;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TiffFieldInfo"/> class.
         /// </summary>
         /// <param name="tag">The tag to describe.</param>
-        /// <param name="readCount">The number of value elements to read when
-        /// reading field information or one of TiffFieldInfo.Variable,
-        /// TiffFieldInfo.Spp and TiffFieldInfo.Variable2</param>
-        /// <param name="writeCount">The number of value elements to write when
-        /// writing field information or one of TiffFieldInfo.Variable,
-        /// TiffFieldInfo.Spp and TiffFieldInfo.Variable2</param>
-        /// <param name="type">The type of the value elements.</param>
-        /// <param name="bit">Index of the bit to use in "Set Fields Vector"
-        /// when this instance is merged into field info collection. Take a look
-        /// at <see cref="FieldBit"/> class.</param>
-        /// <param name="okToChange">If true, then it is permissible to set the
-        /// tag's value even after writing has commenced.</param>
-        /// <param name="passCount">If true, then number of value elements
-        /// should be passed to SetField method as second parameter (right
-        /// after tag type AND before value itself).</param>
-        /// <param name="name">The name (description) of the tag this
-        /// instance describes.</param>
+        /// <param name="readCount">The number of values to read when reading field information or
+        /// one of <see cref="Variable"/>, <see cref="Spp"/> and <see cref="Variable2"/>.</param>
+        /// <param name="writeCount">The number of values to write when writing field information
+        /// or one of <see cref="Variable"/>, <see cref="Spp"/> and <see cref="Variable2"/>.</param>
+        /// <param name="type">The type of the field value.</param>
+        /// <param name="bit">Index of the bit to use in "Set Fields Vector" when this instance
+        /// is merged into field info collection. Take a look at <see cref="FieldBit"/> class.</param>
+        /// <param name="okToChange">If true, then it is permissible to set the tag's value even
+        /// after writing has commenced.</param>
+        /// <param name="passCount">If true, then number of value elements should be passed to
+        /// <see cref="Tiff.SetField"/> method as second parameter (right after tag type AND
+        /// before value itself).</param>
+        /// <param name="name">The name (description) of the tag this instance describes.</param>
         public TiffFieldInfo(TiffTag tag, short readCount, short writeCount,
             TiffType type, short bit, bool okToChange, bool passCount, string name)
         {
@@ -100,9 +100,8 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Number of value elements to read when reading field information or
-        /// one of TiffFieldInfo.Variable, TiffFieldInfo.Spp and
-        /// TiffFieldInfo.Variable2
+        /// Number of values to read when reading field information or
+        /// one of <see cref="Variable"/>, <see cref="Spp"/> and <see cref="Variable2"/>.
         /// </summary>
         public short ReadCount
         {
@@ -110,9 +109,8 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Number of value elements to write when writing field information or
-        /// one of TiffFieldInfo.Variable, TiffFieldInfo.Spp and
-        /// TiffFieldInfo.Variable2
+        /// Number of values to write when writing field information or
+        /// one of <see cref="Variable"/>, <see cref="Spp"/> and <see cref="Variable2"/>.
         /// </summary>
         public short WriteCount
         {
@@ -120,7 +118,7 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// Type of the value elements.
+        /// Type of the field values.
         /// </summary>
         public TiffType Type
         {
@@ -129,7 +127,7 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Index of the bit to use in "Set Fields Vector" when this instance
-        /// is merged into field info collection. Take a look at FieldBit class.
+        /// is merged into field info collection. Take a look at <see cref="FieldBit"/> class.
         /// </summary>
         public short Bit
         {
@@ -137,8 +135,7 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// If true, then it is permissible to set the tag's value even after
-        /// writing has commenced.
+        /// If true, then it is permissible to set the tag's value even after writing has commenced.
         /// </summary>
         public bool OkToChange
         {
@@ -146,9 +143,8 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
-        /// If true, then number of value elements should be passed to
-        /// SetField method as second parameter (right after tag type AND before
-        /// value itself).
+        /// If true, then number of value elements should be passed to <see cref="Tiff.SetField"/>
+        /// method as second parameter (right after tag type AND before values itself).
         /// </summary>
         public bool PassCount
         {

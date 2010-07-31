@@ -155,10 +155,6 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private TiffCIELabToRGB cielab;
 
-        internal int row_offset;
-
-        internal int col_offset;
-
         private static TiffDisplay display_sRGB = new TiffDisplay(
             // XYZ -> luminance matrix
             new float[] { 3.2410F, -1.5374F, -0.4986F },
@@ -175,6 +171,9 @@ namespace BitMiracle.LibTiff.Classic
         // Helper constants used in Orientation tag handling
         private const int FLIP_VERTICALLY = 0x01;
         private const int FLIP_HORIZONTALLY = 0x02;
+
+        internal int row_offset;
+        internal int col_offset;
 
         /// <summary>
         /// Delegate for "put" method (the method that is called to pack pixel data in the raster)
