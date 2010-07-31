@@ -561,29 +561,29 @@
                                     {            
                                         // You may implement any constructor you want here.
 
-                                        public override int Read(object fd, byte[] buf, int offset, int size)
+                                        public override int Read(object clientData, byte[] buffer, int offset, int count)
                                         {
                                             // stub implementation
                                             return -1;
                                         }
 
-                                        public override void Write(object fd, byte[] buf, int size)
+                                        public override void Write(object clientData, byte[] buffer, int offset, int count)
                                         {
                                             // stub implementation
                                         }
 
-                                        public override long Seek(object fd, long off, System.IO.SeekOrigin whence)
+                                        public override long Seek(object clientData, long offset, System.IO.SeekOrigin origin)
                                         {
                                             // stub implementation
                                             return -1;
                                         }
 
-                                        public override void Close(object fd)
+                                        public override void Close(object clientData)
                                         {
                                             // stub implementation
                                         }
 
-                                        public override long Size(object fd)
+                                        public override long Size(object clientData)
                                         {
                                             // stub implementation
                                             return -1;

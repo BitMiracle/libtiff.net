@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// OFileType
+    /// Kind of data in subfile.<br/>
+    /// Possible values for <see cref="TiffTag"/>.OSUBFILETYPE tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,15 +21,17 @@ namespace BitMiracle.LibTiff.Classic
     enum OFileType
     {
         /// <summary>
-        /// Full resolution image data
+        /// Full resolution image data.
         /// </summary>
         IMAGE = 1,
+
         /// <summary>
-        /// Reduced size image data
+        /// Reduced size image data.
         /// </summary>
         REDUCEDIMAGE = 2,
+        
         /// <summary>
-        /// One page of many
+        /// One page of many.
         /// </summary>
         PAGE = 3
     }

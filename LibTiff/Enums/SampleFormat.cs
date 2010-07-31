@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// SampleFormat
+    /// Data sample format.<br/>
+    /// Possible values for <see cref="TiffTag"/>.SAMPLEFORMAT tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -23,26 +23,31 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Unsigned integer data
         /// </summary>
-        UINT = 1,// !
+        UINT = 1,
+        
         /// <summary>
         /// Signed integer data
         /// </summary>
-        INT = 2,// !
+        INT = 2,
+        
         /// <summary>
         /// IEEE floating point data
         /// </summary>
-        IEEEFP = 3,// !
+        IEEEFP = 3,
+        
         /// <summary>
         /// Untyped data
         /// </summary>
-        VOID = 4,// !
+        VOID = 4,
+        
         /// <summary>
         /// Complex signed int
         /// </summary>
-        COMPLEXINT = 5,// !
+        COMPLEXINT = 5,
+        
         /// <summary>
         /// Complex ieee floating
         /// </summary>
-        COMPLEXIEEEFP = 6,// !
+        COMPLEXIEEEFP = 6,
     }
 }

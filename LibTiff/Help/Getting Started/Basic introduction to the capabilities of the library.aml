@@ -697,10 +697,10 @@
                             </codeEntityReference>,
                             and written with
                             <codeEntityReference>
-                                M:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedTile(System.Int32,System.Byte[],System.Int32)
+                                Overload:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedTile
                             </codeEntityReference> or
                             <codeEntityReference>
-                                M:BitMiracle.LibTiff.Classic.Tiff.WriteRawTile(System.Int32,System.Byte[],System.Int32)
+                                Overload:BitMiracle.LibTiff.Classic.Tiff.WriteRawTile
                             </codeEntityReference>.
                             For example, to read all the tiles in an image:
                         </para>

@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// FaxMode
+    /// Group 3/4 format control.<br/>
+    /// Possible values for <see cref="TiffTag"/>.FAXMODE tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,27 +21,32 @@ namespace BitMiracle.LibTiff.Classic
     enum FaxMode
     {
         /// <summary>
-        /// Default, include RTC
+        /// Default, include RTC.
         /// </summary>
         CLASSIC = 0x0000,
+        
         /// <summary>
-        /// No RTC at end of data
+        /// No RTC at end of data.
         /// </summary>
         NORTC = 0x0001,
+        
         /// <summary>
-        /// No EOL code at end of row
+        /// No EOL code at end of row.
         /// </summary>
         NOEOL = 0x0002,
+        
         /// <summary>
-        /// Byte align row
+        /// Byte align row.
         /// </summary>
         BYTEALIGN = 0x0004,
+        
         /// <summary>
-        /// Word align row
+        /// Word align row.
         /// </summary>
         WORDALIGN = 0x0008,
+        
         /// <summary>
-        /// TIFF Class F
+        /// TIFF Class F.
         /// </summary>
         CLASSF = NORTC,
     }

@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// FillOrder
+    /// Data order within a byte.<br/>
+    /// Possible values for <see cref="TiffTag"/>.FILLORDER tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,11 +21,12 @@ namespace BitMiracle.LibTiff.Classic
     enum FillOrder
     {
         /// <summary>
-        /// Most significant -> least
+        /// Most significant -> least.
         /// </summary>
         MSB2LSB = 1,
+        
         /// <summary>
-        /// Least significant -> most
+        /// Least significant -> most.
         /// </summary>
         LSB2MSB = 2,
     }

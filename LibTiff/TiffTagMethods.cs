@@ -912,7 +912,7 @@ namespace BitMiracle.LibTiff.Classic
         /// specified stream using specified print (formatting) options.
         /// </summary>
         /// <param name="tif">An instance of the <see cref="Tiff"/> class.</param>
-        /// <param name="stream">The fd.</param>
+        /// <param name="stream">The stream to print to.</param>
         /// <param name="flags">The print (formatting) options.</param>
         public virtual void PrintDir(Tiff tif, Stream stream, TiffPrintFlags flags)
         {

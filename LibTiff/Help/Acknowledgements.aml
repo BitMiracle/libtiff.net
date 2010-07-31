@@ -32,8 +32,8 @@
             </quote>
         </para>
         <para>
-            Other people have by now helped with bug fixes, test images and code. We want to
-            say "thank you" to following people:
+            <legacyBold>Other people</legacyBold> have by now helped with bug fixes, test images
+            and code. We want to say <legacyBold>"thank you"</legacyBold> to following people:
             <list class="bullet">
                 <listItem>Adriaan van den Brand</listItem>
                 <listItem>Michael Epner</listItem>

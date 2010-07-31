@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// JpegTablesMode
+    /// Jpeg Tables Mode.<br/>
+    /// Possible values for <see cref="TiffTag"/>.JPEGTABLESMODE tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,15 +21,17 @@ namespace BitMiracle.LibTiff.Classic
     enum JpegTablesMode
     {
         /// <summary>
-        /// None
+        /// None.
         /// </summary>
         NONE = 0,
+        
         /// <summary>
-        /// Include quantization tables
+        /// Include quantization tables.
         /// </summary>
         QUANT = 0x0001,
+        
         /// <summary>
-        /// Include Huffman tables
+        /// Include Huffman tables.
         /// </summary>
         HUFF = 0x0002,
     }

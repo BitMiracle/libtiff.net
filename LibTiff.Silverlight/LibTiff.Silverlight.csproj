@@ -86,15 +86,6 @@
     <Compile Include="..\LibTiff\Enums\Compression.cs">
       <Link>Enums\Compression.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\Enums\DCSImagerFilter.cs">
-      <Link>Enums\DCSImagerFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\LibTiff\Enums\DCSImagerModel.cs">
-      <Link>Enums\DCSImagerModel.cs</Link>
-    </Compile>
-    <Compile Include="..\LibTiff\Enums\DCSInterpMode.cs">
-      <Link>Enums\DCSInterpMode.cs</Link>
-    </Compile>
     <Compile Include="..\LibTiff\Enums\ExtraSample.cs">
       <Link>Enums\ExtraSample.cs</Link>
     </Compile>
@@ -134,9 +125,6 @@
     <Compile Include="..\LibTiff\Enums\Photometric.cs">
       <Link>Enums\Photometric.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\Enums\PixarLogDataFmt.cs">
-      <Link>Enums\PixarLogDataFmt.cs</Link>
-    </Compile>
     <Compile Include="..\LibTiff\Enums\PlanarConfig.cs">
       <Link>Enums\PlanarConfig.cs</Link>
     </Compile>
@@ -148,12 +136,6 @@
     </Compile>
     <Compile Include="..\LibTiff\Enums\SampleFormat.cs">
       <Link>Enums\SampleFormat.cs</Link>
-    </Compile>
-    <Compile Include="..\LibTiff\Enums\SGILogDataFmt.cs">
-      <Link>Enums\SGILogDataFmt.cs</Link>
-    </Compile>
-    <Compile Include="..\LibTiff\Enums\SGILogEncode.cs">
-      <Link>Enums\SGILogEncode.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\Enums\Threshold.cs">
       <Link>Enums\Threshold.cs</Link>

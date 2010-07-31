@@ -64,9 +64,6 @@
     <Compile Include="AssemblyVersion.cs" />
     <Compile Include="Enums\CleanFaxData.cs" />
     <Compile Include="Enums\ColorResponseUnit.cs" />
-    <Compile Include="Enums\DCSImagerFilter.cs" />
-    <Compile Include="Enums\DCSImagerModel.cs" />
-    <Compile Include="Enums\DCSInterpMode.cs" />
     <Compile Include="Enums\Compression.cs" />
     <Compile Include="Enums\FileType.cs" />
     <Compile Include="Enums\OFileType.cs" />
@@ -182,14 +179,11 @@
     <Compile Include="LibJpeg\J_MESSAGE_CODE.cs" />
     <Compile Include="LibJpeg\ReadResult.cs" />
     <Compile Include="Enums\Orientation.cs" />
-    <Compile Include="Enums\PixarLogDataFmt.cs" />
     <Compile Include="Enums\PlanarConfig.cs" />
     <Compile Include="Enums\Predictor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enums\ResUnit.cs" />
     <Compile Include="Enums\SampleFormat.cs" />
-    <Compile Include="Enums\SGILogDataFmt.cs" />
-    <Compile Include="Enums\SGILogEncode.cs" />
     <Compile Include="Enums\Threshold.cs" />
     <Compile Include="Tiff.cs" />
     <Compile Include="TiffCodec.cs" />

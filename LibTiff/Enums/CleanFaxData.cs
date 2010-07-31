@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// CleanFaxData
+    /// Regenerated line info.<br/>
+    /// Possible values for <see cref="TiffTag"/>.CLEANFAXDATA tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,15 +21,17 @@ namespace BitMiracle.LibTiff.Classic
     enum CleanFaxData
     {
         /// <summary>
-        /// No errors detected
+        /// No errors detected.
         /// </summary>
         CLEAN = 0,
+
         /// <summary>
-        /// Receiver regenerated lines
+        /// Receiver regenerated lines.
         /// </summary>
         REGENERATED = 1,
+        
         /// <summary>
-        /// Uncorrected errors exist
+        /// Uncorrected errors exist.
         /// </summary>
         UNCLEAN = 2,
     }

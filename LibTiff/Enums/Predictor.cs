@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Predictor
+    /// Prediction scheme w/ LZW.<br/>
+    /// Possible values for <see cref="TiffTag"/>.PREDICTOR tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,15 +21,17 @@ namespace BitMiracle.LibTiff.Classic
     enum Predictor
     {
         /// <summary>
-        /// No prediction scheme used
+        /// No prediction scheme used.
         /// </summary>
         NONE = 1,
+        
         /// <summary>
-        /// Horizontal differencing
+        /// Horizontal differencing.
         /// </summary>
         HORIZONTAL = 2,
+        
         /// <summary>
-        /// Floating point predictor
+        /// Floating point predictor.
         /// </summary>
         FLOATINGPOINT = 3,
     }

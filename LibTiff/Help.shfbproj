@@ -127,7 +127,7 @@
     <CopyrightText>Copyright &amp;#169%3b 2008-2010 Bit Miracle. All rights reserved.</CopyrightText>
     <FeedbackEMailAddress>support%40bitmiracle.com</FeedbackEMailAddress>
     <FeedbackEMailLinkText>support%40bitmiracle.com</FeedbackEMailLinkText>
-    <HelpTitle>LibTiff.Net, a managed version of the LibTiff library for reading and writing TIFF.</HelpTitle>
+    <HelpTitle>LibTiff.Net, the managed version of the LibTiff library for reading and writing TIFF.</HelpTitle>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="BitMiracle.LibTiff.Classic" isDocumented="True">This namespace contains all classes, structures, delegates, and enumerations in the .NET version (port) of the original LibTiff library.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="(global)" isDocumented="False" />

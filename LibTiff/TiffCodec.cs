@@ -127,7 +127,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
         /// <param name="count">The number of decoded bytes that should be placed
-        /// to <paramref name="buffer"/></param>
+        /// to <paramref name="buffer"/>.</param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
@@ -144,7 +144,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
         /// <param name="count">The number of decoded bytes that should be placed
-        /// to <paramref name="buffer"/></param>
+        /// to <paramref name="buffer"/>.</param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
@@ -161,7 +161,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
         /// <param name="count">The number of decoded bytes that should be placed
-        /// to <paramref name="buffer"/></param>
+        /// to <paramref name="buffer"/>.</param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was decoded successfully; otherwise, <c>false</c>.
@@ -220,7 +220,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
-        /// to <paramref name="buffer"/></param>
+        /// to <paramref name="buffer"/>.</param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
@@ -237,7 +237,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
-        /// to <paramref name="buffer"/></param>
+        /// to <paramref name="buffer"/>.</param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.
@@ -254,7 +254,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin read image data.</param>
         /// <param name="count">The maximum number of encoded bytes that can be placed
-        /// to <paramref name="buffer"/></param>
+        /// to <paramref name="buffer"/>.</param>
         /// <param name="plane">The zero-based sample plane index.</param>
         /// <returns>
         /// 	<c>true</c> if image data was encoded successfully; otherwise, <c>false</c>.

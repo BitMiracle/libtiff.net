@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// InkSet
+    /// Inks in separated image.<br/>
+    /// Possible values for <see cref="TiffTag"/>.INKSET tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,12 +21,13 @@ namespace BitMiracle.LibTiff.Classic
     enum InkSet
     {
         /// <summary>
-        /// Cyan-magenta-yellow-black color
+        /// Cyan-magenta-yellow-black color.
         /// </summary>
-        CMYK = 1,// !
+        CMYK = 1,
+        
         /// <summary>
-        /// Multi-ink or hi-fi color
+        /// Multi-ink or hi-fi color.
         /// </summary>
-        MULTIINK = 2,// !
+        MULTIINK = 2,
     }
 }

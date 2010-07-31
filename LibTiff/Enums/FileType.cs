@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// FileType
+    /// Subfile data descriptor.<br/>
+    /// Possible values for <see cref="TiffTag"/>.SUBFILETYPE tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,13 +21,15 @@ namespace BitMiracle.LibTiff.Classic
     enum FileType
     {
         /// <summary>
-        /// Reduced resolution version
+        /// Reduced resolution version.
         /// </summary>
         REDUCEDIMAGE = 0x1,
+        
         /// <summary>
-        /// One page of many
+        /// One page of many.
         /// </summary>
         PAGE = 0x2,
+        
         /// <summary>
         /// Transparency mask.
         /// </summary>

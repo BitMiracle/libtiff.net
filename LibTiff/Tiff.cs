@@ -55,7 +55,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="buffer">The buffer to place decoded image data to.</param>
         /// <param name="offset">The zero-based byte offset in <paramref name="buffer"/> at
         /// which to begin storing decoded bytes.</param>
-        /// <param name="runs">The array of black and white run lengths (white then black)</param>
+        /// <param name="runs">The array of black and white run lengths (white then black).</param>
         /// <param name="thisRunOffset">The zero-based offset in <paramref name="runs"/> array at
         /// which current row's run begins.</param>
         /// <param name="nextRunOffset">The zero-based offset in <paramref name="runs"/> array at
@@ -2127,7 +2127,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <para>
         /// <b>StripSize</b> returns the equivalent size for a strip of data as it would be
         /// returned in a call to <see cref="ReadEncodedStrip"/> or as it would be expected in a
-        /// call to <see cref="O:BitMiracle.Libtiff.Classic.Tiff.WriteEncodedStrip"/>.
+        /// call to <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedStrip"/>.
         /// </para><para>
         /// If the value of the field corresponding to <see cref="TiffTag.ROWSPERSTRIP"/> is
         /// larger than the recorded <see cref="TiffTag.IMAGELENGTH"/>, then the strip size is
@@ -2270,7 +2270,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The number of bytes in a row-aligned tile.</returns>
         /// <remarks><b>TileSize</b> returns the equivalent size for a tile of data as it would be
         /// returned in a call to <see cref="ReadTile"/> or as it would be expected in a
-        /// call to <see cref="O:BitMiracle.Libtiff.Classic.Tiff.WriteTile"/>.
+        /// call to <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteTile"/>.
         /// </remarks>
         public int TileSize()
         {
@@ -4702,7 +4702,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Invokes the library-wide error handling methods to (normally) write an error message
         /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -4757,7 +4757,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Invokes the library-wide error handling methods to (normally) write an error message
         /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="clientData">The client data to be passed to error handler.</param>
         /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
@@ -4824,7 +4824,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Invokes the library-wide warning handling methods to (normally) write a warning message
         /// to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="method">The method in which a warning is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -4878,7 +4878,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Invokes the library-wide warning handling methods to (normally) write a warning message
         /// to the <see cref="Console.Error"/> and passes client data to the warning handler.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="clientData">The client data to be passed to warning handler.</param>
         /// <param name="method">The method in which a warning is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>

@@ -218,13 +218,13 @@
                                     this example.
                                 </listItem>
                                 <listItem>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedStrip(System.Int32,System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedStrip</codeEntityReference>
                                     is the function call that actually inserts the image into the
                                     file. This call inserts uncompressed image data into the file.
                                     This means that LibTiff.Net will compress the image data for
                                     you before writing it to the file. If you have already
                                     compressed data, then have a look at the
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteRawStrip(System.Int32,System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteRawStrip</codeEntityReference>
                                     instead.
                                 </listItem>
                                 <listItem>

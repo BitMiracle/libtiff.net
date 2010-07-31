@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Threshold
+    /// Thresholding used on data.<br/>
+    /// Possible values for <see cref="TiffTag"/>.THRESHHOLDING tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,15 +21,17 @@ namespace BitMiracle.LibTiff.Classic
     enum Threshold
     {
         /// <summary>
-        /// B&amp;W art scan
+        /// B&amp;W art scan.
         /// </summary>
         BILEVEL = 1,
+        
         /// <summary>
-        /// Dithered scan
+        /// Dithered scan.
         /// </summary>
         HALFTONE = 2,
+        
         /// <summary>
-        /// Usually Floyd-Steinberg
+        /// Usually Floyd-Steinberg.
         /// </summary>
         ERRORDIFFUSE = 3,
     }

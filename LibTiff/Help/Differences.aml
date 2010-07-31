@@ -935,7 +935,7 @@
                                     TIFFReadScanline
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.ReadScanline(System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.ReadScanline</codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -1288,17 +1288,17 @@
                                     TIFFWriteCheck
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteCheck(System.Int32,System.String)</codeEntityReference>
+                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteCheck(System.Boolean,System.String)</codeEntityReference>
                                 </entry>
                             </row>
-                            <row>
+                            <!--<row>
                                 <entry>
                                     TIFFWriteCustomDirectory
                                 </entry>
                                 <entry>
                                     <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteCustomDirectory(System.Int64@)</codeEntityReference>
                                 </entry>
-                            </row>
+                            </row>-->
                             <row>
                                 <entry>
                                     TIFFWriteDirectory
@@ -1312,7 +1312,7 @@
                                     TIFFWriteEncodedStrip
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedStrip(System.Int32,System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedStrip</codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -1320,7 +1320,7 @@
                                     TIFFWriteEncodedTile
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedTile(System.Int32,System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedTile</codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -1328,7 +1328,7 @@
                                     TIFFWriteRawStrip
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteRawStrip(System.Int32,System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteRawStrip</codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -1336,7 +1336,7 @@
                                     TIFFWriteRawTile
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteRawTile(System.Int32,System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteRawTile</codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -1344,7 +1344,7 @@
                                     TIFFWriteScanline
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteScanline(System.Byte[],System.Int32)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteScanline</codeEntityReference>
                                 </entry>
                             </row>
                             <row>
@@ -1352,7 +1352,7 @@
                                     TIFFWriteTile
                                 </entry>
                                 <entry>
-                                    <codeEntityReference>M:BitMiracle.LibTiff.Classic.Tiff.WriteTile(System.Byte[],System.Int32,System.Int32,System.Int32,System.Int16)</codeEntityReference>
+                                    <codeEntityReference>Overload:BitMiracle.LibTiff.Classic.Tiff.WriteTile</codeEntityReference>
                                 </entry>
                             </row>
                         </table>
@@ -1390,30 +1390,6 @@
                                 </entry>
                                 <entry>
                                     <codeEntityReference>T:BitMiracle.LibTiff.Classic.Compression</codeEntityReference>.*
-                                </entry>
-                            </row>
-                            <row>
-                                <entry>
-                                    DCSIMAGERFILTER_*
-                                </entry>
-                                <entry>
-                                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.DCSImagerFilter</codeEntityReference>.*
-                                </entry>
-                            </row>
-                            <row>
-                                <entry>
-                                    DCSIMAGERMODEL_*
-                                </entry>
-                                <entry>
-                                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.DCSImagerModel</codeEntityReference>.*
-                                </entry>
-                            </row>
-                            <row>
-                                <entry>
-                                    DCSINTERPMODE_*
-                                </entry>
-                                <entry>
-                                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.DCSInterpMode</codeEntityReference>.*
                                 </entry>
                             </row>
                             <row>
@@ -1532,14 +1508,6 @@
                             </row>
                             <row>
                                 <entry>
-                                    PIXARLOGDATAFMT_*
-                                </entry>
-                                <entry>
-                                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.PixarLogDataFmt</codeEntityReference>.FMT*
-                                </entry>
-                            </row>
-                            <row>
-                                <entry>
                                     PLANARCONFIG_*
                                 </entry>
                                 <entry>
@@ -1568,22 +1536,6 @@
                                 </entry>
                                 <entry>
                                     <codeEntityReference>T:BitMiracle.LibTiff.Classic.SampleFormat</codeEntityReference>.*
-                                </entry>
-                            </row>
-                            <row>
-                                <entry>
-                                    SGILOGDATAFMT_*
-                                </entry>
-                                <entry>
-                                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.SGILogDataFmt</codeEntityReference>.FMT*
-                                </entry>
-                            </row>
-                            <row>
-                                <entry>
-                                    SGILOGENCODE_*
-                                </entry>
-                                <entry>
-                                    <codeEntityReference>T:BitMiracle.LibTiff.Classic.SGILogEncode</codeEntityReference>.*
                                 </entry>
                             </row>
                             <row>

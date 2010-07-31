@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// JpegProc
+    /// JPEG processing algorithm.<br/>
+    /// Possible values for <see cref="TiffTag"/>.JPEGPROC tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,12 +21,13 @@ namespace BitMiracle.LibTiff.Classic
     enum JpegProc
     {
         /// <summary>
-        /// Baseline sequential
+        /// Baseline sequential.
         /// </summary>
-        BASELINE = 1,// !
+        BASELINE = 1,
+        
         /// <summary>
-        /// Huffman coded lossless
+        /// Huffman coded lossless.
         /// </summary>
-        LOSSLESS = 14,// !
+        LOSSLESS = 14,
     }
 }

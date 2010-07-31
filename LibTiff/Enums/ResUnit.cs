@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// ResUnit
+    /// Units of resolutions.<br/>
+    /// Possible values for <see cref="TiffTag"/>.RESOLUTIONUNIT tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,15 +21,17 @@ namespace BitMiracle.LibTiff.Classic
     enum ResUnit
     {
         /// <summary>
-        /// No meaningful units
+        /// No meaningful units.
         /// </summary>
         NONE = 1,
+        
         /// <summary>
-        /// English
+        /// English.
         /// </summary>
         INCH = 2,
+        
         /// <summary>
-        /// Metric
+        /// Metric.
         /// </summary>
         CENTIMETER = 3,
     }

@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// YCbCrPosition
+    /// Subsample positioning.<br/>
+    /// Possible values for <see cref="TiffTag"/>.YCBCRPOSITIONING tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -23,10 +23,11 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// As in PostScript Level 2
         /// </summary>
-        CENTERED = 1,// !
+        CENTERED = 1,
+
         /// <summary>
         /// As in CCIR 601-1
         /// </summary>
-        COSITED = 2,// !
+        COSITED = 2,
     }
 }

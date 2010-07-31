@@ -15,7 +15,7 @@ using System.IO;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// A stream used by the LibTiff.Net for TIFF reading and writing.
+    /// A stream used by the library for TIFF reading and writing.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public

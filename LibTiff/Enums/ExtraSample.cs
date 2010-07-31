@@ -9,11 +9,11 @@
  * For conditions of distribution and use, see the accompanying README file.
  */
 
-
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// ExtraSample
+    /// Information about extra samples.<br/>
+    /// Possible values for <see cref="TiffTag"/>.EXTRASAMPLES tag.
     /// </summary>
 #if EXPOSE_LIBTIFF
     public
@@ -21,16 +21,18 @@ namespace BitMiracle.LibTiff.Classic
     enum ExtraSample
     {
         /// <summary>
-        /// Unspecified data
+        /// Unspecified data.
         /// </summary>
-        UNSPECIFIED = 0,// !
+        UNSPECIFIED = 0,
+        
         /// <summary>
-        /// Associated alpha data
+        /// Associated alpha data.
         /// </summary>
-        ASSOCALPHA = 1,// !
+        ASSOCALPHA = 1,
+        
         /// <summary>
-        /// Unassociated alpha data
+        /// Unassociated alpha data.
         /// </summary>
-        UNASSALPHA = 2,// !
+        UNASSALPHA = 2,
     }
 }

@@ -15,7 +15,7 @@ using System.IO;
 namespace BitMiracle.LibTiff.Classic
 {
     /// <summary>
-    /// Default error handler.
+    /// Default error handler implementation.
     /// </summary>
     /// <remarks>
     /// <para><b>TiffErrorHandler</b> provides error and warning handling methods that write an
@@ -33,7 +33,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Handles an error by writing it text to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -58,7 +58,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Handles an error by writing it text to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="clientData">A client data.</param>
         /// <param name="method">The method where an error is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
@@ -79,7 +79,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Handles a warning by writing it text to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="method">The method where a warning is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -105,7 +105,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Handles a warning by writing it text to the <see cref="Console.Error"/>.
         /// </summary>
-        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c></param>
+        /// <param name="tif">An instance of the <see cref="Tiff"/> class. Can be <c>null</c>.</param>
         /// <param name="clientData">A client data.</param>
         /// <param name="method">The method where a warning is detected.</param>
         /// <param name="format">A composite format string (see Remarks).</param>

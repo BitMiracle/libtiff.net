@@ -528,7 +528,7 @@ namespace BitMiracle.LibTiff.Classic
                         return null;
                     }
 
-                    tif.SetField(TiffTag.SGILOGDATAFMT, SGILogDataFmt.FMT8BIT);
+                    tif.SetField(TiffTag.SGILOGDATAFMT, 3); // 8-bit RGB monitor values. 
                     img.photometric = Photometric.MINISBLACK; // little white lie
                     img.bitspersample = 8;
                     break;
@@ -548,7 +548,7 @@ namespace BitMiracle.LibTiff.Classic
                         return null;
                     }
 
-                    tif.SetField(TiffTag.SGILOGDATAFMT, SGILogDataFmt.FMT8BIT);
+                    tif.SetField(TiffTag.SGILOGDATAFMT, 3); // 8-bit RGB monitor values. 
                     img.photometric = Photometric.RGB; // little white lie
                     img.bitspersample = 8;
                     break;
