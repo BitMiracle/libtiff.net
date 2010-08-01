@@ -137,6 +137,8 @@ namespace UnitTests
             Assert.AreEqual(bytes, res[1].ToByteArray());
 
             image.Dispose();
+
+            Tiff.SetTagExtender(m_parentExtender);
         }
 
         [Test]

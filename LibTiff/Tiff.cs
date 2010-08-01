@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -779,7 +780,7 @@ namespace BitMiracle.LibTiff.Classic
 
             // Sort the field info by tag number
             IComparer myComparer = new TagCompare();
-            Array.Sort(m_fieldinfo, myComparer);
+            Array.Sort(m_fieldinfo, 0, m_nfields, myComparer);
         }
 
         /// <summary>
