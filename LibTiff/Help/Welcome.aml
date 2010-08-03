@@ -18,7 +18,7 @@
 
             <para>
                 This software distribution includes two flavours (for general .NET
-                applications and for Silverlight applications) of the Libtiff.Net library for
+                applications and for Silverlight applications) of the LibTiff.Net library for
                 reading and writing TIFF, a small collection of tools for doing simple
                 manipulations of TIFF images, and documentation on the library and tools.
             </para>
