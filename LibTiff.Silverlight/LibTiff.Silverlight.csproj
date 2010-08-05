@@ -520,7 +520,6 @@
     </Compile>
     <Compile Include="AssemblyVersion.cs" />
     <Compile Include="Enc28591.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
