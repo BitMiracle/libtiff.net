@@ -154,6 +154,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Help\Samples\Using utilities\" />
+    <Folder Include="Help\Samples\Using LibTiff.Net\" />
+    <Folder Include="Help\Samples\" />
     <Folder Include="Help\Getting Started\TIFF Tools\" />
     <Folder Include="Help\Getting Started\Graphics programming with LibTiff.Net\" />
     <Folder Include="Help\Getting Started\" />
@@ -187,6 +190,30 @@
     <None Include="Help\TIFF 6.0 specification coverage.aml" />
     <None Include="Help\Version History.aml" />
     <None Include="Help\Welcome.aml" />
+  </ItemGroup>
+  <!--Samples files-->
+  <ItemGroup>
+    <None Include="Help\Samples\Using LibTiff.Net\Create simple black-and-white TIFF..aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Create gradient TIFF.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Create TIFF with palette (color map).aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Create multipage TIFF.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Copy and rotate TIFF data.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Retrieve number of pages in TIFF image.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Read and write custom TIFF tags.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Read RGB values of image pixels.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Read all TIFF tags.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Read EXIF metadata.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Detect corrupted page.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert System.Drawing.Bitmap to a black and white TIFF.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert black-and-white TIFF to a System.Drawing.Bitmap.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert 16-bit grayscale TIFF to a 8-bit System.Drawing.Bitmap.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert a multi-strip TIFF image to a single-strip one.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Print formatted description of a TIFF file contents.aml" />
+    <None Include="Help\Samples\Using utilities\Merge several TIFF images to single multipage TIFF.aml" />
+    <None Include="Help\Samples\Using utilities\Extract a page from a multi-page TIFF image.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Using LibTiff.Net.aml" />
+    <None Include="Help\Samples\Using utilities\Using utilities.aml" />
+    <None Include="Help\Samples\Samples.aml" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Help\Images\AddReference.png">
