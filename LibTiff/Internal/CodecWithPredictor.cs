@@ -50,14 +50,25 @@ namespace BitMiracle.LibTiff.Classic.Internal
             ptFpDiff,
         };
 
-        private static TiffFieldInfo[] predictFieldInfo = 
+        private static TiffFieldInfo[] m_predictFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.PREDICTOR, 1, 1, TiffType.SHORT, CodecWithPredictor.FIELD_PREDICTOR, false, false, "Predictor"), 
         };
 
-        private Predictor predictor; /* predictor tag value */
-        private int stride; /* sample stride over data */
-        private int rowsize; /* tile/strip row size */
+        /// <summary>
+        /// predictor tag value
+        /// </summary>
+        private Predictor m_predictor;
+
+        /// <summary>
+        /// sample stride over data
+        /// </summary>
+        private int m_stride;
+
+        /// <summary>
+        /// tile/strip row size
+        /// </summary>
+        private int m_rowSize;
 
         private TiffTagMethods m_parentTagMethods;
         private TiffTagMethods m_tagMethods;
@@ -66,7 +77,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private bool m_passThruDecode;
         private bool m_passThruEncode;
 
-        private PredictorType m_predictorType; /* horizontal differencer/accumulator */
+        /// <summary>
+        /// horizontal differencer/accumulator
+        /// </summary>
+        private PredictorType m_predictorType;
 
         public CodecWithPredictor(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
@@ -77,17 +91,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
         // tagMethods can be null
         public void TIFFPredictorInit(TiffTagMethods tagMethods)
         {
-            /*
-            * Merge codec-specific tag information and
-            * override parent get/set field methods.
-            */
-            m_tif.MergeFieldInfo(predictFieldInfo, predictFieldInfo.Length);
+            // Merge codec-specific tag information and override parent get/set field methods.
+            m_tif.MergeFieldInfo(m_predictFieldInfo, m_predictFieldInfo.Length);
             m_childTagMethods = tagMethods;
             m_parentTagMethods = m_tif.m_tagmethods;
             m_tif.m_tagmethods = m_tagMethods;
 
-            predictor = Predictor.NONE; /* default value */
-            m_predictorType = PredictorType.ptNone; /* no predictor routine */
+            m_predictor = Predictor.NONE; // default value
+            m_predictorType = PredictorType.ptNone; // no predictor method
         }
 
         public void TIFFPredictorCleanup()
@@ -295,12 +306,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public Predictor GetPredictorValue()
         {
-            return predictor;
+            return m_predictor;
         }
 
         public void SetPredictorValue(Predictor value)
         {
-            predictor = value;
+            m_predictor = value;
         }
 
         // retrieves child object's tag methods (could be null)
@@ -309,469 +320,369 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return m_childTagMethods;
         }
 
-        private void predictorFunc(byte[] cp0, int offset, int cc)
+        private void predictorFunc(byte[] buffer, int offset, int count)
         {
             switch (m_predictorType)
             {
                 case PredictorType.ptHorAcc8:
-                    horAcc8(cp0, offset, cc);
+                    horAcc8(buffer, offset, count);
                     break;
                 case PredictorType.ptHorAcc16:
-                    horAcc16(cp0, offset, cc);
+                    horAcc16(buffer, offset, count);
                     break;
                 case PredictorType.ptHorAcc32:
-                    horAcc32(cp0, offset, cc);
+                    horAcc32(buffer, offset, count);
                     break;
                 case PredictorType.ptSwabHorAcc16:
-                    swabHorAcc16(cp0, offset, cc);
+                    swabHorAcc16(buffer, offset, count);
                     break;
                 case PredictorType.ptSwabHorAcc32:
-                    swabHorAcc32(cp0, offset, cc);
+                    swabHorAcc32(buffer, offset, count);
                     break;
                 case PredictorType.ptHorDiff8:
-                    horDiff8(cp0, offset, cc);
+                    horDiff8(buffer, offset, count);
                     break;
                 case PredictorType.ptHorDiff16:
-                    horDiff16(cp0, offset, cc);
+                    horDiff16(buffer, offset, count);
                     break;
                 case PredictorType.ptHorDiff32:
-                    horDiff32(cp0, offset, cc);
+                    horDiff32(buffer, offset, count);
                     break;
                 case PredictorType.ptFpAcc:
-                    fpAcc(cp0, offset, cc);
+                    fpAcc(buffer, offset, count);
                     break;
                 case PredictorType.ptFpDiff:
-                    fpDiff(cp0, offset, cc);
+                    fpDiff(buffer, offset, count);
                     break;
             }
         }
 
-        private void horAcc8(byte[] cp0, int offset, int cc)
+        private void horAcc8(byte[] buffer, int offset, int count)
         {
             int cp = offset;
-            if (cc > stride)
+            if (count > m_stride)
             {
-                cc -= stride;
-                /*
-                * Pipeline the most common cases.
-                */
-                if (stride == 3)
+                count -= m_stride;
+                
+                // Pipeline the most common cases.
+
+                if (m_stride == 3)
                 {
-                    int cr = cp0[cp];
-                    int cg = cp0[cp + 1];
-                    int cb = cp0[cp + 2];
+                    int cr = buffer[cp];
+                    int cg = buffer[cp + 1];
+                    int cb = buffer[cp + 2];
                     do
                     {
-                        cc -= 3;
+                        count -= 3;
                         cp += 3;
 
-                        cr += cp0[cp];
-                        cp0[cp] = (byte)cr;
+                        cr += buffer[cp];
+                        buffer[cp] = (byte)cr;
                         
-                        cg += cp0[cp + 1];
-                        cp0[cp + 1] = (byte)cg;
+                        cg += buffer[cp + 1];
+                        buffer[cp + 1] = (byte)cg;
 
-                        cb += cp0[cp + 2];
-                        cp0[cp + 2] = (byte)cb;
+                        cb += buffer[cp + 2];
+                        buffer[cp + 2] = (byte)cb;
                     }
-                    while (cc > 0);
+                    while (count > 0);
                 }
-                else if (stride == 4)
+                else if (m_stride == 4)
                 {
-                    int cr = cp0[cp];
-                    int cg = cp0[cp + 1];
-                    int cb = cp0[cp + 2];
-                    int ca = cp0[cp + 3];
+                    int cr = buffer[cp];
+                    int cg = buffer[cp + 1];
+                    int cb = buffer[cp + 2];
+                    int ca = buffer[cp + 3];
                     do
                     {
-                        cc -= 4;
+                        count -= 4;
                         cp += 4;
 
-                        cr += cp0[cp];
-                        cp0[cp] = (byte)cr;
+                        cr += buffer[cp];
+                        buffer[cp] = (byte)cr;
 
-                        cg += cp0[cp + 1];
-                        cp0[cp + 1] = (byte)cg;
+                        cg += buffer[cp + 1];
+                        buffer[cp + 1] = (byte)cg;
 
-                        cb += cp0[cp + 2];
-                        cp0[cp + 2] = (byte)cb;
+                        cb += buffer[cp + 2];
+                        buffer[cp + 2] = (byte)cb;
 
-                        ca += cp0[cp + 3];
-                        cp0[cp + 3] = (byte)ca;
+                        ca += buffer[cp + 3];
+                        buffer[cp + 3] = (byte)ca;
                     }
-                    while (cc > 0);
+                    while (count > 0);
                 }
                 else
                 {
                     do
                     {
-                        if (stride > 4 || stride < 0)
+                        for (int i = m_stride; i > 0; i--)
                         {
-                            for (int i = stride - 4; i > 0; i--)
-                            {
-                                cp0[cp + stride] = (byte)(cp0[cp + stride] + cp0[cp]);
-                                cp++;
-                            }
-                        }
-                        else
-                        {
-                            for (int i = stride; i > 0; i--)
-                            {
-                                cp0[cp + stride] = (byte)(cp0[cp + stride] + cp0[cp]);
-                                cp++;
-                            }
+                            buffer[cp + m_stride] = (byte)(buffer[cp + m_stride] + buffer[cp]);
+                            cp++;
                         }
 
-                        cc -= stride;
+                        count -= m_stride;
                     }
-                    while (cc > 0);
+                    while (count > 0);
                 }
             }
         }
 
         private void horAcc16(byte[] buffer, int offset, int count)
         {
-            short[] wp = Tiff.ByteArrayToShorts(buffer, offset, count);
-            int wpPos = 0;
+            short[] wBuffer = Tiff.ByteArrayToShorts(buffer, offset, count);
+            int wOffset = 0;
 
-            int wc = count / 2;
-            if (wc > stride)
+            int wCount = count / 2;
+            if (wCount > m_stride)
             {
-                wc -= stride;
+                wCount -= m_stride;
                 do
                 {
-                    if (stride > 4 || stride < 0)
+                    for (int i = m_stride; i > 0; i--)
                     {
-                        for (int i = stride - 4; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = stride; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
+                        wBuffer[wOffset + m_stride] += wBuffer[wOffset];
+                        wOffset++;
                     }
 
-                    wc -= stride;
+                    wCount -= m_stride;
                 }
-                while (wc > 0);
+                while (wCount > 0);
             }
 
-            Tiff.ShortsToByteArray(wp, 0, count / 2, buffer, offset);
+            Tiff.ShortsToByteArray(wBuffer, 0, count / 2, buffer, offset);
         }
 
         private void horAcc32(byte[] buffer, int offset, int count)
         {
-            int[] wp = Tiff.ByteArrayToInts(buffer, offset, count);
-            int wpPos = 0;
+            int[] wBuffer = Tiff.ByteArrayToInts(buffer, offset, count);
+            int wOffset = 0;
 
-            int wc = count / 4;
-            if (wc > stride)
+            int wCount = count / 4;
+            if (wCount > m_stride)
             {
-                wc -= stride;
+                wCount -= m_stride;
                 do
                 {
-                    if (stride > 4 || stride < 0)
+                    for (int i = m_stride; i > 0; i--)
                     {
-                        for (int i = stride - 4; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = stride; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
+                        wBuffer[wOffset + m_stride] += wBuffer[wOffset];
+                        wOffset++;
                     }
 
-                    wc -= stride;
-                } while (wc > 0);
+                    wCount -= m_stride;
+                } while (wCount > 0);
             }
 
-            Tiff.IntsToByteArray(wp, 0, count / 4, buffer, offset);
+            Tiff.IntsToByteArray(wBuffer, 0, count / 4, buffer, offset);
         }
 
         private void swabHorAcc16(byte[] buffer, int offset, int count)
         {
-            short[] wp = Tiff.ByteArrayToShorts(buffer, offset, count);
-            int wpPos= 0;
+            short[] wBuffer = Tiff.ByteArrayToShorts(buffer, offset, count);
+            int wOffset= 0;
             
-            int wc = count / 2;
-            if (wc > stride)
+            int wCount = count / 2;
+            if (wCount > m_stride)
             {
-                Tiff.SwabArrayOfShort(wp, wc);
-                wc -= stride;
+                Tiff.SwabArrayOfShort(wBuffer, wCount);
+                wCount -= m_stride;
                 do
                 {
-                    if (stride > 4 || stride < 0)
+                    for (int i = m_stride; i > 0; i--)
                     {
-                        for (int i = stride - 4; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = stride; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
+                        wBuffer[wOffset + m_stride] += wBuffer[wOffset];
+                        wOffset++;
                     }
 
-                    wc -= stride;
+                    wCount -= m_stride;
                 }
-                while (wc > 0);
+                while (wCount > 0);
             }
 
-            Tiff.ShortsToByteArray(wp, 0, count / 2, buffer, offset);
+            Tiff.ShortsToByteArray(wBuffer, 0, count / 2, buffer, offset);
         }
         
         private void swabHorAcc32(byte[] buffer, int offset, int count)
         {
-            int[] wp = Tiff.ByteArrayToInts(buffer, offset, count);
-            int wpPos = 0;
+            int[] wBuffer = Tiff.ByteArrayToInts(buffer, offset, count);
+            int wOffset = 0;
 
-            int wc = count / 4;
-            if (wc > stride)
+            int wCount = count / 4;
+            if (wCount > m_stride)
             {
-                Tiff.SwabArrayOfLong(wp, wc);
-                wc -= stride;
+                Tiff.SwabArrayOfLong(wBuffer, wCount);
+                wCount -= m_stride;
                 do
                 {
-                    if (stride > 4 || stride < 0)
+                    for (int i = m_stride; i > 0; i--)
                     {
-                        for (int i = stride - 4; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = stride; i > 0; i--)
-                        {
-                            wp[wpPos + stride] += wp[wpPos];
-                            wpPos++;
-                        }
+                        wBuffer[wOffset + m_stride] += wBuffer[wOffset];
+                        wOffset++;
                     }
 
-                    wc -= stride;
-                } while (wc > 0);
+                    wCount -= m_stride;
+                } while (wCount > 0);
             }
 
-            Tiff.IntsToByteArray(wp, 0, count / 4, buffer, offset);
+            Tiff.IntsToByteArray(wBuffer, 0, count / 4, buffer, offset);
         }
 
-        private void horDiff8(byte[] cp0, int offset, int cc)
+        private void horDiff8(byte[] buffer, int offset, int count)
         {
-            if (cc > stride)
+            if (count > m_stride)
             {
-                cc -= stride;
+                count -= m_stride;
                 int cp = offset;
 
-                /*
-                * Pipeline the most common cases.
-                */
-                if (stride == 3)
+                // Pipeline the most common cases.
+
+                if (m_stride == 3)
                 {
-                    int r2 = cp0[cp];
-                    int g2 = cp0[cp + 1];
-                    int b2 = cp0[cp + 2];
+                    int r2 = buffer[cp];
+                    int g2 = buffer[cp + 1];
+                    int b2 = buffer[cp + 2];
                     do
                     {
-                        int r1 = cp0[cp + 3];
-                        cp0[cp + 3] = (byte)(r1 - r2);
+                        int r1 = buffer[cp + 3];
+                        buffer[cp + 3] = (byte)(r1 - r2);
                         r2 = r1;
 
-                        int g1 = cp0[cp + 4];
-                        cp0[cp + 4] = (byte)(g1 - g2);
+                        int g1 = buffer[cp + 4];
+                        buffer[cp + 4] = (byte)(g1 - g2);
                         g2 = g1;
 
-                        int b1 = cp0[cp + 5];
-                        cp0[cp + 5] = (byte)(b1 - b2);
+                        int b1 = buffer[cp + 5];
+                        buffer[cp + 5] = (byte)(b1 - b2);
                         b2 = b1;
 
                         cp += 3;
                     }
-                    while ((cc -= 3) > 0);
+                    while ((count -= 3) > 0);
                 }
-                else if (stride == 4)
+                else if (m_stride == 4)
                 {
-                    int r2 = cp0[cp];
-                    int g2 = cp0[cp + 1];
-                    int b2 = cp0[cp + 2];
-                    int a2 = cp0[cp + 3];
+                    int r2 = buffer[cp];
+                    int g2 = buffer[cp + 1];
+                    int b2 = buffer[cp + 2];
+                    int a2 = buffer[cp + 3];
                     do
                     {
-                        int r1 = cp0[cp + 4];
-                        cp0[cp + 4] = (byte)(r1 - r2);
+                        int r1 = buffer[cp + 4];
+                        buffer[cp + 4] = (byte)(r1 - r2);
                         r2 = r1;
 
-                        int g1 = cp0[cp + 5];
-                        cp0[cp + 5] = (byte)(g1 - g2);
+                        int g1 = buffer[cp + 5];
+                        buffer[cp + 5] = (byte)(g1 - g2);
                         g2 = g1;
 
-                        int b1 = cp0[cp + 6];
-                        cp0[cp + 6] = (byte)(b1 - b2);
+                        int b1 = buffer[cp + 6];
+                        buffer[cp + 6] = (byte)(b1 - b2);
                         b2 = b1;
 
-                        int a1 = cp0[cp + 7];
-                        cp0[cp + 7] = (byte)(a1 - a2);
+                        int a1 = buffer[cp + 7];
+                        buffer[cp + 7] = (byte)(a1 - a2);
                         a2 = a1;
 
                         cp += 4;
                     }
-                    while ((cc -= 4) > 0);
+                    while ((count -= 4) > 0);
                 }
                 else
                 {
-                    cp += cc - 1;
+                    cp += count - 1;
                     do
                     {
-                        if (stride > 4 || stride < 0)
+                        for (int i = m_stride; i > 0; i--)
                         {
-                            for (int i = stride - 4; i > 0; i--)
-                            {
-                                cp0[cp + stride] -= cp0[cp];
-                                cp--;
-                            }
-                        }
-                        else
-                        {
-                            for (int i = stride; i > 0; i--)
-                            {
-                                cp0[cp + stride] -= cp0[cp];
-                                cp--;
-                            }
+                            buffer[cp + m_stride] -= buffer[cp];
+                            cp--;
                         }
                     }
-                    while ((cc -= stride) > 0);
+                    while ((count -= m_stride) > 0);
                 }
             }
         }
 
         private void horDiff16(byte[] buffer, int offset, int count)
         {
-            short[] wp = Tiff.ByteArrayToShorts(buffer, offset, count);
-            int wpPos = 0;
+            short[] wBuffer = Tiff.ByteArrayToShorts(buffer, offset, count);
+            int wOffset = 0;
 
-            int wc = count / 2;
-            if (wc > stride)
+            int wCount = count / 2;
+            if (wCount > m_stride)
             {
-                wc -= stride;
-                wpPos += wc - 1;
+                wCount -= m_stride;
+                wOffset += wCount - 1;
                 do
                 {
-                    if (stride > 4 || stride < 0)
+                    for (int i = m_stride; i > 0; i--)
                     {
-                        for (int i = stride - 4; i > 0; i--)
-                        {
-                            wp[wpPos + stride] -= wp[wpPos];
-                            wpPos--;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = stride; i > 0; i--)
-                        {
-                            wp[wpPos + stride] -= wp[wpPos];
-                            wpPos--;
-                        }
+                        wBuffer[wOffset + m_stride] -= wBuffer[wOffset];
+                        wOffset--;
                     }
 
-                    wc -= stride;
+                    wCount -= m_stride;
                 }
-                while (wc > 0);
+                while (wCount > 0);
             }
 
-            Tiff.ShortsToByteArray(wp, 0, count / 2, buffer, offset);
+            Tiff.ShortsToByteArray(wBuffer, 0, count / 2, buffer, offset);
         }
 
         private void horDiff32(byte[] buffer, int offset, int count)
         {
-            int[] wp = Tiff.ByteArrayToInts(buffer, offset, count);
-            int wpPos = 0;
+            int[] wBuffer = Tiff.ByteArrayToInts(buffer, offset, count);
+            int wOffset = 0;
 
-            int wc = count / 4;
-            if (wc > stride)
+            int wCount = count / 4;
+            if (wCount > m_stride)
             {
-                wc -= stride;
-                wpPos += wc - 1;
+                wCount -= m_stride;
+                wOffset += wCount - 1;
                 do
                 {
-                    if (stride > 4 || stride < 0)
+                    for (int i = m_stride; i > 0; i--)
                     {
-                        for (int i = stride - 4; i > 0; i--)
-                        {
-                            wp[wpPos + stride] -= wp[wpPos];
-                            wpPos--;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = stride; i > 0; i--)
-                        {
-                            wp[wpPos + stride] -= wp[wpPos];
-                            wpPos--;
-                        }
+                        wBuffer[wOffset + m_stride] -= wBuffer[wOffset];
+                        wOffset--;
                     }
 
-                    wc -= stride;
-                } while (wc > 0);
+                    wCount -= m_stride;
+                } while (wCount > 0);
             }
 
-            Tiff.IntsToByteArray(wp, 0, count / 4, buffer, offset);
+            Tiff.IntsToByteArray(wBuffer, 0, count / 4, buffer, offset);
         }
         
-        /*
-        * Floating point predictor accumulation routine.
-        */
-        private void fpAcc(byte[] cp0, int offset, int cc)
+        /// <summary>
+        /// Floating point predictor accumulation routine.
+        /// </summary>
+        private void fpAcc(byte[] buffer, int offset, int count)
         {
             int bps = m_tif.m_dir.td_bitspersample / 8;
-            int wc = cc / bps;
-            int count = cc;
+            int wCount = count / bps;
+            int left = count;
             int cp = offset;
 
-            while (count > stride)
+            while (left > m_stride)
             {
-                if (stride > 4 || stride < 0)
+                for (int i = m_stride; i > 0; i--)
                 {
-                    for (int i = stride - 4; i > 0; i--)
-                    {
-                        cp0[cp + stride] += cp0[cp];
-                        cp++;
-                    }
-                }
-                else
-                {
-                    for (int i = stride; i > 0; i--)
-                    {
-                        cp0[cp + stride] += cp0[cp];
-                        cp++;
-                    }
+                    buffer[cp + m_stride] += buffer[cp];
+                    cp++;
                 }
 
-                count -= stride;
+                left -= m_stride;
             }
 
-            byte[] tmp = new byte[cc];
-            Buffer.BlockCopy(cp0, offset, tmp, 0, cc);
-            for (count = 0; count < wc; count++)
+            byte[] tmp = new byte[count];
+            Buffer.BlockCopy(buffer, offset, tmp, 0, count);
+            for (int i = 0; i < wCount; i++)
             {
                 for (int b = 0; b < bps; b++)
-                    cp0[offset + bps * count + b] = tmp[(bps - b - 1) * wc + count];
+                    buffer[offset + bps * i + b] = tmp[(bps - b - 1) * wCount + i];
             }
         }
 
@@ -784,31 +695,20 @@ namespace BitMiracle.LibTiff.Classic.Internal
             Buffer.BlockCopy(buffer, offset, tmp, 0, count);
 
             int bps = m_tif.m_dir.td_bitspersample / 8;
-            int wc = count / bps;
-            for (int c = 0; c < wc; c++)
+            int wCount = count / bps;
+            for (int c = 0; c < wCount; c++)
             {
                 for (int b = 0; b < bps; b++)
-                    buffer[offset + (bps - b - 1) * wc + c] = tmp[bps * c + b];
+                    buffer[offset + (bps - b - 1) * wCount + c] = tmp[bps * c + b];
             }
 
-            int cp = offset + count - stride - 1;
-            for (int c = count; c > stride; c -= stride)
+            int cp = offset + count - m_stride - 1;
+            for (int c = count; c > m_stride; c -= m_stride)
             {
-                if (stride > 4 || stride < 0)
+                for (int i = m_stride; i > 0; i--)
                 {
-                    for (int i = stride - 4; i > 0; i--)
-                    {
-                        buffer[cp + stride] -= buffer[cp];
-                        cp--;
-                    }
-                }
-                else
-                {
-                    for (int i = stride; i > 0; i--)
-                    {
-                        buffer[cp + stride] -= buffer[cp];
-                        cp--;
-                    }
+                    buffer[cp + m_stride] -= buffer[cp];
+                    cp--;
                 }
             }
         }
@@ -838,14 +738,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             if (predictor_decodetile(buffer, offset, count, plane))
             {
-                Debug.Assert(rowsize > 0);
+                Debug.Assert(m_rowSize > 0);
                 Debug.Assert(m_predictorType != PredictorType.ptNone);
 
                 while (count > 0)
                 {
-                    predictorFunc(buffer, offset, rowsize);
-                    count -= rowsize;
-                    offset += rowsize;
+                    predictorFunc(buffer, offset, m_rowSize);
+                    count -= m_rowSize;
+                    offset += m_rowSize;
                 }
 
                 return true;
@@ -872,15 +772,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
             byte[] working_copy = new byte[count];
             Buffer.BlockCopy(buffer, 0, working_copy, 0, count);
 
-            Debug.Assert(rowsize > 0);
-            Debug.Assert((count % rowsize) == 0);
+            Debug.Assert(m_rowSize > 0);
+            Debug.Assert((count % m_rowSize) == 0);
 
             int cc = count;
             while (cc > 0)
             {
-                predictorFunc(working_copy, offset, rowsize);
-                cc -= rowsize;
-                offset += rowsize;
+                predictorFunc(working_copy, offset, m_rowSize);
+                cc -= m_rowSize;
+                offset += m_rowSize;
             }
 
             return predictor_encodetile(working_copy, 0, count, plane);
@@ -892,7 +792,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return false;
 
             m_passThruDecode = true;
-            if (predictor == Predictor.HORIZONTAL)
+            if (m_predictor == Predictor.HORIZONTAL)
             {
                 switch (m_tif.m_dir.td_bitspersample)
                 {
@@ -907,19 +807,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
                 }
 
-                /*
-                * Override default decoding method with one that does the
-                * predictor stuff.
-                */
+                // Override default decoding method with one that does the predictor stuff.
                 m_passThruDecode = false;
                 
-                /*
-                * If the data is horizontally differenced 16-bit data that
-                * requires byte-swapping, then it must be byte swapped before
-                * the accumulation step.  We do this with a special-purpose
-                * routine and override the normal post decoding logic that
-                * the library setup when the directory was read.
-                */
+                // If the data is horizontally differenced 16-bit data that requires byte-swapping,
+                // then it must be byte swapped before the accumulation step. We do this with a
+                // special-purpose method and override the normal post decoding logic that the
+                // library setup when the directory was read.
                 if ((m_tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                 {
                     if (m_predictorType == PredictorType.ptHorAcc16)
@@ -934,28 +828,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     }
                 }
             }
-            else if (predictor == Predictor.FLOATINGPOINT)
+            else if (m_predictor == Predictor.FLOATINGPOINT)
             {
                 m_predictorType = PredictorType.ptFpAcc;
                 
-                /*
-                * Override default decoding method with one that does the
-                * predictor stuff.
-                */
+                // Override default decoding method with one that does the predictor stuff.
                 m_passThruDecode = false;
                 
-                /*
-                * The data should not be swapped outside of the floating
-                * point predictor, the accumulation routine should return
-                * byres in the native order.
-                */
+                // The data should not be swapped outside of the floating point predictor, the
+                // accumulation method should return bytes in the native order.
                 if ((m_tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                     m_tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmNone;
 
-                /*
-                * Allocate buffer to keep the decoded bytes before
-                * rearranging in the right order
-                */
+                // Allocate buffer to keep the decoded bytes before rearranging in the right order
             }
 
             return true;
@@ -967,7 +852,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return false;
 
             m_passThruEncode = true;
-            if (predictor == Predictor.HORIZONTAL)
+            if (m_predictor == Predictor.HORIZONTAL)
             {
                 switch (m_tif.m_dir.td_bitspersample)
                 {
@@ -982,20 +867,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
                 }
 
-                /*
-                * Override default encoding method with one that does the
-                * predictor stuff.
-                */
+                // Override default encoding method with one that does the predictor stuff.
                 m_passThruEncode = false;
             }
-            else if (predictor == Predictor.FLOATINGPOINT)
+            else if (m_predictor == Predictor.FLOATINGPOINT)
             {
                 m_predictorType = PredictorType.ptFpDiff;
 
-                /*
-                * Override default encoding method with one that does the
-                * predictor stuff.
-                */
+                // Override default encoding method with one that does the predictor stuff.
                 m_passThruEncode = false;
             }
 
@@ -1007,9 +886,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
             const string module = "PredictorSetup";
             TiffDirectory td = m_tif.m_dir;
 
-            switch (predictor) /* no differencing */
+            switch (m_predictor)
             {
                 case Predictor.NONE:
+                    // no differencing
                     return true;
 
                 case Predictor.HORIZONTAL:
@@ -1036,19 +916,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 default:
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, 
-                        "\"Predictor\" value {0} not supported", predictor);
+                        "\"Predictor\" value {0} not supported", m_predictor);
                     return false;
             }
 
-            stride = (td.td_planarconfig == PlanarConfig.CONTIG ? (int)td.td_samplesperpixel : 1);
+            m_stride = (td.td_planarconfig == PlanarConfig.CONTIG ? (int)td.td_samplesperpixel : 1);
             
-            /*
-            * Calculate the scanline/tile-width size in bytes.
-            */
+            // Calculate the scanline/tile-width size in bytes.
             if (m_tif.IsTiled())
-                rowsize = m_tif.TileRowSize();
+                m_rowSize = m_tif.TileRowSize();
             else
-                rowsize = m_tif.ScanlineSize();
+                m_rowSize = m_tif.ScanlineSize();
 
             return true;
         }
