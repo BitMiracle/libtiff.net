@@ -4,7 +4,21 @@
         <section address="Section1">
             <content></content>
             <sections>
-                <section address="SubSection1">
+                <section address="SubSection4">
+                    <title>Version 2.1</title>
+                    <content>
+                        <list class="bullet">
+                            <listItem>
+                                Added samples to the documentation.
+                            </listItem>
+                            <listItem>
+                                Fixed bugs in predictor functions that were affecting Deflate and
+                                LZW codecs for some images.
+                            </listItem>
+                        </list>
+                    </content>
+                </section>
+                <section address="SubSection3">
                     <title>Version 2.0</title>
                     <content>
                         <list class="bullet">
@@ -79,7 +93,7 @@
                         </list>
                     </content>
                 </section>
-                <section address="SubSection3">
+                <section address="SubSection1">
                     <title>Version 1.0</title>
                     <content>
                         <list class="bullet">
