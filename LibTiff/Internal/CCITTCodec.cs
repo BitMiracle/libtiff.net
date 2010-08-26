@@ -1506,7 +1506,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static int Fax3Encode2DRow_Pixel(byte[] buf, int bufOffset, int ix)
         {
-            return ((buf[bufOffset + (ix >> 3)] >> (7 - (ix & 7))) & 1);
+            //return ((buf[bufOffset + (ix >> 3)] >> (7 - (ix & 7))) & 1);
+            return (((buf[Math.Min(bufOffset + (ix >> 3), buf.Length - 1)]) >> (7 - (ix & 7))) & 1);
         }
 
         /// <summary>
