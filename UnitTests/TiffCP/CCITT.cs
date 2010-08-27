@@ -18,7 +18,6 @@ namespace UnitTests.TiffCP
                     "tiger-rgb-strip-contig-01.tif",
                     "tiger-rgb-strip-planar-01.tif",
                     "tiger-rgb-tile-contig-01.tif",
-                    //"uncompressed.tif"
                 };
             }
         }

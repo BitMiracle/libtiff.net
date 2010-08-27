@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.IO;
+
+using NUnit.Framework;
 
 namespace UnitTests.TiffCP
 {
@@ -123,6 +125,28 @@ namespace UnitTests.TiffCP
             Tester.PerformTest("penguin_jpeg.tif",
                 new string[] { "-c", "none", "-p", "separate" },
                 "_converted_strips_separate");
+        }
+
+        [Test]
+        public void test_CCITT_bounds()
+        {
+            string file = "CCITT-bounds.tif";
+            string[] args = new string[] { "-c", "none", };
+            string suffix = "_converted_none";
+
+            // produce uncompressed image 
+            Tester tester = new Tester();
+            string inputFile = Path.Combine(TestCase.Folder, Path.GetFileName(file));
+            string outputFile = TestCase.Folder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
+            tester.Run(args, inputFile, outputFile, false);
+
+            // recompress image and compare with sample
+            suffix = "_converted_ccitt_g4";
+            args = new string[] { "-c", "g4", };
+            
+            inputFile = outputFile;
+            outputFile = TestCase.Folder + @"Output.Tiff\" + Path.GetFileName(file) + suffix + ".tif";
+            tester.Run(args, inputFile, outputFile);
         }
     }
 }

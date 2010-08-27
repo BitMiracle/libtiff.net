@@ -1506,7 +1506,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static int Fax3Encode2DRow_Pixel(byte[] buf, int bufOffset, int ix)
         {
-            //return ((buf[bufOffset + (ix >> 3)] >> (7 - (ix & 7))) & 1);
+            // some images caused out-of-bounds exception here. not sure why. maybe the images are
+            // malformed or implementation is buggy. original libtiff does not produce exceptions
+            // here. it's just read after the end of the buffer.
+
+            // it's a fast fix (use last byte when requested any byte beyond buffer end) for
+            // the problem that possibly should be reviewed.
+            // (it's weird but produced output is byte-to-byte equal to libtiff's one)
             return (((buf[Math.Min(bufOffset + (ix >> 3), buf.Length - 1)]) >> (7 - (ix & 7))) & 1);
         }
 
