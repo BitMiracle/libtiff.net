@@ -15,6 +15,10 @@
                                 Fixed bugs in predictor functions that were affecting Deflate and
                                 LZW codecs for some images.
                             </listItem>
+                            <listItem>
+                                Fixed bug with out-of-bounds exceptions when compressing some images
+                                using CCITT codec.
+                            </listItem>
                         </list>
                     </content>
                 </section>
