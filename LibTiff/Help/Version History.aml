@@ -11,6 +11,9 @@
                             <listItem>
                                 Added samples to the documentation.
                             </listItem>
+							<listItem>
+                                Fixed bug in Sample Viewer.
+                            </listItem>
                             <listItem>
                                 Fixed bugs in predictor functions that were affecting Deflate and
                                 LZW codecs for some images.
