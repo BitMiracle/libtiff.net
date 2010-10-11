@@ -224,7 +224,7 @@ namespace BitMiracle.TiffCP
             }
 
             result = inImage.GetFieldDefaulted(TiffTag.COMPRESSION);
-            Compression input_compression = (Compression)result[0].ToShort();
+            Compression input_compression = (Compression)result[0].ToInt();
 
             result = inImage.GetFieldDefaulted(TiffTag.PHOTOMETRIC);
             Photometric input_photometric = (Photometric)result[0].ToShort();

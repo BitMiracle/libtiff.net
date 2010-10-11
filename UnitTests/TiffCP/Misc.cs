@@ -128,6 +128,14 @@ namespace UnitTests.TiffCP
         }
 
         [Test]
+        public void test_UnknownTags()
+        {
+            Tester.PerformTest("unknown-tags.tif",
+                new string[] { "-c", "lzw", "-p", "separate" },
+                "_converted_lzw_separate");
+        }
+
+        [Test]
         public void test_CCITT_bounds()
         {
             string file = "CCITT-bounds.tif";

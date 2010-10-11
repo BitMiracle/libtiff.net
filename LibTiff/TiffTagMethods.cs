@@ -495,7 +495,8 @@ namespace BitMiracle.LibTiff.Classic
                             fip.Tag != TiffTag.DOTRANGE)
                         {
                             byte[] apBytes = value[paramIndex++].GetBytes();
-                            Buffer.BlockCopy(apBytes, 0, td.td_customValues[tvIndex].value, 0, apBytes.Length);
+                            //Buffer.BlockCopy(apBytes, 0, td.td_customValues[tvIndex].value, 0, apBytes.Length);
+                            Buffer.BlockCopy(apBytes, 0, td.td_customValues[tvIndex].value, 0, td.td_customValues[tvIndex].value.Length);
                         }
                         else
                         {
