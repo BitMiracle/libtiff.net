@@ -11,7 +11,7 @@
                             <listItem>
                                 Added samples to the documentation.
                             </listItem>
-							<listItem>
+                            <listItem>
                                 Fixed bug in Sample Viewer.
                             </listItem>
                             <listItem>
@@ -21,6 +21,9 @@
                             <listItem>
                                 Fixed bug with out-of-bounds exceptions when compressing some images
                                 using CCITT codec.
+                            </listItem>
+                            <listItem>
+                                Fixed bug with handling of "unknown" tags.
                             </listItem>
                         </list>
                     </content>
