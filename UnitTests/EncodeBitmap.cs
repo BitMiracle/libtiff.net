@@ -24,7 +24,18 @@ namespace UnitTests
             }
         }
 
-        private static byte[] getImageRasterBytes(Bitmap bmp)
+        private static string[] RGB_Files
+        {
+            get
+            {
+                return new string[]
+                {
+                    "FLAG_T24.TIF",
+                };
+            }
+        }
+
+        private static byte[] getImageRasterBytes(Bitmap bmp, PixelFormat format)
         {
             Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
             byte[] bits = null;
@@ -32,11 +43,11 @@ namespace UnitTests
             try
             {
                 // Lock the managed memory
-                BitmapData bmpdata = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
+                BitmapData bmpdata = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, format);
 
                 // Declare an array to hold the bytes of the bitmap.
                 bits = new byte[bmpdata.Stride * bmpdata.Height];
-  
+
                 // Copy the values into the array.
                 Marshal.Copy(bmpdata.Scan0, bits, 0, bits.Length);
 
@@ -49,6 +60,11 @@ namespace UnitTests
             }
 
             return bits;
+        }
+
+        private static byte[] getImageRasterBytes(Bitmap bmp)
+        {
+            return getImageRasterBytes(bmp, bmp.PixelFormat);
         }
 
         private string OutputFolder
@@ -197,6 +213,116 @@ namespace UnitTests
             }
 
             FileAssert.AreEqual(fullExpectedPath, fullOutputPath);
+        }
+
+        [Test, TestCaseSource("RGB_Files")]
+        public void EncodeRGBByScanlines(string file)
+        {
+            string fullPath = Path.Combine(TestCase.Folder, file);
+            string outputPath = Path.Combine(OutputFolder, file);
+            string expectedPath = Path.Combine(ExpectedFolder, file);
+
+            string suffix = "_rgb_scanlines.tif";
+            string fullOutputPath = outputPath + suffix;
+            string fullExpectedPath = expectedPath + suffix;
+
+            using (Bitmap bmp = new Bitmap(fullPath))
+            {
+                using (Tiff tif = Tiff.Open(fullOutputPath, "w"))
+                {
+                    Assert.IsNotNull(tif);
+                    convertToTiff(bmp, tif, PixelFormat.Format24bppRgb);
+                }
+            }
+
+            FileAssert.AreEqual(fullExpectedPath, fullOutputPath);
+        }
+
+        [Test, TestCaseSource("RGB_Files")]
+        public void EncodeRGBAByScanlines(string file)
+        {
+            string fullPath = Path.Combine(TestCase.Folder, file);
+            string outputPath = Path.Combine(OutputFolder, file);
+            string expectedPath = Path.Combine(ExpectedFolder, file);
+
+            string suffix = "_rgba_scanlines.tif";
+            string fullOutputPath = outputPath + suffix;
+            string fullExpectedPath = expectedPath + suffix;
+
+            using (Bitmap bmp = new Bitmap(fullPath))
+            {
+                using (Tiff tif = Tiff.Open(fullOutputPath, "w"))
+                {
+                    Assert.IsNotNull(tif);
+                    convertToTiff(bmp, tif, PixelFormat.Format32bppArgb);
+                }
+            }
+
+            FileAssert.AreEqual(fullExpectedPath, fullOutputPath);
+        }
+
+        private static void convertToTiff(Bitmap bmp, Tiff tif, PixelFormat outputFormat)
+        {
+            if (outputFormat != PixelFormat.Format24bppRgb && outputFormat != PixelFormat.Format32bppArgb)
+                throw new System.ArgumentOutOfRangeException();
+
+            byte[] raster = getImageRasterBytes(bmp, outputFormat);
+            tif.SetField(TiffTag.IMAGEWIDTH, bmp.Width);
+            tif.SetField(TiffTag.IMAGELENGTH, bmp.Height);
+            tif.SetField(TiffTag.COMPRESSION, Compression.LZW);
+            tif.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
+
+            tif.SetField(TiffTag.ROWSPERSTRIP, bmp.Height);
+
+            tif.SetField(TiffTag.XRESOLUTION, bmp.HorizontalResolution);
+            tif.SetField(TiffTag.YRESOLUTION, bmp.VerticalResolution);
+
+            tif.SetField(TiffTag.BITSPERSAMPLE, 8);
+            if (outputFormat == PixelFormat.Format32bppArgb)
+                tif.SetField(TiffTag.SAMPLESPERPIXEL, 4);
+            else
+                tif.SetField(TiffTag.SAMPLESPERPIXEL, 3);
+
+            tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+            int stride = raster.Length / bmp.Height;
+            convertRGBSamples(raster, bmp.Width, bmp.Height, outputFormat);
+
+            for (int i = 0, offset = 0; i < bmp.Height; i++)
+            {
+                bool res = tif.WriteScanline(raster, offset, i, 0);
+                Assert.IsTrue(res);
+
+                offset += stride;
+            }
+        }
+
+        /// <summary>
+        /// Converts BGRA or BGR samples into RGBA or RGB samples
+        /// </summary>
+        private static void convertRGBSamples(byte[] data, int width, int height, PixelFormat format)
+        {
+            if (format != PixelFormat.Format24bppRgb && format != PixelFormat.Format32bppArgb)
+                throw new InvalidDataException();
+
+            int stride = data.Length / height;
+
+            int samplesPerPixel = 4;
+            if (format == PixelFormat.Format24bppRgb)
+                samplesPerPixel = 3;
+
+            for (int y = 0; y < height; y++)
+            {
+                int offset = stride * y;
+                int strideEnd = offset + width * samplesPerPixel;
+
+                for (int i = offset; i < strideEnd; i += samplesPerPixel)
+                {
+                    byte temp = data[i + 2];
+                    data[i + 2] = data[i];
+                    data[i] = temp;
+                }
+            }
         }
     }
 }
