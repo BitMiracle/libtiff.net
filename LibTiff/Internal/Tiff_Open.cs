@@ -119,7 +119,7 @@ namespace BitMiracle.LibTiff.Classic
                     break;
 
                 case 'a':
-                    m = FileMode.Append;
+                    m = FileMode.Open;
                     a = FileAccess.ReadWrite;
                     tiffMode = O_RDWR | O_CREAT;
                     break;

@@ -12,6 +12,9 @@
                                 Added samples to the documentation.
                             </listItem>
                             <listItem>
+                                Fixed bug with append mode in Tiff.Open() method.
+                            </listItem>
+                            <listItem>
                                 Fixed bug in Sample Viewer.
                             </listItem>
                             <listItem>
