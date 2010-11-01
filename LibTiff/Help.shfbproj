@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <!-- The configuration and platform will be used to determine which
          assemblies to include from solution and project documentation
@@ -193,6 +193,7 @@
   </ItemGroup>
   <!--Samples files-->
   <ItemGroup>
+    <None Include="Help\Samples\Using LibTiff.Net\Add page to existing TIFF..aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Create simple black-and-white TIFF..aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Create gradient TIFF.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Create TIFF with palette (color map).aml" />
@@ -205,7 +206,11 @@
     <None Include="Help\Samples\Using LibTiff.Net\Read EXIF metadata.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Detect corrupted page.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert System.Drawing.Bitmap to a black and white TIFF.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert System.Drawing.Bitmap to a 32-bit color TIFF.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert System.Drawing.Bitmap to a 24-bit color TIFF.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert black-and-white TIFF to a System.Drawing.Bitmap.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert color TIFF to a 32-bit System.Drawing.Bitmap.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert color TIFF to a 24-bit System.Drawing.Bitmap.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert 16-bit grayscale TIFF to a 8-bit System.Drawing.Bitmap.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert a multi-strip TIFF image to a single-strip one.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Print formatted description of a TIFF file contents.aml" />
