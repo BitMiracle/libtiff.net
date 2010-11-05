@@ -20,7 +20,6 @@
     </Topic>
     <Topic id="9ccb55b6-cac8-4213-9bad-5fcf11d9d6af" visible="True" />
   </Topic>
-  <!--Content layout for samples-->
   <Topic id="e4f25423-eede-4ef6-a920-9cb539d056c6" visible="True" apiParentMode="InsertAfter">
     <Topic id="583193f1-ba33-4d44-a0ec-cdbc339d5804" visible="True">
       <Topic id="e5eb36a8-7150-41dd-8785-f8784a94c214" visible="True" />
@@ -50,8 +49,7 @@
       <Topic id="65159b6b-0f22-41a8-bbcf-fd1df1b2aa9e" visible="True" />
     </Topic>
   </Topic>
-  <!--End of content layout for samples-->
-  <Topic id="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" visible="True" title="Differences between LibTiff-3.9.4 and LibTiff.Net" />
+  <Topic id="dc0ab65b-e9a8-44f9-aec9-82b15a5d14fb" visible="True" title="Differences between LibTiff and LibTiff.Net" />
   <Topic id="609bf177-82ad-4b3f-8a2a-04d0aded0be5" visible="True" />
   <Topic id="5200b425-c5b7-4675-b138-b055935bb221" visible="True" />
   <Topic id="b104b853-026c-4369-b748-4810c886edfc" visible="True" />
