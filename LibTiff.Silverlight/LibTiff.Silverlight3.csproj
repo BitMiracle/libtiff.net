@@ -77,6 +77,81 @@
     <Reference Include="System.Windows.Browser" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\LibTiff\Enums\CleanFaxData.cs">
+      <Link>Enums\CleanFaxData.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\ColorResponseUnit.cs">
+      <Link>Enums\ColorResponseUnit.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\Compression.cs">
+      <Link>Enums\Compression.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\ExtraSample.cs">
+      <Link>Enums\ExtraSample.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\FaxMode.cs">
+      <Link>Enums\FaxMode.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\FileType.cs">
+      <Link>Enums\FileType.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\FillOrder.cs">
+      <Link>Enums\FillOrder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\GrayResponseUnit.cs">
+      <Link>Enums\GrayResponseUnit.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\Group3Opt.cs">
+      <Link>Enums\Group3Opt.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\InkSet.cs">
+      <Link>Enums\InkSet.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\JpegColorMode.cs">
+      <Link>Enums\JpegColorMode.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\JpegProc.cs">
+      <Link>Enums\JpegProc.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\JpegTablesMode.cs">
+      <Link>Enums\JpegTablesMode.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\OFileType.cs">
+      <Link>Enums\OFileType.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\Orientation.cs">
+      <Link>Enums\Orientation.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\Photometric.cs">
+      <Link>Enums\Photometric.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\PlanarConfig.cs">
+      <Link>Enums\PlanarConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\Predictor.cs">
+      <Link>Enums\Predictor.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\ResUnit.cs">
+      <Link>Enums\ResUnit.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\SampleFormat.cs">
+      <Link>Enums\SampleFormat.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\Threshold.cs">
+      <Link>Enums\Threshold.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\TiffPrintFlags.cs">
+      <Link>Enums\TiffPrintFlags.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\TiffTag.cs">
+      <Link>Enums\TiffTag.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\TiffType.cs">
+      <Link>Enums\TiffType.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Enums\YCbCrPosition.cs">
+      <Link>Enums\YCbCrPosition.cs</Link>
+    </Compile>
     <Compile Include="..\LibTiff\FieldBit.cs">
       <Link>FieldBit.cs</Link>
     </Compile>
@@ -154,9 +229,6 @@
     </Compile>
     <Compile Include="..\LibTiff\Internal\TiffHeader.cs">
       <Link>Internal\TiffHeader.cs</Link>
-    </Compile>
-    <Compile Include="..\LibTiff\Internal\TiffRGBAImage.cs">
-      <Link>Internal\TiffRGBAImage.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\Internal\TiffTagValue.cs">
       <Link>Internal\TiffTagValue.cs</Link>
@@ -383,9 +455,6 @@
     <Compile Include="..\LibTiff\LibJpeg\ReadResult.cs">
       <Link>LibJpeg\ReadResult.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\TagDefinitions.cs">
-      <Link>TagDefinitions.cs</Link>
-    </Compile>
     <Compile Include="..\LibTiff\Tiff.cs">
       <Link>Tiff.cs</Link>
     </Compile>
@@ -398,17 +467,14 @@
     <Compile Include="..\LibTiff\TiffFieldInfo.cs">
       <Link>TiffFieldInfo.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\TiffPrintFlags.cs">
-      <Link>TiffPrintFlags.cs</Link>
+    <Compile Include="..\LibTiff\TiffRgbaImage.cs">
+      <Link>TiffRgbaImage.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\TiffStream.cs">
       <Link>TiffStream.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\TiffTagMethods.cs">
       <Link>TiffTagMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\LibTiff\TiffType.cs">
-      <Link>TiffType.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\zLib\Adler32.cs">
       <Link>zLib\Adler32.cs</Link>
@@ -454,7 +520,6 @@
     </Compile>
     <Compile Include="AssemblyVersion.cs" />
     <Compile Include="Enc28591.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -474,6 +539,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -34,6 +34,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SilverlightTestApplication.
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "54509"
+		VWDDynamicPort = "false"
 		DefaultWebSiteLanguage = "Visual C#"
 		ProjOutputReferences = "{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}|ClientBin|false;"
 	EndProjectSection
