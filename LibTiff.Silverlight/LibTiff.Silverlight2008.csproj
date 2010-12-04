@@ -491,7 +491,6 @@
     </Compile>
     <Compile Include="AssemblyVersion.cs" />
     <Compile Include="Enc28591.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\v3.0\Microsoft.Silverlight.CSharp.targets" />
