@@ -15,28 +15,37 @@ using System.Text;
 
 namespace BitMiracle.LibTiff.Classic.Internal
 {
-    struct OJPEGState
+    class OJPEGState
     {
+        public struct SosEnd
+        {
+            public byte log;
+            public OJPEGStateInBufferSource in_buffer_source;
+            public uint in_buffer_next_strile;
+            public uint in_buffer_file_pos;
+            public uint in_buffer_file_togo;
+        }
+
         public Tiff tif;
         //#ifndef LIBJPEG_ENCAP_EXTERNAL
         //        JMP_BUF exit_jmpbuf;
         //#endif
         //TIFFVGetMethod vgetparent;
         //TIFFVSetMethod vsetparent;
-        //toff_t file_size;
+        //uint file_size;
         //uint32 image_width;
         //uint32 image_length;
         //uint32 strile_width;
         //uint32 strile_length;
         //uint32 strile_length_total;
         //byte samples_per_pixel;
-        //byte plane_sample_offset;
+        public byte plane_sample_offset;
         //byte samples_per_pixel_per_plane;
-        //toff_t jpeg_interchange_format;
-        //toff_t jpeg_interchange_format_length;
+        //uint jpeg_interchange_format;
+        //uint jpeg_interchange_format_length;
         public byte jpeg_proc;
         //byte subsamplingcorrect;
-        //byte subsamplingcorrect_done;
+        public byte subsamplingcorrect_done;
         //byte subsampling_tag;
         public byte subsampling_hor;
         public byte subsampling_ver;
@@ -44,13 +53,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //byte qtable_offset_count;
         //byte dctable_offset_count;
         //byte actable_offset_count;
-        //toff_t qtable_offset[3];
-        //toff_t dctable_offset[3];
-        //toff_t actable_offset[3];
+        //uint qtable_offset[3];
+        //uint dctable_offset[3];
+        //uint actable_offset[3];
         //byte* qtable[4];
         //byte* dctable[4];
         //byte* actable[4];
-        //uint16 restart_interval;
+        //ushort restart_interval;
         //byte restart_index;
         //byte sof_log;
         //byte sof_marker_id;
@@ -61,19 +70,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //byte sof_tq[3];
         //byte sos_cs[3];
         //byte sos_tda[3];
-        //struct {
-        //    byte log;
-        //    OJPEGStateInBufferSource in_buffer_source;
-        //    tstrile_t in_buffer_next_strile;
-        //    toff_t in_buffer_file_pos;
-        //    toff_t in_buffer_file_togo;
-        //} sos_end[3];
-        //byte readheader_done;
-        //byte writeheader_done;
-        //short write_cursample;
-        //tstrile_t write_curstrile;
-        //byte libjpeg_session_active;
-        //byte libjpeg_jpeg_query_style;
+        public SosEnd[] sos_end = new SosEnd[3];
+        public byte readheader_done;
+        public byte writeheader_done;
+        public short write_cursample;
+        public uint write_curstrile;
+        public byte libjpeg_session_active;
+        public byte libjpeg_jpeg_query_style;
         //jpeg_error_mgr libjpeg_jpeg_error_mgr;
         //jpeg_decompress_struct libjpeg_jpeg_decompress_struct;
         //jpeg_source_mgr libjpeg_jpeg_source_mgr;
@@ -95,14 +98,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //uint32 subsampling_convert_state;
         //uint32 bytes_per_line;   /* if the codec outputs subsampled data, a 'line' in bytes_per_line */
         //uint32 lines_per_strile; /* and lines_per_strile means subsampling_ver desubsampled rows     */
-        //OJPEGStateInBufferSource in_buffer_source;
-        //tstrile_t in_buffer_next_strile;
-        //tstrile_t in_buffer_strile_count;
-        //toff_t in_buffer_file_pos;
-        //byte in_buffer_file_pos_log;
-        //toff_t in_buffer_file_togo;
-        //uint16 in_buffer_togo;
-        //byte* in_buffer_cur;
+        public OJPEGStateInBufferSource in_buffer_source;
+        public uint in_buffer_next_strile;
+        //uint in_buffer_strile_count;
+        public uint in_buffer_file_pos;
+        public byte in_buffer_file_pos_log;
+        public uint in_buffer_file_togo;
+        public ushort in_buffer_togo;
+        public byte[] in_buffer_cur;
         //byte in_buffer[OJPEG_BUFFER];
         //OJPEGStateOutState out_state;
         //byte out_buffer[OJPEG_BUFFER];
