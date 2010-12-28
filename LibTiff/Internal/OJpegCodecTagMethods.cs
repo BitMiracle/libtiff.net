@@ -22,16 +22,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
         //    static const char module[]="OJPEGVSetField";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    uint32 ma;
-        //    uint32* mb;
-        //    uint32 n;
+        //    uint ma;
+        //    uint* mb;
+        //    uint n;
         //    switch(tag)
         //    {
         //        case TIFFTAG_JPEGIFOFFSET:
-        //            sp.jpeg_interchange_format=(toff_t)va_arg(ap,uint32);  
+        //            sp.jpeg_interchange_format=(toff_t)va_arg(ap,uint);  
         //            break;
         //        case TIFFTAG_JPEGIFBYTECOUNT:
-        //            sp.jpeg_interchange_format_length=(toff_t)va_arg(ap,uint32);  
+        //            sp.jpeg_interchange_format_length=(toff_t)va_arg(ap,uint);  
         //            break;
         //        case TIFFTAG_YCBCRSUBSAMPLING:
         //            sp.subsampling_tag=1;
@@ -41,7 +41,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //            tif.tif_dir.td_ycbcrsubsampling[1]=sp.subsampling_ver;
         //            break;
         //        case TIFFTAG_JPEGQTABLES:
-        //            ma=va_arg(ap,uint32);
+        //            ma=va_arg(ap,uint);
         //            if (ma!=0)
         //            {
         //                if (ma>3)
@@ -50,13 +50,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //                    return(0);
         //                }
         //                sp.qtable_offset_count=(byte)ma;
-        //                mb=va_arg(ap,uint32*);
+        //                mb=va_arg(ap,uint*);
         //                for (n=0; n<ma; n++)
         //                    sp.qtable_offset[n]=(toff_t)mb[n];
         //            }
         //            break;
         //        case TIFFTAG_JPEGDCTABLES:
-        //            ma=va_arg(ap,uint32);
+        //            ma=va_arg(ap,uint);
         //            if (ma!=0)
         //            {
         //                if (ma>3)
@@ -65,13 +65,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //                    return(0);
         //                }
         //                sp.dctable_offset_count=(byte)ma;
-        //                mb=va_arg(ap,uint32*);
+        //                mb=va_arg(ap,uint*);
         //                for (n=0; n<ma; n++)
         //                    sp.dctable_offset[n]=(toff_t)mb[n];
         //            }
         //            break;
         //        case TIFFTAG_JPEGACTABLES:
-        //            ma=va_arg(ap,uint32);
+        //            ma=va_arg(ap,uint);
         //            if (ma!=0)
         //            {
         //                if (ma>3)
@@ -80,16 +80,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //                    return(0);
         //                }
         //                sp.actable_offset_count=(byte)ma;
-        //                mb=va_arg(ap,uint32*);
+        //                mb=va_arg(ap,uint*);
         //                for (n=0; n<ma; n++)
         //                    sp.actable_offset[n]=(toff_t)mb[n];
         //            }
         //            break;
         //        case TIFFTAG_JPEGPROC:
-        //            sp.jpeg_proc=(byte)va_arg(ap,uint32);
+        //            sp.jpeg_proc=(byte)va_arg(ap,uint);
         //            break;
         //        case TIFFTAG_JPEGRESTARTINTERVAL:
-        //            sp.restart_interval=(uint16)va_arg(ap,uint32);
+        //            sp.restart_interval=(uint16)va_arg(ap,uint);
         //            break;
         //        default:
         //            return (*sp.vsetparent)(tif,tag,ap);
@@ -108,10 +108,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //    switch(tag)
         //    {
         //        case TIFFTAG_JPEGIFOFFSET:
-        //            *va_arg(ap,uint32*)=(uint32)sp.jpeg_interchange_format;
+        //            *va_arg(ap,uint*)=(uint)sp.jpeg_interchange_format;
         //            break;
         //        case TIFFTAG_JPEGIFBYTECOUNT:
-        //            *va_arg(ap,uint32*)=(uint32)sp.jpeg_interchange_format_length;
+        //            *va_arg(ap,uint*)=(uint)sp.jpeg_interchange_format_length;
         //            break;
         //        case TIFFTAG_YCBCRSUBSAMPLING:
         //            if (sp.subsamplingcorrect_done==0)
@@ -120,15 +120,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //            *va_arg(ap,uint16*)=(uint16)sp.subsampling_ver;
         //            break;
         //        case TIFFTAG_JPEGQTABLES:
-        //            *va_arg(ap,uint32*)=(uint32)sp.qtable_offset_count;
+        //            *va_arg(ap,uint*)=(uint)sp.qtable_offset_count;
         //            *va_arg(ap,void**)=(void*)sp.qtable_offset;
         //            break;
         //        case TIFFTAG_JPEGDCTABLES:
-        //            *va_arg(ap,uint32*)=(uint32)sp.dctable_offset_count;
+        //            *va_arg(ap,uint*)=(uint)sp.dctable_offset_count;
         //            *va_arg(ap,void**)=(void*)sp.dctable_offset;
         //            break;
         //        case TIFFTAG_JPEGACTABLES:
-        //            *va_arg(ap,uint32*)=(uint32)sp.actable_offset_count;
+        //            *va_arg(ap,uint*)=(uint)sp.actable_offset_count;
         //            *va_arg(ap,void**)=(void*)sp.actable_offset;
         //            break;
         //        case TIFFTAG_JPEGPROC:

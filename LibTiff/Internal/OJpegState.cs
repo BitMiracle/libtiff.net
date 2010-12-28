@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using BitMiracle.LibJpeg.Classic;
+
 namespace BitMiracle.LibTiff.Classic.Internal
 {
     class OJPEGState
@@ -33,11 +35,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //TIFFVGetMethod vgetparent;
         //TIFFVSetMethod vsetparent;
         //uint file_size;
-        //uint32 image_width;
-        //uint32 image_length;
-        //uint32 strile_width;
-        //uint32 strile_length;
-        //uint32 strile_length_total;
+        //uint image_width;
+        //uint image_length;
+        //uint strile_width;
+        //uint strile_length;
+        //uint strile_length_total;
         //byte samples_per_pixel;
         public byte plane_sample_offset;
         //byte samples_per_pixel_per_plane;
@@ -63,8 +65,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //byte restart_index;
         //byte sof_log;
         //byte sof_marker_id;
-        //uint32 sof_x;
-        //uint32 sof_y;
+        //uint sof_x;
+        //uint sof_y;
         //byte sof_c[3];
         //byte sof_hv[3];
         //byte sof_tq[3];
@@ -78,26 +80,26 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public byte libjpeg_session_active;
         public byte libjpeg_jpeg_query_style;
         //jpeg_error_mgr libjpeg_jpeg_error_mgr;
-        //jpeg_decompress_struct libjpeg_jpeg_decompress_struct;
+        public jpeg_decompress_struct libjpeg_jpeg_decompress_struct;
         //jpeg_source_mgr libjpeg_jpeg_source_mgr;
         //byte subsampling_convert_log;
-        //uint32 subsampling_convert_ylinelen;
-        //uint32 subsampling_convert_ylines;
-        //uint32 subsampling_convert_clinelen;
-        //uint32 subsampling_convert_clines;
-        //uint32 subsampling_convert_ybuflen;
-        //uint32 subsampling_convert_cbuflen;
-        //uint32 subsampling_convert_ycbcrbuflen;
+        //uint subsampling_convert_ylinelen;
+        //uint subsampling_convert_ylines;
+        //uint subsampling_convert_clinelen;
+        public uint subsampling_convert_clines;
+        //uint subsampling_convert_ybuflen;
+        //uint subsampling_convert_cbuflen;
+        //uint subsampling_convert_ycbcrbuflen;
         //byte* subsampling_convert_ycbcrbuf;
         //byte* subsampling_convert_ybuf;
         //byte* subsampling_convert_cbbuf;
         //byte* subsampling_convert_crbuf;
-        //uint32 subsampling_convert_ycbcrimagelen;
-        //byte** subsampling_convert_ycbcrimage;
-        //uint32 subsampling_convert_clinelenout;
-        //uint32 subsampling_convert_state;
-        //uint32 bytes_per_line;   /* if the codec outputs subsampled data, a 'line' in bytes_per_line */
-        //uint32 lines_per_strile; /* and lines_per_strile means subsampling_ver desubsampled rows     */
+        public uint subsampling_convert_ycbcrimagelen;
+        public byte[][] subsampling_convert_ycbcrimage;
+        //uint subsampling_convert_clinelenout;
+        public uint subsampling_convert_state;
+        public uint bytes_per_line;   /* if the codec outputs subsampled data, a 'line' in bytes_per_line */
+        public uint lines_per_strile; /* and lines_per_strile means subsampling_ver desubsampled rows     */
         public OJPEGStateInBufferSource in_buffer_source;
         public uint in_buffer_next_strile;
         //uint in_buffer_strile_count;
@@ -109,6 +111,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //byte in_buffer[OJPEG_BUFFER];
         //OJPEGStateOutState out_state;
         //byte out_buffer[OJPEG_BUFFER];
-        //byte* skip_buffer;
+        public byte[] skip_buffer;
     }
 }

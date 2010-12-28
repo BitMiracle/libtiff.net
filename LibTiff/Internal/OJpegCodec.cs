@@ -142,6 +142,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 
+using BitMiracle.LibJpeg.Classic;
+
 namespace BitMiracle.LibTiff.Classic.Internal
 {
     class OJpegCodec : TiffCodec
@@ -490,12 +492,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 if (sp.libjpeg_jpeg_query_style == 0)
                 {
-                    if (OJPEGPreDecodeSkipRaw(m_tif) == 0)
+                    if (OJPEGPreDecodeSkipRaw() == 0)
                         return false;
                 }
                 else
                 {
-                    if (OJPEGPreDecodeSkipScanlines(m_tif) == 0)
+                    if (OJPEGPreDecodeSkipScanlines() == 0)
                         return false;
                 }
                 sp.write_curstrile++;
@@ -589,82 +591,62 @@ namespace BitMiracle.LibTiff.Classic.Internal
             //    }
         }
 
-
-
-
-
-
-
-
-
-
-        private static int OJPEGPreDecodeSkipRaw(Tiff tif)
+        private int OJPEGPreDecodeSkipRaw()
         {
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    uint32 m;
-        //    m=sp.lines_per_strile;
-        //    if (sp.subsampling_convert_state!=0)
-        //    {
-        //        if (sp.subsampling_convert_clines-sp.subsampling_convert_state>=m)
-        //        {
-        //            sp.subsampling_convert_state+=m;
-        //            if (sp.subsampling_convert_state==sp.subsampling_convert_clines)
-        //                sp.subsampling_convert_state=0;
-        //            return(1);
-        //        }
-        //        m-=sp.subsampling_convert_clines-sp.subsampling_convert_state;
-        //        sp.subsampling_convert_state=0;
-        //    }
-        //    while (m>=sp.subsampling_convert_clines)
-        //    {
-        //        if (jpeg_read_raw_data_encap(sp,&(sp.libjpeg_jpeg_decompress_struct),sp.subsampling_convert_ycbcrimage,sp.subsampling_ver*8)==0)
-        //            return(0);
-        //        m-=sp.subsampling_convert_clines;
-        //    }
-        //    if (m>0)
-        //    {
-        //        if (jpeg_read_raw_data_encap(sp,&(sp.libjpeg_jpeg_decompress_struct),sp.subsampling_convert_ycbcrimage,sp.subsampling_ver*8)==0)
-        //            return(0);
-        //        sp.subsampling_convert_state=m;
-        //    }
+            uint m;
+            m = sp.lines_per_strile;
+            if (sp.subsampling_convert_state != 0)
+            {
+                if (sp.subsampling_convert_clines - sp.subsampling_convert_state >= m)
+                {
+                    sp.subsampling_convert_state += m;
+                    if (sp.subsampling_convert_state == sp.subsampling_convert_clines)
+                        sp.subsampling_convert_state = 0;
+                    return (1);
+                }
+                m -= sp.subsampling_convert_clines - sp.subsampling_convert_state;
+                sp.subsampling_convert_state = 0;
+            }
+            while (m >= sp.subsampling_convert_clines)
+            {
+                if (jpeg_read_raw_data_encap(sp, sp.libjpeg_jpeg_decompress_struct, sp.subsampling_convert_ycbcrimage, sp.subsampling_ver * 8) == 0)
+                    return (0);
+                m -= sp.subsampling_convert_clines;
+            }
+            if (m > 0)
+            {
+                if (jpeg_read_raw_data_encap(sp, sp.libjpeg_jpeg_decompress_struct, sp.subsampling_convert_ycbcrimage, sp.subsampling_ver * 8) == 0)
+                    return (0);
+                sp.subsampling_convert_state = m;
+            }
             return 1;
         }
 
-        private static int OJPEGPreDecodeSkipScanlines(Tiff tif)
+        private int OJPEGPreDecodeSkipScanlines()
         {
-        //    static const char module[]="OJPEGPreDecodeSkipScanlines";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    uint32 m;
-        //    if (sp.skip_buffer==NULL)
-        //    {
-        //        sp.skip_buffer=_TIFFmalloc(sp.bytes_per_line);
-        //        if (sp.skip_buffer==NULL)
-        //        {
-        //            TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
-        //            return(0);
-        //        }
-        //    }
-        //    for (m=0; m<sp.lines_per_strile; m++)
-        //    {
-        //        if (jpeg_read_scanlines_encap(sp,&(sp.libjpeg_jpeg_decompress_struct),&sp.skip_buffer,1)==0)
-        //            return(0);
-        //    }
+            uint m;
+            if (sp.skip_buffer == null)
+                sp.skip_buffer = new byte[sp.bytes_per_line];
+
+            for (m = 0; m < sp.lines_per_strile; m++)
+            {
+                if (jpeg_read_scanlines_encap(sp, sp.libjpeg_jpeg_decompress_struct, sp.skip_buffer, 1) == 0)
+                    return 0;
+            }
             return 1;
         }
-
-
 
         private static int OJPEGDecodeRaw(Tiff tif, byte[] buf, int cc)
         {
-        //    static const char module[]="OJPEGDecodeRaw";
+        //    const string module = "OJPEGDecodeRaw";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte* m;
-        //    uint32 n;
+        //    uint n;
         //    byte* oy;
         //    byte* ocb;
         //    byte* ocr;
         //    byte* p;
-        //    uint32 q;
+        //    uint q;
         //    byte* r;
         //    byte sx,sy;
         //    if (cc%sp.bytes_per_line!=0)
@@ -710,10 +692,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static int OJPEGDecodeScanlines(Tiff tif, byte[] buf, int cc)
         {
-        //    static const char module[]="OJPEGDecodeScanlines";
+        //    const string module = "OJPEGDecodeScanlines";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte* m;
-        //    uint32 n;
+        //    uint n;
         //    if (cc%sp.bytes_per_line!=0)
         //    {
         //        TIFFErrorExt(tif.tif_clientdata,module,"Fractional scanline not read");
@@ -746,7 +728,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static void OJPEGSubsamplingCorrect(Tiff tif)
         {
-        //    static const char module[]="OJPEGSubsamplingCorrect";
+        //    const string module = "OJPEGSubsamplingCorrect";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte mh;
         //    byte mv;
@@ -798,7 +780,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static int OJPEGReadHeaderInfo(Tiff tif)
         {
-        //    static const char module[]="OJPEGReadHeaderInfo";
+        //    const string module = "OJPEGReadHeaderInfo";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    assert(sp.readheader_done==0);
         //    sp.image_width=tif.tif_dir.td_imagewidth;
@@ -907,10 +889,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static int OJPEGWriteHeaderInfo(Tiff tif)
         {
-        //    static const char module[]="OJPEGWriteHeaderInfo";
+        //    const string module = "OJPEGWriteHeaderInfo";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte** m;
-        //    uint32 n;
+        //    uint n;
         //    assert(sp.libjpeg_session_active==0);
         //    sp.out_state=ososSoi;
         //    sp.restart_index=0;
@@ -1007,7 +989,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //static int
         //OJPEGReadHeaderInfoSec(TIFF* tif)
         //{
-        //    static const char module[]="OJPEGReadHeaderInfoSec";
+        //    const string module = "OJPEGReadHeaderInfoSec";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte m;
         //    ushort n;
@@ -1139,7 +1121,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //OJPEGReadHeaderInfoSecStreamDri(TIFF* tif)
         //{
         //    /* this could easilly cause trouble in some cases... but no such cases have occured sofar */
-        //    static const char module[]="OJPEGReadHeaderInfoSecStreamDri";
+        //    const string module = "OJPEGReadHeaderInfoSecStreamDri";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    ushort m;
         //    if (OJPEGReadWord(sp,&m)==0)
@@ -1159,10 +1141,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //OJPEGReadHeaderInfoSecStreamDqt(TIFF* tif)
         //{
         //    /* this is a table marker, and it is to be saved as a whole for exact pushing on the jpeg stream later on */
-        //    static const char module[]="OJPEGReadHeaderInfoSecStreamDqt";
+        //    const string module = "OJPEGReadHeaderInfoSecStreamDqt";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    ushort m;
-        //    uint32 na;
+        //    uint na;
         //    byte* nb;
         //    byte o;
         //    if (OJPEGReadWord(sp,&m)==0)
@@ -1185,21 +1167,21 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //                TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DQT marker in JPEG data");
         //                return(0);
         //            }
-        //            na=sizeof(uint32)+69;
+        //            na=sizeof(uint)+69;
         //            nb=_TIFFmalloc(na);
         //            if (nb==0)
         //            {
         //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
         //                return(0);
         //            }
-        //            *(uint32*)nb=na;
-        //            nb[sizeof(uint32)]=255;
-        //            nb[sizeof(uint32)+1]=JPEG_MARKER_DQT;
-        //            nb[sizeof(uint32)+2]=0;
-        //            nb[sizeof(uint32)+3]=67;
-        //            if (OJPEGReadBlock(sp,65,&nb[sizeof(uint32)+4])==0)
+        //            *(uint*)nb=na;
+        //            nb[sizeof(uint)]=255;
+        //            nb[sizeof(uint)+1]=JPEG_MARKER_DQT;
+        //            nb[sizeof(uint)+2]=0;
+        //            nb[sizeof(uint)+3]=67;
+        //            if (OJPEGReadBlock(sp,65,&nb[sizeof(uint)+4])==0)
         //                return(0);
-        //            o=nb[sizeof(uint32)+4]&15;
+        //            o=nb[sizeof(uint)+4]&15;
         //            if (3<o)
         //            {
         //                TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DQT marker in JPEG data");
@@ -1219,10 +1201,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //{
         //    /* this is a table marker, and it is to be saved as a whole for exact pushing on the jpeg stream later on */
         //    /* TODO: the following assumes there is only one table in this marker... but i'm not quite sure that assumption is guaranteed correct */
-        //    static const char module[]="OJPEGReadHeaderInfoSecStreamDht";
+        //    const string module = "OJPEGReadHeaderInfoSecStreamDht";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    ushort m;
-        //    uint32 na;
+        //    uint na;
         //    byte* nb;
         //    byte o;
         //    if (OJPEGReadWord(sp,&m)==0)
@@ -1239,21 +1221,21 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //    }
         //    else
         //    {
-        //        na=sizeof(uint32)+2+m;
+        //        na=sizeof(uint)+2+m;
         //        nb=_TIFFmalloc(na);
         //        if (nb==0)
         //        {
         //            TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
         //            return(0);
         //        }
-        //        *(uint32*)nb=na;
-        //        nb[sizeof(uint32)]=255;
-        //        nb[sizeof(uint32)+1]=JPEG_MARKER_DHT;
-        //        nb[sizeof(uint32)+2]=(m>>8);
-        //        nb[sizeof(uint32)+3]=(m&255);
-        //        if (OJPEGReadBlock(sp,m-2,&nb[sizeof(uint32)+4])==0)
+        //        *(uint*)nb=na;
+        //        nb[sizeof(uint)]=255;
+        //        nb[sizeof(uint)+1]=JPEG_MARKER_DHT;
+        //        nb[sizeof(uint)+2]=(m>>8);
+        //        nb[sizeof(uint)+3]=(m&255);
+        //        if (OJPEGReadBlock(sp,m-2,&nb[sizeof(uint)+4])==0)
         //            return(0);
-        //        o=nb[sizeof(uint32)+4];
+        //        o=nb[sizeof(uint)+4];
         //        if ((o&240)==0)
         //        {
         //            if (3<o)
@@ -1290,7 +1272,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //OJPEGReadHeaderInfoSecStreamSof(TIFF* tif, byte marker_id)
         //{
         //    /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
-        //    static const char module[]="OJPEGReadHeaderInfoSecStreamSof";
+        //    const string module = "OJPEGReadHeaderInfoSecStreamSof";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    ushort m;
         //    ushort n;
@@ -1438,7 +1420,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //OJPEGReadHeaderInfoSecStreamSos(TIFF* tif)
         //{
         //    /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
-        //    static const char module[]="OJPEGReadHeaderInfoSecStreamSos";
+        //    const string module = "OJPEGReadHeaderInfoSecStreamSos";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    ushort m;
         //    byte n;
@@ -1485,13 +1467,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //static int
         //OJPEGReadHeaderInfoSecTablesQTable(TIFF* tif)
         //{
-        //    static const char module[]="OJPEGReadHeaderInfoSecTablesQTable";
+        //    const string module = "OJPEGReadHeaderInfoSecTablesQTable";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte m;
         //    byte n;
-        //    uint32 oa;
+        //    uint oa;
         //    byte* ob;
-        //    uint32 p;
+        //    uint p;
         //    if (sp.qtable_offset[0]==0)
         //    {
         //        TIFFErrorExt(tif.tif_clientdata,module,"Missing JPEG tables");
@@ -1510,21 +1492,21 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //                    return(0);
         //                }
         //            }
-        //            oa=sizeof(uint32)+69;
+        //            oa=sizeof(uint)+69;
         //            ob=_TIFFmalloc(oa);
         //            if (ob==0)
         //            {
         //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
         //                return(0);
         //            }
-        //            *(uint32*)ob=oa;
-        //            ob[sizeof(uint32)]=255;
-        //            ob[sizeof(uint32)+1]=JPEG_MARKER_DQT;
-        //            ob[sizeof(uint32)+2]=0;
-        //            ob[sizeof(uint32)+3]=67;
-        //            ob[sizeof(uint32)+4]=m;
+        //            *(uint*)ob=oa;
+        //            ob[sizeof(uint)]=255;
+        //            ob[sizeof(uint)+1]=JPEG_MARKER_DQT;
+        //            ob[sizeof(uint)+2]=0;
+        //            ob[sizeof(uint)+3]=67;
+        //            ob[sizeof(uint)+4]=m;
         //            TIFFSeekFile(tif,sp.qtable_offset[m],SEEK_SET);
-        //            p=TIFFReadFile(tif,&ob[sizeof(uint32)+5],64);
+        //            p=TIFFReadFile(tif,&ob[sizeof(uint)+5],64);
         //            if (p!=64)
         //                return(0);
         //            sp.qtable[m]=ob;
@@ -1539,14 +1521,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //static int
         //OJPEGReadHeaderInfoSecTablesDcTable(TIFF* tif)
         //{
-        //    static const char module[]="OJPEGReadHeaderInfoSecTablesDcTable";
+        //    const string module = "OJPEGReadHeaderInfoSecTablesDcTable";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte m;
         //    byte n;
         //    byte o[16];
-        //    uint32 p;
-        //    uint32 q;
-        //    uint32 ra;
+        //    uint p;
+        //    uint q;
+        //    uint ra;
         //    byte* rb;
         //    if (sp.dctable_offset[0]==0)
         //    {
@@ -1573,22 +1555,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //            q=0;
         //            for (n=0; n<16; n++)
         //                q+=o[n];
-        //            ra=sizeof(uint32)+21+q;
+        //            ra=sizeof(uint)+21+q;
         //            rb=_TIFFmalloc(ra);
         //            if (rb==0)
         //            {
         //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
         //                return(0);
         //            }
-        //            *(uint32*)rb=ra;
-        //            rb[sizeof(uint32)]=255;
-        //            rb[sizeof(uint32)+1]=JPEG_MARKER_DHT;
-        //            rb[sizeof(uint32)+2]=((19+q)>>8);
-        //            rb[sizeof(uint32)+3]=((19+q)&255);
-        //            rb[sizeof(uint32)+4]=m;
+        //            *(uint*)rb=ra;
+        //            rb[sizeof(uint)]=255;
+        //            rb[sizeof(uint)+1]=JPEG_MARKER_DHT;
+        //            rb[sizeof(uint)+2]=((19+q)>>8);
+        //            rb[sizeof(uint)+3]=((19+q)&255);
+        //            rb[sizeof(uint)+4]=m;
         //            for (n=0; n<16; n++)
-        //                rb[sizeof(uint32)+5+n]=o[n];
-        //            p=TIFFReadFile(tif,&(rb[sizeof(uint32)+21]),q);
+        //                rb[sizeof(uint)+5+n]=o[n];
+        //            p=TIFFReadFile(tif,&(rb[sizeof(uint)+21]),q);
         //            if (p!=q)
         //                return(0);
         //            sp.dctable[m]=rb;
@@ -1603,14 +1585,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //static int
         //OJPEGReadHeaderInfoSecTablesAcTable(TIFF* tif)
         //{
-        //    static const char module[]="OJPEGReadHeaderInfoSecTablesAcTable";
+        //    const string module = "OJPEGReadHeaderInfoSecTablesAcTable";
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte m;
         //    byte n;
         //    byte o[16];
-        //    uint32 p;
-        //    uint32 q;
-        //    uint32 ra;
+        //    uint p;
+        //    uint q;
+        //    uint ra;
         //    byte* rb;
         //    if (sp.actable_offset[0]==0)
         //    {
@@ -1637,22 +1619,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //            q=0;
         //            for (n=0; n<16; n++)
         //                q+=o[n];
-        //            ra=sizeof(uint32)+21+q;
+        //            ra=sizeof(uint)+21+q;
         //            rb=_TIFFmalloc(ra);
         //            if (rb==0)
         //            {
         //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
         //                return(0);
         //            }
-        //            *(uint32*)rb=ra;
-        //            rb[sizeof(uint32)]=255;
-        //            rb[sizeof(uint32)+1]=JPEG_MARKER_DHT;
-        //            rb[sizeof(uint32)+2]=((19+q)>>8);
-        //            rb[sizeof(uint32)+3]=((19+q)&255);
-        //            rb[sizeof(uint32)+4]=(16|m);
+        //            *(uint*)rb=ra;
+        //            rb[sizeof(uint)]=255;
+        //            rb[sizeof(uint)+1]=JPEG_MARKER_DHT;
+        //            rb[sizeof(uint)+2]=((19+q)>>8);
+        //            rb[sizeof(uint)+3]=((19+q)&255);
+        //            rb[sizeof(uint)+4]=(16|m);
         //            for (n=0; n<16; n++)
-        //                rb[sizeof(uint32)+5+n]=o[n];
-        //            p=TIFFReadFile(tif,&(rb[sizeof(uint32)+21]),q);
+        //                rb[sizeof(uint)+5+n]=o[n];
+        //            p=TIFFReadFile(tif,&(rb[sizeof(uint)+21]),q);
         //            if (p!=q)
         //                return(0);
         //            sp.actable[m]=rb;
@@ -1852,7 +1834,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static int
-        //OJPEGWriteStream(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStream(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    *len=0;
@@ -1925,7 +1907,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static void
-        //OJPEGWriteStreamSoi(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStreamSoi(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    assert(OJPEG_BUFFER>=2);
@@ -1937,43 +1919,43 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static void
-        //OJPEGWriteStreamQTable(TIFF* tif, byte table_index, void** mem, uint32* len)
+        //OJPEGWriteStreamQTable(TIFF* tif, byte table_index, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    if (sp.qtable[table_index]!=0)
         //    {
-        //        *mem=(void*)(sp.qtable[table_index]+sizeof(uint32));
-        //        *len=*((uint32*)sp.qtable[table_index])-sizeof(uint32);
+        //        *mem=(void*)(sp.qtable[table_index]+sizeof(uint));
+        //        *len=*((uint*)sp.qtable[table_index])-sizeof(uint);
         //    }
         //    sp.out_state++;
         //}
 
         //static void
-        //OJPEGWriteStreamDcTable(TIFF* tif, byte table_index, void** mem, uint32* len)
+        //OJPEGWriteStreamDcTable(TIFF* tif, byte table_index, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    if (sp.dctable[table_index]!=0)
         //    {
-        //        *mem=(void*)(sp.dctable[table_index]+sizeof(uint32));
-        //        *len=*((uint32*)sp.dctable[table_index])-sizeof(uint32);
+        //        *mem=(void*)(sp.dctable[table_index]+sizeof(uint));
+        //        *len=*((uint*)sp.dctable[table_index])-sizeof(uint);
         //    }
         //    sp.out_state++;
         //}
 
         //static void
-        //OJPEGWriteStreamAcTable(TIFF* tif, byte table_index, void** mem, uint32* len)
+        //OJPEGWriteStreamAcTable(TIFF* tif, byte table_index, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    if (sp.actable[table_index]!=0)
         //    {
-        //        *mem=(void*)(sp.actable[table_index]+sizeof(uint32));
-        //        *len=*((uint32*)sp.actable[table_index])-sizeof(uint32);
+        //        *mem=(void*)(sp.actable[table_index]+sizeof(uint));
+        //        *len=*((uint*)sp.actable[table_index])-sizeof(uint);
         //    }
         //    sp.out_state++;
         //}
 
         //static void
-        //OJPEGWriteStreamDri(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStreamDri(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    assert(OJPEG_BUFFER>=6);
@@ -1992,7 +1974,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static void
-        //OJPEGWriteStreamSof(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStreamSof(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte m;
@@ -2028,7 +2010,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static void
-        //OJPEGWriteStreamSos(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStreamSos(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    byte m;
@@ -2060,7 +2042,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static int
-        //OJPEGWriteStreamCompressed(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStreamCompressed(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    if (sp.in_buffer_togo==0)
@@ -2093,7 +2075,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static void
-        //OJPEGWriteStreamRst(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStreamRst(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    assert(OJPEG_BUFFER>=2);
@@ -2108,7 +2090,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
 
         //static void
-        //OJPEGWriteStreamEoi(TIFF* tif, void** mem, uint32* len)
+        //OJPEGWriteStreamEoi(TIFF* tif, void** mem, uint* len)
         //{
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    assert(OJPEG_BUFFER>=2);
@@ -2142,21 +2124,39 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //}
         //#endif
 
-        //#ifndef LIBJPEG_ENCAP_EXTERNAL
-        //static int
-        //jpeg_read_scanlines_encap(OJPEGState* sp, jpeg_decompress_struct* cinfo, void* scanlines, uint32 max_lines)
-        //{
-        //    return(SETJMP(sp.exit_jmpbuf)?0:(jpeg_read_scanlines(cinfo,scanlines,max_lines),1));
-        //}
-        //#endif
+        private int jpeg_read_scanlines_encap(OJPEGState sp, jpeg_decompress_struct cinfo, byte[] scanlines, int max_lines)
+        {
+            int n = 0;
+            try
+            {
+                byte[][] temp = new byte[1][];
+                temp[0] = scanlines;
+                n = cinfo.jpeg_read_scanlines(temp, max_lines);
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
 
-        //#ifndef LIBJPEG_ENCAP_EXTERNAL
-        //static int
-        //jpeg_read_raw_data_encap(OJPEGState* sp, jpeg_decompress_struct* cinfo, void* data, uint32 max_lines)
-        //{
-        //    return(SETJMP(sp.exit_jmpbuf)?0:(jpeg_read_raw_data(cinfo,data,max_lines),1));
-        //}
-        //#endif
+            return n;
+        }
+
+        private int jpeg_read_raw_data_encap(OJPEGState sp, jpeg_decompress_struct cinfo, byte[][] data, int max_lines)
+        {
+            int n = 0;
+            try
+            {
+                byte[][][] temp = new byte[1][][];
+                temp[0] = data;
+                n = cinfo.jpeg_read_raw_data(temp, max_lines);
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+
+            return n;
+        }
 
         //#ifndef LIBJPEG_ENCAP_EXTERNAL
         //static void
@@ -2196,7 +2196,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //    TIFF* tif=(TIFF*)cinfo.client_data;
         //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
         //    void* mem=0;
-        //    uint32 len=0;
+        //    uint len=0;
         //    if (OJPEGWriteStream(tif,&mem,&len)==0)
         //    {
         //        TIFFErrorExt(tif.tif_clientdata,"LibJpeg","Premature end of JPEG data");
