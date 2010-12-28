@@ -1950,17 +1950,17 @@ namespace BitMiracle.Tiff2Pdf
             if (m_pdf_datetime == null)
                 pdf_tifftime(input);
 
-            int written = 0;
-            if (strlen(m_pdf_datetime) > 0)
-            {
-                written += writeToFile("<< \n/CreationDate ");
-                written += write_pdf_string(m_pdf_datetime);
-                written += writeToFile("\n/ModDate ");
-                written += write_pdf_string(m_pdf_datetime);
-            }
-
+            int written = writeToFile("<< ");
             if (!m_testFriendly)
             {
+                if (strlen(m_pdf_datetime) > 0)
+                {
+                    written += writeToFile("\n/CreationDate ");
+                    written += write_pdf_string(m_pdf_datetime);
+                    written += writeToFile("\n/ModDate ");
+                    written += write_pdf_string(m_pdf_datetime);
+                }
+
                 written += writeToFile("\n/Producer ");
                 string buffer = string.Format("libtiff / tiff2pdf - {0}", Tiff.AssemblyVersion);
                 written += write_pdf_string(Latin1Encoding.GetBytes(buffer));
@@ -2165,15 +2165,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private void pdf_currenttime()
         {
-            DateTime dt;
-
-            if (m_testFriendly)
-            {
-                int timenow = 1247603070; // 15-07-2009 XXXX
-                dt = new DateTime(1970, 1, 1).AddSeconds(timenow).ToLocalTime();
-            }
-            else
-                dt = DateTime.Now.ToLocalTime();
+            DateTime dt = DateTime.Now.ToLocalTime();
 
             string s = string.Format("D:{0:0000}{1:00}{2:00}{3:00}{4:00}{5:00}", 
                 dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256, 
