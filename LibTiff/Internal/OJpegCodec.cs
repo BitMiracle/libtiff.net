@@ -1653,81 +1653,85 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return (1);
         }
 
-        private static int OJPEGReadBufferFill(OJPEGState sp)
+        private int OJPEGReadBufferFill()
         {
-            //    ushort m;
-            //    int n;
-            //    /* TODO: double-check: when subsamplingcorrect is set, no call to TIFFErrorExt or TIFFWarningExt should be made
-            //     * in any other case, seek or read errors should be passed through */
-            //    do
-            //    {
-            //        if (sp.in_buffer_file_togo!=0)
-            //        {
-            //            if (sp.in_buffer_file_pos_log==0)
-            //            {
-            //                TIFFSeekFile(sp.tif,sp.in_buffer_file_pos,SEEK_SET);
-            //                sp.in_buffer_file_pos_log=1;
-            //            }
-            //            m=OJPEG_BUFFER;
-            //            if (m>sp.in_buffer_file_togo)
-            //                m=(ushort)sp.in_buffer_file_togo;
-            //            n=TIFFReadFile(sp.tif,sp.in_buffer,(int)m);
-            //            if (n==0)
-            //                return(0);
-            //            assert(n>0);
-            //            assert(n<=OJPEG_BUFFER);
-            //            assert(n<65536);
-            //            assert((ushort)n<=sp.in_buffer_file_togo);
-            //            m=(ushort)n;
-            //            sp.in_buffer_togo=m;
-            //            sp.in_buffer_cur=sp.in_buffer;
-            //            sp.in_buffer_file_togo-=m;
-            //            sp.in_buffer_file_pos+=m;
-            //            break;
-            //        }
-            //        sp.in_buffer_file_pos_log=0;
-            //        switch(sp.in_buffer_source)
-            //        {
-            //            case osibsNotSetYet:
-            //                if (sp.jpeg_interchange_format!=0)
-            //                {
-            //                    sp.in_buffer_file_pos=sp.jpeg_interchange_format;
-            //                    sp.in_buffer_file_togo=sp.jpeg_interchange_format_length;
-            //                }
-            //                sp.in_buffer_source=osibsJpegInterchangeFormat;
-            //                break;
-            //            case osibsJpegInterchangeFormat:
-            //                sp.in_buffer_source=osibsStrile;
-            //            case osibsStrile:
-            //                if (sp.in_buffer_next_strile==sp.in_buffer_strile_count)  
-            //                    sp.in_buffer_source=osibsEof;
-            //                else
-            //                {
-            //                    if (sp.tif.tif_dir.td_stripoffset == 0) {
-            //                        TIFFErrorExt(sp.tif.tif_clientdata,sp.tif.tif_name,"Strip offsets are missing");
-            //                        return(0);
-            //                    }
-            //                    sp.in_buffer_file_pos=sp.tif.tif_dir.td_stripoffset[sp.in_buffer_next_strile];  
-            //                    if (sp.in_buffer_file_pos!=0)
-            //                    {
-            //                        if (sp.in_buffer_file_pos>=sp.file_size)
-            //                            sp.in_buffer_file_pos=0;
-            //                        else
-            //                        {
-            //                            sp.in_buffer_file_togo=sp.tif.tif_dir.td_stripbytecount[sp.in_buffer_next_strile];  
-            //                            if (sp.in_buffer_file_togo==0)
-            //                                sp.in_buffer_file_pos=0;
-            //                            else if (sp.in_buffer_file_pos+sp.in_buffer_file_togo>sp.file_size)
-            //                                sp.in_buffer_file_togo=sp.file_size-sp.in_buffer_file_pos;
-            //                        }
-            //                    }
-            //                    sp.in_buffer_next_strile++;
-            //                }
-            //                break;
-            //            default:
-            //                return(0);
-            //        }
-            //    } while (1);
+            ushort m;
+            int n;
+            /* TODO: double-check: when subsamplingcorrect is set, no call to TIFFErrorExt or TIFFWarningExt should be made
+             * in any other case, seek or read errors should be passed through */
+            do
+            {
+                if (sp.in_buffer_file_togo != 0)
+                {
+                    TiffStream stream = m_tif.GetStream();
+                    if (sp.in_buffer_file_pos_log == 0)
+                    {
+                        stream.Seek(m_tif.m_clientdata, sp.in_buffer_file_pos, SeekOrigin.Begin);
+                        sp.in_buffer_file_pos_log = 1;
+                    }
+                    m = OJPEGState.OJPEG_BUFFER;
+                    if (m > sp.in_buffer_file_togo)
+                        m = (ushort)sp.in_buffer_file_togo;
+
+                    n = stream.Read(m_tif.m_clientdata, sp.in_buffer, 0, (int)m);
+                    if (n == 0)
+                        return (0);
+                    Debug.Assert(n > 0);
+                    Debug.Assert(n <= OJPEGState.OJPEG_BUFFER);
+                    Debug.Assert(n < 65536);
+                    Debug.Assert((ushort)n <= sp.in_buffer_file_togo);
+                    m = (ushort)n;
+                    sp.in_buffer_togo = m;
+                    sp.in_buffer_cur = 0;
+                    sp.in_buffer_file_togo -= m;
+                    sp.in_buffer_file_pos += m;
+                    break;
+                }
+                sp.in_buffer_file_pos_log = 0;
+                switch (sp.in_buffer_source)
+                {
+                    case OJPEGStateInBufferSource.osibsNotSetYet:
+                        if (sp.jpeg_interchange_format != 0)
+                        {
+                            sp.in_buffer_file_pos = sp.jpeg_interchange_format;
+                            sp.in_buffer_file_togo = sp.jpeg_interchange_format_length;
+                        }
+                        sp.in_buffer_source = OJPEGStateInBufferSource.osibsJpegInterchangeFormat;
+                        break;
+                    case OJPEGStateInBufferSource.osibsJpegInterchangeFormat:
+                        sp.in_buffer_source = OJPEGStateInBufferSource.osibsStrile;
+                        goto case OJPEGStateInBufferSource.osibsStrile;
+                    case OJPEGStateInBufferSource.osibsStrile:
+                        if (sp.in_buffer_next_strile == sp.in_buffer_strile_count)
+                            sp.in_buffer_source = OJPEGStateInBufferSource.osibsEof;
+                        else
+                        {
+                            if (m_tif.m_dir.td_stripoffset == null)
+                            {
+                                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Strip offsets are missing");
+                                return (0);
+                            }
+                            sp.in_buffer_file_pos = m_tif.m_dir.td_stripoffset[sp.in_buffer_next_strile];
+                            if (sp.in_buffer_file_pos != 0)
+                            {
+                                if (sp.in_buffer_file_pos >= sp.file_size)
+                                    sp.in_buffer_file_pos = 0;
+                                else
+                                {
+                                    sp.in_buffer_file_togo = m_tif.m_dir.td_stripbytecount[sp.in_buffer_next_strile];
+                                    if (sp.in_buffer_file_togo == 0)
+                                        sp.in_buffer_file_pos = 0;
+                                    else if (sp.in_buffer_file_pos + sp.in_buffer_file_togo > sp.file_size)
+                                        sp.in_buffer_file_togo = sp.file_size - sp.in_buffer_file_pos;
+                                }
+                            }
+                            sp.in_buffer_next_strile++;
+                        }
+                        break;
+                    default:
+                        return (0);
+                }
+            } while (true);
             return 1;
         }
 
@@ -1735,7 +1739,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             if (sp.in_buffer_togo == 0)
             {
-                if (OJPEGReadBufferFill(sp) == 0)
+                if (OJPEGReadBufferFill() == 0)
                 {
                     b = 0;
                     return 0;
@@ -1754,7 +1758,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             if (sp.in_buffer_togo == 0)
             {
-                if (OJPEGReadBufferFill(sp) == 0)
+                if (OJPEGReadBufferFill() == 0)
                 {
                     b = 0;
                     return 0;
@@ -1800,7 +1804,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 if (sp.in_buffer_togo == 0)
                 {
-                    if (OJPEGReadBufferFill(sp) == 0)
+                    if (OJPEGReadBufferFill() == 0)
                         return (0);
                     Debug.Assert(sp.in_buffer_togo > 0);
                 }
