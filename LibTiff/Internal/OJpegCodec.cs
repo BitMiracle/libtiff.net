@@ -554,23 +554,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private void OJPEGCleanup()
         {
-            //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-            //    if (sp!=0)
-            //    {
-            //        tif.tif_tagmethods.vgetfield=sp.vgetparent;
-            //        tif.tif_tagmethods.vsetfield=sp.vsetparent;
-            //        if (sp.libjpeg_session_active!=0)
-            //            OJPEGLibjpegSessionAbort(tif);
-            //        if (sp.subsampling_convert_ycbcrbuf!=0)
-            //            _TIFFfree(sp.subsampling_convert_ycbcrbuf);
-            //        if (sp.subsampling_convert_ycbcrimage!=0)
-            //            _TIFFfree(sp.subsampling_convert_ycbcrimage);
-            //        if (sp.skip_buffer!=0)
-            //            _TIFFfree(sp.skip_buffer);
-            //        _TIFFfree(sp);
-            //        tif.tif_data=NULL;
-            //        _TIFFSetDefaultCompressionState(tif);
-            //    }
+            m_tif.m_tagmethods = m_parentTagMethods;
+            if (sp.libjpeg_session_active != 0)
+                OJPEGLibjpegSessionAbort();
         }
 
         private int OJPEGPreDecodeSkipRaw()
@@ -591,13 +577,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
             while (m >= sp.subsampling_convert_clines)
             {
-                if (jpeg_read_raw_data_encap(sp, sp.libjpeg_jpeg_decompress_struct, sp.subsampling_convert_ycbcrimage, sp.subsampling_ver * 8) == 0)
+                if (jpeg_read_raw_data_encap(sp.subsampling_ver * 8) == 0)
                     return (0);
                 m -= sp.subsampling_convert_clines;
             }
             if (m > 0)
             {
-                if (jpeg_read_raw_data_encap(sp, sp.libjpeg_jpeg_decompress_struct, sp.subsampling_convert_ycbcrimage, sp.subsampling_ver * 8) == 0)
+                if (jpeg_read_raw_data_encap(sp.subsampling_ver * 8) == 0)
                     return (0);
                 sp.subsampling_convert_state = m;
             }
@@ -635,7 +621,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 if (sp.subsampling_convert_state == 0)
                 {
-                    if (jpeg_read_raw_data_encap(sp, sp.libjpeg_jpeg_decompress_struct, sp.subsampling_convert_ycbcrimage, sp.subsampling_ver * 8) == 0)
+                    if (jpeg_read_raw_data_encap(sp.subsampling_ver * 8) == 0)
                         return (0);
                 }
 
@@ -2157,8 +2143,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return n;
         }
 
-        private int jpeg_read_raw_data_encap(OJPEGState sp, jpeg_decompress_struct cinfo, byte[][] data, int max_lines)
+        private int jpeg_read_raw_data_encap(int max_lines)
         {
+            jpeg_decompress_struct cinfo = sp.libjpeg_jpeg_decompress_struct;
+            byte[][] data = sp.subsampling_convert_ycbcrimage;
+
             int n = 0;
             try
             {
