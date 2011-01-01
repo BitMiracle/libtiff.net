@@ -141,6 +141,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 using BitMiracle.LibJpeg.Classic;
 
@@ -739,7 +740,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 mh = sp.subsampling_hor;
                 mv = sp.subsampling_ver;
                 sp.subsamplingcorrect = 1;
-                OJPEGReadHeaderInfoSec(m_tif);
+                OJPEGReadHeaderInfoSec();
                 if (sp.subsampling_force_desubsampling_inside_decompression != 0)
                 {
                     sp.subsampling_hor = 1;
@@ -845,7 +846,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 sp.restart_interval = (ushort)(((sp.strile_width + sp.subsampling_hor * 8 - 1) / (sp.subsampling_hor * 8)) * (sp.strile_length / (sp.subsampling_ver * 8)));
             }
 
-            if (OJPEGReadHeaderInfoSec(m_tif) == 0)
+            if (OJPEGReadHeaderInfoSec() == 0)
                 return 0;
 
             sp.sos_end[0].log = 1;
@@ -901,7 +902,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 } while (true);
 
                 sp.plane_sample_offset++;
-                if (OJPEGReadHeaderInfoSecStreamSos(m_tif) == 0)
+                if (OJPEGReadHeaderInfoSecStreamSos() == 0)
                     return 0;
 
                 sp.sos_end[sp.plane_sample_offset].log = 1;
@@ -927,7 +928,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             sp.libjpeg_jpeg_error_mgr = new OJpegErrorManager(this);
             if (!jpeg_create_decompress_encap(sp))
                 return 0;
-            
+
             sp.libjpeg_session_active = 1;
             sp.libjpeg_jpeg_source_mgr = new OJpegSrcManager(this);
             sp.libjpeg_jpeg_decompress_struct.Src = sp.libjpeg_jpeg_source_mgr;
@@ -954,27 +955,27 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     sp.subsampling_convert_cbuflen = sp.subsampling_convert_clinelen * sp.subsampling_convert_clines;
                     sp.subsampling_convert_ycbcrbuflen = sp.subsampling_convert_ybuflen + 2 * sp.subsampling_convert_cbuflen;
                     sp.subsampling_convert_ycbcrbuf = new byte[sp.subsampling_convert_ycbcrbuflen];
-                    
+
                     //sp.subsampling_convert_ybuf = sp.subsampling_convert_ycbcrbuf;
                     //sp.subsampling_convert_cbbuf = sp.subsampling_convert_ybuf + sp.subsampling_convert_ybuflen;
                     //sp.subsampling_convert_crbuf = sp.subsampling_convert_cbbuf + sp.subsampling_convert_cbuflen;
                     //sp.subsampling_convert_ycbcrimagelen = 3 + sp.subsampling_convert_ylines + 2 * sp.subsampling_convert_clines;
                     //sp.subsampling_convert_ycbcrimage = new byte[sp.subsampling_convert_ycbcrimagelen][];
-                    
+
                     //m = sp.subsampling_convert_ycbcrimage;
                     //*m++ = (byte[])(sp.subsampling_convert_ycbcrimage + 3);
                     //*m++ = (byte[])(sp.subsampling_convert_ycbcrimage + 3 + sp.subsampling_convert_ylines);
                     //*m++ = (byte[])(sp.subsampling_convert_ycbcrimage + 3 + sp.subsampling_convert_ylines + sp.subsampling_convert_clines);
-                    
+
                     //for (n = 0; n < sp.subsampling_convert_ylines; n++)
                     //    *m++ = sp.subsampling_convert_ybuf + n * sp.subsampling_convert_ylinelen;
-                    
+
                     //for (n = 0; n < sp.subsampling_convert_clines; n++)
                     //    *m++ = sp.subsampling_convert_cbbuf + n * sp.subsampling_convert_clinelen;
-                    
+
                     //for (n = 0; n < sp.subsampling_convert_clines; n++)
                     //    *m++ = sp.subsampling_convert_crbuf + n * sp.subsampling_convert_clinelen;
-                    
+
                     sp.subsampling_convert_clinelenout = ((sp.strile_width + sp.subsampling_hor - 1) / sp.subsampling_hor);
                     sp.subsampling_convert_state = 0;
                     sp.bytes_per_line = (uint)(sp.subsampling_convert_clinelenout * (sp.subsampling_ver * sp.subsampling_hor + 2));
@@ -993,7 +994,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (!jpeg_start_decompress_encap(sp))
                 return 0;
-            
+
             sp.writeheader_done = 1;
             return 1;
         }
@@ -1005,663 +1006,652 @@ namespace BitMiracle.LibTiff.Classic.Internal
             sp.libjpeg_session_active = 0;
         }
 
-        static int OJPEGReadHeaderInfoSec(Tiff tif)
+        private int OJPEGReadHeaderInfoSec()
         {
-            //    const string module = "OJPEGReadHeaderInfoSec";
-            //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-            //    byte m;
-            //    ushort n;
-            //    byte o;
-            //    if (sp.file_size==0)
-            //        sp.file_size=TIFFGetFileSize(tif);
-            //    if (sp.jpeg_interchange_format!=0)
-            //    {
-            //        if (sp.jpeg_interchange_format>=sp.file_size)
-            //        {
-            //            sp.jpeg_interchange_format=0;
-            //            sp.jpeg_interchange_format_length=0;
-            //        }
-            //        else
-            //        {
-            //            if ((sp.jpeg_interchange_format_length==0) || (sp.jpeg_interchange_format+sp.jpeg_interchange_format_length>sp.file_size))
-            //                sp.jpeg_interchange_format_length=sp.file_size-sp.jpeg_interchange_format;
-            //        }
-            //    }
-            //    sp.in_buffer_source=osibsNotSetYet;
-            //    sp.in_buffer_next_strile=0;
-            //    sp.in_buffer_strile_count=tif.tif_dir.td_nstrips;   
-            //    sp.in_buffer_file_togo=0;
-            //    sp.in_buffer_togo=0;
-            //    do
-            //    {
-            //        if (OJPEGReadBytePeek(sp,&m)==0)
-            //            return(0);
-            //        if (m!=255)
-            //            break;
-            //        OJPEGReadByteAdvance(sp);
-            //        do
-            //        {
-            //            if (OJPEGReadByte(sp,&m)==0)
-            //                return(0);
-            //        } while(m==255);
-            //        switch(m)
-            //        {
-            //            case JPEG_MARKER_SOI:
-            //                /* this type of marker has no data, and should be skipped */
-            //                break;
-            //            case JPEG_MARKER_COM:
-            //            case JPEG_MARKER_APP0:
-            //            case JPEG_MARKER_APP0+1:
-            //            case JPEG_MARKER_APP0+2:
-            //            case JPEG_MARKER_APP0+3:
-            //            case JPEG_MARKER_APP0+4:
-            //            case JPEG_MARKER_APP0+5:
-            //            case JPEG_MARKER_APP0+6:
-            //            case JPEG_MARKER_APP0+7:
-            //            case JPEG_MARKER_APP0+8:
-            //            case JPEG_MARKER_APP0+9:
-            //            case JPEG_MARKER_APP0+10:
-            //            case JPEG_MARKER_APP0+11:
-            //            case JPEG_MARKER_APP0+12:
-            //            case JPEG_MARKER_APP0+13:
-            //            case JPEG_MARKER_APP0+14:
-            //            case JPEG_MARKER_APP0+15:
-            //                /* this type of marker has data, but it has no use to us (and no place here) and should be skipped */
-            //                if (OJPEGReadWord(sp,&n)==0)
-            //                    return(0);
-            //                if (n<2)
-            //                {
-            //                    if (sp.subsamplingcorrect==0)
-            //                        TIFFErrorExt(tif.tif_clientdata,module,"Corrupt JPEG data");
-            //                    return(0);
-            //                }
-            //                if (n>2)
-            //                    OJPEGReadSkip(sp,n-2);
-            //                break;
-            //            case JPEG_MARKER_DRI:
-            //                if (OJPEGReadHeaderInfoSecStreamDri(tif)==0)
-            //                    return(0);
-            //                break;
-            //            case JPEG_MARKER_DQT:
-            //                if (OJPEGReadHeaderInfoSecStreamDqt(tif)==0)
-            //                    return(0);
-            //                break;
-            //            case JPEG_MARKER_DHT:
-            //                if (OJPEGReadHeaderInfoSecStreamDht(tif)==0)
-            //                    return(0);
-            //                break;
-            //            case JPEG_MARKER_SOF0:
-            //            case JPEG_MARKER_SOF1:
-            //            case JPEG_MARKER_SOF3:
-            //                if (OJPEGReadHeaderInfoSecStreamSof(tif,m)==0)
-            //                    return(0);
-            //                if (sp.subsamplingcorrect!=0)
-            //                    return(1);
-            //                break;
-            //            case JPEG_MARKER_SOS:
-            //                if (sp.subsamplingcorrect!=0)
-            //                    return(1);
-            //                assert(sp.plane_sample_offset==0);
-            //                if (OJPEGReadHeaderInfoSecStreamSos(tif)==0)
-            //                    return(0);
-            //                break;
-            //            default:
-            //                TIFFErrorExt(tif.tif_clientdata,module,"Unknown marker type %d in JPEG data",m);
-            //                return(0);
-            //        }
-            //    } while(m!=JPEG_MARKER_SOS);
-            //    if (sp.subsamplingcorrect)
-            //        return(1);
-            //    if (sp.sof_log==0)
-            //    {
-            //        if (OJPEGReadHeaderInfoSecTablesQTable(tif)==0)
-            //            return(0);
-            //        sp.sof_marker_id=JPEG_MARKER_SOF0;
-            //        for (o=0; o<sp.samples_per_pixel; o++)
-            //            sp.sof_c[o]=o;
-            //        sp.sof_hv[0]=((sp.subsampling_hor<<4)|sp.subsampling_ver);
-            //        for (o=1; o<sp.samples_per_pixel; o++)
-            //            sp.sof_hv[o]=17;
-            //        sp.sof_x=sp.strile_width;
-            //        sp.sof_y=sp.strile_length_total;
-            //        sp.sof_log=1;
-            //        if (OJPEGReadHeaderInfoSecTablesDcTable(tif)==0)
-            //            return(0);
-            //        if (OJPEGReadHeaderInfoSecTablesAcTable(tif)==0)
-            //            return(0);
-            //        for (o=1; o<sp.samples_per_pixel; o++)
-            //            sp.sos_cs[o]=o;
-            //    }
+            const string module = "OJPEGReadHeaderInfoSec";
+            byte m;
+            ushort n;
+            byte o;
+            if (sp.file_size == 0)
+                sp.file_size = (uint)m_tif.GetStream().Size(m_tif.m_clientdata);
+
+            if (sp.jpeg_interchange_format != 0)
+            {
+                if (sp.jpeg_interchange_format >= sp.file_size)
+                {
+                    sp.jpeg_interchange_format = 0;
+                    sp.jpeg_interchange_format_length = 0;
+                }
+                else
+                {
+                    if ((sp.jpeg_interchange_format_length == 0) || (sp.jpeg_interchange_format + sp.jpeg_interchange_format_length > sp.file_size))
+                        sp.jpeg_interchange_format_length = sp.file_size - sp.jpeg_interchange_format;
+                }
+            }
+
+            sp.in_buffer_source = OJPEGStateInBufferSource.osibsNotSetYet;
+            sp.in_buffer_next_strile = 0;
+            sp.in_buffer_strile_count = (uint)m_tif.m_dir.td_nstrips;
+            sp.in_buffer_file_togo = 0;
+            sp.in_buffer_togo = 0;
+
+            do
+            {
+                if (OJPEGReadBytePeek(out m) == 0)
+                    return 0;
+
+                if (m != 255)
+                    break;
+
+                OJPEGReadByteAdvance();
+                do
+                {
+                    if (OJPEGReadByte(out m) == 0)
+                        return 0;
+                } while (m == 255);
+
+                switch ((JPEG_MARKER)m)
+                {
+                    case JPEG_MARKER.SOI:
+                        /* this type of marker has no data, and should be skipped */
+                        break;
+                    case JPEG_MARKER.COM:
+                    case JPEG_MARKER.APP0:
+                    case JPEG_MARKER.APP1:
+                    case JPEG_MARKER.APP2:
+                    case JPEG_MARKER.APP3:
+                    case JPEG_MARKER.APP4:
+                    case JPEG_MARKER.APP5:
+                    case JPEG_MARKER.APP6:
+                    case JPEG_MARKER.APP7:
+                    case JPEG_MARKER.APP8:
+                    case JPEG_MARKER.APP9:
+                    case JPEG_MARKER.APP10:
+                    case JPEG_MARKER.APP11:
+                    case JPEG_MARKER.APP12:
+                    case JPEG_MARKER.APP13:
+                    case JPEG_MARKER.APP14:
+                    case JPEG_MARKER.APP15:
+                        /* this type of marker has data, but it has no use to us (and no place here) and should be skipped */
+                        if (OJPEGReadWord(out n) == 0)
+                            return (0);
+                        if (n < 2)
+                        {
+                            if (sp.subsamplingcorrect == 0)
+                                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JPEG data");
+                            return (0);
+                        }
+                        if (n > 2)
+                            OJPEGReadSkip((ushort)(n - 2));
+                        break;
+                    case JPEG_MARKER.DRI:
+                        if (OJPEGReadHeaderInfoSecStreamDri() == 0)
+                            return (0);
+                        break;
+                    case JPEG_MARKER.DQT:
+                        if (OJPEGReadHeaderInfoSecStreamDqt() == 0)
+                            return (0);
+                        break;
+                    case JPEG_MARKER.DHT:
+                        if (OJPEGReadHeaderInfoSecStreamDht() == 0)
+                            return (0);
+                        break;
+                    case JPEG_MARKER.SOF0:
+                    case JPEG_MARKER.SOF1:
+                    case JPEG_MARKER.SOF3:
+                        if (OJPEGReadHeaderInfoSecStreamSof(m) == 0)
+                            return (0);
+                        if (sp.subsamplingcorrect != 0)
+                            return (1);
+                        break;
+                    case JPEG_MARKER.SOS:
+                        if (sp.subsamplingcorrect != 0)
+                            return (1);
+                        Debug.Assert(sp.plane_sample_offset == 0);
+                        if (OJPEGReadHeaderInfoSecStreamSos() == 0)
+                            return (0);
+                        break;
+                    default:
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Unknown marker type {0} in JPEG data", m);
+                        return (0);
+                }
+            } while (m != (byte)JPEG_MARKER.SOS);
+
+            if (sp.subsamplingcorrect != 0)
+                return 1;
+
+            if (sp.sof_log == 0)
+            {
+                if (OJPEGReadHeaderInfoSecTablesQTable() == 0)
+                    return (0);
+
+                sp.sof_marker_id = (byte)JPEG_MARKER.SOF0;
+                for (o = 0; o < sp.samples_per_pixel; o++)
+                    sp.sof_c[o] = o;
+
+                sp.sof_hv[0] = (byte)((sp.subsampling_hor << 4) | sp.subsampling_ver);
+                for (o = 1; o < sp.samples_per_pixel; o++)
+                    sp.sof_hv[o] = 17;
+
+                sp.sof_x = sp.strile_width;
+                sp.sof_y = sp.strile_length_total;
+                sp.sof_log = 1;
+
+                if (OJPEGReadHeaderInfoSecTablesDcTable() == 0)
+                    return (0);
+
+                if (OJPEGReadHeaderInfoSecTablesAcTable() == 0)
+                    return (0);
+
+                for (o = 1; o < sp.samples_per_pixel; o++)
+                    sp.sos_cs[o] = o;
+            }
+
             return 1;
         }
 
-        //static int
-        //OJPEGReadHeaderInfoSecStreamDri(TIFF* tif)
-        //{
-        //    /* this could easilly cause trouble in some cases... but no such cases have occured sofar */
-        //    const string module = "OJPEGReadHeaderInfoSecStreamDri";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    ushort m;
-        //    if (OJPEGReadWord(sp,&m)==0)
-        //        return(0);
-        //    if (m!=4)
-        //    {
-        //        TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DRI marker in JPEG data");
-        //        return(0);
-        //    }
-        //    if (OJPEGReadWord(sp,&m)==0)
-        //        return(0);
-        //    sp.restart_interval=m;
-        //    return(1);
-        //}
-
-        //static int
-        //OJPEGReadHeaderInfoSecStreamDqt(TIFF* tif)
-        //{
-        //    /* this is a table marker, and it is to be saved as a whole for exact pushing on the jpeg stream later on */
-        //    const string module = "OJPEGReadHeaderInfoSecStreamDqt";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    ushort m;
-        //    uint na;
-        //    byte[] nb;
-        //    byte o;
-        //    if (OJPEGReadWord(sp,&m)==0)
-        //        return(0);
-        //    if (m<=2)
-        //    {
-        //        if (sp.subsamplingcorrect==0)
-        //            TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DQT marker in JPEG data");
-        //        return(0);
-        //    }
-        //    if (sp.subsamplingcorrect!=0)
-        //        OJPEGReadSkip(sp,m-2);
-        //    else
-        //    {
-        //        m-=2;
-        //        do
-        //        {
-        //            if (m<65)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DQT marker in JPEG data");
-        //                return(0);
-        //            }
-        //            na=sizeof(uint)+69;
-        //            nb=_TIFFmalloc(na);
-        //            if (nb==0)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
-        //                return(0);
-        //            }
-        //            *(uint*)nb=na;
-        //            nb[sizeof(uint)]=255;
-        //            nb[sizeof(uint)+1]=JPEG_MARKER_DQT;
-        //            nb[sizeof(uint)+2]=0;
-        //            nb[sizeof(uint)+3]=67;
-        //            if (OJPEGReadBlock(sp,65,&nb[sizeof(uint)+4])==0)
-        //                return(0);
-        //            o=nb[sizeof(uint)+4]&15;
-        //            if (3<o)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DQT marker in JPEG data");
-        //                return(0);
-        //            }
-        //            if (sp.qtable[o]!=0)
-        //                _TIFFfree(sp.qtable[o]);
-        //            sp.qtable[o]=nb;
-        //            m-=65;
-        //        } while(m>0);
-        //    }
-        //    return(1);
-        //}
-
-        //static int
-        //OJPEGReadHeaderInfoSecStreamDht(TIFF* tif)
-        //{
-        //    /* this is a table marker, and it is to be saved as a whole for exact pushing on the jpeg stream later on */
-        //    /* TODO: the following assumes there is only one table in this marker... but i'm not quite sure that assumption is guaranteed correct */
-        //    const string module = "OJPEGReadHeaderInfoSecStreamDht";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    ushort m;
-        //    uint na;
-        //    byte[] nb;
-        //    byte o;
-        //    if (OJPEGReadWord(sp,&m)==0)
-        //        return(0);
-        //    if (m<=2)
-        //    {
-        //        if (sp.subsamplingcorrect==0)
-        //            TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DHT marker in JPEG data");
-        //        return(0);
-        //    }
-        //    if (sp.subsamplingcorrect!=0)
-        //    {
-        //        OJPEGReadSkip(sp,m-2);
-        //    }
-        //    else
-        //    {
-        //        na=sizeof(uint)+2+m;
-        //        nb=_TIFFmalloc(na);
-        //        if (nb==0)
-        //        {
-        //            TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
-        //            return(0);
-        //        }
-        //        *(uint*)nb=na;
-        //        nb[sizeof(uint)]=255;
-        //        nb[sizeof(uint)+1]=JPEG_MARKER_DHT;
-        //        nb[sizeof(uint)+2]=(m>>8);
-        //        nb[sizeof(uint)+3]=(m&255);
-        //        if (OJPEGReadBlock(sp,m-2,&nb[sizeof(uint)+4])==0)
-        //            return(0);
-        //        o=nb[sizeof(uint)+4];
-        //        if ((o&240)==0)
-        //        {
-        //            if (3<o)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DHT marker in JPEG data");
-        //                return(0);
-        //            }
-        //            if (sp.dctable[o]!=0)
-        //                _TIFFfree(sp.dctable[o]);
-        //            sp.dctable[o]=nb;
-        //        }
-        //        else
-        //        {
-        //            if ((o&240)!=16)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DHT marker in JPEG data");
-        //                return(0);
-        //            }
-        //            o&=15;
-        //            if (3<o)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Corrupt DHT marker in JPEG data");
-        //                return(0);
-        //            }
-        //            if (sp.actable[o]!=0)
-        //                _TIFFfree(sp.actable[o]);
-        //            sp.actable[o]=nb;
-        //        }
-        //    }
-        //    return(1);
-        //}
-
-        //static int
-        //OJPEGReadHeaderInfoSecStreamSof(TIFF* tif, byte marker_id)
-        //{
-        //    /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
-        //    const string module = "OJPEGReadHeaderInfoSecStreamSof";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    ushort m;
-        //    ushort n;
-        //    byte o;
-        //    ushort p;
-        //    ushort q;
-        //    if (sp.sof_log!=0)
-        //    {
-        //        TIFFErrorExt(tif.tif_clientdata,module,"Corrupt JPEG data");
-        //        return(0);
-        //    }
-        //    if (sp.subsamplingcorrect==0)
-        //        sp.sof_marker_id=marker_id;
-        //    /* Lf: data length */
-        //    if (OJPEGReadWord(sp,&m)==0)
-        //        return(0);
-        //    if (m<11)
-        //    {
-        //        if (sp.subsamplingcorrect==0)
-        //            TIFFErrorExt(tif.tif_clientdata,module,"Corrupt SOF marker in JPEG data");
-        //        return(0);
-        //    }
-        //    m-=8;
-        //    if (m%3!=0)
-        //    {
-        //        if (sp.subsamplingcorrect==0)
-        //            TIFFErrorExt(tif.tif_clientdata,module,"Corrupt SOF marker in JPEG data");
-        //        return(0);
-        //    }
-        //    n=m/3;
-        //    if (sp.subsamplingcorrect==0)
-        //    {
-        //        if (n!=sp.samples_per_pixel)
-        //        {
-        //            TIFFErrorExt(tif.tif_clientdata,module,"JPEG compressed data indicates unexpected number of samples");
-        //            return(0);
-        //        }
-        //    }
-        //    /* P: Sample precision */
-        //    if (OJPEGReadByte(sp,&o)==0)
-        //        return(0);
-        //    if (o!=8)
-        //    {
-        //        if (sp.subsamplingcorrect==0)
-        //            TIFFErrorExt(tif.tif_clientdata,module,"JPEG compressed data indicates unexpected number of bits per sample");
-        //        return(0);
-        //    }
-        //    /* Y: Number of lines, X: Number of samples per line */
-        //    if (sp.subsamplingcorrect)
-        //        OJPEGReadSkip(sp,4);
-        //    else
-        //    {
-        //        /* TODO: probably best to also add check on allowed upper bound, especially x, may cause buffer overflow otherwise i think */
-        //        /* Y: Number of lines */
-        //        if (OJPEGReadWord(sp,&p)==0)
-        //            return(0);
-        //        if ((p<sp.image_length) && (p<sp.strile_length_total))
-        //        {
-        //            TIFFErrorExt(tif.tif_clientdata,module,"JPEG compressed data indicates unexpected height");
-        //            return(0);
-        //        }
-        //        sp.sof_y=p;
-        //        /* X: Number of samples per line */
-        //        if (OJPEGReadWord(sp,&p)==0)
-        //            return(0);
-        //        if ((p<sp.image_width) && (p<sp.strile_width))
-        //        {
-        //            TIFFErrorExt(tif.tif_clientdata,module,"JPEG compressed data indicates unexpected width");
-        //            return(0);
-        //        }
-        //        sp.sof_x=p;
-        //    }
-        //    /* Nf: Number of image components in frame */
-        //    if (OJPEGReadByte(sp,&o)==0)
-        //        return(0);
-        //    if (o!=n)
-        //    {
-        //        if (sp.subsamplingcorrect==0)
-        //            TIFFErrorExt(tif.tif_clientdata,module,"Corrupt SOF marker in JPEG data");
-        //        return(0);
-        //    }
-        //    /* per component stuff */
-        //    /* TODO: double-check that flow implies that n cannot be as big as to make us overflow sof_c, sof_hv and sof_tq arrays */
-        //    for (q=0; q<n; q++)
-        //    {
-        //        /* C: Component identifier */
-        //        if (OJPEGReadByte(sp,&o)==0)
-        //            return(0);
-        //        if (sp.subsamplingcorrect==0)
-        //            sp.sof_c[q]=o;
-        //        /* H: Horizontal sampling factor, and V: Vertical sampling factor */
-        //        if (OJPEGReadByte(sp,&o)==0)
-        //            return(0);
-        //        if (sp.subsamplingcorrect!=0)
-        //        {
-        //            if (q==0)
-        //            {
-        //                sp.subsampling_hor=(o>>4);
-        //                sp.subsampling_ver=(o&15);
-        //                if (((sp.subsampling_hor!=1) && (sp.subsampling_hor!=2) && (sp.subsampling_hor!=4)) ||
-        //                    ((sp.subsampling_ver!=1) && (sp.subsampling_ver!=2) && (sp.subsampling_ver!=4)))
-        //                    sp.subsampling_force_desubsampling_inside_decompression=1;
-        //            }
-        //            else
-        //            {
-        //                if (o!=17)
-        //                    sp.subsampling_force_desubsampling_inside_decompression=1;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            sp.sof_hv[q]=o;
-        //            if (sp.subsampling_force_desubsampling_inside_decompression==0)
-        //            {
-        //                if (q==0)
-        //                {
-        //                    if (o!=((sp.subsampling_hor<<4)|sp.subsampling_ver))
-        //                    {
-        //                        TIFFErrorExt(tif.tif_clientdata,module,"JPEG compressed data indicates unexpected subsampling values");
-        //                        return(0);
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    if (o!=17)
-        //                    {
-        //                        TIFFErrorExt(tif.tif_clientdata,module,"JPEG compressed data indicates unexpected subsampling values");
-        //                        return(0);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        /* Tq: Quantization table destination selector */
-        //        if (OJPEGReadByte(sp,&o)==0)
-        //            return(0);
-        //        if (sp.subsamplingcorrect==0)
-        //            sp.sof_tq[q]=o;
-        //    }
-        //    if (sp.subsamplingcorrect==0)
-        //        sp.sof_log=1;
-        //    return(1);
-        //}
-
-        private static int OJPEGReadHeaderInfoSecStreamSos(Tiff tif)
+        private int OJPEGReadHeaderInfoSecStreamDri()
         {
-            //    /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
-            //    const string module = "OJPEGReadHeaderInfoSecStreamSos";
-            //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-            //    ushort m;
-            //    byte n;
-            //    byte o;
-            //    assert(sp.subsamplingcorrect==0);
-            //    if (sp.sof_log==0)
-            //    {
-            //        TIFFErrorExt(tif.tif_clientdata,module,"Corrupt SOS marker in JPEG data");
-            //        return(0);
-            //    }
-            //    /* Ls */
-            //    if (OJPEGReadWord(sp,&m)==0)
-            //        return(0);
-            //    if (m!=6+sp.samples_per_pixel_per_plane*2)
-            //    {
-            //        TIFFErrorExt(tif.tif_clientdata,module,"Corrupt SOS marker in JPEG data");
-            //        return(0);
-            //    }
-            //    /* Ns */
-            //    if (OJPEGReadByte(sp,&n)==0)
-            //        return(0);
-            //    if (n!=sp.samples_per_pixel_per_plane)
-            //    {
-            //        TIFFErrorExt(tif.tif_clientdata,module,"Corrupt SOS marker in JPEG data");
-            //        return(0);
-            //    }
-            //    /* Cs, Td, and Ta */
-            //    for (o=0; o<sp.samples_per_pixel_per_plane; o++)
-            //    {
-            //        /* Cs */
-            //        if (OJPEGReadByte(sp,&n)==0)
-            //            return(0);
-            //        sp.sos_cs[sp.plane_sample_offset+o]=n;
-            //        /* Td and Ta */
-            //        if (OJPEGReadByte(sp,&n)==0)
-            //            return(0);
-            //        sp.sos_tda[sp.plane_sample_offset+o]=n;
-            //    }
-            //    /* skip Ss, Se, Ah, en Al -> no check, as per Tom Lane recommendation, as per LibJpeg source */
-            //    OJPEGReadSkip(sp,3);
+            // this could easilly cause trouble in some cases...
+            // but no such cases have occured so far
+            const string module = "OJPEGReadHeaderInfoSecStreamDri";
+            ushort m;
+            if (OJPEGReadWord(out m) == 0)
+                return 0;
+
+            if (m != 4)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DRI marker in JPEG data");
+                return (0);
+            }
+
+            if (OJPEGReadWord(out m) == 0)
+                return 0;
+
+            sp.restart_interval = m;
             return 1;
         }
 
-        //static int
-        //OJPEGReadHeaderInfoSecTablesQTable(TIFF* tif)
-        //{
-        //    const string module = "OJPEGReadHeaderInfoSecTablesQTable";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    byte m;
-        //    byte n;
-        //    uint oa;
-        //    byte[] ob;
-        //    uint p;
-        //    if (sp.qtable_offset[0]==0)
-        //    {
-        //        TIFFErrorExt(tif.tif_clientdata,module,"Missing JPEG tables");
-        //        return(0);
-        //    }
-        //    sp.in_buffer_file_pos_log=0;
-        //    for (m=0; m<sp.samples_per_pixel; m++)
-        //    {
-        //        if ((sp.qtable_offset[m]!=0) && ((m==0) || (sp.qtable_offset[m]!=sp.qtable_offset[m-1])))
-        //        {
-        //            for (n=0; n<m-1; n++)
-        //            {
-        //                if (sp.qtable_offset[m]==sp.qtable_offset[n])
-        //                {
-        //                    TIFFErrorExt(tif.tif_clientdata,module,"Corrupt JpegQTables tag value");
-        //                    return(0);
-        //                }
-        //            }
-        //            oa=sizeof(uint)+69;
-        //            ob=_TIFFmalloc(oa);
-        //            if (ob==0)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
-        //                return(0);
-        //            }
-        //            *(uint*)ob=oa;
-        //            ob[sizeof(uint)]=255;
-        //            ob[sizeof(uint)+1]=JPEG_MARKER_DQT;
-        //            ob[sizeof(uint)+2]=0;
-        //            ob[sizeof(uint)+3]=67;
-        //            ob[sizeof(uint)+4]=m;
-        //            TIFFSeekFile(tif,sp.qtable_offset[m],SEEK_SET);
-        //            p=TIFFReadFile(tif,&ob[sizeof(uint)+5],64);
-        //            if (p!=64)
-        //                return(0);
-        //            sp.qtable[m]=ob;
-        //            sp.sof_tq[m]=m;
-        //        }
-        //        else
-        //            sp.sof_tq[m]=sp.sof_tq[m-1];
-        //    }
-        //    return(1);
-        //}
+        private int OJPEGReadHeaderInfoSecStreamDqt()
+        {
+            // this is a table marker, and it is to be saved as a whole for
+            // exact pushing on the jpeg stream later on
+            const string module = "OJPEGReadHeaderInfoSecStreamDqt";
+            ushort m;
+            uint na;
+            byte[] nb;
+            byte o;
+            if (OJPEGReadWord(out m) == 0)
+                return (0);
 
-        //static int
-        //OJPEGReadHeaderInfoSecTablesDcTable(TIFF* tif)
-        //{
-        //    const string module = "OJPEGReadHeaderInfoSecTablesDcTable";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    byte m;
-        //    byte n;
-        //    byte o[16];
-        //    uint p;
-        //    uint q;
-        //    uint ra;
-        //    byte[] rb;
-        //    if (sp.dctable_offset[0]==0)
-        //    {
-        //        TIFFErrorExt(tif.tif_clientdata,module,"Missing JPEG tables");
-        //        return(0);
-        //    }
-        //    sp.in_buffer_file_pos_log=0;
-        //    for (m=0; m<sp.samples_per_pixel; m++)
-        //    {
-        //        if ((sp.dctable_offset[m]!=0) && ((m==0) || (sp.dctable_offset[m]!=sp.dctable_offset[m-1])))
-        //        {
-        //            for (n=0; n<m-1; n++)
-        //            {
-        //                if (sp.dctable_offset[m]==sp.dctable_offset[n])
-        //                {
-        //                    TIFFErrorExt(tif.tif_clientdata,module,"Corrupt JpegDcTables tag value");
-        //                    return(0);
-        //                }
-        //            }
-        //            TIFFSeekFile(tif,sp.dctable_offset[m],SEEK_SET);
-        //            p=TIFFReadFile(tif,o,16);
-        //            if (p!=16)
-        //                return(0);
-        //            q=0;
-        //            for (n=0; n<16; n++)
-        //                q+=o[n];
-        //            ra=sizeof(uint)+21+q;
-        //            rb=_TIFFmalloc(ra);
-        //            if (rb==0)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
-        //                return(0);
-        //            }
-        //            *(uint*)rb=ra;
-        //            rb[sizeof(uint)]=255;
-        //            rb[sizeof(uint)+1]=JPEG_MARKER_DHT;
-        //            rb[sizeof(uint)+2]=((19+q)>>8);
-        //            rb[sizeof(uint)+3]=((19+q)&255);
-        //            rb[sizeof(uint)+4]=m;
-        //            for (n=0; n<16; n++)
-        //                rb[sizeof(uint)+5+n]=o[n];
-        //            p=TIFFReadFile(tif,&(rb[sizeof(uint)+21]),q);
-        //            if (p!=q)
-        //                return(0);
-        //            sp.dctable[m]=rb;
-        //            sp.sos_tda[m]=(m<<4);
-        //        }
-        //        else
-        //            sp.sos_tda[m]=sp.sos_tda[m-1];
-        //    }
-        //    return(1);
-        //}
+            if (m <= 2)
+            {
+                if (sp.subsamplingcorrect == 0)
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
+                return (0);
+            }
 
-        //static int
-        //OJPEGReadHeaderInfoSecTablesAcTable(TIFF* tif)
-        //{
-        //    const string module = "OJPEGReadHeaderInfoSecTablesAcTable";
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    byte m;
-        //    byte n;
-        //    byte o[16];
-        //    uint p;
-        //    uint q;
-        //    uint ra;
-        //    byte[] rb;
-        //    if (sp.actable_offset[0]==0)
-        //    {
-        //        TIFFErrorExt(tif.tif_clientdata,module,"Missing JPEG tables");
-        //        return(0);
-        //    }
-        //    sp.in_buffer_file_pos_log=0;
-        //    for (m=0; m<sp.samples_per_pixel; m++)
-        //    {
-        //        if ((sp.actable_offset[m]!=0) && ((m==0) || (sp.actable_offset[m]!=sp.actable_offset[m-1])))
-        //        {
-        //            for (n=0; n<m-1; n++)
-        //            {
-        //                if (sp.actable_offset[m]==sp.actable_offset[n])
-        //                {
-        //                    TIFFErrorExt(tif.tif_clientdata,module,"Corrupt JpegAcTables tag value");
-        //                    return(0);
-        //                }
-        //            }
-        //            TIFFSeekFile(tif,sp.actable_offset[m],SEEK_SET);
-        //            p=TIFFReadFile(tif,o,16);
-        //            if (p!=16)
-        //                return(0);
-        //            q=0;
-        //            for (n=0; n<16; n++)
-        //                q+=o[n];
-        //            ra=sizeof(uint)+21+q;
-        //            rb=_TIFFmalloc(ra);
-        //            if (rb==0)
-        //            {
-        //                TIFFErrorExt(tif.tif_clientdata,module,"Out of memory");
-        //                return(0);
-        //            }
-        //            *(uint*)rb=ra;
-        //            rb[sizeof(uint)]=255;
-        //            rb[sizeof(uint)+1]=JPEG_MARKER_DHT;
-        //            rb[sizeof(uint)+2]=((19+q)>>8);
-        //            rb[sizeof(uint)+3]=((19+q)&255);
-        //            rb[sizeof(uint)+4]=(16|m);
-        //            for (n=0; n<16; n++)
-        //                rb[sizeof(uint)+5+n]=o[n];
-        //            p=TIFFReadFile(tif,&(rb[sizeof(uint)+21]),q);
-        //            if (p!=q)
-        //                return(0);
-        //            sp.actable[m]=rb;
-        //            sp.sos_tda[m]=(sp.sos_tda[m]|m);
-        //        }
-        //        else
-        //            sp.sos_tda[m]=(sp.sos_tda[m]|(sp.sos_tda[m-1]&15));
-        //    }
-        //    return(1);
-        //}
+            if (sp.subsamplingcorrect != 0)
+            {
+                OJPEGReadSkip((ushort)(m - 2));
+            }
+            else
+            {
+                m -= 2;
+                do
+                {
+                    if (m < 65)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
+                        return (0);
+                    }
+
+                    na = sizeof(uint) + 69;
+                    nb = new byte[na];
+                    Buffer.BlockCopy(BitConverter.GetBytes(na), 0, nb, 0, sizeof(uint));
+                    nb[sizeof(uint)] = 255;
+                    nb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DQT;
+                    nb[sizeof(uint) + 2] = 0;
+                    nb[sizeof(uint) + 3] = 67;
+                    if (OJPEGReadBlock(65, nb, sizeof(uint) + 4) == 0)
+                        return (0);
+
+                    o = (byte)(nb[sizeof(uint) + 4] & 15);
+                    if (3 < o)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
+                        return (0);
+                    }
+
+                    sp.qtable[o] = nb;
+                    m -= 65;
+                } while (m > 0);
+            }
+            return (1);
+        }
+
+        private int OJPEGReadHeaderInfoSecStreamDht()
+        {
+            // this is a table marker, and it is to be saved as a whole for
+            // exact pushing on the jpeg stream later on
+            // TODO: the following assumes there is only one table in
+            // this marker... but i'm not quite sure that assumption is
+            // guaranteed correct
+            const string module = "OJPEGReadHeaderInfoSecStreamDht";
+            ushort m;
+            uint na;
+            byte[] nb;
+            byte o;
+            if (OJPEGReadWord(out m) == 0)
+                return (0);
+            if (m <= 2)
+            {
+                if (sp.subsamplingcorrect == 0)
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
+                return (0);
+            }
+            if (sp.subsamplingcorrect != 0)
+            {
+                OJPEGReadSkip((ushort)(m - 2));
+            }
+            else
+            {
+                na = (uint)(sizeof(uint) + 2 + m);
+                nb = new byte[na];
+                Buffer.BlockCopy(BitConverter.GetBytes(na), 0, nb, 0, sizeof(uint));
+                nb[sizeof(uint)] = 255;
+                nb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DHT;
+                nb[sizeof(uint) + 2] = (byte)(m >> 8);
+                nb[sizeof(uint) + 3] = (byte)(m & 255);
+                if (OJPEGReadBlock((ushort)(m - 2), nb, sizeof(uint) + 4) == 0)
+                    return (0);
+                o = nb[sizeof(uint) + 4];
+                if ((o & 240) == 0)
+                {
+                    if (3 < o)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
+                        return (0);
+                    }
+                    sp.dctable[o] = nb;
+                }
+                else
+                {
+                    if ((o & 240) != 16)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
+                        return (0);
+                    }
+                    o &= 15;
+                    if (3 < o)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
+                        return (0);
+                    }
+                    sp.actable[o] = nb;
+                }
+            }
+            return (1);
+        }
+
+        private int OJPEGReadHeaderInfoSecStreamSof(byte marker_id)
+        {
+            /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
+            const string module = "OJPEGReadHeaderInfoSecStreamSof";
+            ushort m;
+            ushort n;
+            byte o;
+            ushort p;
+            ushort q;
+            if (sp.sof_log != 0)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JPEG data");
+                return (0);
+            }
+            if (sp.subsamplingcorrect == 0)
+                sp.sof_marker_id = marker_id;
+            /* Lf: data length */
+            if (OJPEGReadWord(out m) == 0)
+                return (0);
+            if (m < 11)
+            {
+                if (sp.subsamplingcorrect == 0)
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
+                return (0);
+            }
+            m -= 8;
+            if (m % 3 != 0)
+            {
+                if (sp.subsamplingcorrect == 0)
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
+                return (0);
+            }
+            n = (ushort)(m / 3);
+            if (sp.subsamplingcorrect == 0)
+            {
+                if (n != sp.samples_per_pixel)
+                {
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected number of samples");
+                    return (0);
+                }
+            }
+            /* P: Sample precision */
+            if (OJPEGReadByte(out o) == 0)
+                return (0);
+            if (o != 8)
+            {
+                if (sp.subsamplingcorrect == 0)
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected number of bits per sample");
+                return (0);
+            }
+            /* Y: Number of lines, X: Number of samples per line */
+            if (sp.subsamplingcorrect != 0)
+                OJPEGReadSkip(4);
+            else
+            {
+                /* TODO: probably best to also add check on allowed upper bound, especially x, may cause buffer overflow otherwise i think */
+                /* Y: Number of lines */
+                if (OJPEGReadWord(out p) == 0)
+                    return (0);
+                if ((p < sp.image_length) && (p < sp.strile_length_total))
+                {
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected height");
+                    return (0);
+                }
+                sp.sof_y = p;
+                /* X: Number of samples per line */
+                if (OJPEGReadWord(out p) == 0)
+                    return (0);
+                if ((p < sp.image_width) && (p < sp.strile_width))
+                {
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected width");
+                    return (0);
+                }
+                sp.sof_x = p;
+            }
+            /* Nf: Number of image components in frame */
+            if (OJPEGReadByte(out o) == 0)
+                return (0);
+            if (o != n)
+            {
+                if (sp.subsamplingcorrect == 0)
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
+                return (0);
+            }
+            /* per component stuff */
+            /* TODO: double-check that flow implies that n cannot be as big as to make us overflow sof_c, sof_hv and sof_tq arrays */
+            for (q = 0; q < n; q++)
+            {
+                /* C: Component identifier */
+                if (OJPEGReadByte(out o) == 0)
+                    return (0);
+                if (sp.subsamplingcorrect == 0)
+                    sp.sof_c[q] = o;
+                /* H: Horizontal sampling factor, and V: Vertical sampling factor */
+                if (OJPEGReadByte(out o) == 0)
+                    return (0);
+                if (sp.subsamplingcorrect != 0)
+                {
+                    if (q == 0)
+                    {
+                        sp.subsampling_hor = (byte)(o >> 4);
+                        sp.subsampling_ver = (byte)(o & 15);
+                        if (((sp.subsampling_hor != 1) && (sp.subsampling_hor != 2) && (sp.subsampling_hor != 4)) ||
+                            ((sp.subsampling_ver != 1) && (sp.subsampling_ver != 2) && (sp.subsampling_ver != 4)))
+                            sp.subsampling_force_desubsampling_inside_decompression = 1;
+                    }
+                    else
+                    {
+                        if (o != 17)
+                            sp.subsampling_force_desubsampling_inside_decompression = 1;
+                    }
+                }
+                else
+                {
+                    sp.sof_hv[q] = o;
+                    if (sp.subsampling_force_desubsampling_inside_decompression == 0)
+                    {
+                        if (q == 0)
+                        {
+                            if (o != ((sp.subsampling_hor << 4) | sp.subsampling_ver))
+                            {
+                                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected subsampling values");
+                                return (0);
+                            }
+                        }
+                        else
+                        {
+                            if (o != 17)
+                            {
+                                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected subsampling values");
+                                return (0);
+                            }
+                        }
+                    }
+                }
+                /* Tq: Quantization table destination selector */
+                if (OJPEGReadByte(out o) == 0)
+                    return (0);
+                if (sp.subsamplingcorrect == 0)
+                    sp.sof_tq[q] = o;
+            }
+            if (sp.subsamplingcorrect == 0)
+                sp.sof_log = 1;
+            return (1);
+        }
+
+        private int OJPEGReadHeaderInfoSecStreamSos()
+        {
+            /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
+            const string module = "OJPEGReadHeaderInfoSecStreamSos";
+            ushort m;
+            byte n;
+            byte o;
+            Debug.Assert(sp.subsamplingcorrect == 0);
+            if (sp.sof_log == 0)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOS marker in JPEG data");
+                return (0);
+            }
+            /* Ls */
+            if (OJPEGReadWord(out m) == 0)
+                return (0);
+            if (m != 6 + sp.samples_per_pixel_per_plane * 2)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOS marker in JPEG data");
+                return (0);
+            }
+            /* Ns */
+            if (OJPEGReadByte(out n) == 0)
+                return (0);
+            if (n != sp.samples_per_pixel_per_plane)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOS marker in JPEG data");
+                return (0);
+            }
+            /* Cs, Td, and Ta */
+            for (o = 0; o < sp.samples_per_pixel_per_plane; o++)
+            {
+                /* Cs */
+                if (OJPEGReadByte(out n) == 0)
+                    return (0);
+                sp.sos_cs[sp.plane_sample_offset + o] = n;
+                /* Td and Ta */
+                if (OJPEGReadByte(out n) == 0)
+                    return (0);
+                sp.sos_tda[sp.plane_sample_offset + o] = n;
+            }
+            /* skip Ss, Se, Ah, en Al -> no check, as per Tom Lane recommendation, as per LibJpeg source */
+            OJPEGReadSkip(3);
+            return 1;
+        }
+
+        private int OJPEGReadHeaderInfoSecTablesQTable()
+        {
+            const string module = "OJPEGReadHeaderInfoSecTablesQTable";
+            byte m;
+            byte n;
+            uint oa;
+            byte[] ob;
+            uint p;
+            if (sp.qtable_offset[0] == 0)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Missing JPEG tables");
+                return (0);
+            }
+            sp.in_buffer_file_pos_log = 0;
+            for (m = 0; m < sp.samples_per_pixel; m++)
+            {
+                if ((sp.qtable_offset[m] != 0) && ((m == 0) || (sp.qtable_offset[m] != sp.qtable_offset[m - 1])))
+                {
+                    for (n = 0; n < m - 1; n++)
+                    {
+                        if (sp.qtable_offset[m] == sp.qtable_offset[n])
+                        {
+                            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JpegQTables tag value");
+                            return (0);
+                        }
+                    }
+                    oa = sizeof(uint) + 69;
+                    ob = new byte[oa];
+                    Buffer.BlockCopy(BitConverter.GetBytes(oa), 0, ob, 0, sizeof(uint));
+                    ob[sizeof(uint)] = 255;
+                    ob[sizeof(uint) + 1] = (byte)JPEG_MARKER.DQT;
+                    ob[sizeof(uint) + 2] = 0;
+                    ob[sizeof(uint) + 3] = 67;
+                    ob[sizeof(uint) + 4] = m;
+                    TiffStream stream = m_tif.GetStream();
+                    stream.Seek(m_tif.m_clientdata, sp.qtable_offset[m], SeekOrigin.Begin);
+                    p = (uint)stream.Read(m_tif.m_clientdata, ob, sizeof(uint) + 5, 64);
+                    if (p != 64)
+                        return (0);
+                    sp.qtable[m] = ob;
+                    sp.sof_tq[m] = m;
+                }
+                else
+                    sp.sof_tq[m] = sp.sof_tq[m - 1];
+            }
+            return (1);
+        }
+
+        private int OJPEGReadHeaderInfoSecTablesDcTable()
+        {
+            const string module = "OJPEGReadHeaderInfoSecTablesDcTable";
+            byte m;
+            byte n;
+            byte[] o = new byte[16];
+            uint p;
+            uint q;
+            uint ra;
+            byte[] rb;
+            if (sp.dctable_offset[0] == 0)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Missing JPEG tables");
+                return (0);
+            }
+            sp.in_buffer_file_pos_log = 0;
+            for (m = 0; m < sp.samples_per_pixel; m++)
+            {
+                if ((sp.dctable_offset[m] != 0) && ((m == 0) || (sp.dctable_offset[m] != sp.dctable_offset[m - 1])))
+                {
+                    for (n = 0; n < m - 1; n++)
+                    {
+                        if (sp.dctable_offset[m] == sp.dctable_offset[n])
+                        {
+                            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JpegDcTables tag value");
+                            return (0);
+                        }
+                    }
+
+                    TiffStream stream = m_tif.GetStream();
+                    stream.Seek(m_tif.m_clientdata, sp.dctable_offset[m], SeekOrigin.Begin);
+                    p = (uint)stream.Read(m_tif.m_clientdata, o, 0, 16);
+                    if (p != 16)
+                        return (0);
+                    q = 0;
+                    for (n = 0; n < 16; n++)
+                        q += o[n];
+                    ra = sizeof(uint) + 21 + q;
+                    rb = new byte[ra];
+                    Buffer.BlockCopy(BitConverter.GetBytes(ra), 0, rb, 0, sizeof(uint));
+                    rb[sizeof(uint)] = 255;
+                    rb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DHT;
+                    rb[sizeof(uint) + 2] = (byte)((19 + q) >> 8);
+                    rb[sizeof(uint) + 3] = (byte)((19 + q) & 255);
+                    rb[sizeof(uint) + 4] = m;
+                    for (n = 0; n < 16; n++)
+                        rb[sizeof(uint) + 5 + n] = o[n];
+
+                    p = (uint)stream.Read(m_tif.m_clientdata, rb, sizeof(uint) + 21, (int)q);
+                    if (p != q)
+                        return (0);
+                    sp.dctable[m] = rb;
+                    sp.sos_tda[m] = (byte)(m << 4);
+                }
+                else
+                    sp.sos_tda[m] = sp.sos_tda[m - 1];
+            }
+            return (1);
+        }
+
+        private int OJPEGReadHeaderInfoSecTablesAcTable()
+        {
+            const string module = "OJPEGReadHeaderInfoSecTablesAcTable";
+            byte m;
+            byte n;
+            byte[] o = new byte[16];
+            uint p;
+            uint q;
+            uint ra;
+            byte[] rb;
+            if (sp.actable_offset[0] == 0)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Missing JPEG tables");
+                return (0);
+            }
+            sp.in_buffer_file_pos_log = 0;
+            for (m = 0; m < sp.samples_per_pixel; m++)
+            {
+                if ((sp.actable_offset[m] != 0) && ((m == 0) || (sp.actable_offset[m] != sp.actable_offset[m - 1])))
+                {
+                    for (n = 0; n < m - 1; n++)
+                    {
+                        if (sp.actable_offset[m] == sp.actable_offset[n])
+                        {
+                            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JpegAcTables tag value");
+                            return (0);
+                        }
+                    }
+                    TiffStream stream = m_tif.GetStream();
+                    stream.Seek(m_tif.m_clientdata, sp.actable_offset[m], SeekOrigin.Begin);
+                    p = (uint)stream.Read(m_tif.m_clientdata, o, 0, 16);
+                    if (p != 16)
+                        return (0);
+                    q = 0;
+                    for (n = 0; n < 16; n++)
+                        q += o[n];
+                    ra = sizeof(uint) + 21 + q;
+                    rb = new byte[ra];
+                    Buffer.BlockCopy(BitConverter.GetBytes(ra), 0, rb, 0, sizeof(uint));
+                    rb[sizeof(uint)] = 255;
+                    rb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DHT;
+                    rb[sizeof(uint) + 2] = (byte)((19 + q) >> 8);
+                    rb[sizeof(uint) + 3] = (byte)((19 + q) & 255);
+                    rb[sizeof(uint) + 4] = (byte)(16 | m);
+                    for (n = 0; n < 16; n++)
+                        rb[sizeof(uint) + 5 + n] = o[n];
+
+                    p = (uint)stream.Read(m_tif.m_clientdata, rb, sizeof(uint) + 21, (int)q);
+                    if (p != q)
+                        return (0);
+                    sp.actable[m] = rb;
+                    sp.sos_tda[m] = (byte)(sp.sos_tda[m] | m);
+                }
+                else
+                    sp.sos_tda[m] = (byte)(sp.sos_tda[m] | (sp.sos_tda[m - 1] & 15));
+            }
+            return (1);
+        }
 
         private static int OJPEGReadBufferFill(OJPEGState sp)
         {
@@ -1760,98 +1750,101 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return 1;
         }
 
-        //static int
-        //OJPEGReadBytePeek(OJPEGState* sp, byte[] byte)
-        //{
-        //    if (sp.in_buffer_togo==0)
-        //    {
-        //        if (OJPEGReadBufferFill(sp)==0)
-        //            return(0);
-        //        assert(sp.in_buffer_togo>0);
-        //    }
-        //    *byte=*(sp.in_buffer_cur);
-        //    return(1);
-        //}
+        public int OJPEGReadBytePeek(out byte b)
+        {
+            if (sp.in_buffer_togo == 0)
+            {
+                if (OJPEGReadBufferFill(sp) == 0)
+                {
+                    b = 0;
+                    return 0;
+                }
 
-        //static void
-        //OJPEGReadByteAdvance(OJPEGState* sp)
-        //{
-        //    assert(sp.in_buffer_togo>0);
-        //    sp.in_buffer_cur++;
-        //    sp.in_buffer_togo--;
-        //}
+                Debug.Assert(sp.in_buffer_togo > 0);
+            }
 
-        //static int
-        //OJPEGReadWord(OJPEGState* sp, ushort* word)
-        //{
-        //    byte m;
-        //    if (OJPEGReadByte(sp,&m)==0)
-        //        return(0);
-        //    *word=(m<<8);
-        //    if (OJPEGReadByte(sp,&m)==0)
-        //        return(0);
-        //    *word|=m;
-        //    return(1);
-        //}
+            b = sp.in_buffer[sp.in_buffer_cur];
+            return 1;
+        }
 
-        //static int
-        //OJPEGReadBlock(OJPEGState* sp, ushort len, void* mem)
-        //{
-        //    ushort mlen;
-        //    byte[] mmem;
-        //    ushort n;
-        //    assert(len>0);
-        //    mlen=len;
-        //    mmem=mem;
-        //    do
-        //    {
-        //        if (sp.in_buffer_togo==0)
-        //        {
-        //            if (OJPEGReadBufferFill(sp)==0)
-        //                return(0);
-        //            assert(sp.in_buffer_togo>0);
-        //        }
-        //        n=mlen;
-        //        if (n>sp.in_buffer_togo)
-        //            n=sp.in_buffer_togo;
-        //        _TIFFmemcpy(mmem,sp.in_buffer_cur,n);
-        //        sp.in_buffer_cur+=n;
-        //        sp.in_buffer_togo-=n;
-        //        mlen-=n;
-        //        mmem+=n;
-        //    } while(mlen>0);
-        //    return(1);
-        //}
+        private void OJPEGReadByteAdvance()
+        {
+            Debug.Assert(sp.in_buffer_togo > 0);
+            sp.in_buffer_cur++;
+            sp.in_buffer_togo--;
+        }
 
-        //static void
-        //OJPEGReadSkip(OJPEGState* sp, ushort len)
-        //{
-        //    ushort m;
-        //    ushort n;
-        //    m=len;
-        //    n=m;
-        //    if (n>sp.in_buffer_togo)
-        //        n=sp.in_buffer_togo;
-        //    sp.in_buffer_cur+=n;
-        //    sp.in_buffer_togo-=n;
-        //    m-=n;
-        //    if (m>0)
-        //    {
-        //        assert(sp.in_buffer_togo==0);
-        //        n=m;
-        //        if (n>sp.in_buffer_file_togo)
-        //            n=sp.in_buffer_file_togo;
-        //        sp.in_buffer_file_pos+=n;
-        //        sp.in_buffer_file_togo-=n;
-        //        sp.in_buffer_file_pos_log=0;
-        //        /* we don't skip past jpeginterchangeformat/strile block...
-        //         * if that is asked from us, we're dealing with totally bazurk
-        //         * data anyway, and we've not seen this happening on any
-        //         * testfile, so we might as well likely cause some other
-        //         * meaningless error to be passed at some later time
-        //         */
-        //    }
-        //}
+        private int OJPEGReadWord(out ushort word)
+        {
+            word = 0;
+            byte m;
+            if (OJPEGReadByte(out m) == 0)
+                return 0;
+
+            word = (ushort)(m << 8);
+            if (OJPEGReadByte(out m) == 0)
+                return 0;
+
+            word |= m;
+            return 1;
+        }
+
+        public int OJPEGReadBlock(ushort len, byte[] mem, int offset)
+        {
+            ushort mlen;
+            ushort n;
+            Debug.Assert(len > 0);
+            mlen = len;
+            int mmem = offset;
+            do
+            {
+                if (sp.in_buffer_togo == 0)
+                {
+                    if (OJPEGReadBufferFill(sp) == 0)
+                        return (0);
+                    Debug.Assert(sp.in_buffer_togo > 0);
+                }
+                n = mlen;
+                if (n > sp.in_buffer_togo)
+                    n = sp.in_buffer_togo;
+
+                Buffer.BlockCopy(sp.in_buffer, sp.in_buffer_cur, mem, mmem, n);
+                sp.in_buffer_cur += n;
+                sp.in_buffer_togo -= n;
+                mlen -= n;
+                mmem += n;
+            } while (mlen > 0);
+            return (1);
+        }
+
+        private void OJPEGReadSkip(ushort len)
+        {
+            ushort m;
+            ushort n;
+            m = len;
+            n = m;
+            if (n > sp.in_buffer_togo)
+                n = sp.in_buffer_togo;
+            sp.in_buffer_cur += n;
+            sp.in_buffer_togo -= n;
+            m -= n;
+            if (m > 0)
+            {
+                Debug.Assert(sp.in_buffer_togo == 0);
+                n = m;
+                if (n > sp.in_buffer_file_togo)
+                    n = (ushort)sp.in_buffer_file_togo;
+                sp.in_buffer_file_pos += n;
+                sp.in_buffer_file_togo -= n;
+                sp.in_buffer_file_pos_log = 0;
+                /* we don't skip past jpeginterchangeformat/strile block...
+                 * if that is asked from us, we're dealing with totally bazurk
+                 * data anyway, and we've not seen this happening on any
+                 * testfile, so we might as well likely cause some other
+                 * meaningless error to be passed at some later time
+                 */
+            }
+        }
 
         //static int
         //OJPEGWriteStream(TIFF* tif, void** mem, uint* len)

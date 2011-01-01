@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //#endif
         //TIFFVGetMethod vgetparent;
         //TIFFVSetMethod vsetparent;
-        //uint file_size;
+        public uint file_size;
         public uint image_width;
         public uint image_length;
         public uint strile_width;
@@ -45,8 +45,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public byte samples_per_pixel;
         public byte plane_sample_offset;
         public byte samples_per_pixel_per_plane;
-        //uint jpeg_interchange_format;
-        //uint jpeg_interchange_format_length;
+        public uint jpeg_interchange_format;
+        public uint jpeg_interchange_format_length;
         public byte jpeg_proc;
         public byte subsamplingcorrect;
         public byte subsamplingcorrect_done;
@@ -57,23 +57,23 @@ namespace BitMiracle.LibTiff.Classic.Internal
         //byte qtable_offset_count;
         //byte dctable_offset_count;
         //byte actable_offset_count;
-        //uint qtable_offset[3];
-        //uint dctable_offset[3];
-        //uint actable_offset[3];
-        //byte[] qtable[4];
-        //byte[] dctable[4];
-        //byte[] actable[4];
+        public uint[] qtable_offset = new uint[3];
+        public uint[] dctable_offset = new uint[3];
+        public uint[] actable_offset = new uint[3];
+        public byte[][] qtable = new byte[4][];
+        public byte[][] dctable = new byte[4][];
+        public byte[][] actable = new byte[4][];
         public ushort restart_interval;
         public byte restart_index;
-        //byte sof_log;
-        //byte sof_marker_id;
-        //uint sof_x;
-        //uint sof_y;
-        //byte sof_c[3];
-        //byte sof_hv[3];
-        //byte sof_tq[3];
-        //byte sos_cs[3];
-        //byte sos_tda[3];
+        public byte sof_log;
+        public byte sof_marker_id;
+        public uint sof_x;
+        public uint sof_y;
+        public byte[] sof_c = new byte[3];
+        public byte[] sof_hv = new byte[3];
+        public byte[] sof_tq = new byte[3];
+        public byte[] sos_cs = new byte[3];
+        public byte[] sos_tda = new byte[3];
         public SosEnd[] sos_end = new SosEnd[3];
         public byte readheader_done;
         public byte writeheader_done;
@@ -104,7 +104,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public uint lines_per_strile; /* and lines_per_strile means subsampling_ver desubsampled rows     */
         public OJPEGStateInBufferSource in_buffer_source;
         public uint in_buffer_next_strile;
-        //uint in_buffer_strile_count;
+        public uint in_buffer_strile_count;
         public uint in_buffer_file_pos;
         public byte in_buffer_file_pos_log;
         public uint in_buffer_file_togo;
