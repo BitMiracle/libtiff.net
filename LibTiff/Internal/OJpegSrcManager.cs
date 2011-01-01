@@ -20,11 +20,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// </summary>
         public override void init_source()
         {
-            //static void
-            //OJPEGLibjpegJpegSourceMgrInitSource(jpeg_decompress_struct* cinfo)
-            //{
-            //    (void)cinfo;
-            //}
         }
 
         /// <summary>
@@ -35,22 +30,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// </returns>
         public override bool fill_input_buffer()
         {
-            //static boolean
-            //OJPEGLibjpegJpegSourceMgrFillInputBuffer(jpeg_decompress_struct* cinfo)
-            //{
-            //    TIFF* tif=(TIFF*)cinfo.client_data;
-            //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-            //    void* mem=0;
-            //    uint len=0;
-            //    if (OJPEGWriteStream(tif,&mem,&len)==0)
-            //    {
-            //        TIFFErrorExt(tif.tif_clientdata,"LibJpeg","Premature end of JPEG data");
-            //        jpeg_encap_unwind(tif);
-            //    }
-            //    sp.libjpeg_jpeg_source_mgr.bytes_in_buffer=len;
-            //    sp.libjpeg_jpeg_source_mgr.next_input_byte=mem;
-            //    return(1);
-            //}
+            Tiff tif = m_sp.GetTiff();
+            OJPEGState sp = m_sp.sp;
+            byte[] mem = null;
+            uint len = 0;
+            if (m_sp.OJPEGWriteStream(out mem, out len) == 0)
+                Tiff.ErrorExt(tif, tif.m_clientdata, "LibJpeg", "Premature end of JPEG data");
+
+            initInternalBuffer(mem, (int)len);
             return true;
         }
 
@@ -67,14 +54,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// buffer is the application writer's problem.</remarks>
         public override void skip_input_data(int num_bytes)
         {
-            //static void
-            //OJPEGLibjpegJpegSourceMgrSkipInputData(jpeg_decompress_struct* cinfo, long num_bytes)
-            //{
-            //    TIFF* tif=(TIFF*)cinfo.client_data;
-            //    (void)num_bytes;
-            //    TIFFErrorExt(tif.tif_clientdata,"LibJpeg","Unexpected error");
-            //    jpeg_encap_unwind(tif);
-            //}
+            Tiff tif = m_sp.GetTiff();
+            Tiff.ErrorExt(tif, tif.m_clientdata, "LibJpeg", "Unexpected error");
         }
 
         /// <summary>
@@ -128,15 +109,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// any other marker would have to be bogus data in that case.</remarks>
         public override bool resync_to_restart(jpeg_decompress_struct cinfo, int desired)
         {
-            //static boolean
-            //OJPEGLibjpegJpegSourceMgrResyncToRestart(jpeg_decompress_struct* cinfo, int desired)
-            //{
-            //    TIFF* tif=(TIFF*)cinfo.client_data;
-            //    (void)desired;
-            //    TIFFErrorExt(tif.tif_clientdata,"LibJpeg","Unexpected error");
-            //    jpeg_encap_unwind(tif);
-            //    return(0);
-            //}
+            Tiff tif = m_sp.GetTiff();
+            Tiff.ErrorExt(tif, tif.m_clientdata, "LibJpeg", "Unexpected error");
             return false;
         }
 
@@ -149,11 +123,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// for error exit.</remarks>
         public override void term_source()
         {
-            //static void
-            //OJPEGLibjpegJpegSourceMgrTermSource(jpeg_decompress_struct* cinfo)
-            //{
-            //    (void)cinfo;
-            //}
         }
     }
 }

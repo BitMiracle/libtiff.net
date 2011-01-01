@@ -172,7 +172,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private TiffTagMethods m_tagMethods;
         private TiffTagMethods m_parentTagMethods;
 
-        private OJPEGState sp;
+        internal OJPEGState sp;
 
         public OJpegCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
@@ -239,6 +239,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 return true;
             }
+        }
+
+        public Tiff GetTiff()
+        {
+            return m_tif;
         }
 
         /// <summary>
@@ -554,30 +559,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
             //    {
             //        tif.tif_tagmethods.vgetfield=sp.vgetparent;
             //        tif.tif_tagmethods.vsetfield=sp.vsetparent;
-            //        if (sp.qtable[0]!=0)
-            //            _TIFFfree(sp.qtable[0]);
-            //        if (sp.qtable[1]!=0)
-            //            _TIFFfree(sp.qtable[1]);
-            //        if (sp.qtable[2]!=0)
-            //            _TIFFfree(sp.qtable[2]);
-            //        if (sp.qtable[3]!=0)
-            //            _TIFFfree(sp.qtable[3]);
-            //        if (sp.dctable[0]!=0)
-            //            _TIFFfree(sp.dctable[0]);
-            //        if (sp.dctable[1]!=0)
-            //            _TIFFfree(sp.dctable[1]);
-            //        if (sp.dctable[2]!=0)
-            //            _TIFFfree(sp.dctable[2]);
-            //        if (sp.dctable[3]!=0)
-            //            _TIFFfree(sp.dctable[3]);
-            //        if (sp.actable[0]!=0)
-            //            _TIFFfree(sp.actable[0]);
-            //        if (sp.actable[1]!=0)
-            //            _TIFFfree(sp.actable[1]);
-            //        if (sp.actable[2]!=0)
-            //            _TIFFfree(sp.actable[2]);
-            //        if (sp.actable[3]!=0)
-            //            _TIFFfree(sp.actable[3]);
             //        if (sp.libjpeg_session_active!=0)
             //            OJPEGLibjpegSessionAbort(tif);
             //        if (sp.subsampling_convert_ycbcrbuf!=0)
@@ -1206,17 +1187,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return (0);
                     }
 
-                    na = sizeof(uint) + 69;
+                    na = 69;
                     nb = new byte[na];
-                    Buffer.BlockCopy(BitConverter.GetBytes(na), 0, nb, 0, sizeof(uint));
-                    nb[sizeof(uint)] = 255;
-                    nb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DQT;
-                    nb[sizeof(uint) + 2] = 0;
-                    nb[sizeof(uint) + 3] = 67;
-                    if (OJPEGReadBlock(65, nb, sizeof(uint) + 4) == 0)
+                    nb[0] = 255;
+                    nb[1] = (byte)JPEG_MARKER.DQT;
+                    nb[2] = 0;
+                    nb[3] = 67;
+                    if (OJPEGReadBlock(65, nb, 4) == 0)
                         return (0);
 
-                    o = (byte)(nb[sizeof(uint) + 4] & 15);
+                    o = (byte)(nb[4] & 15);
                     if (3 < o)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
@@ -1256,14 +1236,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
             else
             {
-                na = (uint)(sizeof(uint) + 2 + m);
+                na = (uint)(2 + m);
                 nb = new byte[na];
-                Buffer.BlockCopy(BitConverter.GetBytes(na), 0, nb, 0, sizeof(uint));
-                nb[sizeof(uint)] = 255;
-                nb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DHT;
-                nb[sizeof(uint) + 2] = (byte)(m >> 8);
-                nb[sizeof(uint) + 3] = (byte)(m & 255);
-                if (OJPEGReadBlock((ushort)(m - 2), nb, sizeof(uint) + 4) == 0)
+                nb[0] = 255;
+                nb[1] = (byte)JPEG_MARKER.DHT;
+                nb[2] = (byte)(m >> 8);
+                nb[3] = (byte)(m & 255);
+                if (OJPEGReadBlock((ushort)(m - 2), nb, 4) == 0)
                     return (0);
                 o = nb[sizeof(uint) + 4];
                 if ((o & 240) == 0)
@@ -1512,17 +1491,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             return (0);
                         }
                     }
-                    oa = sizeof(uint) + 69;
+                    oa = 69;
                     ob = new byte[oa];
-                    Buffer.BlockCopy(BitConverter.GetBytes(oa), 0, ob, 0, sizeof(uint));
-                    ob[sizeof(uint)] = 255;
-                    ob[sizeof(uint) + 1] = (byte)JPEG_MARKER.DQT;
-                    ob[sizeof(uint) + 2] = 0;
-                    ob[sizeof(uint) + 3] = 67;
-                    ob[sizeof(uint) + 4] = m;
+                    ob[0] = 255;
+                    ob[1] = (byte)JPEG_MARKER.DQT;
+                    ob[2] = 0;
+                    ob[3] = 67;
+                    ob[4] = m;
                     TiffStream stream = m_tif.GetStream();
                     stream.Seek(m_tif.m_clientdata, sp.qtable_offset[m], SeekOrigin.Begin);
-                    p = (uint)stream.Read(m_tif.m_clientdata, ob, sizeof(uint) + 5, 64);
+                    p = (uint)stream.Read(m_tif.m_clientdata, ob, 5, 64);
                     if (p != 64)
                         return (0);
                     sp.qtable[m] = ob;
@@ -1571,18 +1549,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     q = 0;
                     for (n = 0; n < 16; n++)
                         q += o[n];
-                    ra = sizeof(uint) + 21 + q;
+                    ra = 21 + q;
                     rb = new byte[ra];
-                    Buffer.BlockCopy(BitConverter.GetBytes(ra), 0, rb, 0, sizeof(uint));
-                    rb[sizeof(uint)] = 255;
-                    rb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DHT;
-                    rb[sizeof(uint) + 2] = (byte)((19 + q) >> 8);
-                    rb[sizeof(uint) + 3] = (byte)((19 + q) & 255);
-                    rb[sizeof(uint) + 4] = m;
+                    rb[0] = 255;
+                    rb[1] = (byte)JPEG_MARKER.DHT;
+                    rb[2] = (byte)((19 + q) >> 8);
+                    rb[3] = (byte)((19 + q) & 255);
+                    rb[4] = m;
                     for (n = 0; n < 16; n++)
-                        rb[sizeof(uint) + 5 + n] = o[n];
+                        rb[5 + n] = o[n];
 
-                    p = (uint)stream.Read(m_tif.m_clientdata, rb, sizeof(uint) + 21, (int)q);
+                    p = (uint)stream.Read(m_tif.m_clientdata, rb, 21, (int)q);
                     if (p != q)
                         return (0);
                     sp.dctable[m] = rb;
@@ -1630,18 +1607,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     q = 0;
                     for (n = 0; n < 16; n++)
                         q += o[n];
-                    ra = sizeof(uint) + 21 + q;
+                    ra = 21 + q;
                     rb = new byte[ra];
-                    Buffer.BlockCopy(BitConverter.GetBytes(ra), 0, rb, 0, sizeof(uint));
-                    rb[sizeof(uint)] = 255;
-                    rb[sizeof(uint) + 1] = (byte)JPEG_MARKER.DHT;
-                    rb[sizeof(uint) + 2] = (byte)((19 + q) >> 8);
-                    rb[sizeof(uint) + 3] = (byte)((19 + q) & 255);
-                    rb[sizeof(uint) + 4] = (byte)(16 | m);
+                    rb[0] = 255;
+                    rb[1] = (byte)JPEG_MARKER.DHT;
+                    rb[2] = (byte)((19 + q) >> 8);
+                    rb[3] = (byte)((19 + q) & 255);
+                    rb[4] = (byte)(16 | m);
                     for (n = 0; n < 16; n++)
-                        rb[sizeof(uint) + 5 + n] = o[n];
+                        rb[5 + n] = o[n];
 
-                    p = (uint)stream.Read(m_tif.m_clientdata, rb, sizeof(uint) + 21, (int)q);
+                    p = (uint)stream.Read(m_tif.m_clientdata, rb, 21, (int)q);
                     if (p != q)
                         return (0);
                     sp.actable[m] = rb;
@@ -1850,272 +1826,276 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        //static int
-        //OJPEGWriteStream(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    *len=0;
-        //    do
-        //    {
-        //        assert(sp.out_state<=ososEoi);
-        //        switch(sp.out_state)
-        //        {
-        //            case ososSoi:
-        //                OJPEGWriteStreamSoi(tif,mem,len);
-        //                break;
-        //            case ososQTable0:
-        //                OJPEGWriteStreamQTable(tif,0,mem,len);
-        //                break;
-        //            case ososQTable1:
-        //                OJPEGWriteStreamQTable(tif,1,mem,len);
-        //                break;
-        //            case ososQTable2:
-        //                OJPEGWriteStreamQTable(tif,2,mem,len);
-        //                break;
-        //            case ososQTable3:
-        //                OJPEGWriteStreamQTable(tif,3,mem,len);
-        //                break;
-        //            case ososDcTable0:
-        //                OJPEGWriteStreamDcTable(tif,0,mem,len);
-        //                break;
-        //            case ososDcTable1:
-        //                OJPEGWriteStreamDcTable(tif,1,mem,len);
-        //                break;
-        //            case ososDcTable2:
-        //                OJPEGWriteStreamDcTable(tif,2,mem,len);
-        //                break;
-        //            case ososDcTable3:
-        //                OJPEGWriteStreamDcTable(tif,3,mem,len);
-        //                break;
-        //            case ososAcTable0:
-        //                OJPEGWriteStreamAcTable(tif,0,mem,len);
-        //                break;
-        //            case ososAcTable1:
-        //                OJPEGWriteStreamAcTable(tif,1,mem,len);
-        //                break;
-        //            case ososAcTable2:
-        //                OJPEGWriteStreamAcTable(tif,2,mem,len);
-        //                break;
-        //            case ososAcTable3:
-        //                OJPEGWriteStreamAcTable(tif,3,mem,len);
-        //                break;
-        //            case ososDri:
-        //                OJPEGWriteStreamDri(tif,mem,len);
-        //                break;
-        //            case ososSof:
-        //                OJPEGWriteStreamSof(tif,mem,len);
-        //                break;
-        //            case ososSos:
-        //                OJPEGWriteStreamSos(tif,mem,len);
-        //                break;
-        //            case ososCompressed:
-        //                if (OJPEGWriteStreamCompressed(tif,mem,len)==0)
-        //                    return(0);
-        //                break;
-        //            case ososRst:
-        //                OJPEGWriteStreamRst(tif,mem,len);
-        //                break;
-        //            case ososEoi:
-        //                OJPEGWriteStreamEoi(tif,mem,len);
-        //                break;
-        //        }
-        //    } while (*len==0);
-        //    return(1);
-        //}
+        internal int OJPEGWriteStream(out byte[] mem, out uint len)
+        {
+            mem = null;
+            len = 0;
+            do
+            {
+                Debug.Assert(sp.out_state <= OJPEGStateOutState.ososEoi);
+                switch (sp.out_state)
+                {
+                    case OJPEGStateOutState.ososSoi:
+                        OJPEGWriteStreamSoi(out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososQTable0:
+                        OJPEGWriteStreamQTable(0, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososQTable1:
+                        OJPEGWriteStreamQTable(1, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososQTable2:
+                        OJPEGWriteStreamQTable(2, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososQTable3:
+                        OJPEGWriteStreamQTable(3, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososDcTable0:
+                        OJPEGWriteStreamDcTable(0, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososDcTable1:
+                        OJPEGWriteStreamDcTable(1, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososDcTable2:
+                        OJPEGWriteStreamDcTable(2, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososDcTable3:
+                        OJPEGWriteStreamDcTable(3, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososAcTable0:
+                        OJPEGWriteStreamAcTable(0, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososAcTable1:
+                        OJPEGWriteStreamAcTable(1, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososAcTable2:
+                        OJPEGWriteStreamAcTable(2, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososAcTable3:
+                        OJPEGWriteStreamAcTable(3, out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososDri:
+                        OJPEGWriteStreamDri(out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososSof:
+                        OJPEGWriteStreamSof(out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososSos:
+                        OJPEGWriteStreamSos(out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososCompressed:
+                        if (OJPEGWriteStreamCompressed(out mem, out len) == 0)
+                            return (0);
+                        break;
+                    case OJPEGStateOutState.ososRst:
+                        OJPEGWriteStreamRst(out mem, out len);
+                        break;
+                    case OJPEGStateOutState.ososEoi:
+                        OJPEGWriteStreamEoi(out mem, out len);
+                        break;
+                }
+            } while (len == 0);
+            return (1);
+        }
 
-        //static void
-        //OJPEGWriteStreamSoi(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    assert(OJPEG_BUFFER>=2);
-        //    sp.out_buffer[0]=255;
-        //    sp.out_buffer[1]=JPEG_MARKER_SOI;
-        //    *len=2;
-        //    *mem=(void*)sp.out_buffer;
-        //    sp.out_state++;
-        //}
+        private void OJPEGWriteStreamSoi(out byte[] mem, out uint len)
+        {
+            Debug.Assert(OJPEGState.OJPEG_BUFFER >= 2);
+            sp.out_buffer[0] = 255;
+            sp.out_buffer[1] = (byte)JPEG_MARKER.SOI;
+            len = 2;
+            mem = sp.out_buffer;
+            sp.out_state++;
+        }
 
-        //static void
-        //OJPEGWriteStreamQTable(TIFF* tif, byte table_index, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    if (sp.qtable[table_index]!=0)
-        //    {
-        //        *mem=(void*)(sp.qtable[table_index]+sizeof(uint));
-        //        *len=*((uint*)sp.qtable[table_index])-sizeof(uint);
-        //    }
-        //    sp.out_state++;
-        //}
+        private void OJPEGWriteStreamQTable(byte table_index, out byte[] mem, out uint len)
+        {
+            mem = null;
+            len = 0;
 
-        //static void
-        //OJPEGWriteStreamDcTable(TIFF* tif, byte table_index, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    if (sp.dctable[table_index]!=0)
-        //    {
-        //        *mem=(void*)(sp.dctable[table_index]+sizeof(uint));
-        //        *len=*((uint*)sp.dctable[table_index])-sizeof(uint);
-        //    }
-        //    sp.out_state++;
-        //}
+            if (sp.qtable[table_index] != null)
+            {
+                mem = sp.qtable[table_index];
+                len = (uint)sp.qtable[table_index].Length;
+            }
+            sp.out_state++;
+        }
 
-        //static void
-        //OJPEGWriteStreamAcTable(TIFF* tif, byte table_index, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    if (sp.actable[table_index]!=0)
-        //    {
-        //        *mem=(void*)(sp.actable[table_index]+sizeof(uint));
-        //        *len=*((uint*)sp.actable[table_index])-sizeof(uint);
-        //    }
-        //    sp.out_state++;
-        //}
+        private void OJPEGWriteStreamDcTable(byte table_index, out byte[] mem, out uint len)
+        {
+            mem = null;
+            len = 0;
 
-        //static void
-        //OJPEGWriteStreamDri(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    assert(OJPEG_BUFFER>=6);
-        //    if (sp.restart_interval!=0)
-        //    {
-        //        sp.out_buffer[0]=255;
-        //        sp.out_buffer[1]=JPEG_MARKER_DRI;
-        //        sp.out_buffer[2]=0;
-        //        sp.out_buffer[3]=4;
-        //        sp.out_buffer[4]=(sp.restart_interval>>8);
-        //        sp.out_buffer[5]=(sp.restart_interval&255);
-        //        *len=6;
-        //        *mem=(void*)sp.out_buffer;
-        //    }
-        //    sp.out_state++;
-        //}
+            if (sp.dctable[table_index] != null)
+            {
+                mem = sp.dctable[table_index];
+                len = (uint)sp.dctable[table_index].Length;
+            }
+            sp.out_state++;
+        }
 
-        //static void
-        //OJPEGWriteStreamSof(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    byte m;
-        //    assert(OJPEG_BUFFER>=2+8+sp.samples_per_pixel_per_plane*3);
-        //    assert(255>=8+sp.samples_per_pixel_per_plane*3);
-        //    sp.out_buffer[0]=255;
-        //    sp.out_buffer[1]=sp.sof_marker_id;
-        //    /* Lf */
-        //    sp.out_buffer[2]=0;
-        //    sp.out_buffer[3]=8+sp.samples_per_pixel_per_plane*3;
-        //    /* P */
-        //    sp.out_buffer[4]=8;
-        //    /* Y */
-        //    sp.out_buffer[5]=(sp.sof_y>>8);
-        //    sp.out_buffer[6]=(sp.sof_y&255);
-        //    /* X */
-        //    sp.out_buffer[7]=(sp.sof_x>>8);
-        //    sp.out_buffer[8]=(sp.sof_x&255);
-        //    /* Nf */
-        //    sp.out_buffer[9]=sp.samples_per_pixel_per_plane;
-        //    for (m=0; m<sp.samples_per_pixel_per_plane; m++)
-        //    {
-        //        /* C */
-        //        sp.out_buffer[10+m*3]=sp.sof_c[sp.plane_sample_offset+m];
-        //        /* H and V */
-        //        sp.out_buffer[10+m*3+1]=sp.sof_hv[sp.plane_sample_offset+m];
-        //        /* Tq */
-        //        sp.out_buffer[10+m*3+2]=sp.sof_tq[sp.plane_sample_offset+m];
-        //    }
-        //    *len=10+sp.samples_per_pixel_per_plane*3;
-        //    *mem=(void*)sp.out_buffer;
-        //    sp.out_state++;
-        //}
+        private void OJPEGWriteStreamAcTable(byte table_index, out byte[] mem, out uint len)
+        {
+            mem = null;
+            len = 0;
 
-        //static void
-        //OJPEGWriteStreamSos(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    byte m;
-        //    assert(OJPEG_BUFFER>=2+6+sp.samples_per_pixel_per_plane*2);
-        //    assert(255>=6+sp.samples_per_pixel_per_plane*2);
-        //    sp.out_buffer[0]=255;
-        //    sp.out_buffer[1]=JPEG_MARKER_SOS;
-        //    /* Ls */
-        //    sp.out_buffer[2]=0;
-        //    sp.out_buffer[3]=6+sp.samples_per_pixel_per_plane*2;
-        //    /* Ns */
-        //    sp.out_buffer[4]=sp.samples_per_pixel_per_plane;
-        //    for (m=0; m<sp.samples_per_pixel_per_plane; m++)
-        //    {
-        //        /* Cs */
-        //        sp.out_buffer[5+m*2]=sp.sos_cs[sp.plane_sample_offset+m];
-        //        /* Td and Ta */
-        //        sp.out_buffer[5+m*2+1]=sp.sos_tda[sp.plane_sample_offset+m];
-        //    }
-        //    /* Ss */
-        //    sp.out_buffer[5+sp.samples_per_pixel_per_plane*2]=0;
-        //    /* Se */
-        //    sp.out_buffer[5+sp.samples_per_pixel_per_plane*2+1]=63;
-        //    /* Ah and Al */
-        //    sp.out_buffer[5+sp.samples_per_pixel_per_plane*2+2]=0;
-        //    *len=8+sp.samples_per_pixel_per_plane*2;
-        //    *mem=(void*)sp.out_buffer;
-        //    sp.out_state++;
-        //}
+            if (sp.actable[table_index] != null)
+            {
+                mem = sp.actable[table_index];
+                len = (uint)sp.actable[table_index].Length;
+            }
+            sp.out_state++;
+        }
 
-        //static int
-        //OJPEGWriteStreamCompressed(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    if (sp.in_buffer_togo==0)
-        //    {
-        //        if (OJPEGReadBufferFill(sp)==0)
-        //            return(0);
-        //        assert(sp.in_buffer_togo>0);
-        //    }
-        //    *len=sp.in_buffer_togo;
-        //    *mem=(void*)sp.in_buffer_cur;
-        //    sp.in_buffer_togo=0;
-        //    if (sp.in_buffer_file_togo==0)
-        //    {
-        //        switch(sp.in_buffer_source)
-        //        {
-        //            case osibsStrile:
-        //                if (sp.in_buffer_next_strile<sp.in_buffer_strile_count)  
-        //                    sp.out_state=ososRst;
-        //                else
-        //                    sp.out_state=ososEoi;
-        //                break;
-        //            case osibsEof:
-        //                sp.out_state=ososEoi;
-        //                break;
-        //            default:
-        //                break;
-        //        }
-        //    }
-        //    return(1);
-        //}
+        private void OJPEGWriteStreamDri(out byte[] mem, out uint len)
+        {
+            Debug.Assert(OJPEGState.OJPEG_BUFFER >= 6);
+            mem = null;
+            len = 0;
 
-        //static void
-        //OJPEGWriteStreamRst(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    assert(OJPEG_BUFFER>=2);
-        //    sp.out_buffer[0]=255;
-        //    sp.out_buffer[1]=JPEG_MARKER_RST0+sp.restart_index;
-        //    sp.restart_index++;
-        //    if (sp.restart_index==8)
-        //        sp.restart_index=0;
-        //    *len=2;
-        //    *mem=(void*)sp.out_buffer;
-        //    sp.out_state=ososCompressed;
-        //}
+            if (sp.restart_interval != 0)
+            {
+                sp.out_buffer[0] = 255;
+                sp.out_buffer[1] = (byte)JPEG_MARKER.DRI;
+                sp.out_buffer[2] = 0;
+                sp.out_buffer[3] = 4;
+                sp.out_buffer[4] = (byte)(sp.restart_interval >> 8);
+                sp.out_buffer[5] = (byte)(sp.restart_interval & 255);
+                len = 6;
+                mem = sp.out_buffer;
+            }
+            sp.out_state++;
+        }
 
-        //static void
-        //OJPEGWriteStreamEoi(TIFF* tif, void** mem, uint* len)
-        //{
-        //    OJPEGState* sp=(OJPEGState*)tif.tif_data;
-        //    assert(OJPEG_BUFFER>=2);
-        //    sp.out_buffer[0]=255;
-        //    sp.out_buffer[1]=JPEG_MARKER_EOI;
-        //    *len=2;
-        //    *mem=(void*)sp.out_buffer;
-        //}
+        private void OJPEGWriteStreamSof(out byte[] mem, out uint len)
+        {
+            byte m;
+            Debug.Assert(OJPEGState.OJPEG_BUFFER >= 2 + 8 + sp.samples_per_pixel_per_plane * 3);
+            Debug.Assert(255 >= 8 + sp.samples_per_pixel_per_plane * 3);
+            sp.out_buffer[0] = 255;
+            sp.out_buffer[1] = sp.sof_marker_id;
+            /* Lf */
+            sp.out_buffer[2] = 0;
+            sp.out_buffer[3] = (byte)(8 + sp.samples_per_pixel_per_plane * 3);
+            /* P */
+            sp.out_buffer[4] = 8;
+            /* Y */
+            sp.out_buffer[5] = (byte)(sp.sof_y >> 8);
+            sp.out_buffer[6] = (byte)(sp.sof_y & 255);
+            /* X */
+            sp.out_buffer[7] = (byte)(sp.sof_x >> 8);
+            sp.out_buffer[8] = (byte)(sp.sof_x & 255);
+            /* Nf */
+            sp.out_buffer[9] = sp.samples_per_pixel_per_plane;
+            for (m = 0; m < sp.samples_per_pixel_per_plane; m++)
+            {
+                /* C */
+                sp.out_buffer[10 + m * 3] = sp.sof_c[sp.plane_sample_offset + m];
+                /* H and V */
+                sp.out_buffer[10 + m * 3 + 1] = sp.sof_hv[sp.plane_sample_offset + m];
+                /* Tq */
+                sp.out_buffer[10 + m * 3 + 2] = sp.sof_tq[sp.plane_sample_offset + m];
+            }
+            len = (uint)(10 + sp.samples_per_pixel_per_plane * 3);
+            mem = sp.out_buffer;
+            sp.out_state++;
+        }
+
+        private void OJPEGWriteStreamSos(out byte[] mem, out uint len)
+        {
+            byte m;
+            Debug.Assert(OJPEGState.OJPEG_BUFFER >= 2 + 6 + sp.samples_per_pixel_per_plane * 2);
+            Debug.Assert(255 >= 6 + sp.samples_per_pixel_per_plane * 2);
+            sp.out_buffer[0] = 255;
+            sp.out_buffer[1] = (byte)JPEG_MARKER.SOS;
+            /* Ls */
+            sp.out_buffer[2] = 0;
+            sp.out_buffer[3] = (byte)(6 + sp.samples_per_pixel_per_plane * 2);
+            /* Ns */
+            sp.out_buffer[4] = sp.samples_per_pixel_per_plane;
+            for (m = 0; m < sp.samples_per_pixel_per_plane; m++)
+            {
+                /* Cs */
+                sp.out_buffer[5 + m * 2] = sp.sos_cs[sp.plane_sample_offset + m];
+                /* Td and Ta */
+                sp.out_buffer[5 + m * 2 + 1] = sp.sos_tda[sp.plane_sample_offset + m];
+            }
+            /* Ss */
+            sp.out_buffer[5 + sp.samples_per_pixel_per_plane * 2] = 0;
+            /* Se */
+            sp.out_buffer[5 + sp.samples_per_pixel_per_plane * 2 + 1] = 63;
+            /* Ah and Al */
+            sp.out_buffer[5 + sp.samples_per_pixel_per_plane * 2 + 2] = 0;
+            len = (uint)(8 + sp.samples_per_pixel_per_plane * 2);
+            mem = sp.out_buffer;
+            sp.out_state++;
+        }
+
+        private int OJPEGWriteStreamCompressed(out byte[] mem, out uint len)
+        {
+            mem = null;
+            len = 0;
+
+            if (sp.in_buffer_togo == 0)
+            {
+                if (OJPEGReadBufferFill() == 0)
+                    return (0);
+                Debug.Assert(sp.in_buffer_togo > 0);
+            }
+            len = sp.in_buffer_togo;
+
+            if (sp.in_buffer_cur == 0)
+            {
+                mem = sp.in_buffer;
+            }
+            else
+            {
+                mem = new byte[len];
+                Buffer.BlockCopy(sp.in_buffer, sp.in_buffer_cur, mem, 0, (int)len);
+            }
+
+            sp.in_buffer_togo = 0;
+            if (sp.in_buffer_file_togo == 0)
+            {
+                switch (sp.in_buffer_source)
+                {
+                    case OJPEGStateInBufferSource.osibsStrile:
+                        if (sp.in_buffer_next_strile < sp.in_buffer_strile_count)
+                            sp.out_state = OJPEGStateOutState.ososRst;
+                        else
+                            sp.out_state = OJPEGStateOutState.ososEoi;
+                        break;
+                    case OJPEGStateInBufferSource.osibsEof:
+                        sp.out_state = OJPEGStateOutState.ososEoi;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return (1);
+        }
+
+        private void OJPEGWriteStreamRst(out byte[] mem, out uint len)
+        {
+            Debug.Assert(OJPEGState.OJPEG_BUFFER >= 2);
+            sp.out_buffer[0] = 255;
+            sp.out_buffer[1] = (byte)((byte)JPEG_MARKER.RST0 + sp.restart_index);
+            sp.restart_index++;
+            if (sp.restart_index == 8)
+                sp.restart_index = 0;
+            len = 2;
+            mem = sp.out_buffer;
+            sp.out_state = OJPEGStateOutState.ososCompressed;
+        }
+
+        private void OJPEGWriteStreamEoi(out byte[] mem, out uint len)
+        {
+            Debug.Assert(OJPEGState.OJPEG_BUFFER >= 2);
+            sp.out_buffer[0] = 255;
+            sp.out_buffer[1] = (byte)JPEG_MARKER.EOI;
+            len = 2;
+            mem = sp.out_buffer;
+        }
 
         private bool jpeg_create_decompress_encap(OJPEGState sp)
         {

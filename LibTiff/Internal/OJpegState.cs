@@ -112,7 +112,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public int in_buffer_cur; // was byte[], index into in_buffer
         public byte[] in_buffer = new byte[OJPEG_BUFFER];
         public OJPEGStateOutState out_state;
-        //byte out_buffer[OJPEG_BUFFER];
+        public byte[] out_buffer = new byte[OJPEG_BUFFER];
         public byte[] skip_buffer;
     }
 }

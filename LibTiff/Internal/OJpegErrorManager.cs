@@ -21,14 +21,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
          */
         public override void error_exit()
         {
-            //static void
-            //OJPEGLibjpegJpegErrorMgrErrorExit(jpeg_common_struct* cinfo)
-            //{
-            //    char buffer[JMSG_LENGTH_MAX];
-            //    (*cinfo.err.format_message)(cinfo,buffer);
-            //    TIFFErrorExt(((TIFF*)(cinfo.client_data)).tif_clientdata,"LibJpeg", "%s", buffer);
-            //    jpeg_encap_unwind((TIFF*)(cinfo.client_data));
-            //}
+            string buffer = format_message();
+            Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "LibJpeg", "{0}", buffer); /* display the error message */
+
+            // clean up LibJpeg.Net state
+            m_sp.sp.libjpeg_jpeg_decompress_struct.jpeg_abort();
+
+            throw new Exception(buffer);
         }
 
         /* This routine is invoked only for warning messages, since error_exit
@@ -36,13 +35,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
          */
         public override void output_message()
         {
-            //static void
-            //OJPEGLibjpegJpegErrorMgrOutputMessage(jpeg_common_struct* cinfo)
-            //{
-            //    char buffer[JMSG_LENGTH_MAX];
-            //    (*cinfo.err.format_message)(cinfo,buffer);
-            //    TIFFWarningExt(((TIFF*)(cinfo.client_data)).tif_clientdata,"LibJpeg", "%s", buffer);
-            //}
+            string buffer = format_message();
+            Tiff.WarningExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "LibJpeg", "{0}", buffer);
         }
     }
 }
