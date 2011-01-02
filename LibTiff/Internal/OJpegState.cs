@@ -89,13 +89,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public uint subsampling_convert_ylines;
         public uint subsampling_convert_clinelen;
         public uint subsampling_convert_clines;
-        public uint subsampling_convert_ybuflen;
-        public uint subsampling_convert_cbuflen;
-        public uint subsampling_convert_ycbcrbuflen;
-        public byte[] subsampling_convert_ycbcrbuf;
-        public byte[] subsampling_convert_ybuf;
-        public byte[] subsampling_convert_cbbuf;
-        public byte[] subsampling_convert_crbuf;
+        //public uint subsampling_convert_ybuflen;
+        //public uint subsampling_convert_cbuflen;
+        //public uint subsampling_convert_ycbcrbuflen;
+        //public byte[] subsampling_convert_ycbcrbuf;
+        public byte[][] subsampling_convert_ybuf; // was byte[]
+        public byte[][] subsampling_convert_cbbuf; // was byte[]
+        public byte[][] subsampling_convert_crbuf; // was byte[]
         public uint subsampling_convert_ycbcrimagelen;
         public byte[][] subsampling_convert_ycbcrimage;
         public uint subsampling_convert_clinelenout;

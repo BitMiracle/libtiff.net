@@ -629,6 +629,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 uint ocb = sp.subsampling_convert_state * sp.subsampling_convert_clinelen;
                 uint ocr = sp.subsampling_convert_state * sp.subsampling_convert_clinelen;
 
+                int i = 0;
+                int ii = 0;
                 int p = m;
                 for (uint q = 0; q < sp.subsampling_convert_clinelenout; q++)
                 {
@@ -636,13 +638,26 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     for (byte sy = 0; sy < sp.subsampling_ver; sy++)
                     {
                         for (byte sx = 0; sx < sp.subsampling_hor; sx++)
-                            buf[p++] = sp.subsampling_convert_ybuf[r++];
+                        {
+                            i = (int)(r / sp.subsampling_convert_ylinelen);
+                            ii = (int)(r % sp.subsampling_convert_ylinelen);
+                            r++;
+                            buf[p++] = sp.subsampling_convert_ybuf[i][ii];
+                        }
 
                         r += sp.subsampling_convert_ylinelen - sp.subsampling_hor;
                     }
                     oy += sp.subsampling_hor;
-                    buf[p++] = sp.subsampling_convert_cbbuf[ocb++];
-                    buf[p++] = sp.subsampling_convert_crbuf[ocr++];
+
+                    i = (int)(ocb / sp.subsampling_convert_clinelen);
+                    ii = (int)(ocb % sp.subsampling_convert_clinelen);
+                    ocb++;
+                    buf[p++] = sp.subsampling_convert_cbbuf[i][ii];
+
+                    i = (int)(ocr / sp.subsampling_convert_clinelen);
+                    ii = (int)(ocr % sp.subsampling_convert_clinelen);
+                    ocr++;
+                    buf[p++] = sp.subsampling_convert_crbuf[i][ii];
                 }
                 sp.subsampling_convert_state++;
                 if (sp.subsampling_convert_state == sp.subsampling_convert_clines)
@@ -884,9 +899,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private int OJPEGWriteHeaderInfo()
         {
-            //const string module = "OJPEGWriteHeaderInfo";
-            //byte[][] m;
-            //uint n;
             Debug.Assert(sp.libjpeg_session_active == 0);
 
             sp.out_state = OJPEGStateOutState.ososSoi;
@@ -912,36 +924,56 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 sp.libjpeg_jpeg_query_style = 0;
                 if (sp.subsampling_convert_log == 0)
                 {
-                    Debug.Assert(sp.subsampling_convert_ycbcrbuf == null);
+                    //Debug.Assert(sp.subsampling_convert_ycbcrbuf == null);
+                    Debug.Assert(sp.subsampling_convert_ybuf == null);
+                    Debug.Assert(sp.subsampling_convert_cbbuf == null);
+                    Debug.Assert(sp.subsampling_convert_crbuf == null);
                     Debug.Assert(sp.subsampling_convert_ycbcrimage == null);
+
                     sp.subsampling_convert_ylinelen = (uint)((sp.strile_width + sp.subsampling_hor * 8 - 1) / (sp.subsampling_hor * 8) * sp.subsampling_hor * 8);
                     sp.subsampling_convert_ylines = (uint)(sp.subsampling_ver * 8);
                     sp.subsampling_convert_clinelen = sp.subsampling_convert_ylinelen / sp.subsampling_hor;
                     sp.subsampling_convert_clines = 8;
-                    sp.subsampling_convert_ybuflen = sp.subsampling_convert_ylinelen * sp.subsampling_convert_ylines;
-                    sp.subsampling_convert_cbuflen = sp.subsampling_convert_clinelen * sp.subsampling_convert_clines;
-                    sp.subsampling_convert_ycbcrbuflen = sp.subsampling_convert_ybuflen + 2 * sp.subsampling_convert_cbuflen;
-                    sp.subsampling_convert_ycbcrbuf = new byte[sp.subsampling_convert_ycbcrbuflen];
+
+                    sp.subsampling_convert_ybuf = new byte[sp.subsampling_convert_ylines][];
+                    for (int i = 0; i < sp.subsampling_convert_ylines; i++)
+                        sp.subsampling_convert_ybuf[i] = new byte[sp.subsampling_convert_ylinelen];
+
+                    sp.subsampling_convert_cbbuf = new byte[sp.subsampling_convert_clines][];
+                    sp.subsampling_convert_crbuf = new byte[sp.subsampling_convert_clines][];
+                    for (int i = 0; i < sp.subsampling_convert_clines; i++)
+                    {
+                        sp.subsampling_convert_cbbuf[i] = new byte[sp.subsampling_convert_clinelen];
+                        sp.subsampling_convert_crbuf[i] = new byte[sp.subsampling_convert_clinelen];
+                    }
+
+                    //sp.subsampling_convert_ybuflen = sp.subsampling_convert_ylinelen * sp.subsampling_convert_ylines;
+                    //sp.subsampling_convert_cbuflen = sp.subsampling_convert_clinelen * sp.subsampling_convert_clines;
+                    //sp.subsampling_convert_ycbcrbuflen = sp.subsampling_convert_ybuflen + 2 * sp.subsampling_convert_cbuflen;
+                    //sp.subsampling_convert_ycbcrbuf = new byte[sp.subsampling_convert_ycbcrbuflen];
 
                     //sp.subsampling_convert_ybuf = sp.subsampling_convert_ycbcrbuf;
                     //sp.subsampling_convert_cbbuf = sp.subsampling_convert_ybuf + sp.subsampling_convert_ybuflen;
                     //sp.subsampling_convert_crbuf = sp.subsampling_convert_cbbuf + sp.subsampling_convert_cbuflen;
-                    //sp.subsampling_convert_ycbcrimagelen = 3 + sp.subsampling_convert_ylines + 2 * sp.subsampling_convert_clines;
-                    //sp.subsampling_convert_ycbcrimage = new byte[sp.subsampling_convert_ycbcrimagelen][];
+                    
+                    sp.subsampling_convert_ycbcrimagelen = 3 + sp.subsampling_convert_ylines + 2 * sp.subsampling_convert_clines;
+                    sp.subsampling_convert_ycbcrimage = new byte[sp.subsampling_convert_ycbcrimagelen][];
 
-                    //m = sp.subsampling_convert_ycbcrimage;
-                    //*m++ = (byte[])(sp.subsampling_convert_ycbcrimage + 3);
-                    //*m++ = (byte[])(sp.subsampling_convert_ycbcrimage + 3 + sp.subsampling_convert_ylines);
-                    //*m++ = (byte[])(sp.subsampling_convert_ycbcrimage + 3 + sp.subsampling_convert_ylines + sp.subsampling_convert_clines);
+                    byte[][] m = sp.subsampling_convert_ycbcrimage;
+                    int mIndex = 3;
 
-                    //for (n = 0; n < sp.subsampling_convert_ylines; n++)
-                    //    *m++ = sp.subsampling_convert_ybuf + n * sp.subsampling_convert_ylinelen;
+                    for (uint n = 0; n < sp.subsampling_convert_ylines; n++)
+                        m[mIndex++] = sp.subsampling_convert_ybuf[n];
 
-                    //for (n = 0; n < sp.subsampling_convert_clines; n++)
-                    //    *m++ = sp.subsampling_convert_cbbuf + n * sp.subsampling_convert_clinelen;
+                    for (uint n = 0; n < sp.subsampling_convert_clines; n++)
+                        m[mIndex++] = sp.subsampling_convert_cbbuf[n];
 
-                    //for (n = 0; n < sp.subsampling_convert_clines; n++)
-                    //    *m++ = sp.subsampling_convert_crbuf + n * sp.subsampling_convert_clinelen;
+                    for (uint n = 0; n < sp.subsampling_convert_clines; n++)
+                        m[mIndex++] = sp.subsampling_convert_crbuf[n];
+
+                    m[0] = sp.subsampling_convert_ycbcrimage[3];
+                    m[1] = sp.subsampling_convert_ycbcrimage[3 + sp.subsampling_convert_ylines];
+                    m[2] = sp.subsampling_convert_ycbcrimage[3 + sp.subsampling_convert_ylines + sp.subsampling_convert_clines];
 
                     sp.subsampling_convert_clinelenout = ((sp.strile_width + sp.subsampling_hor - 1) / sp.subsampling_hor);
                     sp.subsampling_convert_state = 0;
