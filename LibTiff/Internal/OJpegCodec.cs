@@ -573,13 +573,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (!m_readheader_done)
             {
-                if (OJPEGReadHeaderInfo() == 0)
+                if (!OJPEGReadHeaderInfo())
                     return false;
             }
 
             if (!m_sos_end[s].m_log)
             {
-                if (OJPEGReadSecondarySos(s) == 0)
+                if (!OJPEGReadSecondarySos(s))
                     return false;
             }
 
@@ -611,7 +611,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     m_in_buffer_togo = 0;
                     m_in_buffer_cur = 0;
                 }
-                if (OJPEGWriteHeaderInfo() == 0)
+                if (!OJPEGWriteHeaderInfo())
                     return false;
             }
 
@@ -619,12 +619,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 if (m_libjpeg_jpeg_query_style == 0)
                 {
-                    if (OJPEGPreDecodeSkipRaw() == 0)
+                    if (!OJPEGPreDecodeSkipRaw())
                         return false;
                 }
                 else
                 {
-                    if (OJPEGPreDecodeSkipScanlines() == 0)
+                    if (!OJPEGPreDecodeSkipScanlines())
                         return false;
                 }
                 m_write_curstrile++;
@@ -637,12 +637,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             if (m_libjpeg_jpeg_query_style == 0)
             {
-                if (OJPEGDecodeRaw(buf, offset, cc) == 0)
+                if (!OJPEGDecodeRaw(buf, offset, cc))
                     return false;
             }
             else
             {
-                if (OJPEGDecodeScanlines(buf, offset, cc) == 0)
+                if (!OJPEGDecodeScanlines(buf, offset, cc))
                     return false;
             }
             return true;
@@ -663,7 +663,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 OJPEGLibjpegSessionAbort();
         }
 
-        private int OJPEGPreDecodeSkipRaw()
+        private bool OJPEGPreDecodeSkipRaw()
         {
             uint m;
             m = m_lines_per_strile;
@@ -674,7 +674,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     m_subsampling_convert_state += m;
                     if (m_subsampling_convert_state == m_subsampling_convert_clines)
                         m_subsampling_convert_state = 0;
-                    return (1);
+                    return true;
                 }
                 m -= m_subsampling_convert_clines - m_subsampling_convert_state;
                 m_subsampling_convert_state = 0;
@@ -682,19 +682,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
             while (m >= m_subsampling_convert_clines)
             {
                 if (jpeg_read_raw_data_encap(m_subsampling_ver * 8) == 0)
-                    return (0);
+                    return false;
                 m -= m_subsampling_convert_clines;
             }
             if (m > 0)
             {
                 if (jpeg_read_raw_data_encap(m_subsampling_ver * 8) == 0)
-                    return (0);
+                    return false;
                 m_subsampling_convert_state = m;
             }
-            return 1;
+            return true;
         }
 
-        private int OJPEGPreDecodeSkipScanlines()
+        private bool OJPEGPreDecodeSkipScanlines()
         {
             uint m;
             if (m_skip_buffer == null)
@@ -703,19 +703,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
             for (m = 0; m < m_lines_per_strile; m++)
             {
                 if (jpeg_read_scanlines_encap(m_skip_buffer, 1) == 0)
-                    return 0;
+                    return false;
             }
-            return 1;
+            return true;
         }
 
-        private int OJPEGDecodeRaw(byte[] buf, int offset, int cc)
+        private bool OJPEGDecodeRaw(byte[] buf, int offset, int cc)
         {
             const string module = "OJPEGDecodeRaw";
 
             if (cc % m_bytes_per_line != 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Fractional scanline not read");
-                return (0);
+                return false;
             }
 
             Debug.Assert(cc > 0);
@@ -726,7 +726,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 if (m_subsampling_convert_state == 0)
                 {
                     if (jpeg_read_raw_data_encap(m_subsampling_ver * 8) == 0)
-                        return (0);
+                        return false;
                 }
 
                 uint oy = m_subsampling_convert_state * m_subsampling_ver * m_subsampling_convert_ylinelen;
@@ -769,17 +769,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m += (int)m_bytes_per_line;
                 n -= (int)m_bytes_per_line;
             } while (n > 0);
-            return 1;
+            return true;
         }
 
-        private int OJPEGDecodeScanlines(byte[] buf, int offset, int cc)
+        private bool OJPEGDecodeScanlines(byte[] buf, int offset, int cc)
         {
             const string module = "OJPEGDecodeScanlines";
 
             if (cc % m_bytes_per_line != 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Fractional scanline not read");
-                return (0);
+                return false;
             }
 
             Debug.Assert(cc > 0);
@@ -790,14 +790,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
             do
             {
                 if (jpeg_read_scanlines_encap(temp, 1) == 0)
-                    return (0);
+                    return false;
 
                 Buffer.BlockCopy(temp, 0, buf, m, temp.Length);
                 m += (int)m_bytes_per_line;
                 n -= (int)m_bytes_per_line;
             } while (n > 0);
 
-            return 1;
+            return true;
         }
 
         public void OJPEGSubsamplingCorrect()
@@ -879,7 +879,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_subsamplingcorrect_done = true;
         }
 
-        private int OJPEGReadHeaderInfo()
+        private bool OJPEGReadHeaderInfo()
         {
             const string module = "OJPEGReadHeaderInfo";
             Debug.Assert(!m_readheader_done);
@@ -912,7 +912,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
                         "SamplesPerPixel {0} not supported for this compression scheme",
                         m_samples_per_pixel);
-                    return 0;
+                    return false;
                 }
 
                 m_plane_sample_offset = 0;
@@ -927,13 +927,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
                         "Incompatible vertical subsampling and image strip/tile length");
-                    return 0;
+                    return false;
                 }
                 m_restart_interval = (ushort)(((m_strile_width + m_subsampling_hor * 8 - 1) / (m_subsampling_hor * 8)) * (m_strile_length / (m_subsampling_ver * 8)));
             }
 
-            if (OJPEGReadHeaderInfoSec() == 0)
-                return 0;
+            if (!OJPEGReadHeaderInfoSec())
+                return false;
 
             m_sos_end[0].m_log = true;
             m_sos_end[0].m_in_buffer_source = m_in_buffer_source;
@@ -941,10 +941,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_sos_end[0].m_in_buffer_file_pos = m_in_buffer_file_pos - m_in_buffer_togo;
             m_sos_end[0].m_in_buffer_file_togo = m_in_buffer_file_togo + m_in_buffer_togo;
             m_readheader_done = true;
-            return 1;
+            return true;
         }
 
-        private int OJPEGReadSecondarySos(short s)
+        private bool OJPEGReadSecondarySos(short s)
         {
             Debug.Assert(s > 0);
             Debug.Assert(s < 3);
@@ -968,15 +968,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 do
                 {
                     byte m;
-                    if (OJPEGReadByte(out m) == 0)
-                        return 0;
+                    if (!OJPEGReadByte(out m))
+                        return false;
 
                     if (m == 255)
                     {
                         do
                         {
-                            if (OJPEGReadByte(out m) == 0)
-                                return 0;
+                            if (!OJPEGReadByte(out m))
+                                return false;
 
                             if (m != 255)
                                 break;
@@ -988,8 +988,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 } while (true);
 
                 m_plane_sample_offset++;
-                if (OJPEGReadHeaderInfoSecStreamSos() == 0)
-                    return 0;
+                if (!OJPEGReadHeaderInfoSecStreamSos())
+                    return false;
 
                 m_sos_end[m_plane_sample_offset].m_log = true;
                 m_sos_end[m_plane_sample_offset].m_in_buffer_source = m_in_buffer_source;
@@ -998,10 +998,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_sos_end[m_plane_sample_offset].m_in_buffer_file_togo = m_in_buffer_file_togo + m_in_buffer_togo;
             }
 
-            return 1;
+            return true;
         }
 
-        private int OJPEGWriteHeaderInfo()
+        private bool OJPEGWriteHeaderInfo()
         {
             Debug.Assert(!m_libjpeg_session_active);
 
@@ -1010,14 +1010,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             m_libjpeg_jpeg_error_mgr = new OJpegErrorManager(this);
             if (!jpeg_create_decompress_encap())
-                return 0;
+                return false;
 
             m_libjpeg_session_active = true;
             m_libjpeg_jpeg_source_mgr = new OJpegSrcManager(this);
             m_libjpeg_jpeg_decompress_struct.Src = m_libjpeg_jpeg_source_mgr;
 
             if (jpeg_read_header_encap(true) == ReadResult.JPEG_SUSPENDED)
-                return 0;
+                return false;
 
             if (!m_subsampling_force_desubsampling_inside_decompression && (m_samples_per_pixel_per_plane > 1))
             {
@@ -1080,10 +1080,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
 
             if (!jpeg_start_decompress_encap())
-                return 0;
+                return false;
 
             m_writeheader_done = true;
-            return 1;
+            return true;
         }
 
         private void OJPEGLibjpegSessionAbort()
@@ -1093,7 +1093,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_libjpeg_session_active = false;
         }
 
-        private int OJPEGReadHeaderInfoSec()
+        private bool OJPEGReadHeaderInfoSec()
         {
             const string module = "OJPEGReadHeaderInfoSec";
             byte m;
@@ -1124,8 +1124,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             do
             {
-                if (OJPEGReadBytePeek(out m) == 0)
-                    return 0;
+                if (!OJPEGReadBytePeek(out m))
+                    return false;
 
                 if (m != 255)
                     break;
@@ -1133,8 +1133,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 OJPEGReadByteAdvance();
                 do
                 {
-                    if (OJPEGReadByte(out m) == 0)
-                        return 0;
+                    if (!OJPEGReadByte(out m))
+                        return false;
                 } while (m == 255);
 
                 switch ((JPEG_MARKER)m)
@@ -1160,57 +1160,57 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     case JPEG_MARKER.APP14:
                     case JPEG_MARKER.APP15:
                         /* this type of marker has data, but it has no use to us (and no place here) and should be skipped */
-                        if (OJPEGReadWord(out n) == 0)
-                            return (0);
+                        if (!OJPEGReadWord(out n))
+                            return false;
                         if (n < 2)
                         {
                             if (!m_subsamplingcorrect)
                                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JPEG data");
-                            return (0);
+                            return false;
                         }
                         if (n > 2)
                             OJPEGReadSkip((ushort)(n - 2));
                         break;
                     case JPEG_MARKER.DRI:
-                        if (OJPEGReadHeaderInfoSecStreamDri() == 0)
-                            return (0);
+                        if (!OJPEGReadHeaderInfoSecStreamDri())
+                            return false;
                         break;
                     case JPEG_MARKER.DQT:
-                        if (OJPEGReadHeaderInfoSecStreamDqt() == 0)
-                            return (0);
+                        if (!OJPEGReadHeaderInfoSecStreamDqt())
+                            return false;
                         break;
                     case JPEG_MARKER.DHT:
-                        if (OJPEGReadHeaderInfoSecStreamDht() == 0)
-                            return (0);
+                        if (!OJPEGReadHeaderInfoSecStreamDht())
+                            return false;
                         break;
                     case JPEG_MARKER.SOF0:
                     case JPEG_MARKER.SOF1:
                     case JPEG_MARKER.SOF3:
-                        if (OJPEGReadHeaderInfoSecStreamSof(m) == 0)
-                            return (0);
+                        if (!OJPEGReadHeaderInfoSecStreamSof(m))
+                            return false;
                         if (m_subsamplingcorrect)
-                            return (1);
+                            return true;
                         break;
                     case JPEG_MARKER.SOS:
                         if (m_subsamplingcorrect)
-                            return (1);
+                            return true;
                         Debug.Assert(m_plane_sample_offset == 0);
-                        if (OJPEGReadHeaderInfoSecStreamSos() == 0)
-                            return (0);
+                        if (!OJPEGReadHeaderInfoSecStreamSos())
+                            return false;
                         break;
                     default:
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Unknown marker type {0} in JPEG data", m);
-                        return (0);
+                        return false;
                 }
             } while (m != (byte)JPEG_MARKER.SOS);
 
             if (m_subsamplingcorrect)
-                return 1;
+                return true;
 
             if (!m_sof_log)
             {
-                if (OJPEGReadHeaderInfoSecTablesQTable() == 0)
-                    return (0);
+                if (!OJPEGReadHeaderInfoSecTablesQTable())
+                    return false;
 
                 m_sof_marker_id = (byte)JPEG_MARKER.SOF0;
                 for (o = 0; o < m_samples_per_pixel; o++)
@@ -1224,42 +1224,42 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_sof_y = m_strile_length_total;
                 m_sof_log = true;
 
-                if (OJPEGReadHeaderInfoSecTablesDcTable() == 0)
-                    return (0);
+                if (!OJPEGReadHeaderInfoSecTablesDcTable())
+                    return false;
 
-                if (OJPEGReadHeaderInfoSecTablesAcTable() == 0)
-                    return (0);
+                if (!OJPEGReadHeaderInfoSecTablesAcTable())
+                    return false;
 
                 for (o = 1; o < m_samples_per_pixel; o++)
                     m_sos_cs[o] = o;
             }
 
-            return 1;
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecStreamDri()
+        private bool OJPEGReadHeaderInfoSecStreamDri()
         {
             // this could easilly cause trouble in some cases...
             // but no such cases have occured so far
             const string module = "OJPEGReadHeaderInfoSecStreamDri";
             ushort m;
-            if (OJPEGReadWord(out m) == 0)
-                return 0;
+            if (!OJPEGReadWord(out m))
+                return false;
 
             if (m != 4)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DRI marker in JPEG data");
-                return (0);
+                return false;
             }
 
-            if (OJPEGReadWord(out m) == 0)
-                return 0;
+            if (!OJPEGReadWord(out m))
+                return false;
 
             m_restart_interval = m;
-            return 1;
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecStreamDqt()
+        private bool OJPEGReadHeaderInfoSecStreamDqt()
         {
             // this is a table marker, and it is to be saved as a whole for
             // exact pushing on the jpeg stream later on
@@ -1268,14 +1268,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
             uint na;
             byte[] nb;
             byte o;
-            if (OJPEGReadWord(out m) == 0)
-                return (0);
+            if (!OJPEGReadWord(out m))
+                return false;
 
             if (m <= 2)
             {
                 if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
-                return (0);
+                return false;
             }
 
             if (m_subsamplingcorrect)
@@ -1290,7 +1290,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     if (m < 65)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
-                        return (0);
+                        return false;
                     }
 
                     na = 69;
@@ -1299,24 +1299,24 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     nb[1] = (byte)JPEG_MARKER.DQT;
                     nb[2] = 0;
                     nb[3] = 67;
-                    if (OJPEGReadBlock(65, nb, 4) == 0)
-                        return (0);
+                    if (!OJPEGReadBlock(65, nb, 4))
+                        return false;
 
                     o = (byte)(nb[4] & 15);
                     if (3 < o)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
-                        return (0);
+                        return false;
                     }
 
                     m_qtable[o] = nb;
                     m -= 65;
                 } while (m > 0);
             }
-            return (1);
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecStreamDht()
+        private bool OJPEGReadHeaderInfoSecStreamDht()
         {
             // this is a table marker, and it is to be saved as a whole for
             // exact pushing on the jpeg stream later on
@@ -1328,13 +1328,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
             uint na;
             byte[] nb;
             byte o;
-            if (OJPEGReadWord(out m) == 0)
-                return (0);
+            if (!OJPEGReadWord(out m))
+                return false;
             if (m <= 2)
             {
                 if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
-                return (0);
+                return false;
             }
             if (m_subsamplingcorrect)
             {
@@ -1348,15 +1348,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 nb[1] = (byte)JPEG_MARKER.DHT;
                 nb[2] = (byte)(m >> 8);
                 nb[3] = (byte)(m & 255);
-                if (OJPEGReadBlock((ushort)(m - 2), nb, 4) == 0)
-                    return (0);
+                if (!OJPEGReadBlock((ushort)(m - 2), nb, 4))
+                    return false;
                 o = nb[4];
                 if ((o & 240) == 0)
                 {
                     if (3 < o)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
-                        return (0);
+                        return false;
                     }
                     m_dctable[o] = nb;
                 }
@@ -1365,21 +1365,21 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     if ((o & 240) != 16)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
-                        return (0);
+                        return false;
                     }
                     o &= 15;
                     if (3 < o)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
-                        return (0);
+                        return false;
                     }
                     m_actable[o] = nb;
                 }
             }
-            return (1);
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecStreamSof(byte marker_id)
+        private bool OJPEGReadHeaderInfoSecStreamSof(byte marker_id)
         {
             /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
             const string module = "OJPEGReadHeaderInfoSecStreamSof";
@@ -1391,25 +1391,25 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (m_sof_log)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JPEG data");
-                return (0);
+                return false;
             }
             if (!m_subsamplingcorrect)
                 m_sof_marker_id = marker_id;
             /* Lf: data length */
-            if (OJPEGReadWord(out m) == 0)
-                return (0);
+            if (!OJPEGReadWord(out m))
+                return false;
             if (m < 11)
             {
                 if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
-                return (0);
+                return false;
             }
             m -= 8;
             if (m % 3 != 0)
             {
                 if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
-                return (0);
+                return false;
             }
             n = (ushort)(m / 3);
             if (!m_subsamplingcorrect)
@@ -1417,17 +1417,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 if (n != m_samples_per_pixel)
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected number of samples");
-                    return (0);
+                    return false;
                 }
             }
             /* P: Sample precision */
-            if (OJPEGReadByte(out o) == 0)
-                return (0);
+            if (!OJPEGReadByte(out o))
+                return false;
             if (o != 8)
             {
                 if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected number of bits per sample");
-                return (0);
+                return false;
             }
             /* Y: Number of lines, X: Number of samples per line */
             if (m_subsamplingcorrect)
@@ -1436,45 +1436,45 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 /* TODO: probably best to also add check on allowed upper bound, especially x, may cause buffer overflow otherwise i think */
                 /* Y: Number of lines */
-                if (OJPEGReadWord(out p) == 0)
-                    return (0);
+                if (!OJPEGReadWord(out p))
+                    return false;
                 if ((p < m_image_length) && (p < m_strile_length_total))
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected height");
-                    return (0);
+                    return false;
                 }
                 m_sof_y = p;
                 /* X: Number of samples per line */
-                if (OJPEGReadWord(out p) == 0)
-                    return (0);
+                if (!OJPEGReadWord(out p))
+                    return false;
                 if ((p < m_image_width) && (p < m_strile_width))
                 {
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected width");
-                    return (0);
+                    return false;
                 }
                 m_sof_x = p;
             }
             /* Nf: Number of image components in frame */
-            if (OJPEGReadByte(out o) == 0)
-                return (0);
+            if (!OJPEGReadByte(out o))
+                return false;
             if (o != n)
             {
                 if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
-                return (0);
+                return false;
             }
             /* per component stuff */
             /* TODO: double-check that flow implies that n cannot be as big as to make us overflow sof_c, sof_hv and sof_tq arrays */
             for (q = 0; q < n; q++)
             {
                 /* C: Component identifier */
-                if (OJPEGReadByte(out o) == 0)
-                    return (0);
+                if (!OJPEGReadByte(out o))
+                    return false;
                 if (!m_subsamplingcorrect)
                     m_sof_c[q] = o;
                 /* H: Horizontal sampling factor, and V: Vertical sampling factor */
-                if (OJPEGReadByte(out o) == 0)
-                    return (0);
+                if (!OJPEGReadByte(out o))
+                    return false;
                 if (m_subsamplingcorrect)
                 {
                     if (q == 0)
@@ -1501,7 +1501,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             if (o != ((m_subsampling_hor << 4) | m_subsampling_ver))
                             {
                                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected subsampling values");
-                                return (0);
+                                return false;
                             }
                         }
                         else
@@ -1509,23 +1509,23 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             if (o != 17)
                             {
                                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected subsampling values");
-                                return (0);
+                                return false;
                             }
                         }
                     }
                 }
                 /* Tq: Quantization table destination selector */
-                if (OJPEGReadByte(out o) == 0)
-                    return (0);
+                if (!OJPEGReadByte(out o))
+                    return false;
                 if (!m_subsamplingcorrect)
                     m_sof_tq[q] = o;
             }
             if (!m_subsamplingcorrect)
                 m_sof_log = true;
-            return (1);
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecStreamSos()
+        private bool OJPEGReadHeaderInfoSecStreamSos()
         {
             /* this marker needs to be checked, and part of its data needs to be saved for regeneration later on */
             const string module = "OJPEGReadHeaderInfoSecStreamSos";
@@ -1536,42 +1536,42 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (!m_sof_log)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOS marker in JPEG data");
-                return (0);
+                return false;
             }
             /* Ls */
-            if (OJPEGReadWord(out m) == 0)
-                return (0);
+            if (!OJPEGReadWord(out m))
+                return false;
             if (m != 6 + m_samples_per_pixel_per_plane * 2)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOS marker in JPEG data");
-                return (0);
+                return false;
             }
             /* Ns */
-            if (OJPEGReadByte(out n) == 0)
-                return (0);
+            if (!OJPEGReadByte(out n))
+                return false;
             if (n != m_samples_per_pixel_per_plane)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOS marker in JPEG data");
-                return (0);
+                return false;
             }
             /* Cs, Td, and Ta */
             for (o = 0; o < m_samples_per_pixel_per_plane; o++)
             {
                 /* Cs */
-                if (OJPEGReadByte(out n) == 0)
-                    return (0);
+                if (!OJPEGReadByte(out n))
+                    return false;
                 m_sos_cs[m_plane_sample_offset + o] = n;
                 /* Td and Ta */
-                if (OJPEGReadByte(out n) == 0)
-                    return (0);
+                if (!OJPEGReadByte(out n))
+                    return false;
                 m_sos_tda[m_plane_sample_offset + o] = n;
             }
             /* skip Ss, Se, Ah, en Al -> no check, as per Tom Lane recommendation, as per LibJpeg source */
             OJPEGReadSkip(3);
-            return 1;
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecTablesQTable()
+        private bool OJPEGReadHeaderInfoSecTablesQTable()
         {
             const string module = "OJPEGReadHeaderInfoSecTablesQTable";
             byte m;
@@ -1582,7 +1582,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (m_qtable_offset[0] == 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Missing JPEG tables");
-                return (0);
+                return false;
             }
             m_in_buffer_file_pos_log = false;
             for (m = 0; m < m_samples_per_pixel; m++)
@@ -1594,7 +1594,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         if (m_qtable_offset[m] == m_qtable_offset[n])
                         {
                             Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JpegQTables tag value");
-                            return (0);
+                            return false;
                         }
                     }
                     oa = 69;
@@ -1608,17 +1608,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     stream.Seek(m_tif.m_clientdata, m_qtable_offset[m], SeekOrigin.Begin);
                     p = (uint)stream.Read(m_tif.m_clientdata, ob, 5, 64);
                     if (p != 64)
-                        return (0);
+                        return false;
                     m_qtable[m] = ob;
                     m_sof_tq[m] = m;
                 }
                 else
                     m_sof_tq[m] = m_sof_tq[m - 1];
             }
-            return (1);
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecTablesDcTable()
+        private bool OJPEGReadHeaderInfoSecTablesDcTable()
         {
             const string module = "OJPEGReadHeaderInfoSecTablesDcTable";
             byte m;
@@ -1631,7 +1631,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (m_dctable_offset[0] == 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Missing JPEG tables");
-                return (0);
+                return false;
             }
             m_in_buffer_file_pos_log = false;
             for (m = 0; m < m_samples_per_pixel; m++)
@@ -1643,7 +1643,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         if (m_dctable_offset[m] == m_dctable_offset[n])
                         {
                             Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JpegDcTables tag value");
-                            return (0);
+                            return false;
                         }
                     }
 
@@ -1651,7 +1651,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     stream.Seek(m_tif.m_clientdata, m_dctable_offset[m], SeekOrigin.Begin);
                     p = (uint)stream.Read(m_tif.m_clientdata, o, 0, 16);
                     if (p != 16)
-                        return (0);
+                        return false;
                     q = 0;
                     for (n = 0; n < 16; n++)
                         q += o[n];
@@ -1667,17 +1667,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     p = (uint)stream.Read(m_tif.m_clientdata, rb, 21, (int)q);
                     if (p != q)
-                        return (0);
+                        return false;
                     m_dctable[m] = rb;
                     m_sos_tda[m] = (byte)(m << 4);
                 }
                 else
                     m_sos_tda[m] = m_sos_tda[m - 1];
             }
-            return (1);
+            return true;
         }
 
-        private int OJPEGReadHeaderInfoSecTablesAcTable()
+        private bool OJPEGReadHeaderInfoSecTablesAcTable()
         {
             const string module = "OJPEGReadHeaderInfoSecTablesAcTable";
             byte m;
@@ -1690,7 +1690,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (m_actable_offset[0] == 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Missing JPEG tables");
-                return (0);
+                return false;
             }
             m_in_buffer_file_pos_log = false;
             for (m = 0; m < m_samples_per_pixel; m++)
@@ -1702,14 +1702,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         if (m_actable_offset[m] == m_actable_offset[n])
                         {
                             Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JpegAcTables tag value");
-                            return (0);
+                            return false;
                         }
                     }
                     TiffStream stream = m_tif.GetStream();
                     stream.Seek(m_tif.m_clientdata, m_actable_offset[m], SeekOrigin.Begin);
                     p = (uint)stream.Read(m_tif.m_clientdata, o, 0, 16);
                     if (p != 16)
-                        return (0);
+                        return false;
                     q = 0;
                     for (n = 0; n < 16; n++)
                         q += o[n];
@@ -1725,17 +1725,17 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     p = (uint)stream.Read(m_tif.m_clientdata, rb, 21, (int)q);
                     if (p != q)
-                        return (0);
+                        return false;
                     m_actable[m] = rb;
                     m_sos_tda[m] = (byte)(m_sos_tda[m] | m);
                 }
                 else
                     m_sos_tda[m] = (byte)(m_sos_tda[m] | (m_sos_tda[m - 1] & 15));
             }
-            return (1);
+            return true;
         }
 
-        private int OJPEGReadBufferFill()
+        private bool OJPEGReadBufferFill()
         {
             ushort m;
             int n;
@@ -1757,7 +1757,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                     n = stream.Read(m_tif.m_clientdata, m_in_buffer, 0, (int)m);
                     if (n == 0)
-                        return (0);
+                        return false;
                     Debug.Assert(n > 0);
                     Debug.Assert(n <= OJPEG_BUFFER);
                     Debug.Assert(n < 65536);
@@ -1791,7 +1791,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             if (m_tif.m_dir.td_stripoffset == null)
                             {
                                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Strip offsets are missing");
-                                return (0);
+                                return false;
                             }
                             m_in_buffer_file_pos = m_tif.m_dir.td_stripoffset[m_in_buffer_next_strile];
                             if (m_in_buffer_file_pos != 0)
@@ -1811,20 +1811,20 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         }
                         break;
                     default:
-                        return (0);
+                        return false;
                 }
             } while (true);
-            return 1;
+            return true;
         }
 
-        private int OJPEGReadByte(out byte b)
+        private bool OJPEGReadByte(out byte b)
         {
             if (m_in_buffer_togo == 0)
             {
-                if (OJPEGReadBufferFill() == 0)
+                if (!OJPEGReadBufferFill())
                 {
                     b = 0;
-                    return 0;
+                    return false;
                 }
 
                 Debug.Assert(m_in_buffer_togo > 0);
@@ -1833,24 +1833,24 @@ namespace BitMiracle.LibTiff.Classic.Internal
             b = m_in_buffer[m_in_buffer_cur];
             m_in_buffer_cur++;
             m_in_buffer_togo--;
-            return 1;
+            return true;
         }
 
-        public int OJPEGReadBytePeek(out byte b)
+        public bool OJPEGReadBytePeek(out byte b)
         {
             if (m_in_buffer_togo == 0)
             {
-                if (OJPEGReadBufferFill() == 0)
+                if (!OJPEGReadBufferFill())
                 {
                     b = 0;
-                    return 0;
+                    return false;
                 }
 
                 Debug.Assert(m_in_buffer_togo > 0);
             }
 
             b = m_in_buffer[m_in_buffer_cur];
-            return 1;
+            return true;
         }
 
         private void OJPEGReadByteAdvance()
@@ -1860,22 +1860,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_in_buffer_togo--;
         }
 
-        private int OJPEGReadWord(out ushort word)
+        private bool OJPEGReadWord(out ushort word)
         {
             word = 0;
             byte m;
-            if (OJPEGReadByte(out m) == 0)
-                return 0;
+            if (!OJPEGReadByte(out m))
+                return false;
 
             word = (ushort)(m << 8);
-            if (OJPEGReadByte(out m) == 0)
-                return 0;
+            if (!OJPEGReadByte(out m))
+                return false;
 
             word |= m;
-            return 1;
+            return true;
         }
 
-        public int OJPEGReadBlock(ushort len, byte[] mem, int offset)
+        public bool OJPEGReadBlock(ushort len, byte[] mem, int offset)
         {
             ushort mlen;
             ushort n;
@@ -1886,8 +1886,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 if (m_in_buffer_togo == 0)
                 {
-                    if (OJPEGReadBufferFill() == 0)
-                        return (0);
+                    if (!OJPEGReadBufferFill())
+                        return false;
                     Debug.Assert(m_in_buffer_togo > 0);
                 }
                 n = mlen;
@@ -1900,7 +1900,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 mlen -= n;
                 mmem += n;
             } while (mlen > 0);
-            return (1);
+            return true;
         }
 
         private void OJPEGReadSkip(ushort len)
@@ -1932,7 +1932,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
         }
 
-        internal int OJPEGWriteStream(out byte[] mem, out uint len)
+        internal bool OJPEGWriteStream(out byte[] mem, out uint len)
         {
             mem = null;
             len = 0;
@@ -1990,8 +1990,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         OJPEGWriteStreamSos(out mem, out len);
                         break;
                     case OJPEGStateOutState.ososCompressed:
-                        if (OJPEGWriteStreamCompressed(out mem, out len) == 0)
-                            return (0);
+                        if (!OJPEGWriteStreamCompressed(out mem, out len))
+                            return false;
                         break;
                     case OJPEGStateOutState.ososRst:
                         OJPEGWriteStreamRst(out mem, out len);
@@ -2001,7 +2001,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
                 }
             } while (len == 0);
-            return (1);
+            return true;
         }
 
         private void OJPEGWriteStreamSoi(out byte[] mem, out uint len)
@@ -2137,15 +2137,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_out_state++;
         }
 
-        private int OJPEGWriteStreamCompressed(out byte[] mem, out uint len)
+        private bool OJPEGWriteStreamCompressed(out byte[] mem, out uint len)
         {
             mem = null;
             len = 0;
 
             if (m_in_buffer_togo == 0)
             {
-                if (OJPEGReadBufferFill() == 0)
-                    return (0);
+                if (!OJPEGReadBufferFill())
+                    return false;
                 Debug.Assert(m_in_buffer_togo > 0);
             }
             len = m_in_buffer_togo;
@@ -2178,7 +2178,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         break;
                 }
             }
-            return (1);
+            return true;
         }
 
         private void OJPEGWriteStreamRst(out byte[] mem, out uint len)

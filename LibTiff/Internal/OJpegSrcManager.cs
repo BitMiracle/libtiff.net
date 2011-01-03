@@ -33,7 +33,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             Tiff tif = m_sp.GetTiff();
             byte[] mem = null;
             uint len = 0;
-            if (m_sp.OJPEGWriteStream(out mem, out len) == 0)
+            if (!m_sp.OJPEGWriteStream(out mem, out len))
                 Tiff.ErrorExt(tif, tif.m_clientdata, "LibJpeg", "Premature end of JPEG data");
 
             initInternalBuffer(mem, (int)len);
