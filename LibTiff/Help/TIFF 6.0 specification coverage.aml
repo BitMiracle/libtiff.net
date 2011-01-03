@@ -220,7 +220,7 @@
             (see <link xlink:href="b104b853-026c-4369-b748-4810c886edfc" />) which
             defines a revised JPEG-in-TIFF scheme (revised over that appendix that was part of the TIFF 6.0 specification).
             In addition, the library supports PKZIP-style Deflate encoding (Compression.DEFLATE)
-            <!--and Old-style JPEG encoding (as defined in the 6.0 specification, Compression.OJPEG) in read-only mode-->.
+            and Old-style JPEG encoding (as defined in the 6.0 specification, Compression.OJPEG) in read-only mode.
         </para>
 
         <para>
