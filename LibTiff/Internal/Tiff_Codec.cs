@@ -39,11 +39,7 @@ namespace BitMiracle.LibTiff.Classic
                 new TiffCodec(this, Compression.THUNDERSCAN, "ThunderScan"),
                 new TiffCodec(this, Compression.NEXT, "NeXT"),
                 new JpegCodec(this, Compression.JPEG, "JPEG"),
-#if !SILVERLIGHT 
                 new OJpegCodec(this, Compression.OJPEG, "Old-style JPEG"),
-#else
-                new TiffCodec(this, Compression.OJPEG, "Old-style JPEG"),
-#endif
                 new CCITTCodec(this, Compression.CCITTRLE, "CCITT RLE"),
                 new CCITTCodec(this, Compression.CCITTRLEW, "CCITT RLE/W"),
                 new CCITTCodec(this, Compression.CCITTFAX3, "CCITT Group 3"),
