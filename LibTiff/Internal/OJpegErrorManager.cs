@@ -25,7 +25,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "LibJpeg", "{0}", buffer); /* display the error message */
 
             // clean up LibJpeg.Net state
-            m_sp.sp.libjpeg_jpeg_decompress_struct.jpeg_abort();
+            m_sp.sp.m_libjpeg_jpeg_decompress_struct.jpeg_abort();
 
             throw new Exception(buffer);
         }
