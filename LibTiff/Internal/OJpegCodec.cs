@@ -956,24 +956,29 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     //sp.subsampling_convert_cbbuf = sp.subsampling_convert_ybuf + sp.subsampling_convert_ybuflen;
                     //sp.subsampling_convert_crbuf = sp.subsampling_convert_cbbuf + sp.subsampling_convert_cbuflen;
                     
-                    sp.subsampling_convert_ycbcrimagelen = 3 + sp.subsampling_convert_ylines + 2 * sp.subsampling_convert_clines;
-                    sp.subsampling_convert_ycbcrimage = new byte[sp.subsampling_convert_ycbcrimagelen][];
+                    //sp.subsampling_convert_ycbcrimagelen = 3 + sp.subsampling_convert_ylines + 2 * sp.subsampling_convert_clines;
+                    //sp.subsampling_convert_ycbcrimage = new byte[sp.subsampling_convert_ycbcrimagelen][];
+                    sp.subsampling_convert_ycbcrimage = new byte[3][][];
 
-                    byte[][] m = sp.subsampling_convert_ycbcrimage;
-                    int mIndex = 3;
+                    sp.subsampling_convert_ycbcrimage[0] = new byte[sp.subsampling_convert_ylines][];
+
+                    //byte[][] m = sp.subsampling_convert_ycbcrimage;
+                    //int mIndex = 3;
 
                     for (uint n = 0; n < sp.subsampling_convert_ylines; n++)
-                        m[mIndex++] = sp.subsampling_convert_ybuf[n];
+                        sp.subsampling_convert_ycbcrimage[0][n] = sp.subsampling_convert_ybuf[n];
 
+                    sp.subsampling_convert_ycbcrimage[1] = new byte[sp.subsampling_convert_clines][];
                     for (uint n = 0; n < sp.subsampling_convert_clines; n++)
-                        m[mIndex++] = sp.subsampling_convert_cbbuf[n];
+                        sp.subsampling_convert_ycbcrimage[1][n] = sp.subsampling_convert_cbbuf[n];
 
+                    sp.subsampling_convert_ycbcrimage[2] = new byte[sp.subsampling_convert_clines][];
                     for (uint n = 0; n < sp.subsampling_convert_clines; n++)
-                        m[mIndex++] = sp.subsampling_convert_crbuf[n];
+                        sp.subsampling_convert_ycbcrimage[2][n] = sp.subsampling_convert_crbuf[n];
 
-                    m[0] = sp.subsampling_convert_ycbcrimage[3];
-                    m[1] = sp.subsampling_convert_ycbcrimage[3 + sp.subsampling_convert_ylines];
-                    m[2] = sp.subsampling_convert_ycbcrimage[3 + sp.subsampling_convert_ylines + sp.subsampling_convert_clines];
+                    //m[0] = sp.subsampling_convert_ycbcrimage[3];
+                    //m[1] = sp.subsampling_convert_ycbcrimage[3 + sp.subsampling_convert_ylines];
+                    //m[2] = sp.subsampling_convert_ycbcrimage[3 + sp.subsampling_convert_ylines + sp.subsampling_convert_clines];
 
                     sp.subsampling_convert_clinelenout = ((sp.strile_width + sp.subsampling_hor - 1) / sp.subsampling_hor);
                     sp.subsampling_convert_state = 0;
@@ -2178,14 +2183,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private int jpeg_read_raw_data_encap(int max_lines)
         {
             jpeg_decompress_struct cinfo = sp.libjpeg_jpeg_decompress_struct;
-            byte[][] data = sp.subsampling_convert_ycbcrimage;
+            //byte[][] data = sp.subsampling_convert_ycbcrimage;
 
             int n = 0;
             try
             {
-                byte[][][] temp = new byte[1][][];
-                temp[0] = data;
-                n = cinfo.jpeg_read_raw_data(temp, max_lines);
+                //byte[][][] temp = new byte[3][][];
+                //temp[0] = data;
+                //n = cinfo.jpeg_read_raw_data(temp, max_lines);
+                n = cinfo.jpeg_read_raw_data(sp.subsampling_convert_ycbcrimage, max_lines);
             }
             catch (Exception)
             {

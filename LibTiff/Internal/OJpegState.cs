@@ -96,8 +96,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public byte[][] subsampling_convert_ybuf; // was byte[]
         public byte[][] subsampling_convert_cbbuf; // was byte[]
         public byte[][] subsampling_convert_crbuf; // was byte[]
-        public uint subsampling_convert_ycbcrimagelen;
-        public byte[][] subsampling_convert_ycbcrimage;
+        //public uint subsampling_convert_ycbcrimagelen;
+        public byte[][][] subsampling_convert_ycbcrimage;
         public uint subsampling_convert_clinelenout;
         public uint subsampling_convert_state;
         public uint bytes_per_line;   /* if the codec outputs subsampled data, a 'line' in bytes_per_line */
