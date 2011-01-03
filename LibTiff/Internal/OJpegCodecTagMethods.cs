@@ -37,7 +37,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     sp.m_jpeg_interchange_format_length = ap[0].ToUInt();
                     break;
                 case TiffTag.YCBCRSUBSAMPLING:
-                    sp.m_subsampling_tag = 1;
+                    sp.m_subsampling_tag = true;
                     sp.m_subsampling_hor = ap[0].ToByte();
                     sp.m_subsampling_ver = ap[1].ToByte();
                     tif.m_dir.td_ycbcrsubsampling[0] = sp.m_subsampling_hor;
@@ -126,7 +126,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     result[0].Set(sp.m_jpeg_interchange_format_length);
                     break;
                 case TiffTag.YCBCRSUBSAMPLING:
-                    if (sp.m_subsamplingcorrect_done == 0)
+                    if (!sp.m_subsamplingcorrect_done)
                         sp.OJPEGSubsamplingCorrect();
 
                     result = new FieldValue[2];

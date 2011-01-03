@@ -208,7 +208,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private struct SosEnd
         {
-            public byte m_log;
+            public bool m_log;
             public OJPEGStateInBufferSource m_in_buffer_source;
             public uint m_in_buffer_next_strile;
             public uint m_in_buffer_file_pos;
@@ -219,8 +219,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         internal uint m_jpeg_interchange_format_length;
         internal byte m_jpeg_proc;
 
-        internal byte m_subsamplingcorrect_done;
-        internal byte m_subsampling_tag;
+        internal bool m_subsamplingcorrect_done;
+        internal bool m_subsampling_tag;
         internal byte m_subsampling_hor;
         internal byte m_subsampling_ver;
 
@@ -247,8 +247,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private byte m_samples_per_pixel;
         private byte m_plane_sample_offset;
         private byte m_samples_per_pixel_per_plane;
-        private byte m_subsamplingcorrect;
-        private byte m_subsampling_force_desubsampling_inside_decompression;
+        private bool m_subsamplingcorrect;
+        private bool m_subsampling_force_desubsampling_inside_decompression;
         private byte[][] m_qtable = new byte[4][];
         private byte[][] m_dctable = new byte[4][];
         private byte[][] m_actable = new byte[4][];
@@ -568,7 +568,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private bool OJPEGPreDecode(short s)
         {
             uint m;
-            if (m_subsamplingcorrect_done == 0)
+            if (!m_subsamplingcorrect_done)
                 OJPEGSubsamplingCorrect();
 
             if (m_readheader_done == 0)
@@ -577,7 +577,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     return false;
             }
 
-            if (m_sos_end[s].m_log == 0)
+            if (!m_sos_end[s].m_log)
             {
                 if (OJPEGReadSecondarySos(s) == 0)
                     return false;
@@ -805,12 +805,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
             const string module = "OJPEGSubsamplingCorrect";
             byte mh;
             byte mv;
-            Debug.Assert(m_subsamplingcorrect_done == 0);
+            Debug.Assert(!m_subsamplingcorrect_done);
 
             if ((m_tif.m_dir.td_samplesperpixel != 3) || ((m_tif.m_dir.td_photometric != Photometric.YCBCR) &&
                 (m_tif.m_dir.td_photometric != Photometric.ITULAB)))
             {
-                if (m_subsampling_tag != 0)
+                if (m_subsampling_tag)
                 {
                     Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                         "Subsampling tag not appropriate for this Photometric and/or SamplesPerPixel");
@@ -818,25 +818,25 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 m_subsampling_hor = 1;
                 m_subsampling_ver = 1;
-                m_subsampling_force_desubsampling_inside_decompression = 0;
+                m_subsampling_force_desubsampling_inside_decompression = false;
             }
             else
             {
-                m_subsamplingcorrect_done = 1;
+                m_subsamplingcorrect_done = true;
                 mh = m_subsampling_hor;
                 mv = m_subsampling_ver;
-                m_subsamplingcorrect = 1;
+                m_subsamplingcorrect = true;
                 OJPEGReadHeaderInfoSec();
-                if (m_subsampling_force_desubsampling_inside_decompression != 0)
+                if (m_subsampling_force_desubsampling_inside_decompression)
                 {
                     m_subsampling_hor = 1;
                     m_subsampling_ver = 1;
                 }
-                m_subsamplingcorrect = 0;
+                m_subsamplingcorrect = false;
 
-                if (((m_subsampling_hor != mh) || (m_subsampling_ver != mv)) && (m_subsampling_force_desubsampling_inside_decompression == 0))
+                if (((m_subsampling_hor != mh) || (m_subsampling_ver != mv)) && !m_subsampling_force_desubsampling_inside_decompression)
                 {
-                    if (m_subsampling_tag == 0)
+                    if (!m_subsampling_tag)
                     {
                         Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                             "Subsampling tag is not set, yet subsampling inside JPEG data [{0},{1}] does not match default values [2,2]; assuming subsampling inside JPEG data is correct",
@@ -850,9 +850,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     }
                 }
 
-                if (m_subsampling_force_desubsampling_inside_decompression != 0)
+                if (m_subsampling_force_desubsampling_inside_decompression)
                 {
-                    if (m_subsampling_tag == 0)
+                    if (!m_subsampling_tag)
                     {
                         Tiff.WarningExt(m_tif, m_tif.m_clientdata, module,
                             "Subsampling tag is not set, yet subsampling inside JPEG data does not match default values [2,2] (nor any other values allowed in TIFF); assuming subsampling inside JPEG data is correct and desubsampling inside JPEG decompression");
@@ -865,7 +865,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     }
                 }
 
-                if (m_subsampling_force_desubsampling_inside_decompression == 0)
+                if (!m_subsampling_force_desubsampling_inside_decompression)
                 {
                     if (m_subsampling_hor < m_subsampling_ver)
                     {
@@ -876,7 +876,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 }
             }
 
-            m_subsamplingcorrect_done = 1;
+            m_subsamplingcorrect_done = true;
         }
 
         private int OJPEGReadHeaderInfo()
@@ -935,7 +935,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (OJPEGReadHeaderInfoSec() == 0)
                 return 0;
 
-            m_sos_end[0].m_log = 1;
+            m_sos_end[0].m_log = true;
             m_sos_end[0].m_in_buffer_source = m_in_buffer_source;
             m_sos_end[0].m_in_buffer_next_strile = m_in_buffer_next_strile;
             m_sos_end[0].m_in_buffer_file_pos = m_in_buffer_file_pos - m_in_buffer_togo;
@@ -948,11 +948,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             Debug.Assert(s > 0);
             Debug.Assert(s < 3);
-            Debug.Assert(m_sos_end[0].m_log != 0);
-            Debug.Assert(m_sos_end[s].m_log == 0);
+            Debug.Assert(m_sos_end[0].m_log);
+            Debug.Assert(!m_sos_end[s].m_log);
 
             m_plane_sample_offset = (byte)(s - 1);
-            while (m_sos_end[m_plane_sample_offset].m_log == 0)
+            while (!m_sos_end[m_plane_sample_offset].m_log)
                 m_plane_sample_offset--;
 
             m_in_buffer_source = m_sos_end[m_plane_sample_offset].m_in_buffer_source;
@@ -991,7 +991,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 if (OJPEGReadHeaderInfoSecStreamSos() == 0)
                     return 0;
 
-                m_sos_end[m_plane_sample_offset].m_log = 1;
+                m_sos_end[m_plane_sample_offset].m_log = true;
                 m_sos_end[m_plane_sample_offset].m_in_buffer_source = m_in_buffer_source;
                 m_sos_end[m_plane_sample_offset].m_in_buffer_next_strile = m_in_buffer_next_strile;
                 m_sos_end[m_plane_sample_offset].m_in_buffer_file_pos = m_in_buffer_file_pos - m_in_buffer_togo;
@@ -1019,7 +1019,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (jpeg_read_header_encap(true) == ReadResult.JPEG_SUSPENDED)
                 return 0;
 
-            if ((m_subsampling_force_desubsampling_inside_decompression == 0) && (m_samples_per_pixel_per_plane > 1))
+            if (!m_subsampling_force_desubsampling_inside_decompression && (m_samples_per_pixel_per_plane > 1))
             {
                 m_libjpeg_jpeg_decompress_struct.Raw_data_out = true;
                 //#if JPEG_LIB_VERSION >= 70
@@ -1164,7 +1164,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                             return (0);
                         if (n < 2)
                         {
-                            if (m_subsamplingcorrect == 0)
+                            if (!m_subsamplingcorrect)
                                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JPEG data");
                             return (0);
                         }
@@ -1188,11 +1188,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     case JPEG_MARKER.SOF3:
                         if (OJPEGReadHeaderInfoSecStreamSof(m) == 0)
                             return (0);
-                        if (m_subsamplingcorrect != 0)
+                        if (m_subsamplingcorrect)
                             return (1);
                         break;
                     case JPEG_MARKER.SOS:
-                        if (m_subsamplingcorrect != 0)
+                        if (m_subsamplingcorrect)
                             return (1);
                         Debug.Assert(m_plane_sample_offset == 0);
                         if (OJPEGReadHeaderInfoSecStreamSos() == 0)
@@ -1204,7 +1204,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 }
             } while (m != (byte)JPEG_MARKER.SOS);
 
-            if (m_subsamplingcorrect != 0)
+            if (m_subsamplingcorrect)
                 return 1;
 
             if (m_sof_log == 0)
@@ -1273,12 +1273,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (m <= 2)
             {
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DQT marker in JPEG data");
                 return (0);
             }
 
-            if (m_subsamplingcorrect != 0)
+            if (m_subsamplingcorrect)
             {
                 OJPEGReadSkip((ushort)(m - 2));
             }
@@ -1332,11 +1332,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return (0);
             if (m <= 2)
             {
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt DHT marker in JPEG data");
                 return (0);
             }
-            if (m_subsamplingcorrect != 0)
+            if (m_subsamplingcorrect)
             {
                 OJPEGReadSkip((ushort)(m - 2));
             }
@@ -1393,26 +1393,26 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt JPEG data");
                 return (0);
             }
-            if (m_subsamplingcorrect == 0)
+            if (!m_subsamplingcorrect)
                 m_sof_marker_id = marker_id;
             /* Lf: data length */
             if (OJPEGReadWord(out m) == 0)
                 return (0);
             if (m < 11)
             {
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
                 return (0);
             }
             m -= 8;
             if (m % 3 != 0)
             {
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
                 return (0);
             }
             n = (ushort)(m / 3);
-            if (m_subsamplingcorrect == 0)
+            if (!m_subsamplingcorrect)
             {
                 if (n != m_samples_per_pixel)
                 {
@@ -1425,12 +1425,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return (0);
             if (o != 8)
             {
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "JPEG compressed data indicates unexpected number of bits per sample");
                 return (0);
             }
             /* Y: Number of lines, X: Number of samples per line */
-            if (m_subsamplingcorrect != 0)
+            if (m_subsamplingcorrect)
                 OJPEGReadSkip(4);
             else
             {
@@ -1459,7 +1459,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 return (0);
             if (o != n)
             {
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOF marker in JPEG data");
                 return (0);
             }
@@ -1470,12 +1470,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 /* C: Component identifier */
                 if (OJPEGReadByte(out o) == 0)
                     return (0);
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     m_sof_c[q] = o;
                 /* H: Horizontal sampling factor, and V: Vertical sampling factor */
                 if (OJPEGReadByte(out o) == 0)
                     return (0);
-                if (m_subsamplingcorrect != 0)
+                if (m_subsamplingcorrect)
                 {
                     if (q == 0)
                     {
@@ -1483,18 +1483,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         m_subsampling_ver = (byte)(o & 15);
                         if (((m_subsampling_hor != 1) && (m_subsampling_hor != 2) && (m_subsampling_hor != 4)) ||
                             ((m_subsampling_ver != 1) && (m_subsampling_ver != 2) && (m_subsampling_ver != 4)))
-                            m_subsampling_force_desubsampling_inside_decompression = 1;
+                            m_subsampling_force_desubsampling_inside_decompression = true;
                     }
                     else
                     {
                         if (o != 17)
-                            m_subsampling_force_desubsampling_inside_decompression = 1;
+                            m_subsampling_force_desubsampling_inside_decompression = true;
                     }
                 }
                 else
                 {
                     m_sof_hv[q] = o;
-                    if (m_subsampling_force_desubsampling_inside_decompression == 0)
+                    if (!m_subsampling_force_desubsampling_inside_decompression)
                     {
                         if (q == 0)
                         {
@@ -1517,10 +1517,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 /* Tq: Quantization table destination selector */
                 if (OJPEGReadByte(out o) == 0)
                     return (0);
-                if (m_subsamplingcorrect == 0)
+                if (!m_subsamplingcorrect)
                     m_sof_tq[q] = o;
             }
-            if (m_subsamplingcorrect == 0)
+            if (!m_subsamplingcorrect)
                 m_sof_log = 1;
             return (1);
         }
@@ -1532,7 +1532,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             ushort m;
             byte n;
             byte o;
-            Debug.Assert(m_subsamplingcorrect == 0);
+            Debug.Assert(!m_subsamplingcorrect);
             if (m_sof_log == 0)
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module, "Corrupt SOS marker in JPEG data");
