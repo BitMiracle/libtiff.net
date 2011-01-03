@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2011, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -158,7 +158,7 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-                return "Copyright (C) 2008-2010, Bit Miracle";
+                return "Copyright (C) 2008-2011, Bit Miracle";
             }
         }
 

@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2010, Bit Miracle
+﻿/* Copyright (C) 2008-2011, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -63,7 +63,7 @@ namespace BitMiracle.LibJpeg.Classic
          * downsampled_width = ceil(image_width * Hi/Hmax * DCT_scaled_size/DCTSIZE)
          */
         internal int downsampled_width;    /* actual width in samples */
-	
+    
         internal int downsampled_height; /* actual height in samples */
         /* This flag is used only for decompression.  In cases where some of the
          * components will be ignored (eg grayscale output from YCbCr image),
@@ -199,9 +199,9 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         /// <value>The downsampled width.</value>
         public int Downsampled_width
-	    {
-		    get { return downsampled_width; }
-	    }
+        {
+            get { return downsampled_width; }
+        }
 
         internal static jpeg_component_info[] createArrayOfComponents(int length)
         {
