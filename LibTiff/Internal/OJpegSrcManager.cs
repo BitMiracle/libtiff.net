@@ -31,7 +31,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public override bool fill_input_buffer()
         {
             Tiff tif = m_sp.GetTiff();
-            OJPEGState sp = m_sp.sp;
             byte[] mem = null;
             uint len = 0;
             if (m_sp.OJPEGWriteStream(out mem, out len) == 0)

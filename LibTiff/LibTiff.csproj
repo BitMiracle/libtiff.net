@@ -96,7 +96,6 @@
     <Compile Include="Internal\OJpegCodecTagMethods.cs" />
     <Compile Include="Internal\OJpegErrorManager.cs" />
     <Compile Include="Internal\OJpegSrcManager.cs" />
-    <Compile Include="Internal\OJpegState.cs" />
     <Compile Include="Internal\OJpegStateInBufferSource.cs" />
     <Compile Include="Internal\OJpegStateOutState.cs" />
     <Compile Include="Internal\PackBitsCodec.cs" />

@@ -22,9 +22,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public override bool SetField(Tiff tif, TiffTag tag, FieldValue[] ap)
         {
             const string module = "OJPEGVSetField";
-            OJpegCodec codec = tif.m_currentCodec as OJpegCodec;
-            Debug.Assert(codec != null);
-            OJPEGState sp = codec.sp;
+            OJpegCodec sp = tif.m_currentCodec as OJpegCodec;
+            Debug.Assert(sp != null);
 
             uint ma;
             uint[] mb;
@@ -111,9 +110,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public override FieldValue[] GetField(Tiff tif, TiffTag tag)
         {
-            OJpegCodec codec = tif.m_currentCodec as OJpegCodec;
-            Debug.Assert(codec != null);
-            OJPEGState sp = codec.sp;
+            OJpegCodec sp = tif.m_currentCodec as OJpegCodec;
+            Debug.Assert(sp != null);
 
             FieldValue[] result = null;
 
@@ -129,7 +127,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     break;
                 case TiffTag.YCBCRSUBSAMPLING:
                     if (sp.m_subsamplingcorrect_done == 0)
-                        codec.OJPEGSubsamplingCorrect();
+                        sp.OJPEGSubsamplingCorrect();
 
                     result = new FieldValue[2];
                     result[0].Set(sp.m_subsampling_hor);
@@ -167,9 +165,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public override void PrintDir(Tiff tif, Stream fd, TiffPrintFlags flags)
         {
-            OJpegCodec codec = tif.m_currentCodec as OJpegCodec;
-            Debug.Assert(codec != null);
-            OJPEGState sp = codec.sp;
+            OJpegCodec sp = tif.m_currentCodec as OJpegCodec;
+            Debug.Assert(sp != null);
 
             if (tif.fieldSet(OJpegCodec.FIELD_OJPEG_JPEGINTERCHANGEFORMAT))
                 Tiff.fprintf(fd, "  JpegInterchangeFormat: {0}\n", sp.m_jpeg_interchange_format);
