@@ -637,12 +637,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             if (m_libjpeg_jpeg_query_style == 0)
             {
-                if (OJPEGDecodeRaw(buf, cc) == 0)
+                if (OJPEGDecodeRaw(buf, offset, cc) == 0)
                     return false;
             }
             else
             {
-                if (OJPEGDecodeScanlines(buf, cc) == 0)
+                if (OJPEGDecodeScanlines(buf, offset, cc) == 0)
                     return false;
             }
             return true;
@@ -708,7 +708,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return 1;
         }
 
-        private int OJPEGDecodeRaw(byte[] buf, int cc)
+        private int OJPEGDecodeRaw(byte[] buf, int offset, int cc)
         {
             const string module = "OJPEGDecodeRaw";
 
@@ -719,7 +719,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
 
             Debug.Assert(cc > 0);
-            int m = 0; // offset
+            int m = offset;
             int n = cc;
             do
             {
@@ -772,7 +772,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return 1;
         }
 
-        private int OJPEGDecodeScanlines(byte[] buf, int cc)
+        private int OJPEGDecodeScanlines(byte[] buf, int offset, int cc)
         {
             const string module = "OJPEGDecodeScanlines";
 
@@ -784,7 +784,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             Debug.Assert(cc > 0);
 
-            int m = 0;
+            int m = offset;
             byte[] temp = new byte[m_bytes_per_line];
             int n = cc;
             do
