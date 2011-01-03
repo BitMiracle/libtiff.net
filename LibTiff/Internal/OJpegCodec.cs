@@ -160,6 +160,41 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         public const int OJPEG_BUFFER = 2048;
 
+        enum OJPEGStateInBufferSource
+        {
+            osibsNotSetYet,
+            osibsJpegInterchangeFormat,
+            osibsStrile,
+            osibsEof
+        }
+
+        enum OJPEGStateOutState
+        {
+            ososSoi,
+
+            ososQTable0,
+            ososQTable1,
+            ososQTable2,
+            ososQTable3,
+
+            ososDcTable0,
+            ososDcTable1,
+            ososDcTable2,
+            ososDcTable3,
+
+            ososAcTable0,
+            ososAcTable1,
+            ososAcTable2,
+            ososAcTable3,
+
+            ososDri,
+            ososSof,
+            ososSos,
+            ososCompressed,
+            ososRst,
+            ososEoi
+        }
+
         private static TiffFieldInfo[] ojpeg_field_info =
         {
             new TiffFieldInfo(TiffTag.JPEGIFOFFSET, 1, 1, TiffType.LONG, FIELD_OJPEG_JPEGINTERCHANGEFORMAT, true, false, "JpegInterchangeFormat"),
@@ -171,7 +206,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             new TiffFieldInfo(TiffTag.JPEGRESTARTINTERVAL, 1, 1, TiffType.SHORT, FIELD_OJPEG_JPEGRESTARTINTERVAL, false, false, "JpegRestartInterval"),
         };
 
-        public struct SosEnd
+        private struct SosEnd
         {
             public byte m_log;
             public OJPEGStateInBufferSource m_in_buffer_source;
@@ -221,7 +256,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public byte[] m_sof_tq = new byte[3];
         public byte[] m_sos_cs = new byte[3];
         public byte[] m_sos_tda = new byte[3];
-        public SosEnd[] m_sos_end = new SosEnd[3];
+        private SosEnd[] m_sos_end = new SosEnd[3];
         public byte m_readheader_done;
         public byte m_writeheader_done;
         public short m_write_cursample;
@@ -244,7 +279,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public uint m_subsampling_convert_state;
         public uint m_bytes_per_line;   /* if the codec outputs subsampled data, a 'line' in bytes_per_line */
         public uint m_lines_per_strile; /* and lines_per_strile means subsampling_ver desubsampled rows     */
-        public OJPEGStateInBufferSource m_in_buffer_source;
+        private OJPEGStateInBufferSource m_in_buffer_source;
         public uint m_in_buffer_next_strile;
         public uint m_in_buffer_strile_count;
         public uint m_in_buffer_file_pos;
@@ -253,7 +288,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public ushort m_in_buffer_togo;
         public int m_in_buffer_cur; // index into m_in_buffer
         public byte[] m_in_buffer = new byte[OJPEG_BUFFER];
-        public OJPEGStateOutState m_out_state;
+        private OJPEGStateOutState m_out_state;
         public byte[] m_out_buffer = new byte[OJPEG_BUFFER];
         public byte[] m_skip_buffer;
 
