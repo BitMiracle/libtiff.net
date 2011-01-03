@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SilverlightTestApplication")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyCopyright("Copyright (C) 2008-2011, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

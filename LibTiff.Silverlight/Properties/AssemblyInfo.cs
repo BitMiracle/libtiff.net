@@ -11,7 +11,7 @@ using System;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bit Miracle")]
 [assembly: AssemblyProduct("BitMiracle.LibTiff.NET for Silverlight")]
-[assembly: AssemblyCopyright("Copyright (C) 2008-2010, Bit Miracle")]
+[assembly: AssemblyCopyright("Copyright (C) 2008-2011, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

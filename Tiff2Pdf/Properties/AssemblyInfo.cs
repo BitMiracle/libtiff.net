@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Tiff2Pdf")]
-[assembly: AssemblyCopyright("Copyright ©  2009")]
+[assembly: AssemblyCopyright("Copyright (C) 2008-2011, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
