@@ -54,9 +54,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public byte subsampling_hor;
         public byte subsampling_ver;
         public byte subsampling_force_desubsampling_inside_decompression;
-        //byte qtable_offset_count;
-        //byte dctable_offset_count;
-        //byte actable_offset_count;
+        public byte qtable_offset_count;
+        public byte dctable_offset_count;
+        public byte actable_offset_count;
         public uint[] qtable_offset = new uint[3];
         public uint[] dctable_offset = new uint[3];
         public uint[] actable_offset = new uint[3];

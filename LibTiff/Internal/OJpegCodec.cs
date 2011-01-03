@@ -696,7 +696,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return 1;
         }
 
-        private void OJPEGSubsamplingCorrect()
+        public void OJPEGSubsamplingCorrect()
         {
             const string module = "OJPEGSubsamplingCorrect";
             byte mh;
