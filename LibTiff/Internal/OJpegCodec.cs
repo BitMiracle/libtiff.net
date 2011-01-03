@@ -1267,7 +1267,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 nb[3] = (byte)(m & 255);
                 if (OJPEGReadBlock((ushort)(m - 2), nb, 4) == 0)
                     return (0);
-                o = nb[sizeof(uint) + 4];
+                o = nb[4];
                 if ((o & 240) == 0)
                 {
                     if (3 < o)
