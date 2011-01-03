@@ -100,7 +100,9 @@ namespace UnitTests
             {
                 return new string[]
                 {
-                    "gray16-lzw-pc.tif"
+                    "gray16-lzw-pc.tif",
+                    "smallliz.tif",
+                    "zackthecat.tif",
                 };
             }
         }
