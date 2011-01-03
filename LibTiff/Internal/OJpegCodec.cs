@@ -149,18 +149,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
 {
     class OJpegCodec : TiffCodec
     {
-        public const int FIELD_OJPEG_JPEGINTERCHANGEFORMAT = (FieldBit.Codec + 0);
-        public const int FIELD_OJPEG_JPEGINTERCHANGEFORMATLENGTH = (FieldBit.Codec + 1);
-        public const int FIELD_OJPEG_JPEGQTABLES = (FieldBit.Codec + 2);
-        public const int FIELD_OJPEG_JPEGDCTABLES = (FieldBit.Codec + 3);
-        public const int FIELD_OJPEG_JPEGACTABLES = (FieldBit.Codec + 4);
-        public const int FIELD_OJPEG_JPEGPROC = (FieldBit.Codec + 5);
-        public const int FIELD_OJPEG_JPEGRESTARTINTERVAL = (FieldBit.Codec + 6);
-        public const int FIELD_OJPEG_COUNT = 7;
+        internal const int FIELD_OJPEG_JPEGINTERCHANGEFORMAT = (FieldBit.Codec + 0);
+        internal const int FIELD_OJPEG_JPEGINTERCHANGEFORMATLENGTH = (FieldBit.Codec + 1);
+        internal const int FIELD_OJPEG_JPEGQTABLES = (FieldBit.Codec + 2);
+        internal const int FIELD_OJPEG_JPEGDCTABLES = (FieldBit.Codec + 3);
+        internal const int FIELD_OJPEG_JPEGACTABLES = (FieldBit.Codec + 4);
+        internal const int FIELD_OJPEG_JPEGPROC = (FieldBit.Codec + 5);
+        internal const int FIELD_OJPEG_JPEGRESTARTINTERVAL = (FieldBit.Codec + 6);
+        internal const int FIELD_OJPEG_COUNT = 7;
 
-        public const int OJPEG_BUFFER = 2048;
+        private const int OJPEG_BUFFER = 2048;
 
-        enum OJPEGStateInBufferSource
+        private enum OJPEGStateInBufferSource
         {
             osibsNotSetYet,
             osibsJpegInterchangeFormat,
@@ -168,7 +168,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             osibsEof
         }
 
-        enum OJPEGStateOutState
+        private enum OJPEGStateOutState
         {
             ososSoi,
 
@@ -215,82 +215,87 @@ namespace BitMiracle.LibTiff.Classic.Internal
             public uint m_in_buffer_file_togo;
         }
 
+        internal uint m_jpeg_interchange_format;
+        internal uint m_jpeg_interchange_format_length;
+        internal byte m_jpeg_proc;
+
+        internal byte m_subsamplingcorrect_done;
+        internal byte m_subsampling_tag;
+        internal byte m_subsampling_hor;
+        internal byte m_subsampling_ver;
+
+        internal byte m_qtable_offset_count;
+        internal byte m_dctable_offset_count;
+        internal byte m_actable_offset_count;
+        internal uint[] m_qtable_offset = new uint[3];
+        internal uint[] m_dctable_offset = new uint[3];
+        internal uint[] m_actable_offset = new uint[3];
+
+        internal ushort m_restart_interval;
+
+        internal jpeg_decompress_struct m_libjpeg_jpeg_decompress_struct;
+
         private TiffTagMethods m_tagMethods;
         private TiffTagMethods m_parentTagMethods;
 
-        public uint m_file_size;
-        public uint m_image_width;
-        public uint m_image_length;
-        public uint m_strile_width;
-        public uint m_strile_length;
-        public uint m_strile_length_total;
-        public byte m_samples_per_pixel;
-        public byte m_plane_sample_offset;
-        public byte m_samples_per_pixel_per_plane;
-        public uint m_jpeg_interchange_format;
-        public uint m_jpeg_interchange_format_length;
-        public byte m_jpeg_proc;
-        public byte m_subsamplingcorrect;
-        public byte m_subsamplingcorrect_done;
-        public byte m_subsampling_tag;
-        public byte m_subsampling_hor;
-        public byte m_subsampling_ver;
-        public byte m_subsampling_force_desubsampling_inside_decompression;
-        public byte m_qtable_offset_count;
-        public byte m_dctable_offset_count;
-        public byte m_actable_offset_count;
-        public uint[] m_qtable_offset = new uint[3];
-        public uint[] m_dctable_offset = new uint[3];
-        public uint[] m_actable_offset = new uint[3];
-        public byte[][] m_qtable = new byte[4][];
-        public byte[][] m_dctable = new byte[4][];
-        public byte[][] m_actable = new byte[4][];
-        public ushort m_restart_interval;
-        public byte m_restart_index;
-        public byte m_sof_log;
-        public byte m_sof_marker_id;
-        public uint m_sof_x;
-        public uint m_sof_y;
-        public byte[] m_sof_c = new byte[3];
-        public byte[] m_sof_hv = new byte[3];
-        public byte[] m_sof_tq = new byte[3];
-        public byte[] m_sos_cs = new byte[3];
-        public byte[] m_sos_tda = new byte[3];
+        private uint m_file_size;
+        private uint m_image_width;
+        private uint m_image_length;
+        private uint m_strile_width;
+        private uint m_strile_length;
+        private uint m_strile_length_total;
+        private byte m_samples_per_pixel;
+        private byte m_plane_sample_offset;
+        private byte m_samples_per_pixel_per_plane;
+        private byte m_subsamplingcorrect;
+        private byte m_subsampling_force_desubsampling_inside_decompression;
+        private byte[][] m_qtable = new byte[4][];
+        private byte[][] m_dctable = new byte[4][];
+        private byte[][] m_actable = new byte[4][];
+        private byte m_restart_index;
+        private byte m_sof_log;
+        private byte m_sof_marker_id;
+        private uint m_sof_x;
+        private uint m_sof_y;
+        private byte[] m_sof_c = new byte[3];
+        private byte[] m_sof_hv = new byte[3];
+        private byte[] m_sof_tq = new byte[3];
+        private byte[] m_sos_cs = new byte[3];
+        private byte[] m_sos_tda = new byte[3];
         private SosEnd[] m_sos_end = new SosEnd[3];
-        public byte m_readheader_done;
-        public byte m_writeheader_done;
-        public short m_write_cursample;
-        public uint m_write_curstrile;
-        public byte m_libjpeg_session_active;
-        public byte m_libjpeg_jpeg_query_style;
-        public jpeg_error_mgr m_libjpeg_jpeg_error_mgr;
-        public jpeg_decompress_struct m_libjpeg_jpeg_decompress_struct;
-        public jpeg_source_mgr m_libjpeg_jpeg_source_mgr;
-        public byte m_subsampling_convert_log;
-        public uint m_subsampling_convert_ylinelen;
-        public uint m_subsampling_convert_ylines;
-        public uint m_subsampling_convert_clinelen;
-        public uint m_subsampling_convert_clines;
-        public byte[][] m_subsampling_convert_ybuf;
-        public byte[][] m_subsampling_convert_cbbuf;
-        public byte[][] m_subsampling_convert_crbuf;
-        public byte[][][] m_subsampling_convert_ycbcrimage;
-        public uint m_subsampling_convert_clinelenout;
-        public uint m_subsampling_convert_state;
-        public uint m_bytes_per_line;   /* if the codec outputs subsampled data, a 'line' in bytes_per_line */
-        public uint m_lines_per_strile; /* and lines_per_strile means subsampling_ver desubsampled rows     */
+        private byte m_readheader_done;
+        private byte m_writeheader_done;
+        private short m_write_cursample;
+        private uint m_write_curstrile;
+        private byte m_libjpeg_session_active;
+        private byte m_libjpeg_jpeg_query_style;
+        private jpeg_error_mgr m_libjpeg_jpeg_error_mgr;
+        private jpeg_source_mgr m_libjpeg_jpeg_source_mgr;
+        private byte m_subsampling_convert_log;
+        private uint m_subsampling_convert_ylinelen;
+        private uint m_subsampling_convert_ylines;
+        private uint m_subsampling_convert_clinelen;
+        private uint m_subsampling_convert_clines;
+        private byte[][] m_subsampling_convert_ybuf;
+        private byte[][] m_subsampling_convert_cbbuf;
+        private byte[][] m_subsampling_convert_crbuf;
+        private byte[][][] m_subsampling_convert_ycbcrimage;
+        private uint m_subsampling_convert_clinelenout;
+        private uint m_subsampling_convert_state;
+        private uint m_bytes_per_line;   /* if the codec outputs subsampled data, a 'line' in bytes_per_line */
+        private uint m_lines_per_strile; /* and lines_per_strile means subsampling_ver desubsampled rows     */
         private OJPEGStateInBufferSource m_in_buffer_source;
-        public uint m_in_buffer_next_strile;
-        public uint m_in_buffer_strile_count;
-        public uint m_in_buffer_file_pos;
-        public byte m_in_buffer_file_pos_log;
-        public uint m_in_buffer_file_togo;
-        public ushort m_in_buffer_togo;
-        public int m_in_buffer_cur; // index into m_in_buffer
-        public byte[] m_in_buffer = new byte[OJPEG_BUFFER];
+        private uint m_in_buffer_next_strile;
+        private uint m_in_buffer_strile_count;
+        private uint m_in_buffer_file_pos;
+        private byte m_in_buffer_file_pos_log;
+        private uint m_in_buffer_file_togo;
+        private ushort m_in_buffer_togo;
+        private int m_in_buffer_cur; // index into m_in_buffer
+        private byte[] m_in_buffer = new byte[OJPEG_BUFFER];
         private OJPEGStateOutState m_out_state;
-        public byte[] m_out_buffer = new byte[OJPEG_BUFFER];
-        public byte[] m_skip_buffer;
+        private byte[] m_out_buffer = new byte[OJPEG_BUFFER];
+        private byte[] m_skip_buffer;
 
         public OJpegCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
