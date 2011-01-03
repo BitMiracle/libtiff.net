@@ -34,5 +34,18 @@ namespace UnitTests
                 Assert.AreEqual(expectedDataBase64, actualDataBase64);
             }
         }
+
+        [Test]
+        public void TestReadTileOJpeg()
+        {
+            string fn = Path.Combine(TestCase.Folder, "zackthecat.tif");
+            using (Tiff tiff = Tiff.Open(fn, "r"))
+            {
+                long size = tiff.TileSize();
+                byte[] buffer = new byte[size];
+                int read = tiff.ReadTile(buffer, 0, 0, 0, 0, 0);
+                Assert.AreNotEqual(-1, read);
+            }
+        }
     }
 }
