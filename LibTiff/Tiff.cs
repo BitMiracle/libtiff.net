@@ -4503,8 +4503,8 @@ namespace BitMiracle.LibTiff.Classic
 
             for (int i_row = 0; i_row < read_ysize; i_row++)
             {
-                Buffer.BlockCopy(raster, (read_ysize - i_row - 1) * read_xsize,
-                    raster, (tile_ysize - i_row - 1) * tile_xsize, read_xsize * sizeof(int));
+                Buffer.BlockCopy(raster, (read_ysize - i_row - 1) * read_xsize * sizeof(int),
+                    raster, (tile_ysize - i_row - 1) * tile_xsize * sizeof(int), read_xsize * sizeof(int));
 
                 Array.Clear(raster, (tile_ysize - i_row - 1) * tile_xsize + read_xsize, tile_xsize - read_xsize);
             }

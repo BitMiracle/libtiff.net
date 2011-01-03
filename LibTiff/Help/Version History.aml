@@ -12,7 +12,10 @@
                                 Added new OJPEG (or Old JPEG, or Original JPEG) codec.
                             </listItem>
                             <listItem>
-                                Fixed bugs with timezones in Tiff2Pdf utility.
+                                Fixed bug in ReadRGBATile method.
+                            </listItem>
+							<listItem>
+                                Fixed bug with timezones in Tiff2Pdf utility.
                             </listItem>
                         </list>
                     </content>
