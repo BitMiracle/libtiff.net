@@ -1,5 +1,5 @@
 LibTiff.Net
-Copyright (c) 2008-2010, Bit Miracle
+Copyright (c) 2008-2011, Bit Miracle
 
 All rights reserved.
 
