@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <!-- The configuration and platform will be used to determine which
          assemblies to include from solution and project documentation
@@ -213,6 +213,7 @@
     <None Include="Help\Samples\Using LibTiff.Net\Convert color TIFF to a 24-bit System.Drawing.Bitmap.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert 16-bit grayscale TIFF to a 8-bit System.Drawing.Bitmap.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert a multi-strip TIFF image to a single-strip one.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Convert bytes of a multi-strip TIFF image to bytes of a single-strip one.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Print formatted description of a TIFF file contents.aml" />
     <None Include="Help\Samples\Using utilities\Merge several TIFF images to single multipage TIFF.aml" />
     <None Include="Help\Samples\Using utilities\Extract a page from a multi-page TIFF image.aml" />
