@@ -11,6 +11,9 @@
                             <listItem>
                                 Added new OJPEG (or Old JPEG, or Original JPEG) codec.
                             </listItem>
+							<listItem>
+                                Added new sample ConvertToSingleStripInMemory.
+                            </listItem>
                             <listItem>
                                 Fixed bug in ReadRGBATile method.
                             </listItem>
