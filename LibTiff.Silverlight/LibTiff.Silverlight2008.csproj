@@ -48,7 +48,7 @@
     <Reference Include="System.Windows.Browser" />
   </ItemGroup>
   <ItemGroup>
-  <Compile Include="..\LibTiff\Enums\CleanFaxData.cs">
+    <Compile Include="..\LibTiff\Enums\CleanFaxData.cs">
       <Link>Enums\CleanFaxData.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\Enums\ColorResponseUnit.cs">
@@ -176,6 +176,18 @@
     </Compile>
     <Compile Include="..\LibTiff\Internal\LZWCodec.cs">
       <Link>Internal\LZWCodec.cs</Link>
+    </Compile>
+	<Compile Include="..\LibTiff\Internal\OJpegCodec.cs">
+      <Link>Internal\OJpegCodec.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Internal\OJpegCodecTagMethods.cs">
+      <Link>Internal\OJpegCodecTagMethods.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Internal\OJpegErrorManager.cs">
+      <Link>Internal\OJpegErrorManager.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\Internal\OJpegSrcManager.cs">
+      <Link>Internal\OJpegSrcManager.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\Internal\PackBitsCodec.cs">
       <Link>Internal\PackBitsCodec.cs</Link>
