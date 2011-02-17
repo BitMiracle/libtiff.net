@@ -10,7 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BitMiracle.Tiff2Pdf</RootNamespace>
     <AssemblyName>Tiff2Pdf</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -47,7 +46,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LibTiff\LibTiff2005.csproj">
       <Project>{281EF657-40C0-432D-8AC4-E9ADDFD792B2}</Project>
-      <Name>LibTiff2005</Name>
+      <Name>LibTiff</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
