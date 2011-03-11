@@ -50,6 +50,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         * until we have enough to do a downsample step.
         */
         private byte[][][] m_color_buf = new byte[JpegConstants.MAX_COMPONENTS][][];
+        private int m_colorBufRowsOffset;
 
         private int m_rows_to_go;  /* counts rows remaining in source image */
         private int m_next_buf_row;       /* index of next row to store in color_buf */
@@ -75,6 +76,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* No context, just make it tall enough for one row group */
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
+                    m_colorBufRowsOffset = 0;
                     m_color_buf[ci] = jpeg_compress_struct.AllocJpegSamples(
                         (cinfo.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.Component_info[ci].H_samp_factor,
                         cinfo.m_max_v_samp_factor);
@@ -124,7 +126,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int samplesPerRow = (m_cinfo.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.Component_info[ci].H_samp_factor;
 
                 byte[][] fake_buffer = new byte[5 * rgroup_height][];
-                for (int i = 0; i < 5 * rgroup_height; i++)
+                for (int i = 1; i < 4 * rgroup_height; i++)
                     fake_buffer[i] = new byte [samplesPerRow];
 
                 /* Allocate the actual buffer space (3 row groups) for this component.
@@ -145,6 +147,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 m_color_buf[ci] = fake_buffer;
+                m_colorBufRowsOffset = rgroup_height;
             }
         }
 
@@ -164,7 +167,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int inrows = in_rows_avail - in_row_ctr;
                 int numrows = m_cinfo.m_max_v_samp_factor - m_next_buf_row;
                 numrows = Math.Min(numrows, inrows);
-                m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, m_next_buf_row, numrows);
+                m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, m_colorBufRowsOffset + m_next_buf_row, numrows);
                 in_row_ctr += numrows;
                 m_next_buf_row += numrows;
                 m_rows_to_go -= numrows;
@@ -173,7 +176,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 if (m_rows_to_go == 0 && m_next_buf_row < m_cinfo.m_max_v_samp_factor)
                 {
                     for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
-                        expand_bottom_edge(m_color_buf[ci], m_cinfo.m_image_width, m_next_buf_row, m_cinfo.m_max_v_samp_factor);
+                        expand_bottom_edge(m_color_buf[ci], m_colorBufRowsOffset, m_cinfo.m_image_width, m_next_buf_row, m_cinfo.m_max_v_samp_factor);
 
                     m_next_buf_row = m_cinfo.m_max_v_samp_factor;
                 }
@@ -181,7 +184,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* If we've filled the conversion buffer, empty it. */
                 if (m_next_buf_row == m_cinfo.m_max_v_samp_factor)
                 {
-                    m_cinfo.m_downsample.downsample(m_color_buf, 0, output_buf, out_row_group_ctr);
+                    m_cinfo.m_downsample.downsample(m_color_buf, m_colorBufRowsOffset, output_buf, out_row_group_ctr);
                     m_next_buf_row = 0;
                     out_row_group_ctr++;
                 }
@@ -194,7 +197,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.Component_info[ci];
-                        expand_bottom_edge(output_buf[ci], componentInfo.Width_in_blocks * JpegConstants.DCTSIZE,
+                        expand_bottom_edge(output_buf[ci], 0, componentInfo.Width_in_blocks * JpegConstants.DCTSIZE,
                             out_row_group_ctr * componentInfo.V_samp_factor,
                             out_row_groups_avail * componentInfo.V_samp_factor);
                     }
@@ -218,7 +221,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int inrows = in_rows_avail - in_row_ctr;
                     int numrows = m_next_buf_stop - m_next_buf_row;
                     numrows = Math.Min(numrows, inrows);
-                    m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, m_next_buf_row, numrows);
+                    m_cinfo.m_cconvert.color_convert(input_buf, in_row_ctr, m_color_buf, m_colorBufRowsOffset + m_next_buf_row, numrows);
 
                     /* Pad at top of image, if first time through */
                     if (m_rows_to_go == m_cinfo.m_image_height)
@@ -226,7 +229,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                         {
                             for (int row = 1; row <= m_cinfo.m_max_v_samp_factor; row++)
-                                JpegUtils.jcopy_sample_rows(m_color_buf[ci], 0, m_color_buf[ci], -row, 1, m_cinfo.m_image_width);
+                                JpegUtils.jcopy_sample_rows(m_color_buf[ci], m_colorBufRowsOffset, m_color_buf[ci], m_colorBufRowsOffset - row, 1, m_cinfo.m_image_width);
                         }
                     }
                     
@@ -244,7 +247,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     if (m_next_buf_row < m_next_buf_stop)
                     {
                         for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
-                            expand_bottom_edge(m_color_buf[ci], m_cinfo.m_image_width, m_next_buf_row, m_next_buf_stop);
+                            expand_bottom_edge(m_color_buf[ci], m_colorBufRowsOffset, m_cinfo.m_image_width, m_next_buf_row, m_next_buf_stop);
 
                         m_next_buf_row = m_next_buf_stop;
                     }
@@ -253,7 +256,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* If we've gotten enough data, downsample a row group. */
                 if (m_next_buf_row == m_next_buf_stop)
                 {
-                    m_cinfo.m_downsample.downsample(m_color_buf, m_this_row_group, output_buf, out_row_group_ctr);
+                    m_cinfo.m_downsample.downsample(m_color_buf, m_colorBufRowsOffset + m_this_row_group, output_buf, out_row_group_ctr);
                     out_row_group_ctr++;
                 
                     /* Advance pointers with wraparound as necessary. */
@@ -275,10 +278,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Expand an image vertically from height input_rows to height output_rows,
         /// by duplicating the bottom row.
         /// </summary>
-        private static void expand_bottom_edge(byte[][] image_data, int num_cols, int input_rows, int output_rows)
+        private static void expand_bottom_edge(byte[][] image_data, int rowsOffset, int num_cols, int input_rows, int output_rows)
         {
             for (int row = input_rows; row < output_rows; row++)
-                JpegUtils.jcopy_sample_rows(image_data, input_rows - 1, image_data, row, 1, num_cols);
+                JpegUtils.jcopy_sample_rows(image_data, rowsOffset + input_rows - 1, image_data, row, 1, num_cols);
         }
     }
 }

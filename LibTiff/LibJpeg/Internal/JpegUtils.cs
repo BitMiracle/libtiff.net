@@ -110,7 +110,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public static void jcopy_sample_rows(byte[][] input_array, int source_row, byte[][] output_array, int dest_row, int num_rows, int num_cols)
         {
             for (int row = 0; row < num_rows; row++)
-                Buffer.BlockCopy(input_array[source_row + row], 0, output_array[dest_row + row], 0, num_cols);
+                Buffer.BlockCopy(input_array[source_row++], 0, output_array[dest_row++], 0, num_cols);
         }
     }
 }
