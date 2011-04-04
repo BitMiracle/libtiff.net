@@ -4,6 +4,16 @@
         <section address="Section1">
             <content></content>
             <sections>
+			<section address="SubSection6">
+                    <title>Version 2.3</title>
+                    <content>
+                        <list class="bullet">
+                            <listItem>
+                                Fixed subsampling-related bug in OJpeg codec.
+                            </listItem>
+                        </list>
+                    </content>
+                </section>
 				<section address="SubSection5">
                     <title>Version 2.2</title>
                     <content>

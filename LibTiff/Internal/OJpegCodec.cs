@@ -313,6 +313,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_tif.MergeFieldInfo(ojpeg_field_info, ojpeg_field_info.Length);
 
             m_jpeg_proc = 1;
+            m_subsamplingcorrect_done = false;
             m_subsampling_hor = 2;
             m_subsampling_ver = 2;
 
