@@ -92,6 +92,41 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_tagMethods = new JpegCodecTagMethods();
         }
 
+        private void cleanState()
+        {
+            m_compression = null;
+            m_decompression = null;
+            m_common = null;
+
+            m_h_sampling = 0;
+            m_v_sampling = 0;
+
+            m_jpegtables = null;
+            m_jpegtables_length = 0;
+            m_jpegquality = 0;
+            m_jpegcolormode = 0;
+            m_jpegtablesmode = 0;
+
+            m_ycbcrsampling_fetched = false;
+
+            m_recvparams = 0;
+            m_subaddress = null;
+            m_recvtime = 0;
+            m_faxdcs = null;
+            m_rawDecode = false;
+            m_rawEncode = false;
+
+            m_cinfo_initialized = false;
+
+            m_err = null;
+            m_photometric = 0;
+
+            m_bytesperline = 0;
+            m_ds_buffer = new byte[JpegConstants.MAX_COMPONENTS][][];
+            m_scancount = 0;
+            m_samplesperclump = 0;
+        }
+
         public override bool Init()
         {
             Debug.Assert(m_scheme == Compression.JPEG);
@@ -105,38 +140,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
             /*
              * Allocate state block so tag methods have storage to record values.
              */
-            m_compression = null;
-            m_decompression = null;
-            m_photometric = 0;
-            m_h_sampling = 0;
-            m_v_sampling = 0;
-            m_bytesperline = 0;
-            m_scancount = 0;
-            m_samplesperclump = 0;
-            m_recvtime = 0;
+            cleanState();
             m_err = new JpegErrorManager(this);
 
             m_parentTagMethods = m_tif.m_tagmethods;
             m_tif.m_tagmethods = m_tagMethods;
 
             /* Default values for codec-specific fields */
-            m_jpegtables = null;
-            m_jpegtables_length = 0;
             m_jpegquality = 75; /* Default IJG quality */
             m_jpegcolormode = JpegColorMode.RGB;
             m_jpegtablesmode = JpegTablesMode.QUANT | JpegTablesMode.HUFF;
 
-            m_recvparams = 0;
-            m_subaddress = null;
-            m_faxdcs = null;
-
-            m_ycbcrsampling_fetched = false;
-
-            m_rawDecode = false;
-            m_rawEncode = false;
             m_tif.m_flags |= TiffFlags.NOBITREV; // no bit reversal, please
-
-            m_cinfo_initialized = false;
 
             /*
              ** Create a JPEGTables field if no directory has yet been created. 

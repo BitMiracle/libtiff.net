@@ -303,6 +303,88 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_tagMethods = new OJpegCodecTagMethods();
         }
 
+        private void cleanState()
+        {
+            m_jpeg_interchange_format = 0;
+            m_jpeg_interchange_format_length = 0;
+            m_jpeg_proc = 0;
+
+            m_subsamplingcorrect_done = false;
+            m_subsampling_tag = false;
+            m_subsampling_hor = 0;
+            m_subsampling_ver = 0;
+
+            m_qtable_offset_count = 0;
+            m_dctable_offset_count = 0;
+            m_actable_offset_count = 0;
+            m_qtable_offset = new uint[3];
+            m_dctable_offset = new uint[3];
+            m_actable_offset = new uint[3];
+
+            m_restart_interval = 0;
+
+            m_libjpeg_jpeg_decompress_struct = null;
+
+            m_file_size = 0;
+            m_image_width = 0;
+            m_image_length = 0;
+            m_strile_width = 0;
+            m_strile_length = 0;
+            m_strile_length_total = 0;
+            m_samples_per_pixel = 0;
+            m_plane_sample_offset = 0;
+            m_samples_per_pixel_per_plane = 0;
+            m_subsamplingcorrect = false;
+            m_subsampling_force_desubsampling_inside_decompression = false;
+            m_qtable = new byte[4][];
+            m_dctable = new byte[4][];
+            m_actable = new byte[4][];
+            m_restart_index = 0;
+            m_sof_log = false;
+            m_sof_marker_id = 0;
+            m_sof_x = 0;
+            m_sof_y = 0;
+            m_sof_c = new byte[3];
+            m_sof_hv = new byte[3];
+            m_sof_tq = new byte[3];
+            m_sos_cs = new byte[3];
+            m_sos_tda = new byte[3];
+            m_sos_end = new SosEnd[3];
+            m_readheader_done = false;
+            m_writeheader_done = false;
+            m_write_cursample = 0;
+            m_write_curstrile = 0;
+            m_libjpeg_session_active = false;
+            m_libjpeg_jpeg_query_style = 0;
+            m_libjpeg_jpeg_error_mgr = null;
+            m_libjpeg_jpeg_source_mgr = null;
+            m_subsampling_convert_log = false;
+            m_subsampling_convert_ylinelen = 0;
+            m_subsampling_convert_ylines = 0;
+            m_subsampling_convert_clinelen = 0;
+            m_subsampling_convert_clines = 0;
+            m_subsampling_convert_ybuf = null;
+            m_subsampling_convert_cbbuf = null;
+            m_subsampling_convert_crbuf = null;
+            m_subsampling_convert_ycbcrimage = null;
+            m_subsampling_convert_clinelenout = 0;
+            m_subsampling_convert_state = 0;
+            m_bytes_per_line = 0;
+            m_lines_per_strile = 0;
+            m_in_buffer_source = OJPEGStateInBufferSource.osibsNotSetYet;
+            m_in_buffer_next_strile = 0;
+            m_in_buffer_strile_count = 0;
+            m_in_buffer_file_pos = 0;
+            m_in_buffer_file_pos_log = false;
+            m_in_buffer_file_togo = 0;
+            m_in_buffer_togo = 0;
+            m_in_buffer_cur = 0; // index into m_in_buffer
+            m_in_buffer = new byte[OJPEG_BUFFER];
+            m_out_state = 0;
+            m_out_buffer = new byte[OJPEG_BUFFER];
+            m_skip_buffer = null;
+        }
+
         public override bool Init()
         {
             Debug.Assert(m_scheme == Compression.OJPEG);
@@ -312,8 +394,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
              */
             m_tif.MergeFieldInfo(ojpeg_field_info, ojpeg_field_info.Length);
 
+            cleanState();
             m_jpeg_proc = 1;
-            m_subsamplingcorrect_done = false;
             m_subsampling_hor = 2;
             m_subsampling_ver = 2;
 

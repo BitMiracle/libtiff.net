@@ -198,6 +198,49 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_tagMethods = new CCITTCodecTagMethods();
         }
 
+        private void cleanState()
+        {
+            m_mode = FaxMode.CLASSIC;
+            m_groupoptions = Group3Opt.UNKNOWN;
+            m_cleanfaxdata = CleanFaxData.CLEAN;
+            m_badfaxlines = 0;
+            m_badfaxrun = 0;
+            m_recvparams = 0;
+            m_subaddress = null;
+            m_recvtime = 0;
+            m_faxdcs = null;
+
+            fill = null;
+            m_rw_mode = 0;
+            m_rowbytes = 0;
+            m_rowpixels = 0;
+
+            m_decoder = 0;
+            m_bitmap = null;
+            m_data = 0;
+            m_bit = 0;
+            m_EOLcnt = 0;
+            m_runs = null;
+            m_refruns = 0;
+            m_curruns = 0;
+
+            m_a0 = 0;
+            m_RunLength = 0;
+            m_thisrun = 0;
+            m_pa = 0;
+            m_pb = 0;
+
+            m_encoder = 0;
+            m_encodingFax4 = false;
+            m_refline = null;
+            m_k = 0;
+            m_maxk = 0;
+            m_line = 0;
+
+            m_buffer = null;
+            m_offset = 0;
+        }
+
         public override bool Init()
         {
             switch (m_scheme)
@@ -1588,6 +1631,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             /*
              * Allocate state block so tag methods have storage to record values.
              */
+            cleanState();
             m_rw_mode = m_tif.m_mode;
 
             m_parentTagMethods = m_tif.m_tagmethods;

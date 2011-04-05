@@ -8,6 +8,9 @@
                     <title>Version 2.3</title>
                     <content>
                         <list class="bullet">
+							<listItem>
+                                Fixed state-related bugs in some codecs.
+                            </listItem>
                             <listItem>
                                 Fixed subsampling-related bug in OJpeg codec.
                             </listItem>
