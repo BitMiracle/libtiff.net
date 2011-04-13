@@ -322,7 +322,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 if (!m_oldStyleCodeFound)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Old-style LZW codes, convert file");
+                    Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Old-style LZW codes, convert file.");
                     m_compatDecode = true;
 
                     /*
