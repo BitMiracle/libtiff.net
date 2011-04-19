@@ -9,6 +9,9 @@
                     <content>
                         <list class="bullet">
 							<listItem>
+                                Improved support for legacy TIFF writers.
+                            </listItem>
+							<listItem>
                                 Fixed state-related bugs in some codecs.
                             </listItem>
                             <listItem>

@@ -1163,12 +1163,34 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private bool fetchRefBlackWhite(TiffDirEntry dir)
         {
+            // some OJPEG images specify Reference BlackWhite as array of longs
+            //
+            // so, we'll try to read value as float array and check them
+            // if read was successfull and there is at least one value greater
+            // then 1.0 then ok, return value just read.
+            //
+            // if read failed or all values are less then or equal to 1.0 then
+            // try once again but read as long array this time.
+
             if (dir.tdir_type == TiffType.RATIONAL)
-                return fetchNormalTag(dir);
-            
+            {
+                bool res = fetchNormalTag(dir);
+                if (res)
+                {
+                    for (int i = 0; i < m_dir.td_refblackwhite.Length; i++)
+                    {
+                        if (m_dir.td_refblackwhite[i] > 1)
+                            return true;
+                    }
+                }
+            }
+
             // Handle LONG's for backward compatibility.
+            dir.tdir_type = TiffType.LONG;
             int[] cp = new int [dir.tdir_count];
             bool ok = fetchLongArray(dir, cp);
+            dir.tdir_type = TiffType.RATIONAL;
+
             if (ok)
             {
                 float[] fp = new float [dir.tdir_count];
