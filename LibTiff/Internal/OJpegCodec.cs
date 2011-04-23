@@ -296,6 +296,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private OJPEGStateOutState m_out_state;
         private byte[] m_out_buffer = new byte[OJPEG_BUFFER];
         private byte[] m_skip_buffer;
+        private bool m_forceProcessedRgbOutput;
 
         public OJpegCodec(Tiff tif, Compression scheme, string name)
             : base(tif, scheme, name)
@@ -383,6 +384,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_out_state = 0;
             m_out_buffer = new byte[OJPEG_BUFFER];
             m_skip_buffer = null;
+            m_forceProcessedRgbOutput = false;
         }
 
         public override bool Init()
@@ -638,6 +640,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public override void Cleanup()
         {
             OJPEGCleanup();
+        }
+
+        internal void ForceProcessedRgbOutput(bool force)
+        {
+            // forces codec to output de-subsampled RGB image data
+            m_forceProcessedRgbOutput = force;
+            m_subsamplingcorrect_done = false;
         }
 
         private bool OJPEGSetupDecode()
@@ -1105,6 +1114,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (!m_subsampling_force_desubsampling_inside_decompression && (m_samples_per_pixel_per_plane > 1))
             {
                 m_libjpeg_jpeg_decompress_struct.Raw_data_out = true;
+                m_libjpeg_jpeg_decompress_struct.Do_fancy_upsampling = false;
+
                 //#if JPEG_LIB_VERSION >= 70
                 //    libjpeg_jpeg_decompress_struct.do_fancy_upsampling=FALSE;
                 //#endif
@@ -1155,8 +1166,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
             else
             {
-                m_libjpeg_jpeg_decompress_struct.Jpeg_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
-                m_libjpeg_jpeg_decompress_struct.Out_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
+                if (m_forceProcessedRgbOutput)
+                {
+                    m_libjpeg_jpeg_decompress_struct.Do_fancy_upsampling = false;
+                    m_libjpeg_jpeg_decompress_struct.Jpeg_color_space = J_COLOR_SPACE.JCS_YCbCr;
+                    m_libjpeg_jpeg_decompress_struct.Out_color_space = J_COLOR_SPACE.JCS_RGB;
+                }
+                else
+                {
+                    m_libjpeg_jpeg_decompress_struct.Jpeg_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
+                    m_libjpeg_jpeg_decompress_struct.Out_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
+                }
+
                 m_libjpeg_jpeg_query_style = 1;
                 m_bytes_per_line = m_samples_per_pixel_per_plane * m_strile_width;
                 m_lines_per_strile = m_strile_length;
@@ -1565,8 +1586,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         m_subsampling_hor = (byte)(o >> 4);
                         m_subsampling_ver = (byte)(o & 15);
                         if (((m_subsampling_hor != 1) && (m_subsampling_hor != 2) && (m_subsampling_hor != 4)) ||
-                            ((m_subsampling_ver != 1) && (m_subsampling_ver != 2) && (m_subsampling_ver != 4)))
+                            ((m_subsampling_ver != 1) && (m_subsampling_ver != 2) && (m_subsampling_ver != 4)) ||
+                            m_forceProcessedRgbOutput)
+                        {
                             m_subsampling_force_desubsampling_inside_decompression = true;
+                        }
                     }
                     else
                     {
