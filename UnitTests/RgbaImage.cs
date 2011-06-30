@@ -63,7 +63,7 @@ namespace UnitTests
                     "quad-lzw.tif",
                     "quad-tile.tif",
                     "strike.tif",
-                    "ycbcr-cat.tif",
+                    "ycbcr-cat.tif",                    
                 };
             }
         }

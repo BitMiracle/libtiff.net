@@ -6042,7 +6042,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="count">The number of items to swap bytes in.</param>
         public static void SwabArrayOfDouble(double[] array, int offset, int count)
         {
-            int[] ints = new int[count * sizeof(int) / sizeof(double)];
+            int[] ints = new int[count * sizeof(double) / sizeof(int)];
             Buffer.BlockCopy(array, offset * sizeof(double), ints, 0, ints.Length * sizeof(int));
 
             SwabArrayOfLong(ints, ints.Length);
