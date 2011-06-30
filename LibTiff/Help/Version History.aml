@@ -15,6 +15,9 @@
                                 Fixed opening of files with wrong tag data types.
                             </listItem>
                             <listItem>
+                                Fixed bug in SwabArrayOfDouble method.
+                            </listItem>
+                            <listItem>
                                 Fixed state-related bugs in some codecs.
                             </listItem>
                             <listItem>
