@@ -47,5 +47,15 @@ namespace UnitTests
                 Assert.AreNotEqual(-1, read);
             }
         }
+
+        [Test]
+        public void TestReadAndIgnoreTags()
+        {
+            string fn = Path.Combine(TestCase.Folder, "doc-1211625-8-1.tiff");
+            using (Tiff tiff = Tiff.Open(fn, "r"))
+            {
+                Assert.IsNotNull(tiff);
+            }
+        }
     }
 }

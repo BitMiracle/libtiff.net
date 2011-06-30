@@ -4,14 +4,17 @@
         <section address="Section1">
             <content></content>
             <sections>
-			<section address="SubSection6">
+            <section address="SubSection6">
                     <title>Version 2.3</title>
                     <content>
                         <list class="bullet">
-							<listItem>
-                                Improved support for legacy TIFF writers.
+                            <listItem>
+                                Improved support for files produced by legacy TIFF writers.
                             </listItem>
-							<listItem>
+                            <listItem>
+                                Fixed opening of files with wrong tag data types.
+                            </listItem>
+                            <listItem>
                                 Fixed state-related bugs in some codecs.
                             </listItem>
                             <listItem>
@@ -20,20 +23,20 @@
                         </list>
                     </content>
                 </section>
-				<section address="SubSection5">
+                <section address="SubSection5">
                     <title>Version 2.2</title>
                     <content>
                         <list class="bullet">
                             <listItem>
                                 Added new OJPEG (or Old JPEG, or Original JPEG) codec.
                             </listItem>
-							<listItem>
+                            <listItem>
                                 Added new sample ConvertToSingleStripInMemory.
                             </listItem>
                             <listItem>
                                 Fixed bug in ReadRGBATile method.
                             </listItem>
-							<listItem>
+                            <listItem>
                                 Fixed bug with timezones in Tiff2Pdf utility.
                             </listItem>
                         </list>

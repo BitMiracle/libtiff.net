@@ -1369,6 +1369,7 @@ namespace BitMiracle.LibTiff.Classic
 
                 // Check data type.
                 TiffFieldInfo fip = m_fieldinfo[fix];
+                bool tagIgnored = false;
                 while (dir[i].tdir_type != fip.Type && fix < m_nfields)
                 {
                     if (fip.Type == TiffType.ANY)
@@ -1385,9 +1386,13 @@ namespace BitMiracle.LibTiff.Classic
                             m_name, dir[i].tdir_type, m_fieldinfo[fix - 1].Name);
 
                         dir[i].tdir_tag = TiffTag.IGNORE;
-                        continue;
+                        tagIgnored = true;
+                        break;
                     }
                 }
+
+                if (tagIgnored)
+                    continue;
 
                 // Check count if known in advance.
                 if (fip.ReadCount != TiffFieldInfo.Variable &&
