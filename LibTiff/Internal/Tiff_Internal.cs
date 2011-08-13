@@ -287,16 +287,8 @@ namespace BitMiracle.LibTiff.Classic
 
         private TiffTagMethods m_defaultTagMethods;
 
-        private static TiffErrorHandler m_errorHandler;
-        private TiffErrorHandler m_defaultErrorHandler;
-
         private bool m_disposed;
         private Stream m_fileStream;
- 
-        /// <summary>
-        /// Client Tag extension support (from Niles Ritter).
-        /// </summary>
-        private static TiffExtendProc m_extender;
 
         /// <summary>
         /// stream used for read|write|etc.
@@ -312,13 +304,11 @@ namespace BitMiracle.LibTiff.Classic
 
             m_defaultTagMethods = new TiffTagMethods();
 
-            m_defaultErrorHandler = null;
             if (m_errorHandler == null)
             {
                 // user did not setup custom handler.
                 // install default
-                m_defaultErrorHandler = new TiffErrorHandler();
-                m_errorHandler = m_defaultErrorHandler;
+                m_errorHandler = new TiffErrorHandler();
             }
         }
 

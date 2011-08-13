@@ -63,6 +63,7 @@
     <Compile Include="Internal\DeflateCodecTagMethods.cs" />
     <Compile Include="Internal\DumpModeCodec.cs" />
     <Compile Include="FieldBit.cs" />
+    <Compile Include="Internal\ExtenderAndErrorHandler-non-thread-safe.cs" />
     <Compile Include="Internal\JpegCodec.cs" />
     <Compile Include="Internal\JpegCodecTagMethods.cs" />
     <Compile Include="Internal\JpegErrorManager.cs" />

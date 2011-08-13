@@ -4956,9 +4956,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </returns>
         public static TiffErrorHandler SetErrorHandler(TiffErrorHandler errorHandler)
         {
-            TiffErrorHandler prev = m_errorHandler;
-            m_errorHandler = errorHandler;
-            return prev;
+            return setErrorHandlerImpl(errorHandler);
         }
 
         /// <summary>
@@ -4971,9 +4969,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public static TiffExtendProc SetTagExtender(TiffExtendProc extender)
         {
-            TiffExtendProc prev = m_extender;
-            m_extender = extender;
-            return prev;
+            return setTagExtenderImpl(extender);
         }
 
         /// <summary>
