@@ -6,19 +6,37 @@ namespace BitMiracle.LibTiff.Classic
 {
     partial class Tiff
     {
+#if THREAD_SAFE_LIBTIFF
+        private TiffErrorHandler m_errorHandler;
+#else
         private static TiffErrorHandler m_errorHandler;
+#endif
 
         /// <summary>
         /// Client Tag extension support (from Niles Ritter).
         /// </summary>
+#if THREAD_SAFE_LIBTIFF
+        private TiffExtendProc m_extender;
+#else
         private static TiffExtendProc m_extender;
+#endif
 
-        private static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler)
+#if THREAD_SAFE_LIBTIFF
+        public
+#else
+        private
+#endif
+        static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler)
         {
             return Tiff.Open(fileName, mode, errorHandler, null);
         }
 
-        private static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler, TiffExtendProc extender)
+#if THREAD_SAFE_LIBTIFF
+        public
+#else
+        private
+#endif
+        static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler, TiffExtendProc extender)
         {
             const string module = "Open";
 
@@ -49,12 +67,22 @@ namespace BitMiracle.LibTiff.Classic
             return tif;
         }
 
-        private static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler)
+#if THREAD_SAFE_LIBTIFF
+        public
+#else
+        private
+#endif
+        static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler)
         {
             return ClientOpen(name, mode, clientData, stream, errorHandler, null);
         }
 
-        private static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler, TiffExtendProc extender)
+#if THREAD_SAFE_LIBTIFF
+        public
+#else
+        private
+#endif
+        static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler, TiffExtendProc extender)
         {
             const string module = "ClientOpen";
 
@@ -260,16 +288,26 @@ namespace BitMiracle.LibTiff.Classic
 
         private static TiffErrorHandler setErrorHandlerImpl(TiffErrorHandler errorHandler)
         {
+#if THREAD_SAFE_LIBTIFF
+            throw new InvalidOperationException("Do not use SetErrorHandler method (it's not thread-safe).\n" +
+                "Use overloads for Open and ClientOpen methods to achieve the same.");
+#else
             TiffErrorHandler prev = m_errorHandler;
             m_errorHandler = errorHandler;
             return prev;
+#endif
         }
 
         private static TiffExtendProc setTagExtenderImpl(TiffExtendProc extender)
         {
+#if THREAD_SAFE_LIBTIFF
+            throw new InvalidOperationException("Do not use SetTagExtender method (it's not thread-safe).\n" +
+                "Use overloads for Open and ClientOpen methods to achieve the same.");
+#else
             TiffExtendProc prev = m_extender;
             m_extender = extender;
-            return prev;
+            return prev;            
+#endif
         }
     }
 }

@@ -159,8 +159,8 @@
     <Compile Include="..\LibTiff\Internal\DumpModeCodec.cs">
       <Link>Internal\DumpModeCodec.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\Internal\ExtenderAndErrorHandler-non-thread-safe.cs">
-      <Link>Internal\ExtenderAndErrorHandler-non-thread-safe.cs</Link>
+    <Compile Include="..\LibTiff\Internal\ExtenderAndErrorHandler.cs">
+      <Link>Internal\ExtenderAndErrorHandler.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\Internal\JpegCodec.cs">
       <Link>Internal\JpegCodec.cs</Link>
