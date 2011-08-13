@@ -4515,12 +4515,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void Error(Tiff tif, string method, string format, params object[] args)
         {
-            TiffErrorHandler errorHandler;
-#if THREAD_SAFE_LIBTIFF
-            errorHandler = tif.m_errorHandler;
-#else
-            errorHandler = m_errorHandler;
-#endif
+            TiffErrorHandler errorHandler = getErrorHandler(tif);
             if (errorHandler == null)
                 return;
 
@@ -4582,12 +4577,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void ErrorExt(Tiff tif, object clientData, string method, string format, params object[] args)
         {
-            TiffErrorHandler errorHandler;
-#if THREAD_SAFE_LIBTIFF
-            errorHandler = tif.m_errorHandler;
-#else
-            errorHandler = m_errorHandler;
-#endif
+            TiffErrorHandler errorHandler = getErrorHandler(tif);
             if (errorHandler == null)
                 return;
 
@@ -4649,12 +4639,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void Warning(Tiff tif, string method, string format, params object[] args)
         {
-            TiffErrorHandler errorHandler;
-#if THREAD_SAFE_LIBTIFF
-            errorHandler = tif.m_errorHandler;
-#else
-            errorHandler = m_errorHandler;
-#endif
+            TiffErrorHandler errorHandler = getErrorHandler(tif);
             if (errorHandler == null)
                 return;
 
@@ -4715,12 +4700,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void WarningExt(Tiff tif, object clientData, string method, string format, params object[] args)
         {
-            TiffErrorHandler errorHandler;
-#if THREAD_SAFE_LIBTIFF
-            errorHandler = tif.m_errorHandler;
-#else
-            errorHandler = m_errorHandler;
-#endif
+            TiffErrorHandler errorHandler = getErrorHandler(tif);
             if (errorHandler == null)
                 return;
 

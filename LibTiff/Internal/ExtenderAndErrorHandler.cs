@@ -310,5 +310,19 @@ namespace BitMiracle.LibTiff.Classic
             return prev;            
 #endif
         }
+
+        private static TiffErrorHandler getErrorHandler(Tiff tif)
+        {
+            TiffErrorHandler errorHandler = null;
+#if THREAD_SAFE_LIBTIFF
+            if (tif != null)
+            {
+                errorHandler = tif.m_errorHandler;
+            }
+#else
+            errorHandler = m_errorHandler;
+#endif
+            return errorHandler;
+        }
     }
 }
