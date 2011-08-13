@@ -366,7 +366,7 @@ namespace BitMiracle.LibTiff.Classic
         /// successfully opened; otherwise, <c>null</c>.</returns>
         /// <remarks>
         /// <para>
-        /// <see cref="Open"/> opens a TIFF file whose name is <paramref name="fileName"/>. When
+        /// <see cref="Open(string, string)"/> opens a TIFF file whose name is <paramref name="fileName"/>. When
         /// a file is opened for appending, existing data will not be touched; instead new data
         /// will be written as additional subfiles. If an existing file is opened for writing,
         /// all previous data is overwritten.
@@ -444,33 +444,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public static Tiff Open(string fileName, string mode)
         {
-            const string module = "Open";
-
-            FileMode fileMode;
-            FileAccess fileAccess;
-            getMode(mode, module, out fileMode, out fileAccess);
-
-            FileStream stream = null;
-            try
-            {
-                if (fileAccess == FileAccess.Read)
-                    stream = File.Open(fileName, fileMode, fileAccess, FileShare.Read);
-                else
-                    stream = File.Open(fileName, fileMode, fileAccess);
-            }
-            catch (Exception e)
-            {
-                Error(module, "Failed to open '{0}'. {1}", fileName, e.Message);
-                return null;
-            }
-
-            Tiff tif = ClientOpen(fileName, mode, stream, new TiffStream());
-            if (tif == null)
-                stream.Dispose();
-            else
-                tif.m_fileStream = stream;
-
-            return tif;
+            return Tiff.Open(fileName, mode, null, null);
         }
 
         /// <summary>
@@ -480,7 +454,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <param name="name">The name for the new instance of <see cref="Tiff"/> class.</param>
         /// <param name="mode">The open mode. Specifies if the file is to be opened for
         /// reading ("r"), writing ("w"), or appending ("a") and, optionally, whether to override
-        /// certain default aspects of library operation (see remarks for <see cref="Open"/>
+        /// certain default aspects of library operation (see remarks for <see cref="Open(string, string)"/>
         /// method for the list of the mode flags).</param>
         /// <param name="clientData">Some client data. This data is passed as parameter to every
         /// method of the <see cref="TiffStream"/> object specified by the
@@ -499,215 +473,22 @@ namespace BitMiracle.LibTiff.Classic
         /// ID for the created <see cref="Tiff"/>. It's not required to be a file name or anything
         /// meaningful at all.</para>
         /// <para>
-        /// Please read remarks for <see cref="Open"/> method for the list of option flags that
+        /// Please read remarks for <see cref="Open(string, string)"/> method for the list of option flags that
         /// can be specified in <paramref name="mode"/> parameter.
         /// </para>
         /// </remarks>
         public static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream)
         {
-            const string module = "ClientOpen";
-
-            if (mode == null || mode.Length == 0)
-            {
-                ErrorExt(null, clientData, module, "{0}: mode string should contain at least one char", name);
-                return null;
-            }
-
-            FileMode fileMode;
-            FileAccess fileAccess;
-            int m = getMode(mode, module, out fileMode, out fileAccess);
-
-            Tiff tif = new Tiff();
-            tif.m_name = name;
-
-            tif.m_mode = m & ~(O_CREAT | O_TRUNC);
-            tif.m_curdir = -1; // non-existent directory
-            tif.m_curoff = 0;
-            tif.m_curstrip = -1; // invalid strip
-            tif.m_row = -1; // read/write pre-increment
-            tif.m_clientdata = clientData;
-
-            if (stream == null)
-            {
-                ErrorExt(tif, clientData, module, "TiffStream is null pointer.");
-                return null;
-            }
-
-            tif.m_stream = stream;
-
-            // setup default state
-            tif.m_currentCodec = tif.m_builtInCodecs[0];
-
-            // Default is to return data MSB2LSB and enable the use of
-            // strip chopping when a file is opened read-only.
-            tif.m_flags = TiffFlags.MSB2LSB;
-
-            if (m == O_RDONLY || m == O_RDWR)
-                tif.m_flags |= STRIPCHOP_DEFAULT;
-
-            // Process library-specific flags in the open mode string.
-            // See remarks for Open method for the list of supported flags.
-            int modelength = mode.Length;
-            for (int i = 0; i < modelength; i++)
-            {
-                switch (mode[i])
-                {
-                    case 'b':
-                        if ((m & O_CREAT) != 0)
-                            tif.m_flags |= TiffFlags.SWAB;
-                        break;
-                    case 'l':
-                        break;
-                    case 'B':
-                        tif.m_flags = (tif.m_flags & ~TiffFlags.FILLORDER) | TiffFlags.MSB2LSB;
-                        break;
-                    case 'L':
-                        tif.m_flags = (tif.m_flags & ~TiffFlags.FILLORDER) | TiffFlags.LSB2MSB;
-                        break;
-                    case 'H':
-                        tif.m_flags = (tif.m_flags & ~TiffFlags.FILLORDER) | TiffFlags.LSB2MSB;
-                        break;
-                    case 'C':
-                        if (m == O_RDONLY)
-                            tif.m_flags |= TiffFlags.STRIPCHOP;
-                        break;
-                    case 'c':
-                        if (m == O_RDONLY)
-                            tif.m_flags &= ~TiffFlags.STRIPCHOP;
-                        break;
-                    case 'h':
-                        tif.m_flags |= TiffFlags.HEADERONLY;
-                        break;
-                }
-            }
-
-            // Read in TIFF header.
-
-            if ((tif.m_mode & O_TRUNC) != 0 || !tif.readHeaderOk(ref tif.m_header))
-            {
-                if (tif.m_mode == O_RDONLY)
-                {
-                    ErrorExt(tif, tif.m_clientdata, name, "Cannot read TIFF header");
-                    return null;
-                }
-
-                // Setup header and write.
-
-                if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                    tif.m_header.tiff_magic = TIFF_BIGENDIAN;
-                else
-                    tif.m_header.tiff_magic = TIFF_LITTLEENDIAN;
-
-                tif.m_header.tiff_version = TIFF_VERSION;
-                if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                    SwabShort(ref tif.m_header.tiff_version);
-
-                tif.m_header.tiff_diroff = 0; // filled in later
-
-                tif.seekFile(0, SeekOrigin.Begin);
-
-                if (!tif.writeHeaderOK(tif.m_header))
-                {
-                    ErrorExt(tif, tif.m_clientdata, name, "Error writing TIFF header");
-                    tif.m_mode = O_RDONLY;
-                    return null;
-                }
-
-                // Setup the byte order handling.
-                tif.initOrder(tif.m_header.tiff_magic);
-
-                // Setup default directory.
-                tif.setupDefaultDirectory();
-                tif.m_diroff = 0;
-                tif.m_dirlist = null;
-                tif.m_dirlistsize = 0;
-                tif.m_dirnumber = 0;
-                return tif;
-            }
-
-            // Setup the byte order handling.
-            if (tif.m_header.tiff_magic != TIFF_BIGENDIAN &&
-                tif.m_header.tiff_magic != TIFF_LITTLEENDIAN &&
-                tif.m_header.tiff_magic != MDI_LITTLEENDIAN)
-            {
-                ErrorExt(tif, tif.m_clientdata, name,
-                    "Not a TIFF or MDI file, bad magic number {0} (0x{1:x})",
-                    tif.m_header.tiff_magic, tif.m_header.tiff_magic);
-                tif.m_mode = O_RDONLY;
-                return null;
-            }
-
-            tif.initOrder(tif.m_header.tiff_magic);
-
-            // Swap header if required.
-            if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-            {
-                SwabShort(ref tif.m_header.tiff_version);
-                SwabUInt(ref tif.m_header.tiff_diroff);
-            }
-
-            // Now check version (if needed, it's been byte-swapped).
-            // Note that this isn't actually a version number, it's a
-            // magic number that doesn't change (stupid).
-            if (tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION)
-            {
-                ErrorExt(tif, tif.m_clientdata, name,
-                    "This is a BigTIFF file. This format not supported\nby this version of LibTiff.Net.");
-                tif.m_mode = O_RDONLY;
-                return null;
-            }
-
-            if (tif.m_header.tiff_version != TIFF_VERSION)
-            {
-                ErrorExt(tif, tif.m_clientdata, name,
-                    "Not a TIFF file, bad version number {0} (0x{1:x})",
-                    tif.m_header.tiff_version, tif.m_header.tiff_version);
-                tif.m_mode = O_RDONLY;
-                return null;
-            }
-
-            tif.m_flags |= TiffFlags.MYBUFFER;
-            tif.m_rawcp = 0;
-            tif.m_rawdata = null;
-            tif.m_rawdatasize = 0;
-
-            // Sometimes we do not want to read the first directory (for example,
-            // it may be broken) and want to proceed to other directories. I this
-            // case we use the HEADERONLY flag to open file and return
-            // immediately after reading TIFF header.
-            if ((tif.m_flags & TiffFlags.HEADERONLY) == TiffFlags.HEADERONLY)
-                return tif;
-
-            // Setup initial directory.
-            switch (mode[0])
-            {
-                case 'r':
-                    tif.m_nextdiroff = tif.m_header.tiff_diroff;
-
-                    if (tif.ReadDirectory())
-                    {
-                        tif.m_rawcc = -1;
-                        tif.m_flags |= TiffFlags.BUFFERSETUP;
-                        return tif;
-                    }
-                    break;
-                case 'a':
-                    // New directories are automatically append to the end of
-                    // the directory chain when they are written out (see WriteDirectory).
-                    tif.setupDefaultDirectory();
-                    return tif;
-            }
-
-            tif.m_mode = O_RDONLY;
-            return null;
+            return ClientOpen(name, mode, clientData, stream, null, null);
         }
 
         /// <summary>
         /// Closes a previously opened TIFF file.
         /// </summary>
         /// <remarks>
-        /// This method closes a file or stream that was previously opened with <see cref="Open"/>
-        /// or <see cref="ClientOpen"/>. Any buffered data are flushed to the file/stream,
+        /// This method closes a file or stream that was previously opened with <see cref="Open(string, string)"/>
+        /// or <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>.
+        /// Any buffered data are flushed to the file/stream,
         /// including the contents of the current directory (if modified); and all resources
         /// are reclaimed.
         /// </remarks>
@@ -1235,7 +1016,8 @@ namespace BitMiracle.LibTiff.Classic
         /// <remarks><para>Directories are read sequentially.</para>
         /// <para>Applications only need to call <see cref="ReadDirectory"/> to read multiple
         /// subfiles in a single TIFF file/stream - the first directory in a file/stream is
-        /// automatically read when <see cref="Open"/> or <see cref="ClientOpen"/> is called.
+        /// automatically read when <see cref="Open(string, string)"/> or
+        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/> is called.
         /// </para><para>
         /// The images that have a single uncompressed strip or tile of data are automatically
         /// treated as if they were made up of multiple strips or tiles of approximately 8
@@ -3052,8 +2834,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <remarks><para>
         /// <b>SetField</b> sets the value of a tag or pseudo-tag in the current directory
         /// associated with the open TIFF file/stream. To set the value of a field the file/stream
-        /// must have been previously opened for writing with <see cref="Open"/> or
-        /// <see cref="ClientOpen"/>; pseudo-tags can be set whether the file was opened for
+        /// must have been previously opened for writing with <see cref="Open(string, string)"/> or
+        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>;
+        /// pseudo-tags can be set whether the file was opened for
         /// reading or writing. The tag is identified by <paramref name="tag"/>.
         /// The type and number of values in <paramref name="value"/> is dependent on the tag
         /// being set. You may want to consult
@@ -4680,10 +4463,13 @@ namespace BitMiracle.LibTiff.Classic
         /// Gets the name of the file or ID string for this <see cref="Tiff"/>.
         /// </summary>
         /// <returns>The name of the file or ID string for this <see cref="Tiff"/>.</returns>
-        /// <remarks>If this <see cref="Tiff"/> was created using <see cref="Open"/> method then
-        /// value of fileName parameter of <see cref="Open"/> method is returned. If this
-        /// <see cref="Tiff"/> was created using <see cref="ClientOpen"/> then value of
-        /// name parameter of <see cref="ClientOpen"/> method is returned.</remarks>
+        /// <remarks>If this <see cref="Tiff"/> was created using <see cref="Open(string, string)"/> method then
+        /// value of fileName parameter of <see cref="Open(string, string)"/> method is returned. If this
+        /// <see cref="Tiff"/> was created using
+        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>
+        /// then value of name parameter of
+        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>
+        /// method is returned.</remarks>
         public string FileName()
         {
             return m_name;
