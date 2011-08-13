@@ -4515,11 +4515,17 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void Error(Tiff tif, string method, string format, params object[] args)
         {
-            if (m_errorHandler == null)
+            TiffErrorHandler errorHandler;
+#if THREAD_SAFE_LIBTIFF
+            errorHandler = tif.m_errorHandler;
+#else
+            errorHandler = m_errorHandler;
+#endif
+            if (errorHandler == null)
                 return;
 
-            m_errorHandler.ErrorHandler(tif, method, format, args);
-            m_errorHandler.ErrorHandlerExt(tif, null, method, format, args);
+            errorHandler.ErrorHandler(tif, method, format, args);
+            errorHandler.ErrorHandlerExt(tif, null, method, format, args);
         }
 
         /// <summary>
@@ -4576,11 +4582,17 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void ErrorExt(Tiff tif, object clientData, string method, string format, params object[] args)
         {
-            if (m_errorHandler == null)
+            TiffErrorHandler errorHandler;
+#if THREAD_SAFE_LIBTIFF
+            errorHandler = tif.m_errorHandler;
+#else
+            errorHandler = m_errorHandler;
+#endif
+            if (errorHandler == null)
                 return;
 
-            m_errorHandler.ErrorHandler(tif, method, format, args);
-            m_errorHandler.ErrorHandlerExt(tif, clientData, method, format, args);
+            errorHandler.ErrorHandler(tif, method, format, args);
+            errorHandler.ErrorHandlerExt(tif, clientData, method, format, args);
         }
 
         /// <summary>
@@ -4637,11 +4649,17 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void Warning(Tiff tif, string method, string format, params object[] args)
         {
-            if (m_errorHandler == null)
+            TiffErrorHandler errorHandler;
+#if THREAD_SAFE_LIBTIFF
+            errorHandler = tif.m_errorHandler;
+#else
+            errorHandler = m_errorHandler;
+#endif
+            if (errorHandler == null)
                 return;
 
-            m_errorHandler.WarningHandler(tif, method, format, args);
-            m_errorHandler.WarningHandlerExt(tif, null, method, format, args);
+            errorHandler.WarningHandler(tif, method, format, args);
+            errorHandler.WarningHandlerExt(tif, null, method, format, args);
         }
 
         /// <summary>
@@ -4697,11 +4715,17 @@ namespace BitMiracle.LibTiff.Classic
         /// </overloads>
         public static void WarningExt(Tiff tif, object clientData, string method, string format, params object[] args)
         {
-            if (m_errorHandler == null)
+            TiffErrorHandler errorHandler;
+#if THREAD_SAFE_LIBTIFF
+            errorHandler = tif.m_errorHandler;
+#else
+            errorHandler = m_errorHandler;
+#endif
+            if (errorHandler == null)
                 return;
 
-            m_errorHandler.WarningHandler(tif, method, format, args);
-            m_errorHandler.WarningHandlerExt(tif, clientData, method, format, args);
+            errorHandler.WarningHandler(tif, method, format, args);
+            errorHandler.WarningHandlerExt(tif, clientData, method, format, args);
         }
 
         /// <summary>

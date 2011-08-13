@@ -97,11 +97,12 @@ namespace BitMiracle.LibTiff.Classic
             int m = getMode(mode, module, out fileMode, out fileAccess);
 
             Tiff tif = new Tiff();
+#if THREAD_SAFE_LIBTIFF
             if (errorHandler != null)
-                m_errorHandler = errorHandler;
+                tif.m_errorHandler = errorHandler;
             if (extender != null)
-                m_extender = extender;
-
+                tif.m_extender = extender;
+#endif
             tif.m_name = name;
 
             tif.m_mode = m & ~(O_CREAT | O_TRUNC);
