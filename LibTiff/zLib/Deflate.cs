@@ -77,8 +77,23 @@ namespace ComponentAce.Compression.Libs.zlib
         private const int STORED = 0;
         private const int FAST = 1;
         private const int SLOW = 2;
-        private static Config[] config_table;
-                
+
+        private static readonly Config[] config_table = new Config[]
+        {
+            // good  lazy  nice  chain
+            new Config(0, 0, 0, 0, STORED),
+            new Config(4, 4, 8, 4, FAST),
+            new Config(4, 5, 16, 8, FAST),
+            new Config(4, 6, 32, 32, FAST),
+
+            new Config(4, 4, 16, 16, SLOW),
+            new Config(8, 16, 32, 32, SLOW),
+            new Config(8, 16, 128, 128, SLOW),
+            new Config(8, 32, 128, 256, SLOW),
+            new Config(32, 128, 258, 1024, SLOW),
+            new Config(32, 258, 258, 4096, SLOW),
+        };
+        
         private static readonly System.String[] z_errmsg = new System.String[]{"need dictionary", "stream end", "", "file error", "stream error", "data error", "insufficient memory", "buffer error", "incompatible version", ""};
         
         // block not completed, need more input or more output
@@ -145,15 +160,15 @@ namespace ComponentAce.Compression.Libs.zlib
         
         private const int MIN_MATCH = 3;
         private const int MAX_MATCH = 258;		
-        private static readonly int MIN_LOOKAHEAD = (MAX_MATCH + MIN_MATCH + 1);
+        private const int MIN_LOOKAHEAD = (MAX_MATCH + MIN_MATCH + 1);
         
         private const int MAX_BITS = 15;
         private const int D_CODES = 30;
         private const int BL_CODES = 19;
         private const int LENGTH_CODES = 29;
         private const int LITERALS = 256;		
-        private static readonly int L_CODES = (LITERALS + 1 + LENGTH_CODES);		
-        private static readonly int HEAP_SIZE = (2 * L_CODES + 1);
+        private const int L_CODES = (LITERALS + 1 + LENGTH_CODES);		
+        private const int HEAP_SIZE = (2 * L_CODES + 1);
         
         private const int END_BLOCK = 256;
         
@@ -1778,24 +1793,6 @@ namespace ComponentAce.Compression.Libs.zlib
             // to flush the rest.
             noheader = - 1; // write the trailer only once!
             return pending != 0?Z_OK:Z_STREAM_END;
-        }
-        static Deflate()
-        {
-            {
-                config_table = new Config[10];
-                //                         good  lazy  nice  chain
-                config_table[0] = new Config(0, 0, 0, 0, STORED);
-                config_table[1] = new Config(4, 4, 8, 4, FAST);
-                config_table[2] = new Config(4, 5, 16, 8, FAST);
-                config_table[3] = new Config(4, 6, 32, 32, FAST);
-                
-                config_table[4] = new Config(4, 4, 16, 16, SLOW);
-                config_table[5] = new Config(8, 16, 32, 32, SLOW);
-                config_table[6] = new Config(8, 16, 128, 128, SLOW);
-                config_table[7] = new Config(8, 32, 128, 256, SLOW);
-                config_table[8] = new Config(32, 128, 258, 1024, SLOW);
-                config_table[9] = new Config(32, 258, 258, 4096, SLOW);
-            }
         }
     }
 }
