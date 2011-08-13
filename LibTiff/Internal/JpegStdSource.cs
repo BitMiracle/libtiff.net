@@ -19,7 +19,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
     /// </summary>
     class JpegStdSource : jpeg_source_mgr
     {
-        static byte[] dummy_EOI = { 0xFF, (byte)JPEG_MARKER.EOI };
+        private static readonly byte[] dummy_EOI = { 0xFF, (byte)JPEG_MARKER.EOI };
         protected JpegCodec m_sp;
 
         public JpegStdSource(JpegCodec sp)

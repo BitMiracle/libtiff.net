@@ -195,7 +195,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             ososEoi
         }
 
-        private static TiffFieldInfo[] ojpeg_field_info =
+        private static readonly TiffFieldInfo[] ojpeg_field_info =
         {
             new TiffFieldInfo(TiffTag.JPEGIFOFFSET, 1, 1, TiffType.LONG, FIELD_OJPEG_JPEGINTERCHANGEFORMAT, true, false, "JpegInterchangeFormat"),
             new TiffFieldInfo(TiffTag.JPEGIFBYTECOUNT, 1, 1, TiffType.LONG, FIELD_OJPEG_JPEGINTERCHANGEFORMATLENGTH, true, false, "JpegInterchangeFormatLength"),

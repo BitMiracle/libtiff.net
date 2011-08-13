@@ -50,7 +50,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             ptFpDiff,
         };
 
-        private static TiffFieldInfo[] m_predictFieldInfo = 
+        private static readonly TiffFieldInfo[] m_predictFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.PREDICTOR, 1, 1, TiffType.SHORT, CodecWithPredictor.FIELD_PREDICTOR, false, false, "Predictor"), 
         };

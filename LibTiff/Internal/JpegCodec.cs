@@ -56,7 +56,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         internal int m_recvtime; /* time spent receiving (secs) */
         internal string m_faxdcs; /* encoded fax parameters (DCS, Table 2/T.30) */
 
-        private static TiffFieldInfo[] jpegFieldInfo = 
+        private static readonly TiffFieldInfo[] jpegFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.JPEGTABLES, -3, -3, TiffType.UNDEFINED, FIELD_JPEGTABLES, false, true, "JPEGTables"), 
             new TiffFieldInfo(TiffTag.JPEGQUALITY, 0, 0, TiffType.ANY, FieldBit.Pseudo, true, false, ""), 

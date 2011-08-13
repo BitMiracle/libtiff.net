@@ -133,7 +133,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             useFax2DEncoder
         };
 
-        private static TiffFieldInfo[] m_faxFieldInfo =
+        private static readonly TiffFieldInfo[] m_faxFieldInfo =
         {
             new TiffFieldInfo(TiffTag.FAXMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, "FaxMode"), 
             new TiffFieldInfo(TiffTag.FAXFILLFUNC, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, "FaxFillFunc"), 
@@ -147,13 +147,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
             new TiffFieldInfo(TiffTag.FAXRECVTIME, 1, 1, TiffType.LONG, FIELD_RECVTIME, true, false, "FaxRecvTime"), 
             new TiffFieldInfo(TiffTag.FAXDCS, -1, -1, TiffType.ASCII, FIELD_FAXDCS, true, false, "FaxDcs"), 
         };
-        
-        private static TiffFieldInfo[] m_fax3FieldInfo = 
+
+        private static readonly TiffFieldInfo[] m_fax3FieldInfo = 
         {
             new TiffFieldInfo(TiffTag.GROUP3OPTIONS, 1, 1, TiffType.LONG, FIELD_OPTIONS, false, false, "Group3Options"), 
         };
 
-        private static TiffFieldInfo[] m_fax4FieldInfo = 
+        private static readonly TiffFieldInfo[] m_fax4FieldInfo = 
         {
             new TiffFieldInfo(TiffTag.GROUP4OPTIONS, 1, 1, TiffType.LONG, FIELD_OPTIONS, false, false, "Group4Options"), 
         };

@@ -13,7 +13,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 {
     partial class CCITTCodec
     {
-        private static int[] m_faxMainTable =
+        private static readonly int[] m_faxMainTable =
         { 
             12,7,0, 3,1,0, 5,3,1,
             3,1,0, 2,3,0, 3,1,0,
@@ -60,7 +60,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             4,3,1, 3,1,0 
         };
 
-        private static int[] m_faxWhiteTable =
+        private static readonly int[] m_faxWhiteTable =
         {
             12,11,0, 7,4,3, 7,5,11,
             7,4,5, 7,6,12, 7,5,9,
@@ -1440,7 +1440,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             7,4,4, 7,4,2, 7,4,7 
             };
 
-        private static int[] m_faxBlackTable = 
+        private static readonly int[] m_faxBlackTable = 
         { 
             12,11,0, 8,2,3, 8,3,1,
             8,2,2, 8,4,6, 8,2,3,
@@ -4206,7 +4206,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
          * NB: The G3CODE_INVALID entries are only used
          *     during state generation (see mkg3states.c).
          */
-        private static short[] m_faxWhiteCodes =
+        private static readonly short[] m_faxWhiteCodes =
         {
             8, 0x35, 0,  /* 0011 0101 */
             6, 0x7, 1,  /* 0001 11 */
@@ -4319,7 +4319,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             12, 0x0, G3CODE_INVALID,  /* 0000 0000 0000 */
         };
 
-        private static short[] m_faxBlackCodes = 
+        private static readonly short[] m_faxBlackCodes = 
         {
             10, 0x37, 0,  /* 0000 1101 11 */
             3, 0x2, 1,  /* 010 */
@@ -4432,9 +4432,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             12, 0x0, G3CODE_INVALID,  /* 0000 0000 0000 */
         };
 
-        private static tableEntry m_horizcode = new tableEntry(3, 0x1, 0); /* 001 */
-        private static tableEntry m_passcode = new tableEntry(4, 0x1, 0); /* 0001 */
-        private static tableEntry[] m_vcodes = 
+        private static readonly tableEntry m_horizcode = new tableEntry(3, 0x1, 0); /* 001 */
+        private static readonly tableEntry m_passcode = new tableEntry(4, 0x1, 0); /* 0001 */
+        private static readonly tableEntry[] m_vcodes = 
         {
             new tableEntry(7, 0x03, 0),  /* 0000 011 */
             new tableEntry(6, 0x03, 0),  /* 0000 11 */
@@ -4445,12 +4445,12 @@ namespace BitMiracle.LibTiff.Classic.Internal
             new tableEntry(7, 0x02, 0)   /* 0000 010 */
         };
 
-        private static int[] m_msbmask = 
+        private static readonly int[] m_msbmask = 
         {
             0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
         };
 
-        private static byte[] m_zeroruns =  
+        private static readonly byte[] m_zeroruns =  
         {
             8, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,  /* 0x00 - 0x0f */
             3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,  /* 0x10 - 0x1f */
@@ -4470,7 +4470,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /* 0xf0 - 0xff */
         };
 
-        private static byte[] m_oneruns = 
+        private static readonly byte[] m_oneruns = 
         {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /* 0x00 - 0x0f */
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /* 0x10 - 0x1f */
@@ -4490,7 +4490,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 7, 8,  /* 0xf0 - 0xff */
         };
 
-        static byte[] fillMasks = 
+        private static readonly byte[] fillMasks = 
         {
             0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff
         };

@@ -155,7 +155,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private TiffCIELabToRGB cielab;
 
-        private static TiffDisplay display_sRGB = new TiffDisplay(
+        private static readonly TiffDisplay display_sRGB = new TiffDisplay(
             // XYZ -> luminance matrix
             new float[] { 3.2410F, -1.5374F, -0.4986F },
             new float[] { -0.9692F, 1.8760F, 0.0416F },

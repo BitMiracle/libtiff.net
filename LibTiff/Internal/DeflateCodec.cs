@@ -43,7 +43,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public int m_zipquality; /* compression level */
         public int m_state; /* state flags */
 
-        private static TiffFieldInfo[] zipFieldInfo = 
+        private static readonly TiffFieldInfo[] zipFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.ZIPQUALITY, 0, 0, TiffType.ANY, FieldBit.Pseudo, true, false, ""), 
         };

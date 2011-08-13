@@ -34,7 +34,7 @@ namespace BitMiracle.LibTiff.Classic
         ///       would throw off the formatting of the code, so please
         ///       interpret the -1, -2 and -3  values accordingly.
         /// </summary>
-        static TiffFieldInfo[] tiffFieldInfo = 
+        private static readonly TiffFieldInfo[] tiffFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.SUBFILETYPE, 1, 1, TiffType.LONG, FieldBit.SubFileType, true, false, "SubfileType"), 
             /* XXX SHORT for compatibility w/ old versions of the library */
@@ -216,7 +216,7 @@ namespace BitMiracle.LibTiff.Classic
             /* end DNG tags */
         };
 
-        static TiffFieldInfo[] exifFieldInfo = 
+        private static readonly TiffFieldInfo[] exifFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.EXIF_EXPOSURETIME, 1, 1, TiffType.RATIONAL, FieldBit.Custom, true, false, "ExposureTime"), 
             new TiffFieldInfo(TiffTag.EXIF_FNUMBER, 1, 1, TiffType.RATIONAL, FieldBit.Custom, true, false, "FNumber"), 
