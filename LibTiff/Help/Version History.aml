@@ -23,6 +23,9 @@
                             <listItem>
                                 Fixed subsampling-related bug in OJpeg codec.
                             </listItem>
+                            <listItem>
+                                Added new samples.
+                            </listItem>
                         </list>
                     </content>
                 </section>
