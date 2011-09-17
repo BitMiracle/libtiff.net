@@ -422,6 +422,7 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         if (td.td_customValues[iCustom].info.Tag == tag)
                         {
+                            tvIndex = iCustom;
                             td.td_customValues[iCustom].value = null;
                             break;
                         }
