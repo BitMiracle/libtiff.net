@@ -102,6 +102,9 @@
                 </list>
             </listItem>
             <listItem>
+            	<link xlink:href="e4f25423-eede-4ef6-a920-9cb539d056c6" />
+            </listItem>
+            <listItem>
                 <codeEntityReference>N:BitMiracle.LibTiff.Classic</codeEntityReference> namespace
             </listItem>
             <listItem>
