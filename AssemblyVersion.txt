@@ -18,8 +18,8 @@ using System.Runtime.InteropServices;
 //      Revision
 //
 // 
-//      Build Number gets placed in strings below using SVN version info
+//      Build Number gets placed in strings below using HG version info
 
-[assembly: AssemblyVersion("2.2.$REVNUM$.$DIRTY$")]
-[assembly: AssemblyFileVersion("2.2.$REVNUM$.$DIRTY$")]
+[assembly: AssemblyVersion("2.3.$REVNUM$.$DIRTY$")]
+[assembly: AssemblyFileVersion("2.3.$REVNUM$.$DIRTY$")]
 
