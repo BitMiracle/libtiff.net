@@ -122,7 +122,8 @@
     </ComponentConfigurations>
     <DocumentationSources>
       <DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.dll" />
-<DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.xml" /></DocumentationSources>
+      <DocumentationSource sourceFile="bin\Release\BitMiracle.LibTiff.NET.xml" />
+    </DocumentationSources>
     <CopyrightHref>http://www.bitmiracle.com/libtiff</CopyrightHref>
     <CopyrightText>Copyright &amp;#169%3b 2008-2011 Bit Miracle. All rights reserved.</CopyrightText>
     <FeedbackEMailAddress>support%40bitmiracle.com</FeedbackEMailAddress>
@@ -195,15 +196,18 @@
   </ItemGroup>
   <!--Samples files-->
   <ItemGroup>
+    <None Include="Help\Samples\Using LibTiff.Net\How to read basic properties of a TIFF image.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Add page to existing TIFF.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Create simple black-and-white TIFF.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Create gradient TIFF.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Create TIFF with palette (color map).aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Create multipage TIFF.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Copy and rotate TIFF data.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Rotate TIFF data (in a viewer-agnostic way).aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Retrieve number of pages in TIFF image.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Read and write custom TIFF tags.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Add custom TIFF tags to an existing TIFF image.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\How to read value of a TIFF tag unknown to LibTiff.Net.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Read RGB values of image pixels.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Read all TIFF tags.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Read EXIF metadata.aml" />
@@ -214,13 +218,19 @@
     <None Include="Help\Samples\Using LibTiff.Net\Convert black-and-white TIFF to a System.Drawing.Bitmap.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert color TIFF to a 32-bit System.Drawing.Bitmap.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert color TIFF to a 24-bit System.Drawing.Bitmap.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Create 16-bit grayscale TIFF.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert 16-bit grayscale TIFF to a 8-bit System.Drawing.Bitmap.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\Process 16-bit TIFF (increase brightness).aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert a multi-strip TIFF image to a single-strip one.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Convert bytes of a multi-strip TIFF image to bytes of a single-strip one.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Print formatted description of a TIFF file contents.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\How to write TIFF tags before data (like in Cisco TIFF files).aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\How to read TIFF scanlines in a random fashion.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\How to use a custom TiffStream to read or write TIFF images.aml" />
+    <None Include="Help\Samples\Using LibTiff.Net\How to use a System.IO.Stream to read or write TIFF images.aml" />
     <None Include="Help\Samples\Using utilities\Merge several TIFF images to single multipage TIFF.aml" />
     <None Include="Help\Samples\Using utilities\Extract a page from a multi-page TIFF image.aml" />
+    <None Include="Help\Samples\Using utilities\Convert TIFF image to PDF document.aml" />
     <None Include="Help\Samples\Using LibTiff.Net\Using LibTiff.Net.aml" />
     <None Include="Help\Samples\Using utilities\Using utilities.aml" />
     <None Include="Help\Samples\Samples.aml" />
