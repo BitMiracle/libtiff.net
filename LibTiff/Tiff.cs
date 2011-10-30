@@ -91,14 +91,9 @@ namespace BitMiracle.LibTiff.Classic
         {
             get
             {
-                Version version = Assembly.GetExecutingAssembly().GetName().Version;
-                string versionString = version.Major.ToString(CultureInfo.InvariantCulture) +
-                    "." + version.Minor.ToString(CultureInfo.InvariantCulture);
-
-                versionString += "." + version.Build.ToString(CultureInfo.InvariantCulture);
-                versionString += "." + version.Revision.ToString(CultureInfo.InvariantCulture);
-
-                return versionString;
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                string assemblyVersion = assembly.FullName.Split(',')[1];
+                return assemblyVersion.Split('=')[1];
             }
         }
 
