@@ -26,6 +26,9 @@
                             <listItem>
                                 Added new samples.
                             </listItem>
+                            <listItem>
+                                Fixed bugs in Tiff2Pdf utility.
+                            </listItem>
                         </list>
                     </content>
                 </section>

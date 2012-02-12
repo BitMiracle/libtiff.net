@@ -1369,7 +1369,7 @@ namespace BitMiracle.Tiff2Pdf
                     for (int i = 0; i < stripcount; i++)
                     {
                         int striplength = input.ReadRawStrip(i, stripbuffer, 0, -1);
-                        if (!process_jpeg_strip(stripbuffer, striplength, buffer, ref bufferoffset, i, m_tiff_length))
+                        if (!process_jpeg_strip(stripbuffer, striplength, buffer, ref bufferoffset, stripcount, i, m_tiff_length))
                         {
                             Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Can't process JPEG data in input file {0}", input.FileName());
@@ -3001,7 +3001,7 @@ namespace BitMiracle.Tiff2Pdf
             return false;
         }
 
-        private static bool process_jpeg_strip(byte[] strip, int striplength, byte[] buffer, ref int bufferoffset, int no, int height)
+        private static bool process_jpeg_strip(byte[] strip, int striplength, byte[] buffer, ref int bufferoffset, int stripCount, int no, int height)
         {
             int i = 1;
             while (i < striplength)
@@ -3041,12 +3041,15 @@ namespace BitMiracle.Tiff2Pdf
                             bufferoffset += strip[i + 2] + 2;
                             i += strip[i + 2] + 2;
 
-                            buffer[bufferoffset++] = 0xff;
-                            buffer[bufferoffset++] = 0xdd;
-                            buffer[bufferoffset++] = 0x00;
-                            buffer[bufferoffset++] = 0x04;
-                            buffer[bufferoffset++] = (byte)((ri >> 8) & 0xff);
-                            buffer[bufferoffset++] = (byte)(ri & 0xff);
+                            if (stripCount > 1)
+                            {
+                                buffer[bufferoffset++] = 0xff;
+                                buffer[bufferoffset++] = 0xdd;
+                                buffer[bufferoffset++] = 0x00;
+                                buffer[bufferoffset++] = 0x04;
+                                buffer[bufferoffset++] = (byte)((ri >> 8) & 0xff);
+                                buffer[bufferoffset++] = (byte)(ri & 0xff);
+                            }
                         }
                         else
                         {
@@ -3056,8 +3059,11 @@ namespace BitMiracle.Tiff2Pdf
 
                     case 0xc4:
                     case 0xdb:
-                        Buffer.BlockCopy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
-                        bufferoffset += strip[i + 2] + 2;
+                        if (no == 0)
+                        {
+                            Buffer.BlockCopy(strip, i - 1, buffer, bufferoffset, strip[i + 2] + 2);
+                            bufferoffset += strip[i + 2] + 2;
+                        }
                         i += strip[i + 2] + 2;
                         break;
 
