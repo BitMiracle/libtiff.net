@@ -211,6 +211,10 @@ namespace BitMiracle.LibTiff.Classic
             {
                 return Tiff.Latin1Encoding.GetBytes(m_value as string);
             }
+            else if (m_value is int)
+            {
+                return BitConverter.GetBytes((int)m_value);
+            }
 
             return null;
         }
