@@ -15,6 +15,11 @@ namespace BitMiracle.Tiff2Pdf
     {
         public const string TIFF2PDF_MODULE = "tiff2pdf";
         public const float PS_UNIT_SIZE	= 72.0F;
+        public const string UnexpectedClientData = "Unexpected type of client data";
+
+        private Tiff2PdfConstants()
+        {
+        }
     }
 
     /* This struct defines a logical page of a TIFF. */

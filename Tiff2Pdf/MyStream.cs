@@ -27,7 +27,7 @@ namespace BitMiracle.Tiff2Pdf
         {
             T2P t2p = clientData as T2P;
             if (t2p == null)
-                throw new ArgumentException();
+                throw new ArgumentException(Tiff2PdfConstants.UnexpectedClientData, "clientData");
 
             if (!t2p.m_outputdisable && t2p.m_outputfile != null)
             {
@@ -40,7 +40,7 @@ namespace BitMiracle.Tiff2Pdf
         {
             T2P t2p = clientData as T2P;
             if (t2p == null)
-                throw new ArgumentException();
+                throw new ArgumentException(Tiff2PdfConstants.UnexpectedClientData, "clientData");
 
             if (!t2p.m_outputdisable && t2p.m_outputfile != null)
                 return t2p.m_outputfile.Seek(offset, origin);

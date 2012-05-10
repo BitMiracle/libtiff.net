@@ -24,7 +24,7 @@ namespace BitMiracle.Tiff2Pdf
      * This is used to sort a T2P_PAGE array of page structures
      * by page number.
      */
-    public class cmp_t2p_page : IComparer
+    public sealed class cmp_t2p_page : IComparer
     {
         int IComparer.Compare(object x, object y)
         {
@@ -1907,7 +1907,9 @@ namespace BitMiracle.Tiff2Pdf
         */
         private int write_pdf_header()
         {
-            string buffer = string.Format("%PDF-{0}.{1} ", m_pdf_majorversion & 0xff, m_pdf_minorversion & 0xff);
+            string buffer = string.Format(CultureInfo.InvariantCulture, 
+                "%PDF-{0}.{1} ", (m_pdf_majorversion & 0xff).ToString(CultureInfo.InvariantCulture),
+                (m_pdf_minorversion & 0xff).ToString(CultureInfo.InvariantCulture));
             
             int written = writeToFile(buffer);
             written += writeToFile("\n%");
@@ -1930,8 +1932,8 @@ namespace BitMiracle.Tiff2Pdf
         private int write_pdf_catalog()
         {
             int written = writeToFile("<< \n/Type /Catalog \n/Pages ");
-    
-            string buffer = string.Format("{0}", m_pdf_pages);
+
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_pages);
             written += writeToFile(buffer);
             written += writeToFile(" 0 R \n");
 
@@ -1962,7 +1964,8 @@ namespace BitMiracle.Tiff2Pdf
                 }
 
                 written += writeToFile("\n/Producer ");
-                string buffer = string.Format("libtiff / tiff2pdf - {0}", Tiff.AssemblyVersion);
+                string buffer = string.Format(CultureInfo.InvariantCulture,
+                    "libtiff / tiff2pdf - {0}", Tiff.AssemblyVersion);
                 written += write_pdf_string(Latin1Encoding.GetBytes(buffer));
             }
 
@@ -2148,7 +2151,7 @@ namespace BitMiracle.Tiff2Pdf
             return written;
         }
 
-        private int strlen(byte[] buffer)
+        private static int strlen(byte[] buffer)
         {
             for (int i = 0; i < buffer.Length; i++)
             {
@@ -2167,7 +2170,8 @@ namespace BitMiracle.Tiff2Pdf
         {
             DateTime dt = DateTime.Now.ToLocalTime();
 
-            string s = string.Format("D:{0:0000}{1:00}{2:00}{3:00}{4:00}{5:00}", 
+            string s = string.Format(CultureInfo.InvariantCulture,
+                "D:{0:0000}{1:00}{2:00}{3:00}{4:00}{5:00}", 
                 dt.Year % 65536, dt.Month % 256, dt.Day % 256, dt.Hour % 256, 
                 dt.Minute % 256, dt.Second % 256);
 
@@ -2220,7 +2224,7 @@ namespace BitMiracle.Tiff2Pdf
             string buffer = null;
             for (short i = 0; i < m_tiff_pagecount; i++)
             {
-                buffer = string.Format("{0}", page);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", page);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ");
 
@@ -2237,7 +2241,7 @@ namespace BitMiracle.Tiff2Pdf
             }
 
             written += writeToFile("] \n/Count ");
-            buffer = string.Format("{0}", m_tiff_pagecount);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_tiff_pagecount);
             written += writeToFile(buffer);
             written += writeToFile(" \n>> \n");
 
@@ -2447,10 +2451,10 @@ namespace BitMiracle.Tiff2Pdf
                 m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace ^ t2p_cs_t.T2P_CS_PALETTE);
                 written += write_pdf_xobject_cs();
                 m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace | t2p_cs_t.T2P_CS_PALETTE);
-                buffer = string.Format("{0}", (0x0001 << m_tiff_bitspersample) - 1);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", (0x0001 << m_tiff_bitspersample) - 1);
                 written += writeToFile(buffer);
                 written += writeToFile(" ");
-                buffer = string.Format("{0}", m_pdf_palettecs);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_palettecs);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ]\n");
                 return written;
@@ -2489,7 +2493,8 @@ namespace BitMiracle.Tiff2Pdf
                 X_W /= Y_W;
                 Z_W /= Y_W;
                 Y_W = 1.0F;
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
+                buffer = string.Format(CultureInfo.InvariantCulture,
+                    "[{0:F4} {1:F4} {2:F4}] \n", X_W, Y_W, Z_W);
                 written += writeToFile(buffer);
 
                 written += writeToFile("/BlackPoint ");
@@ -2499,10 +2504,12 @@ namespace BitMiracle.Tiff2Pdf
                 X_W /= Y_W;
                 Z_W /= Y_W;
                 Y_W = 1.0F;
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
+                buffer = string.Format(CultureInfo.InvariantCulture,
+                    "[{0:F4} {1:F4} {2:F4}] \n", X_W, Y_W, Z_W);
                 written += writeToFile(buffer);
                 written += writeToFile("/Range ");
-                buffer = string.Format("[{0} {1} {2} {3}] \n", m_pdf_labrange[0], m_pdf_labrange[1], m_pdf_labrange[2], m_pdf_labrange[3]);
+                buffer = string.Format(CultureInfo.InvariantCulture,
+                    "[{0} {1} {2} {3}] \n", m_pdf_labrange[0], m_pdf_labrange[1], m_pdf_labrange[2], m_pdf_labrange[3]);
                 written += writeToFile(buffer);
                 written += writeToFile(">>] \n");
             }
@@ -2517,20 +2524,20 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_tiff_transferfunctioncount == 1)
             {
-                buffer = string.Format("{0}", m_pdf_xrefcount + 1);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_xrefcount + 1);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ");
             }
             else
             {
                 written += writeToFile("[ ");
-                buffer = string.Format("{0}", m_pdf_xrefcount + 1);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_xrefcount + 1);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ");
-                buffer = string.Format("{0}", m_pdf_xrefcount + 2);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_xrefcount + 2);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ");
-                buffer = string.Format("{0}", m_pdf_xrefcount + 3);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_xrefcount + 3);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ");
                 written += writeToFile("/Identity ] ");
@@ -2546,7 +2553,8 @@ namespace BitMiracle.Tiff2Pdf
             written += writeToFile("/Domain [0.0 1.0] \n");
             written += writeToFile("/Range [0.0 1.0] \n");
 
-            string buffer = string.Format("/Size [{0}] \n", (1 << m_tiff_bitspersample));
+            string buffer = string.Format(CultureInfo.InvariantCulture, 
+                "/Size [{0}] \n", (1 << m_tiff_bitspersample));
             written += writeToFile(buffer);
             written += writeToFile("/BitsPerSample 16 \n");
             written += write_pdf_stream_dict(1 << (m_tiff_bitspersample + 1), 0);
@@ -2629,7 +2637,7 @@ namespace BitMiracle.Tiff2Pdf
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALGRAY) != 0)
             {
                 written += writeToFile("/WhitePoint ");
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
+                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:F4} {1:F4} {2:F4}] \n", X_W, Y_W, Z_W);
                 written += writeToFile(buffer);
                 written += writeToFile("/Gamma 2.2 \n");
             }
@@ -2637,12 +2645,12 @@ namespace BitMiracle.Tiff2Pdf
             if ((m_pdf_colorspace & t2p_cs_t.T2P_CS_CALRGB) != 0)
             {
                 written += writeToFile("/WhitePoint ");
-                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:N4} {1:N4} {2:N4}] \n", X_W, Y_W, Z_W);
+                buffer = string.Format(CultureInfo.InvariantCulture, "[{0:F4} {1:F4} {2:F4}] \n", X_W, Y_W, Z_W);
                 written += writeToFile(buffer);
                 written += writeToFile("/Matrix ");
                 
                 buffer = string.Format(CultureInfo.InvariantCulture,
-                    "[{0:N4} {1:N4} {2:N4} {3:N4} {4:N4} {5:N4} {6:N4} {7:N4} {8:N4}] \n",
+                    "[{0:F4} {1:F4} {2:F4} {3:F4} {4:F4} {5:F4} {6:F4} {7:F4} {8:F4}] \n",
                     X_R, Y_R, Z_R, X_G, Y_G, Z_G, X_B, Y_B, Z_B);
                 written += writeToFile(buffer);
 
@@ -2660,7 +2668,7 @@ namespace BitMiracle.Tiff2Pdf
         {
             int written = writeToFile("[/ICCBased ");
 
-            string buffer = string.Format("{0}", m_pdf_icccs);
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_icccs);
             written += writeToFile(buffer);
             written += writeToFile(" 0 R] \n");
 
@@ -2671,7 +2679,7 @@ namespace BitMiracle.Tiff2Pdf
         {
             int written = writeToFile("/N ");
 
-            string buffer = string.Format("{0} \n", m_tiff_samplesperpixel);
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0} \n", m_tiff_samplesperpixel);
             written += writeToFile(buffer);
             written += writeToFile("/Alternate ");
             m_pdf_colorspace = (t2p_cs_t)(m_pdf_colorspace ^ t2p_cs_t.T2P_CS_ICCBASED);
@@ -2706,13 +2714,13 @@ namespace BitMiracle.Tiff2Pdf
         private int write_pdf_xreftable()
         {
             int written = writeToFile("xref\n0 ");
-    
-            string buffer = string.Format("{0}", m_pdf_xrefcount + 1);
+
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_xrefcount + 1);
             written += writeToFile(buffer);
             written += writeToFile(" \n0000000000 65535 f \n");
             for (int i = 0; i < m_pdf_xrefcount; i++)
             {
-                buffer = string.Format("{0:D10} 00000 n \n", m_pdf_xrefoffsets[i]);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0:D10} 00000 n \n", m_pdf_xrefoffsets[i]);
                 written += writeToFile(buffer);
             }
 
@@ -2743,7 +2751,7 @@ namespace BitMiracle.Tiff2Pdf
 
                 for (int i = 0; i < 16; i++)
                 {
-                    string s = string.Format("{0:X2}", temp[i]);
+                    string s = string.Format(CultureInfo.InvariantCulture, "{0:X2}", temp[i]);
                     m_pdf_fileid[i * 2] = (byte)s[0];
                     m_pdf_fileid[i * 2 + 1] = (byte)s[1];
                 }
@@ -2751,20 +2759,20 @@ namespace BitMiracle.Tiff2Pdf
 
             int written = writeToFile("trailer\n<<\n/Size ");
 
-            string buffer = string.Format("{0}", m_pdf_xrefcount + 1);
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_xrefcount + 1);
             written += writeToFile(buffer);
             written += writeToFile("\n/Root ");
-            buffer = string.Format("{0}", m_pdf_catalog);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_catalog);
             written += writeToFile(buffer);
             written += writeToFile(" 0 R \n/Info ");
-            buffer = string.Format("{0}", m_pdf_info);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_info);
             written += writeToFile(buffer);
             written += writeToFile(" 0 R \n/ID[<");
             written += writeToFile(m_pdf_fileid, 32);
             written += writeToFile("><");
             written += writeToFile(m_pdf_fileid, 32);
             written += writeToFile(">]\n>>\nstartxref\n");
-            buffer = string.Format("{0}", m_pdf_startxref);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_startxref);
             written += writeToFile(buffer);
             written += writeToFile("\n%%EOF\n");
 
@@ -2779,45 +2787,57 @@ namespace BitMiracle.Tiff2Pdf
             int written = write_pdf_stream_dict(0, m_pdf_xrefcount + 1);
             written += writeToFile("/Type /XObject \n/Subtype /Image \n/Name /Im");
 
-            string buffer = string.Format("{0}", m_pdf_page + 1);
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_page + 1);
             written += writeToFile(buffer);
             if (tile != 0)
             {
                 written += writeToFile("_");
-                buffer = string.Format("{0}", tile);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", tile);
                 written += writeToFile(buffer);
             }
 
             written += writeToFile("\n/Width ");
             if (tile == 0)
             {
-                buffer = string.Format("{0}", m_tiff_width);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_tiff_width);
             }
             else
             {
                 if (tile_is_right_edge(m_tiff_pages[m_pdf_page], tile - 1))
-                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilewidth);
+                {
+                    buffer = string.Format(CultureInfo.InvariantCulture,
+                        "{0}", m_tiff_pages[m_pdf_page].tiles_edgetilewidth);
+                }
                 else
-                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilewidth);
+                {
+                    buffer = string.Format(CultureInfo.InvariantCulture,
+                        "{0}", m_tiff_pages[m_pdf_page].tiles_tilewidth);
+                }
             }
 
             written += writeToFile(buffer);
             written += writeToFile("\n/Height ");
             if (tile == 0)
             {
-                buffer = string.Format("{0}", m_tiff_length);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_tiff_length);
             }
             else
             {
                 if (tile_is_bottom_edge(m_tiff_pages[m_pdf_page], tile - 1))
-                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilelength);
+                {
+                    buffer = string.Format(CultureInfo.InvariantCulture,
+                        "{0}", m_tiff_pages[m_pdf_page].tiles_edgetilelength);
+                }
                 else
-                    buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilelength);
+                {
+                    buffer = string.Format(CultureInfo.InvariantCulture,
+                        "{0}", m_tiff_pages[m_pdf_page].tiles_tilelength);
+                }
             }
 
             written += writeToFile(buffer);
             written += writeToFile("\n/BitsPerComponent ");
-            buffer = string.Format("{0}", m_tiff_bitspersample);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_tiff_bitspersample);
             written += writeToFile(buffer);
             written += writeToFile("\n/ColorSpace ");
             written += write_pdf_xobject_cs();
@@ -2854,10 +2874,10 @@ namespace BitMiracle.Tiff2Pdf
                     if (tile == 0)
                     {
                         written += writeToFile("/Columns ");
-                        buffer = string.Format("{0}", m_tiff_width);
+                        buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_tiff_width);
                         written += writeToFile(buffer);
                         written += writeToFile(" /Rows ");
-                        buffer = string.Format("{0}", m_tiff_length);
+                        buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_tiff_length);
                         written += writeToFile(buffer);
                     }
                     else
@@ -2865,26 +2885,30 @@ namespace BitMiracle.Tiff2Pdf
                         if (!tile_is_right_edge(m_tiff_pages[m_pdf_page], tile - 1))
                         {
                             written += writeToFile("/Columns ");
-                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilewidth);
+                            buffer = string.Format(CultureInfo.InvariantCulture, 
+                                "{0}", m_tiff_pages[m_pdf_page].tiles_tilewidth);
                             written += writeToFile(buffer);
                         }
                         else
                         {
                             written += writeToFile("/Columns ");
-                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilewidth);
+                            buffer = string.Format(CultureInfo.InvariantCulture,
+                                "{0}", m_tiff_pages[m_pdf_page].tiles_edgetilewidth);
                             written += writeToFile(buffer);
                         }
 
                         if (!tile_is_bottom_edge(m_tiff_pages[m_pdf_page], tile - 1))
                         {
                             written += writeToFile(" /Rows ");
-                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_tilelength);
+                            buffer = string.Format(CultureInfo.InvariantCulture,
+                                "{0}", m_tiff_pages[m_pdf_page].tiles_tilelength);
                             written += writeToFile(buffer);
                         }
                         else
                         {
                             written += writeToFile(" /Rows ");
-                            buffer = string.Format("{0}", m_tiff_pages[m_pdf_page].tiles_edgetilelength);
+                            buffer = string.Format(CultureInfo.InvariantCulture,
+                                "{0}", m_tiff_pages[m_pdf_page].tiles_edgetilelength);
                             written += writeToFile(buffer);
                         }
                     }
@@ -2911,16 +2935,20 @@ namespace BitMiracle.Tiff2Pdf
                     {
                         written += writeToFile("/DecodeParms ");
                         written += writeToFile("<< /Predictor ");
-                        buffer = string.Format("{0}", m_pdf_defaultcompressionquality % 100);
+                        buffer = string.Format(CultureInfo.InvariantCulture, 
+                            "{0}", m_pdf_defaultcompressionquality % 100);
                         written += writeToFile(buffer);
                         written += writeToFile(" /Columns ");
-                        buffer = string.Format("{0}", m_tiff_width);
+                        buffer = string.Format(CultureInfo.InvariantCulture,
+                            "{0}", m_tiff_width);
                         written += writeToFile(buffer);
                         written += writeToFile(" /Colors ");
-                        buffer = string.Format("{0}", m_tiff_samplesperpixel);
+                        buffer = string.Format(CultureInfo.InvariantCulture,
+                            "{0}", m_tiff_samplesperpixel);
                         written += writeToFile(buffer);
                         written += writeToFile(" /BitsPerComponent ");
-                        buffer = string.Format("{0}", m_tiff_bitspersample);
+                        buffer = string.Format(CultureInfo.InvariantCulture,
+                            "{0}", m_tiff_bitspersample);
                         written += writeToFile(buffer);
                         written += writeToFile(">>\n");
                     }
@@ -2946,7 +2974,7 @@ namespace BitMiracle.Tiff2Pdf
                 {
                     T2P_BOX box = m_tiff_pages[m_pdf_page].tiles_tiles[i].tile_box;
                     buffer = string.Format(CultureInfo.InvariantCulture, 
-                        "q {0} {1:N4} {2:N4} {3:N4} {4:N4} {5:N4} {6:N4} cm /Im{7}_{8} Do Q\n", 
+                        "q {0} {1:F4} {2:F4} {3:F4} {4:F4} {5:F4} {6:F4} cm /Im{7}_{8} Do Q\n", 
                         m_tiff_transferfunctioncount != 0 ? "/GS1 gs " : "", box.mat[0], box.mat[1], 
                         box.mat[3], box.mat[4], box.mat[6], box.mat[7], m_pdf_page + 1, i + 1);
 
@@ -2958,7 +2986,7 @@ namespace BitMiracle.Tiff2Pdf
             {
                 T2P_BOX box = m_pdf_imagebox;
                 buffer = string.Format(CultureInfo.InvariantCulture, 
-                    "q {0} {1:N4} {2:N4} {3:N4} {4:N4} {5:N4} {6:N4} cm /Im{7} Do Q\n", 
+                    "q {0} {1:F4} {2:F4} {3:F4} {4:F4} {5:F4} {6:F4} cm /Im{7} Do Q\n", 
                     m_tiff_transferfunctioncount != 0 ? "/GS1 gs " : "", box.mat[0], box.mat[1],
                     box.mat[3], box.mat[4], box.mat[6], box.mat[7], m_pdf_page + 1);
 
@@ -3174,7 +3202,7 @@ namespace BitMiracle.Tiff2Pdf
         {
             T2P t2p = tif.Clientdata() as T2P;
             if (t2p == null)
-                throw new ArgumentException();
+                throw new ArgumentException(Tiff2PdfConstants.UnexpectedClientData, "tif");
 
             t2p.m_outputdisable = true;
         }
@@ -3183,7 +3211,7 @@ namespace BitMiracle.Tiff2Pdf
         {
             T2P t2p = tif.Clientdata() as T2P;
             if (t2p == null)
-                throw new ArgumentException();
+                throw new ArgumentException(Tiff2PdfConstants.UnexpectedClientData, "tif");
 
             t2p.m_outputdisable = false;
         }
@@ -3205,7 +3233,7 @@ namespace BitMiracle.Tiff2Pdf
             int x = value;
 
             //return octal encoding \ddd of the character value. 
-            return string.Format(@"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);
+            return string.Format(CultureInfo.InvariantCulture, @"\{0}{1}{2}", (x >> 6) & 7, (x >> 3) & 7, x & 7);
         }
 
         /*
@@ -3219,7 +3247,8 @@ namespace BitMiracle.Tiff2Pdf
             {
                 if ((pdfstr[i] & 0x80) != 0 || (pdfstr[i] == 127) || (pdfstr[i] < 32))
                 {
-                    string buffer = string.Format("{0}", encodeOctalString(pdfstr[i]));
+                    string buffer = string.Format(CultureInfo.InvariantCulture, 
+                        "{0}", encodeOctalString(pdfstr[i]));
                     written += writeToFile(buffer);
                 }
                 else
@@ -3446,7 +3475,7 @@ namespace BitMiracle.Tiff2Pdf
             }
             else
             {
-                string buffer = string.Format("{0}", number);
+                string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", number);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R \n");
             }
@@ -3475,7 +3504,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private int write_pdf_stream_length(int len)
         {
-            string buffer = string.Format("{0}", len);
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", len);
             int written = writeToFile(buffer);
             written += writeToFile("\n");
             return written;
@@ -3486,7 +3515,7 @@ namespace BitMiracle.Tiff2Pdf
         */
         private int write_pdf_obj_start(int number)
         {
-            string buffer = string.Format("{0}", number);
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", number);
             int written = writeToFile(buffer);
             written += writeToFile(" 0 obj\n");
             return written;
@@ -3506,25 +3535,25 @@ namespace BitMiracle.Tiff2Pdf
         private int write_pdf_page(int obj)
         {
             int written = writeToFile("<<\n/Type /Page \n/Parent ");
-    
-            string buffer = string.Format("{0}", m_pdf_pages);
+
+            string buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_pages);
             written += writeToFile(buffer);
             written += writeToFile(" 0 R \n");
             written += writeToFile("/MediaBox [");
-            buffer = string.Format(CultureInfo.InvariantCulture, "{0:N4}", m_pdf_mediabox.x1);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0:F4}", m_pdf_mediabox.x1);
             written += writeToFile(buffer);
             written += writeToFile(" ");
-            buffer = string.Format(CultureInfo.InvariantCulture, "{0:N4}", m_pdf_mediabox.y1);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0:F4}", m_pdf_mediabox.y1);
             written += writeToFile(buffer);
             written += writeToFile(" ");
-            buffer = string.Format(CultureInfo.InvariantCulture, "{0:N4}", m_pdf_mediabox.x2);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0:F4}", m_pdf_mediabox.x2);
             written += writeToFile(buffer);
             written += writeToFile(" ");
-            buffer = string.Format(CultureInfo.InvariantCulture, "{0:N4}", m_pdf_mediabox.y2);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0:F4}", m_pdf_mediabox.y2);
             written += writeToFile(buffer);
             written += writeToFile("] \n");
             written += writeToFile("/Contents ");
-            buffer = string.Format("{0}", obj + 1);
+            buffer = string.Format(CultureInfo.InvariantCulture, "{0}", obj + 1);
             written += writeToFile(buffer);
             written += writeToFile(" 0 R \n");
             written += writeToFile("/Resources << \n");
@@ -3535,13 +3564,14 @@ namespace BitMiracle.Tiff2Pdf
                 for (int i = 0; i < m_tiff_pages[m_pdf_page].page_tilecount; i++)
                 {
                     written += writeToFile("/Im");
-                    buffer = string.Format("{0}", m_pdf_page + 1);
+                    buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_page + 1);
                     written += writeToFile(buffer);
                     written += writeToFile("_");
-                    buffer = string.Format("{0}", i + 1);
+                    buffer = string.Format(CultureInfo.InvariantCulture, "{0}", i + 1);
                     written += writeToFile(buffer);
                     written += writeToFile(" ");
-                    buffer = string.Format("{0}", obj + 3 + 2 * i + m_tiff_pages[m_pdf_page].page_extra);
+                    buffer = string.Format(CultureInfo.InvariantCulture,
+                        "{0}", obj + 3 + 2 * i + m_tiff_pages[m_pdf_page].page_extra);
                     written += writeToFile(buffer);
                     written += writeToFile(" 0 R ");
                     if (i % 4 == 3)
@@ -3554,10 +3584,11 @@ namespace BitMiracle.Tiff2Pdf
             {
                 written += writeToFile("/XObject <<\n");
                 written += writeToFile("/Im");
-                buffer = string.Format("{0}", m_pdf_page + 1);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", m_pdf_page + 1);
                 written += writeToFile(buffer);
                 written += writeToFile(" ");
-                buffer = string.Format("{0}", obj + 3 + m_tiff_pages[m_pdf_page].page_extra);
+                buffer = string.Format(CultureInfo.InvariantCulture, 
+                    "{0}", obj + 3 + m_tiff_pages[m_pdf_page].page_extra);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ");
                 written += writeToFile(">>\n");
@@ -3567,7 +3598,7 @@ namespace BitMiracle.Tiff2Pdf
             {
                 written += writeToFile("/ExtGState <<");
                 writeToFile("/GS1 ");
-                buffer = string.Format("{0}", obj + 3);
+                buffer = string.Format(CultureInfo.InvariantCulture, "{0}", obj + 3);
                 written += writeToFile(buffer);
                 written += writeToFile(" 0 R ");
                 written += writeToFile(">> \n");

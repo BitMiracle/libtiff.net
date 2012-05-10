@@ -24,7 +24,7 @@ using BitMiracle.LibTiff.Classic;
 
 namespace BitMiracle.Tiff2Pdf
 {
-    public class Program
+    public static class Program
     {
         // setting this to true will make program to always output identical 
         // PDF files for each given image.
@@ -471,7 +471,7 @@ namespace BitMiracle.Tiff2Pdf
             width = 0;
             length = 0;
 
-            string papersizeUpper = papersize.ToUpper();
+            string papersizeUpper = papersize.ToUpper(CultureInfo.InvariantCulture);
             for (int i = 0; sizes[i] != null; i++)
             {
                 if (papersizeUpper == sizes[i])

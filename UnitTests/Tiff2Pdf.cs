@@ -117,7 +117,8 @@ namespace UnitTests
                     "XING_T24.TIF",
                     "ycbcr-cat.tif",
                     "multipage.tif",
-                    "chevron.tif",                    
+                    "chevron.tif",
+                    "2.tif"
                 };
             }
         }
