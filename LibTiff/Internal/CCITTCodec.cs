@@ -1360,23 +1360,21 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 {
                     // premature EOF
                     CLEANUP_RUNS(module);
-                }
-                else
-                {
-                    bool expandSucceeded = EXPAND1D(module);
-                    if (expandSucceeded)
-                    {
-                        fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
-                        offset += m_rowbytes;
-                        count -= m_rowbytes;
-                        m_line++;
-                        continue;
-                    }
+                    fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                    return false;
                 }
 
-                // premature EOF
+                bool expandSucceeded = EXPAND1D(module);
+                if (!expandSucceeded)
+                {
+                    fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
+                    return false;
+                }
+
                 fill(buffer, offset, m_runs, m_thisrun, m_pa, m_rowpixels);
-                return false;
+                offset += m_rowbytes;
+                count -= m_rowbytes;
+                m_line++;
             }
 
             return true;
@@ -1847,9 +1845,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private bool EXPAND1D(string module)
         {
             faxTableEntry TabEnt;
-            bool decodingDone = false;
-            bool whiteDecodingDone = false;
-            bool blackDecodingDone = false;
 
             for ( ; ; )
             {
@@ -1862,12 +1857,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
                     }
 
+                    bool whiteDecodingDone = false;
                     switch (TabEnt.State)
                     {
                         case S_EOL:
-                            m_rowpixels = 1;
-                            decodingDone = true;
-                            break;
+                            m_EOLcnt = 1;
+                            CLEANUP_RUNS(module);
+                            return true;
 
                         case S_TermW:
                             SETVALUE(TabEnt.Param);
@@ -1883,19 +1879,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         default:
                             /* "WhiteTable" */
                             Fax3Unexpected(module);
-                            decodingDone = true;
-                            break;
+                            CLEANUP_RUNS(module);
+                            return true;
                     }
 
-                    if (decodingDone || whiteDecodingDone)
+                    if (whiteDecodingDone)
                         break;
                 }
 
-                if (decodingDone)
-                    break;
-
                 if (m_a0 >= m_rowpixels)
-                    break;
+                {
+                    CLEANUP_RUNS(module);
+                    return true;
+                }
 
                 for ( ; ; )
                 {
@@ -1906,12 +1902,13 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         return false;
                     }
 
+                    bool blackDecodingDone = false;
                     switch (TabEnt.State)
                     {
                         case S_EOL:
                             m_EOLcnt = 1;
-                            decodingDone = true;
-                            break;
+                            CLEANUP_RUNS(module);
+                            return true;
 
                         case S_TermB:
                             SETVALUE(TabEnt.Param);
@@ -1927,29 +1924,23 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         default:
                             /* "BlackTable" */
                             Fax3Unexpected(module);
-                            decodingDone = true;
-                            break;
+                            CLEANUP_RUNS(module);
+                            return true;
                     }
 
-                    if (decodingDone || blackDecodingDone)
+                    if (blackDecodingDone)
                         break;
                 }
 
-                if (decodingDone)
-                    break;
-
                 if (m_a0 >= m_rowpixels)
-                    break;
+                {
+                    CLEANUP_RUNS(module);
+                    return true;
+                }
 
                 if (m_runs[m_pa - 1] == 0 && m_runs[m_pa - 2] == 0)
                     m_pa -= 2;
-
-                whiteDecodingDone = false;
-                blackDecodingDone = false;
             }
-
-            CLEANUP_RUNS(module);
-            return true;
         }
 
         /*
