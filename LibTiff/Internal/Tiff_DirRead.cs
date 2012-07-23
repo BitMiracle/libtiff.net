@@ -300,6 +300,7 @@ namespace BitMiracle.LibTiff.Classic
                 WarningExt(this, m_clientdata, m_name,
                     "incorrect count for field \"{0}\" ({1}, expecting {2}); tag trimmed",
                     FieldWithTag(dir.tdir_tag).Name, dir.tdir_count, count);
+                dir.tdir_count = count;
                 return true;
             }
 
