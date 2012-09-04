@@ -45,14 +45,12 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public virtual void ErrorHandler(Tiff tif, string method, string format, params object[] args)
         {
-            using (TextWriter stderr = Console.Error)
-            {
-                if (method != null)
-                    stderr.Write("{0}: ", method);
+            TextWriter stderr = Console.Error;
+            if (method != null)
+                stderr.Write("{0}: ", method);
 
-                stderr.Write(format, args);
-                stderr.Write("\n");
-            }
+            stderr.Write(format, args);
+            stderr.Write("\n");
         }
 
         /// <summary>
@@ -91,15 +89,13 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public virtual void WarningHandler(Tiff tif, string method, string format, params object[] args)
         {
-            using (TextWriter stderr = Console.Error)
-            {
-                if (method != null)
-                    stderr.Write("{0}: ", method);
+            TextWriter stderr = Console.Error;
+            if (method != null)
+                stderr.Write("{0}: ", method);
 
-                stderr.Write("Warning, ");
-                stderr.Write(format, args);
-                stderr.Write("\n");
-            }
+            stderr.Write("Warning, ");
+            stderr.Write(format, args);
+            stderr.Write("\n");
         }
 
         /// <summary>
