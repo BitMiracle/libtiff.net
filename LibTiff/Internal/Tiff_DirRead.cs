@@ -135,8 +135,20 @@ namespace BitMiracle.LibTiff.Classic
 
         private int fetchFailed(TiffDirEntry dir)
         {
-            ErrorExt(this, m_clientdata, m_name,
-                "Error fetching data for field \"{0}\"", FieldWithTag(dir.tdir_tag).Name);
+            string format = "Error fetching data for field \"{0}\"";
+
+            TiffFieldInfo fi = FieldWithTag(dir.tdir_tag);
+            if (fi.Bit == FieldBit.Custom)
+            {
+                // According to the TIFF standard, private (custom) tags can be safely
+                // ignored when reading an image from a TIFF file.
+                WarningExt(this, m_clientdata, m_name, format, fi.Name);
+            }
+            else
+            {
+                ErrorExt(this, m_clientdata, m_name, format, fi.Name);
+            }
+
             return 0;
         }
 
