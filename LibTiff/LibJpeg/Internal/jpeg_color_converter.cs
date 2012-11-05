@@ -31,14 +31,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         // address, which can be held in a register in the inner loops on many
         // machines (more than can hold all eight addresses, anyway).
         private const int R_Y_OFF = 0;           /* offset to R => Y section */
-        private const int G_Y_OFF = (1 * (JpegConstants.MAXJSAMPLE+1));  /* offset to G => Y section */
-        private const int B_Y_OFF = (2 * (JpegConstants.MAXJSAMPLE+1));  /* etc. */
-        private const int R_CB_OFF = (3 * (JpegConstants.MAXJSAMPLE+1));
-        private const int G_CB_OFF = (4 * (JpegConstants.MAXJSAMPLE+1));
-        private const int B_CB_OFF = (5 * (JpegConstants.MAXJSAMPLE+1));
+        private const int G_Y_OFF = (1 * (JpegConstants.MAXJSAMPLE + 1));  /* offset to G => Y section */
+        private const int B_Y_OFF = (2 * (JpegConstants.MAXJSAMPLE + 1));  /* etc. */
+        private const int R_CB_OFF = (3 * (JpegConstants.MAXJSAMPLE + 1));
+        private const int G_CB_OFF = (4 * (JpegConstants.MAXJSAMPLE + 1));
+        private const int B_CB_OFF = (5 * (JpegConstants.MAXJSAMPLE + 1));
         private const int R_CR_OFF = B_CB_OFF;        /* B=>Cb, R=>Cr are the same */
-        private const int G_CR_OFF = (6 * (JpegConstants.MAXJSAMPLE+1));
-        private const int B_CR_OFF = (7 * (JpegConstants.MAXJSAMPLE+1));
+        private const int G_CR_OFF = (6 * (JpegConstants.MAXJSAMPLE + 1));
+        private const int B_CR_OFF = (7 * (JpegConstants.MAXJSAMPLE + 1));
         private const int TABLE_SIZE = (8 * (JpegConstants.MAXJSAMPLE + 1));
 
         private jpeg_compress_struct m_cinfo;
