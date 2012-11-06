@@ -31,8 +31,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         * -16384 .. +16383 for 12-bit data.
         * Hence the magnitude should always fit in 10 or 14 bits respectively.
         */
-        protected static int MAX_HUFFMAN_COEF_BITS = 10;
-        private static int MAX_CLEN = 32;     /* assumed maximum initial code length */
+        protected const int MAX_HUFFMAN_COEF_BITS = 10;
+        private const int MAX_CLEN = 32;     /* assumed maximum initial code length */
 
         protected jpeg_compress_struct m_cinfo;
 
@@ -176,7 +176,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             /* Huffman's basic algorithm to assign optimal code lengths to symbols */
 
-            for (; ;)
+            for (;;)
             {
                 /* Find the smallest nonzero frequency, set c1 = its symbol */
                 /* In case of ties, take the larger symbol number */

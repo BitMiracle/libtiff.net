@@ -58,7 +58,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 // unknown tag
                 ErrorExt(this, m_clientdata, "SetField", "{0}: Unknown {1}tag {2}",
-                    m_name, isPseudoTag(tag) ? "pseudo-" : "", tag);
+                    m_name, isPseudoTag(tag) ? "pseudo-" : string.Empty, tag);
                 return false;
             }
 

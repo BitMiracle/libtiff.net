@@ -3131,7 +3131,7 @@ namespace BitMiracle.LibTiff.Classic
             if (fieldSet(FieldBit.ExtraSamples) && m_dir.td_extrasamples != 0)
             {
                 fprintf(stream, "  Extra Samples: {0}<", m_dir.td_extrasamples);
-                string sep = "";
+                string sep = string.Empty;
                 for (short i = 0; i < m_dir.td_extrasamples; i++)
                 {
                     switch (m_dir.td_sampleinfo[i])
@@ -3293,7 +3293,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(stream, "  Color Map: ");
                 if ((flags & TiffPrintFlags.COLORMAP) != 0)
                 {
-                    fprintf(stream, "" + EndOfLine);
+                    fprintf(stream, string.Empty + EndOfLine);
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
                         fprintf(stream, "   {0,5}: {1,5} {2,5} {3,5}" + EndOfLine, l, m_dir.td_colormap[0][l], m_dir.td_colormap[1][l], m_dir.td_colormap[2][l]);
@@ -3307,14 +3307,14 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(stream, "  Transfer Function: ");
                 if ((flags & TiffPrintFlags.CURVES) != 0)
                 {
-                    fprintf(stream, "" + EndOfLine);
+                    fprintf(stream, string.Empty + EndOfLine);
                     int n = 1 << m_dir.td_bitspersample;
                     for (int l = 0; l < n; l++)
                     {
                         fprintf(stream, "    {0,2}: {0,5}", l, m_dir.td_transferfunction[0][l]);
                         for (short i = 1; i < m_dir.td_samplesperpixel; i++)
                             fprintf(stream, " {0,5}", m_dir.td_transferfunction[i][l]);
-                        fprintf(stream, "" + EndOfLine);
+                        fprintf(stream, string.Empty + EndOfLine);
                     }
                 }
                 else
@@ -3326,7 +3326,7 @@ namespace BitMiracle.LibTiff.Classic
                 fprintf(stream, "  SubIFD Offsets:");
                 for (short i = 0; i < m_dir.td_nsubifd; i++)
                     fprintf(stream, " {0,5}", m_dir.td_subifd[i]);
-                fprintf(stream, "" + EndOfLine);
+                fprintf(stream, string.Empty + EndOfLine);
             }
 
             // Custom tag support.

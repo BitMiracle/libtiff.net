@@ -100,7 +100,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public ReadResult read_markers()
         {
             /* Outer loop repeats once for each marker. */
-            for ( ; ; )
+            for (;;)
             {
                 /* Collect the marker proper, unless we already did. */
                 /* NB: first_marker() enforces the requirement that SOI appear first. */

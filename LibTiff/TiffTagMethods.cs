@@ -410,7 +410,7 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         Tiff.ErrorExt(tif, tif.m_clientdata, module,
                             "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
-                            tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
+                            tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : string.Empty,
                             fip != null ? fip.Name : "Unknown");
                         status = false;
                         break;
@@ -807,7 +807,7 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         Tiff.ErrorExt(tif, tif.m_clientdata, "_TIFFVGetField",
                             "{0}: Invalid {1}tag \"{2}\" (not supported by codec)",
-                            tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : "",
+                            tif.m_name, Tiff.isPseudoTag(tag) ? "pseudo-" : string.Empty,
                             fip != null ? fip.Name : "Unknown");
                         result = null;
                         break;

@@ -45,7 +45,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private static readonly TiffFieldInfo[] zipFieldInfo = 
         {
-            new TiffFieldInfo(TiffTag.ZIPQUALITY, 0, 0, TiffType.ANY, FieldBit.Pseudo, true, false, ""), 
+            new TiffFieldInfo(TiffTag.ZIPQUALITY, 0, 0, TiffType.ANY, FieldBit.Pseudo, true, false, string.Empty), 
         };
 
         private TiffTagMethods m_tagMethods;

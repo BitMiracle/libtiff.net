@@ -59,9 +59,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
         private static readonly TiffFieldInfo[] jpegFieldInfo = 
         {
             new TiffFieldInfo(TiffTag.JPEGTABLES, -3, -3, TiffType.UNDEFINED, FIELD_JPEGTABLES, false, true, "JPEGTables"), 
-            new TiffFieldInfo(TiffTag.JPEGQUALITY, 0, 0, TiffType.ANY, FieldBit.Pseudo, true, false, ""), 
-            new TiffFieldInfo(TiffTag.JPEGCOLORMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, ""), 
-            new TiffFieldInfo(TiffTag.JPEGTABLESMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, ""), 
+            new TiffFieldInfo(TiffTag.JPEGQUALITY, 0, 0, TiffType.ANY, FieldBit.Pseudo, true, false, string.Empty), 
+            new TiffFieldInfo(TiffTag.JPEGCOLORMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, string.Empty), 
+            new TiffFieldInfo(TiffTag.JPEGTABLESMODE, 0, 0, TiffType.ANY, FieldBit.Pseudo, false, false, string.Empty), 
             /* Specific for JPEG in faxes */
             new TiffFieldInfo(TiffTag.FAXRECVPARAMS, 1, 1, TiffType.LONG, FIELD_RECVPARAMS, true, false, "FaxRecvParams"), 
             new TiffFieldInfo(TiffTag.FAXSUBADDRESS, -1, -1, TiffType.ASCII, FIELD_SUBADDRESS, true, false, "FaxSubAddress"), 
