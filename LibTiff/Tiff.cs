@@ -1612,7 +1612,7 @@ namespace BitMiracle.LibTiff.Classic
             dir = null;
 
             if (!fieldSet(FieldBit.MaxSampleValue))
-                m_dir.td_maxsamplevalue = (short)((1 << m_dir.td_bitspersample) - 1);
+                m_dir.td_maxsamplevalue = (ushort)((1 << m_dir.td_bitspersample) - 1);
 
             // Setup default compression scheme.
 

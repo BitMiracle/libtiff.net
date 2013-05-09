@@ -8,6 +8,9 @@
                     <title>Version 2.3</title>
                     <content>
                         <list class="bullet">
+							<listItem>
+                                Fixed opening of 16 bit grayscale files with large MAXSAMPLEVALUE values.
+                            </listItem>
                             <listItem>
                                 Improved support for files produced by legacy TIFF writers.
                             </listItem>

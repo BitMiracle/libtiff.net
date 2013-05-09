@@ -181,10 +181,10 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.MINSAMPLEVALUE:
-                    td.td_minsamplevalue = value[0].ToShort();
+                    td.td_minsamplevalue = value[0].ToUShort();
                     break;
                 case TiffTag.MAXSAMPLEVALUE:
-                    td.td_maxsamplevalue = value[0].ToShort();
+                    td.td_maxsamplevalue = value[0].ToUShort();
                     break;
                 case TiffTag.SMINSAMPLEVALUE:
                     td.td_sminsamplevalue = value[0].ToDouble();

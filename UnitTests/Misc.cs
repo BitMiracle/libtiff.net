@@ -36,6 +36,22 @@ namespace UnitTests
         }
 
         [Test]
+        public void TestReadMinMaxSampleValues()
+        {
+            string fn = Path.Combine(TestCase.Folder, "B00005-no-100.tif");
+            using (Tiff tiff = Tiff.Open(fn, "r"))
+            {
+                FieldValue[] fieldValues = tiff.GetField(TiffTag.MINSAMPLEVALUE);
+                uint min = fieldValues[0].ToUInt();
+                Assert.AreEqual(0, min);
+
+                fieldValues = tiff.GetField(TiffTag.MAXSAMPLEVALUE);
+                uint max = (uint)fieldValues[0].ToInt();
+                Assert.AreEqual(65535, max);
+            }
+        }
+
+        [Test]
         public void TestReadTileOJpeg()
         {
             string fn = Path.Combine(TestCase.Folder, "zackthecat.tif");

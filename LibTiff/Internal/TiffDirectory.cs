@@ -37,8 +37,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public Orientation td_orientation;
         public short td_samplesperpixel;
         public int td_rowsperstrip;
-        public short td_minsamplevalue;
-        public short td_maxsamplevalue;
+        public ushort td_minsamplevalue;
+        public ushort td_maxsamplevalue;
         public double td_sminsamplevalue;
         public double td_smaxsamplevalue;
         public float td_xresolution;
