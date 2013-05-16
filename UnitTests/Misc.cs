@@ -35,10 +35,11 @@ namespace UnitTests
             }
         }
 
-        [Test]
-        public void TestReadMinMaxSampleValues()
+        [TestCase("B00005-no-100.tif")]
+        [TestCase("16-bit-4-Band.tiff")]
+        public void TestReadMinMaxSampleValues(string name)
         {
-            string fn = Path.Combine(TestCase.Folder, "B00005-no-100.tif");
+            string fn = Path.Combine(TestCase.Folder, name);
             using (Tiff tiff = Tiff.Open(fn, "r"))
             {
                 FieldValue[] fieldValues = tiff.GetField(TiffTag.MINSAMPLEVALUE);

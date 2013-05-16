@@ -72,6 +72,15 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The value converted to short.</returns>
         public short ToShort()
         {
+            switch (Type.GetTypeCode(m_value.GetType()))
+            {
+                case TypeCode.UInt16:
+                    return (short)((ushort)m_value);
+
+                case TypeCode.Int16:
+                    return (short)m_value;
+            }
+
             return Convert.ToInt16(m_value);
         }
 
@@ -84,6 +93,15 @@ namespace BitMiracle.LibTiff.Classic
 #endif
         public ushort ToUShort()
         {
+            switch (Type.GetTypeCode(m_value.GetType()))
+            {
+                case TypeCode.UInt16:
+                    return (ushort)m_value;
+
+                case TypeCode.Int16:
+                    return (ushort)((short)m_value);
+            }
+
             return Convert.ToUInt16(m_value);
         }
 
@@ -93,6 +111,15 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The value converted to int.</returns>
         public int ToInt()
         {
+            switch (Type.GetTypeCode(m_value.GetType()))
+            {
+                case TypeCode.UInt32:
+                    return (int)((uint)m_value);
+
+                case TypeCode.Int32:
+                    return (int)m_value;
+            }
+
             return Convert.ToInt32(m_value);
         }
 
@@ -105,6 +132,15 @@ namespace BitMiracle.LibTiff.Classic
 #endif
         public uint ToUInt()
         {
+            switch (Type.GetTypeCode(m_value.GetType()))
+            {
+                case TypeCode.UInt32:
+                    return (uint)m_value;
+
+                case TypeCode.Int32:
+                    return (uint)((int)m_value);
+            }
+
             return Convert.ToUInt32(m_value);
         }
 
