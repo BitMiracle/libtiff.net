@@ -351,6 +351,7 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffType.LONG:
                     case TiffType.SLONG:
                     case TiffType.FLOAT:
+                    case TiffType.IFD:
                         int[] l = ByteArrayToInts(buffer, 0, count);
                         SwabArrayOfLong(l, dir.tdir_count);
                         IntsToByteArray(l, 0, dir.tdir_count, buffer, 0);
@@ -920,6 +921,7 @@ namespace BitMiracle.LibTiff.Classic
 
                     case TiffType.LONG:
                     case TiffType.SLONG:
+                    case TiffType.IFD:
                         v32 = extractData(dir);
                         if (fip.PassCount)
                         {

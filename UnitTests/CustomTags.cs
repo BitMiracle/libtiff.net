@@ -7,12 +7,13 @@ namespace UnitTests
     class CustomTags
     {
         private const TiffTag TIFFTAG_ASCIITAG = (TiffTag)666;
-        private const TiffTag TIFFTAG_LONGTAG = (TiffTag)667;
-        private const TiffTag TIFFTAG_SHORTTAG = (TiffTag)668;
+        private const TiffTag TIFFTAG_SHORTTAG = (TiffTag)667;
+        private const TiffTag TIFFTAG_LONGTAG = (TiffTag)668;
         private const TiffTag TIFFTAG_RATIONALTAG = (TiffTag)669;
         private const TiffTag TIFFTAG_FLOATTAG = (TiffTag)670;
         private const TiffTag TIFFTAG_DOUBLETAG = (TiffTag)671;
-        private const TiffTag TIFFTAG_BYTE = (TiffTag)672;
+        private const TiffTag TIFFTAG_BYTETAG = (TiffTag)672;
+        private const TiffTag TIFFTAG_IFDTAG = (TiffTag)673;
 
         private Tiff.TiffExtendProc m_parentExtender;
 
@@ -26,7 +27,8 @@ namespace UnitTests
                 new TiffFieldInfo(TIFFTAG_RATIONALTAG, 2, 2, TiffType.RATIONAL, FieldBit.Custom, false, true, "RationalTag"),
                 new TiffFieldInfo(TIFFTAG_FLOATTAG, 2, 2, TiffType.FLOAT, FieldBit.Custom, false, true, "FloatTag"),
                 new TiffFieldInfo(TIFFTAG_DOUBLETAG, 2, 2, TiffType.DOUBLE, FieldBit.Custom, false, true, "DoubleTag"),
-                new TiffFieldInfo(TIFFTAG_BYTE, 2, 2, TiffType.BYTE, FieldBit.Custom, false, true, "ByteTag"),
+                new TiffFieldInfo(TIFFTAG_BYTETAG, 2, 2, TiffType.BYTE, FieldBit.Custom, false, true, "ByteTag"),
+                new TiffFieldInfo(TIFFTAG_IFDTAG, 1, 1, TiffType.IFD, FieldBit.Custom, false, false, "IfdTag"),
             };
 
             tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
@@ -85,7 +87,10 @@ namespace UnitTests
             image.SetField(TIFFTAG_DOUBLETAG, 2, doubles);
             
             byte[] bytes = { 89, 90 };
-            image.SetField(TIFFTAG_BYTE, 2, bytes);
+            image.SetField(TIFFTAG_BYTETAG, 2, bytes);
+
+            int ifd_offset = 1234567890;
+            image.SetField(TIFFTAG_IFDTAG, ifd_offset);
 
             // Write the information to the file
             image.WriteEncodedStrip(0, buffer, 25 * 144);
@@ -130,11 +135,16 @@ namespace UnitTests
             Assert.AreEqual(2, res[0].ToInt());
             Assert.AreEqual(doubles, res[1].ToDoubleArray());
 
-            res = image.GetField(TIFFTAG_BYTE);
+            res = image.GetField(TIFFTAG_BYTETAG);
             Assert.IsNotNull(res);
             Assert.AreEqual(2, res.Length);
             Assert.AreEqual(2, res[0].ToInt());
             Assert.AreEqual(bytes, res[1].ToByteArray());
+
+            res = image.GetField(TIFFTAG_IFDTAG);
+            Assert.IsNotNull(res);
+            Assert.AreEqual(1, res.Length);
+            Assert.AreEqual(ifd_offset, res[0].ToInt());
 
             image.Dispose();
 

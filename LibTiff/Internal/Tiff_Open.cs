@@ -35,6 +35,7 @@ namespace BitMiracle.LibTiff.Classic
             0xffffffff,     // TIFF_SRATIONAL
             0xffffffff,     // TIFF_FLOAT
             0xffffffff,     // TIFF_DOUBLE
+            0xffffffff,     // TIFF_IFD
         };
 
         private static readonly int[] bigTypeshift = 
@@ -52,6 +53,7 @@ namespace BitMiracle.LibTiff.Classic
             0,      // TIFF_SRATIONAL
             0,      // TIFF_FLOAT
             0,      // TIFF_DOUBLE
+            0,      // TIFF_IFD
         };
 
         private static readonly int[] litTypeshift = 
@@ -69,6 +71,7 @@ namespace BitMiracle.LibTiff.Classic
             0,  // TIFF_SRATIONAL
             0,  // TIFF_FLOAT
             0,  // TIFF_DOUBLE
+            0,  // TIFF_IFD
         };
 
         /*
