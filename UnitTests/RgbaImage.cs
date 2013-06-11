@@ -89,7 +89,8 @@ namespace UnitTests
                     "flower-ycbcr12-contig-08.tif",
                     "flower-ycbcr41-contig-08.tif",
                     "flower-ycbcr42-contig-08.tif",
-                    "flower-ycbcr44-contig-08.tif",                    
+                    "flower-ycbcr44-contig-08.tif",
+                    "palette1bpp.tif"
                 };
             }
         }

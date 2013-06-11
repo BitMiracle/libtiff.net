@@ -120,11 +120,11 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// colormap pallete
         /// </summary>
-        private short[] redcmap;
+        private ushort[] redcmap;
 
-        private short[] greencmap;
+        private ushort[] greencmap;
 
-        private short[] bluecmap;
+        private ushort[] bluecmap;
 
         private GetDelegate get;
         private PutContigDelegate putContig;
@@ -435,13 +435,13 @@ namespace BitMiracle.LibTiff.Classic
 
                     // copy the colormaps so we can modify them
                     int n_color = (1 << img.bitspersample);
-                    img.redcmap = new short[n_color];
-                    img.greencmap = new short[n_color];
-                    img.bluecmap = new short[n_color];
+                    img.redcmap = new ushort[n_color];
+                    img.greencmap = new ushort[n_color];
+                    img.bluecmap = new ushort[n_color];
 
-                    Buffer.BlockCopy(red_orig, 0, img.redcmap, 0, n_color * sizeof(short));
-                    Buffer.BlockCopy(green_orig, 0, img.greencmap, 0, n_color * sizeof(short));
-                    Buffer.BlockCopy(blue_orig, 0, img.bluecmap, 0, n_color * sizeof(short));
+                    Buffer.BlockCopy(red_orig, 0, img.redcmap, 0, n_color * sizeof(ushort));
+                    Buffer.BlockCopy(green_orig, 0, img.greencmap, 0, n_color * sizeof(ushort));
+                    Buffer.BlockCopy(blue_orig, 0, img.bluecmap, 0, n_color * sizeof(ushort));
 
                     if (planarconfig == PlanarConfig.CONTIG &&
                         img.samplesperpixel != 1 && img.bitspersample < 8)
@@ -1647,9 +1647,9 @@ namespace BitMiracle.LibTiff.Classic
         {
             for (int i = (1 << bitspersample) - 1; i >= 0; i--)
             {
-                redcmap[i] = (short)(redcmap[i] >> 8);
-                greencmap[i] = (short)(greencmap[i] >> 8);
-                bluecmap[i] = (short)(bluecmap[i] >> 8);
+                redcmap[i] = (ushort)(redcmap[i] >> 8);
+                greencmap[i] = (ushort)(greencmap[i] >> 8);
+                bluecmap[i] = (ushort)(bluecmap[i] >> 8);
             }
         }
 

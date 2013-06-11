@@ -20,6 +20,9 @@
                             <listItem>
                                 Fixed bug in SwabArrayOfDouble method.
                             </listItem>
+							<listItem>
+                                Fixed bug related to paletted 1bpp images in TiffRgbaImage.
+                            </listItem>
                             <listItem>
                                 Fixed state-related bugs in some codecs.
                             </listItem>
