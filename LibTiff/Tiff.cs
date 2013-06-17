@@ -537,9 +537,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             m_foundfield = null;
 
-            if (m_nfields > 0)
-                m_fieldinfo = Realloc(m_fieldinfo, m_nfields, m_nfields + count);
-            else
+            if (m_nfields <= 0)
                 m_fieldinfo = new TiffFieldInfo[count];
 
             for (int i = 0; i < count; i++)
@@ -549,6 +547,7 @@ namespace BitMiracle.LibTiff.Classic
                 // only add definitions that aren't already present
                 if (fip == null)
                 {
+                    m_fieldinfo = Realloc(m_fieldinfo, m_nfields, m_nfields + 1);
                     m_fieldinfo[m_nfields] = info[i];
                     m_nfields++;
                 }
@@ -1695,7 +1694,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             const string module = "ReadCustomDirectory";
 
-            setupFieldInfo(info, count);
+            MergeFieldInfo(info, count);
 
             uint dummyNextDirOff;
             TiffDirEntry[] dir;
