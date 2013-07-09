@@ -1684,8 +1684,8 @@ namespace BitMiracle.LibTiff.Classic
         /// Reads a custom directory from the arbitrary offset within file/stream.
         /// </summary>
         /// <param name="offset">The directory offset.</param>
-        /// <param name="info">The array of <see cref="TiffFieldInfo"/> objects to merge to
-        /// existing field information.</param>
+        /// <param name="info">The array of <see cref="TiffFieldInfo"/> objects to read from
+        /// custom directory. Standard <see cref="TiffFieldInfo"/> objects are ignored.</param>
         /// <param name="count">The number of items to use from
         /// the <paramref name="info"/> array.</param>
         /// <returns><c>true</c> if a custom directory was read successfully;
@@ -1694,7 +1694,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             const string module = "ReadCustomDirectory";
 
-            MergeFieldInfo(info, count);
+            setupFieldInfo(info, count);
 
             uint dummyNextDirOff;
             TiffDirEntry[] dir;
