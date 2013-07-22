@@ -628,14 +628,25 @@ namespace BitMiracle.LibTiff.Classic
                         else
                             cp = result[0].ToString();
 
-                        // add zero ('\0') at the end of the byte array
                         byte[] stringBytes = Latin1Encoding.GetBytes(cp);
-                        byte[] totalBytes = new byte[stringBytes.Length + 1];
-                        Buffer.BlockCopy(stringBytes, 0, totalBytes, 0, stringBytes.Length);
 
-                        dir.tdir_count = totalBytes.Length;
-                        if (!writeByteArray(ref dir, totalBytes))
-                            return false;
+                        // If this last character is a '\0' null char
+                        if (stringBytes[stringBytes.Length - 1] == 0)
+                        {
+                            dir.tdir_count = stringBytes.Length;
+                            if (!writeByteArray(ref dir, stringBytes))
+                                return false;
+                        }
+                        else
+                        {
+                            // add zero ('\0') at the end of the byte array
+                            byte[] totalBytes = new byte[stringBytes.Length + 1];
+                            Buffer.BlockCopy(stringBytes, 0, totalBytes, 0, stringBytes.Length);
+
+                            dir.tdir_count = totalBytes.Length;
+                            if (!writeByteArray(ref dir, totalBytes))
+                                return false;
+                        }
                     }
                     break;
 

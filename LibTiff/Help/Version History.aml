@@ -9,6 +9,9 @@
                     <content>
                         <list class="bullet">
 							<listItem>
+                                Fixed issues related to processing of custom directories and custom tags (thanks to Oliver Merkle and Alex J. Kennedy)
+                            </listItem>
+							<listItem>
                                 Fixed opening of 16 bit grayscale files with large MAXSAMPLEVALUE values.
                             </listItem>
                             <listItem>
