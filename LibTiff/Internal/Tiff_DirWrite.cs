@@ -631,7 +631,7 @@ namespace BitMiracle.LibTiff.Classic
                         byte[] stringBytes = Latin1Encoding.GetBytes(cp);
 
                         // If this last character is a '\0' null char
-                        if (stringBytes[stringBytes.Length - 1] == 0)
+                        if (stringBytes.Length != 0 && stringBytes[stringBytes.Length - 1] == 0)
                         {
                             dir.tdir_count = stringBytes.Length;
                             if (!writeByteArray(ref dir, stringBytes))
