@@ -554,5 +554,37 @@ namespace BitMiracle.LibTiff.Classic
                     break;
             }
         }
+
+#if FIX_JPEG_IS_OJPEG
+        private bool checkJpegIsOJpeg(ref int v, TiffDirEntry[] dir, short dircount)
+        {
+            // detect a bug in some older JPEG-IN-TIFF formats (emitted by (unknown) scanner software)
+            // where the Compression field reports new-style JPEG (7) but the JPEG encoded data
+            // and JPEG related fields actually conform to old-style JPEG (6).
+            if ((Compression)(v & 0xffff) == Compression.JPEG)
+            {
+                for (int i = 0; i < dircount; i++)
+                {
+                    switch (dir[i].tdir_tag)
+                    {
+                        case TiffTag.JPEGPROC:
+                        case TiffTag.JPEGIFOFFSET:
+                        case TiffTag.JPEGIFBYTECOUNT:
+                        case TiffTag.JPEGRESTARTINTERVAL:
+                        case TiffTag.JPEGLOSSLESSPREDICTORS:
+                        case TiffTag.JPEGPOINTTRANSFORM:
+                        case TiffTag.JPEGQTABLES:
+                        case TiffTag.JPEGDCTABLES:
+                        case TiffTag.JPEGACTABLES:
+                            v = (int)Compression.OJPEG;
+                            return true;
+                        default:
+                            break;
+                    }
+                }
+            }
+            return false;
+        }
+#endif
     }
 }

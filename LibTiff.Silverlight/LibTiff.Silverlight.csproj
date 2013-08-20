@@ -26,7 +26,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Bin\Debug</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SILVERLIGHT EXPOSE_LIBTIFF</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT EXPOSE_LIBTIFF FIX_JPEG_IS_OJPEG</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
@@ -37,7 +37,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>Bin\Release</OutputPath>
-    <DefineConstants>TRACE;SILVERLIGHT EXPOSE_LIBTIFF</DefineConstants>
+    <DefineConstants>TRACE;SILVERLIGHT EXPOSE_LIBTIFF FIX_JPEG_IS_OJPEG</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>

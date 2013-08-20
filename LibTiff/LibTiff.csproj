@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;EXPOSE_LIBTIFF</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EXPOSE_LIBTIFF  FIX_JPEG_IS_OJPEG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -28,7 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;EXPOSE_LIBTIFF</DefineConstants>
+    <DefineConstants>TRACE;EXPOSE_LIBTIFF FIX_JPEG_IS_OJPEG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\BitMiracle.LibTiff.NET.xml</DocumentationFile>

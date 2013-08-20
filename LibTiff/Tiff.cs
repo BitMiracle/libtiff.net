@@ -1104,6 +1104,9 @@ namespace BitMiracle.LibTiff.Classic
             int fix = 0;
             bool diroutoforderwarning = false;
             bool haveunknowntags = false;
+#if FIX_JPEG_IS_OJPEG
+            bool fixJpegIsOJpeg = false;
+#endif
             for (int i = 0; i < dircount; i++)
             {
                 if (dir[i].tdir_tag == TiffTag.IGNORE)
@@ -1194,6 +1197,9 @@ namespace BitMiracle.LibTiff.Classic
                         if (dir[i].tdir_count == 1)
                         {
                             int v = extractData(dir[i]);
+#if FIX_JPEG_IS_OJPEG
+                            fixJpegIsOJpeg = checkJpegIsOJpeg(ref v, dir, dircount);
+#endif
                             if (!SetField(dir[i].tdir_tag, v))
                                 return false;
 
@@ -1202,15 +1208,36 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else if (dir[i].tdir_type == TiffType.LONG)
                         {
+#if FIX_JPEG_IS_OJPEG
+                            int v;
+                            bool isFetched = fetchPerSampleLongs(dir[i], out v);
+                            if (!isFetched) 
+                                return false;
+                            fixJpegIsOJpeg = checkJpegIsOJpeg(ref v, dir, dircount);
+                            if (!SetField(dir[i].tdir_tag, v))
+                                return false;
+#else
                             int v;
                             if (!fetchPerSampleLongs(dir[i], out v) || !SetField(dir[i].tdir_tag, v))
                                 return false;
+#endif
                         }
                         else
                         {
+#if FIX_JPEG_IS_OJPEG
+                            short iv;
+                            bool isFetched = fetchPerSampleShorts(dir[i], out iv);
+                            if (!isFetched)
+                                return false;
+                            int v = iv;
+                            fixJpegIsOJpeg = checkJpegIsOJpeg(ref v, dir, dircount);
+                            if (!SetField(dir[i].tdir_tag, (short)v))
+                                return false;
+#else
                             short iv;
                             if (!fetchPerSampleShorts(dir[i], out iv) || !SetField(dir[i].tdir_tag, iv))
                                 return false;
+#endif
                         }
                         dir[i].tdir_tag = TiffTag.IGNORE;
                         break;
@@ -1485,6 +1512,15 @@ namespace BitMiracle.LibTiff.Classic
 
                         break;
                     // END REV 4.0 COMPATIBILITY
+#if FIX_JPEG_IS_OJPEG
+                    case TiffTag.COMPRESSION:
+                        // do not set compression field again (see first pass) to avoid undoing the fix
+                        if (!fixJpegIsOJpeg)
+                        {
+                            fetchNormalTag(dir[i]);
+                        }
+                        break;
+#endif
                     default:
                         fetchNormalTag(dir[i]);
                         break;
