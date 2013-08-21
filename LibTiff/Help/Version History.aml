@@ -4,14 +4,17 @@
         <section address="Section1">
             <content></content>
             <sections>
-            <section address="SubSection6">
+                <section address="SubSection6">
                     <title>Version 2.3</title>
                     <content>
                         <list class="bullet">
-							<listItem>
+                            <listItem>
+                                Added support for OJPEG files mistakenly marked as JPEG ones (thanks to Hubertus Hohl)
+                            </listItem>
+                            <listItem>
                                 Fixed issues related to processing of custom directories and custom tags (thanks to Oliver Merkle and Alex J. Kennedy)
                             </listItem>
-							<listItem>
+                            <listItem>
                                 Fixed opening of 16 bit grayscale files with large MAXSAMPLEVALUE values.
                             </listItem>
                             <listItem>
@@ -23,7 +26,7 @@
                             <listItem>
                                 Fixed bug in SwabArrayOfDouble method.
                             </listItem>
-							<listItem>
+                            <listItem>
                                 Fixed bug related to paletted 1bpp images in TiffRgbaImage.
                             </listItem>
                             <listItem>
@@ -150,7 +153,7 @@
                             </listItem>
                             <listItem>
                                 Fixed bugs within ReadRGBAImage (thanks to San Chen)
-                            </listItem>                            
+                            </listItem>
                         </list>
                     </content>
                 </section>
