@@ -925,7 +925,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             }
             else
             {
-                if (segment_height > td.td_rowsperstrip)
+                if (segment_height > td.td_rowsperstrip && td.td_rowsperstrip != -1)
                     segment_height = td.td_rowsperstrip;
                 m_bytesperline = m_tif.oldScanlineSize();
             }
