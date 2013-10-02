@@ -12,6 +12,9 @@
                                 Added support for OJPEG files mistakenly marked as JPEG ones (thanks to Hubertus Hohl)
                             </listItem>
                             <listItem>
+                                Fixed bugs related to processing of JPEG data.
+                            </listItem>
+                            <listItem>
                                 Fixed bug related to strip length calculations in JPEG codec (thanks to Emilie Lessard)
                             </listItem>
                             <listItem>
