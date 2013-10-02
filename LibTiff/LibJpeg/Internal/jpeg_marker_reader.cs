@@ -517,8 +517,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 /* Copy bytes with reasonable rapidity */
                 int read = cinfo.m_src.GetBytes(tempData, data_length - bytes_read);
-                Buffer.BlockCopy(tempData, 0, data, dataOffset, data_length - bytes_read);
+                Buffer.BlockCopy(tempData, 0, data, dataOffset, read);
                 bytes_read += read;
+                dataOffset += read;
             }
 
             /* Done reading what we want to read */
