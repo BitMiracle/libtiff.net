@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4982B49A-C3D7-4C2A-82D9-195CAC547CFE}"
 	ProjectSection(SolutionItems) = preProject
 		LibTiff\Help.shfbproj = LibTiff\Help.shfbproj
@@ -25,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff.Silverlight", "LibT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilverlightTestApplication", "SilverlightTest\SilverlightTestApplication\SilverlightTestApplication.csproj", "{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SilverlightTestApplication.Web", "SilverlightTest\SilverlightTestApplication.Web", "{27BFF6F3-A5AD-478C-91F4-D012B5E11850}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SilverlightTestApplication.Web", "SilverlightTest\SilverlightTestApplication.Web\", "{27BFF6F3-A5AD-478C-91F4-D012B5E11850}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
 		Debug.AspNetCompiler.VirtualPath = "/SilverlightTestApplication.Web"

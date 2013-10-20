@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -89,7 +89,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
-        RST0 = 0xd0, /* RST0 marker code */
+        RST0 = 0xd0,
         /// <summary>
         /// 
         /// </summary>
@@ -125,7 +125,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
-        EOI = 0xd9, /* EOI marker code */
+        EOI = 0xd9,
         /// <summary>
         /// 
         /// </summary>
@@ -153,7 +153,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
-        APP0 = 0xe0, /* APP0 marker code */
+        APP0 = 0xe0,
         /// <summary>
         /// 
         /// </summary>
@@ -225,7 +225,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
-        COM = 0xfe, /* COM marker code */
+        COM = 0xfe,
         /// <summary>
         /// 
         /// </summary>

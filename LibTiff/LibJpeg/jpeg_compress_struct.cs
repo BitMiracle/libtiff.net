@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -29,7 +29,7 @@ namespace BitMiracle.LibJpeg.Classic
          * The spec says that the values given produce "good" quality, and
          * when divided by 2, "very good" quality.
          */
-        private static int[] std_luminance_quant_tbl = { 
+        private static readonly int[] std_luminance_quant_tbl = { 
             16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26,
             58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56, 14, 17,
             22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109,
@@ -37,7 +37,7 @@ namespace BitMiracle.LibJpeg.Classic
             78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112,
             100, 103, 99 };
 
-        private static int[] std_chrominance_quant_tbl = {
+        private static readonly int[] std_chrominance_quant_tbl = {
             17, 18, 24, 47, 99, 99, 99, 99, 18, 21, 26, 66,
             99, 99, 99, 99, 24, 26, 56, 99, 99, 99, 99, 99,
             47, 66, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
@@ -48,20 +48,20 @@ namespace BitMiracle.LibJpeg.Classic
         // Standard Huffman tables (cf. JPEG standard section K.3)
         // 
         // IMPORTANT: these are only valid for 8-bit data precision!
-        private static byte[] bits_dc_luminance = 
+        private static readonly byte[] bits_dc_luminance = 
             { /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
 
-        private static byte[] val_dc_luminance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+        private static readonly byte[] val_dc_luminance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
-        private static byte[] bits_dc_chrominance = 
+        private static readonly byte[] bits_dc_chrominance = 
             { /* 0-base */ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
 
-        private static byte[] val_dc_chrominance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+        private static readonly byte[] val_dc_chrominance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
-        private static byte[] bits_ac_luminance = 
+        private static readonly byte[] bits_ac_luminance = 
             { /* 0-base */ 0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
 
-        private static byte[] val_ac_luminance = 
+        private static readonly byte[] val_ac_luminance = 
             { 0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06,
               0x13, 0x51, 0x61, 0x07, 0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
               0x23, 0x42, 0xb1, 0xc1, 0x15, 0x52, 0xd1, 0xf0, 0x24, 0x33, 0x62, 0x72,
@@ -77,10 +77,10 @@ namespace BitMiracle.LibJpeg.Classic
               0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf1, 0xf2, 0xf3, 0xf4,
               0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa };
 
-        private static byte[] bits_ac_chrominance = 
+        private static readonly byte[] bits_ac_chrominance = 
             { /* 0-base */ 0, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
 
-        private static byte[] val_ac_chrominance = 
+        private static readonly byte[] val_ac_chrominance = 
             { 0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41,
               0x51, 0x07, 0x61, 0x71, 0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
               0xa1, 0xb1, 0xc1, 0x09, 0x23, 0x33, 0x52, 0xf0, 0x15, 0x62, 0x72, 0xd1,

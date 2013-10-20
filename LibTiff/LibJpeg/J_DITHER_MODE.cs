@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -26,10 +26,12 @@ namespace BitMiracle.LibJpeg.Classic
         /// No dithering: fast, very low quality
         /// </summary>
         JDITHER_NONE,
+
         /// <summary>
         /// Ordered dither: moderate speed and quality
         /// </summary>
         JDITHER_ORDERED,
+
         /// <summary>
         /// Floyd-Steinberg dither: slow, high quality
         /// </summary>

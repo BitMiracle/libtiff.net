@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -129,7 +129,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private const int REDUCED_FIX_3_624509785 = 29692;   /* REDUCED_FIX(3.624509785) */
 
         /* precomputed values scaled up by 14 bits */
-        private static short[] aanscales = 
+        private static readonly short[] aanscales = 
         {
             16384, 22725, 21407, 19266, 16384, 12873, 8867, 4520, 22725, 31521, 29692, 26722, 22725, 17855,
             12299, 6270, 21407, 29692, 27969, 25172, 21407, 16819, 11585,
@@ -142,7 +142,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
         private const int CONST_BITS = 14;
 
-        private static double[] aanscalefactor = 
+        private static readonly double[] aanscalefactor = 
         { 
             1.0, 1.387039845, 1.306562965, 1.175875602, 1.0,
             0.785694958, 0.541196100, 0.275899379 

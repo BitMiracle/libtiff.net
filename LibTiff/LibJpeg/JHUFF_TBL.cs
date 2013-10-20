@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -44,11 +44,6 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_huffval; }
         }
 
-        /* This property is used only during compression.  It's initialized false when
-         * the table is created, and set true when it's been output to the file.
-         * You could suppress output of a table by setting this to true.
-         * (See jpeg_suppress_tables for an example.)
-         */
         /// <summary>
         /// Gets or sets a value indicating whether the table has been output to file.
         /// </summary>
@@ -56,7 +51,10 @@ namespace BitMiracle.LibJpeg.Classic
         /// <c>true</c> when it's been output to the file. You could suppress output 
         /// of a table by setting this to <c>true</c>.
         /// </value>
-        /// <remarks>This property is used only during compression.</remarks>
+        /// <remarks>This property is used only during compression. It's initialized
+        /// <c>false</c> when the table is created, and set <c>true</c> when it's been
+        /// output to the file. You could suppress output of a table by setting this to
+        /// <c>true</c>. (See jpeg_suppress_tables for an example.)</remarks>
         /// <seealso cref="jpeg_compress_struct.jpeg_suppress_tables"/>
         public bool Sent_table
         {

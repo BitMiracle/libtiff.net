@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * This software is based in part on the work of the Sam Leffler, Silicon 
@@ -80,7 +80,7 @@ namespace BitMiracle.LibTiff.Classic
         public static string GetVersion()
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "LibTiff.Net, Version {0}\nCopyright (C) 2008-2011, Bit Miracle.", AssemblyVersion);
+                "LibTiff.Net, Version {0}\nCopyright (C) 2008-2013, Bit Miracle.", AssemblyVersion);
         }
 
         /// <summary>

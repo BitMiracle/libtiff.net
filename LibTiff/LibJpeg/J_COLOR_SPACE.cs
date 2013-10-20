@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -26,22 +26,27 @@ namespace BitMiracle.LibJpeg.Classic
         /// Unspecified color space.
         /// </summary>
         JCS_UNKNOWN,
+
         /// <summary>
         /// Grayscale
         /// </summary>
-        JCS_GRAYSCALE,  /* monochrome */
+        JCS_GRAYSCALE,
+
         /// <summary>
         /// RGB
         /// </summary>
         JCS_RGB,
+
         /// <summary>
         /// YCbCr (also known as YUV)
         /// </summary>
         JCS_YCbCr,
+
         /// <summary>
         /// CMYK
         /// </summary>
         JCS_CMYK,
+
         /// <summary>
         /// YCbCrK
         /// </summary>

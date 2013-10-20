@@ -18,10 +18,12 @@ namespace BitMiracle.LibJpeg.Classic
         /// Unknown density
         /// </summary>
         Unknown = 0,
+
         /// <summary>
         /// Dots/inch
         /// </summary>
         DotsInch = 1,
+
         /// <summary>
         /// Dots/cm
         /// </summary>

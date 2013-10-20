@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -108,12 +108,12 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// DCT method used by default.
         /// </summary>
-        public static J_DCT_METHOD JDCT_DEFAULT = J_DCT_METHOD.JDCT_ISLOW;
+        public const J_DCT_METHOD JDCT_DEFAULT = J_DCT_METHOD.JDCT_ISLOW;
 
         /// <summary>
         /// Fastest DCT method.
         /// </summary>
-        public static J_DCT_METHOD JDCT_FASTEST = J_DCT_METHOD.JDCT_IFAST;
+        public const J_DCT_METHOD JDCT_FASTEST = J_DCT_METHOD.JDCT_IFAST;
 
         /// <summary>
         /// A tad under 64K to prevent overflows. 

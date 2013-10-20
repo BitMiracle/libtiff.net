@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -33,10 +33,12 @@ namespace BitMiracle.LibJpeg.Classic
         /// Slow but accurate integer algorithm.
         /// </summary>
         JDCT_ISLOW,
+
         /// <summary>
         /// Faster, less accurate integer method.
         /// </summary>
         JDCT_IFAST,
+
         /// <summary>
         /// Floating-point method.
         /// </summary>

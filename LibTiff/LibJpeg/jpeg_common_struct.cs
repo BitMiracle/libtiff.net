@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -139,7 +139,8 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+                AssemblyName assemblyName = new AssemblyName(Assembly.GetExecutingAssembly().FullName);
+                Version version = assemblyName.Version;
                 string versionString = version.Major.ToString(CultureInfo.InvariantCulture) +
                     "." + version.Minor.ToString(CultureInfo.InvariantCulture);
 
@@ -158,7 +159,7 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-                return "Copyright (C) 2008-2011, Bit Miracle";
+                return "Copyright (C) 2008-2013, Bit Miracle";
             }
         }
 

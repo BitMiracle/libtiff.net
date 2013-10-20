@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -35,7 +35,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         * The worst case would be a run-length of 15, which means we need 16
         * fake entries.
         */
-        public static int[] jpeg_natural_order = 
+        public static readonly int[] jpeg_natural_order = 
         { 
             0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12,
             19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35,

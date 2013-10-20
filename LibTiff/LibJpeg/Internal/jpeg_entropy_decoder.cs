@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2011, Bit Miracle
+﻿/* Copyright (C) 2008-2013, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * Copyright (C) 1994-1996, Thomas G. Lane.
@@ -20,7 +20,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
     {
         // Figure F.12: extend sign bit.
         // entry n is 2**(n-1)
-        private static int[] extend_test = 
+        private static readonly int[] extend_test = 
         { 
             0, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 
             0x0040, 0x0080, 0x0100, 0x0200, 0x0400, 0x0800, 
@@ -28,7 +28,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         };
 
         // entry n is (-1 << n) + 1
-        private static int[] extend_offset = 
+        private static readonly int[] extend_offset = 
         { 
             0, (-1 << 1) + 1, (-1 << 2) + 1, 
             (-1 << 3) + 1, (-1 << 4) + 1, (-1 << 5) + 1,
