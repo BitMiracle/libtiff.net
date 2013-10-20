@@ -34,6 +34,12 @@
     <DocumentationFile>bin\Release\BitMiracle.LibTiff.NET.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <PropertyGroup Label="NuGet">
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <DownloadNuGetExe>true</DownloadNuGetExe>
+    <RestorePackages>true</RestorePackages>
+    <BuildPackage>true</BuildPackage>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -195,7 +201,11 @@
     <Compile Include="zLib\ZStream.cs" />
     <Compile Include="zLib\ZStreamException.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LibTiff.nuspec" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project='$([System.IO.Path]::Combine($(SolutionDir), ".nuget\NuGet.targets"))' />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -204,8 +214,10 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>cd "$(SolutionDir)"
-update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
+    <PreBuildEvent>
+      cd "$(SolutionDir)"
+      update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"
+    </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)Distributives\Scripts\replace.vbs" O: Overload: "$(TargetDir)BitMiracle.LibTiff.NET.xml"</PostBuildEvent>
