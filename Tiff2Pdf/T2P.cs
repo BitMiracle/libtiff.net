@@ -34,7 +34,16 @@ namespace BitMiracle.Tiff2Pdf
             Debug.Assert(e1 != null);
             Debug.Assert(e2 != null);
 
-            return e1.page_number - e2.page_number;
+            int result = e1.page_number - e2.page_number;
+            if (result == 0)
+            {
+                // Page numbers are equal, this is the case when 
+                // TIFF creator put equal numbers (zeros, usually) for all the pages.
+                // Let's use directory number instead.
+                result = e1.page_directory - e2.page_directory;
+            }
+
+            return result;
         }
     }
 
