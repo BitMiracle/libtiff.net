@@ -985,21 +985,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
                         m_decompression.Comp_info[0].V_samp_factor, m_h_sampling, m_v_sampling);
 
                     /*
-                    * There are potential security issues here
-                    * for decoders that have already allocated
-                    * buffers based on the expected sampling
-                    * factors. Lets check the sampling factors
-                    * dont exceed what we were expecting.
-                    */
-                    if (m_decompression.Comp_info[0].H_samp_factor > m_h_sampling ||
-                        m_decompression.Comp_info[0].V_samp_factor > m_v_sampling)
-                    {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, module,
-                            "Cannot honour JPEG sampling factors that exceed those specified.");
-                        return false;
-                    }
-
-                    /*
                      * XXX: Files written by the Intergraph software
                      * has different sampling factors stored in the
                      * TIFF tags and in the JPEG structures. We will
