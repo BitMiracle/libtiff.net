@@ -32,7 +32,7 @@ namespace BitMiracle.Tiff2Rgba
             "usage: tiff2rgba [-c comp] [-r rows] [-b] input... output",
             "where comp is one of the following compression algorithms:",
             " jpeg\t\tJPEG encoding",
-            " zip\t\tLempel-Ziv & Welch encoding",
+            " zip\t\tDeflate encoding",
             " lzw\t\tLempel-Ziv & Welch encoding",
             " packbits\tPackBits encoding",
             " none\t\tno compression",
