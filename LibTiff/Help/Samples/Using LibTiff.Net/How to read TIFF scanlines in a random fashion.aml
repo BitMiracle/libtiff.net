@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="6a59b98d-3a27-4f99-9f18-4f898cc74f75" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to read image scanlines in a random fashion.</para>
+<para></para>
+<para>To read scanlines of an image you may use one of Tiff.ReadScanline methods, but there is a catch. Images</para>
+<para>compressed using LZW or PackBits compression scheme don't allow accessing scanlines in a random fashion. </para>
+<para></para>
+<para>This sample shows how to avoid this limitation and access any scanline you want.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ReadArbitraryScanlines
+    {
+        public static void Main()
+        {
+            int startScanline = 10;
+            int stopScanline = 20;
+
+            using (Tiff image = Tiff.Open(@&quot;Sample Data\f-lzw.tif&quot;, &quot;r&quot;))
+            {
+                int stride = image.ScanlineSize();
+                byte[] scanline = new byte[stride];
+
+                Compression compression = (Compression)image.GetField(TiffTag.COMPRESSION)[0].ToInt();
+                if (compression == Compression.LZW || compression == Compression.PACKBITS)
+                {
+                    // LZW and PackBits compression schemes do not allow
+                    // scanlines to be read in a random fashion.
+                    // So, we need to read all scanlines from start of the image.
+
+                    for (int i = 0; i &lt; startScanline; i++)
+                    {
+                        // of course, the data won't be used.
+                        image.ReadScanline(scanline, i);
+                    }
+                }
+
+                for (int i = startScanline; i &lt; stopScanline; i++)
+                {
+                    image.ReadScanline(scanline, i);
+
+                    // do what ever you need with the data
+                }
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ReadArbitraryScanlines
+        Public Shared Sub Main()
+            Dim startScanline As Integer = 10
+            Dim stopScanline As Integer = 20
+
+            Using image As Tiff = Tiff.Open(&quot;Sample Data\f-lzw.tif&quot;, &quot;r&quot;)
+                Dim stride As Integer = image.ScanlineSize()
+                Dim scanline As Byte() = New Byte(stride - 1) {}
+
+                Dim compression As Compression = DirectCast(image.GetField(TiffTag.COMPRESSION)(0).ToInt(), Compression)
+                If compression = compression.LZW OrElse compression = compression.PACKBITS Then
+                    ' LZW and PackBits compression schemes do not allow
+                    ' scanlines to be read in a random fashion.
+                    ' So, we need to read all scanlines from start of the image.
+
+                    For i As Integer = 0 To startScanline - 1
+                        ' of course, the data won't be used.
+                        image.ReadScanline(scanline, i)
+                    Next
+                End If
+
+                For i As Integer = startScanline To stopScanline - 1
+
+                    ' do what ever you need with the data
+                    image.ReadScanline(scanline, i)
+                Next
+            End Using
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

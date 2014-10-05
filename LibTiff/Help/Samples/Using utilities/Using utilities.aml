@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="b1138f67-2dd5-4bf7-b59b-b1c611865e26" revisionNumber="1">
+  <developerConceptualDocument xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+    <introduction>
+      <para>This group contains samples that show how you can process TIFF images using utilities shipped with LibTiff.Net.</para>
+    </introduction>
+    <content>
+      <para>
+        <link xlink:href="0664189f-7442-4bef-8f2f-1ee6ce82cd87">Merge several TIFF images to single multipage TIFF</link>
+      </para>
+      <para>&#160;&#160;&#160;&#160;This sample shows how to merge several TIFF images to one multipage TIFF image.</para>
+      <para>
+        <link xlink:href="65159b6b-0f22-41a8-bbcf-fd1df1b2aa9e">Extract a page from a multi-page TIFF image</link>
+      </para>
+      <para>&#160;&#160;&#160;&#160;This sample shows how to split multipage TIFF image.</para>
+      <para>
+        <link xlink:href="11e05b16-d3ea-4a41-9a70-f02404c56bc6">Convert TIFF image to PDF document</link>
+      </para>
+      <para>&#160;&#160;&#160;&#160;This sample shows how to convert TIFF image to PDF document.</para>
+    </content>
+  </developerConceptualDocument>
+</topic>

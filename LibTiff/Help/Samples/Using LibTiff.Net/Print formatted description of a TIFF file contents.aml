@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="4870e3fc-867f-41b0-af72-c48e0f5f7a96" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to pretty-print contents of a TIFF file using plain text representation.</para>
+<para></para>
+<para>Such representation may be useful for diagnostic purposes.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class PrintDirectory
+    {
+        public static void Main()
+        {
+            using (Tiff image = Tiff.Open(@&quot;Sample Data\multipage.tif&quot;, &quot;r&quot;))
+            {
+                if (image == null)
+                {
+                    MessageBox.Show(&quot;Could not open incoming image&quot;);
+                    return;
+                }
+
+                byte[] endOfLine = { (byte)'\r', (byte)'\n' };
+                using (FileStream stream = new FileStream(&quot;PrintDirectory.txt&quot;, FileMode.Create))
+                {
+                    do
+                    {
+                        image.PrintDirectory(stream);
+
+                        stream.Write(endOfLine, 0, endOfLine.Length);
+
+                    } while (image.ReadDirectory());
+                }
+            }
+
+            Process.Start(&quot;PrintDirectory.txt&quot;);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports Microsoft
+Imports System.Diagnostics
+Imports System.IO
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class PrintDirectory
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using image As Tiff = Tiff.Open(&quot;Sample Data\multipage.tif&quot;, &quot;r&quot;)
+                If image Is Nothing Then
+                    MessageBox.Show(&quot;Could not open incoming image&quot;)
+                    Return
+                End If
+
+                Dim endOfLine As Byte() = {VisualBasic.AscW(VisualBasic.ControlChars.Cr), VisualBasic.AscW(VisualBasic.ControlChars.Lf)}
+                Using stream As New FileStream(&quot;PrintDirectory.txt&quot;, FileMode.Create)
+                    Do
+                        image.PrintDirectory(stream)
+
+                        stream.Write(endOfLine, 0, endOfLine.Length)
+                    Loop While image.ReadDirectory()
+                End Using
+            End Using
+
+            Process.Start(&quot;PrintDirectory.txt&quot;)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

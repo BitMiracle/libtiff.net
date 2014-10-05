@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="4bceb00d-9b22-4a5a-a912-f9319c1e80ef" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to create 16-bit grayscale TIFF image.</para>
+<para></para>
+<para>This sample shows how to create 16-bit image with randomly generated samples (pixels) using Tiff.WriteScanline method.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class Create16BitGrayscaleTiff
+    {
+        public static void Main()
+        {
+            int width = 100;
+            int height = 150;
+            string fileName = &quot;random.tif&quot;;
+            using (Tiff output = Tiff.Open(fileName, &quot;w&quot;))
+            {
+                output.SetField(TiffTag.IMAGEWIDTH, width);
+                output.SetField(TiffTag.IMAGELENGTH, height);
+                output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                output.SetField(TiffTag.BITSPERSAMPLE, 16);
+                output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT);
+                output.SetField(TiffTag.ROWSPERSTRIP, height);
+                output.SetField(TiffTag.XRESOLUTION, 88.0);
+                output.SetField(TiffTag.YRESOLUTION, 88.0);
+                output.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.CENTIMETER);
+                output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+                output.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+
+                Random random = new Random();
+                for (int i = 0; i &lt; height; i++)
+                {
+                    short[] samples = new short[width];
+                    for (int j = 0; j &lt; width; j++)
+                        samples[j] = (short)random.Next(0, short.MaxValue);
+
+                    byte[] buffer = new byte[samples.Length * sizeof(short)];
+                    Buffer.BlockCopy(samples, 0, buffer, 0, buffer.Length);
+                    output.WriteScanline(buffer, i);
+                }
+            }
+
+            System.Diagnostics.Process.Start(fileName);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class Create16BitGrayscaleTiff
+        Public Shared Sub Main()
+            Dim width As Integer = 100
+            Dim height As Integer = 150
+            Dim fileName As String = &quot;random.tif&quot;
+            Using output As Tiff = Tiff.Open(fileName, &quot;w&quot;)
+                output.SetField(TiffTag.IMAGEWIDTH, width)
+                output.SetField(TiffTag.IMAGELENGTH, height)
+                output.SetField(TiffTag.SAMPLESPERPIXEL, 1)
+                output.SetField(TiffTag.BITSPERSAMPLE, 16)
+                output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT)
+                output.SetField(TiffTag.ROWSPERSTRIP, height)
+                output.SetField(TiffTag.XRESOLUTION, 88.0)
+                output.SetField(TiffTag.YRESOLUTION, 88.0)
+                output.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.CENTIMETER)
+                output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+                output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK)
+                output.SetField(TiffTag.COMPRESSION, Compression.NONE)
+                output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB)
+
+                Dim random As New Random()
+                For i As Integer = 0 To height - 1
+                    Dim samples As Short() = New Short(width - 1) {}
+                    For j As Integer = 0 To width - 1
+                        samples(j) = CShort(random.[Next](0, Short.MaxValue))
+                    Next
+
+                    Dim buf As Byte() = New Byte(samples.Length * 2 - 1) {}
+                    Buffer.BlockCopy(samples, 0, buf, 0, buf.Length)
+                    output.WriteScanline(buf, i)
+                Next
+            End Using
+
+            System.Diagnostics.Process.Start(fileName)
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

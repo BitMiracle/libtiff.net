@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="39c566d1-98fa-4b46-aa7a-e03ee2eada8c" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to rotate a TIFF image by 90, 180 and 270 degrees. Rotated images are to be properly displayed by any TIFF viewer.</para>
+<para></para>
+<para>To rotate an image one might just set the value of TiffTag.ORIENTATION tag. Unfortunately, not all of TIFF viewers respect the value of</para>
+<para>this tag when displaying an image. In fact, most of the viewers don't respect the value of orientation tag.</para>
+<para></para>
+<para>This sample shows how to rotate image data in a viewer-agnostic way.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class RotateTiff
+    {
+        public static void Main()
+        {
+            int[] rotateAngles = new int[] { 90, 180, 270 };
+
+            for (int angleIndex = 0; angleIndex &lt; rotateAngles.Length; angleIndex++)
+            {
+                string outputFileName = string.Format(&quot;Rotated-{0}-degrees.tif&quot;, rotateAngles[angleIndex]);
+
+                using (Tiff input = Tiff.Open(@&quot;Sample Data\flag_t24.tif&quot;, &quot;r&quot;))
+                {
+                    using (Tiff output = Tiff.Open(outputFileName, &quot;w&quot;))
+                    {
+                        for (short page = 0; page &lt; input.NumberOfDirectories(); page++)
+                        {
+                            input.SetDirectory(page);
+                            output.SetDirectory(page);
+
+                            int width = input.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
+                            int height = input.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+                            int samplesPerPixel = input.GetField(TiffTag.SAMPLESPERPIXEL)[0].ToInt();
+                            int bitsPerSample = input.GetField(TiffTag.BITSPERSAMPLE)[0].ToInt();
+                            int photo = input.GetField(TiffTag.PHOTOMETRIC)[0].ToInt();
+
+                            int[] raster = new int[width * height];
+                            input.ReadRGBAImageOriented(width, height, raster, Orientation.TOPLEFT);
+
+                            raster = rotate(raster, rotateAngles[angleIndex], ref width, ref height);
+
+                            output.SetField(TiffTag.IMAGEWIDTH, width);
+                            output.SetField(TiffTag.IMAGELENGTH, height);
+                            output.SetField(TiffTag.SAMPLESPERPIXEL, 3);
+                            output.SetField(TiffTag.BITSPERSAMPLE, 8);
+                            output.SetField(TiffTag.ROWSPERSTRIP, height);
+                            output.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
+                            output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                            output.SetField(TiffTag.COMPRESSION, Compression.DEFLATE);
+
+                            byte[] strip = rasterToRgbBuffer(raster);
+                            output.WriteEncodedStrip(0, strip, strip.Length);
+
+                            output.WriteDirectory();
+                        }
+                    }
+                }
+
+                Process.Start(outputFileName);
+            }
+        }
+
+        private static byte[] rasterToRgbBuffer(int[] raster)
+        {
+            byte[] buffer = new byte[raster.Length * 3];
+            for (int i = 0; i &lt; raster.Length; i++)
+                Buffer.BlockCopy(raster, i * 4, buffer, i * 3, 3);
+
+            return buffer;
+        }
+
+        private static int[] rotate(int[] buffer, int angle, ref int width, ref int height)
+        {
+            int rotatedWidth = width;
+            int rotatedHeight = height;
+            int numberOf90s = angle / 90;
+            if (numberOf90s % 2 != 0)
+            {
+                int tmp = rotatedWidth;
+                rotatedWidth = rotatedHeight;
+                rotatedHeight = tmp;
+            }
+
+            int[] rotated = new int[rotatedWidth * rotatedHeight];
+
+            for (int h = 0; h &lt; height; ++h)
+            {
+                for (int w = 0; w &lt; width; ++w)
+                {
+                    int item = buffer[h * width + w];
+                    int x = 0;
+                    int y = 0;
+                    switch (numberOf90s % 4)
+                    {
+                        case 0:
+                            x = w;
+                            y = h;
+                            break;
+
+                        case 1:
+                            x = (height - h - 1);
+                            y = (rotatedHeight - 1) - (width - w - 1);
+                            break;
+
+                        case 2:
+                            x = (width - w - 1);
+                            y = (height - h - 1);
+
+                            break;
+
+                        case 3:
+                            x = (rotatedWidth - 1) - (height - h - 1);
+                            y = (width - w - 1);
+                            break;
+                    }
+
+                    rotated[y * rotatedWidth + x] = item;
+                }
+            }
+
+            width = rotatedWidth;
+            height = rotatedHeight;
+            return rotated;
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class RotateTiff
+        Public Shared Sub Main()
+            Dim rotateAngles As Integer() = New Integer() {90, 180, 270}
+
+            For angleIndex As Integer = 0 To rotateAngles.Length - 1
+                Dim outputFileName As String = String.Format(&quot;Rotated-{0}-degrees.tif&quot;, rotateAngles(angleIndex))
+
+                Using input As Tiff = Tiff.Open(&quot;Sample Data\flag_t24.tif&quot;, &quot;r&quot;)
+                    Using output As Tiff = Tiff.Open(outputFileName, &quot;w&quot;)
+                        For page As Short = 0 To input.NumberOfDirectories() - 1
+                            input.SetDirectory(page)
+                            output.SetDirectory(page)
+
+                            Dim width As Integer = input.GetField(TiffTag.IMAGEWIDTH)(0).ToInt()
+                            Dim height As Integer = input.GetField(TiffTag.IMAGELENGTH)(0).ToInt()
+                            Dim samplesPerPixel As Integer = input.GetField(TiffTag.SAMPLESPERPIXEL)(0).ToInt()
+                            Dim bitsPerSample As Integer = input.GetField(TiffTag.BITSPERSAMPLE)(0).ToInt()
+                            Dim photo As Integer = input.GetField(TiffTag.PHOTOMETRIC)(0).ToInt()
+
+                            Dim raster As Integer() = New Integer(width * height - 1) {}
+                            input.ReadRGBAImageOriented(width, height, raster, Orientation.TOPLEFT)
+
+                            raster = rotate(raster, rotateAngles(angleIndex), width, height)
+
+                            output.SetField(TiffTag.IMAGEWIDTH, width)
+                            output.SetField(TiffTag.IMAGELENGTH, height)
+                            output.SetField(TiffTag.SAMPLESPERPIXEL, 3)
+                            output.SetField(TiffTag.BITSPERSAMPLE, 8)
+                            output.SetField(TiffTag.ROWSPERSTRIP, height)
+                            output.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB)
+                            output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+                            output.SetField(TiffTag.COMPRESSION, Compression.DEFLATE)
+
+                            Dim strip As Byte() = rasterToRgbBuffer(raster)
+                            output.WriteEncodedStrip(0, strip, strip.Length)
+
+                            output.WriteDirectory()
+                        Next
+                    End Using
+                End Using
+
+                Process.Start(outputFileName)
+            Next
+        End Sub
+
+        Private Shared Function rasterToRgbBuffer(raster As Integer()) As Byte()
+            Dim buf As Byte() = New Byte(raster.Length * 3 - 1) {}
+            For i As Integer = 0 To raster.Length - 1
+                Buffer.BlockCopy(raster, i * 4, buf, i * 3, 3)
+            Next
+
+            Return buf
+        End Function
+
+        Private Shared Function rotate(buffer As Integer(), angle As Integer, ByRef width As Integer, ByRef height As Integer) As Integer()
+            Dim rotatedWidth As Integer = width
+            Dim rotatedHeight As Integer = height
+            Dim numberOf90s As Integer = angle \ 90
+            If numberOf90s Mod 2 &lt;&gt; 0 Then
+                Dim tmp As Integer = rotatedWidth
+                rotatedWidth = rotatedHeight
+                rotatedHeight = tmp
+            End If
+
+            Dim rotated As Integer() = New Integer(rotatedWidth * rotatedHeight - 1) {}
+
+            For h As Integer = 0 To height - 1
+                For w As Integer = 0 To width - 1
+                    Dim item As Integer = buffer(h * width + w)
+                    Dim x As Integer = 0
+                    Dim y As Integer = 0
+                    Select Case numberOf90s Mod 4
+                        Case 0
+                            x = w
+                            y = h
+                            Exit Select
+
+                        Case 1
+                            x = (height - h - 1)
+                            y = (rotatedHeight - 1) - (width - w - 1)
+                            Exit Select
+
+                        Case 2
+                            x = (width - w - 1)
+                            y = (height - h - 1)
+
+                            Exit Select
+
+                        Case 3
+                            x = (rotatedWidth - 1) - (height - h - 1)
+                            y = (width - w - 1)
+                            Exit Select
+                    End Select
+
+                    rotated(y * rotatedWidth + x) = item
+                Next
+            Next
+
+            width = rotatedWidth
+            height = rotatedHeight
+            Return rotated
+        End Function
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

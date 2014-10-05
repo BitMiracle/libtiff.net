@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="e4f25423-eede-4ef6-a920-9cb539d056c6" revisionNumber="1">
+  <developerConceptualDocument xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+    <section address="Using LibTiff.Net">
+      <title>Using LibTiff.Net</title>
+      <content>
+        <para>
+          <link xlink:href="8bd9873f-831f-40e1-937c-fd6702dc0670">How to read basic properties of a TIFF image</link>
+        </para>
+        <para>
+          <link xlink:href="e5eb36a8-7150-41dd-8785-f8784a94c214">Add page to existing TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="99e4ca6d-023c-430a-9ef0-e25c27dd42cf">Create simple black-and-white TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="7005eea9-13c6-49a9-9804-864be2654278">Create gradient TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="4821a437-c9e1-4206-bfee-e19f33ce7943">Create TIFF with palette (color map)</link>
+        </para>
+        <para>
+          <link xlink:href="a74083a3-0fc0-494e-a302-9f64017355b7">Create multipage TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="98f13f88-f60d-40dc-a5b3-cf902f385d92">Copy and rotate TIFF data</link>
+        </para>
+        <para>
+          <link xlink:href="39c566d1-98fa-4b46-aa7a-e03ee2eada8c">Rotate TIFF data (in a viewer-agnostic way)</link>
+        </para>
+        <para>
+          <link xlink:href="336d22bb-109b-41cf-9cce-8acc43f43b3b">Retrieve number of pages in TIFF image</link>
+        </para>
+        <para>
+          <link xlink:href="61b90b5d-8a3b-4122-a5f2-8674dda2b696">Read and write custom TIFF tags</link>
+        </para>
+        <para>
+          <link xlink:href="f47d1201-0893-45dc-907e-2bbeb5e3cb0c">Add custom TIFF tags to an existing TIFF image</link>
+        </para>
+        <para>
+          <link xlink:href="c3397c64-c55d-4db2-8245-654d21555c15">How to read value of a TIFF tag unknown to LibTiff.Net</link>
+        </para>
+        <para>
+          <link xlink:href="98c3da41-bb2c-4bba-9a94-5ba32069aab5">Read RGB values of image pixels</link>
+        </para>
+        <para>
+          <link xlink:href="01d0b300-5deb-4e14-a534-c1a91fac0c2a">Read all TIFF tags</link>
+        </para>
+        <para>
+          <link xlink:href="1af6fd13-f108-4935-a6d8-0e6db6d11b8f">Read EXIF metadata</link>
+        </para>
+        <para>
+          <link xlink:href="9adabd62-5bd5-45f9-ab3e-5394fb59b8d5">Detect corrupted page</link>
+        </para>
+        <para>
+          <link xlink:href="075f57db-d779-48f7-9fd7-4ca075a01599">Convert System.Drawing.Bitmap to a black and white TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="753aa95f-9715-4b89-9a78-2982756d0a2c">Convert System.Drawing.Bitmap to a 32-bit color TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="b98882ca-a191-4a27-880c-f4959161d890">Convert System.Drawing.Bitmap to a 24-bit color TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="fc9f330d-e6eb-4dc9-af00-06f111ffc860">Convert black-and-white TIFF to a System.Drawing.Bitmap</link>
+        </para>
+        <para>
+          <link xlink:href="dd8f94ce-2292-4504-8f32-242dfc34dfb1">Convert color TIFF to a 32-bit System.Drawing.Bitmap</link>
+        </para>
+        <para>
+          <link xlink:href="4f1836a4-ed48-48f0-9c2d-5cf81ffb9303">Convert color TIFF to a 24-bit System.Drawing.Bitmap</link>
+        </para>
+        <para>
+          <link xlink:href="4bceb00d-9b22-4a5a-a912-f9319c1e80ef">Create 16-bit grayscale TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="be3a882e-080a-4520-b2df-b3d99e9e81aa">Convert 16-bit grayscale TIFF to a 8-bit System.Drawing.Bitmap</link>
+        </para>
+        <para>
+          <link xlink:href="91d736ff-8648-4c2f-a87a-9d8d215416b8">Process 16-bit TIFF (increase brightness)</link>
+        </para>
+        <para>
+          <link xlink:href="a917f97b-3b03-422b-ba9b-5cb672f8617a">Convert a multi-strip TIFF image to a single-strip one</link>
+        </para>
+        <para>
+          <link xlink:href="a4e19121-9974-4755-83f1-d4d8b09f5ecf">Convert bytes of a multi-strip TIFF image to bytes of a single-strip one</link>
+        </para>
+        <para>
+          <link xlink:href="4870e3fc-867f-41b0-af72-c48e0f5f7a96">Print formatted description of a TIFF file contents</link>
+        </para>
+        <para>
+          <link xlink:href="95e4c191-ff3e-4e11-8a10-1257a95e91f2">How to write TIFF tags before data (like in Cisco TIFF files)</link>
+        </para>
+        <para>
+          <link xlink:href="6a59b98d-3a27-4f99-9f18-4f898cc74f75">How to read TIFF scanlines in a random fashion</link>
+        </para>
+        <para>
+          <link xlink:href="79c178e6-79a9-42df-b04a-c2b1f6b67595">How to use a custom TiffStream to read or write TIFF images</link>
+        </para>
+        <para>
+          <link xlink:href="90904127-73c2-4c17-99e4-1d5d94f4315f">How to use a System.IO.Stream to read or write TIFF images</link>
+        </para>
+      </content>
+    </section>
+    <section address="Using utilities">
+      <title>Using utilities</title>
+      <content>
+        <para>
+          <link xlink:href="0664189f-7442-4bef-8f2f-1ee6ce82cd87">Merge several TIFF images to single multipage TIFF</link>
+        </para>
+        <para>
+          <link xlink:href="65159b6b-0f22-41a8-bbcf-fd1df1b2aa9e">Extract a page from a multi-page TIFF image</link>
+        </para>
+        <para>
+          <link xlink:href="11e05b16-d3ea-4a41-9a70-f02404c56bc6">Convert TIFF image to PDF document</link>
+        </para>
+      </content>
+    </section>
+    <section address="Non-grouped samples">
+      <title>Other samples</title>
+      <content />
+    </section>
+  </developerConceptualDocument>
+</topic>

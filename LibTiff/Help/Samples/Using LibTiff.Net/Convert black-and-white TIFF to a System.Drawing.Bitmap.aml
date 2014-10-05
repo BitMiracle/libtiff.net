@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="fc9f330d-e6eb-4dc9-af00-06f111ffc860" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to convert black and white TIFF image to a System.Drawing.Bitmap.</para>
+<para></para>
+<para>At first, this sample reads important TIFF fields like width, height, samples per pixel, etc. then reads scanlines of an image using Tiff.ReadScanline method in a loop. Note, that there are other Tiff.Read* methods provided by the library.</para>
+<para></para>
+<para>To convert opened TIFF image to a System.Drawing.Bitmap this sample creates Bitmap with the size of the original TIFF image and then uses combination of Bitmap.LockBits, Marshal.Copy and Bitmap.UnlockBits methods for each scanline.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class BitonalTiffToBitmap
+    {
+        public static void Main()
+        {
+            using (Bitmap bitmap = tiffToBitmap(@&quot;Sample Data\bitonal.tif&quot;))
+            {
+                if (bitmap == null)
+                {
+                    MessageBox.Show(&quot;Failed to convert image. Maybe input image does not exist or is not 1 bit per pixel.&quot;);
+                    return;
+                }
+
+                bitmap.Save(&quot;BitonalTiffToBitmap.bmp&quot;);
+                Process.Start(&quot;BitonalTiffToBitmap.bmp&quot;);
+            }
+        }
+
+        private static Bitmap tiffToBitmap(string fileName)
+        {
+            using (Tiff tif = Tiff.Open(fileName, &quot;r&quot;))
+            {
+                if (tif == null)
+                    return null;
+
+                FieldValue[] imageHeight = tif.GetField(TiffTag.IMAGELENGTH);
+                int height = imageHeight[0].ToInt();
+
+                FieldValue[] imageWidth = tif.GetField(TiffTag.IMAGEWIDTH);
+                int width = imageWidth[0].ToInt();
+
+                FieldValue[] bitsPerSample = tif.GetField(TiffTag.BITSPERSAMPLE);
+                short bpp = bitsPerSample[0].ToShort();
+                if (bpp != 1)
+                    return null;
+
+                FieldValue[] samplesPerPixel = tif.GetField(TiffTag.SAMPLESPERPIXEL);
+                short spp = samplesPerPixel[0].ToShort();
+                if (spp != 1)
+                    return null;
+
+                FieldValue[] photoMetric = tif.GetField(TiffTag.PHOTOMETRIC);
+                Photometric photo = (Photometric)photoMetric[0].ToInt();
+                if (photo != Photometric.MINISBLACK &amp;&amp; photo != Photometric.MINISWHITE)
+                    return null;
+
+                int stride = tif.ScanlineSize();
+                Bitmap result = new Bitmap(width, height, PixelFormat.Format1bppIndexed);
+
+                // update bitmap palette according to Photometric value
+                bool minIsWhite = (photo == Photometric.MINISWHITE);
+                ColorPalette palette = result.Palette;
+                palette.Entries[0] = (minIsWhite ? Color.White : Color.Black);
+                palette.Entries[1] = (minIsWhite ? Color.Black : Color.White);
+                result.Palette = palette;
+                    
+                for (int i = 0; i &lt; height; i++)
+                {
+                    Rectangle imgRect = new Rectangle(0, i, width, 1);
+                    BitmapData imgData = result.LockBits(imgRect, ImageLockMode.WriteOnly, PixelFormat.Format1bppIndexed);
+
+                    byte[] buffer = new byte[stride];
+                    tif.ReadScanline(buffer, i);
+
+                    Marshal.Copy(buffer, 0, imgData.Scan0, buffer.Length);
+                    result.UnlockBits(imgData);
+                }
+
+                return result;
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.Drawing.Imaging
+Imports System.Runtime.InteropServices
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class BitonalTiffToBitmap
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using bitmap As Bitmap = tiffToBitmap(&quot;Sample Data\bitonal.tif&quot;)
+                If bitmap Is Nothing Then
+                    MessageBox.Show(&quot;Failed to convert image. Maybe input image does not exist or is not 1 bit per pixel.&quot;)
+                    Return
+                End If
+
+                bitmap.Save(&quot;BitonalTiffToBitmap.bmp&quot;)
+                Process.Start(&quot;BitonalTiffToBitmap.bmp&quot;)
+            End Using
+        End Sub
+
+        Private Shared Function tiffToBitmap(ByVal fileName As String) As Bitmap
+            Using tif As Tiff = Tiff.Open(fileName, &quot;r&quot;)
+                If tif Is Nothing Then
+                    Return Nothing
+                End If
+
+                Dim imageHeight As FieldValue() = tif.GetField(TiffTag.IMAGELENGTH)
+                Dim height As Integer = imageHeight(0).ToInt()
+
+                Dim imageWidth As FieldValue() = tif.GetField(TiffTag.IMAGEWIDTH)
+                Dim width As Integer = imageWidth(0).ToInt()
+
+                Dim bitsPerSample As FieldValue() = tif.GetField(TiffTag.BITSPERSAMPLE)
+                Dim bpp As Short = bitsPerSample(0).ToShort()
+                If bpp &lt;&gt; 1 Then
+                    Return Nothing
+                End If
+
+                Dim samplesPerPixel As FieldValue() = tif.GetField(TiffTag.SAMPLESPERPIXEL)
+                Dim spp As Short = samplesPerPixel(0).ToShort()
+                If spp &lt;&gt; 1 Then
+                    Return Nothing
+                End If
+
+                Dim photoMetricField As FieldValue() = tif.GetField(TiffTag.PHOTOMETRIC)
+                Dim photo As Photometric = DirectCast(photoMetricField(0).ToInt(), Photometric)
+                If photo &lt;&gt; Photometric.MINISBLACK AndAlso photo &lt;&gt; Photometric.MINISWHITE Then
+                    Return Nothing
+                End If
+
+                Dim stride As Integer = tif.ScanlineSize()
+                Dim result As New Bitmap(width, height, PixelFormat.Format1bppIndexed)
+
+                ' update bitmap palette according to Photometric value
+                Dim minIsWhite As Boolean = (photo = Photometric.MINISWHITE)
+                Dim palette As ColorPalette = result.Palette
+                If minIsWhite Then
+                    palette.Entries(0) = Color.White
+                    palette.Entries(1) = Color.Black
+                Else
+                    palette.Entries(0) = Color.Black
+                    palette.Entries(1) = Color.White
+                End If
+                result.Palette = palette
+
+                For i As Integer = 0 To height - 1
+                    Dim imgRect As New Rectangle(0, i, width, 1)
+                    Dim imgData As BitmapData = result.LockBits(imgRect, ImageLockMode.[WriteOnly], PixelFormat.Format1bppIndexed)
+
+                    Dim buffer As Byte() = New Byte(stride - 1) {}
+                    tif.ReadScanline(buffer, i)
+
+                    Marshal.Copy(buffer, 0, imgData.Scan0, buffer.Length)
+                    result.UnlockBits(imgData)
+                Next
+
+                Return result
+            End Using
+        End Function
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

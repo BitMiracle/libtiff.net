@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="61b90b5d-8a3b-4122-a5f2-8674dda2b696" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to read and write custom TIFF tags.</para>
+<para></para>
+<para>Custom tags are tags unknown to the library. However, they may be read from a file or written to a file without problems. Special &quot;extender callback&quot; method should be used to instruct the library about format, names and other properties of such tags.</para>
+<para></para>
+<para>This sample shows how to create &quot;extender callback&quot; method, register that method with the library and use Tiff.MergeFieldInfo to merge description of your custom tags with other tags description. After that custom tags can be read or written as usual.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+using System.Text;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ReadWriteCustomTags
+    {
+        private const TiffTag TIFFTAG_ASCIITAG = (TiffTag)666;
+        private const TiffTag TIFFTAG_LONGTAG = (TiffTag)667;
+        private const TiffTag TIFFTAG_SHORTTAG = (TiffTag)668;
+        private const TiffTag TIFFTAG_RATIONALTAG = (TiffTag)669;
+        private const TiffTag TIFFTAG_FLOATTAG = (TiffTag)670;
+        private const TiffTag TIFFTAG_DOUBLETAG = (TiffTag)671;
+        private const TiffTag TIFFTAG_BYTETAG = (TiffTag)672;
+
+        private static Tiff.TiffExtendProc m_parentExtender;
+
+        public static void TagExtender(Tiff tif)
+        {
+            TiffFieldInfo[] tiffFieldInfo = 
+            {
+                new TiffFieldInfo(TIFFTAG_ASCIITAG, -1, -1, TiffType.ASCII, FieldBit.Custom, true, false, &quot;MyTag&quot;),
+                new TiffFieldInfo(TIFFTAG_SHORTTAG, 2, 2, TiffType.SHORT, FieldBit.Custom, false, true, &quot;ShortTag&quot;),
+                new TiffFieldInfo(TIFFTAG_LONGTAG, 2, 2, TiffType.LONG, FieldBit.Custom, false, true, &quot;LongTag&quot;),
+                new TiffFieldInfo(TIFFTAG_RATIONALTAG, 2, 2, TiffType.RATIONAL, FieldBit.Custom, false, true, &quot;RationalTag&quot;),
+                new TiffFieldInfo(TIFFTAG_FLOATTAG, 2, 2, TiffType.FLOAT, FieldBit.Custom, false, true, &quot;FloatTag&quot;),
+                new TiffFieldInfo(TIFFTAG_DOUBLETAG, 2, 2, TiffType.DOUBLE, FieldBit.Custom, false, true, &quot;DoubleTag&quot;),
+                new TiffFieldInfo(TIFFTAG_BYTETAG, 2, 2, TiffType.BYTE, FieldBit.Custom, false, true, &quot;ByteTag&quot;),
+            };
+
+            tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
+
+            if (m_parentExtender != null)
+                m_parentExtender(tif);
+        }
+
+        public static void Main()
+        {
+            // Define an image
+            byte[] buffer = new byte[25 * 144];
+
+            // Register the extender callback
+            // It's a good idea to keep track of the previous tag extender (if any) so that we can call it
+            // from our extender allowing a chain of customizations to take effect.
+            m_parentExtender = Tiff.SetTagExtender(TagExtender);
+
+            string outputFileName = writeTiffWithCustomTags(buffer);
+            readCustomTags(outputFileName);
+            
+            // restore previous tag extender
+            Tiff.SetTagExtender(m_parentExtender);
+        }
+
+        private static string writeTiffWithCustomTags(byte[] buffer)
+        {
+            string outputFileName = &quot;output.tif&quot;;
+            using (Tiff image = Tiff.Open(outputFileName, &quot;w&quot;))
+            {
+                // set up some basic tags before adding data
+                image.SetField(TiffTag.IMAGEWIDTH, 25 * 8);
+                image.SetField(TiffTag.IMAGELENGTH, 144);
+                image.SetField(TiffTag.BITSPERSAMPLE, 1);
+                image.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                image.SetField(TiffTag.ROWSPERSTRIP, 144);
+
+                image.SetField(TiffTag.COMPRESSION, Compression.CCITTFAX4);
+                image.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISWHITE);
+                image.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+                image.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+                image.SetField(TiffTag.XRESOLUTION, 150.0);
+                image.SetField(TiffTag.YRESOLUTION, 150.0);
+                image.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.INCH);
+
+                // set custom tags
+
+                string value = &quot;Tag contents&quot;;
+                image.SetField(TIFFTAG_ASCIITAG, value);
+
+                short[] shorts = { 263, 264 };
+                image.SetField(TIFFTAG_SHORTTAG, 2, shorts);
+
+                int[] longs = { 117, 118 };
+                image.SetField(TIFFTAG_LONGTAG, 2, longs);
+
+                float[] rationals = { 0.333333f, 0.444444f };
+                image.SetField(TIFFTAG_RATIONALTAG, 2, rationals);
+
+                float[] floats = { 0.666666f, 0.777777f };
+                image.SetField(TIFFTAG_FLOATTAG, 2, floats);
+
+                double[] doubles = { 0.1234567, 0.7654321 };
+                image.SetField(TIFFTAG_DOUBLETAG, 2, doubles);
+
+                byte[] bytes = { 89, 90 };
+                image.SetField(TIFFTAG_BYTETAG, 2, bytes);
+
+                // Write the information to the file
+                image.WriteEncodedStrip(0, buffer, 25 * 144);
+            }
+            return outputFileName;
+        }
+
+        private static void readCustomTags(string outputFileName)
+        {
+            const string messageFormat = &quot;{0} is read ok: {1}\n&quot;;
+            StringBuilder result = new StringBuilder();
+
+            // Now open that TIFF back and read new tags
+            using (Tiff image = Tiff.Open(outputFileName, &quot;r&quot;))
+            {
+                FieldValue[] res = image.GetField(TIFFTAG_ASCIITAG);
+                bool tagOk = (res != null &amp;&amp; res.Length == 1 &amp;&amp; res[0].ToString() == &quot;Tag contents&quot;);
+                result.AppendFormat(messageFormat, &quot;MyTag&quot;, tagOk);
+
+                res = image.GetField(TIFFTAG_SHORTTAG);
+                tagOk = (res != null &amp;&amp; res.Length == 2 &amp;&amp; res[0].ToInt() == 2 &amp;&amp; res[1].ToShortArray() != null);
+                result.AppendFormat(messageFormat, &quot;ShortTag&quot;, tagOk);
+
+                res = image.GetField(TIFFTAG_LONGTAG);
+                tagOk = (res != null &amp;&amp; res.Length == 2 &amp;&amp; res[0].ToInt() == 2 &amp;&amp; res[1].ToIntArray() != null);
+                result.AppendFormat(messageFormat, &quot;LongTag&quot;, tagOk);
+
+                res = image.GetField(TIFFTAG_RATIONALTAG);
+                tagOk = (res != null &amp;&amp; res.Length == 2 &amp;&amp; res[0].ToInt() == 2 &amp;&amp; res[1].ToFloatArray() != null);
+                result.AppendFormat(messageFormat, &quot;RationalTag&quot;, tagOk);
+
+                res = image.GetField(TIFFTAG_FLOATTAG);
+                tagOk = (res != null &amp;&amp; res.Length == 2 &amp;&amp; res[0].ToInt() == 2 &amp;&amp; res[1].ToFloatArray() != null);
+                result.AppendFormat(messageFormat, &quot;FloatTag&quot;, tagOk);
+
+                res = image.GetField(TIFFTAG_DOUBLETAG);
+                tagOk = (res != null &amp;&amp; res.Length == 2 &amp;&amp; res[0].ToInt() == 2 &amp;&amp; res[1].ToFloatArray() != null);
+                result.AppendFormat(messageFormat, &quot;DoubleTag&quot;, tagOk);
+
+                res = image.GetField(TIFFTAG_BYTETAG);
+                tagOk = (res != null &amp;&amp; res.Length == 2 &amp;&amp; res[0].ToInt() == 2 &amp;&amp; res[1].ToByteArray() != null);
+                result.AppendFormat(messageFormat, &quot;ByteTag&quot;, tagOk);
+            }
+
+            MessageBox.Show(result.ToString());
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports Microsoft.VisualBasic
+Imports System.Diagnostics
+Imports System.Text
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ReadWriteCustomTags
+        Private Sub New()
+        End Sub
+        Private Const TIFFTAG_ASCIITAG As TiffTag = DirectCast(666, TiffTag)
+        Private Const TIFFTAG_LONGTAG As TiffTag = DirectCast(667, TiffTag)
+        Private Const TIFFTAG_SHORTTAG As TiffTag = DirectCast(668, TiffTag)
+        Private Const TIFFTAG_RATIONALTAG As TiffTag = DirectCast(669, TiffTag)
+        Private Const TIFFTAG_FLOATTAG As TiffTag = DirectCast(670, TiffTag)
+        Private Const TIFFTAG_DOUBLETAG As TiffTag = DirectCast(671, TiffTag)
+        Private Const TIFFTAG_BYTETAG As TiffTag = DirectCast(672, TiffTag)
+
+        Private Shared m_parentExtender As Tiff.TiffExtendProc
+
+        Public Shared Sub TagExtender(ByVal tif As Tiff)
+            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_ASCIITAG, -1, -1, TiffType.ASCII, FieldBit.[Custom], True, _
+             False, &quot;MyTag&quot;), New TiffFieldInfo(TIFFTAG_SHORTTAG, 2, 2, TiffType.[SHORT], FieldBit.[Custom], False, _
+             True, &quot;ShortTag&quot;), New TiffFieldInfo(TIFFTAG_LONGTAG, 2, 2, TiffType.[LONG], FieldBit.[Custom], False, _
+             True, &quot;LongTag&quot;), New TiffFieldInfo(TIFFTAG_RATIONALTAG, 2, 2, TiffType.RATIONAL, FieldBit.[Custom], False, _
+             True, &quot;RationalTag&quot;), New TiffFieldInfo(TIFFTAG_FLOATTAG, 2, 2, TiffType.FLOAT, FieldBit.[Custom], False, _
+             True, &quot;FloatTag&quot;), New TiffFieldInfo(TIFFTAG_DOUBLETAG, 2, 2, TiffType.[DOUBLE], FieldBit.[Custom], False, _
+             True, &quot;DoubleTag&quot;), _
+             New TiffFieldInfo(TIFFTAG_BYTETAG, 2, 2, TiffType.[BYTE], FieldBit.[Custom], False, _
+             True, &quot;ByteTag&quot;)}
+
+            tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length)
+
+            If m_parentExtender IsNot Nothing Then
+                m_parentExtender.Invoke(tif)
+            End If
+
+        End Sub
+
+        Public Shared Sub Main()
+            ' Define an image
+            Dim buffer As Byte() = New Byte(25 * 144 - 1) {}
+
+            ' Register the extender callback
+            ' It's a good idea to keep track of the previous tag extender (if any) so that we can call it
+            ' from our extender allowing a chain of customizations to take effect.
+            m_parentExtender = Tiff.SetTagExtender(AddressOf TagExtender)
+
+            Dim outputFileName As String = writeTiffWithCustomTags(buffer)
+            readCustomTags(outputFileName)
+            
+            ' restore previous tag extender
+            Tiff.SetTagExtender(m_parentExtender)
+        End Sub
+
+        Private Shared Function writeTiffWithCustomTags(ByVal buffer As Byte()) As String
+            Dim outputFileName As String = &quot;output.tif&quot;
+            Using image As Tiff = Tiff.Open(outputFileName, &quot;w&quot;)
+                ' set up some basic tags before adding data
+                image.SetField(TiffTag.IMAGEWIDTH, 25 * 8)
+                image.SetField(TiffTag.IMAGELENGTH, 144)
+                image.SetField(TiffTag.BITSPERSAMPLE, 1)
+                image.SetField(TiffTag.SAMPLESPERPIXEL, 1)
+                image.SetField(TiffTag.ROWSPERSTRIP, 144)
+
+                image.SetField(TiffTag.COMPRESSION, Compression.CCITTFAX4)
+                image.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISWHITE)
+                image.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB)
+                image.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+
+                image.SetField(TiffTag.XRESOLUTION, 150.0)
+                image.SetField(TiffTag.YRESOLUTION, 150.0)
+                image.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.INCH)
+
+                ' set custom tags
+
+                Dim value As String = &quot;Tag contents&quot;
+                image.SetField(TIFFTAG_ASCIITAG, value)
+
+                Dim shorts As Short() = {263, 264}
+                image.SetField(TIFFTAG_SHORTTAG, 2, shorts)
+
+                Dim longs As Integer() = {117, 118}
+                image.SetField(TIFFTAG_LONGTAG, 2, longs)
+
+                Dim rationals As Single() = {0.333333F, 0.444444F}
+                image.SetField(TIFFTAG_RATIONALTAG, 2, rationals)
+
+                Dim floats As Single() = {0.666666F, 0.777777F}
+                image.SetField(TIFFTAG_FLOATTAG, 2, floats)
+
+                Dim doubles As Double() = {0.1234567, 0.7654321}
+                image.SetField(TIFFTAG_DOUBLETAG, 2, doubles)
+
+                Dim bytes As Byte() = {89, 90}
+                image.SetField(TIFFTAG_BYTETAG, 2, bytes)
+
+                ' Write the information to the file
+                image.WriteEncodedStrip(0, buffer, 25 * 144)
+            End Using
+            Return outputFileName
+        End Function
+
+        Private Shared Sub readCustomTags(ByVal outputFileName As String)
+            Const messageFormat As String = &quot;{0} is read ok: {1}&quot; &amp; vbCrLf
+            Dim result As New StringBuilder()
+
+            ' Now open that TIFF back and read new tags
+            Using image As Tiff = Tiff.Open(outputFileName, &quot;r&quot;)
+                Dim res As FieldValue() = image.GetField(TIFFTAG_ASCIITAG)
+                Dim tagOk As Boolean = (res IsNot Nothing AndAlso res.Length = 1 AndAlso res(0).ToString() = &quot;Tag contents&quot;)
+                result.AppendFormat(messageFormat, &quot;MyTag&quot;, tagOk)
+
+                res = image.GetField(TIFFTAG_SHORTTAG)
+                tagOk = (res IsNot Nothing AndAlso res.Length = 2 AndAlso res(0).ToInt() = 2 AndAlso res(1).ToShortArray() IsNot Nothing)
+                result.AppendFormat(messageFormat, &quot;ShortTag&quot;, tagOk)
+
+                res = image.GetField(TIFFTAG_LONGTAG)
+                tagOk = (res IsNot Nothing AndAlso res.Length = 2 AndAlso res(0).ToInt() = 2 AndAlso res(1).ToIntArray() IsNot Nothing)
+                result.AppendFormat(messageFormat, &quot;LongTag&quot;, tagOk)
+
+                res = image.GetField(TIFFTAG_RATIONALTAG)
+                tagOk = (res IsNot Nothing AndAlso res.Length = 2 AndAlso res(0).ToInt() = 2 AndAlso res(1).ToFloatArray() IsNot Nothing)
+                result.AppendFormat(messageFormat, &quot;RationalTag&quot;, tagOk)
+
+                res = image.GetField(TIFFTAG_FLOATTAG)
+                tagOk = (res IsNot Nothing AndAlso res.Length = 2 AndAlso res(0).ToInt() = 2 AndAlso res(1).ToFloatArray() IsNot Nothing)
+                result.AppendFormat(messageFormat, &quot;FloatTag&quot;, tagOk)
+
+                res = image.GetField(TIFFTAG_DOUBLETAG)
+                tagOk = (res IsNot Nothing AndAlso res.Length = 2 AndAlso res(0).ToInt() = 2 AndAlso res(1).ToFloatArray() IsNot Nothing)
+                result.AppendFormat(messageFormat, &quot;DoubleTag&quot;, tagOk)
+
+                res = image.GetField(TIFFTAG_BYTETAG)
+                tagOk = (res IsNot Nothing AndAlso res.Length = 2 AndAlso res(0).ToInt() = 2 AndAlso res(1).ToByteArray() IsNot Nothing)
+                result.AppendFormat(messageFormat, &quot;ByteTag&quot;, tagOk)
+            End Using
+
+            MessageBox.Show(result.ToString())
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

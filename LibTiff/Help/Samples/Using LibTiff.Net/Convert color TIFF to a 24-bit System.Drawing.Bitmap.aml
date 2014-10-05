@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="4f1836a4-ed48-48f0-9c2d-5cf81ffb9303" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to convert a TIFF image to the 24-bit color System.Drawing.Bitmap.</para>
+<para></para>
+<para>The code also shows how to flip and convert raster returned by ReadRGBAImage method from RGBA to BGR format.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Drawing;
+using System.Drawing.Imaging;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class TiffTo24BitBitmap
+    {
+        public static void Main()
+        {
+            using (Tiff tif = Tiff.Open(@&quot;Sample data\dscf0013.tif&quot;, &quot;r&quot;))
+            {
+                // Find the width and height of the image
+                FieldValue[] value = tif.GetField(TiffTag.IMAGEWIDTH);
+                int width = value[0].ToInt();
+
+                value = tif.GetField(TiffTag.IMAGELENGTH);
+                int height = value[0].ToInt();
+
+                // Read the image into the memory buffer
+                int[] raster = new int[height * width];
+                if (!tif.ReadRGBAImage(width, height, raster))
+                {
+                    System.Windows.Forms.MessageBox.Show(&quot;Could not read image&quot;);
+                    return;
+                }
+
+                using (Bitmap bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb))
+                {
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData bmpdata = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                    byte[] bits = new byte[bmpdata.Stride * bmpdata.Height];
+
+                    for (int y = 0; y &lt; bmp.Height; y++)
+                    {
+                        int rasterOffset = y * bmp.Width;
+                        int bitsOffset = (bmp.Height - y - 1) * bmpdata.Stride;
+
+                        for (int x = 0; x &lt; bmp.Width; x++)
+                        {
+                            int rgba = raster[rasterOffset++];
+                            bits[bitsOffset++] = (byte)((rgba &gt;&gt; 16) &amp; 0xff);
+                            bits[bitsOffset++] = (byte)((rgba &gt;&gt; 8) &amp; 0xff);
+                            bits[bitsOffset++] = (byte)(rgba &amp; 0xff);
+                        }
+                    }
+
+                    System.Runtime.InteropServices.Marshal.Copy(bits, 0, bmpdata.Scan0, bits.Length);
+                    bmp.UnlockBits(bmpdata);
+
+                    bmp.Save(&quot;TiffTo24BitBitmap.bmp&quot;);
+                    System.Diagnostics.Process.Start(&quot;TiffTo24BitBitmap.bmp&quot;);
+                }
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Drawing
+Imports System.Drawing.Imaging
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class TiffTo24BitBitmap
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using tif As Tiff = Tiff.Open(&quot;Sample data\dscf0013.tif&quot;, &quot;r&quot;)
+                ' Find the width and height of the image
+                Dim value As FieldValue() = tif.GetField(TiffTag.IMAGEWIDTH)
+                Dim width As Integer = value(0).ToInt()
+
+                value = tif.GetField(TiffTag.IMAGELENGTH)
+                Dim height As Integer = value(0).ToInt()
+
+                ' Read the image into the memory buffer
+                Dim raster As Integer() = New Integer(height * width - 1) {}
+                If Not tif.ReadRGBAImage(width, height, raster) Then
+                    System.Windows.Forms.MessageBox.Show(&quot;Could not read image&quot;)
+                    Return
+                End If
+
+                Using bmp As New Bitmap(width, height, PixelFormat.Format24bppRgb)
+                    Dim rect As New Rectangle(0, 0, bmp.Width, bmp.Height)
+
+                    Dim bmpdata As BitmapData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb)
+                    Dim bits As Byte() = New Byte(bmpdata.Stride * bmpdata.Height - 1) {}
+
+                    For y As Integer = 0 To bmp.Height - 1
+                        Dim rasterOffset As Integer = y * bmp.Width
+                        Dim bitsOffset As Integer = (bmp.Height - y - 1) * bmpdata.Stride
+
+                        For x As Integer = 0 To bmp.Width - 1
+                            Dim rgba As Integer = raster(rasterOffset)
+                            rasterOffset = rasterOffset + 1
+                            bits(bitsOffset) = CByte((rgba &gt;&gt; 16) And &amp;HFF)
+                            bits(bitsOffset + 1) = CByte((rgba &gt;&gt; 8) And &amp;HFF)
+                            bits(bitsOffset + 2) = CByte(rgba And &amp;HFF)
+                            bitsOffset = bitsOffset + 3
+                        Next
+                    Next
+
+                    System.Runtime.InteropServices.Marshal.Copy(bits, 0, bmpdata.Scan0, bits.Length)
+                    bmp.UnlockBits(bmpdata)
+
+                    bmp.Save(&quot;TiffTo24BitBitmap.bmp&quot;)
+                    System.Diagnostics.Process.Start(&quot;TiffTo24BitBitmap.bmp&quot;)
+                End Using
+            End Using
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

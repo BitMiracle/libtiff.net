@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="a917f97b-3b03-422b-ba9b-5cb672f8617a" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to convert any non-tiled TIFF image to the TIFF image which have all data written in a single strip.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ConvertToSingleStrip
+    {
+        public static void Main()
+        {
+            using (Tiff input = Tiff.Open(@&quot;Sample Data\multipage.tif&quot;, &quot;r&quot;))
+            {
+                if (input == null)
+                {
+                    MessageBox.Show(&quot;Could not open incoming image&quot;);
+                    return;
+                }
+
+                if (input.IsTiled())
+                {
+                    MessageBox.Show(&quot;Could not process tiled image&quot;);
+                    return;
+                }
+
+                using (Tiff output = Tiff.Open(&quot;ConvertToSingleStrip.tif&quot;, &quot;w&quot;))
+                {
+                    int numberOfDirectories = input.NumberOfDirectories();
+                    for (short i = 0; i &lt; numberOfDirectories; ++i)
+                    {
+                        input.SetDirectory(i);
+
+                        copyTags(input, output);
+                        copyStrips(input, output);
+
+                        output.WriteDirectory();
+                    }
+                }
+            }
+
+            using (Tiff result = Tiff.Open(@&quot;ConvertToSingleStrip.tif&quot;, &quot;rc&quot;))
+            {
+                MessageBox.Show(&quot;Number of strips in result file: &quot; + result.NumberOfStrips());
+            }
+
+            Process.Start(&quot;ConvertToSingleStrip.tif&quot;);
+        }
+
+        private static void copyTags(Tiff input, Tiff output)
+        {
+            for (ushort t = ushort.MinValue; t &lt; ushort.MaxValue; ++t)
+            {
+                TiffTag tag = (TiffTag)t;
+                FieldValue[] tagValue = input.GetField(tag);
+                if (tagValue != null)
+                    output.GetTagMethods().SetField(output, tag, tagValue);
+            }
+
+            int height = input.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+            output.SetField(TiffTag.ROWSPERSTRIP, height);
+        }
+
+        private static void copyStrips(Tiff input, Tiff output)
+        {
+            bool encoded = false;
+            FieldValue[] compressionTagValue = input.GetField(TiffTag.COMPRESSION);
+            if (compressionTagValue != null)
+                encoded = (compressionTagValue[0].ToInt() != (int)Compression.NONE);
+
+            int numberOfStrips = input.NumberOfStrips();
+
+            int offset = 0;
+            byte[] stripsData = new byte[numberOfStrips * input.StripSize()];
+            for (int i = 0; i &lt; numberOfStrips; ++i)
+            {
+                int bytesRead = readStrip(input, i, stripsData, offset, encoded);
+                offset += bytesRead;
+            }
+
+            writeStrip(output, stripsData, offset, encoded);
+        }
+
+        private static int readStrip(Tiff image, int stripNumber, byte[] buffer, int offset, bool encoded)
+        {
+            if (encoded)
+                return image.ReadEncodedStrip(stripNumber, buffer, offset, buffer.Length - offset);
+            else
+                return image.ReadRawStrip(stripNumber, buffer, offset, buffer.Length - offset);
+        }
+
+        private static void writeStrip(Tiff image, byte[] stripsData, int count, bool encoded)
+        {
+            if (encoded)
+                image.WriteEncodedStrip(0, stripsData, count);
+            else
+                image.WriteRawStrip(0, stripsData, count);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ConvertToSingleStrip
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using input As Tiff = Tiff.Open(&quot;Sample Data\multipage.tif&quot;, &quot;r&quot;)
+                If input Is Nothing Then
+                    MessageBox.Show(&quot;Could not open incoming image&quot;)
+                    Return
+                End If
+
+                If input.IsTiled() Then
+                    MessageBox.Show(&quot;Could not process tiled image&quot;)
+                    Return
+                End If
+
+                Using output As Tiff = Tiff.Open(&quot;ConvertToSingleStrip.tif&quot;, &quot;w&quot;)
+                    Dim numberOfDirectories As Integer = input.NumberOfDirectories()
+                    For i As Short = 0 To numberOfDirectories - 1
+                        input.SetDirectory(i)
+
+                        copyTags(input, output)
+                        copyStrips(input, output)
+
+                        output.WriteDirectory()
+                    Next
+                End Using
+            End Using
+
+            Using result As Tiff = Tiff.Open(&quot;ConvertToSingleStrip.tif&quot;, &quot;rc&quot;)
+                MessageBox.Show(&quot;Number of strips in result file: &quot; + result.NumberOfStrips().ToString())
+            End Using
+
+            Process.Start(&quot;ConvertToSingleStrip.tif&quot;)
+        End Sub
+
+        Private Shared Sub copyTags(ByVal input As Tiff, ByVal output As Tiff)
+            For t As Integer = 0 To 65535
+                Dim tag As TiffTag = DirectCast(t, TiffTag)
+                Dim tagValue As FieldValue() = input.GetField(tag)
+                If tagValue IsNot Nothing Then
+                    output.GetTagMethods().SetField(output, tag, tagValue)
+                End If
+            Next
+
+            Dim height As Integer = input.GetField(TiffTag.IMAGELENGTH)(0).ToInt()
+            output.SetField(TiffTag.ROWSPERSTRIP, height)
+        End Sub
+
+        Private Shared Sub copyStrips(ByVal input As Tiff, ByVal output As Tiff)
+            Dim encoded As Boolean = False
+            Dim compressionTagValue As FieldValue() = input.GetField(TiffTag.COMPRESSION)
+            If compressionTagValue IsNot Nothing Then
+                encoded = (compressionTagValue(0).ToInt() &lt;&gt; CInt(Compression.NONE))
+            End If
+
+            Dim numberOfStrips As Integer = input.NumberOfStrips()
+
+            Dim offset As Integer = 0
+            Dim stripsData As Byte() = New Byte(numberOfStrips * input.StripSize() - 1) {}
+            For i As Integer = 0 To numberOfStrips - 1
+                Dim bytesRead As Integer = readStrip(input, i, stripsData, offset, encoded)
+                offset += bytesRead
+            Next
+
+            writeStrip(output, stripsData, offset, encoded)
+        End Sub
+
+        Private Shared Function readStrip(ByVal image As Tiff, ByVal stripNumber As Integer, ByVal buffer As Byte(), ByVal offset As Integer, ByVal encoded As Boolean) As Integer
+            If encoded Then
+                Return image.ReadEncodedStrip(stripNumber, buffer, offset, buffer.Length - offset)
+            Else
+                Return image.ReadRawStrip(stripNumber, buffer, offset, buffer.Length - offset)
+            End If
+        End Function
+
+        Private Shared Sub writeStrip(ByVal image As Tiff, ByVal stripsData As Byte(), ByVal count As Integer, ByVal encoded As Boolean)
+            If encoded Then
+                image.WriteEncodedStrip(0, stripsData, count)
+            Else
+                image.WriteRawStrip(0, stripsData, count)
+            End If
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

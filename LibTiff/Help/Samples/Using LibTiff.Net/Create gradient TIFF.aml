@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="7005eea9-13c6-49a9-9804-864be2654278" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to create simple grayscale gradient TIFF image.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class CreateGradientTiff
+    {
+        public static void Main()
+        {
+            using (Tiff tif = Tiff.Open(&quot;CreateGradientTiff.tif&quot;, &quot;w&quot;))
+            {
+                if (tif == null)
+                    return;
+
+                tif.SetField(TiffTag.IMAGEWIDTH, 256);
+                tif.SetField(TiffTag.IMAGELENGTH, 256);
+                tif.SetField(TiffTag.BITSPERSAMPLE, 8);
+                tif.SetField(TiffTag.SAMPLESPERPIXEL, 3);
+                tif.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
+                tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                tif.SetField(TiffTag.ROWSPERSTRIP, 1);
+
+                byte[] color_ptr = new byte[256 * 3];
+                for (int i = 0; i &lt; 256; i++)
+                {
+                    for (int j = 0; j &lt; 256; j++)
+                    {
+                        color_ptr[j * 3 + 0] = (byte)i;
+                        color_ptr[j * 3 + 1] = (byte)i;
+                        color_ptr[j * 3 + 2] = (byte)i;
+                    }
+                    tif.WriteScanline(color_ptr, i);
+                }
+
+                tif.FlushData();
+                tif.Close();
+            }
+
+            Process.Start(&quot;CreateGradientTiff.tif&quot;);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class CreateGradientTiff
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using tif As Tiff = Tiff.Open(&quot;CreateGradientTiff.tif&quot;, &quot;w&quot;)
+                If tif Is Nothing Then
+                    Return
+                End If
+
+                tif.SetField(TiffTag.IMAGEWIDTH, 256)
+                tif.SetField(TiffTag.IMAGELENGTH, 256)
+                tif.SetField(TiffTag.BITSPERSAMPLE, 8)
+                tif.SetField(TiffTag.SAMPLESPERPIXEL, 3)
+                tif.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB)
+                tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+                tif.SetField(TiffTag.ROWSPERSTRIP, 1)
+
+                Dim color_ptr As Byte() = New Byte(256 * 3 - 1) {}
+                For i As Integer = 0 To 255
+                    For j As Integer = 0 To 255
+                        color_ptr(j * 3 + 0) = CByte(i)
+                        color_ptr(j * 3 + 1) = CByte(i)
+                        color_ptr(j * 3 + 2) = CByte(i)
+                    Next
+                    tif.WriteScanline(color_ptr, i)
+                Next
+
+                tif.FlushData()
+                tif.Close()
+            End Using
+
+            Process.Start(&quot;CreateGradientTiff.tif&quot;)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="8bd9873f-831f-40e1-937c-fd6702dc0670" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to read basic properties of a TIFF image like dimensions and resolution.</para>
+<para></para>
+<para>TIFF image properties are the data that is stored in a TIFF file along with pixel's data. Each property is</para>
+<para>tagged with a numeric value.</para>
+<para></para>
+<para>LibTiff.Net defines mnemonic names for well-known tags (see TiffTag enumeration).</para>
+<para>You can read properties using GetField method. The method returns array of FieldValue structures. Most of</para>
+<para>the properties are represented by exactly one value but there are some properties that are represented by</para>
+<para>two, three or more values. FieldValue structure has methods to convert values to integers, strings and</para>
+<para>other data types.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ReadBasicProperties
+    {
+        public static void Main()
+        {
+            using (Tiff image = Tiff.Open(@&quot;Sample Data\pc260001.tif&quot;, &quot;r&quot;))
+            {
+                FieldValue[] value = image.GetField(TiffTag.IMAGEWIDTH);
+                int width = value[0].ToInt();
+
+                value = image.GetField(TiffTag.IMAGELENGTH);
+                int height = value[0].ToInt();
+
+                value = image.GetField(TiffTag.XRESOLUTION);
+                float dpiX = value[0].ToFloat();
+
+                value = image.GetField(TiffTag.YRESOLUTION);
+                float dpiY = value[0].ToInt();
+
+                MessageBox.Show(string.Format(&quot;Width = {0}, Height = {1}, DPI = {2}x{3}&quot;,
+                    width, height, dpiX, dpiY), &quot;TIFF properties&quot;);
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ReadBasicProperties
+        Public Shared Sub Main()
+            Using image As Tiff = Tiff.Open(&quot;Sample Data\pc260001.tif&quot;, &quot;r&quot;)
+                Dim value As FieldValue() = image.GetField(TiffTag.IMAGEWIDTH)
+                Dim width As Integer = value(0).ToInt()
+
+                value = image.GetField(TiffTag.IMAGELENGTH)
+                Dim height As Integer = value(0).ToInt()
+
+                value = image.GetField(TiffTag.XRESOLUTION)
+                Dim dpiX As Single = value(0).ToFloat()
+
+                value = image.GetField(TiffTag.YRESOLUTION)
+                Dim dpiY As Single = value(0).ToInt()
+
+                MessageBox.Show(String.Format(&quot;Width = {0}, Height = {1}, DPI = {2}x{3}&quot;, width, height, dpiX, dpiY), &quot;TIFF properties&quot;)
+            End Using
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

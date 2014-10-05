@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="1af6fd13-f108-4935-a6d8-0e6db6d11b8f" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to extract EXIF metadata from a TIFF file.</para>
+<para></para>
+<para>EXIF tags are stored in EXIF IFD (information directory). This sample shows how to get offset to that directory and read it. When EXIF IFD is read all EXIF tags can be retrieved using Tiff.GetField method with appropriate tag identifiers. EXIF tag identifiers start with EXIF_ (i.e. TiffTag.EXIF_*).</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ReadExifMetadata
+    {
+        public static void Main()
+        {
+            using (Tiff image = Tiff.Open(@&quot;Sample data\dscf0013.tif&quot;, &quot;r&quot;))
+            {
+                if (image == null)
+                {
+                    MessageBox.Show(&quot;Could not open incoming image&quot;);
+                    return;
+                }
+
+                FieldValue[] exifIFDTag = image.GetField(TiffTag.EXIFIFD);
+                if (exifIFDTag == null)
+                {
+                    MessageBox.Show(&quot;Exif metadata not found&quot;);
+                    return;
+                }
+
+                int exifIFDOffset = exifIFDTag[0].ToInt();
+                if (!image.ReadEXIFDirectory(exifIFDOffset))
+                {
+                    MessageBox.Show(&quot;Could not read EXIF IFD&quot;);
+                    return;
+                }
+
+                using (StreamWriter writer = new StreamWriter(&quot;ReadExifMetadata.txt&quot;))
+                {
+                    for (TiffTag tag = TiffTag.EXIF_EXPOSURETIME; tag &lt;= TiffTag.EXIF_IMAGEUNIQUEID; ++tag)
+                    {
+                        FieldValue[] value = image.GetField(tag);
+                        if (value != null)
+                        {
+                            for (int i = 0; i &lt; value.Length; i++)
+                            {
+                                writer.WriteLine(&quot;{0}&quot;, tag.ToString());
+                                writer.WriteLine(&quot;{0} : {1}&quot;, value[i].Value.GetType().ToString(), value[i].ToString());
+                            }
+
+                            writer.WriteLine();
+                        }
+                    }
+                }
+            }
+
+            Process.Start(&quot;ReadExifMetadata.txt&quot;);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Diagnostics
+Imports System.IO
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ReadExifMetadata
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using image As Tiff = Tiff.Open(&quot;Sample data\dscf0013.tif&quot;, &quot;r&quot;)
+                If image Is Nothing Then
+                    MessageBox.Show(&quot;Could not open incoming image&quot;)
+                    Return
+                End If
+
+                Dim exifIFDTag As FieldValue() = image.GetField(TiffTag.EXIFIFD)
+                If exifIFDTag Is Nothing Then
+                    MessageBox.Show(&quot;Exif metadata not found&quot;)
+                    Return
+                End If
+
+                Dim exifIFDOffset As Integer = exifIFDTag(0).ToInt()
+                If Not image.ReadEXIFDirectory(exifIFDOffset) Then
+                    MessageBox.Show(&quot;Could not read EXIF IFD&quot;)
+                    Return
+                End If
+
+                Using writer As New StreamWriter(&quot;ReadExifMetadata.txt&quot;)
+                    For tag As TiffTag = TiffTag.EXIF_EXPOSURETIME To TiffTag.EXIF_IMAGEUNIQUEID
+                        Dim value As FieldValue() = image.GetField(tag)
+                        If value IsNot Nothing Then
+                            For i As Integer = 0 To value.Length - 1
+                                writer.WriteLine(&quot;{0}&quot;, tag.ToString())
+                                writer.WriteLine(&quot;{0} : {1}&quot;, value(i).Value.[GetType]().ToString(), value(i).ToString())
+                            Next
+
+                            writer.WriteLine()
+                        End If
+                    Next
+                End Using
+            End Using
+
+            Process.Start(&quot;ReadExifMetadata.txt&quot;)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

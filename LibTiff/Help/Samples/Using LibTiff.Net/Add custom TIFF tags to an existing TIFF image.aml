@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="f47d1201-0893-45dc-907e-2bbeb5e3cb0c" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to add custom TIFF tag to an existing TIFF image.</para>
+<para></para>
+<para>Custom tags are tags unknown to the library. However, they may be added to a file without problems. Special &quot;extender callback&quot; method should be used to instruct the library about format, names and other properties of such tags.</para>
+<para></para>
+<para>This sample shows how to create &quot;extender callback&quot; method, register that method with the library and use Tiff.MergeFieldInfo to merge description of GDAL Metadata tag with other tags description. GDAL Metadata tag is used as an example, you may add any other tags the same way.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class AddCustomTagsToExistingTiff
+    {
+        private const TiffTag TIFFTAG_GDAL_METADATA = (TiffTag)42112;
+
+        private static Tiff.TiffExtendProc m_parentExtender;
+
+        public static void TagExtender(Tiff tif)
+        {
+            TiffFieldInfo[] tiffFieldInfo = 
+            {
+                new TiffFieldInfo(TIFFTAG_GDAL_METADATA, -1, -1, TiffType.ASCII,
+                    FieldBit.Custom, true, false, &quot;GDALMetadata&quot;),
+            };
+
+            tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
+
+            if (m_parentExtender != null)
+                m_parentExtender(tif);
+        }
+
+        public static void Main()
+        {
+            // Register the extender callback
+            // It's a good idea to keep track of the previous tag extender (if any) so that we can call it
+            // from our extender allowing a chain of customizations to take effect.
+            m_parentExtender = Tiff.SetTagExtender(TagExtender);
+
+            File.Copy(@&quot;Sample Data\dummy.tif&quot;, @&quot;Sample Data\ToBeModifed.tif&quot;, true);
+
+            string existingTiffName = @&quot;Sample Data\ToBeModifed.tif&quot;;
+            using (Tiff image = Tiff.Open(existingTiffName, &quot;a&quot;))
+            {
+                // we should rewind to first directory (first image) because of append mode
+                image.SetDirectory(0);
+
+                // set the custom tag 
+                string value = &quot;&lt;GDALMetadata&gt;\n&lt;Item name=\&quot;IMG_GUID\&quot;&gt;&quot; + 
+                    &quot;817C0168-0688-45CD-B799-CF8C4DE9AB2B&lt;/Item&gt;\n&lt;Item&quot; + 
+                    &quot; name=\&quot;LAYER_TYPE\&quot; sample=\&quot;0\&quot;&gt;athematic&lt;/Item&gt;\n&lt;/GDALMetadata&gt;&quot;;
+                image.SetField(TIFFTAG_GDAL_METADATA, value);
+
+                // rewrites directory saving new tag
+                image.CheckpointDirectory();
+            }
+
+            // restore previous tag extender
+            Tiff.SetTagExtender(m_parentExtender);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class AddCustomTagsToExistingTiff
+        Private Sub New()
+        End Sub
+        Private Const TIFFTAG_GDAL_METADATA As TiffTag = DirectCast(42112, TiffTag)
+
+        Private Shared m_parentExtender As Tiff.TiffExtendProc
+
+        Public Shared Sub TagExtender(tif As Tiff)
+            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_GDAL_METADATA, -1, -1, TiffType.ASCII, FieldBit.[Custom], True, _
+             False, &quot;GDALMetadata&quot;)}
+
+            tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length)
+
+            If m_parentExtender IsNot Nothing Then
+                m_parentExtender.Invoke(tif)
+            End If
+        End Sub
+
+        Public Shared Sub Main()
+            ' Register the extender callback
+            ' It's a good idea to keep track of the previous tag extender (if any) so that we can call it
+            ' from our extender allowing a chain of customizations to take effect.
+            m_parentExtender = Tiff.SetTagExtender(AddressOf TagExtender)
+
+            File.Copy(&quot;Sample Data\dummy.tif&quot;, &quot;Sample Data\ToBeModifed.tif&quot;, True)
+
+            Dim existingTiffName As String = &quot;Sample Data\ToBeModifed.tif&quot;
+            Using image As Tiff = Tiff.Open(existingTiffName, &quot;a&quot;)
+                ' we should rewind to first directory (first image) because of append mode
+                image.SetDirectory(0)
+
+                ' set the custom tag 
+                Dim value As String = &quot;&lt;GDALMetadata&gt;&quot; &amp; vbLf &amp; &quot;&lt;Item name=&quot;&quot;IMG_GUID&quot;&quot;&gt;&quot; &amp; &quot;817C0168-0688-45CD-B799-CF8C4DE9AB2B&lt;/Item&gt;&quot; &amp; vbLf &amp; &quot;&lt;Item&quot; &amp; &quot; name=&quot;&quot;LAYER_TYPE&quot;&quot; sample=&quot;&quot;0&quot;&quot;&gt;athematic&lt;/Item&gt;&quot; &amp; vbLf &amp; &quot;&lt;/GDALMetadata&gt;&quot;
+                image.SetField(TIFFTAG_GDAL_METADATA, value)
+
+                ' rewrites directory saving new tag
+                image.CheckpointDirectory()
+            End Using
+
+            ' restore previous tag extender
+            Tiff.SetTagExtender(m_parentExtender)
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="79c178e6-79a9-42df-b04a-c2b1f6b67595" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to use a custom TiffStream to read and write TIFF images.</para>
+<para></para>
+<para>Sometimes you may want to read or write TIFF images stored in an unusial places like byte buffers.</para>
+<para>In such cases a custom TiffStream and ClientOpen method may help you.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class UsingCustomTiffStream
+    {
+        static void Main(string[] args)
+        {
+            MyStream stream = new MyStream();
+
+            // Open the TIFF image for reading
+            using (Tiff image = Tiff.ClientOpen(&quot;custom&quot;, &quot;r&quot;, null, stream))
+            {
+                if (image == null)
+                    return;
+
+                // Read image data here the same way
+                // as if LibTiff.Net was using regular image file
+                image.Close();
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Custom stream for LibTiff.Net.
+        /// Please consult documentation for TiffStream class for method parameters meaning.
+        /// &lt;/summary&gt;
+        class MyStream : TiffStream
+        {
+            // You may implement any constructor you want here.
+
+            public override int Read(object clientData, byte[] buffer, int offset, int count)
+            {
+                // stub implementation
+                return -1;
+            }
+
+            public override void Write(object clientData, byte[] buffer, int offset, int count)
+            {
+                // stub implementation
+            }
+
+            public override long Seek(object clientData, long offset, System.IO.SeekOrigin whence)
+            {
+                // stub implementation
+                return -1;
+            }
+
+            public override void Close(object clientData)
+            {
+                // stub implementation
+            }
+
+            public override long Size(object clientData)
+            {
+                // stub implementation
+                return -1;
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class UsingCustomTiffStream
+        Public Shared Sub Main()
+            Dim stream As New MyStream()
+
+            ' Open the TIFF image for reading
+            Using image As Tiff = Tiff.ClientOpen(&quot;custom&quot;, &quot;r&quot;, Nothing, stream)
+                If image Is Nothing Then
+                    Return
+                End If
+
+                ' Read image data here the same way
+                ' as if LibTiff.Net was using regular image file
+                image.Close()
+            End Using
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' Custom stream for LibTiff.Net.
+        ''' Please consult documentation for TiffStream class for method parameters meaning.
+        ''' &lt;/summary&gt;
+        Private Class MyStream
+            Inherits TiffStream
+            ' You may implement any constructor you want here.
+
+            Public Overrides Function Read(clientData As Object, buffer As Byte(), offset As Integer, count As Integer) As Integer
+                ' stub implementation
+                Return -1
+            End Function
+
+            Public Overrides Sub Write(clientData As Object, buffer As Byte(), offset As Integer, count As Integer)
+                ' stub implementation
+            End Sub
+
+            Public Overrides Function Seek(clientData As Object, offset As Long, whence As System.IO.SeekOrigin) As Long
+                ' stub implementation
+                Return -1
+            End Function
+
+            Public Overrides Sub Close(clientData As Object)
+                ' stub implementation
+            End Sub
+
+            Public Overrides Function Size(clientData As Object) As Long
+                ' stub implementation
+                Return -1
+            End Function
+        End Class
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

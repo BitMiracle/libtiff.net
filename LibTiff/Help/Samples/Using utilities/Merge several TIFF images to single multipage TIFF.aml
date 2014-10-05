@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="0664189f-7442-4bef-8f2f-1ee6ce82cd87" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to merge several TIFF images to one multipage TIFF image.</para>
+<para></para>
+<para>LibTiff.Net ships with TiffCP utility designed to make a lot of operations with TIFF images. It can merge several TIFF images, extract some pages from a multipage TIFF image, compress/decompress TIFF images and so on.</para>
+<para></para>
+<para>This sample shows how to use TiffCP from your code. You can also use this utility from command line.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+
+using BitMiracle;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class MergeTiffImages
+    {
+        public static void Main()
+        {
+            string[] arguments = 
+            {
+                @&quot;Sample Data\bitonal.tif&quot;,
+                @&quot;Sample Data\marbles.tif&quot;,
+                &quot;MergeTiffImages.tif&quot;
+            };
+            TiffCP.Program.Main(arguments);
+
+            Process.Start(&quot;MergeTiffImages.tif&quot;);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+
+Imports BitMiracle
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class MergeTiffImages
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Dim arguments As String() = {&quot;Sample Data\bitonal.tif&quot;, &quot;Sample Data\marbles.tif&quot;, &quot;MergeTiffImages.tif&quot;}
+            TiffCP.Program.Main(arguments)
+
+            Process.Start(&quot;MergeTiffImages.tif&quot;)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

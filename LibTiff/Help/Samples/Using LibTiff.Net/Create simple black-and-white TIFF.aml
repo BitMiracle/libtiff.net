@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="99e4ca6d-023c-430a-9ef0-e25c27dd42cf" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to create simple black and white TIFF image.</para>
+<para></para>
+<para>To create a TIFF file you should create Tiff object using Tiff.Open method, then set necessary properties like width, height, resolution, etc. and then fill image contents using one of the Tiff.Write* methods.</para>
+<para></para>
+<para>This sample shows how to create bitonal image with randomly generated samples (pixels) using Tiff.WriteScanline method.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class WriteBlackWhiteTiff
+    {
+        public static void Main()
+        {
+            const int width = 100;
+            const int height = 150;
+            const string fileName = &quot;WriteBlackWhiteTiff.tif&quot;;
+
+            using (Tiff output = Tiff.Open(fileName, &quot;w&quot;))
+            {
+                output.SetField(TiffTag.IMAGEWIDTH, width);
+                output.SetField(TiffTag.IMAGELENGTH, height);
+                output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                output.SetField(TiffTag.BITSPERSAMPLE, 8);
+                output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT);
+                output.SetField(TiffTag.ROWSPERSTRIP, height);
+                output.SetField(TiffTag.XRESOLUTION, 88.0);
+                output.SetField(TiffTag.YRESOLUTION, 88.0);
+                output.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.INCH);
+                output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+                output.SetField(TiffTag.COMPRESSION, Compression.NONE);
+                output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+
+                Random random = new Random();
+                for (int i = 0; i &lt; height; ++i)
+                {
+                    byte[] buf = new byte[width];
+                    for (int j = 0; j &lt; width; ++j)
+                        buf[j] = (byte)random.Next(255);
+
+                    output.WriteScanline(buf, i);
+                }
+            }
+
+            Process.Start(fileName);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class WriteBlackWhiteTiff
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Const width As Integer = 100
+            Const height As Integer = 150
+            Const fileName As String = &quot;WriteBlackWhiteTiff.tif&quot;
+
+            Using output As Tiff = Tiff.Open(fileName, &quot;w&quot;)
+                output.SetField(TiffTag.IMAGEWIDTH, width)
+                output.SetField(TiffTag.IMAGELENGTH, height)
+                output.SetField(TiffTag.SAMPLESPERPIXEL, 1)
+                output.SetField(TiffTag.BITSPERSAMPLE, 8)
+                output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT)
+                output.SetField(TiffTag.ROWSPERSTRIP, height)
+                output.SetField(TiffTag.XRESOLUTION, 88.0)
+                output.SetField(TiffTag.YRESOLUTION, 88.0)
+                output.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.INCH)
+                output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+                output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK)
+                output.SetField(TiffTag.COMPRESSION, Compression.NONE)
+                output.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB)
+
+                Dim random As New Random()
+                For i As Integer = 0 To height - 1
+                    Dim buf As Byte() = New Byte(width - 1) {}
+                    For j As Integer = 0 To width - 1
+                        buf(j) = CByte(random.[Next](255))
+                    Next
+
+                    output.WriteScanline(buf, i)
+                Next
+            End Using
+
+            Process.Start(fileName)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

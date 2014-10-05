@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="336d22bb-109b-41cf-9cce-8acc43f43b3b" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to get the number of pages in TIFF image.</para>
+<para></para>
+<para>To calculate number of pages in a TIFF image the Tiff.NumberOfDirectories() method or a simple loop that traverses directories can be used. This sample shows both methods.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Text;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class NumberOfPages
+    {
+        public static void Main()
+        {
+            const string fileName = &quot;Sample Data/multipage.tif&quot;;
+
+            using (Tiff image = Tiff.Open(fileName, &quot;r&quot;))
+            {
+                if (image == null)
+                {
+                    MessageBox.Show(&quot;Could not open incoming image&quot;);
+                    return;
+                }
+
+                StringBuilder message = new StringBuilder();
+                message.AppendFormat(&quot;Tiff.NumberOfDirectories() returns {0} pages\n&quot;, image.NumberOfDirectories());
+                message.AppendFormat(&quot;Enumerated {0} pages&quot;, CalculatePageNumber(image));
+                
+                MessageBox.Show(message.ToString());
+            }
+        }
+
+        private static int CalculatePageNumber(Tiff image)
+        {
+            int pageCount = 0;
+            do
+            {
+                ++pageCount;
+            } while (image.ReadDirectory());
+
+            return pageCount;
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports Microsoft.VisualBasic
+Imports System
+Imports System.Text
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class NumberOfPages
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Const fileName As String = &quot;Sample Data/multipage.tif&quot;
+
+            Using image As Tiff = Tiff.Open(fileName, &quot;r&quot;)
+                If image Is Nothing Then
+                    MessageBox.Show(&quot;Could not open incoming image&quot;)
+                    Return
+                End If
+
+                Dim message As New StringBuilder()
+                message.AppendFormat(&quot;Tiff.NumberOfDirectories() returns {0} pages&quot; &amp; vbCrLf, image.NumberOfDirectories())
+                message.AppendFormat(&quot;Enumerated {0} pages&quot;, CalculatePageNumber(image))
+
+                MessageBox.Show(message.ToString())
+            End Using
+        End Sub
+
+        Private Shared Function CalculatePageNumber(ByVal image As Tiff) As Integer
+            Dim pageCount As Integer = 0
+            Do
+                pageCount += 1
+            Loop While image.ReadDirectory()
+
+            Return pageCount
+        End Function
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

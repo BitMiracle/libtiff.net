@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="4821a437-c9e1-4206-bfee-e19f33ce7943" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to create TIFF image with colormap (palette).</para>
+<para></para>
+<para>In this sample we use palette containing 256 colors. Please note that a TIFF palette may contain more than 256 colors.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class TiffWithColorMap
+    {
+        public static void Main()
+        {
+            const int numberOfColors = 256;
+            const int width = 32;
+            const int height = 100;
+            const int samplesPerPixel = 1;
+            const int bitsPerSample = 8;
+            const string fileName = &quot;TiffWithColorMap.tif&quot;;
+
+            using (Tiff output = Tiff.Open(fileName, &quot;w&quot;))
+            {
+                output.SetField(TiffTag.IMAGEWIDTH, width / samplesPerPixel);
+                output.SetField(TiffTag.SAMPLESPERPIXEL, samplesPerPixel);
+                output.SetField(TiffTag.BITSPERSAMPLE, bitsPerSample);
+                output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT);
+                output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                output.SetField(TiffTag.PHOTOMETRIC, Photometric.PALETTE);
+                output.SetField(TiffTag.ROWSPERSTRIP, output.DefaultStripSize(0));
+
+                // it is good idea to specify resolution too (but it is not necessary)
+                output.SetField(TiffTag.XRESOLUTION, 100.0);
+                output.SetField(TiffTag.YRESOLUTION, 100.0);
+                output.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.INCH);
+
+                // compression is optional
+                output.SetField(TiffTag.COMPRESSION, Compression.ADOBE_DEFLATE);
+
+                // fill color tables
+                ushort[] redTable = new ushort[1 &lt;&lt; bitsPerSample];
+                ushort[] greenTable = new ushort[1 &lt;&lt; bitsPerSample];
+                ushort[] blueTable = new ushort[1 &lt;&lt; bitsPerSample];
+                for (int i = 0; i &lt; numberOfColors; ++i)
+                {
+                    redTable[i] = (ushort)(100 * i);
+                    greenTable[i] = (ushort)(150 * i);
+                    blueTable[i] = (ushort)(200 * i);
+                }
+                output.SetField(TiffTag.COLORMAP, redTable, greenTable, blueTable);
+
+                // fill samples array
+                byte[][] buffer = new byte[height][];
+                for (int j = 0; j &lt; height; j++)
+                {
+                    buffer[j] = new byte[width];
+                    for (int i = 0; i &lt; width; i++)
+                        buffer[j][i] = (byte)(j * width + i);
+                }
+            
+                for (int j = 0; j &lt; height; ++j)
+                    output.WriteScanline(buffer[j], j);
+            }
+
+            Process.Start(fileName);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Diagnostics
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class TiffWithColorMap
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Const numberOfColors As Integer = 256
+            Const width As Integer = 32
+            Const height As Integer = 100
+            Const samplesPerPixel As Integer = 1
+            Const bitsPerSample As Integer = 8
+            Const fileName As String = &quot;TiffWithColorMap.tif&quot;
+
+            Using output As Tiff = Tiff.Open(fileName, &quot;w&quot;)
+                output.SetField(TiffTag.IMAGEWIDTH, width / samplesPerPixel)
+                output.SetField(TiffTag.SAMPLESPERPIXEL, samplesPerPixel)
+                output.SetField(TiffTag.BITSPERSAMPLE, bitsPerSample)
+                output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT)
+                output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+                output.SetField(TiffTag.PHOTOMETRIC, Photometric.PALETTE)
+                output.SetField(TiffTag.ROWSPERSTRIP, output.DefaultStripSize(0))
+
+                ' it is good idea to specify resolution too (but it is not necessary)
+                output.SetField(TiffTag.XRESOLUTION, 100.0)
+                output.SetField(TiffTag.YRESOLUTION, 100.0)
+                output.SetField(TiffTag.RESOLUTIONUNIT, ResUnit.INCH)
+
+                ' compression is optional
+                output.SetField(TiffTag.COMPRESSION, Compression.ADOBE_DEFLATE)
+
+                ' fill color tables
+                Dim redTable As UShort() = New UShort((1 &lt;&lt; bitsPerSample) - 1) {}
+                Dim greenTable As UShort() = New UShort((1 &lt;&lt; bitsPerSample) - 1) {}
+                Dim blueTable As UShort() = New UShort((1 &lt;&lt; bitsPerSample) - 1) {}
+                For i As Integer = 0 To numberOfColors - 1
+                    redTable(i) = CUShort(100 * i)
+                    greenTable(i) = CUShort(150 * i)
+                    blueTable(i) = CUShort(200 * i)
+                Next
+                output.SetField(TiffTag.COLORMAP, redTable, greenTable, blueTable)
+
+                ' fill samples array
+                Dim buffer As Byte()() = New Byte(height - 1)() {}
+                For j As Integer = 0 To height - 1
+                    buffer(j) = New Byte(width - 1) {}
+                    For i As Integer = 0 To width - 1
+                        buffer(j)(i) = (j * width + i) Mod 256
+                    Next
+                Next
+
+                For j As Integer = 0 To height - 1
+                    output.WriteScanline(buffer(j), j)
+                Next
+            End Using
+
+            Process.Start(fileName)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

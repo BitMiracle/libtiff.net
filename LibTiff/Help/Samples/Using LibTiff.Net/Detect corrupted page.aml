@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="9adabd62-5bd5-45f9-ab3e-5394fb59b8d5" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to check whether a TIFF page is corrupted.</para>
+<para></para>
+<para>Note that the last parameter for Tiff.ReadRGBAImage method is set to &quot;true&quot;.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class DetermineCorruptPage
+    {
+        public static void Main()
+        {
+            using (Tiff image = Tiff.Open(@&quot;Sample Data\127.tif&quot;, &quot;r&quot;))
+            {
+                if (image == null)
+                {
+                    MessageBox.Show(&quot;Could not load incoming image&quot;);
+                    return;
+                }
+
+                int numberOfDirectories = image.NumberOfDirectories();
+                for (int i = 0; i &lt; numberOfDirectories; ++i)
+                {
+                    image.SetDirectory((short)i);
+
+                    int width = image.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
+                    int height = image.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+
+                    int imageSize = height * width;
+                    int[] raster = new int[imageSize];
+
+                    if (!image.ReadRGBAImage(width, height, raster, true))
+                    {
+                        MessageBox.Show(&quot;Page &quot; + i + &quot; is corrupted&quot;);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+    </code>
+<code language="vb">
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class DetermineCorruptPage
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using image As Tiff = Tiff.Open(&quot;Sample Data\127.tif&quot;, &quot;r&quot;)
+                If image Is Nothing Then
+                    MessageBox.Show(&quot;Could not load incoming image&quot;)
+                    Return
+                End If
+
+                Dim numberOfDirectories As Integer = image.NumberOfDirectories()
+                For i As Integer = 0 To numberOfDirectories - 1
+                    image.SetDirectory(CShort(i))
+
+                    Dim width As Integer = image.GetField(TiffTag.IMAGEWIDTH)(0).ToInt()
+                    Dim height As Integer = image.GetField(TiffTag.IMAGELENGTH)(0).ToInt()
+
+                    Dim imageSize As Integer = height * width
+                    Dim raster As Integer() = New Integer(imageSize) {}
+
+                    If Not image.ReadRGBAImage(width, height, raster, True) Then
+                        MessageBox.Show(&quot;Page &quot; + i.ToString() + &quot; is corrupted&quot;)
+                        Return
+                    End If
+                Next
+            End Using
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

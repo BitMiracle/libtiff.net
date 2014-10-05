@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="90904127-73c2-4c17-99e4-1d5d94f4315f" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to use a System.IO.Stream to read and write TIFF images.</para>
+<para></para>
+<para>Sometimes you may want to read or write TIFF images stored in an unusial places like byte buffers, database BLOBs etc.</para>
+<para>In such cases a System.IO.Stream and ClientOpen method may help you.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class UsingSystemIOStream
+    {
+        public static void Main()
+        {
+            // read bytes of an image
+            byte[] buffer = File.ReadAllBytes(@&quot;Sample Data\pc260001.tif&quot;);
+
+            // create a memory stream out of them
+            MemoryStream ms = new MemoryStream(buffer);
+
+            // open a Tiff stored in the memory stream
+            using (Tiff image = Tiff.ClientOpen(&quot;in-memory&quot;, &quot;r&quot;, ms, new TiffStream()))
+            {
+                FieldValue[] value = image.GetField(TiffTag.IMAGEWIDTH);
+                int width = value[0].ToInt();
+
+                value = image.GetField(TiffTag.IMAGELENGTH);
+                int height = value[0].ToInt();
+
+                value = image.GetField(TiffTag.XRESOLUTION);
+                float dpiX = value[0].ToFloat();
+
+                value = image.GetField(TiffTag.YRESOLUTION);
+                float dpiY = value[0].ToInt();
+
+                MessageBox.Show(string.Format(&quot;Width = {0}, Height = {1}, DPI = {2}x{3}&quot;,
+                    width, height, dpiX, dpiY), &quot;TIFF properties&quot;);
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class UsingSystemIOStream
+        Public Shared Sub Main()
+            ' read bytes of an image
+            Dim buffer As Byte() = File.ReadAllBytes(&quot;Sample Data\pc260001.tif&quot;)
+
+            ' create a memory stream out of them
+            Dim ms As New MemoryStream(buffer)
+
+            ' open a Tiff stored in the memory stream
+            Using image As Tiff = Tiff.ClientOpen(&quot;in-memory&quot;, &quot;r&quot;, ms, New TiffStream())
+                Dim value As FieldValue() = image.GetField(TiffTag.IMAGEWIDTH)
+                Dim width As Integer = value(0).ToInt()
+
+                value = image.GetField(TiffTag.IMAGELENGTH)
+                Dim height As Integer = value(0).ToInt()
+
+                value = image.GetField(TiffTag.XRESOLUTION)
+                Dim dpiX As Single = value(0).ToFloat()
+
+                value = image.GetField(TiffTag.YRESOLUTION)
+                Dim dpiY As Single = value(0).ToInt()
+
+                MessageBox.Show(String.Format(&quot;Width = {0}, Height = {1}, DPI = {2}x{3}&quot;, width, height, dpiX, dpiY), &quot;TIFF properties&quot;)
+            End Using
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

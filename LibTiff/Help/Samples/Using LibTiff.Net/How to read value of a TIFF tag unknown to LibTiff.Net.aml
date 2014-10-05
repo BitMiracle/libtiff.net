@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="c3397c64-c55d-4db2-8245-654d21555c15" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to read value of a TIFF tag that is not well-known to the library.</para>
+<para></para>
+<para>LibTiff.Net designed to read and write all well-known TIFF tags but once in a while you may face a TIFF file</para>
+<para>that has some data tagged with a tag unknown to the library. Don't worry, the library won't lose any data,</para>
+<para>the tag will be auto-registered and you'll be able to retrieve the data using GetField method.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ReadUnknownTagValue
+    {
+        public static void Main()
+        {
+            using (Tiff image = Tiff.Open(@&quot;Sample Data\pc260001.tif&quot;, &quot;r&quot;))
+            {
+                // read auto-registered tag 50341
+                FieldValue[] value = image.GetField((TiffTag)50341);
+                System.Console.Out.WriteLine(&quot;Tag value(s) are as follows:&quot;);
+                for (int i = 0; i &lt; value.Length; i++)
+                    System.Console.Out.WriteLine(&quot;{0} : {1}&quot;, i, value[i].ToString());
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ReadUnknownTagValue
+        Public Shared Sub Main()
+            Using image As Tiff = Tiff.Open(&quot;Sample Data\pc260001.tif&quot;, &quot;r&quot;)
+                ' read auto-registered tag 50341
+                Dim value As FieldValue() = image.GetField(DirectCast(50341, TiffTag))
+                System.Console.Out.WriteLine(&quot;Tag value(s) are as follows:&quot;)
+                For i As Integer = 0 To value.Length - 1
+                    System.Console.Out.WriteLine(&quot;{0} : {1}&quot;, i, value(i).ToString())
+                Next
+            End Using
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

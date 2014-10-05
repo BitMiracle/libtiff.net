@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="65159b6b-0f22-41a8-bbcf-fd1df1b2aa9e" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to split multipage TIFF image.</para>
+<para></para>
+<para>In this sample second page of multipage image gets extracted using TiffCP utility.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+
+using BitMiracle;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class SplitTiffImage
+    {
+        public static void Main()
+        {
+            string[] arguments =
+            {
+                @&quot;Sample Data\multipage.tif,1&quot;,
+                &quot;SplitTiffImage_2ndPage.tif&quot;
+            };
+            TiffCP.Program.Main(arguments);
+
+            Process.Start(&quot;SplitTiffImage_2ndPage.tif&quot;);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+
+Imports BitMiracle
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class SplitTiffImage
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Dim arguments As String() = {&quot;Sample Data\multipage.tif,1&quot;, &quot;SplitTiffImage_2ndPage.tif&quot;}
+            TiffCP.Program.Main(arguments)
+
+            Process.Start(&quot;SplitTiffImage_2ndPage.tif&quot;)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

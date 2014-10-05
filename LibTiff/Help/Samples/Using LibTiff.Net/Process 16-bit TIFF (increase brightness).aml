@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="91d736ff-8648-4c2f-a87a-9d8d215416b8" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to read 16-bit TIFF image and process its pixels (create brighter version of the image)</para>
+<para></para>
+<para>From this sample you can also learn how to pack bytes returned by ReadScanline method to 16-bit samples and</para>
+<para>how to unpack 16-bit samples into a byte buffer that can be used by WriteScanline method.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class Process16BitSamples
+    {
+        public static void Main()
+        {
+            using (Tiff tiff = Tiff.Open(@&quot;Sample Data\16bit-lzw.tif&quot;, &quot;r&quot;))
+            {
+                int width = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
+                int height = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+                double dpiX = tiff.GetField(TiffTag.XRESOLUTION)[0].ToDouble();
+                double dpiY = tiff.GetField(TiffTag.YRESOLUTION)[0].ToDouble();
+
+                byte[] scanline = new byte[tiff.ScanlineSize()];
+                ushort[] scanline16Bit = new ushort[tiff.ScanlineSize() / 2];
+
+                using (Tiff output = Tiff.Open(&quot;processed.tif&quot;, &quot;w&quot;))
+                {
+                    if (output == null)
+                        return;
+
+                    output.SetField(TiffTag.IMAGEWIDTH, width);
+                    output.SetField(TiffTag.IMAGELENGTH, height);
+                    output.SetField(TiffTag.BITSPERSAMPLE, 16);
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, 1);
+                    output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK);
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                    output.SetField(TiffTag.ROWSPERSTRIP, 1);
+                    output.SetField(TiffTag.COMPRESSION, Compression.LZW);
+
+                    for (int i = 0; i &lt; height; i++)
+                    {
+                        tiff.ReadScanline(scanline, i);
+                        MultiplyScanLineAs16BitSamples(scanline, scanline16Bit, 16);
+                        output.WriteScanline(scanline, i);
+                    }
+                }
+
+                Process.Start(&quot;processed.tif&quot;);
+            }
+        }
+
+        private static void MultiplyScanLineAs16BitSamples(byte[] scanline, ushort[] temp, ushort factor)
+        {
+            if (scanline.Length % 2 != 0)
+            {
+                // each two bytes define one sample so there should be even number of bytes
+                throw new ArgumentException();
+            }
+
+            // pack all bytes to ushorts
+            Buffer.BlockCopy(scanline, 0, temp, 0, scanline.Length);
+
+            for (int i = 0; i &lt; temp.Length; i++)
+                temp[i] *= factor;
+
+            // unpack all ushorts to bytes
+            Buffer.BlockCopy(temp, 0, scanline, 0, scanline.Length);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class Process16BitSamples
+        Public Shared Sub Main()
+            Using tif As Tiff = Tiff.Open(&quot;Sample Data\16bit-lzw.tif&quot;, &quot;r&quot;)
+                Dim width As Integer = tif.GetField(TiffTag.IMAGEWIDTH)(0).ToInt()
+                Dim height As Integer = tif.GetField(TiffTag.IMAGELENGTH)(0).ToInt()
+                Dim dpiX As Double = tif.GetField(TiffTag.XRESOLUTION)(0).ToDouble()
+                Dim dpiY As Double = tif.GetField(TiffTag.YRESOLUTION)(0).ToDouble()
+
+                Dim scanline As Byte() = New Byte(tif.ScanlineSize() - 1) {}
+                Dim scanline16Bit As UShort() = New UShort(tif.ScanlineSize() / 2 - 1) {}
+
+                Using output As Tiff = Tiff.Open(&quot;processed.tif&quot;, &quot;w&quot;)
+                    If output Is Nothing Then
+                        Return
+                    End If
+
+                    output.SetField(TiffTag.IMAGEWIDTH, width)
+                    output.SetField(TiffTag.IMAGELENGTH, height)
+                    output.SetField(TiffTag.BITSPERSAMPLE, 16)
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, 1)
+                    output.SetField(TiffTag.PHOTOMETRIC, Photometric.MINISBLACK)
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+                    output.SetField(TiffTag.ROWSPERSTRIP, 1)
+                    output.SetField(TiffTag.COMPRESSION, Compression.LZW)
+
+                    For i As Integer = 0 To height - 1
+                        tif.ReadScanline(scanline, i)
+                        MultiplyScanLineAs16BitSamples(scanline, scanline16Bit, 16)
+                        output.WriteScanline(scanline, i)
+                    Next
+                End Using
+
+                Process.Start(&quot;processed.tif&quot;)
+            End Using
+        End Sub
+
+        Private Shared Sub MultiplyScanLineAs16BitSamples(scanline As Byte(), temp As UShort(), factor As UShort)
+            If scanline.Length Mod 2 &lt;&gt; 0 Then
+                ' each two bytes define one sample so there should be even number of bytes
+                Throw New ArgumentException()
+            End If
+
+            ' pack all bytes to ushorts
+            Buffer.BlockCopy(scanline, 0, temp, 0, scanline.Length)
+
+            For i As Integer = 0 To temp.Length - 1
+                temp(i) *= factor
+            Next
+
+            ' unpack all ushorts to bytes
+            Buffer.BlockCopy(temp, 0, scanline, 0, scanline.Length)
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

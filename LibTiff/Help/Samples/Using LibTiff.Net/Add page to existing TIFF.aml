@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="e5eb36a8-7150-41dd-8785-f8784a94c214" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to add new page to existing TIFF.</para>
+<para></para>
+<para>In this sample we open existing TIFF and add new page to it. The page contents is the page number.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class AddPageToTiff
+    {
+        public static void Main()
+        {
+            File.Copy(@&quot;Sample Data\16bit.tif&quot;, @&quot;Sample Data\ToBeAppended.tif&quot;, true);
+
+            using (Tiff image = Tiff.Open(@&quot;Sample Data\ToBeAppended.tif&quot;, &quot;a&quot;))
+            {
+                int newPageNumber = image.NumberOfDirectories() + 1;
+                const int width = 100;
+                const int height = 100;
+
+                image.SetField(TiffTag.IMAGEWIDTH, width);
+                image.SetField(TiffTag.IMAGELENGTH, height);
+                image.SetField(TiffTag.BITSPERSAMPLE, 8);
+                image.SetField(TiffTag.SAMPLESPERPIXEL, 3);
+                image.SetField(TiffTag.ROWSPERSTRIP, height);
+
+                image.SetField(TiffTag.COMPRESSION, Compression.LZW);
+                image.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
+                image.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB);
+                image.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+                byte[] buffer = null;
+                using (Bitmap bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb))
+                {
+                    using (Graphics g = Graphics.FromImage(bmp))
+                    {
+                        g.FillRectangle(Brushes.White, g.VisibleClipBounds);
+                        string s = newPageNumber.ToString();
+                        Font f = SystemFonts.DefaultFont;
+
+                        SizeF size = g.MeasureString(s, f);
+                        PointF loc = new PointF(Math.Max((bmp.Width - size.Width) / 2, 0), Math.Max((bmp.Height - size.Height) / 2, 0));
+                        g.DrawString(s, f, Brushes.Black, loc);
+
+                        buffer = getImageRasterBytes(bmp, PixelFormat.Format24bppRgb);
+                    }
+                }
+
+                int stride = buffer.Length / height;
+                convertRGBSamples(buffer, width, height);
+
+                for (int i = 0, offset = 0; i &lt; height; i++)
+                {
+                    image.WriteScanline(buffer, offset, i, 0);
+                    offset += stride;
+                }
+            }
+
+            Process.Start(@&quot;Sample Data\ToBeAppended.tif&quot;);
+        }
+
+        private static byte[] getImageRasterBytes(Bitmap bmp, PixelFormat format)
+        {
+            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            byte[] bits = null;
+
+            try
+            {
+                // Lock the managed memory
+                BitmapData bmpdata = bmp.LockBits(rect, ImageLockMode.ReadWrite, format);
+
+                // Declare an array to hold the bytes of the bitmap.
+                bits = new byte[bmpdata.Stride * bmpdata.Height];
+
+                // Copy the values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(bmpdata.Scan0, bits, 0, bits.Length);
+
+                // Release managed memory
+                bmp.UnlockBits(bmpdata);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return bits;
+        }
+
+        /// &lt;summary&gt;
+        /// Converts BGR samples into RGB samples
+        /// &lt;/summary&gt;
+        private static void convertRGBSamples(byte[] data, int width, int height)
+        {
+            int stride = data.Length / height;
+            const int samplesPerPixel = 3;
+
+            for (int y = 0; y &lt; height; y++)
+            {
+                int offset = stride * y;
+                int strideEnd = offset + width * samplesPerPixel;
+
+                for (int i = offset; i &lt; strideEnd; i += samplesPerPixel)
+                {
+                    byte temp = data[i + 2];
+                    data[i + 2] = data[i];
+                    data[i] = temp;
+                }
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.Drawing.Imaging
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class AddPageToTiff
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            File.Copy(&quot;Sample Data\16bit.tif&quot;, &quot;Sample Data\ToBeAppended.tif&quot;, True)
+
+            Using image As Tiff = Tiff.Open(&quot;Sample Data\ToBeAppended.tif&quot;, &quot;a&quot;)
+                Dim newPageNumber As Integer = image.NumberOfDirectories() + 1
+                Const width As Integer = 100
+                Const height As Integer = 100
+
+                image.SetField(TiffTag.IMAGEWIDTH, width)
+                image.SetField(TiffTag.IMAGELENGTH, height)
+                image.SetField(TiffTag.BITSPERSAMPLE, 8)
+                image.SetField(TiffTag.SAMPLESPERPIXEL, 3)
+                image.SetField(TiffTag.ROWSPERSTRIP, height)
+
+                image.SetField(TiffTag.COMPRESSION, Compression.LZW)
+                image.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB)
+                image.SetField(TiffTag.FILLORDER, FillOrder.MSB2LSB)
+                image.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+
+                Dim buffer As Byte() = Nothing
+                Using bmp As New Bitmap(width, height, PixelFormat.Format24bppRgb)
+                    Using g As Graphics = Graphics.FromImage(bmp)
+                        g.FillRectangle(Brushes.White, g.VisibleClipBounds)
+                        Dim s As String = newPageNumber.ToString()
+                        Dim f As Font = SystemFonts.DefaultFont
+
+                        Dim size As SizeF = g.MeasureString(s, f)
+                        Dim loc As New PointF(Math.Max((bmp.Width - size.Width) / 2, 0), Math.Max((bmp.Height - size.Height) / 2, 0))
+                        g.DrawString(s, f, Brushes.Black, loc)
+
+                        buffer = getImageRasterBytes(bmp, PixelFormat.Format24bppRgb)
+                    End Using
+                End Using
+
+                Dim stride As Integer = buffer.Length \ height
+                convertRGBSamples(buffer, width, height)
+
+                Dim i As Integer = 0, offset As Integer = 0
+                While i &lt; height
+                    image.WriteScanline(buffer, offset, i, 0)
+                    offset += stride
+                    i += 1
+                End While
+            End Using
+
+            Process.Start(&quot;Sample Data\ToBeAppended.tif&quot;)
+        End Sub
+
+        Private Shared Function getImageRasterBytes(ByVal bmp As Bitmap, ByVal format As PixelFormat) As Byte()
+            Dim rect As New Rectangle(0, 0, bmp.Width, bmp.Height)
+            Dim bits As Byte() = Nothing
+
+            Try
+                ' Lock the managed memory
+                Dim bmpdata As BitmapData = bmp.LockBits(rect, ImageLockMode.ReadWrite, format)
+
+                ' Declare an array to hold the bytes of the bitmap.
+                bits = New Byte(bmpdata.Stride * bmpdata.Height - 1) {}
+
+                ' Copy the values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(bmpdata.Scan0, bits, 0, bits.Length)
+
+                ' Release managed memory
+                bmp.UnlockBits(bmpdata)
+            Catch
+                Return Nothing
+            End Try
+
+            Return bits
+        End Function
+
+        ''' &lt;summary&gt;
+        ''' Converts BGR samples into RGB samples
+        ''' &lt;/summary&gt;
+        Private Shared Sub convertRGBSamples(ByVal data As Byte(), ByVal width As Integer, ByVal height As Integer)
+            Dim stride As Integer = data.Length \ height
+            Const samplesPerPixel As Integer = 3
+
+            For y As Integer = 0 To height - 1
+                Dim offset As Integer = stride * y
+                Dim strideEnd As Integer = offset + width * samplesPerPixel
+
+                Dim i As Integer = offset
+                While i &lt; strideEnd
+                    Dim temp As Byte = data(i + 2)
+                    data(i + 2) = data(i)
+                    data(i) = temp
+                    i += samplesPerPixel
+                End While
+            Next
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

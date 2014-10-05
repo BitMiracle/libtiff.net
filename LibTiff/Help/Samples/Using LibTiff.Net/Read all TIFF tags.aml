@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="01d0b300-5deb-4e14-a534-c1a91fac0c2a" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to enumerate all tags that are set in a TIFF image.</para>
+<para></para>
+<para>Basic idea is to use Tiff.GetField method with all possible input values in a loop and check for non-null return value.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+using System.IO;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class EnumerateTiffTags
+    {
+        public static void Main()
+        {
+            const string fileName = @&quot;Sample data\multipage.tif&quot;;
+
+            using (Tiff image = Tiff.Open(fileName, &quot;r&quot;))
+            {
+                if (image == null)
+                {
+                    MessageBox.Show(&quot;Could not open incoming image&quot;);
+                    return;
+                }
+
+                using (StreamWriter writer = new StreamWriter(&quot;EnumerateTiffTags.txt&quot;))
+                {
+                    short numberOfDirectories = image.NumberOfDirectories();
+                    for (short d = 0; d &lt; numberOfDirectories; ++d)
+                    {
+                        if (d != 0)
+                            writer.WriteLine(&quot;---------------------------------&quot;);
+
+                        image.SetDirectory((short)d);
+
+                        writer.WriteLine(&quot;Image {0}, page {1} has following tags set:\n&quot;, fileName, d);
+                        for (ushort t = ushort.MinValue; t &lt; ushort.MaxValue; ++t)
+                        {
+                            TiffTag tag = (TiffTag)t;
+                            FieldValue[] value = image.GetField(tag);
+                            if (value != null)
+                            {
+                                for (int j = 0; j &lt; value.Length; j++)
+                                {
+                                    writer.WriteLine(&quot;{0}&quot;, tag.ToString());
+                                    writer.WriteLine(&quot;{0} : {1}&quot;, value[j].Value.GetType().ToString(), value[j].ToString());
+                                }
+
+                                writer.WriteLine();
+                            }
+                        }
+                    }
+                }
+            }
+
+            Process.Start(&quot;EnumerateTiffTags.txt&quot;);
+        }
+    }
+}
+    </code>
+<code language="vb">
+Imports Microsoft.VisualBasic
+Imports System.Diagnostics
+Imports System.IO
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class EnumerateTiffTags
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Const fileName As String = &quot;Sample data\multipage.tif&quot;
+
+            Using image As Tiff = Tiff.Open(fileName, &quot;r&quot;)
+                If image Is Nothing Then
+                    MessageBox.Show(&quot;Could not open incoming image&quot;)
+                    Return
+                End If
+
+                Using writer As New StreamWriter(&quot;EnumerateTiffTags.txt&quot;)
+                    Dim numberOfDirectories As Short = image.NumberOfDirectories()
+                    For d As Short = 0 To numberOfDirectories - 1
+                        If d &lt;&gt; 0 Then
+                            writer.WriteLine(&quot;---------------------------------&quot;)
+                        End If
+
+                        image.SetDirectory(CShort(d))
+
+                        writer.WriteLine(&quot;Image {0}, page {1} has following tags set:&quot; &amp; vbCrLf, fileName, d)
+                        For t As Integer = 0 To 65535
+                            Dim tag As TiffTag = DirectCast(t, TiffTag)
+                            Dim value As FieldValue() = image.GetField(tag)
+                            If value IsNot Nothing Then
+                                For j As Integer = 0 To value.Length - 1
+                                    writer.WriteLine(&quot;{0}&quot;, tag.ToString())
+                                    writer.WriteLine(&quot;{0} : {1}&quot;, value(j).Value.[GetType]().ToString(), value(j).ToString())
+                                Next
+
+                                writer.WriteLine()
+                            End If
+                        Next
+                    Next
+                End Using
+            End Using
+
+            Process.Start(&quot;EnumerateTiffTags.txt&quot;)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

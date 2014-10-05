@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="a4e19121-9974-4755-83f1-d4d8b09f5ecf" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to convert any non-tiled TIFF image to the TIFF image which have all data written in a single strip using custom TiffStream and System.IO.MemoryStream.</para>
+<para>Input image is read from byte buffer (via custom TiffStream) and output image is written in System.IO.MemoryStream.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Windows.Forms;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ConvertToSingleStripInMemory
+    {
+        public static void Main()
+        {
+            byte[] inputBytes = File.ReadAllBytes(@&quot;Sample Data\multipage.tif&quot;);
+            TiffStreamForBytes byteStream = new TiffStreamForBytes(inputBytes);
+
+            using (Tiff input = Tiff.ClientOpen(&quot;bytes&quot;, &quot;r&quot;, null, byteStream))
+            {
+                if (input == null)
+                {
+                    MessageBox.Show(&quot;Could not open incoming image&quot;);
+                    return;
+                }
+
+                if (input.IsTiled())
+                {
+                    MessageBox.Show(&quot;Could not process tiled image&quot;);
+                    return;
+                }
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (Tiff output = Tiff.ClientOpen(&quot;InMemory&quot;, &quot;w&quot;, ms, new TiffStream()))
+                    {
+                        int numberOfDirectories = input.NumberOfDirectories();
+                        for (short i = 0; i &lt; numberOfDirectories; ++i)
+                        {
+                            input.SetDirectory(i);
+
+                            copyTags(input, output);
+                            copyStrips(input, output);
+
+                            output.WriteDirectory();
+                        }
+                    }
+
+                    // retrieve bytes from memory stream and write them in a file
+                    byte[] bytes = ms.ToArray();
+                    File.WriteAllBytes(&quot;SavedBytes.tif&quot;, bytes);
+                }
+            }
+
+            using (Tiff result = Tiff.Open(&quot;SavedBytes.tif&quot;, &quot;rc&quot;))
+            {
+                MessageBox.Show(&quot;Number of strips in result file: &quot; + result.NumberOfStrips());
+            }
+
+            Process.Start(&quot;SavedBytes.tif&quot;);
+        }
+
+        private static void copyTags(Tiff input, Tiff output)
+        {
+            for (ushort t = ushort.MinValue; t &lt; ushort.MaxValue; ++t)
+            {
+                TiffTag tag = (TiffTag)t;
+                FieldValue[] tagValue = input.GetField(tag);
+                if (tagValue != null)
+                    output.GetTagMethods().SetField(output, tag, tagValue);
+            }
+
+            int height = input.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+            output.SetField(TiffTag.ROWSPERSTRIP, height);
+        }
+
+        private static void copyStrips(Tiff input, Tiff output)
+        {
+            bool encoded = false;
+            FieldValue[] compressionTagValue = input.GetField(TiffTag.COMPRESSION);
+            if (compressionTagValue != null)
+                encoded = (compressionTagValue[0].ToInt() != (int)Compression.NONE);
+
+            int numberOfStrips = input.NumberOfStrips();
+
+            int offset = 0;
+            byte[] stripsData = new byte[numberOfStrips * input.StripSize()];
+            for (int i = 0; i &lt; numberOfStrips; ++i)
+            {
+                int bytesRead = readStrip(input, i, stripsData, offset, encoded);
+                offset += bytesRead;
+            }
+
+            writeStrip(output, stripsData, offset, encoded);
+        }
+
+        private static int readStrip(Tiff image, int stripNumber, byte[] buffer, int offset, bool encoded)
+        {
+            if (encoded)
+                return image.ReadEncodedStrip(stripNumber, buffer, offset, buffer.Length - offset);
+            else
+                return image.ReadRawStrip(stripNumber, buffer, offset, buffer.Length - offset);
+        }
+
+        private static void writeStrip(Tiff image, byte[] stripsData, int count, bool encoded)
+        {
+            if (encoded)
+                image.WriteEncodedStrip(0, stripsData, count);
+            else
+                image.WriteRawStrip(0, stripsData, count);
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Custom read-only stream for byte buffer that can be used
+    /// with Tiff.ClientOpen method.
+    /// &lt;/summary&gt;
+    class TiffStreamForBytes : TiffStream
+    {
+        private byte[] m_bytes;
+        private int m_position;
+
+        public TiffStreamForBytes(byte[] bytes)
+        {
+            m_bytes = bytes;
+            m_position = 0;
+        }
+
+        public override int Read(object clientData, byte[] buffer, int offset, int count)
+        {
+            if ((m_position + count) &gt; m_bytes.Length)
+                return -1;
+
+            Buffer.BlockCopy(m_bytes, m_position, buffer, offset, count);
+            m_position += count;
+            return count;
+        }
+
+        public override void Write(object clientData, byte[] buffer, int offset, int count)
+        {
+            throw new InvalidOperationException(&quot;This stream is read-only&quot;);
+        }
+
+        public override long Seek(object clientData, long offset, SeekOrigin origin)
+        {
+            switch (origin)
+            {
+                case SeekOrigin.Begin:
+                    if (offset &gt; m_bytes.Length)
+                        return -1;
+
+                    m_position = (int)offset;
+                    return m_position;
+
+                case SeekOrigin.Current:
+                    if ((offset + m_position) &gt; m_bytes.Length)
+                        return -1;
+
+                    m_position += (int)offset;
+                    return m_position;
+
+                case SeekOrigin.End:
+                    if ((m_bytes.Length - offset) &lt; 0)
+                        return -1;
+
+                    m_position = (int)(m_bytes.Length - offset);
+                    return m_position;
+            }
+
+            return -1;
+        }
+
+        public override void Close(object clientData)
+        {
+            // nothing to do
+        }
+
+        public override long Size(object clientData)
+        {
+            return m_bytes.Length;
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Diagnostics
+Imports System.Windows.Forms
+Imports System.IO
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ConvertToSingleStripInMemory
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Dim inputBytes As Byte() = File.ReadAllBytes(&quot;Sample Data\multipage.tif&quot;)
+            Dim byteStream As New TiffStreamForBytes(inputBytes)
+
+            Using input As Tiff = Tiff.ClientOpen(&quot;bytes&quot;, &quot;r&quot;, Nothing, byteStream)
+                If input Is Nothing Then
+                    MessageBox.Show(&quot;Could not open incoming image&quot;)
+                    Return
+                End If
+
+                If input.IsTiled() Then
+                    MessageBox.Show(&quot;Could not process tiled image&quot;)
+                    Return
+                End If
+
+                Using ms As New MemoryStream()
+                    Using output As Tiff = Tiff.ClientOpen(&quot;InMemory&quot;, &quot;w&quot;, ms, New TiffStream())
+                        Dim numberOfDirectories As Integer = input.NumberOfDirectories()
+                        For i As Short = 0 To numberOfDirectories - 1
+                            input.SetDirectory(i)
+
+                            copyTags(input, output)
+                            copyStrips(input, output)
+
+                            output.WriteDirectory()
+                        Next
+                    End Using
+
+                    ' retrieve bytes from memory stream and write them in a file
+                    Dim bytes As Byte() = ms.ToArray()
+                    File.WriteAllBytes(&quot;SavedBytes.tif&quot;, bytes)
+                End Using
+            End Using
+
+            Using result As Tiff = Tiff.Open(&quot;SavedBytes.tif&quot;, &quot;rc&quot;)
+                MessageBox.Show(&quot;Number of strips in result file: &quot; &amp; result.NumberOfStrips())
+            End Using
+
+            Process.Start(&quot;SavedBytes.tif&quot;)
+        End Sub
+
+        Private Shared Sub copyTags(ByVal input As Tiff, ByVal output As Tiff)
+            For t As Integer = 0 To 65535
+                Dim tag As TiffTag = DirectCast(t, TiffTag)
+                Dim tagValue As FieldValue() = input.GetField(tag)
+                If tagValue IsNot Nothing Then
+                    output.GetTagMethods().SetField(output, tag, tagValue)
+                End If
+            Next
+
+            Dim height As Integer = input.GetField(TiffTag.IMAGELENGTH)(0).ToInt()
+            output.SetField(TiffTag.ROWSPERSTRIP, height)
+        End Sub
+
+        Private Shared Sub copyStrips(ByVal input As Tiff, ByVal output As Tiff)
+            Dim encoded As Boolean = False
+            Dim compressionTagValue As FieldValue() = input.GetField(TiffTag.COMPRESSION)
+            If compressionTagValue IsNot Nothing Then
+                encoded = (compressionTagValue(0).ToInt() &lt;&gt; CInt(Compression.NONE))
+            End If
+
+            Dim numberOfStrips As Integer = input.NumberOfStrips()
+
+            Dim offset As Integer = 0
+            Dim stripsData As Byte() = New Byte(numberOfStrips * input.StripSize() - 1) {}
+            For i As Integer = 0 To numberOfStrips - 1
+                Dim bytesRead As Integer = readStrip(input, i, stripsData, offset, encoded)
+                offset += bytesRead
+            Next
+
+            writeStrip(output, stripsData, offset, encoded)
+        End Sub
+
+        Private Shared Function readStrip(ByVal image As Tiff, ByVal stripNumber As Integer, ByVal buffer As Byte(), ByVal offset As Integer, ByVal encoded As Boolean) As Integer
+            If encoded Then
+                Return image.ReadEncodedStrip(stripNumber, buffer, offset, buffer.Length - offset)
+            Else
+                Return image.ReadRawStrip(stripNumber, buffer, offset, buffer.Length - offset)
+            End If
+        End Function
+
+        Private Shared Sub writeStrip(ByVal image As Tiff, ByVal stripsData As Byte(), ByVal count As Integer, ByVal encoded As Boolean)
+            If encoded Then
+                image.WriteEncodedStrip(0, stripsData, count)
+            Else
+                image.WriteRawStrip(0, stripsData, count)
+            End If
+        End Sub
+    End Class
+
+    ''' &lt;summary&gt;
+    ''' Custom read-only stream for byte buffer that can be used
+    ''' with Tiff.ClientOpen method.
+    ''' &lt;/summary&gt;
+    Class TiffStreamForBytes
+        Inherits TiffStream
+        Private m_bytes As Byte()
+        Private m_position As Integer
+
+        Public Sub New(ByVal bytes As Byte())
+            m_bytes = bytes
+            m_position = 0
+        End Sub
+
+        Public Overrides Function Read(ByVal clientData As Object, ByVal buffer__1 As Byte(), ByVal offset As Integer, ByVal count As Integer) As Integer
+            If (m_position + count) &gt; m_bytes.Length Then
+                Return -1
+            End If
+
+            Buffer.BlockCopy(m_bytes, m_position, buffer__1, offset, count)
+            m_position += count
+            Return count
+        End Function
+
+        Public Overrides Sub Write(ByVal clientData As Object, ByVal buffer As Byte(), ByVal offset As Integer, ByVal count As Integer)
+            Throw New InvalidOperationException(&quot;This stream is read-only&quot;)
+        End Sub
+
+        Public Overrides Function Seek(ByVal clientData As Object, ByVal offset As Long, ByVal origin As SeekOrigin) As Long
+            Select Case origin
+                Case SeekOrigin.Begin
+                    If offset &gt; m_bytes.Length Then
+                        Return -1
+                    End If
+
+                    m_position = CInt(offset)
+                    Return m_position
+
+                Case SeekOrigin.Current
+                    If (offset + m_position) &gt; m_bytes.Length Then
+                        Return -1
+                    End If
+
+                    m_position += CInt(offset)
+                    Return m_position
+
+                Case SeekOrigin.[End]
+                    If (m_bytes.Length - offset) &lt; 0 Then
+                        Return -1
+                    End If
+
+                    m_position = CInt(m_bytes.Length - offset)
+                    Return m_position
+            End Select
+
+            Return -1
+        End Function
+
+        Public Overrides Sub Close(ByVal clientData As Object)
+            ' nothing to do
+        End Sub
+
+        Public Overrides Function Size(ByVal clientData As Object) As Long
+            Return m_bytes.Length
+        End Function
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

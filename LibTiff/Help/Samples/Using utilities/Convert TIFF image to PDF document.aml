@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="11e05b16-d3ea-4a41-9a70-f02404c56bc6" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to convert TIFF image to PDF document.</para>
+<para></para>
+<para>LibTiff.Net ships with Tiff2Pdf utility that can be used to convert TIFF images (including multipage ones) to PDFs.</para>
+<para>You can setup additional convertion options like resolution and size of pages in output PDF documents.</para>
+<para></para>
+<para>This sample shows how to use Tiff2Pdf from your code. You can also use this utility from command line.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ConvertTiffToPdf
+    {
+        public static void Main()
+        {
+            string inputFile = @&quot;Sample Data\multipage.tif&quot;;
+            string outputFile = &quot;output.pdf&quot;;
+
+            string[] arguments = new string[] { &quot;-o&quot;, outputFile, &quot;-p&quot;, &quot;A4&quot;, inputFile };
+            BitMiracle.Tiff2Pdf.Program.Main(arguments);
+
+            Process.Start(outputFile);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.IO
+
+Imports BitMiracle
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ConvertTiffToPdf
+        Public Shared Sub Main()
+            Dim inputFile As String = &quot;Sample Data\multipage.tif&quot;
+            Dim outputFile As String = &quot;output.pdf&quot;
+
+            Dim arguments As String() = New String() {&quot;-o&quot;, outputFile, &quot;-p&quot;, &quot;A4&quot;, inputFile}
+            Tiff2Pdf.Program.Main(arguments)
+
+            Process.Start(outputFile)
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

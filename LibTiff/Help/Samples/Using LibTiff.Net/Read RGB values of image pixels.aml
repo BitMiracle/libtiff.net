@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="98c3da41-bb2c-4bba-9a94-5ba32069aab5" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to read RGB value of any pixel in a TIFF image.</para>
+<para></para>
+<para>The library provides methods that can decode almost any TIFF image and return array of packed RGBA values for its samples (pixels). This sample shows how to use  Tiff.ReadRGBAImage method to get packed sample values and Tiff.GetA/GetB/GetG/GetR to unpack individual components of an RGBA value.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+using System.Drawing;
+using System.Windows.Forms;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class ReadSamples
+    {
+        public static void Main()
+        {
+            // Open the TIFF image
+            using (Tiff image = Tiff.Open(@&quot;Sample Data\marbles.tif&quot;, &quot;r&quot;))
+            {
+                if (image == null)
+                {
+                    MessageBox.Show(&quot;Could not open incoming image&quot;);
+                    return;
+                }
+
+                // Find the width and height of the image
+                FieldValue[] value = image.GetField(TiffTag.IMAGEWIDTH);
+                int width = value[0].ToInt();
+
+                value = image.GetField(TiffTag.IMAGELENGTH);
+                int height = value[0].ToInt();
+
+                int imageSize = height * width;
+                int[] raster = new int[imageSize];
+
+                // Read the image into the memory buffer
+                if (!image.ReadRGBAImage(width, height, raster))
+                {
+                    MessageBox.Show(&quot;Could not read image&quot;);
+                    return;
+                }
+
+                using (Bitmap bmp = new Bitmap(200, 200))
+                {
+                    for (int i = 0; i &lt; bmp.Width; ++i)
+                        for (int j = 0; j &lt; bmp.Height; ++j)
+                            bmp.SetPixel(i, j, getSample(i + 330, j + 30, raster, width, height));
+
+                    bmp.Save(&quot;ReadSamples.bmp&quot;);
+                }
+                
+            }
+
+            Process.Start(&quot;ReadSamples.bmp&quot;);
+        }
+
+        private static Color getSample(int x, int y, int[] raster, int width, int height)
+        {
+            int offset = (height - y - 1) * width + x;
+            int red = Tiff.GetR(raster[offset]);
+            int green = Tiff.GetG(raster[offset]);
+            int blue = Tiff.GetB(raster[offset]);
+            return Color.FromArgb(red, green, blue);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.Windows.Forms
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class ReadSamples
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            ' Open the TIFF image
+            Using image As Tiff = Tiff.Open(&quot;Sample Data\marbles.tif&quot;, &quot;r&quot;)
+                If image Is Nothing Then
+                    MessageBox.Show(&quot;Could not open incoming image&quot;)
+                    Return
+                End If
+
+                ' Find the width and height of the image
+                Dim value As FieldValue() = image.GetField(TiffTag.IMAGEWIDTH)
+                Dim width As Integer = value(0).ToInt()
+
+                value = image.GetField(TiffTag.IMAGELENGTH)
+                Dim height As Integer = value(0).ToInt()
+
+                Dim imageSize As Integer = height * width
+                Dim raster As Integer() = New Integer(imageSize - 1) {}
+
+                ' Read the image into the memory buffer
+                If Not image.ReadRGBAImage(width, height, raster) Then
+                    MessageBox.Show(&quot;Could not read image&quot;)
+                    Return
+                End If
+
+                Using bmp As New Bitmap(200, 200)
+                    For i As Integer = 0 To bmp.Width - 1
+                        For j As Integer = 0 To bmp.Height - 1
+                            bmp.SetPixel(i, j, getSample(i + 330, j + 30, raster, width, height))
+                        Next
+                    Next
+
+                    bmp.Save(&quot;ReadSamples.bmp&quot;)
+
+                End Using
+            End Using
+
+            Process.Start(&quot;ReadSamples.bmp&quot;)
+        End Sub
+
+        Private Shared Function getSample(ByVal x As Integer, ByVal y As Integer, ByVal raster As Integer(), ByVal width As Integer, ByVal height As Integer) As Color
+            Dim offset As Integer = (height - y - 1) * width + x
+            Dim red As Integer = Tiff.GetR(raster(offset))
+            Dim green As Integer = Tiff.GetG(raster(offset))
+            Dim blue As Integer = Tiff.GetB(raster(offset))
+            Return Color.FromArgb(red, green, blue)
+        End Function
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="98f13f88-f60d-40dc-a5b3-cf902f385d92" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to copy contents of an existing TIFF image to a new one.</para>
+<para></para>
+<para>Code that can copy contents of an arbitrary TIFF file to another one is too complex to be used as a sample. This sample contains a simple code that shows basics you can start from. It works for stripped images.</para>
+<para></para>
+<para>For more advanced code you may want to look at the TiffCP utility source code. TiffCP is designed to copy contents of an arbitrary TIFF file to another one.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Diagnostics;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class SimpleTiffCopy
+    {
+        public static void Main()
+        {
+            using (Tiff input = Tiff.Open(@&quot;Sample Data\flag_t24.tif&quot;, &quot;r&quot;))
+            {
+                int width = input.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
+                int height = input.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
+                int samplesPerPixel = input.GetField(TiffTag.SAMPLESPERPIXEL)[0].ToInt();
+                int bitsPerSample = input.GetField(TiffTag.BITSPERSAMPLE)[0].ToInt();
+                int photo = input.GetField(TiffTag.PHOTOMETRIC)[0].ToInt();
+
+                int scanlineSize = input.ScanlineSize();
+                byte[][] buffer = new byte[height][];
+                for (int i = 0; i &lt; height; ++i)
+                {
+                    buffer[i] = new byte[scanlineSize];
+                    input.ReadScanline(buffer[i], i);
+                }
+
+                using (Tiff output = Tiff.Open(&quot;SimpleTiffCopy.tif&quot;, &quot;w&quot;))
+                {
+                    output.SetField(TiffTag.IMAGEWIDTH, width);
+                    output.SetField(TiffTag.IMAGELENGTH, height);
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, samplesPerPixel);
+                    output.SetField(TiffTag.BITSPERSAMPLE, bitsPerSample);
+                    output.SetField(TiffTag.ROWSPERSTRIP, output.DefaultStripSize(0));
+                    output.SetField(TiffTag.PHOTOMETRIC, photo);
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+                    // change orientation of the image
+                    output.SetField(TiffTag.ORIENTATION, Orientation.RIGHTBOT);
+
+                    for (int i = 0; i &lt; height; ++i)
+                        output.WriteScanline(buffer[i], i);
+                }
+            }
+
+            Process.Start(&quot;SimpleTiffCopy.tif&quot;);
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Diagnostics
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class SimpleTiffCopy
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using input As Tiff = Tiff.Open(&quot;Sample Data\flag_t24.tif&quot;, &quot;r&quot;)
+                Dim width As Integer = input.GetField(TiffTag.IMAGEWIDTH)(0).ToInt()
+                Dim height As Integer = input.GetField(TiffTag.IMAGELENGTH)(0).ToInt()
+                Dim samplesPerPixel As Integer = input.GetField(TiffTag.SAMPLESPERPIXEL)(0).ToInt()
+                Dim bitsPerSample As Integer = input.GetField(TiffTag.BITSPERSAMPLE)(0).ToInt()
+                Dim photo As Integer = input.GetField(TiffTag.PHOTOMETRIC)(0).ToInt()
+
+                Dim scanlineSize As Integer = input.ScanlineSize()
+                Dim buffer As Byte()() = New Byte(height - 1)() {}
+                For i As Integer = 0 To height - 1
+                    buffer(i) = New Byte(scanlineSize - 1) {}
+                    input.ReadScanline(buffer(i), i)
+                Next
+
+                Using output As Tiff = Tiff.Open(&quot;SimpleTiffCopy.tif&quot;, &quot;w&quot;)
+                    output.SetField(TiffTag.IMAGEWIDTH, width)
+                    output.SetField(TiffTag.IMAGELENGTH, height)
+                    output.SetField(TiffTag.SAMPLESPERPIXEL, samplesPerPixel)
+                    output.SetField(TiffTag.BITSPERSAMPLE, bitsPerSample)
+                    output.SetField(TiffTag.ROWSPERSTRIP, output.DefaultStripSize(0))
+                    output.SetField(TiffTag.PHOTOMETRIC, photo)
+                    output.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+
+                    ' change orientation of the image
+                    output.SetField(TiffTag.ORIENTATION, Orientation.RIGHTBOT)
+
+                    For i As Integer = 0 To height - 1
+                        output.WriteScanline(buffer(i), i)
+                    Next
+                End Using
+            End Using
+
+            Process.Start(&quot;SimpleTiffCopy.tif&quot;)
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>

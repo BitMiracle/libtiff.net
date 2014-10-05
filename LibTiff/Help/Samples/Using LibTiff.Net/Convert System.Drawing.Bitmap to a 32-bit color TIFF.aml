@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="753aa95f-9715-4b89-9a78-2982756d0a2c" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to convert a System.Drawing.Bitmap to the 32-bit color LZW compressed TIFF image.</para>
+<para></para>
+<para>The code also shows how to retrieve bits of a System.Drawing.Bitmap and convert them from BGRA to RGBA format.</para>
+
+    </introduction>
+    <code language="cs">
+using System.Drawing;
+using System.Drawing.Imaging;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class BitmapTo32BitColorTiff
+    {
+        public static void Main()
+        {
+            using (Bitmap bmp = new Bitmap(@&quot;Sample Data\rgb.jpg&quot;))
+            {
+                using (Tiff tif = Tiff.Open(&quot;BitmapTo32BitColorTiff.tif&quot;, &quot;w&quot;))
+                {
+                    byte[] raster = getImageRasterBytes(bmp, PixelFormat.Format32bppArgb);
+                    tif.SetField(TiffTag.IMAGEWIDTH, bmp.Width);
+                    tif.SetField(TiffTag.IMAGELENGTH, bmp.Height);
+                    tif.SetField(TiffTag.COMPRESSION, Compression.LZW);
+                    tif.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB);
+
+                    tif.SetField(TiffTag.ROWSPERSTRIP, bmp.Height);
+
+                    tif.SetField(TiffTag.XRESOLUTION, bmp.HorizontalResolution);
+                    tif.SetField(TiffTag.YRESOLUTION, bmp.VerticalResolution);
+
+                    tif.SetField(TiffTag.BITSPERSAMPLE, 8);
+                    tif.SetField(TiffTag.SAMPLESPERPIXEL, 4);
+
+                    tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+
+                    int stride = raster.Length / bmp.Height;
+                    convertSamples(raster, bmp.Width, bmp.Height);
+
+                    for (int i = 0, offset = 0; i &lt; bmp.Height; i++)
+                    {
+                        tif.WriteScanline(raster, offset, i, 0);
+                        offset += stride;
+                    }
+                }
+
+                System.Diagnostics.Process.Start(&quot;BitmapTo32BitColorTiff.tif&quot;);
+            }
+        }
+
+        private static byte[] getImageRasterBytes(Bitmap bmp, PixelFormat format)
+        {
+            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            byte[] bits = null;
+
+            try
+            {
+                // Lock the managed memory
+                BitmapData bmpdata = bmp.LockBits(rect, ImageLockMode.ReadWrite, format);
+
+                // Declare an array to hold the bytes of the bitmap.
+                bits = new byte[bmpdata.Stride * bmpdata.Height];
+
+                // Copy the values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(bmpdata.Scan0, bits, 0, bits.Length);
+
+                // Release managed memory
+                bmp.UnlockBits(bmpdata);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return bits;
+        }
+
+        /// &lt;summary&gt;
+        /// Converts BGRA samples into RGBA samples
+        /// &lt;/summary&gt;
+        private static void convertSamples(byte[] data, int width, int height)
+        {
+            int stride = data.Length / height;
+            const int samplesPerPixel = 4;
+
+            for (int y = 0; y &lt; height; y++)
+            {
+                int offset = stride * y;
+                int strideEnd = offset + width * samplesPerPixel;
+
+                for (int i = offset; i &lt; strideEnd; i += samplesPerPixel)
+                {
+                    byte temp = data[i + 2];
+                    data[i + 2] = data[i];
+                    data[i] = temp;
+                }
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System.Drawing
+Imports System.Drawing.Imaging
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class BitmapTo32BitColorTiff
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using bmp As New Bitmap(&quot;Sample Data\rgb.jpg&quot;)
+                Using tif As Tiff = Tiff.Open(&quot;BitmapTo32BitColorTiff.tif&quot;, &quot;w&quot;)
+                    Dim raster As Byte() = getImageRasterBytes(bmp, PixelFormat.Format32bppArgb)
+                    tif.SetField(TiffTag.IMAGEWIDTH, bmp.Width)
+                    tif.SetField(TiffTag.IMAGELENGTH, bmp.Height)
+                    tif.SetField(TiffTag.COMPRESSION, Compression.LZW)
+                    tif.SetField(TiffTag.PHOTOMETRIC, Photometric.RGB)
+
+                    tif.SetField(TiffTag.ROWSPERSTRIP, bmp.Height)
+
+                    tif.SetField(TiffTag.XRESOLUTION, bmp.HorizontalResolution)
+                    tif.SetField(TiffTag.YRESOLUTION, bmp.VerticalResolution)
+
+                    tif.SetField(TiffTag.BITSPERSAMPLE, 8)
+                    tif.SetField(TiffTag.SAMPLESPERPIXEL, 4)
+
+                    tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+
+                    Dim stride As Integer = raster.Length \ bmp.Height
+                    convertSamples(raster, bmp.Width, bmp.Height)
+
+                    Dim i As Integer = 0, offset As Integer = 0
+                    While i &lt; bmp.Height
+                        tif.WriteScanline(raster, offset, i, 0)
+                        offset += stride
+                        i += 1
+                    End While
+                End Using
+
+                System.Diagnostics.Process.Start(&quot;BitmapTo32BitColorTiff.tif&quot;)
+            End Using
+        End Sub
+
+        Private Shared Function getImageRasterBytes(ByVal bmp As Bitmap, ByVal format As PixelFormat) As Byte()
+            Dim rect As New Rectangle(0, 0, bmp.Width, bmp.Height)
+            Dim bits As Byte() = Nothing
+
+            Try
+                ' Lock the managed memory
+                Dim bmpdata As BitmapData = bmp.LockBits(rect, ImageLockMode.ReadWrite, format)
+
+                ' Declare an array to hold the bytes of the bitmap.
+                bits = New Byte(bmpdata.Stride * bmpdata.Height - 1) {}
+
+                ' Copy the values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(bmpdata.Scan0, bits, 0, bits.Length)
+
+                ' Release managed memory
+                bmp.UnlockBits(bmpdata)
+            Catch
+                Return Nothing
+            End Try
+
+            Return bits
+        End Function
+
+        ''' &lt;summary&gt;
+        ''' Converts BGRA samples into RGBA samples
+        ''' &lt;/summary&gt;
+        Private Shared Sub convertSamples(ByVal data As Byte(), ByVal width As Integer, ByVal height As Integer)
+            Dim stride As Integer = data.Length \ height
+            Const samplesPerPixel As Integer = 4
+
+            For y As Integer = 0 To height - 1
+                Dim offset As Integer = stride * y
+                Dim strideEnd As Integer = offset + width * samplesPerPixel
+
+                Dim i As Integer = offset
+                While i &lt; strideEnd
+                    Dim temp As Byte = data(i + 2)
+                    data(i + 2) = data(i)
+                    data(i) = temp
+                    i += samplesPerPixel
+                End While
+            Next
+        End Sub
+    End Class
+End Namespace
+
+</code>
+
+  </developerSampleDocument>
+</topic>

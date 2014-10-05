@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="be3a882e-080a-4520-b2df-b3d99e9e81aa" revisionNumber="1">
+  <developerSampleDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+<para>This sample shows how to convert 16-bit grayscale TIFF image to a 8-bit System.Drawing.Bitmap.</para>
+
+    </introduction>
+    <code language="cs">
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+
+using BitMiracle.LibTiff.Classic;
+
+namespace BitMiracle.LibTiff.Samples
+{
+    public static class Convert16BitTo8Bit
+    {
+        public static void Main()
+        {
+            using (Bitmap tiff8bit = getBitmap8Bit(@&quot;Sample Data\16bit.tif&quot;))
+            {
+                if (tiff8bit == null)
+                {
+                    Console.WriteLine(&quot;Failed to convert image. Maybe input image does not exist or is not 16 bit.&quot;);
+                    return;
+                }
+
+                tiff8bit.Save(&quot;Convert16BitTo8Bit.bmp&quot;);
+                Process.Start(&quot;Convert16BitTo8Bit.bmp&quot;);
+            }
+            
+        }
+
+        private static Bitmap getBitmap8Bit(string inputName)
+        {
+            Bitmap result;
+
+            using (Tiff tif = Tiff.Open(inputName, &quot;r&quot;))
+            {
+                FieldValue[] res = tif.GetField(TiffTag.IMAGELENGTH);
+                int height = res[0].ToInt();
+
+                res = tif.GetField(TiffTag.IMAGEWIDTH);
+                int width = res[0].ToInt();
+
+                res = tif.GetField(TiffTag.BITSPERSAMPLE);
+                short bpp = res[0].ToShort();
+                if (bpp != 16)
+                    return null;
+
+                res = tif.GetField(TiffTag.SAMPLESPERPIXEL);
+                short spp = res[0].ToShort();
+                if (spp != 1)
+                    return null;
+
+                res = tif.GetField(TiffTag.PHOTOMETRIC);
+                Photometric photo = (Photometric)res[0].ToInt();
+                if (photo != Photometric.MINISBLACK &amp;&amp; photo != Photometric.MINISWHITE)
+                    return null;
+
+                int stride = tif.ScanlineSize();
+                byte[] buffer = new byte[stride];
+
+                result = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
+                byte[] buffer8Bit = null;
+
+                for (int i = 0; i &lt; height; i++)
+                {
+                    Rectangle imgRect = new Rectangle(0, i, width, 1);
+                    BitmapData imgData = result.LockBits(imgRect, ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+                    if (buffer8Bit == null)
+                        buffer8Bit = new byte[imgData.Stride];
+                    else
+                        Array.Clear(buffer8Bit, 0, buffer8Bit.Length);
+
+                    tif.ReadScanline(buffer, i);
+                    convertBuffer(buffer, buffer8Bit);
+
+                    Marshal.Copy(buffer8Bit, 0, imgData.Scan0, buffer8Bit.Length);
+                    result.UnlockBits(imgData);
+                }
+            }
+
+            return result;
+        }
+
+        private static void convertBuffer(byte[] buffer, byte[] buffer8Bit)
+        {
+            for (int src = 0, dst = 0; src &lt; buffer.Length; dst++)
+            {
+                int value16 = buffer[src++];
+                value16 = value16 + (buffer[src++] &lt;&lt; 8);
+                buffer8Bit[dst] = (byte)(value16 / 257.0 + 0.5);
+            }
+        }
+    }
+}
+
+    </code>
+<code language="vb">
+Imports System
+Imports System.Diagnostics
+Imports System.Drawing
+Imports System.Drawing.Imaging
+Imports System.Runtime.InteropServices
+
+Imports BitMiracle.LibTiff.Classic
+
+Namespace BitMiracle.LibTiff.Samples
+    Public NotInheritable Class Convert16BitTo8Bit
+        Private Sub New()
+        End Sub
+        Public Shared Sub Main()
+            Using tiff8bit As Bitmap = getBitmap8Bit(&quot;Sample Data\16bit.tif&quot;)
+                If tiff8bit Is Nothing Then
+                    Console.WriteLine(&quot;Failed to convert image. Maybe input image does not exist or is not 16 bit.&quot;)
+                    Return
+                End If
+
+                tiff8bit.Save(&quot;Convert16BitTo8Bit.bmp&quot;)
+                Process.Start(&quot;Convert16BitTo8Bit.bmp&quot;)
+            End Using
+
+        End Sub
+
+        Private Shared Function getBitmap8Bit(ByVal inputName As String) As Bitmap
+            Dim result As Bitmap
+
+            Using tif As Tiff = Tiff.Open(inputName, &quot;r&quot;)
+                Dim res As FieldValue() = tif.GetField(TiffTag.IMAGELENGTH)
+                Dim height As Integer = res(0).ToInt()
+
+                res = tif.GetField(TiffTag.IMAGEWIDTH)
+                Dim width As Integer = res(0).ToInt()
+
+                res = tif.GetField(TiffTag.BITSPERSAMPLE)
+                Dim bpp As Short = res(0).ToShort()
+                If bpp &lt;&gt; 16 Then
+                    Return Nothing
+                End If
+
+                res = tif.GetField(TiffTag.SAMPLESPERPIXEL)
+                Dim spp As Short = res(0).ToShort()
+                If spp &lt;&gt; 1 Then
+                    Return Nothing
+                End If
+
+                res = tif.GetField(TiffTag.PHOTOMETRIC)
+                Dim photo As Photometric = DirectCast(res(0).ToInt(), Photometric)
+                If photo &lt;&gt; Photometric.MINISBLACK AndAlso photo &lt;&gt; Photometric.MINISWHITE Then
+                    Return Nothing
+                End If
+
+                Dim stride As Integer = tif.ScanlineSize()
+                Dim buffer As Byte() = New Byte(stride - 1) {}
+
+                result = New Bitmap(width, height, PixelFormat.Format8bppIndexed)
+                Dim buffer8Bit As Byte() = Nothing
+
+                For i As Integer = 0 To height - 1
+                    Dim imgRect As New Rectangle(0, i, width, 1)
+                    Dim imgData As BitmapData = result.LockBits(imgRect, ImageLockMode.[WriteOnly], PixelFormat.Format8bppIndexed)
+
+                    If buffer8Bit Is Nothing Then
+                        buffer8Bit = New Byte(imgData.Stride - 1) {}
+                    Else
+                        Array.Clear(buffer8Bit, 0, buffer8Bit.Length)
+                    End If
+
+                    tif.ReadScanline(buffer, i)
+                    convertBuffer(buffer, buffer8Bit)
+
+                    Marshal.Copy(buffer8Bit, 0, imgData.Scan0, buffer8Bit.Length)
+                    result.UnlockBits(imgData)
+                Next
+            End Using
+
+            Return result
+        End Function
+
+        Private Shared Sub convertBuffer(ByVal buffer As Byte(), ByVal buffer8Bit As Byte())
+            Dim src As Integer = 0, dst As Integer = 0
+            While src &lt; buffer.Length
+                Dim value16 As Integer = buffer(src)
+                src += 1
+                value16 = value16 + (CType(buffer(src), Integer) &lt;&lt; 8)
+                src += 1
+                buffer8Bit(dst) = Math.Floor(value16 / 257.0 + 0.5) Mod 256
+                dst += 1
+            End While
+        End Sub
+    End Class
+End Namespace
+</code>
+
+  </developerSampleDocument>
+</topic>
