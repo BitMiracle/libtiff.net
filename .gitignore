@@ -52,3 +52,7 @@ Desktop.ini
 # Test outputs
 TestCase/Output.Pdf/*.pdf
 TestCase/Output.Tiff/*.tif
+
+# Auto-generated files
+LibTiff/AssemblyVersion.cs
+LibTiff.Silverlight/AssemblyVersion.cs
