@@ -9,6 +9,7 @@
 *.suo
 *.user
 *.sln.docstates
+*.shfbproj_*
 
 # Build results
 
@@ -33,6 +34,7 @@ ClientBin/
 
 # RIA/Silverlight projects
 Generated_Code/
+PrecompiledWeb/
 
 # SQL Server files
 App_Data/*.mdf
