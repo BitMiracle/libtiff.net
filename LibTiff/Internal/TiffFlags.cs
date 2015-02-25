@@ -89,5 +89,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// skip reading of raw uncompressed image data
         /// </summary>
         NOREADRAW = 0x20000,
+
+        /// <summary>
+        /// File is written in bigTiff-format.
+        /// </summary>
+        ISBIGTIFF = 0x100000,
+
+        /// <summary>
+        /// File must not be in bigTiff-format.
+        /// </summary>
+        NOBIGTIFF = 0x200000
     }
 }

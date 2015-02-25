@@ -26,7 +26,7 @@ namespace BitMiracle.LibTiff.Classic
 #else
         private
 #endif
-        static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler)
+ static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler)
         {
             return Tiff.Open(fileName, mode, errorHandler, null);
         }
@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff.Classic
 #else
         private
 #endif
-        static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler, TiffExtendProc extender)
+ static Tiff Open(string fileName, string mode, TiffErrorHandler errorHandler, TiffExtendProc extender)
         {
             const string module = "Open";
 
@@ -72,7 +72,7 @@ namespace BitMiracle.LibTiff.Classic
 #else
         private
 #endif
-        static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler)
+ static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler)
         {
             return ClientOpen(name, mode, clientData, stream, errorHandler, null);
         }
@@ -82,7 +82,7 @@ namespace BitMiracle.LibTiff.Classic
 #else
         private
 #endif
-        static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler, TiffExtendProc extender)
+ static Tiff ClientOpen(string name, string mode, object clientData, TiffStream stream, TiffErrorHandler errorHandler, TiffExtendProc extender)
         {
             const string module = "ClientOpen";
 
@@ -163,6 +163,12 @@ namespace BitMiracle.LibTiff.Classic
                     case 'h':
                         tif.m_flags |= TiffFlags.HEADERONLY;
                         break;
+                    case '4':
+                        tif.m_flags |= TiffFlags.NOBIGTIFF;
+                        break;
+                    case '8':
+                        tif.m_flags |= TiffFlags.ISBIGTIFF;
+                        break;
                 }
             }
 
@@ -183,11 +189,30 @@ namespace BitMiracle.LibTiff.Classic
                 else
                     tif.m_header.tiff_magic = TIFF_LITTLEENDIAN;
 
-                tif.m_header.tiff_version = TIFF_VERSION;
-                if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                    SwabShort(ref tif.m_header.tiff_version);
 
-                tif.m_header.tiff_diroff = 0; // filled in later
+                if ((tif.m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF)
+                {
+                    tif.m_header.tiff_version = TIFF_BIGTIFF_VERSION;
+                    tif.m_header.tiff_diroff = 0; //filled in later
+                    tif.m_header.tiff_fill = 0;
+                    tif.m_header.tiff_offsize = sizeof(long);
+                    if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                    {
+                        SwabShort(ref tif.m_header.tiff_version);
+                        SwabShort(ref tif.m_header.tiff_offsize);
+                    }
+
+                }
+                else
+                {
+                    tif.m_header.tiff_version = TIFF_VERSION;
+                    tif.m_header.tiff_diroff = 0; //filled in later
+                    tif.m_header.tiff_fill = sizeof(long);
+                    if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                    {
+                        SwabShort(ref tif.m_header.tiff_version);
+                    }
+                }
 
                 tif.seekFile(0, SeekOrigin.Begin);
 
@@ -228,7 +253,7 @@ namespace BitMiracle.LibTiff.Classic
             if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
             {
                 SwabShort(ref tif.m_header.tiff_version);
-                SwabUInt(ref tif.m_header.tiff_diroff);
+                SwabLong8(ref tif.m_header.tiff_diroff);
             }
 
             // Now check version (if needed, it's been byte-swapped).
@@ -236,13 +261,25 @@ namespace BitMiracle.LibTiff.Classic
             // magic number that doesn't change (stupid).
             if (tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
-                ErrorExt(tif, tif.m_clientdata, name,
-                    "This is a BigTIFF file. This format not supported\nby this version of LibTiff.Net.");
-                tif.m_mode = O_RDONLY;
-                return null;
+                if ((tif.m_flags & TiffFlags.NOBIGTIFF) == TiffFlags.NOBIGTIFF)
+                {
+                    ErrorExt(tif, tif.m_clientdata, name,
+                    "This is a BigTIFF file. Non-BigTIFF mode '32' is forced");
+                    tif.m_mode = O_RDONLY;
+                    return null;
+                }
             }
-
-            if (tif.m_header.tiff_version != TIFF_VERSION)
+            if (tif.m_header.tiff_version == TIFF_VERSION)
+            {
+                if ((tif.m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF)
+                {
+                    ErrorExt(tif, tif.m_clientdata, name,
+                    "This is a non-BigTIFF file. BigTIFF mode '64' is forced");
+                    tif.m_mode = O_RDONLY;
+                    return null;
+                }
+            }
+            if (tif.m_header.tiff_version != TIFF_VERSION && tif.m_header.tiff_version != TIFF_BIGTIFF_VERSION)
             {
                 ErrorExt(tif, tif.m_clientdata, name,
                     "Not a TIFF file, bad version number {0} (0x{1:x})",
@@ -307,7 +344,7 @@ namespace BitMiracle.LibTiff.Classic
 #else
             TiffExtendProc prev = m_extender;
             m_extender = extender;
-            return prev;            
+            return prev;
 #endif
         }
 

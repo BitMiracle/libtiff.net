@@ -1900,14 +1900,14 @@ namespace BitMiracle.LibTiff.Classic.Internal
                                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name, "Strip offsets are missing");
                                 return false;
                             }
-                            m_in_buffer_file_pos = m_tif.m_dir.td_stripoffset[m_in_buffer_next_strile];
+                            m_in_buffer_file_pos = (uint)m_tif.m_dir.td_stripoffset[m_in_buffer_next_strile];
                             if (m_in_buffer_file_pos != 0)
                             {
                                 if (m_in_buffer_file_pos >= m_file_size)
                                     m_in_buffer_file_pos = 0;
                                 else
                                 {
-                                    m_in_buffer_file_togo = m_tif.m_dir.td_stripbytecount[m_in_buffer_next_strile];
+                                    m_in_buffer_file_togo = (uint)m_tif.m_dir.td_stripbytecount[m_in_buffer_next_strile];
                                     if (m_in_buffer_file_togo == 0)
                                         m_in_buffer_file_pos = 0;
                                     else if (m_in_buffer_file_pos + m_in_buffer_file_togo > m_file_size)

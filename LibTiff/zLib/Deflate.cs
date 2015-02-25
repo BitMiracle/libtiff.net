@@ -93,8 +93,8 @@ namespace ComponentAce.Compression.Libs.zlib
             new Config(32, 128, 258, 1024, SLOW),
             new Config(32, 258, 258, 4096, SLOW),
         };
-        
-        private static readonly System.String[] z_errmsg = new System.String[]{"need dictionary", "stream end", string.Empty, "file error", "stream error", "data error", "insufficient memory", "buffer error", "incompatible version", string.Empty};
+
+        private static readonly System.String[] z_errmsg = new System.String[] { "need dictionary", "stream end", string.Empty, "file error", "stream error", "data error", "insufficient memory", "buffer error", "incompatible version", string.Empty };
         
         // block not completed, need more input or more output
         private const int NeedMore = 0;

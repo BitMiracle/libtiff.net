@@ -79,6 +79,19 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        internal static ulong readULong(byte[] buffer, int offset)
+        {
+            ulong value = (ulong)buffer[offset++] & 0xFF;
+            value += (ulong)(buffer[offset++] & 0xFF) << 8;
+            value += (ulong)(buffer[offset++] & 0xFF) << 16;
+            value += (ulong)(buffer[offset++] & 0xFF) << 24;
+            value += (ulong)(buffer[offset++] & 0xFF) << 32;
+            value += (ulong)(buffer[offset++] & 0xFF) << 40;
+            value += (ulong)(buffer[offset++] & 0xFF) << 48;
+            value += (ulong)buffer[offset++] << 56;
+            return value;
+        }
+
         internal static int readInt(byte[] buffer, int offset)
         {
             int value = buffer[offset++] & 0xFF;

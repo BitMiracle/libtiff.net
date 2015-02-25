@@ -358,7 +358,7 @@ namespace BitMiracle.LibTiff.Classic
                     if ((tif.m_flags & TiffFlags.INSUBIFD) != TiffFlags.INSUBIFD)
                     {
                         td.td_nsubifd = value[0].ToShort();
-                        Tiff.setLongArray(out td.td_subifd, value[1].ToIntArray(), td.td_nsubifd);
+                        Tiff.setLong8Array(out td.td_subifd, value[1].TolongArray(), td.td_nsubifd);
                     }
                     else
                     {

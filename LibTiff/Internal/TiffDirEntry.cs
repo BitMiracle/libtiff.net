@@ -26,8 +26,6 @@ namespace BitMiracle.LibTiff.Classic.Internal
     /// </summary>
     class TiffDirEntry
     {
-        public const int SizeInBytes = 12;
-
         public TiffTag tdir_tag;
         public TiffType tdir_type;
 
@@ -39,12 +37,18 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// <summary>
         /// byte offset to field data
         /// </summary>
-        public uint tdir_offset;
+        public ulong tdir_offset;
 
         public new string ToString()
         {
             return tdir_tag.ToString() + ", " + tdir_type.ToString() + " " +
                 tdir_offset.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public static int SizeInBytes(bool isBigTiff)
+        {
+            if (isBigTiff) return 20;
+            else return 12;
         }
     }
 }

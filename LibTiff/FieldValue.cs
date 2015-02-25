@@ -612,6 +612,67 @@ namespace BitMiracle.LibTiff.Classic
             return null;
         }
 
+        public long[] TolongArray()
+        {
+            if (m_value == null)
+                return null;
+
+            Type t = m_value.GetType();
+            if (t.IsArray)
+            {
+                if (m_value is long[])
+                    return m_value as long[];
+                else if (m_value is byte[])
+                {
+                    byte[] temp = m_value as byte[];
+                    if (temp.Length % sizeof(long) != 0)
+                        return null;
+
+                    int totalUInts = temp.Length / sizeof(long);
+                    long[] result = new long[totalUInts];
+
+                    int byteOffset = 0;
+                    for (int i = 0; i < totalUInts; i++)
+                    {
+                        long s = BitConverter.ToUInt32(temp, byteOffset);
+                        result[i] = s;
+                        byteOffset += sizeof(long);
+                    }
+
+                    return result;
+                }
+                else if (m_value is short[])
+                {
+                    short[] temp = m_value as short[];
+                    long[] result = new long[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (long)temp[i];
+
+                    return result;
+                }
+                else if (m_value is ushort[])
+                {
+                    ushort[] temp = m_value as ushort[];
+                    long[] result = new long[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (long)temp[i];
+
+                    return result;
+                }
+                else if (m_value is int[])
+                {
+                    int[] temp = m_value as int[];
+                    long[] result = new long[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (long)temp[i];
+
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Retrieves value converted to array of float values.
         /// </summary>

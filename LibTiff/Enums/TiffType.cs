@@ -93,6 +93,19 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// 32-bit unsigned integer (offset)
         /// </summary>
-        IFD = 13
+        IFD = 13,
+
+        /// <summary>
+        /// BigTIFF 64-bit unsigned long
+        /// </summary>
+        LONG8 = 16,
+        /// <summary>
+        /// BigTIFF 64-bit signed long
+        /// </summary>
+        SLONG8 = 17,
+        /// <summary>
+        /// BigTIFF 64-bit unsigned integer/long (offset)
+        /// </summary>
+        IFD8 = 18
     }
 }

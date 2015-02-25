@@ -24,7 +24,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
-    partial class Tiff
+ partial class Tiff
     {
         private bool writeCheckStrips(string module)
         {
@@ -60,36 +60,55 @@ namespace BitMiracle.LibTiff.Classic
         private bool writeHeaderOK(TiffHeader header)
         {
             bool res = writeShortOK(header.tiff_magic);
-
             if (res)
                 res = writeShortOK(header.tiff_version);
-
-            if (res)
-                res = writeIntOK((int)header.tiff_diroff);
-
+            if (header.tiff_version == TIFF_BIGTIFF_VERSION)
+            {
+                if (res)
+                    res = writeShortOK(header.tiff_offsize);
+                if (res)
+                    res = writeShortOK(header.tiff_fill);
+                if (res)
+                    res = writelongOK((long)header.tiff_diroff);
+            }
+            else
+            {
+                if (res)
+                    res = writeIntOK((int)header.tiff_diroff);
+                if (res)
+                    res = writelongOK(0); // 8 Byte fill for possible bigtiff-header
+            }
             return res;
         }
 
-        private bool writeDirEntryOK(TiffDirEntry[] entries, int count)
+        private bool writeDirEntryOK(TiffDirEntry[] entries, long count, bool isBigTiff)
         {
             bool res = true;
-            for (int i = 0; i < count; i++)
+
+            for (long i = 0; i < count; i++)
             {
                 res = writeShortOK((short)entries[i].tdir_tag);
-
                 if (res)
                     res = writeShortOK((short)entries[i].tdir_type);
+                if (isBigTiff)
+                {
+                    if (res)
+                        res = writelongOK(entries[i].tdir_count);
 
-                if (res)
-                    res = writeIntOK(entries[i].tdir_count);
+                    if (res)
+                        res = writelongOK((long)entries[i].tdir_offset);
+                }
+                else
+                {
+                    if (res)
+                        res = writeIntOK(entries[i].tdir_count);
 
-                if (res)
-                    res = writeIntOK((int)entries[i].tdir_offset);
-
+                    if (res)
+                        res = writeIntOK((int)entries[i].tdir_offset);
+                }
                 if (!res)
                     break;
             }
-
             return res;
         }
 
@@ -100,6 +119,30 @@ namespace BitMiracle.LibTiff.Classic
             cp[1] = (byte)(value >> 8);
 
             return writeOK(cp, 0, 2);
+        }
+
+        private bool writeDirCountOK(long value, bool isBigTiff)
+        {
+            if (isBigTiff)
+            {
+                return writelongOK(value);
+            }
+            else
+            {
+                return writeShortOK((short)value);
+            }
+        }
+
+        private bool writeDirOffOK(long value, bool isBigTiff)
+        {
+            if (isBigTiff)
+            {
+                return writelongOK(value);
+            }
+            else
+            {
+                return writeIntOK((int)value);
+            }
         }
 
         private bool writeIntOK(int value)
@@ -113,6 +156,21 @@ namespace BitMiracle.LibTiff.Classic
             return writeOK(cp, 0, 4);
         }
 
+        private bool writelongOK(long value)
+        {
+            byte[] cp = new byte[8];
+            cp[0] = (byte)value;
+            cp[1] = (byte)(value >> 8);
+            cp[2] = (byte)(value >> 16);
+            cp[3] = (byte)(value >> 24);
+            cp[4] = (byte)(value >> 32);
+            cp[5] = (byte)(value >> 40);
+            cp[6] = (byte)(value >> 48);
+            cp[7] = (byte)(value >> 56);
+
+            return writeOK(cp, 0, 8);
+        }
+
         private bool isUnspecified(int f)
         {
             return (fieldSet(f) && m_dir.td_imagelength == 0);
@@ -124,8 +182,8 @@ namespace BitMiracle.LibTiff.Classic
         private bool growStrips(int delta)
         {
             Debug.Assert(m_dir.td_planarconfig == PlanarConfig.CONTIG);
-            uint[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
-            uint[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            ulong[] new_stripoffset = Realloc(m_dir.td_stripoffset, m_dir.td_nstrips, m_dir.td_nstrips + delta);
+            ulong[] new_stripbytecount = Realloc(m_dir.td_stripbytecount, m_dir.td_nstrips, m_dir.td_nstrips + delta);
             m_dir.td_stripoffset = new_stripoffset;
             m_dir.td_stripbytecount = new_stripbytecount;
             Array.Clear(m_dir.td_stripoffset, m_dir.td_nstrips, delta);
@@ -137,7 +195,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Appends the data to the specified strip.
         /// </summary>
-        private bool appendToStrip(int strip, byte[] buffer, int offset, int count)
+        private bool appendToStrip(int strip, byte[] buffer, int offset, long count)
         {
             const string module = "appendToStrip";
 
@@ -147,14 +205,14 @@ namespace BitMiracle.LibTiff.Classic
 
                 if (m_dir.td_stripbytecount[strip] != 0 &&
                     m_dir.td_stripoffset[strip] != 0 &&
-                    m_dir.td_stripbytecount[strip] >= count)
+                    m_dir.td_stripbytecount[strip] >= (ulong)count)
                 {
                     // There is already tile data on disk, and the new tile 
                     // data we have to will fit in the same space. The only
                     // aspect of this that is risky is that there could be
                     // more data to append to this strip before we are done
                     // depending on how we are getting called.
-                    if (!seekOK(m_dir.td_stripoffset[strip]))
+                    if (!seekOK((long)m_dir.td_stripoffset[strip]))
                     {
                         ErrorExt(this, m_clientdata, module, "Seek error at scanline {0}", m_row);
                         return false;
@@ -164,7 +222,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     // Seek to end of file, and set that as our location
                     // to write this strip.
-                    m_dir.td_stripoffset[strip] = (uint)seekFile(0, SeekOrigin.End);
+                    m_dir.td_stripoffset[strip] = (ulong)seekFile(0, SeekOrigin.End);
                 }
 
                 m_curoff = m_dir.td_stripoffset[strip];
@@ -173,14 +231,14 @@ namespace BitMiracle.LibTiff.Classic
                 m_dir.td_stripbytecount[strip] = 0;
             }
 
-            if (!writeOK(buffer, offset, count))
+            if (!writeOK(buffer, offset, (int)count))
             {
                 ErrorExt(this, m_clientdata, module, "Write error at scanline {0}", m_row);
                 return false;
             }
 
-            m_curoff += (uint)count;
-            m_dir.td_stripbytecount[strip] += (uint)count;
+            m_curoff += (ulong)count;
+            m_dir.td_stripbytecount[strip] += (ulong)count;
             return true;
         }
 

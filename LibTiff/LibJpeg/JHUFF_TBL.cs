@@ -23,10 +23,10 @@ namespace BitMiracle.LibJpeg.Classic
     {
         /* These two fields directly represent the contents of a JPEG DHT marker */
         private readonly byte[] m_bits = new byte[17];     /* bits[k] = # of symbols with codes of */
-        
+
         /* length k bits; bits[0] is unused */
         private readonly byte[] m_huffval = new byte[256];     /* The symbols, in order of incr code length */
-        
+
         private bool m_sent_table;        /* true when table has been output */
 
 

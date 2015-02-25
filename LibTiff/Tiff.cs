@@ -36,7 +36,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
-    partial class Tiff : IDisposable
+ partial class Tiff : IDisposable
     {
         /// <summary>
         /// Delegate for LibTiff.Net extender method
@@ -72,7 +72,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para></remarks>
         public delegate void FaxFillFunc(
             byte[] buffer, int offset, int[] runs, int thisRunOffset, int nextRunOffset, int width);
-        
+
         /// <summary>
         /// Gets the library version string.
         /// </summary>
@@ -1039,7 +1039,7 @@ namespace BitMiracle.LibTiff.Classic
             m_currentCodec.Cleanup();
             m_curdir++;
             TiffDirEntry[] dir;
-            short dircount = fetchDirectory(m_nextdiroff, out dir, out m_nextdiroff);
+            ulong dircount = fetchDirectory(m_nextdiroff, out dir, out m_nextdiroff);
             if (dircount == 0)
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Failed to read directory at offset {1}", m_name, m_nextdiroff);
@@ -1074,7 +1074,7 @@ namespace BitMiracle.LibTiff.Classic
             //
             // It sure would have been nice if Aldus had really thought this stuff through carefully.
 
-            for (int i = 0; i < dircount; i++)
+            for (ulong i = 0; i < dircount; i++)
             {
                 TiffDirEntry dp = dir[i];
                 if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
@@ -1088,7 +1088,7 @@ namespace BitMiracle.LibTiff.Classic
                     dp.tdir_type = (TiffType)temp;
 
                     SwabLong(ref dp.tdir_count);
-                    SwabUInt(ref dp.tdir_offset);
+                    SwabLong8(ref dp.tdir_offset);
                 }
 
                 if (dp.tdir_tag == TiffTag.SAMPLESPERPIXEL)
@@ -1104,10 +1104,7 @@ namespace BitMiracle.LibTiff.Classic
             int fix = 0;
             bool diroutoforderwarning = false;
             bool haveunknowntags = false;
-#if FIX_JPEG_IS_OJPEG
-            bool fixJpegIsOJpeg = false;
-#endif
-            for (int i = 0; i < dircount; i++)
+            for (ulong i = 0; i < dircount; i++)
             {
                 if (dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
@@ -1208,7 +1205,7 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else if (dir[i].tdir_type == TiffType.LONG)
                         {
-#if FIX_JPEG_IS_OJPEG
+                            #if FIX_JPEG_IS_OJPEG
                             int v;
                             bool isFetched = fetchPerSampleLongs(dir[i], out v);
                             if (!isFetched) 
@@ -1224,7 +1221,7 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else
                         {
-#if FIX_JPEG_IS_OJPEG
+                            #if FIX_JPEG_IS_OJPEG
                             short iv;
                             bool isFetched = fetchPerSampleShorts(dir[i], out iv);
                             if (!isFetched)
@@ -1271,7 +1268,7 @@ namespace BitMiracle.LibTiff.Classic
             if (haveunknowntags)
             {
                 fix = 0;
-                for (int i = 0; i < dircount; i++)
+                for (ulong i = 0; i < dircount; i++)
                 {
                     if (dir[i].tdir_tag == TiffTag.IGNORE)
                         continue;
@@ -1331,7 +1328,7 @@ namespace BitMiracle.LibTiff.Classic
             // matches contig planarconfig best. So we 'fix-up' the tag here
             if ((m_dir.td_compression == Compression.OJPEG) && (m_dir.td_planarconfig == PlanarConfig.SEPARATE))
             {
-                int dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPOFFSETS);
+                long dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPOFFSETS);
                 if (dpIndex != -1 && dir[dpIndex].tdir_count == 1)
                 {
                     dpIndex = readDirectoryFind(dir, dircount, TiffTag.STRIPBYTECOUNTS);
@@ -1395,7 +1392,7 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             // Second pass: extract other information.
-            for (int i = 0; i < dircount; i++)
+            for (ulong i = 0; i < dircount; i++)
             {
                 if (dir[i].tdir_tag == TiffTag.IGNORE)
                     continue;
@@ -1451,6 +1448,25 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffTag.TILEBYTECOUNTS:
                         if (!fetchStripThing(dir[i], m_dir.td_nstrips, ref m_dir.td_stripbytecount))
                             return false;
+                        break;
+                    case TiffTag.SUBIFD:
+                        var v8 = new long[dir[i].tdir_count];
+                        if (dir[i].tdir_type == TiffType.LONG8 || dir[i].tdir_type == TiffType.IFD8)
+                        {
+                            if (!fetchLong8Array(dir[i], v8))
+                                return false;
+                        }
+                        else
+                        {
+                            var v = new int[dir[i].tdir_count];
+                            if (!fetchLongArray(dir[i], v))
+                                return false;
+                            for (int si = 0; si < dir[si].tdir_count; si++)
+                            {
+                                v8[si] = (long) v[si];
+                            }
+                        }
+                        SetField(TiffTag.SUBIFD, v8);
                         break;
                     case TiffTag.COLORMAP:
                     case TiffTag.TRANSFERFUNCTION:
@@ -1572,7 +1588,7 @@ namespace BitMiracle.LibTiff.Classic
                     {
                         WarningExt(this, m_clientdata, "ReadDirectory",
                             "SamplesPerPixel tag is missing, assuming correct SamplesPerPixel value is 3");
-                        
+
                         if (!SetField(TiffTag.SAMPLESPERPIXEL, 3))
                             return false;
                     }
@@ -1614,7 +1630,7 @@ namespace BitMiracle.LibTiff.Classic
                         "{0}: TIFF directory is missing required \"{1}\" field, calculating from imagelength",
                         m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
 
-                    if (!estimateStripByteCounts(dir, dircount))
+                    if (!estimateStripByteCounts(dir, (long)dircount))
                         return false;
                 }
                 else if (m_dir.td_nstrips == 1 && m_dir.td_stripoffset[0] != 0 && byteCountLooksBad(m_dir))
@@ -1626,7 +1642,7 @@ namespace BitMiracle.LibTiff.Classic
                         "{0}: Bogus \"{1}\" field, ignoring and calculating from imagelength",
                         m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
 
-                    if (!estimateStripByteCounts(dir, dircount))
+                    if (!estimateStripByteCounts(dir, (long)dircount))
                         return false;
                 }
                 else if (m_dir.td_planarconfig == PlanarConfig.CONTIG && m_dir.td_nstrips > 2 &&
@@ -1639,7 +1655,7 @@ namespace BitMiracle.LibTiff.Classic
                         "{0}: Wrong \"{1}\" field, ignoring and calculating from imagelength",
                         m_name, FieldWithTag(TiffTag.STRIPBYTECOUNTS).Name);
 
-                    if (!estimateStripByteCounts(dir, dircount))
+                    if (!estimateStripByteCounts(dir, (long)dircount))
                         return false;
                 }
             }
@@ -1732,9 +1748,9 @@ namespace BitMiracle.LibTiff.Classic
 
             setupFieldInfo(info, count);
 
-            uint dummyNextDirOff;
+            ulong dummyNextDirOff;
             TiffDirEntry[] dir;
-            short dircount = fetchDirectory((uint)offset, out dir, out dummyNextDirOff);
+            ulong dircount = fetchDirectory((ulong)offset, out dir, out dummyNextDirOff);
             if (dircount == 0)
             {
                 ErrorExt(this, m_clientdata, module,
@@ -1746,7 +1762,7 @@ namespace BitMiracle.LibTiff.Classic
             m_dir = new TiffDirectory();
 
             int fix = 0;
-            for (short i = 0; i < dircount; i++)
+            for (ulong i = 0; i < dircount; i++)
             {
                 if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                 {
@@ -1759,7 +1775,7 @@ namespace BitMiracle.LibTiff.Classic
                     dir[i].tdir_type = (TiffType)temp;
 
                     SwabLong(ref dir[i].tdir_count);
-                    SwabUInt(ref dir[i].tdir_offset);
+                    SwabLong8(ref dir[i].tdir_offset);
                 }
 
                 if (fix >= m_nfields || dir[i].tdir_tag == TiffTag.IGNORE)
@@ -2008,7 +2024,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The number of bytes in a raw strip.</returns>
         public long RawStripSize(int strip)
         {
-            long bytecount = m_dir.td_stripbytecount[strip];
+            long bytecount = (long)m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
                 ErrorExt(this, m_clientdata, m_name,
@@ -2288,7 +2304,7 @@ namespace BitMiracle.LibTiff.Classic
                     multiply(howMany(m_dir.td_imagewidth, dx), howMany(m_dir.td_imagelength, dy), "NumberOfTiles"),
                     howMany(m_dir.td_imagedepth, dz), "NumberOfTiles");
             }
-            
+
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 ntiles = multiply(ntiles, m_dir.td_samplesperpixel, "NumberOfTiles");
 
@@ -2447,7 +2463,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The number of directories in a file.</returns>
         public short NumberOfDirectories()
         {
-            uint nextdir = m_header.tiff_diroff;
+            var nextdir = m_header.tiff_diroff;
             short n = 0;
             long dummyOff;
             while (nextdir != 0 && advanceDirectory(ref nextdir, out dummyOff))
@@ -2462,7 +2478,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The file/stream offset of the current directory.</returns>
         public long CurrentDirOffset()
         {
-            return m_diroff;
+            return (long)m_diroff;
         }
 
         /// <summary>
@@ -2606,8 +2622,8 @@ namespace BitMiracle.LibTiff.Classic
             if (m_dir.td_planarconfig == PlanarConfig.SEPARATE)
                 m_dir.td_stripsperimage /= m_dir.td_samplesperpixel;
 
-            m_dir.td_stripoffset = new uint[m_dir.td_nstrips];
-            m_dir.td_stripbytecount = new uint[m_dir.td_nstrips];
+            m_dir.td_stripoffset = new ulong[m_dir.td_nstrips];
+            m_dir.td_stripbytecount = new ulong[m_dir.td_nstrips];
 
             setFieldBit(FieldBit.StripOffsets);
             setFieldBit(FieldBit.StripByteCounts);
@@ -2739,7 +2755,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="ReadDirectory"/>.</remarks>
         public bool SetDirectory(short number)
         {
-            uint nextdir = m_header.tiff_diroff;
+            var nextdir = m_header.tiff_diroff;
             short n;
             for (n = number; n > 0 && nextdir != 0; n--)
             {
@@ -2773,7 +2789,7 @@ namespace BitMiracle.LibTiff.Classic
         /// accessing subdirectories linked through a SubIFD tag (e.g. thumbnail images).</remarks>        
         public bool SetSubDirectory(long offset)
         {
-            m_nextdiroff = (uint)offset;
+            m_nextdiroff = (ulong)offset;
 
             // Reset m_dirnumber counter and start new list of seen directories.
             // We need this to prevent IFD loops.
@@ -2801,7 +2817,7 @@ namespace BitMiracle.LibTiff.Classic
             // Go to the directory before the one we want
             // to unlink and nab the offset of the link
             // field we'll need to patch.
-            uint nextdir = m_header.tiff_diroff;
+            var nextdir = m_header.tiff_diroff;
             long off = sizeof(short) + sizeof(short);
             for (int n = number - 1; n > 0; n--)
             {
@@ -2824,9 +2840,9 @@ namespace BitMiracle.LibTiff.Classic
 
             // Go back and patch the link field of the preceding directory to point to the
             // offset of the directory that follows.
-            seekFile(off, SeekOrigin.Begin);
+            seekFile((long)off, SeekOrigin.Begin);
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabUInt(ref nextdir);
+                SwabLong8(ref nextdir);
 
             if (!writeIntOK((int)nextdir))
             {
@@ -2958,7 +2974,7 @@ namespace BitMiracle.LibTiff.Classic
                 m_diroff = 0;
 
                 seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SeekOrigin.Begin);
-                if (!writeIntOK((int)m_header.tiff_diroff))
+                if (!writeDirOffOK((long)m_header.tiff_diroff,m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                 {
                     ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
                     return false;
@@ -2966,38 +2982,59 @@ namespace BitMiracle.LibTiff.Classic
             }
             else
             {
-                uint nextdir = m_header.tiff_diroff;
+                var nextdir = m_header.tiff_diroff;
                 do
                 {
-                    short dircount;
-                    if (!seekOK(nextdir) || !readShortOK(out dircount))
+                    ulong dircount;
+                    if (!seekOK((long)nextdir) || !readDirCountOK(out dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                     {
                         ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                         return false;
                     }
 
                     if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                        SwabShort(ref dircount);
+                        SwabLong8(ref dircount);
 
-                    seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
+                    seekFile((long)(dircount * (ulong)TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION)), SeekOrigin.Current);
 
-                    if (!readUIntOK(out nextdir))
+                    if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
                     {
-                        ErrorExt(this, m_clientdata, module, "Error fetching directory link");
-                        return false;
+                        if (!readUlongOK(out nextdir))
+                        {
+                            ErrorExt(this, m_clientdata, module, "Error fetching directory link");
+                            return false;
+                        }
+
+                    }
+                    else
+                    {
+                        uint temp;
+                        if (!readUIntOK(out temp))
+                        {
+                            ErrorExt(this, m_clientdata, module, "Error fetching directory link");
+                            return false;
+                        }
+                        nextdir = temp;
                     }
 
                     if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                        SwabUInt(ref nextdir);
+                        SwabLong8(ref nextdir);
                 }
                 while (nextdir != m_diroff && nextdir != 0);
 
                 // get current offset
                 long off = seekFile(0, SeekOrigin.Current);
-                seekFile(off - sizeof(int), SeekOrigin.Begin);
+                if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
+                {
+                    seekFile(off - sizeof(long), SeekOrigin.Begin);
+                }
+                else
+                {
+                    seekFile(off - sizeof(int), SeekOrigin.Begin);
+                }
                 m_diroff = 0;
 
-                if (!writeIntOK((int)m_diroff))
+                if (!writeDirOffOK((long)m_diroff, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                 {
                     ErrorExt(this, m_clientdata, module, "Error writing directory link");
                     return false;
@@ -4928,9 +4965,9 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            uint bytecount = m_dir.td_stripbytecount[tile];
-            if (count != -1 && (uint)count < bytecount)
-                bytecount = (uint)count;
+            ulong bytecount = m_dir.td_stripbytecount[tile];
+            if (count != -1 && (ulong)count < bytecount)
+                bytecount = (ulong)count;
 
             return readRawTile1(tile, buffer, offset, (int)bytecount, module);
         }
@@ -5122,15 +5159,15 @@ namespace BitMiracle.LibTiff.Classic
                 return -1;
             }
 
-            uint bytecount = m_dir.td_stripbytecount[strip];
+            ulong bytecount = m_dir.td_stripbytecount[strip];
             if (bytecount <= 0)
             {
                 ErrorExt(this, m_clientdata, m_name, "{0}: Invalid strip byte count, strip {1}", bytecount, strip);
                 return -1;
             }
 
-            if (count != -1 && (uint)count < bytecount)
-                bytecount = (uint)count;
+            if (count != -1 && (ulong)count < bytecount)
+                bytecount = (ulong)count;
 
             return readRawStrip1(strip, buffer, offset, (int)bytecount, module);
         }
@@ -5641,6 +5678,9 @@ namespace BitMiracle.LibTiff.Classic
                 case TiffType.RATIONAL:
                 case TiffType.SRATIONAL:
                 case TiffType.DOUBLE:
+                case TiffType.LONG8:
+                case TiffType.SLONG8:
+                case TiffType.IFD8:
                     return 8;
 
                 default:
@@ -5691,6 +5731,44 @@ namespace BitMiracle.LibTiff.Classic
             value += (bytes[1] & 0xFF) << 8;
             value += (bytes[2] & 0xFF) << 16;
             value += bytes[3] << 24;
+        }
+
+        private static void SwabLong8(ref ulong value)
+        {
+            byte[] bytes = new byte[8];
+            bytes[0] = (byte)value;
+            bytes[1] = (byte)(value >> 8);
+            bytes[2] = (byte)(value >> 16);
+            bytes[3] = (byte)(value >> 24);
+            bytes[4] = (byte)(value >> 32);
+            bytes[5] = (byte)(value >> 40);
+            bytes[6] = (byte)(value >> 48);
+            bytes[7] = (byte)(value >> 56);
+
+            byte temp = bytes[7];
+            bytes[7] = bytes[0];
+            bytes[0] = temp;
+
+            temp = bytes[6];
+            bytes[6] = bytes[1];
+            bytes[1] = temp;
+
+            temp = bytes[5];
+            bytes[5] = bytes[2];
+            bytes[2] = temp;
+
+            temp = bytes[4];
+            bytes[4] = bytes[3];
+            bytes[3] = temp;
+
+            value = (ulong)bytes[0] & 0xFF;
+            value += (ulong)(bytes[1] & 0xFF) << 8;
+            value += (ulong)(bytes[2] & 0xFF) << 16;
+            value += (ulong)(bytes[3] & 0xFF) << 24;
+            value += (ulong)(bytes[4] & 0xFF) << 32;
+            value += (ulong)(bytes[5] & 0xFF) << 40;
+            value += (ulong)(bytes[6] & 0xFF) << 48;
+            value += (ulong)(bytes[7] & 0xFF) << 56;
         }
 
         /// <summary>
@@ -5799,6 +5877,11 @@ namespace BitMiracle.LibTiff.Classic
             SwabArrayOfLong(array, 0, count);
         }
 
+        public static void SwabArrayOfLong8(long[] array, int count)
+        {
+            SwabArrayOfLong8(array, 0, count);
+        }
+
         /// <summary>
         /// Swaps the bytes in specified number of values in the array of 32-bit items
         /// starting at specified offset.
@@ -5830,6 +5913,48 @@ namespace BitMiracle.LibTiff.Classic
                 array[offset] += (bytes[1] & 0xFF) << 8;
                 array[offset] += (bytes[2] & 0xFF) << 16;
                 array[offset] += bytes[3] << 24;
+            }
+        }
+
+        public static void SwabArrayOfLong8(long[] array, int offset, int count)
+        {
+            byte[] bytes = new byte[8];
+
+            for (int i = 0; i < count; i++, offset++)
+            {
+                bytes[0] = (byte)array[offset];
+                bytes[1] = (byte)(array[offset] >> 8);
+                bytes[2] = (byte)(array[offset] >> 16);
+                bytes[3] = (byte)(array[offset] >> 24);
+                bytes[4] = (byte)(array[offset] >> 32);
+                bytes[5] = (byte)(array[offset] >> 40);
+                bytes[6] = (byte)(array[offset] >> 48);
+                bytes[7] = (byte)(array[offset] >> 56);
+
+                byte temp = bytes[7];
+                bytes[7] = bytes[0];
+                bytes[0] = temp;
+
+                temp = bytes[6];
+                bytes[6] = bytes[1];
+                bytes[1] = temp;
+
+                temp = bytes[5];
+                bytes[5] = bytes[2];
+                bytes[2] = temp;
+
+                temp = bytes[4];
+                bytes[4] = bytes[3];
+                bytes[3] = temp;
+
+                array[offset] = bytes[0] & 0xFF;
+                array[offset] += (bytes[1] & 0xFF) << 8;
+                array[offset] += (bytes[2] & 0xFF) << 16;
+                array[offset] += (bytes[3] & 0xFF) << 24;
+                array[offset] += (bytes[4] & 0xFF) << 32;
+                array[offset] += (bytes[5] & 0xFF) << 40;
+                array[offset] += (bytes[6] & 0xFF) << 48;
+                array[offset] += bytes[7] << 56;
             }
         }
 
@@ -5954,8 +6079,21 @@ namespace BitMiracle.LibTiff.Classic
         {
             int intCount = count / sizeof(int);
             int[] integers = new int[intCount];
-            Buffer.BlockCopy(buffer, offset, integers, 0, intCount * sizeof(int));            
+            Buffer.BlockCopy(buffer, offset, integers, 0, intCount * sizeof(int));
             return integers;
+        }
+
+        public static long[] ByteArrayToLong8(byte[] buffer, int offset, int count)
+        {
+            int intCount = count / sizeof(long);
+            var integers = new long[intCount];
+            Buffer.BlockCopy(buffer, offset, integers, 0, intCount * sizeof(long));
+            return integers;
+        }
+
+        public static void Long8ToByteArray(long[] source, int srcOffset, int srcCount, byte[] bytes, int offset)
+        {
+            Buffer.BlockCopy(source, srcOffset * sizeof(long), bytes, offset, srcCount * sizeof(long));
         }
 
         /// <summary>
@@ -6003,5 +6141,35 @@ namespace BitMiracle.LibTiff.Classic
         {
             Buffer.BlockCopy(source, srcOffset * sizeof(short), bytes, offset, srcCount * sizeof(short));
         }
+
+        private static ulong[] IntToLong(uint[] inputArray)
+        {
+            var output =
+            Array.ConvertAll(inputArray,
+                i => (ulong)i);
+            return output;
+        }
+        private static long[] IntToLong(int[] inputArray)
+        {
+            var output =
+            Array.ConvertAll(inputArray,
+                i => (long)i);
+            return output;
+        }
+        private static uint[] LongToInt(ulong[] inputArray)
+        {
+            var output =
+            Array.ConvertAll(inputArray,
+                i => (uint)i);
+            return output;
+        }
+        private static int[] LongToInt(long[] inputArray)
+        {
+            var output =
+            Array.ConvertAll(inputArray,
+                i => (int)i);
+            return output;
+        }
+
     }
 }
