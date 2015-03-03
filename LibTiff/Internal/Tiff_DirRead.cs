@@ -67,9 +67,12 @@ namespace BitMiracle.LibTiff.Classic
 
             if (m_dir.td_compression != Compression.NONE)
             {
-                long space = TiffHeader.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION) + sizeof(long) + (dircount * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION)) + sizeof(int);
-                long filesize = getFileSize();
-
+              long filesize = getFileSize();
+              long space = m_header.tiff_version == TIFF_BIGTIFF_VERSION
+                ? TiffHeader.SizeInBytes(true) + sizeof(long) +
+                  (dircount * TiffDirEntry.SizeInBytes(true)) + sizeof(long)
+                : TiffHeader.SizeInBytes(false) + sizeof(short) +
+                  (dircount * TiffDirEntry.SizeInBytes(false)) + sizeof(int); 
                 // calculate amount of space used by indirect values
                 for (short n = 0; n < dircount; n++)
                 {
