@@ -25,13 +25,13 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     partial class Tiff
     {
-        private int extractData(TiffDirEntry dir)
+        private long extractData(TiffDirEntry dir)
         {
-            int type = (int)dir.tdir_type;
+          int type = (int)dir.tdir_type;
             if (m_header.tiff_magic == TIFF_BIGENDIAN)
-                return (int)((dir.tdir_offset >> m_typeshift[type]) & m_typemask[type]);
+                return (long)((dir.tdir_offset >> m_typeshift[type]) & m_typemask[type]);
 
-            return (int)(dir.tdir_offset & m_typemask[type]);
+            return (long)(dir.tdir_offset & m_typemask[type]);
         }
 
         private bool byteCountLooksBad(TiffDirectory td)
@@ -466,7 +466,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private float fetchFloat(TiffDirEntry dir)
         {
-            int l = extractData(dir);
+            int l = (int)extractData(dir);
             return BitConverter.ToSingle(BitConverter.GetBytes(l), 0);
         }
 
@@ -928,6 +928,7 @@ namespace BitMiracle.LibTiff.Classic
             else if (checkDirCount(dir, 1))
             {
                 int v32 = 0;
+                long v64 = 0;
                 // singleton value
                 switch (dir.tdir_type)
                 {
@@ -959,7 +960,7 @@ namespace BitMiracle.LibTiff.Classic
                             break;
                         }
 
-                        v32 = extractData(dir);
+                        v32 = (int)extractData(dir);
                         if (fip.PassCount)
                         {
                             int[] a = new int[1];
@@ -974,7 +975,7 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffType.LONG:
                     case TiffType.SLONG:
                     case TiffType.IFD:
-                        v32 = extractData(dir);
+                        v32 = (int)extractData(dir);
                         if (fip.PassCount)
                         {
                             int[] a = new int[1];
@@ -983,7 +984,19 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else
                             ok = SetField(dir.tdir_tag, v32);
-
+                        break;
+                    case TiffType.LONG8:
+                    case TiffType.SLONG8:
+                    case TiffType.IFD8:
+                        v64 = extractData(dir);
+                        if (fip.PassCount)
+                        {
+                          long[] a = new long[1];
+                          a[0] = v64;
+                          ok = SetField(dir.tdir_tag, 1, a);
+                        }
+                        else
+                          ok = SetField(dir.tdir_tag, v64);
                         break;
 
                     case TiffType.RATIONAL:

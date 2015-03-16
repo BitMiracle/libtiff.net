@@ -1193,7 +1193,7 @@ namespace BitMiracle.LibTiff.Classic
                         // Because of this, we accept the tag if one value is supplied.
                         if (dir[i].tdir_count == 1)
                         {
-                            int v = extractData(dir[i]);
+                            int v = (int)extractData(dir[i]);
 #if FIX_JPEG_IS_OJPEG
                             fixJpegIsOJpeg = checkJpegIsOJpeg(ref v, dir, dircount);
 #endif
@@ -1415,7 +1415,7 @@ namespace BitMiracle.LibTiff.Classic
                         // incorrect one for BitsPerSample and friends, and we will read this too.
                         if (dir[i].tdir_count == 1)
                         {
-                            int v = extractData(dir[i]);
+                            int v = (int)extractData(dir[i]);
                             if (!SetField(dir[i].tdir_tag, v))
                                 return false;
                             // XXX: workaround for broken TIFFs
