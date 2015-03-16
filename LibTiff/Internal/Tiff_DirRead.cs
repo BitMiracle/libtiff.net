@@ -1317,8 +1317,8 @@ namespace BitMiracle.LibTiff.Classic
                 return;
             }
 
-            var newcounts = new ulong[nstrips];
-            var newoffsets = new ulong[nstrips];
+            ulong[] newcounts = new ulong[nstrips];
+            ulong[] newoffsets = new ulong[nstrips];
 
             // Fill the strip information arrays with new bytecounts and offsets
             // that reflect the broken-up format.

@@ -1450,7 +1450,7 @@ namespace BitMiracle.LibTiff.Classic
                             return false;
                         break;
                     case TiffTag.SUBIFD:
-                        var v8 = new long[dir[i].tdir_count];
+                        long[] v8 = new long[dir[i].tdir_count];
                         if (dir[i].tdir_type == TiffType.LONG8 || dir[i].tdir_type == TiffType.IFD8)
                         {
                             if (!fetchLong8Array(dir[i], v8))
@@ -1458,7 +1458,7 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else
                         {
-                            var v = new int[dir[i].tdir_count];
+                            int[] v = new int[dir[i].tdir_count];
                             if (!fetchLongArray(dir[i], v))
                                 return false;
                             for (int si = 0; si < dir[si].tdir_count; si++)
@@ -2463,7 +2463,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The number of directories in a file.</returns>
         public short NumberOfDirectories()
         {
-            var nextdir = m_header.tiff_diroff;
+            ulong nextdir = m_header.tiff_diroff;
             short n = 0;
             long dummyOff;
             while (nextdir != 0 && advanceDirectory(ref nextdir, out dummyOff))
@@ -2755,7 +2755,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="ReadDirectory"/>.</remarks>
         public bool SetDirectory(short number)
         {
-            var nextdir = m_header.tiff_diroff;
+          ulong nextdir = m_header.tiff_diroff;
             short n;
             for (n = number; n > 0 && nextdir != 0; n--)
             {
@@ -2817,7 +2817,7 @@ namespace BitMiracle.LibTiff.Classic
             // Go to the directory before the one we want
             // to unlink and nab the offset of the link
             // field we'll need to patch.
-            var nextdir = m_header.tiff_diroff;
+            ulong nextdir = m_header.tiff_diroff;
             long off = sizeof(short) + sizeof(short);
             for (int n = number - 1; n > 0; n--)
             {
@@ -2982,7 +2982,7 @@ namespace BitMiracle.LibTiff.Classic
             }
             else
             {
-                var nextdir = m_header.tiff_diroff;
+                ulong nextdir = m_header.tiff_diroff;
                 do
                 {
                     ulong dircount;
@@ -5876,7 +5876,14 @@ namespace BitMiracle.LibTiff.Classic
         {
             SwabArrayOfLong(array, 0, count);
         }
-
+        /// <summary>
+        /// Swaps the bytes in specified number of values in the array of 64-bit items.
+        /// </summary>
+        /// <overloads>
+        /// Swaps the bytes in specified number of values in the array of 64-bit items.
+        /// </overloads>
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
         public static void SwabArrayOfLong8(long[] array, int count)
         {
             SwabArrayOfLong8(array, 0, count);
@@ -5915,7 +5922,14 @@ namespace BitMiracle.LibTiff.Classic
                 array[offset] += bytes[3] << 24;
             }
         }
-
+        /// <summary>
+        /// Swaps the bytes in specified number of values in the array of 64-bit items
+        /// starting at specified offset.
+        /// </summary>
+        /// <param name="array">The array to swap bytes in.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="array"/> at
+        /// which to begin swapping bytes.</param>
+        /// <param name="count">The number of items to swap bytes in.</param>
         public static void SwabArrayOfLong8(long[] array, int offset, int count)
         {
             byte[] bytes = new byte[8];
@@ -6083,14 +6097,32 @@ namespace BitMiracle.LibTiff.Classic
             return integers;
         }
 
+        /// <summary>
+        /// Converts a byte buffer into array of 64-bit values.
+        /// </summary>
+        /// <param name="buffer">The byte buffer.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="buffer"/> at
+        /// which to begin converting bytes.</param>
+        /// <param name="count">The number of bytes to convert.</param>
+        /// <returns>The array of 64-bit values.</returns>
         public static long[] ByteArrayToLong8(byte[] buffer, int offset, int count)
         {
             int intCount = count / sizeof(long);
-            var integers = new long[intCount];
+            long[] integers = new long[intCount];
             Buffer.BlockCopy(buffer, offset, integers, 0, intCount * sizeof(long));
             return integers;
         }
 
+        /// <summary>
+        /// Converts array of 64-bit values into array of bytes.
+        /// </summary>
+        /// <param name="source">The array of 64-bit values.</param>
+        /// <param name="srcOffset">The zero-based offset in <paramref name="source"/> at
+        /// which to begin converting bytes.</param>
+        /// <param name="srcCount">The number of 64-bit values to convert.</param>
+        /// <param name="bytes">The byte array to store converted values at.</param>
+        /// <param name="offset">The zero-based offset in <paramref name="bytes"/> at
+        /// which to begin storing converted values.</param>
         public static void Long8ToByteArray(long[] source, int srcOffset, int srcCount, byte[] bytes, int offset)
         {
             Buffer.BlockCopy(source, srcOffset * sizeof(long), bytes, offset, srcCount * sizeof(long));
@@ -6141,31 +6173,23 @@ namespace BitMiracle.LibTiff.Classic
         {
             Buffer.BlockCopy(source, srcOffset * sizeof(short), bytes, offset, srcCount * sizeof(short));
         }
-
-        private static ulong[] IntToLong(uint[] inputArray)
-        {
-            var output =
-            Array.ConvertAll(inputArray,
-                i => (ulong)i);
-            return output;
-        }
         private static long[] IntToLong(int[] inputArray)
         {
-            var output =
+            long[] output =
             Array.ConvertAll(inputArray,
                 i => (long)i);
             return output;
         }
         private static uint[] LongToInt(ulong[] inputArray)
         {
-            var output =
+            uint[] output =
             Array.ConvertAll(inputArray,
                 i => (uint)i);
             return output;
         }
         private static int[] LongToInt(long[] inputArray)
         {
-            var output =
+            int[] output =
             Array.ConvertAll(inputArray,
                 i => (int)i);
             return output;

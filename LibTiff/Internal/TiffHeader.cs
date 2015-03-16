@@ -30,8 +30,19 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// byte offset to first directory
         /// </summary>
         public ulong tiff_diroff;
+        /// <summary>
+        /// reperesents the size in bytes of the offsets
+        /// </summary>
         public short tiff_offsize;
+        /// <summary>
+        /// constant for possibly bigtiff convert
+        /// </summary>
         public short tiff_fill;
+        /// <summary>
+        /// size in bytes of the header depending on the current format
+        /// </summary>
+        /// <param name="isBigTiff">if set to <c>true</c> then the bigtiff size will be returned.</param>
+        /// <returns></returns>
         public static int SizeInBytes(bool isBigTiff)
         {
             if (isBigTiff) return 16;

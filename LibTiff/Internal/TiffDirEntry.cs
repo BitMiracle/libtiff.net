@@ -44,7 +44,11 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return tdir_tag.ToString() + ", " + tdir_type.ToString() + " " +
                 tdir_offset.ToString(CultureInfo.InvariantCulture);
         }
-
+        /// <summary>
+        /// size in bytes of the entry depending on the current format
+        /// </summary>
+        /// <param name="isBigTiff">if set to <c>true</c> then the bigtiff size will be returned.</param>
+        /// <returns></returns>
         public static int SizeInBytes(bool isBigTiff)
         {
             if (isBigTiff) return 20;

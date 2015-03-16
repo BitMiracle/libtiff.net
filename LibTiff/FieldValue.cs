@@ -612,6 +612,17 @@ namespace BitMiracle.LibTiff.Classic
             return null;
         }
 
+        /// <summary>
+        /// Retrieves value converted to array of long values.
+        /// </summary>
+        /// <returns>Value converted to array of long values.</returns>
+        /// <remarks><para>If value is array of long values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each 8 bytes are converted to uint and added to
+        /// resulting array. If value contains amount of bytes that can't be divided by 8 without
+        /// remainder, then null is returned.</para>
+        /// <para>If value is array of short, ushort or int values then each element of
+        /// field value gets converted to long and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
         public long[] TolongArray()
         {
             if (m_value == null)
