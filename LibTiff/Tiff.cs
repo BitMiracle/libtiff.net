@@ -6175,23 +6175,29 @@ namespace BitMiracle.LibTiff.Classic
         }
         private static long[] IntToLong(int[] inputArray)
         {
-            long[] output =
-            Array.ConvertAll(inputArray,
-                i => (long)i);
+            long[] output = new long[inputArray.Length];
+          for (int i = 0; i < inputArray.Length; i++)
+          {
+            output[i] = (long)inputArray[i];
+          }
             return output;
         }
         private static uint[] LongToInt(ulong[] inputArray)
         {
-            uint[] output =
-            Array.ConvertAll(inputArray,
-                i => (uint)i);
+          uint[] output = new uint[inputArray.Length];
+          for (int i = 0; i < inputArray.Length; i++)
+          {
+            output[i] = (uint)inputArray[i];
+          }
             return output;
         }
         private static int[] LongToInt(long[] inputArray)
         {
-            int[] output =
-            Array.ConvertAll(inputArray,
-                i => (int)i);
+          int[] output = new int[inputArray.Length];
+          for (int i = 0; i < inputArray.Length; i++)
+          {
+            output[i] = (int)inputArray[i];
+          }
             return output;
         }
 
