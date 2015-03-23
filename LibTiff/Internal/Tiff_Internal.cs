@@ -418,7 +418,7 @@ namespace BitMiracle.LibTiff.Classic
                     SwabShort(ref temp);
                     dirEntry.tdir_type = (TiffType)temp;
                     SwabLong(ref dirEntry.tdir_count);
-                    SwabLong8(ref dirEntry.tdir_offset);
+                    SwabBigTiffValue(ref dirEntry.tdir_offset, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
                 }
 
                 dircount = (short)nfields;
@@ -555,14 +555,14 @@ namespace BitMiracle.LibTiff.Classic
         }
 
 #if FIX_JPEG_IS_OJPEG
-        private bool checkJpegIsOJpeg(ref int v, TiffDirEntry[] dir, short dircount)
+        private bool checkJpegIsOJpeg(ref int v, TiffDirEntry[] dir, ulong dircount)
         {
             // detect a bug in some older JPEG-IN-TIFF formats (emitted by (unknown) scanner software)
             // where the Compression field reports new-style JPEG (7) but the JPEG encoded data
             // and JPEG related fields actually conform to old-style JPEG (6).
             if ((Compression)(v & 0xffff) == Compression.JPEG)
             {
-                for (int i = 0; i < dircount; i++)
+                for (ulong i = 0; i < dircount; i++)
                 {
                     switch (dir[i].tdir_tag)
                     {

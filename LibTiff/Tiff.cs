@@ -1088,7 +1088,7 @@ namespace BitMiracle.LibTiff.Classic
                     dp.tdir_type = (TiffType)temp;
 
                     SwabLong(ref dp.tdir_count);
-                    SwabLong8(ref dp.tdir_offset);
+                    SwabBigTiffValue(ref dp.tdir_offset, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
                 }
 
                 if (dp.tdir_tag == TiffTag.SAMPLESPERPIXEL)
@@ -1104,6 +1104,9 @@ namespace BitMiracle.LibTiff.Classic
             int fix = 0;
             bool diroutoforderwarning = false;
             bool haveunknowntags = false;
+#if FIX_JPEG_IS_OJPEG
+          bool fixJpegIsOJpeg = false;
+#endif
             for (ulong i = 0; i < dircount; i++)
             {
                 if (dir[i].tdir_tag == TiffTag.IGNORE)
@@ -1449,25 +1452,6 @@ namespace BitMiracle.LibTiff.Classic
                         if (!fetchStripThing(dir[i], m_dir.td_nstrips, ref m_dir.td_stripbytecount))
                             return false;
                         break;
-                    case TiffTag.SUBIFD:
-                        long[] v8 = new long[dir[i].tdir_count];
-                        if (dir[i].tdir_type == TiffType.LONG8 || dir[i].tdir_type == TiffType.IFD8)
-                        {
-                            if (!fetchLong8Array(dir[i], v8))
-                                return false;
-                        }
-                        else
-                        {
-                            int[] v = new int[dir[i].tdir_count];
-                            if (!fetchLongArray(dir[i], v))
-                                return false;
-                            for (int si = 0; si < dir[si].tdir_count; si++)
-                            {
-                                v8[si] = (long) v[si];
-                            }
-                        }
-                        SetField(TiffTag.SUBIFD, v8);
-                        break;
                     case TiffTag.COLORMAP:
                     case TiffTag.TRANSFERFUNCTION:
                         {
@@ -1775,7 +1759,7 @@ namespace BitMiracle.LibTiff.Classic
                     dir[i].tdir_type = (TiffType)temp;
 
                     SwabLong(ref dir[i].tdir_count);
-                    SwabLong8(ref dir[i].tdir_offset);
+                    SwabBigTiffValue(ref dir[i].tdir_offset, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
                 }
 
                 if (fix >= m_nfields || dir[i].tdir_tag == TiffTag.IGNORE)
@@ -2842,7 +2826,8 @@ namespace BitMiracle.LibTiff.Classic
             // offset of the directory that follows.
             seekFile((long)off, SeekOrigin.Begin);
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabLong8(ref nextdir);
+              SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+
 
             if (!writeIntOK((int)nextdir))
             {
@@ -2993,7 +2978,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
 
                     if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                        SwabLong8(ref dircount);
+                      SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
 
                     seekFile((long)(dircount * (ulong)TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION)), SeekOrigin.Current);
 
@@ -3018,7 +3003,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
 
                     if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                        SwabLong8(ref nextdir);
+                      SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
                 }
                 while (nextdir != m_diroff && nextdir != 0);
 
@@ -5769,6 +5754,30 @@ namespace BitMiracle.LibTiff.Classic
             value += (ulong)(bytes[5] & 0xFF) << 40;
             value += (ulong)(bytes[6] & 0xFF) << 48;
             value += (ulong)(bytes[7] & 0xFF) << 56;
+        }
+
+        private static void SwabBigTiffValue(ref ulong value, bool isBigTiff, bool isShort)
+        {
+          if (isBigTiff)
+          {
+            SwabLong8(ref value);
+          }
+          else
+          {
+            if (isShort)
+            {
+              short tempValue = (short)value;
+              SwabShort(ref tempValue);
+              value = (ulong)tempValue;
+            }
+            else
+            {
+
+              int tempValue = (int) value;
+              SwabLong(ref tempValue);
+              value = (ulong) tempValue;
+            }
+          }
         }
 
         /// <summary>

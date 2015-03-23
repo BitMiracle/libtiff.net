@@ -115,11 +115,9 @@ namespace BitMiracle.LibTiff.Classic
             {
                 case TypeCode.UInt32:
                     return (int)((uint)m_value);
-
                 case TypeCode.Int32:
                     return (int)m_value;
             }
-
             return Convert.ToInt32(m_value);
         }
 
@@ -142,6 +140,22 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             return Convert.ToUInt32(m_value);
+        }
+        /// <summary>
+        /// Retrieves value converted to long.
+        /// </summary>
+        /// <returns>The value converted to long.</returns>
+        public long ToLong()
+        {
+          switch (Type.GetTypeCode(m_value.GetType()))
+          {
+            case TypeCode.UInt64:
+              return (int)((uint)m_value);
+
+            case TypeCode.Int64:
+              return (int)m_value;
+          }
+          return Convert.ToInt64(m_value);
         }
 
         /// <summary>
@@ -531,6 +545,15 @@ namespace BitMiracle.LibTiff.Classic
                         result[i] = (int)temp[i];
 
                     return result;
+                }
+                else if (m_value is ulong[])
+                {
+                  ulong[] temp = m_value as ulong[];
+                  int[] result = new int[temp.Length];
+                  for (int i = 0; i < temp.Length; i++)
+                    result[i] = (int)temp[i];
+
+                  return result;
                 }
             }
 

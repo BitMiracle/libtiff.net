@@ -75,8 +75,8 @@ namespace BitMiracle.LibTiff.Classic
             {
                 if (res)
                     res = writeIntOK((int)header.tiff_diroff);
-                if (res)
-                    res = writelongOK(0); // 8 Byte fill for possible bigtiff-header
+              if (res)
+                res = writelongOK(0);
             }
             return res;
         }

@@ -253,7 +253,7 @@ namespace BitMiracle.LibTiff.Classic
             if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
             {
                 SwabShort(ref tif.m_header.tiff_version);
-                SwabLong8(ref tif.m_header.tiff_diroff);
+                SwabBigTiffValue(ref tif.m_header.tiff_diroff, tif.m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
             }
 
             // Now check version (if needed, it's been byte-swapped).

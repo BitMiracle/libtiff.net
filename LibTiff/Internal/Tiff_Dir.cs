@@ -139,7 +139,7 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabLong8(ref dircount);
+              SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
 
             off = (long)seekFile((long)dircount * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION), SeekOrigin.Current);
 
@@ -164,7 +164,7 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabLong8(ref nextdir);
+              SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
             
             return true;
         }

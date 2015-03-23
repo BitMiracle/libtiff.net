@@ -66,7 +66,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// </summary>
         public bool td_stripbytecountsorted;
 
-        public short td_nsubifd;
+        public int td_nsubifd;
         public long[] td_subifd;
 
         // YCbCr parameters
