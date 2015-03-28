@@ -60,6 +60,8 @@ namespace BitMiracle.LibTiff.Classic
             uint[] uints = raw_data as uint[];
             float[] floats = raw_data as float[];
             double[] doubles = raw_data as double[];
+            long[] longs = raw_data as long[];
+            ulong[] ulongs = raw_data as ulong[];
             string s = raw_data as string;
 
             for (int j = 0; j < value_count; j++)
@@ -89,6 +91,20 @@ namespace BitMiracle.LibTiff.Classic
                         fprintf(fd, "{0}", ints[j]);
                     else if (uints != null)
                         fprintf(fd, "{0}", uints[j]);
+                }
+                else if (fip.Type == TiffType.LONG8 || fip.Type == TiffType.SLONG8)
+                {
+                    if (longs != null)
+                        fprintf(fd, "{0}", longs[j]);
+                    else if (ulongs != null)
+                        fprintf(fd, "{0}", ulongs[j]);
+                }
+                else if (fip.Type == TiffType.IFD8)
+                {
+                    if (longs != null)
+                        fprintf(fd, "0x{0:x}", longs[j]);
+                    else if (ulongs != null)
+                        fprintf(fd, "0x{0:x}", ulongs[j]);
                 }
                 else if (fip.Type == TiffType.RATIONAL ||
                     fip.Type == TiffType.SRATIONAL ||

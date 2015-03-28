@@ -90,7 +90,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// file offset of current directory
         /// </summary>
-        internal uint m_diroff;
+        internal ulong m_diroff;
 
         // directories to prevent IFD looping
 
@@ -188,12 +188,12 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// file offset of following directory
         /// </summary>
-        private uint m_nextdiroff;
+        private ulong m_nextdiroff;
 
         /// <summary>
         /// list of offsets to already seen directories to prevent IFD looping
         /// </summary>
-        private uint[] m_dirlist;
+        private ulong[] m_dirlist;
 
         /// <summary>
         /// number of entires in offset list
@@ -228,12 +228,12 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// current offset for read/write
         /// </summary>
-        private uint m_curoff;
+        private ulong m_curoff;
 
         /// <summary>
         /// current offset for writing dir
         /// </summary>
-        private uint m_dataoff;
+        private ulong m_dataoff;
 
         //
         // SubIFD support
@@ -247,7 +247,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// offset for patching SubIFD link
         /// </summary>
-        private uint m_subifdoff;
+        private ulong m_subifdoff;
 
         // tiling support
 
@@ -357,16 +357,16 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             nfields += m_dir.td_customValueCount;
-            int dirsize = nfields * TiffDirEntry.SizeInBytes;
+            int dirsize = nfields * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION);
             TiffDirEntry[] data = new TiffDirEntry[nfields];
 
             // Put the directory at the end of the file.
-            m_diroff = (uint)((seekFile(0, SeekOrigin.End) + 1) & ~1);
-            m_dataoff = m_diroff + sizeof(short) + (uint)dirsize + sizeof(int);
+            m_diroff = (ulong)((seekFile(0, SeekOrigin.End) + 1) & ~1);
+            m_dataoff = m_diroff + sizeof(short) + (ulong)dirsize + sizeof(int);
             if ((m_dataoff & 1) != 0)
                 m_dataoff++;
 
-            seekFile(m_dataoff, SeekOrigin.Begin);
+            seekFile((long) m_dataoff, SeekOrigin.Begin);
 
             // Setup external form of directory entries and write data items.
             int[] fields = new int[FieldBit.SetLongs];
@@ -397,7 +397,7 @@ namespace BitMiracle.LibTiff.Classic
             // Write directory.
 
             short dircount = (short)nfields;
-            pdiroff = m_nextdiroff;
+            pdiroff = (long)m_nextdiroff;
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
             {
                 // The file's byte order is opposite to the native machine
@@ -417,9 +417,8 @@ namespace BitMiracle.LibTiff.Classic
                     temp = (short)dirEntry.tdir_type;
                     SwabShort(ref temp);
                     dirEntry.tdir_type = (TiffType)temp;
-
                     SwabLong(ref dirEntry.tdir_count);
-                    SwabUInt(ref dirEntry.tdir_offset);
+                    SwabBigTiffValue(ref dirEntry.tdir_offset, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
                 }
 
                 dircount = (short)nfields;
@@ -430,14 +429,14 @@ namespace BitMiracle.LibTiff.Classic
                 pdiroff = tempOff;
             }
 
-            seekFile(m_diroff, SeekOrigin.Begin);
+            seekFile((long)m_diroff, SeekOrigin.Begin);
             if (!writeShortOK(dircount))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
                 return false;
             }
 
-            if (!writeDirEntryOK(data, dirsize / TiffDirEntry.SizeInBytes))
+            if (!writeDirEntryOK(data, dirsize / TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION), m_header.tiff_version == TIFF_BIGTIFF_VERSION))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory contents");
                 return false;
@@ -474,9 +473,9 @@ namespace BitMiracle.LibTiff.Classic
             lp += (uint)(cp[3] << 24);
         }
 
-        internal static uint[] Realloc(uint[] buffer, int elementCount, int newElementCount)
+        internal static ulong[] Realloc(ulong[] buffer, int elementCount, int newElementCount)
         {
-            uint[] newBuffer = new uint[newElementCount];
+            ulong[] newBuffer = new ulong[newElementCount];
             if (buffer != null)
             {
                 int copyLength = Math.Min(elementCount, newElementCount);
@@ -556,14 +555,14 @@ namespace BitMiracle.LibTiff.Classic
         }
 
 #if FIX_JPEG_IS_OJPEG
-        private bool checkJpegIsOJpeg(ref int v, TiffDirEntry[] dir, short dircount)
+        private bool checkJpegIsOJpeg(ref int v, TiffDirEntry[] dir, ulong dircount)
         {
             // detect a bug in some older JPEG-IN-TIFF formats (emitted by (unknown) scanner software)
             // where the Compression field reports new-style JPEG (7) but the JPEG encoded data
             // and JPEG related fields actually conform to old-style JPEG (6).
             if ((Compression)(v & 0xffff) == Compression.JPEG)
             {
-                for (int i = 0; i < dircount; i++)
+                for (ulong i = 0; i < dircount; i++)
                 {
                     switch (dir[i].tdir_tag)
                     {

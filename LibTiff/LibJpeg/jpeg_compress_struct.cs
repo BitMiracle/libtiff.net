@@ -49,17 +49,17 @@ namespace BitMiracle.LibJpeg.Classic
         // 
         // IMPORTANT: these are only valid for 8-bit data precision!
         private static readonly byte[] bits_dc_luminance = 
-            { /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
+        { /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
 
         private static readonly byte[] val_dc_luminance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
         private static readonly byte[] bits_dc_chrominance = 
-            { /* 0-base */ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
+        { /* 0-base */ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
 
         private static readonly byte[] val_dc_chrominance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
         private static readonly byte[] bits_ac_luminance = 
-            { /* 0-base */ 0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
+        { /* 0-base */ 0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
 
         private static readonly byte[] val_ac_luminance = 
             { 0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06,
@@ -78,7 +78,7 @@ namespace BitMiracle.LibJpeg.Classic
               0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa };
 
         private static readonly byte[] bits_ac_chrominance = 
-            { /* 0-base */ 0, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
+        { /* 0-base */ 0, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
 
         private static readonly byte[] val_ac_chrominance = 
             { 0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41,

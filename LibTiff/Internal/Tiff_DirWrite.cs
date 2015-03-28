@@ -23,15 +23,15 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
-    partial class Tiff
+ partial class Tiff
     {
-        private uint insertData(TiffType type, int v)
+        private ulong insertData(TiffType type, int v)
         {
             int t = (int)type;
             if (m_header.tiff_magic == TIFF_BIGENDIAN)
-                return (((uint)v & m_typemask[t]) << m_typeshift[t]);
-            
-            return ((uint)v & m_typemask[t]);
+                return (((ulong)v & m_typemask[t]) << m_typeshift[t]);
+
+            return ((ulong)v & m_typemask[t]);
         }
 
         private static void resetFieldBit(int[] fields, short f)
@@ -95,7 +95,7 @@ namespace BitMiracle.LibTiff.Classic
 
                 // shutdown encoder
                 m_currentCodec.Close();
-                
+
                 // Flush any data that might have been written by the
                 // compression close+cleanup routines.
                 if (m_rawcc > 0 && (m_flags & TiffFlags.BEENWRITING) == TiffFlags.BEENWRITING && !flushData1())
@@ -113,225 +113,281 @@ namespace BitMiracle.LibTiff.Classic
 
                 m_flags &= ~(TiffFlags.BEENWRITING | TiffFlags.BUFFERSETUP);
             }
-
-            // Size the directory so that we can calculate offsets for the data
-            // items that aren't kept in-place in each field.
-            int nfields = 0;
-            for (int b = 0; b <= FieldBit.Last; b++)
+            TiffDirEntry[] data;
+            int nfields;
+            long dirsize;
+            while (true)
             {
-                if (fieldSet(b) && b != FieldBit.Custom)
-                    nfields += (b < FieldBit.SubFileType ? 2 : 1);
-            }
-
-            nfields += m_dir.td_customValueCount;
-            int dirsize = nfields * TiffDirEntry.SizeInBytes;
-            TiffDirEntry[] data = new TiffDirEntry [nfields];
-            for (int i = 0; i < nfields; i++)
-                data[i] = new TiffDirEntry();
-
-            // Directory hasn't been placed yet, put it at the end of the file
-            // and link it into the existing directory structure.
-            if (m_diroff == 0 && !linkDirectory())
-                return false;
-
-            m_dataoff = m_diroff + sizeof(short) + (uint)dirsize + sizeof(int);
-            if ((m_dataoff & 1) != 0)
-                m_dataoff++;
-
-            seekFile(m_dataoff, SeekOrigin.Begin);
-            m_curdir++;
-            int dir = 0;
-
-            // Setup external form of directory entries and write data items.
-            int[] fields = new int[FieldBit.SetLongs];
-            Buffer.BlockCopy(m_dir.td_fieldsset, 0, fields, 0, FieldBit.SetLongs * sizeof(int));
-
-            // Write out ExtraSamples tag only if extra samples are present in the data.
-            if (fieldSet(fields, FieldBit.ExtraSamples) && m_dir.td_extrasamples == 0)
-            {
-                resetFieldBit(fields, FieldBit.ExtraSamples);
-                nfields--;
-                dirsize -= TiffDirEntry.SizeInBytes;
-            } // XXX
-
-            for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
-            {
-                TiffFieldInfo fip = m_fieldinfo[fi];
-
-                // For custom fields, we test to see if the custom field is set
-                // or not.  For normal fields, we just use the fieldSet test. 
-                if (fip.Bit == FieldBit.Custom)
+                // Directory hasn't been placed yet, put it at the end of the file
+                // and link it into the existing directory structure.
+                if (m_diroff == 0 && !linkDirectory())
+                    return false;
+                // Size the directory so that we can calculate offsets for the data
+                // items that aren't kept in-place in each field.
+                nfields = 0;
+                for (int b = 0; b <= FieldBit.Last; b++)
                 {
-                    bool is_set = false;
-                    for (int ci = 0; ci < m_dir.td_customValueCount; ci++)
-                        is_set |= (m_dir.td_customValues[ci].info == fip);
+                    if (fieldSet(b) && b != FieldBit.Custom)
+                        nfields += (b < FieldBit.SubFileType ? 2 : 1);
+                }
 
-                    if (!is_set)
+                nfields += m_dir.td_customValueCount;
+                dirsize = nfields * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION);
+                data = new TiffDirEntry[nfields];
+                for (int i = 0; i < nfields; i++)
+                    data[i] = new TiffDirEntry();
+
+                if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
+                {
+                    m_dataoff = m_diroff + sizeof(long) + (ulong)dirsize + sizeof(long);
+                }
+                else
+                {
+                    m_dataoff = m_diroff + sizeof(short) + (ulong)dirsize + sizeof(int);
+                }
+                if ((m_dataoff & 1) != 0)
+                    m_dataoff++;
+
+                seekFile((long)m_dataoff, SeekOrigin.Begin);
+                m_curdir++;
+                int dir = 0;
+
+                // Setup external form of directory entries and write data items.
+                int[] fields = new int[FieldBit.SetLongs];
+                Buffer.BlockCopy(m_dir.td_fieldsset, 0, fields, 0, FieldBit.SetLongs * sizeof(int));
+
+                // Write out ExtraSamples tag only if extra samples are present in the data.
+                if (fieldSet(fields, FieldBit.ExtraSamples) && m_dir.td_extrasamples == 0)
+                {
+                    resetFieldBit(fields, FieldBit.ExtraSamples);
+                    nfields--;
+                    dirsize -= TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION);
+                } // XXX
+
+                for (int fi = 0, nfi = m_nfields; nfi > 0; nfi--, fi++)
+                {
+                    TiffFieldInfo fip = m_fieldinfo[fi];
+
+                    // For custom fields, we test to see if the custom field is set
+                    // or not.  For normal fields, we just use the fieldSet test. 
+                    if (fip.Bit == FieldBit.Custom)
+                    {
+                        bool is_set = false;
+                        for (int ci = 0; ci < m_dir.td_customValueCount; ci++)
+                            is_set |= (m_dir.td_customValues[ci].info == fip);
+
+                        if (!is_set)
+                            continue;
+                    }
+                    else if (!fieldSet(fields, fip.Bit))
+                    {
                         continue;
-                }
-                else if (!fieldSet(fields, fip.Bit))
-                {
-                    continue;
-                }
+                    }
 
-                // Handle other fields.
+                    // Handle other fields.
 
-                TiffTag tag = (TiffTag)FieldBit.Ignore;
-                switch (fip.Bit)
-                {
-                    case FieldBit.StripOffsets:
-                        // We use one field bit for both strip and tile 
-                        // offsets, and so must be careful in selecting
-                        // the appropriate field descriptor (so that tags
-                        // are written in sorted order).
-                        tag = IsTiled() ? TiffTag.TILEOFFSETS : TiffTag.STRIPOFFSETS;
-                        if (tag != fip.Tag)
-                            continue;
+                    TiffTag tag = (TiffTag)FieldBit.Ignore;
+                    switch (fip.Bit)
+                    {
+                        case FieldBit.StripOffsets:
+                            // We use one field bit for both strip and tile 
+                            // offsets, and so must be careful in selecting
+                            // the appropriate field descriptor (so that tags
+                            // are written in sorted order).
+                            tag = IsTiled() ? TiffTag.TILEOFFSETS : TiffTag.STRIPOFFSETS;
+                            if (tag != fip.Tag)
+                                continue;
 
-                        data[dir].tdir_tag = tag;
-                        data[dir].tdir_type = TiffType.LONG;
-                        data[dir].tdir_count = m_dir.td_nstrips;
-                        if (!writeLongArray(ref data[dir], m_dir.td_stripoffset))
-                            return false;
-
-                        break;
-                    case FieldBit.StripByteCounts:
-                        // We use one field bit for both strip and tile byte
-                        // counts, and so must be careful in selecting the
-                        // appropriate field descriptor (so that tags are
-                        // written in sorted order).
-                        tag = IsTiled() ? TiffTag.TILEBYTECOUNTS: TiffTag.STRIPBYTECOUNTS;
-                        if (tag != fip.Tag)
-                            continue;
-
-                        data[dir].tdir_tag = tag;
-                        data[dir].tdir_type = TiffType.LONG;
-                        data[dir].tdir_count = m_dir.td_nstrips;
-                        if (!writeLongArray(ref data[dir], m_dir.td_stripbytecount))
-                            return false;
-
-                        break;
-                    case FieldBit.RowsPerStrip:
-                        setupShortLong(TiffTag.ROWSPERSTRIP, ref data[dir], m_dir.td_rowsperstrip);
-                        break;
-                    case FieldBit.ColorMap:
-                        if (!writeShortTable(TiffTag.COLORMAP, ref data[dir], 3, m_dir.td_colormap))
-                            return false;
-
-                        break;
-                    case FieldBit.ImageDimensions:
-                        setupShortLong(TiffTag.IMAGEWIDTH, ref data[dir++], m_dir.td_imagewidth);
-                        setupShortLong(TiffTag.IMAGELENGTH, ref data[dir], m_dir.td_imagelength);
-                        break;
-                    case FieldBit.TileDimensions:
-                        setupShortLong(TiffTag.TILEWIDTH, ref data[dir++], m_dir.td_tilewidth);
-                        setupShortLong(TiffTag.TILELENGTH, ref data[dir], m_dir.td_tilelength);
-                        break;
-                    case FieldBit.Compression:
-                        setupShort(TiffTag.COMPRESSION, ref data[dir], (short)m_dir.td_compression);
-                        break;
-                    case FieldBit.Photometric:
-                        setupShort(TiffTag.PHOTOMETRIC, ref data[dir], (short)m_dir.td_photometric);
-                        break;
-                    case FieldBit.Position:
-                        if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XPOSITION, m_dir.td_xposition, TiffTag.YPOSITION, m_dir.td_yposition))
-                            return false;
-
-                        dir++;
-                        break;
-                    case FieldBit.Resolution:
-                        if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XRESOLUTION, m_dir.td_xresolution, TiffTag.YRESOLUTION, m_dir.td_yresolution))
-                            return false;
-
-                        dir++;
-                        break;
-                    case FieldBit.BitsPerSample:
-                    case FieldBit.MinSampleValue:
-                    case FieldBit.MaxSampleValue:
-                    case FieldBit.SampleFormat:
-                        if (!writePerSampleShorts(fip.Tag, ref data[dir]))
-                            return false;
-
-                        break;
-                    case FieldBit.SMinSampleValue:
-                    case FieldBit.SMaxSampleValue:
-                        if (!writePerSampleAnys(sampleToTagType(), fip.Tag, ref data[dir]))
-                            return false;
-
-                        break;
-                    case FieldBit.PageNumber:
-                    case FieldBit.HalftoneHints:
-                    case FieldBit.YCbCrSubsampling:
-                        if (!setupShortPair(fip.Tag, ref data[dir]))
-                            return false;
-
-                        break;
-                    case FieldBit.InkNames:
-                        if (!writeInkNames(ref data[dir]))
-                            return false;
-
-                        break;
-                    case FieldBit.TransferFunction:
-                        if (!writeTransferFunction(ref data[dir]))
-                            return false;
-
-                        break;
-                    case FieldBit.SubIFD:
-                        // XXX: Always write this field using LONG type
-                        // for backward compatibility.
-                        data[dir].tdir_tag = fip.Tag;
-                        data[dir].tdir_type = TiffType.LONG;
-                        data[dir].tdir_count = m_dir.td_nsubifd;
-                        if (!writeLongArray(ref data[dir], m_dir.td_subifd))
-                            return false;
-
-                        // Total hack: if this directory includes a SubIFD
-                        // tag then force the next <n> directories to be
-                        // written as "sub directories" of this one.  This
-                        // is used to write things like thumbnails and
-                        // image masks that one wants to keep out of the
-                        // normal directory linkage access mechanism.
-                        if (data[dir].tdir_count > 0)
-                        {
-                            m_flags |= TiffFlags.INSUBIFD;
-                            m_nsubifd = (short)data[dir].tdir_count;
-                            if (data[dir].tdir_count > 1)
+                            data[dir].tdir_tag = tag;
+                            data[dir].tdir_count = m_dir.td_nstrips;
+                            if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
                             {
-                                m_subifdoff = data[dir].tdir_offset;
+                                data[dir].tdir_type = TiffType.LONG8;
+                                if (!writeLong8Array(ref data[dir], m_dir.td_stripoffset))
+                                    return false;
                             }
                             else
                             {
-                                m_subifdoff = m_diroff + sizeof(short) +
-                                    (uint)dir * TiffDirEntry.SizeInBytes +
-                                    sizeof(short) * 2 + sizeof(int);
+                                data[dir].tdir_type = TiffType.LONG;
+                                if (!writeLongArray(ref data[dir], LongToInt(m_dir.td_stripoffset)))
+                                    return false;
                             }
-                        }
-                        break;
-                    default:
-                        // XXX: Should be fixed and removed.
-                        if (fip.Tag == TiffTag.DOTRANGE)
-                        {
+                            break;
+                        case FieldBit.StripByteCounts:
+                            // We use one field bit for both strip and tile byte
+                            // counts, and so must be careful in selecting the
+                            // appropriate field descriptor (so that tags are
+                            // written in sorted order).
+                            tag = IsTiled() ? TiffTag.TILEBYTECOUNTS : TiffTag.STRIPBYTECOUNTS;
+                            if (tag != fip.Tag)
+                                continue;
+
+                            data[dir].tdir_tag = tag;
+                            data[dir].tdir_count = m_dir.td_nstrips;
+                            if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
+                            {
+                                data[dir].tdir_type = TiffType.LONG8;
+                                if (!writeLong8Array(ref data[dir], m_dir.td_stripbytecount))
+                                    return false;
+                            }
+                            else
+                            {
+                                data[dir].tdir_type = TiffType.LONG;
+                                if (!writeLongArray(ref data[dir], LongToInt(m_dir.td_stripbytecount)))
+                                    return false;
+                            }
+                            break;
+                        case FieldBit.RowsPerStrip:
+                            setupShortLong(TiffTag.ROWSPERSTRIP, ref data[dir], m_dir.td_rowsperstrip);
+                            break;
+                        case FieldBit.ColorMap:
+                            if (!writeShortTable(TiffTag.COLORMAP, ref data[dir], 3, m_dir.td_colormap))
+                                return false;
+
+                            break;
+                        case FieldBit.ImageDimensions:
+                            setupShortLong(TiffTag.IMAGEWIDTH, ref data[dir++], m_dir.td_imagewidth);
+                            setupShortLong(TiffTag.IMAGELENGTH, ref data[dir], m_dir.td_imagelength);
+                            break;
+                        case FieldBit.TileDimensions:
+                            setupShortLong(TiffTag.TILEWIDTH, ref data[dir++], m_dir.td_tilewidth);
+                            setupShortLong(TiffTag.TILELENGTH, ref data[dir], m_dir.td_tilelength);
+                            break;
+                        case FieldBit.Compression:
+                            setupShort(TiffTag.COMPRESSION, ref data[dir], (short)m_dir.td_compression);
+                            break;
+                        case FieldBit.Photometric:
+                            setupShort(TiffTag.PHOTOMETRIC, ref data[dir], (short)m_dir.td_photometric);
+                            break;
+                        case FieldBit.Position:
+                            if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XPOSITION, m_dir.td_xposition, TiffTag.YPOSITION, m_dir.td_yposition))
+                                return false;
+
+                            dir++;
+                            break;
+                        case FieldBit.Resolution:
+                            if (!writeRationalPair(data, dir, TiffType.RATIONAL, TiffTag.XRESOLUTION, m_dir.td_xresolution, TiffTag.YRESOLUTION, m_dir.td_yresolution))
+                                return false;
+
+                            dir++;
+                            break;
+                        case FieldBit.BitsPerSample:
+                        case FieldBit.MinSampleValue:
+                        case FieldBit.MaxSampleValue:
+                        case FieldBit.SampleFormat:
+                            if (!writePerSampleShorts(fip.Tag, ref data[dir]))
+                                return false;
+
+                            break;
+                        case FieldBit.SMinSampleValue:
+                        case FieldBit.SMaxSampleValue:
+                            if (!writePerSampleAnys(sampleToTagType(), fip.Tag, ref data[dir]))
+                                return false;
+
+                            break;
+                        case FieldBit.PageNumber:
+                        case FieldBit.HalftoneHints:
+                        case FieldBit.YCbCrSubsampling:
                             if (!setupShortPair(fip.Tag, ref data[dir]))
                                 return false;
-                        }
-                        else if (!writeNormalTag(ref data[dir], fip))
-                            return false;
 
-                        break;
+                            break;
+                        case FieldBit.InkNames:
+                            if (!writeInkNames(ref data[dir]))
+                                return false;
+
+                            break;
+                        case FieldBit.TransferFunction:
+                            if (!writeTransferFunction(ref data[dir]))
+                                return false;
+
+                            break;
+                        case FieldBit.SubIFD:
+                            data[dir].tdir_tag = fip.Tag;
+                            data[dir].tdir_count = (int)m_dir.td_nsubifd;
+
+                            // Total hack: if this directory includes a SubIFD
+                            // tag then force the next <n> directories to be
+                            // written as "sub directories" of this one.  This
+                            // is used to write things like thumbnails and
+                            // image masks that one wants to keep out of the
+                            // normal directory linkage access mechanism.
+                            if (data[dir].tdir_count > 0)
+                            {
+                                m_flags |= TiffFlags.INSUBIFD;
+                                m_nsubifd = (short)data[dir].tdir_count;
+                                if (data[dir].tdir_count > 1)
+                                {
+                                    m_subifdoff = data[dir].tdir_offset;
+                                }
+                                else
+                                {
+                                    if ((m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF)
+                                    {
+                                        m_subifdoff = m_diroff + sizeof(long) +
+                                                      (ulong)dir *
+                                                      (ulong)
+                                                          TiffDirEntry.SizeInBytes(m_header.tiff_version ==
+                                                                                   TIFF_BIGTIFF_VERSION) +
+                                                      sizeof(short) * 2 + sizeof(long);
+                                    }
+                                    else
+                                    {
+                                        m_subifdoff = m_diroff + sizeof(short) +
+                                                      (ulong)dir *
+                                                      (ulong)
+                                                          TiffDirEntry.SizeInBytes(m_header.tiff_version ==
+                                                                                   TIFF_BIGTIFF_VERSION) +
+                                                      sizeof(short) * 2 + sizeof(int);
+                                    }
+                                }
+                            }
+                            if ((m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF)
+                            {
+                                data[dir].tdir_type = TiffType.IFD8;
+                                if (!writeLong8Array(ref data[dir], m_dir.td_subifd))
+                                    return false;
+                            }
+                            else
+                            {
+                                data[dir].tdir_type = TiffType.LONG;
+                                if (!writeLongArray(ref data[dir], LongToInt(m_dir.td_subifd)))
+                                    return false;
+                            }
+                            break;
+                        default:
+                            // XXX: Should be fixed and removed.
+                            if (fip.Tag == TiffTag.DOTRANGE)
+                            {
+                                if (!setupShortPair(fip.Tag, ref data[dir]))
+                                    return false;
+                            }
+                            else if (!writeNormalTag(ref data[dir], fip))
+                                return false;
+
+                            break;
+                    }
+
+                    dir++;
+
+                    if (fip.Bit != FieldBit.Custom)
+                        resetFieldBit(fields, fip.Bit);
                 }
+                if ((m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF ||
+                    (m_dataoff + sizeof(int)) < uint.MaxValue)
+                    break;
 
-                dir++;
-
-                if (fip.Bit != FieldBit.Custom)
-                    resetFieldBit(fields, fip.Bit);
+                m_dataoff = m_diroff;
+                if (!MakeBigTIFF())
+                    return false;
+                m_diroff = 0;
             }
 
-            // Write directory.
-
-            short dircount = (short)nfields;
-            uint diroff = m_nextdiroff;
+            ulong dircount = (ulong)nfields;
+            ulong diroff = m_nextdiroff;
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
             {
+                int dir;
                 // The file's byte order is opposite to the native machine
                 // architecture. We overwrite the directory information with
                 // impunity because it'll be released below after we write it to
@@ -349,33 +405,33 @@ namespace BitMiracle.LibTiff.Classic
                     data[dir].tdir_type = (TiffType)temp;
 
                     SwabLong(ref data[dir].tdir_count);
-                    SwabUInt(ref data[dir].tdir_offset);
+                    SwabBigTiffValue(ref data[dir].tdir_offset, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
                 }
 
-                dircount = (short)nfields;
-                SwabShort(ref dircount);
-                SwabUInt(ref diroff);
+                dircount = (ulong)nfields;
+                SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
+                SwabBigTiffValue(ref diroff, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
             }
 
-            seekFile(m_diroff, SeekOrigin.Begin);
-            if (!writeShortOK(dircount))
+            seekFile((long)m_diroff, SeekOrigin.Begin);
+            if (!writeDirCountOK((long)dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory count");
                 return false;
             }
-            
-            if (!writeDirEntryOK(data, dirsize / TiffDirEntry.SizeInBytes))
+
+            if (!writeDirEntryOK(data, (dirsize / TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION)), m_header.tiff_version == TIFF_BIGTIFF_VERSION))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory contents");
                 return false;
             }
-            
-            if (!writeIntOK((int)diroff))
+
+            if (!writeDirOffOK((long)diroff, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
             {
                 ErrorExt(this, m_clientdata, m_name, "Error writing directory link");
                 return false;
             }
-            
+
             if (done)
             {
                 FreeDirectory();
@@ -388,6 +444,211 @@ namespace BitMiracle.LibTiff.Classic
 
             return true;
         }
+
+        private bool MakeBigTIFF()
+        {
+
+            int dirlink = 2 * sizeof(short);
+            int diroff = (int)m_header.tiff_diroff;
+            ulong dirlinkB = 4 * sizeof(short),
+                diroffB;
+            short dircount, dirindex;
+            ulong dircountB;
+            long dirsize, dirsizeB;
+            int issubifd = 0;
+            uint subifdcnt = 0;
+            uint subifdlink = 0;
+            long subifdlinkB = 0;
+            TiffDirEntry[] data, dataB;
+            TiffDirEntry dir, dirB;
+
+            m_flags |= TiffFlags.ISBIGTIFF;
+            m_header.tiff_version = TIFF_BIGTIFF_VERSION;
+            m_header.tiff_offsize = 8;
+            m_header.tiff_fill = 0;
+            m_header.tiff_diroff = 0;
+            if ((m_flags & TiffFlags.NOBIGTIFF) == TiffFlags.NOBIGTIFF)
+            {
+                ErrorExt(Clientdata(),
+                    "TIFFCheckBigTIFF", "File > 2^32 and NO BigTIFF specified");
+                return false;
+            }
+            if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+            {
+                SwabShort(ref m_header.tiff_version);
+                SwabShort(ref m_header.tiff_offsize);
+            }
+            if (!seekOK(0) ||
+                !writeHeaderOK(m_header))
+            {
+                ErrorExt(Clientdata(), m_name,
+                    "Error updating TIFF header", "");
+                return (false);
+            }
+            if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+            {
+                SwabShort(ref m_header.tiff_version);
+                SwabShort(ref m_header.tiff_offsize);
+            }
+
+            while (diroff != 0 && (uint)diroff != m_diroff)
+            {
+                if (!seekOK((long)diroff) ||
+                    !readShortOK(out dircount))
+                {
+                    ErrorExt(m_clientdata, m_name,
+                        "Error reading TIFF directory");
+                    return false;
+                }
+                if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                    SwabShort(ref dircount);
+                dircountB = (ulong)dircount;
+                dirsize = dircount * TiffDirEntry.SizeInBytes(false);
+                dirsizeB = dircount * TiffDirEntry.SizeInBytes(true);
+                data = new TiffDirEntry[dircount];
+                dataB = new TiffDirEntry[dircountB];
+                if (!seekOK((long)diroff + sizeof(short)) ||
+                    !readDirEntryOk(data, (ulong)dircount, false))
+                {
+                    ErrorExt(m_clientdata, m_name,
+                        "Error reading TIFF directory");
+                    return false;
+                }
+                diroffB = m_dataoff;
+                m_dataoff += sizeof(long) + (ulong)dirsizeB + sizeof(long);
+
+                for (dirindex = 0; dirindex < dircount; dirindex++)
+                {
+                    dir = data[dirindex];
+                    dirB = new TiffDirEntry();
+                    dataB[dirindex] = dirB;
+                    if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                    {
+                        SwabLong(ref dir.tdir_count);
+                        SwabBigTiffValue(ref dir.tdir_offset, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+                    }
+                    dirB.tdir_tag = dir.tdir_tag;
+                    dirB.tdir_type = dir.tdir_type;
+                    dirB.tdir_count = dir.tdir_count;
+                    dirB.tdir_offset = dir.tdir_offset;
+                    /*
+			 * If data are in directory entry itself, copy data, else (data are pointed
+			 * to by directory entry) copy pointer.  This is complicated by the fact that
+			 * the old entry had 32-bits of space, and the new has 64-bits, so may have
+			 * to read data pointed at by the old entry directly into the new entry.
+			 */
+  
+                    switch (dirB.tdir_tag)
+                    {
+                        case TiffTag.SUBIFD:
+                            dirB.tdir_type = TiffType.IFD8;
+                            subifdcnt = (uint)dir.tdir_count;
+                            /*
+				 * Set pointer to existing SubIFD array
+				 */
+                            if (subifdcnt <= sizeof(int) /
+                            sizeof(int))
+                                subifdlink = (uint)((ulong)diroff + sizeof(short) +
+                                             dir.tdir_offset);
+                            else
+                                subifdlink = (uint)dir.tdir_offset;
+                            /*
+				 * Initialize new SubIFD array, set pointer to it
+				 */
+                            if (subifdcnt <= sizeof(long) /
+                            sizeof(long))
+                            {
+                                dir.tdir_offset = 0;
+                                subifdlinkB = (long)(diroffB + sizeof(long) +
+                                              dir.tdir_offset);
+                            }
+                             else
+                                 {
+                                     subifdlinkB = (long)dirB.tdir_offset;
+                                 }
+                            break;
+                    }
+                    if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                    {
+                        SwabLong(ref dirB.tdir_count);
+                        SwabBigTiffValue(ref dirB.tdir_offset, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+                    }
+                }
+
+                /*
+                 * Chain new directory to previous
+                 */
+                if (( m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                  SwabBigTiffValue(ref dircountB, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
+                if (!seekOK((long)diroffB) ||
+                    !writeDirCountOK((long)dircountB, true) ||
+                    !seekOK((long)diroffB + sizeof(long)) ||
+                    !writeDirEntryOK(dataB, (long)dircountB,true))
+                {
+                    ErrorExt(m_clientdata,m_name,
+                        "Error writing TIFF directory!");
+                    return false;
+                }
+
+                /*
+                 * If directory is SubIFD update array in host directory, else add to
+                 * main directory chain
+                 */
+                if (m_nsubifd != 0 &&
+                    m_subifdoff == subifdlink)
+                    m_subifdoff = (ulong)subifdlinkB;
+
+                if (issubifd == 0 &&
+                    dirlinkB == 8)
+                    m_header.tiff_diroff = diroffB;
+                if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                  SwabBigTiffValue(ref diroffB, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+                if (!seekOK((issubifd != 0 ? subifdlinkB++ : (long)dirlinkB)) ||
+                    !writeDirOffOK((long)diroffB, true))
+                {
+                    ErrorExt(m_clientdata, m_name,
+                        "Error writing directory link!");
+                    return false;
+                }
+
+                if (issubifd != 0)
+                    subifdcnt--;
+                else
+                {
+                    dirlink = (int)diroff + sizeof(short) + (int)dirsize;
+                    dirlinkB = diroffB + sizeof(long) + (ulong)dirsizeB;
+                }
+                if (subifdcnt > 0)
+                issubifd = (int)subifdcnt;
+
+                if (!seekOK(issubifd != 0 ? (int)subifdlink++ : (int)dirlink) ||
+                    !readIntOK(out diroff))
+                {
+                    ErrorExt(m_clientdata, m_name,
+                        "Error writing directory link!");
+                    return false;
+                }
+                if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                    SwabLong(ref diroff);
+            }
+
+            diroffB = 0;
+            if (dirlinkB == (ulong)4 * sizeof(short))
+                m_header.tiff_diroff = diroffB;
+            if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+              SwabBigTiffValue(ref diroffB, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+            if (!seekOK((long)dirlinkB) ||
+                !writelongOK((long)diroffB))
+            {
+                ErrorExt(Clientdata(), m_name,
+                    "Error writing directory link", "");
+                return false;
+            }
+
+            return true;
+        }
+
+
 
         /// <summary>
         /// Writes tags that are not special cased.
@@ -628,7 +889,7 @@ namespace BitMiracle.LibTiff.Classic
                         else
                             cp = result[0].ToString();
 
-                        byte[] stringBytes = Latin1Encoding.GetBytes(cp);
+                                                byte[] stringBytes = Latin1Encoding.GetBytes(cp);
 
                         // If this last character is a '\0' null char
                         if (stringBytes.Length != 0 && stringBytes[stringBytes.Length - 1] == 0)
@@ -799,7 +1060,7 @@ namespace BitMiracle.LibTiff.Classic
 
             for (short i = 0; i < m_dir.td_samplesperpixel; i++)
                 w[i] = v;
-            
+
             bool status = writeAnyArray(type, tag, ref dir, m_dir.td_samplesperpixel, w);
             return status;
         }
@@ -832,7 +1093,7 @@ namespace BitMiracle.LibTiff.Classic
 
             // XXX -- yech, fool writeData
             dir.tdir_count = 1 << m_dir.td_bitspersample;
-            uint off = m_dataoff;
+            ulong off = m_dataoff;
             for (int i = 0; i < n; i++)
             {
                 if (!writeData(ref dir, table[i], dir.tdir_count))
@@ -931,6 +1192,22 @@ namespace BitMiracle.LibTiff.Classic
             return writeLongArray(ref dir, temp);
         }
 
+        private bool writeLong8Array(ref TiffDirEntry dir, long[] v)
+        {
+            if (dir.tdir_count == 1)
+            {
+                dir.tdir_offset = (ulong)v[0];
+                return true;
+            }
+
+            return writeData(ref dir, v, dir.tdir_count);
+        }
+        private bool writeLong8Array(ref TiffDirEntry dir, ulong[] v)
+        {
+            long[] temp = new long[v.Length];
+            Buffer.BlockCopy(v, 0, temp, 0, v.Length * sizeof(ulong));
+            return writeLong8Array(ref dir, temp);
+        }
         /// <summary>
         /// Setup a directory entry of an array of RATIONAL or SRATIONAL and
         /// write the associated indirect values.
@@ -957,7 +1234,7 @@ namespace BitMiracle.LibTiff.Classic
                         sign = -1;
                     }
                 }
-            
+
                 int den = 1;
                 if (fv > 0)
                 {
@@ -967,7 +1244,7 @@ namespace BitMiracle.LibTiff.Classic
                         den *= 1 << 3;
                     }
                 }
-                
+
                 t[2 * i + 0] = (int)(sign * (fv + 0.5));
                 t[2 * i + 1] = den;
             }
@@ -1026,7 +1303,7 @@ namespace BitMiracle.LibTiff.Classic
                         short[] bp = new short [n];
                         for (int i = 0; i < n; i++)
                             bp[i] = (short)v[i];
-                        
+
                         if (!writeShortArray(ref dir, bp))
                             failed = true;
                     }
@@ -1037,7 +1314,7 @@ namespace BitMiracle.LibTiff.Classic
                         int[] bp = new int [n];
                         for (int i = 0; i < n; i++)
                             bp[i] = (int)v[i];
-                        
+
                         if (!writeLongArray(ref dir, bp))
                             failed = true;
                     }
@@ -1047,7 +1324,7 @@ namespace BitMiracle.LibTiff.Classic
                         float[] bp = new float [n];
                         for (int i = 0; i < n; i++)
                             bp[i] = (float)v[i];
-                        
+
                         if (!writeFloatArray(ref dir, bp))
                             failed = true;
                     }
@@ -1055,7 +1332,7 @@ namespace BitMiracle.LibTiff.Classic
                 case TiffType.DOUBLE:
                     if (!writeDoubleArray(ref dir, v))
                         failed = true;
-                        
+
                     break;
 
                 default:
@@ -1095,7 +1372,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (Compare(m_dir.td_transferfunction[0], m_dir.td_transferfunction[1], n) != 0)
                     ncols = 3;
             }
-            
+
             return writeShortTable(TiffTag.TRANSFERFUNCTION, ref dir, ncols, m_dir.td_transferfunction);
         }
 
@@ -1115,9 +1392,9 @@ namespace BitMiracle.LibTiff.Classic
         {
             dir.tdir_offset = m_dataoff;
             count = (int)dir.tdir_count * DataWidth(dir.tdir_type);
-            if (seekOK(dir.tdir_offset) && writeOK(buffer, 0, count))
+            if (seekOK((long)dir.tdir_offset) && writeOK(buffer, 0, count))
             {
-                m_dataoff += (uint)((count + 1) & ~1);
+                m_dataoff += (ulong)((count + 1) & ~1);
                 return true;
             }
 
@@ -1133,8 +1410,19 @@ namespace BitMiracle.LibTiff.Classic
                 SwabArrayOfShort(buffer, count);
 
             int byteCount = count * sizeof(short);
-            byte[] bytes = new byte [byteCount];
+            byte[] bytes = new byte[byteCount];
             ShortsToByteArray(buffer, 0, count, bytes, 0);
+            return writeData(ref dir, bytes, byteCount);
+        }
+
+        private bool writeData(ref TiffDirEntry dir, long[] buffer, int count)
+        {
+            if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                SwabArrayOfLong8(buffer, count);
+
+            int byteCount = count * sizeof(long);
+            byte[] bytes = new byte[byteCount];
+            Long8ToByteArray(buffer, 0, count, bytes, 0);
             return writeData(ref dir, bytes, byteCount);
         }
 
@@ -1180,17 +1468,26 @@ namespace BitMiracle.LibTiff.Classic
         {
             const string module = "linkDirectory";
 
-            m_diroff = (uint)((seekFile(0, SeekOrigin.End) + 1) & ~1);
-            uint diroff = m_diroff;
+            m_diroff = (ulong)((seekFile(0, SeekOrigin.End) + 1) & ~1);
+            if ((m_flags & TiffFlags.ISBIGTIFF) != TiffFlags.ISBIGTIFF
+                && m_diroff > uint.MaxValue)
+            {
+                if (!MakeBigTIFF())
+                    return false;
+                m_diroff = (ulong)((seekFile(0, SeekOrigin.End) + 1) & ~1);
+            }
+
+
+            ulong diroff = m_diroff;
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabUInt(ref diroff);
+              SwabBigTiffValue(ref diroff, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
 
             // Handle SubIFDs
 
             if ((m_flags & TiffFlags.INSUBIFD) == TiffFlags.INSUBIFD)
             {
-                seekFile(m_subifdoff, SeekOrigin.Begin);
-                if (!writeIntOK((int)diroff))
+                seekFile((long)m_subifdoff, SeekOrigin.Begin);
+                if (!writeDirOffOK((long)diroff, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                 {
                     ErrorExt(this, m_clientdata, module,
                         "{0}: Error writing SubIFD directory link", m_name);
@@ -1205,7 +1502,7 @@ namespace BitMiracle.LibTiff.Classic
                     m_subifdoff += sizeof(int);
                 else
                     m_flags &= ~TiffFlags.INSUBIFD;
-                
+
                 return true;
             }
 
@@ -1214,51 +1511,89 @@ namespace BitMiracle.LibTiff.Classic
                 // First directory, overwrite offset in header.
 
                 m_header.tiff_diroff = m_diroff;
-                seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SeekOrigin.Begin);
-                if (!writeIntOK((int)diroff))
+                if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
                 {
-                    ErrorExt(this, m_clientdata, m_name, "Error writing TIFF header");
-                    return false;
+                    seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE + sizeof(short) + sizeof(short), SeekOrigin.Begin);
+                    if (!writelongOK((long)diroff))
+                    {
+                        ErrorExt(this, m_clientdata, m_name, "Error writing TIFF header");
+                        return false;
+                    }
                 }
-
+                else
+                {
+                    seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SeekOrigin.Begin);
+                    if (!writeIntOK((int)diroff))
+                    {
+                        ErrorExt(this, m_clientdata, m_name, "Error writing TIFF header");
+                        return false;
+                    }
+                }
                 return true;
             }
 
             // Not the first directory, search to the last and append.
 
-            uint nextdir = m_header.tiff_diroff;
+            ulong nextdir = m_header.tiff_diroff;
             do
             {
-                short dircount;
-                if (!seekOK(nextdir) || !readShortOK(out dircount))
+                ulong dircount;
+                if (!seekOK((long)nextdir) || !readDirCountOK(out dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                 {
                     ErrorExt(this, m_clientdata, module, "Error fetching directory count");
                     return false;
                 }
-                
-                if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                    SwabShort(ref dircount);
 
-                seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
-                if (!readUIntOK(out nextdir))
+                if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
+                  SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
+
+                seekFile((long)dircount * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION), SeekOrigin.Current);
+                uint temp;
+                if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
                 {
-                    ErrorExt(this, m_clientdata, module, "Error fetching directory link");
-                    return false;
+                    if (!readUlongOK(out nextdir))
+                    {
+                        ErrorExt(this, m_clientdata, module, "Error fetching directory link");
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!readUIntOK(out temp))
+                    {
+                        ErrorExt(this, m_clientdata, module, "Error fetching directory link");
+                        return false;
+                    }
+                    nextdir = temp;
                 }
 
                 if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                    SwabUInt(ref nextdir);
+                  SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
             }
             while (nextdir != 0);
 
             // get current offset
             long off = seekFile(0, SeekOrigin.Current);
-            seekFile(off - sizeof(int), SeekOrigin.Begin);
 
-            if (!writeIntOK((int)diroff))
+            
+            if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
-                ErrorExt(this, m_clientdata, module, "Error writing directory link");
-                return false;
+                seekFile(off - sizeof(long), SeekOrigin.Begin);
+                if (!writelongOK((long)diroff))
+                {
+                    ErrorExt(this, m_clientdata, module, "Error writing directory link");
+                    return false;
+                }
+            }
+            else
+            {
+                seekFile(off - sizeof(int), SeekOrigin.Begin);
+
+                if (!writeIntOK((int)diroff))
+                {
+                    ErrorExt(this, m_clientdata, module, "Error writing directory link");
+                    return false;
+                }
             }
 
             return true;

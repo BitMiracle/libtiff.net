@@ -58,16 +58,16 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /// size of offset and bytecount arrays
         /// </summary>
         public int td_nstrips;
-        public uint[] td_stripoffset;
-        public uint[] td_stripbytecount;
+        public ulong[] td_stripoffset;
+        public ulong[] td_stripbytecount;
 
         /// <summary>
         /// is the bytecount array sorted ascending?
         /// </summary>
         public bool td_stripbytecountsorted;
 
-        public short td_nsubifd;
-        public int[] td_subifd;
+        public int td_nsubifd;
+        public long[] td_subifd;
 
         // YCbCr parameters
         public short[] td_ycbcrsubsampling = new short[2];

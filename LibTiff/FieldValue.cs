@@ -115,11 +115,9 @@ namespace BitMiracle.LibTiff.Classic
             {
                 case TypeCode.UInt32:
                     return (int)((uint)m_value);
-
                 case TypeCode.Int32:
                     return (int)m_value;
             }
-
             return Convert.ToInt32(m_value);
         }
 
@@ -142,6 +140,22 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             return Convert.ToUInt32(m_value);
+        }
+        /// <summary>
+        /// Retrieves value converted to long.
+        /// </summary>
+        /// <returns>The value converted to long.</returns>
+        public long ToLong()
+        {
+          switch (Type.GetTypeCode(m_value.GetType()))
+          {
+            case TypeCode.UInt64:
+              return (int)((uint)m_value);
+
+            case TypeCode.Int64:
+              return (int)m_value;
+          }
+          return Convert.ToInt64(m_value);
         }
 
         /// <summary>
@@ -532,6 +546,15 @@ namespace BitMiracle.LibTiff.Classic
 
                     return result;
                 }
+                else if (m_value is ulong[])
+                {
+                  ulong[] temp = m_value as ulong[];
+                  int[] result = new int[temp.Length];
+                  for (int i = 0; i < temp.Length; i++)
+                    result[i] = (int)temp[i];
+
+                  return result;
+                }
             }
 
             return null;
@@ -604,6 +627,78 @@ namespace BitMiracle.LibTiff.Classic
                     uint[] result = new uint[temp.Length];
                     for (int i = 0; i < temp.Length; i++)
                         result[i] = (uint)temp[i];
+
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Retrieves value converted to array of long values.
+        /// </summary>
+        /// <returns>Value converted to array of long values.</returns>
+        /// <remarks><para>If value is array of long values then it retrieved unaltered.</para>
+        /// <para>If value is array of bytes then each 8 bytes are converted to uint and added to
+        /// resulting array. If value contains amount of bytes that can't be divided by 8 without
+        /// remainder, then null is returned.</para>
+        /// <para>If value is array of short, ushort or int values then each element of
+        /// field value gets converted to long and added to resulting array.</para><para>
+        /// If value is of any other type then null is returned.</para></remarks>
+        public long[] TolongArray()
+        {
+            if (m_value == null)
+                return null;
+
+            Type t = m_value.GetType();
+            if (t.IsArray)
+            {
+                if (m_value is long[])
+                    return m_value as long[];
+                else if (m_value is byte[])
+                {
+                    byte[] temp = m_value as byte[];
+                    if (temp.Length % sizeof(long) != 0)
+                        return null;
+
+                    int totalUInts = temp.Length / sizeof(long);
+                    long[] result = new long[totalUInts];
+
+                    int byteOffset = 0;
+                    for (int i = 0; i < totalUInts; i++)
+                    {
+                        long s = BitConverter.ToUInt32(temp, byteOffset);
+                        result[i] = s;
+                        byteOffset += sizeof(long);
+                    }
+
+                    return result;
+                }
+                else if (m_value is short[])
+                {
+                    short[] temp = m_value as short[];
+                    long[] result = new long[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (long)temp[i];
+
+                    return result;
+                }
+                else if (m_value is ushort[])
+                {
+                    ushort[] temp = m_value as ushort[];
+                    long[] result = new long[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (long)temp[i];
+
+                    return result;
+                }
+                else if (m_value is int[])
+                {
+                    int[] temp = m_value as int[];
+                    long[] result = new long[temp.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                        result[i] = (long)temp[i];
 
                     return result;
                 }

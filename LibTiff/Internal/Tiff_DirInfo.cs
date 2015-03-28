@@ -62,12 +62,14 @@ namespace BitMiracle.LibTiff.Classic
             new TiffFieldInfo(TiffTag.MAKE, -1, -1, TiffType.ASCII, FieldBit.Custom, true, false, "Make"), 
             new TiffFieldInfo(TiffTag.MODEL, -1, -1, TiffType.ASCII, FieldBit.Custom, true, false, "Model"), 
             new TiffFieldInfo(TiffTag.STRIPOFFSETS, -1, -1, TiffType.LONG, FieldBit.StripOffsets, false, false, "StripOffsets"), 
+            new TiffFieldInfo(TiffTag.STRIPOFFSETS, -1, -1, TiffType.LONG8, FieldBit.StripOffsets, false, false, "StripOffsets"), 
             new TiffFieldInfo(TiffTag.STRIPOFFSETS, -1, -1, TiffType.SHORT, FieldBit.StripOffsets, false, false, "StripOffsets"), 
             new TiffFieldInfo(TiffTag.ORIENTATION, 1, 1, TiffType.SHORT, FieldBit.Orientation, false, false, "Orientation"), 
             new TiffFieldInfo(TiffTag.SAMPLESPERPIXEL, 1, 1, TiffType.SHORT, FieldBit.SamplesPerPixel, false, false, "SamplesPerPixel"), 
             new TiffFieldInfo(TiffTag.ROWSPERSTRIP, 1, 1, TiffType.LONG, FieldBit.RowsPerStrip, false, false, "RowsPerStrip"), 
             new TiffFieldInfo(TiffTag.ROWSPERSTRIP, 1, 1, TiffType.SHORT, FieldBit.RowsPerStrip, false, false, "RowsPerStrip"), 
             new TiffFieldInfo(TiffTag.STRIPBYTECOUNTS, -1, -1, TiffType.LONG, FieldBit.StripByteCounts, false, false, "StripByteCounts"), 
+            new TiffFieldInfo(TiffTag.STRIPBYTECOUNTS, -1, -1, TiffType.LONG8, FieldBit.StripByteCounts, false, false, "StripByteCounts"), 
             new TiffFieldInfo(TiffTag.STRIPBYTECOUNTS, -1, -1, TiffType.SHORT, FieldBit.StripByteCounts, false, false, "StripByteCounts"), 
             new TiffFieldInfo(TiffTag.MINSAMPLEVALUE, -2, -1, TiffType.SHORT, FieldBit.MinSampleValue, true, false, "MinSampleValue"), 
             new TiffFieldInfo(TiffTag.MAXSAMPLEVALUE, -2, -1, TiffType.SHORT, FieldBit.MaxSampleValue, true, false, "MaxSampleValue"), 
@@ -101,7 +103,9 @@ namespace BitMiracle.LibTiff.Classic
             new TiffFieldInfo(TiffTag.TILEBYTECOUNTS, -1, 1, TiffType.LONG, FieldBit.StripByteCounts, false, false, "TileByteCounts"), 
             new TiffFieldInfo(TiffTag.TILEBYTECOUNTS, -1, 1, TiffType.SHORT, FieldBit.StripByteCounts, false, false, "TileByteCounts"), 
             new TiffFieldInfo(TiffTag.SUBIFD, -1, -1, TiffType.IFD, FieldBit.SubIFD, true, true, "SubIFD"), 
+            new TiffFieldInfo(TiffTag.SUBIFD, -1, -1, TiffType.IFD8, FieldBit.SubIFD, true, true, "SubIFD"), 
             new TiffFieldInfo(TiffTag.SUBIFD, -1, -1, TiffType.LONG, FieldBit.SubIFD, true, true, "SubIFD"), 
+            new TiffFieldInfo(TiffTag.SUBIFD, -1, -1, TiffType.LONG8, FieldBit.SubIFD, true, true, "SubIFD"), 
             new TiffFieldInfo(TiffTag.INKSET, 1, 1, TiffType.SHORT, FieldBit.Custom, false, false, "InkSet"), 
             new TiffFieldInfo(TiffTag.INKNAMES, -1, -1, TiffType.ASCII, FieldBit.InkNames, true, true, "InkNames"), 
             new TiffFieldInfo(TiffTag.NUMBEROFINKS, 1, 1, TiffType.SHORT, FieldBit.Custom, true, false, "NumberOfInks"), 
@@ -359,6 +363,9 @@ namespace BitMiracle.LibTiff.Classic
                     return 4;
 
                 case TiffType.DOUBLE:
+                case TiffType.LONG8:
+                case TiffType.SLONG8:
+                case TiffType.IFD8:
                     return 8;
 
                 default:

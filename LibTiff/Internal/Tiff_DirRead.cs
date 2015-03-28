@@ -25,13 +25,13 @@ namespace BitMiracle.LibTiff.Classic
 #endif
     partial class Tiff
     {
-        private int extractData(TiffDirEntry dir)
+        private long extractData(TiffDirEntry dir)
         {
-            int type = (int)dir.tdir_type;
+          int type = (int)dir.tdir_type;
             if (m_header.tiff_magic == TIFF_BIGENDIAN)
-                return (int)((dir.tdir_offset >> m_typeshift[type]) & m_typemask[type]);
+                return (long)((dir.tdir_offset >> m_typeshift[type]) & m_typemask[type]);
 
-            return (int)(dir.tdir_offset & m_typemask[type]);
+            return (long)(dir.tdir_offset & m_typemask[type]);
         }
 
         private bool byteCountLooksBad(TiffDirectory td)
@@ -49,8 +49,8 @@ namespace BitMiracle.LibTiff.Classic
             return
             (
                 (td.td_stripbytecount[0] == 0 && td.td_stripoffset[0] != 0) ||
-                (td.td_compression == Compression.NONE && td.td_stripbytecount[0] > getFileSize() - td.td_stripoffset[0]) ||
-                (m_mode == O_RDONLY && td.td_compression == Compression.NONE && td.td_stripbytecount[0] < ScanlineSize() * td.td_imagelength)
+                (td.td_compression == Compression.NONE && td.td_stripbytecount[0] > (ulong)getFileSize() - td.td_stripoffset[0]) ||
+                (m_mode == O_RDONLY && td.td_compression == Compression.NONE && td.td_stripbytecount[0] < (ulong)(ScanlineSize() * td.td_imagelength))
             );
         }
 
@@ -59,17 +59,20 @@ namespace BitMiracle.LibTiff.Classic
             return ((x & 0x07) != 0 ? (x >> 3) + 1 : x >> 3);
         }
 
-        private bool estimateStripByteCounts(TiffDirEntry[] dir, short dircount)
+        private bool estimateStripByteCounts(TiffDirEntry[] dir, long dircount)
         {
             const string module = "estimateStripByteCounts";
 
-            m_dir.td_stripbytecount = new uint [m_dir.td_nstrips];
+            m_dir.td_stripbytecount = new ulong [m_dir.td_nstrips];
 
             if (m_dir.td_compression != Compression.NONE)
             {
-                long space = TiffHeader.SizeInBytes + sizeof(short) + (dircount * TiffDirEntry.SizeInBytes) + sizeof(int);
-                long filesize = getFileSize();
-
+              long filesize = getFileSize();
+              long space = m_header.tiff_version == TIFF_BIGTIFF_VERSION
+                ? TiffHeader.SizeInBytes(true) + sizeof(long) +
+                  (dircount * TiffDirEntry.SizeInBytes(true)) + sizeof(long)
+                : TiffHeader.SizeInBytes(false) + sizeof(short) +
+                  (dircount * TiffDirEntry.SizeInBytes(false)) + sizeof(int); 
                 // calculate amount of space used by indirect values
                 for (short n = 0; n < dircount; n++)
                 {
@@ -101,8 +104,8 @@ namespace BitMiracle.LibTiff.Classic
                 // that we've overestimated the amount of data in the strip and
                 // trim this number back accordingly.
                 strip--;
-                if ((m_dir.td_stripoffset[strip] + m_dir.td_stripbytecount[strip]) > filesize)
-                    m_dir.td_stripbytecount[strip] = (uint)(filesize - m_dir.td_stripoffset[strip]);
+                if ((m_dir.td_stripoffset[strip] + m_dir.td_stripbytecount[strip]) > (ulong)filesize)
+                    m_dir.td_stripbytecount[strip] = ((ulong)filesize - m_dir.td_stripoffset[strip]);
             }
             else if (IsTiled()) 
             {
@@ -152,12 +155,12 @@ namespace BitMiracle.LibTiff.Classic
             return 0;
         }
 
-        private static int readDirectoryFind(TiffDirEntry[] dir, short dircount, TiffTag tagid)
+        private static long readDirectoryFind(TiffDirEntry[] dir, ulong dircount, TiffTag tagid)
         {
-            for (short n = 0; n < dircount; n++)
+            for (ulong n = 0; n < dircount; n++)
             {
                 if (dir[n].tdir_tag == tagid)
-                    return n;
+                    return (long)n;
             }
 
             return -1;
@@ -171,7 +174,7 @@ namespace BitMiracle.LibTiff.Classic
         /// create TIFF file with looped directory pointers. We will maintain a
         /// list of already seen directories and check every IFD offset against
         /// that list.</remarks>
-        private bool checkDirOffset(uint diroff)
+        private bool checkDirOffset(ulong diroff)
         {
             if (diroff == 0)
             {
@@ -190,7 +193,7 @@ namespace BitMiracle.LibTiff.Classic
             if (m_dirnumber > m_dirlistsize)
             {
                 // XXX: Reduce memory allocation granularity of the dirlist array.
-                uint[] new_dirlist = Realloc(m_dirlist, m_dirnumber - 1, 2 * m_dirnumber);
+                ulong[] new_dirlist = Realloc(m_dirlist, m_dirnumber - 1, 2 * m_dirnumber);
                 m_dirlistsize = 2 * m_dirnumber;
                 m_dirlist = new_dirlist;
             }
@@ -203,25 +206,25 @@ namespace BitMiracle.LibTiff.Classic
         /// Reads IFD structure from the specified offset.
         /// </summary>
         /// <returns>The number of fields in the directory or 0 if failed.</returns>
-        private short fetchDirectory(uint diroff, out TiffDirEntry[] pdir, out uint nextdiroff)
+        private ulong fetchDirectory(ulong diroff, out TiffDirEntry[] pdir, out ulong nextdiroff)
         {
             const string module = "fetchDirectory";
 
             m_diroff = diroff;
             nextdiroff = 0;
 
-            short dircount;
+            ulong dircount;
             TiffDirEntry[] dir = null;
             pdir = null;
 
-            if (!seekOK(m_diroff)) 
+            if (!seekOK((long)m_diroff)) 
             {
                 ErrorExt(this, m_clientdata, module,
                     "{0}: Seek error accessing TIFF directory", m_name);
                 return 0;
             }
-            
-            if (!readShortOK(out dircount)) 
+
+            if (!readDirCountOK(out dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION)) 
             {
                 ErrorExt(this, m_clientdata, module,
                     "{0}: Can not read TIFF directory count", m_name);
@@ -229,25 +232,33 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabShort(ref dircount);
+              SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
 
             dir = new TiffDirEntry [dircount];
-            if (!readDirEntryOk(dir, dircount))
+            if (!readDirEntryOk(dir, dircount,(m_header.tiff_version == TIFF_BIGTIFF_VERSION)))
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Can not read TIFF directory", m_name);
                 return 0;
             }
-
+            ulong temp;
             // Read offset to next directory for sequential scans.
-            int temp;
-            readIntOK(out temp);
-            nextdiroff = (uint)temp;
+            if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
+            {
+                readUlongOK(out temp);
+                nextdiroff = temp;
+            }
+            else
+            {
+                int tempInt = 0;
+                readIntOK(out tempInt);
+                nextdiroff = (ulong)tempInt;
+            }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
             {
-                temp = (int)nextdiroff;
-                SwabLong(ref temp);
-                nextdiroff = (uint)temp;
+                temp = nextdiroff;
+                SwabBigTiffValue(ref temp, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+                nextdiroff = (ulong)temp;
             }
 
             pdir = dir;
@@ -325,13 +336,13 @@ namespace BitMiracle.LibTiff.Classic
         private int fetchData(TiffDirEntry dir, byte[] buffer)
         {
             int width = DataWidth(dir.tdir_type);
-            int count = (int)dir.tdir_count * width;
+            int count = dir.tdir_count * width;
 
             // Check for overflow.
             if (dir.tdir_count == 0 || width == 0 || (count / width) != dir.tdir_count)
                 fetchFailed(dir);
 
-            if (!seekOK(dir.tdir_offset))
+            if (!seekOK((long)dir.tdir_offset))
                 fetchFailed(dir);
 
             if (!readOK(buffer, count))
@@ -355,6 +366,13 @@ namespace BitMiracle.LibTiff.Classic
                         int[] l = ByteArrayToInts(buffer, 0, count);
                         SwabArrayOfLong(l, dir.tdir_count);
                         IntsToByteArray(l, 0, dir.tdir_count, buffer, 0);
+                        break;
+                    case TiffType.LONG8:
+                    case TiffType.SLONG8:
+                    case TiffType.IFD8:
+                        long[] m = ByteArrayToLong8(buffer, 0, count);
+                        SwabArrayOfLong8(m, 2 * dir.tdir_count);
+                        Long8ToByteArray(m, 0, 2 * dir.tdir_count, buffer, 0);
                         break;
                     
                     case TiffType.RATIONAL:
@@ -448,7 +466,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         private float fetchFloat(TiffDirEntry dir)
         {
-            int l = extractData(dir);
+            int l = (int)extractData(dir);
             return BitConverter.ToSingle(BitConverter.GetBytes(l), 0);
         }
 
@@ -581,6 +599,26 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             int cc = dir.tdir_count * sizeof(int);
+            byte[] b = new byte[cc];
+            int read = fetchData(dir, b);
+            if (read != 0)
+                Buffer.BlockCopy(b, 0, v, 0, b.Length);
+
+            return (read != 0);
+        }
+
+        /// <summary>
+        /// Fetches an array of LONG or SLONG values.
+        /// </summary>
+        private bool fetchLong8Array(TiffDirEntry dir, long[] v)
+        {
+            if (dir.tdir_count == 1)
+            {
+                v[0] = (int)dir.tdir_offset;
+                return true;
+            }
+
+            int cc = dir.tdir_count * sizeof(long);
             byte[] b = new byte[cc];
             int read = fetchData(dir, b);
             if (read != 0)
@@ -818,6 +856,20 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         break;
 
+                    case TiffType.LONG8:
+                    case TiffType.SLONG8:
+                    case TiffType.IFD8:
+                        long[] longs = new long[dir.tdir_count];
+                        ok = fetchLong8Array(dir, longs);
+                        if (ok)
+                        {
+                            if (fip.PassCount)
+                                ok = SetField(dir.tdir_tag, dir.tdir_count, longs);
+                            else
+                                ok = SetField(dir.tdir_tag, longs);
+                        }
+                        break;
+
                     case TiffType.RATIONAL:
                     case TiffType.SRATIONAL:
                         float[] rs = new float [dir.tdir_count];
@@ -876,6 +928,7 @@ namespace BitMiracle.LibTiff.Classic
             else if (checkDirCount(dir, 1))
             {
                 int v32 = 0;
+                long v64 = 0;
                 // singleton value
                 switch (dir.tdir_type)
                 {
@@ -907,7 +960,7 @@ namespace BitMiracle.LibTiff.Classic
                             break;
                         }
 
-                        v32 = extractData(dir);
+                        v32 = (int)extractData(dir);
                         if (fip.PassCount)
                         {
                             int[] a = new int[1];
@@ -922,7 +975,7 @@ namespace BitMiracle.LibTiff.Classic
                     case TiffType.LONG:
                     case TiffType.SLONG:
                     case TiffType.IFD:
-                        v32 = extractData(dir);
+                        v32 = (int)extractData(dir);
                         if (fip.PassCount)
                         {
                             int[] a = new int[1];
@@ -931,7 +984,19 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else
                             ok = SetField(dir.tdir_tag, v32);
-
+                        break;
+                    case TiffType.LONG8:
+                    case TiffType.SLONG8:
+                    case TiffType.IFD8:
+                        v64 = extractData(dir);
+                        if (fip.PassCount)
+                        {
+                          long[] a = new long[1];
+                          a[0] = v64;
+                          ok = SetField(dir.tdir_tag, 1, a);
+                        }
+                        else
+                          ok = SetField(dir.tdir_tag, v64);
                         break;
 
                     case TiffType.RATIONAL:
@@ -1114,13 +1179,13 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <remarks>While this routine says "strips", in fact it's also used
         /// for tiles.</remarks>
-        private bool fetchStripThing(TiffDirEntry dir, int nstrips, ref int[] lpp)
+        private bool fetchStripThing(TiffDirEntry dir, int nstrips, ref long[] lpp)
         {
             checkDirCount(dir, nstrips);
 
             // Allocate space for strip information.
             if (lpp == null)
-                lpp = new int [nstrips];
+                lpp = new long[nstrips];
             else
                 Array.Clear(lpp, 0, lpp.Length);
 
@@ -1147,27 +1212,32 @@ namespace BitMiracle.LibTiff.Classic
                         lpp[i] = dp[i];
                 }
             }
-            else
+            else if(dir.tdir_type == TiffType.LONG8)
             {
-                status = fetchLongArray(dir, lpp);
+                status = fetchLong8Array(dir, lpp);
+            } else
+            {
+                int[] temp = new int[lpp.Length];
+                status = fetchLongArray(dir, temp);
+                lpp = IntToLong(temp);
             }
 
             return status;
         }
 
-        private bool fetchStripThing(TiffDirEntry dir, int nstrips, ref uint[] lpp)
+        private bool fetchStripThing(TiffDirEntry dir, int nstrips, ref ulong[] lpp)
         {
-            int[] temp = null;
+            long[] temp = null;
             if (lpp != null)
-                temp = new int[lpp.Length];
+                temp = new long[lpp.Length];
 
             bool res = fetchStripThing(dir, nstrips, ref temp);
             if (res)
             {
                 if (lpp == null)
-                    lpp = new uint[temp.Length];
+                    lpp = new ulong[temp.Length];
 
-                Buffer.BlockCopy(temp, 0, lpp, 0, temp.Length * sizeof(uint));
+                Buffer.BlockCopy(temp, 0, lpp, 0, temp.Length * sizeof(ulong));
             }
 
             return res;
@@ -1226,23 +1296,23 @@ namespace BitMiracle.LibTiff.Classic
         /// dealing with machines with a limited amount of memory.</remarks>
         private void chopUpSingleUncompressedStrip()
         {
-            uint bytecount = m_dir.td_stripbytecount[0];
-            uint offset = m_dir.td_stripoffset[0];
+            ulong bytecount = m_dir.td_stripbytecount[0];
+            ulong offset = m_dir.td_stripoffset[0];
 
             // Make the rows hold at least one scanline, but fill specified
             // amount of data if possible.
             int rowbytes = VTileSize(1);
-            uint stripbytes;
+            ulong stripbytes;
             int rowsperstrip;
             if (rowbytes > STRIP_SIZE_DEFAULT)
             {
-                stripbytes = (uint)rowbytes;
+                stripbytes = (ulong)rowbytes;
                 rowsperstrip = 1;
             }
             else if (rowbytes > 0)
             {
                 rowsperstrip = STRIP_SIZE_DEFAULT / rowbytes;
-                stripbytes = (uint)(rowbytes * rowsperstrip);
+                stripbytes = (ulong)(rowbytes * rowsperstrip);
             }
             else
             {
@@ -1252,20 +1322,20 @@ namespace BitMiracle.LibTiff.Classic
             // never increase the number of strips in an image
             if (rowsperstrip >= m_dir.td_rowsperstrip)
                 return;
-            
-            uint nstrips = howMany(bytecount, stripbytes);
+
+            ulong nstrips = howMany(bytecount, stripbytes);
             if (nstrips == 0)
             {
                 // something is wonky, do nothing.
                 return;
             }
 
-            uint[] newcounts = new uint [nstrips];
-            uint[] newoffsets = new uint [nstrips];
+            ulong[] newcounts = new ulong[nstrips];
+            ulong[] newoffsets = new ulong[nstrips];
 
             // Fill the strip information arrays with new bytecounts and offsets
             // that reflect the broken-up format.
-            for (int strip = 0; strip < nstrips; strip++)
+            for (ulong strip = 0; strip < nstrips; strip++)
             {
                 if (stripbytes > bytecount)
                     stripbytes = bytecount;
@@ -1300,13 +1370,10 @@ namespace BitMiracle.LibTiff.Classic
             return (int)res;
         }
 
-        internal static uint howMany(uint x, uint y)
+        internal static ulong howMany(ulong x, ulong y)
         {
-            long res = (((long)x + ((long)y - 1)) / (long)y);
-            if (res > uint.MaxValue)
-                return 0;
-
-            return (uint)res;
+            ulong res = ((x + (y - 1)) / y);
+            return res;
         }
     }
 }

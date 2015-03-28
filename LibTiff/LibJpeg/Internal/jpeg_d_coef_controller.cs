@@ -94,7 +94,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 for (int ci = 0; ci < cinfo.m_num_components; ci++)
                 {
                     m_whole_image[ci] = jpeg_common_struct.CreateBlocksArray(
-                        JpegUtils.jround_up(cinfo.Comp_info[ci].Width_in_blocks, cinfo.Comp_info[ci].H_samp_factor), 
+                        JpegUtils.jround_up(cinfo.Comp_info[ci].Width_in_blocks, cinfo.Comp_info[ci].H_samp_factor),
                         JpegUtils.jround_up(cinfo.Comp_info[ci].height_in_blocks, cinfo.Comp_info[ci].V_samp_factor));
                     m_whole_image[ci].ErrorProcessor = cinfo;
                 }
@@ -147,7 +147,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
             {
                 jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
-                
+
                 buffer[ci] = m_whole_image[componentInfo.Component_index].Access(
                     m_cinfo.m_input_iMCU_row * componentInfo.V_samp_factor, componentInfo.V_samp_factor);
 
@@ -268,7 +268,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
                     for (int i = 0; i < m_cinfo.m_blocks_in_MCU; i++)
                         Array.Clear(m_MCU_buffer[i].data, 0, m_MCU_buffer[i].data.Length);
-                    
+
                     if (!m_cinfo.m_entropy.decode_mcu(m_MCU_buffer))
                     {
                         /* Suspension forced; update state counters and exit */
@@ -439,7 +439,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* Don't bother to IDCT an uninteresting component. */
                 if (!componentInfo.component_needed)
                     continue;
-                
+
                 int block_rows;
                 int access_rows;
                 bool last_row;
@@ -459,7 +459,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     access_rows = block_rows; /* this iMCU row only */
                     last_row = true;
                 }
-                
+
                 /* Align the virtual buffer for this component. */
                 JBLOCK[][] buffer = null;
                 bool first_row;
@@ -486,12 +486,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int Q11 = componentInfo.quant_table.quantval[Q11_POS];
                 int Q02 = componentInfo.quant_table.quantval[Q02_POS];
                 int outputIndex = ci;
-                
+
                 /* Loop over all DCT blocks to be processed. */
                 for (int block_row = 0; block_row < block_rows; block_row++)
                 {
                     int bufferIndex = bufferRowOffset + block_row;
-                    
+
                     int prev_block_row = 0;
                     if (first_row && block_row == 0)
                         prev_block_row = bufferIndex;
@@ -503,7 +503,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         next_block_row = bufferIndex;
                     else
                         next_block_row = bufferIndex + 1;
-                    
+
                     /* We fetch the surrounding DC values using a sliding-register approach.
                      * Initialize all nine here so as to do the right thing on narrow pics.
                      */
@@ -651,19 +651,19 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                         /* OK, do the IDCT */
                         m_cinfo.m_idct.inverse(componentInfo.Component_index, workspace.data, output_buf[outputIndex], 0, output_col);
-                        
+
                         /* Advance for next column */
-                        DC1 = DC2; 
+                        DC1 = DC2;
                         DC2 = DC3;
-                        DC4 = DC5; 
+                        DC4 = DC5;
                         DC5 = DC6;
-                        DC7 = DC8; 
+                        DC7 = DC8;
                         DC8 = DC9;
 
                         bufferIndex++;
                         prev_block_row++;
                         next_block_row++;
-                        
+
                         output_col += componentInfo.DCT_scaled_size;
                     }
 

@@ -80,6 +80,24 @@ namespace BitMiracle.LibTiff.Classic
             return res;
         }
 
+        private bool readDirCountOK(out ulong dircount, bool isBigTiff)
+        {
+            if (isBigTiff)
+            {
+                ulong i;
+                bool result = readUlongOK(out i);
+                dircount = i;
+                return result;
+            }
+            else
+            {
+                short i;
+                bool result = readShortOK(out i);
+                dircount = (ulong)i;
+                return result;
+            }
+        }
+
         private bool readUIntOK(out uint value)
         {
             int temp;
@@ -88,6 +106,38 @@ namespace BitMiracle.LibTiff.Classic
                 value = (uint)temp;
             else
                 value = 0;
+
+            return res;
+        }
+
+        private bool readUlongOK(out ulong value)
+        {
+            long temp;
+            bool res = readLongOK(out temp);
+            if (res)
+                value = (ulong)temp;
+            else
+                value = 0;
+
+            return res;
+        }
+
+        private bool readLongOK(out long value)
+        {
+            byte[] cp = new byte[8];
+            bool res = readOK(cp, 8);
+            value = 0;
+            if (res)
+            {
+                value = (long)cp[0] & 0xFF;
+                value += (long)(cp[1] & 0xFF) << 8;
+                value += (long)(cp[2] & 0xFF) << 16;
+                value += (long)(cp[3] & 0xFF) << 24;
+                value += (long)(cp[4] & 0xFF) << 32;
+                value += (long)(cp[5] & 0xFF) << 40;
+                value += (long)(cp[6] & 0xFF) << 48;
+                value += (long)cp[7] << 56;
+            }
 
             return res;
         }
@@ -108,32 +158,50 @@ namespace BitMiracle.LibTiff.Classic
             return res;
         }
 
-        private bool readDirEntryOk(TiffDirEntry[] dir, short dircount)
+        private bool readDirEntryOk(TiffDirEntry[] dir, ulong dircount, bool isBigTiff)
         {
-            int entrySize = sizeof(short) * 2 + sizeof(int) * 2;
-            int totalSize = entrySize * dircount;
+            int entrySize = 0;
+            if (isBigTiff)
+            {
+                 entrySize = sizeof(short) * 2 + sizeof(long) * 2;
+            }
+            else
+            {
+                 entrySize = sizeof(short) * 2 + sizeof(int) * 2;
+            }
+            int totalSize = entrySize * (int)dircount;
             byte[] bytes = new byte[totalSize];
             bool res = readOK(bytes, totalSize);
             if (res)
-                readDirEntry(dir, dircount, bytes, 0);
+                readDirEntry(dir, dircount, bytes, 0, isBigTiff);
 
             return res;
         }
 
-        private static void readDirEntry(TiffDirEntry[] dir, short dircount, byte[] bytes, int offset)
+        private static void readDirEntry(TiffDirEntry[] dir, ulong dircount, byte[] bytes, int offset, bool isBigTiff)
         {
             int pos = offset;
-            for (int i = 0; i < dircount; i++)
+            for (ulong i = 0; i < dircount; i++)
             {
                 TiffDirEntry entry = new TiffDirEntry();
                 entry.tdir_tag = (TiffTag)(ushort)readShort(bytes, pos);
                 pos += sizeof(short);
                 entry.tdir_type = (TiffType)readShort(bytes, pos);
                 pos += sizeof(short);
-                entry.tdir_count = readInt(bytes, pos);
-                pos += sizeof(int);
-                entry.tdir_offset = (uint)readInt(bytes, pos);
-                pos += sizeof(int);
+                if (isBigTiff)
+                {
+                    entry.tdir_count = (int)readULong(bytes, pos);
+                    pos += sizeof(ulong);
+                    entry.tdir_offset = readULong(bytes, pos);
+                    pos += sizeof(ulong);
+                }
+                else
+                {
+                    entry.tdir_count = (int)readInt(bytes, pos);
+                    pos += sizeof (int);
+                    entry.tdir_offset = (ulong) readInt(bytes, pos);
+                    pos += sizeof (int);
+                }
                 dir[i] = entry;
             }
         }
@@ -141,12 +209,25 @@ namespace BitMiracle.LibTiff.Classic
         private bool readHeaderOk(ref TiffHeader header)
         {
             bool res = readShortOK(out header.tiff_magic);
-
             if (res)
                 res = readShortOK(out header.tiff_version);
-
             if (res)
-                res = readUIntOK(out header.tiff_diroff);
+            {
+                if (header.tiff_version == TIFF_BIGTIFF_VERSION)
+                {
+                    res = readShortOK(out header.tiff_offsize);
+                    if (res)
+                        res = readShortOK(out header.tiff_fill);
+                    if (res)
+                        res = readUlongOK(out header.tiff_diroff);
+                }
+                else
+                {
+                    uint intout;
+                    res = readUIntOK(out intout);
+                    header.tiff_diroff = intout;
+                }
+            }
 
             return res;
         }
@@ -230,7 +311,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
 
-            if (!seekOK(m_dir.td_stripoffset[strip]))
+            if (!seekOK((long)m_dir.td_stripoffset[strip]))
             {
                 ErrorExt(this, m_clientdata, module,
                     "{0}: Seek error at scanline {1}, strip {2}", m_name, m_row, strip);
@@ -253,7 +334,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
 
-            if (!seekOK(m_dir.td_stripoffset[tile]))
+            if (!seekOK((long)m_dir.td_stripoffset[tile]))
             {
                 ErrorExt(this, m_clientdata, module,
                     "{0}: Seek error at row {1}, col {2}, tile {3}", m_name, m_row, m_col, tile);

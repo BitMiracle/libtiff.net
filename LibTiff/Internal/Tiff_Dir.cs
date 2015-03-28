@@ -125,32 +125,46 @@ namespace BitMiracle.LibTiff.Classic
             m_scanlinesize = -1;
         }
 
-        private bool advanceDirectory(ref uint nextdir, out long off)
+        private bool advanceDirectory(ref ulong nextdir, out long off)
         {
             off = 0;
 
             const string module = "advanceDirectory";
-            short dircount;
+            ulong dircount;
             
-            if (!seekOK(nextdir) || !readShortOK(out dircount))
+            if (!seekOK((long)nextdir) || !readDirCountOK(out dircount,m_header.tiff_version == TIFF_BIGTIFF_VERSION))
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory count", m_name);
                 return false;
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabShort(ref dircount);
+              SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
 
-            off = seekFile(dircount * TiffDirEntry.SizeInBytes, SeekOrigin.Current);
+            off = (long)seekFile((long)dircount * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION), SeekOrigin.Current);
 
-            if (!readUIntOK(out nextdir))
+            
+            if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
-                ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
-                return false;
+                if (!readUlongOK(out nextdir))
+                {
+                    ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
+                    return false;
+                }
+            }
+            else
+            {
+                uint temp;
+                if (!readUIntOK(out temp))
+                {
+                    ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
+                    return false;
+                }
+                nextdir = temp;
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                SwabUInt(ref nextdir);
+              SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
             
             return true;
         }
@@ -170,6 +184,13 @@ namespace BitMiracle.LibTiff.Classic
         internal static void setLongArray(out int[] lpp, int[] lp, int n)
         {
             lpp = new int[n];
+            for (int i = 0; i < n; i++)
+                lpp[i] = lp[i];
+        }
+
+        internal static void setLong8Array(out long[] lpp, long[] lp, int n)
+        {
+            lpp = new long[n];
             for (int i = 0; i < n; i++)
                 lpp[i] = lp[i];
         }

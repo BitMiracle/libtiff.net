@@ -169,7 +169,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int rgroup = (cinfo.Comp_info[ci].V_samp_factor * cinfo.Comp_info[ci].DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
 
                 m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(
-                    cinfo.Comp_info[ci].Width_in_blocks * cinfo.Comp_info[ci].DCT_scaled_size, 
+                    cinfo.Comp_info[ci].Width_in_blocks * cinfo.Comp_info[ci].DCT_scaled_size,
                     rgroup * ngroups);
             }
         }
