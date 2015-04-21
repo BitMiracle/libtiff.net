@@ -44,6 +44,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 namespace ComponentAce.Compression.Libs.zlib
 {
+    [Serializable]
 #if EXPOSE_ZLIB
     public
 #endif
