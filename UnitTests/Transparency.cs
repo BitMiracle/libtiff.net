@@ -48,7 +48,6 @@ namespace UnitTests
                 }
 
                 tif.FlushData();
-                tif.Close();
             }
 
             string expectedPath = Path.Combine(ExpectedFolder, "UnassociatedAlpha.tif");
@@ -92,7 +91,6 @@ namespace UnitTests
                 }
 
                 tif.FlushData();
-                tif.Close();
             }
         }
     }
