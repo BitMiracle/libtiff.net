@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright (C) 2008-2013, Bit Miracle
+ * Copyright (C) 2008-2015, Bit Miracle
  * http://www.bitmiracle.com
  * 
  */

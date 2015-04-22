@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008-2013, Bit Miracle
+﻿/* Copyright (C) 2008-2015, Bit Miracle
  * http://www.bitmiracle.com
  * 
  * This software is based in part on the work of the Sam Leffler, Silicon 
