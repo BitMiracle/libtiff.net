@@ -1410,5 +1410,20 @@ namespace BitMiracle.LibTiff.Classic
         /// Unique image ID.
         /// </summary>
         EXIF_IMAGEUNIQUEID = 42016,
+        
+        /// <summary>
+        /// This tag is defining exact affine transformations between raster and model space. Used in interchangeable GeoTIFF files.
+        /// </summary>
+        GEOTIFF_MODELPIXELSCALETAG = 33550,
+        
+        /// <summary>
+        /// This tag stores raster->model tiepoint pairs. Used in interchangeable GeoTIFF files.
+        /// </summary>
+        GEOTIFF_MODELTIEPOINTTAG = 33922,
+        
+        /// <summary>
+        /// This tag is optionally provided for defining exact affine transformations between raster and model space. Used in interchangeable GeoTIFF files.
+        /// </summary>
+        GEOTIFF_MODELTRANSFORMATIONTAG = 34264,
     }
 }
