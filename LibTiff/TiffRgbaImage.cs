@@ -58,8 +58,8 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
-    class TiffRgbaImage
-    {       
+ class TiffRgbaImage
+    {
         internal const string photoTag = "PhotometricInterpretation";
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace BitMiracle.LibTiff.Classic
                         break;
 
                     case ExtraSample.ASSOCALPHA:
-                        // data is pre-multiplied
+                    // data is pre-multiplied
                     case ExtraSample.UNASSALPHA:
                         // data is not pre-multiplied
                         img.alpha = (ExtraSample)sampleinfo[0];
@@ -826,6 +826,12 @@ namespace BitMiracle.LibTiff.Classic
             return (r | (g << 8) | (b << 16) | (a << 24));
         }
 
+        private static int PACK4(int rgb, int a)
+        {
+            // The highest 8 bit was 0xff
+            return rgb & (a << 24);
+        }
+
         private static int W2B(short v)
         {
             return ((v >> 8) & 0xff);
@@ -1217,7 +1223,7 @@ namespace BitMiracle.LibTiff.Classic
                 }
 
                 int pos = ((row + img.row_offset) % rowsperstrip) * scanline;
-                
+
                 img.putSeparate(img, raster, offset + y * width, rasterShift,
                     0, y, width, nrow,
                     buf, p0 + pos, p1 + pos, p2 + pos, img.alpha != 0 ? (pa + pos) : -1, bufferShift);
@@ -1349,7 +1355,10 @@ namespace BitMiracle.LibTiff.Classic
                         if (bitspersample == 8)
                         {
                             if (Map == null)
-                                putContig = putRGBcontig8bitCMYKtile;
+                                if (alpha == ExtraSample.ASSOCALPHA)
+                                    putContig = putRGBAcontig8bitCMYKAtile;
+                                else
+                                    putContig = putRGBcontig8bitCMYKtile;
                             else
                                 putContig = putRGBcontig8bitCMYKMaptile;
                         }
@@ -1387,7 +1396,10 @@ namespace BitMiracle.LibTiff.Classic
                                 putContig = put16bitbwtile;
                                 break;
                             case 8:
-                                putContig = putgreytile;
+                                if (alpha == ExtraSample.ASSOCALPHA)
+                                    putContig = putgreywithalphatile;
+                                else
+                                    putContig = putgreytile;
                                 break;
                             case 4:
                                 putContig = put4bitbwtile;
@@ -1797,7 +1809,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] PALmap = img.PALmap;
             bufferShift /= 2;
-            
+
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -1837,7 +1849,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] PALmap = img.PALmap;
             bufferShift /= 4;
-            
+
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -1939,6 +1951,31 @@ namespace BitMiracle.LibTiff.Classic
                 offset += bufferShift;
             }
         }
+
+        /// <summary>
+        /// 8-bit greyscale with alpha => colormap/RGBA
+        /// </summary>
+        private static void putgreywithalphatile(
+            TiffRgbaImage img, int[] raster, int rasterOffset, int rasterShift,
+            int x, int y, int width, int height, byte[] buffer, int offset, int bufferShift)
+        {
+            int samplesperpixel = img.samplesperpixel;
+            int[][] BWmap = img.BWmap;
+
+            while (height-- > 0)
+            {
+                for (x = width; x-- > 0; )
+                {
+                    raster[rasterOffset] = PACK4(BWmap[buffer[offset]][0], buffer[offset + 1] & 0xff);
+                    rasterOffset++;
+                    offset += samplesperpixel;
+                }
+
+                rasterOffset += rasterShift;
+                offset += bufferShift;
+            }
+        }
+
 
         /// <summary>
         /// 16-bit greyscale => colormap/RGB
@@ -2071,7 +2108,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int[][] BWmap = img.BWmap;
             bufferShift /= 2;
-            
+
             while (height-- > 0)
             {
                 int[] bw = null;
@@ -2111,7 +2148,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             bufferShift *= samplesperpixel;
-            
+
             while (height-- > 0)
             {
                 int _x;
@@ -2293,6 +2330,58 @@ namespace BitMiracle.LibTiff.Classic
 
                 rasterOffset += rasterShift;
                 wpPos += bufferShift;
+            }
+        }
+
+        /// <summary>
+        /// 8-bit packed CMYKA samples w/o Map => RGBA.
+        /// NB: The conversion of CMYKA->RGBA is *very* crude.
+        /// </summary>
+        private static void putRGBAcontig8bitCMYKAtile(
+            TiffRgbaImage img, int[] raster, int rasterOffset, int rasterShift,
+            int x, int y, int width, int height, byte[] buffer, int offset, int bufferShift)
+        {
+            int samplesperpixel = img.samplesperpixel;
+            bufferShift *= samplesperpixel;
+
+            while (height-- > 0)
+            {
+                int _x;
+                for (_x = width; _x >= 8; _x -= 8)
+                {
+                    for (int rc = 0; rc < 8; rc++)
+                    {
+                        short k = (short)(255 - buffer[offset + 3]);
+                        short r = (short)((k * (255 - buffer[offset])) / 255);
+                        short g = (short)((k * (255 - buffer[offset + 1])) / 255);
+                        short b = (short)((k * (255 - buffer[offset + 2])) / 255);
+                        short a = (short)(buffer[offset + 4]);
+                        raster[rasterOffset] = PACK4(r, g, b, a);
+                        rasterOffset++;
+                        offset += samplesperpixel;
+                    }
+                }
+
+                if (_x > 0)
+                {
+                    if (_x <= 7 && _x > 0)
+                    {
+                        for (int i = _x; i > 0; i--)
+                        {
+                            short k = (short)(255 - buffer[offset + 3]);
+                            short r = (short)((k * (255 - buffer[offset])) / 255);
+                            short g = (short)((k * (255 - buffer[offset + 1])) / 255);
+                            short b = (short)((k * (255 - buffer[offset + 2])) / 255);
+                            short a = (short)(buffer[offset + 4]);
+                            raster[rasterOffset] = PACK4(r, g, b, a);
+                            rasterOffset++;
+                            offset += samplesperpixel;
+                        }
+                    }
+                }
+
+                rasterOffset += rasterShift;
+                offset += bufferShift;
             }
         }
 
