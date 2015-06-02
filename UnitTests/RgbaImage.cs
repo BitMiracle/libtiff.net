@@ -90,7 +90,9 @@ namespace UnitTests
                     "flower-ycbcr41-contig-08.tif",
                     "flower-ycbcr42-contig-08.tif",
                     "flower-ycbcr44-contig-08.tif",
-                    "palette1bpp.tif"
+                    "palette1bpp.tif",
+                    "cmyka-tile.tif",
+                    "gray8a-tile.tif"
                 };
             }
         }
