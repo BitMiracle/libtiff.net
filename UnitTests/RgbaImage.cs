@@ -90,7 +90,9 @@ namespace UnitTests
                     "flower-ycbcr41-contig-08.tif",
                     "flower-ycbcr42-contig-08.tif",
                     "flower-ycbcr44-contig-08.tif",
-                    "palette1bpp.tif"
+                    "palette1bpp.tif",
+                    "cmyka-tile.tif",
+                    "gray8a-tile.tif"
                 };
             }
         }
@@ -118,7 +120,7 @@ namespace UnitTests
                     "127.tif",
                 };
             }
-        }        
+        }
 
         private static bool tryReadRGBAImage(string file)
         {
@@ -163,13 +165,13 @@ namespace UnitTests
         [Test, TestCaseSource("ToPlainRgbaFiles")]
         public void TestTiff2Rgba(string file)
         {
-            testTiff2Rgba(file, new string[] {}, "_rgba");
+            testTiff2Rgba(file, new string[] { }, "_rgba");
         }
 
         [Test, TestCaseSource("ToRgbaFiles")]
         public void TestTiff2RgbaBlocks(string file)
         {
-            testTiff2Rgba(file, new string[] { "-b"}, "_rgba_b");
+            testTiff2Rgba(file, new string[] { "-b" }, "_rgba_b");
         }
 
         [Test, TestCaseSource("ToRgbaFiles")]
