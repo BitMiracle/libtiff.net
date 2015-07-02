@@ -20,7 +20,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
-    partial class Tiff
+ partial class Tiff
     {
         /// <summary>
         /// NB:   THIS ARRAY IS ASSUMED TO BE SORTED BY TAG.
@@ -100,8 +100,10 @@ namespace BitMiracle.LibTiff.Classic
             new TiffFieldInfo(TiffTag.TILELENGTH, 1, 1, TiffType.LONG, FieldBit.TileDimensions, false, false, "TileLength"), 
             new TiffFieldInfo(TiffTag.TILELENGTH, 1, 1, TiffType.SHORT, FieldBit.TileDimensions, false, false, "TileLength"), 
             new TiffFieldInfo(TiffTag.TILEOFFSETS, -1, 1, TiffType.LONG, FieldBit.StripOffsets, false, false, "TileOffsets"), 
+            new TiffFieldInfo(TiffTag.TILEOFFSETS, -1, 1, TiffType.LONG8, FieldBit.StripOffsets, false, false, "TileOffsets"), 
             new TiffFieldInfo(TiffTag.TILEBYTECOUNTS, -1, 1, TiffType.LONG, FieldBit.StripByteCounts, false, false, "TileByteCounts"), 
             new TiffFieldInfo(TiffTag.TILEBYTECOUNTS, -1, 1, TiffType.SHORT, FieldBit.StripByteCounts, false, false, "TileByteCounts"), 
+            new TiffFieldInfo(TiffTag.TILEBYTECOUNTS, -1, 1, TiffType.LONG8, FieldBit.StripByteCounts, false, false, "TileByteCounts"),
             new TiffFieldInfo(TiffTag.SUBIFD, -1, -1, TiffType.IFD, FieldBit.SubIFD, true, true, "SubIFD"), 
             new TiffFieldInfo(TiffTag.SUBIFD, -1, -1, TiffType.IFD8, FieldBit.SubIFD, true, true, "SubIFD"), 
             new TiffFieldInfo(TiffTag.SUBIFD, -1, -1, TiffType.LONG, FieldBit.SubIFD, true, true, "SubIFD"), 
@@ -318,7 +320,7 @@ namespace BitMiracle.LibTiff.Classic
                 case SampleFormat.VOID:
                     return TiffType.UNDEFINED;
             }
-            
+
             return TiffType.UNDEFINED;
         }
 
@@ -332,7 +334,7 @@ namespace BitMiracle.LibTiff.Classic
             fld.Name = string.Format(CultureInfo.InvariantCulture, "Tag {0}", tag);
             return fld;
         }
-        
+
         /*
         * Return size of TiffDataType in bytes.
         *
