@@ -455,7 +455,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 if (GET_BITS(1, get_buffer, ref bits_left) != 0)
                 {
                     /* 1 in the bit position being coded */
-                    MCU_data[blkn][0] |= (short)(1 << m_cinfo.m_Al);
+                    MCU_data[blkn][0] = (short)((ushort)MCU_data[blkn][0] | (ushort)(1 << m_cinfo.m_Al));
                 }
 
                 /* Note: since we use |=, repeating the assignment later is safe */
