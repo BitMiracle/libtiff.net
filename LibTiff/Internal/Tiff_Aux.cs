@@ -103,10 +103,22 @@ namespace BitMiracle.LibTiff.Classic
 
         internal static void writeInt(int value, byte[] buffer, int offset)
         {
-            buffer[offset++] = (byte)value;
-            buffer[offset++] = (byte)(value >> 8);
-            buffer[offset++] = (byte)(value >> 16);
-            buffer[offset++] = (byte)(value >> 24);
+          buffer[offset++] = (byte)value;
+          buffer[offset++] = (byte)(value >> 8);
+          buffer[offset++] = (byte)(value >> 16);
+          buffer[offset++] = (byte)(value >> 24);
+        }
+
+        internal static void writeULong(ulong value, byte[] buffer, int offset)
+        {
+          buffer[offset++] = (byte)value;
+          buffer[offset++] = (byte)(value >> 8);
+          buffer[offset++] = (byte)(value >> 16);
+          buffer[offset++] = (byte)(value >> 24);
+          buffer[offset++] = (byte)(value >> 32);
+          buffer[offset++] = (byte)(value >> 40);
+          buffer[offset++] = (byte)(value >> 48);
+          buffer[offset++] = (byte)(value >> 56);
         }
 
         internal static short readShort(byte[] buffer, int offset)
