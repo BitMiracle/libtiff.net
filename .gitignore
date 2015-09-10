@@ -10,6 +10,7 @@
 *.user
 *.sln.docstates
 *.shfbproj_*
+.vs
 
 # Build results
 
