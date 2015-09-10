@@ -368,7 +368,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.YCBCRPOSITIONING:
-                    td.td_ycbcrpositioning = (YCbCrPosition)value[0].ToByte();
+                    td.td_ycbcrpositioning = (YCbCrPosition)value[0].ToShort();
                     break;
                 case TiffTag.YCBCRSUBSAMPLING:
                     td.td_ycbcrsubsampling[0] = value[0].ToShort();
