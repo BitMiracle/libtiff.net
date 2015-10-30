@@ -94,18 +94,23 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 case J_COLOR_SPACE.JCS_GRAYSCALE:
                     if (cinfo.m_num_components != 1)
                         cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
-                    
-                    if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_GRAYSCALE)
-                        m_useGrayscaleConvert = true;
-                    else if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_RGB)
+                    switch (cinfo.m_in_color_space)
                     {
-                        m_useNullStart = false; // use rgb_ycc_start
-                        m_useRgbGrayConvert = true;
+                        case J_COLOR_SPACE.JCS_GRAYSCALE:
+                            m_useGrayscaleConvert = true;
+                            break;
+                        case J_COLOR_SPACE.JCS_RGB:
+                            m_useNullStart = false; // use rgb_ycc_start
+                            m_useRgbGrayConvert = true;
+                            break;
+                        case J_COLOR_SPACE.JCS_YCbCr:
+                            m_useGrayscaleConvert = true;
+                            break;
+                        default:
+                            cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                            break;
                     }
-                    else if (cinfo.m_in_color_space == J_COLOR_SPACE.JCS_YCbCr)
-                        m_useGrayscaleConvert = true;
-                    else
-                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+
                     break;
 
                 case J_COLOR_SPACE.JCS_RGB:
