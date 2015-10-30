@@ -8,6 +8,7 @@
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  * For conditions of distribution and use, see the accompanying README file.
  */
+using System;
 
 namespace BitMiracle.LibTiff.Classic
 {
@@ -15,6 +16,7 @@ namespace BitMiracle.LibTiff.Classic
     /// Jpeg Tables Mode.<br/>
     /// Possible values for <see cref="TiffTag"/>.JPEGTABLESMODE tag.
     /// </summary>
+    [Flags]
 #if EXPOSE_LIBTIFF
     public
 #endif
