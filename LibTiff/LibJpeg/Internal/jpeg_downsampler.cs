@@ -170,7 +170,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     case downSampleMethod.int_downsampler:
                         int_downsample(ci, input_buf[ci], in_row_index, output_buf[ci], outIndex);
                         break;
-                };
+                }
             }
         }
 

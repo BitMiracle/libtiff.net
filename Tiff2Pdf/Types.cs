@@ -8,6 +8,7 @@
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  * For conditions of distribution and use, see the accompanying README file.
  */
+using System;
 
 namespace BitMiracle.Tiff2Pdf
 {
@@ -57,6 +58,7 @@ namespace BitMiracle.Tiff2Pdf
     };
 
     /* This type is of PDF color spaces. */
+    [Flags]
     enum t2p_cs_t
     {
         T2P_CS_UNKNOWN = 0,
@@ -72,6 +74,7 @@ namespace BitMiracle.Tiff2Pdf
     };
 
     /* This type is of PDF compression types.  */
+    [Flags]
     enum t2p_compress_t
     {
         T2P_COMPRESS_NONE = 0x00,
@@ -81,6 +84,7 @@ namespace BitMiracle.Tiff2Pdf
     };
 
     /* This type is whether TIFF image data can be used in PDF without transcoding. */
+    [Flags]
     enum t2p_transcode_t
     {
         T2P_TRANSCODE_UNKNOWN = 0,
@@ -89,6 +93,7 @@ namespace BitMiracle.Tiff2Pdf
     };
 
     /* This type is of information about the data samples of the input image. */
+    [Flags]
     enum t2p_sample_t
     {
         T2P_SAMPLE_NOTHING = 0x0000,  /* The unencoded samples are normal for the output colorspace */

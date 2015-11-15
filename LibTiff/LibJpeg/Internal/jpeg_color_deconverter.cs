@@ -101,17 +101,23 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 case J_COLOR_SPACE.JCS_RGB:
                     cinfo.m_out_color_components = JpegConstants.RGB_PIXELSIZE;
-                    if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr)
+                    switch (cinfo.m_jpeg_color_space)
                     {
-                        m_converter = ColorConverter.ycc_rgb_converter;
-                        build_ycc_rgb_table();
+                        case J_COLOR_SPACE.JCS_YCbCr:
+                            m_converter = ColorConverter.ycc_rgb_converter;
+                            build_ycc_rgb_table();
+                            break;
+                        case J_COLOR_SPACE.JCS_GRAYSCALE:
+                            m_converter = ColorConverter.gray_rgb_converter;
+                            break;
+                        case J_COLOR_SPACE.JCS_RGB:
+                            m_converter = ColorConverter.null_converter;
+                            break;
+                        default:
+                            cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                            break;
                     }
-                    else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_GRAYSCALE)
-                        m_converter = ColorConverter.gray_rgb_converter;
-                    else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_RGB)
-                        m_converter = ColorConverter.null_converter;
-                    else
-                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+
                     break;
 
                 case J_COLOR_SPACE.JCS_CMYK:
