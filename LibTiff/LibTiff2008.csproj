@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;EXPOSE_LIBTIFF</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EXPOSE_LIBTIFF  FIX_JPEG_IS_OJPEG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -28,7 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;EXPOSE_LIBTIFF</DefineConstants>
+    <DefineConstants>TRACE;EXPOSE_LIBTIFF FIX_JPEG_IS_OJPEG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\BitMiracle.LibTiff.NET.xml</DocumentationFile>
@@ -63,7 +63,7 @@
     <Compile Include="Internal\DeflateCodecTagMethods.cs" />
     <Compile Include="Internal\DumpModeCodec.cs" />
     <Compile Include="FieldBit.cs" />
-	<Compile Include="Internal\ExtenderAndErrorHandler.cs" />
+    <Compile Include="Internal\ExtenderAndErrorHandler.cs" />
     <Compile Include="Internal\JpegCodec.cs" />
     <Compile Include="Internal\JpegCodecTagMethods.cs" />
     <Compile Include="Internal\JpegErrorManager.cs" />
@@ -205,7 +205,8 @@
   -->
   <PropertyGroup>
     <PreBuildEvent>cd "$(SolutionDir)"
-update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
+update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"
+</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)replace.vbs" O: Overload: "$(TargetDir)BitMiracle.LibTiff.NET.xml"</PostBuildEvent>

@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4982B49A-C3D7-4C2A-82D9-195CAC547CFE}"
 	ProjectSection(SolutionItems) = preProject
 		LibTiff\Help.shfbproj = LibTiff\Help.shfbproj
@@ -42,6 +44,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SilverlightTestApplication.
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "59385"
 		VWDDynamicPort = "false"
+		SlnRelativePath = "SilverlightTest\SilverlightTestApplication.Web\"
 		DefaultWebSiteLanguage = "Visual C#"
 		ProjOutputReferences = "{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}|ClientBin|false;"
 	EndProjectSection

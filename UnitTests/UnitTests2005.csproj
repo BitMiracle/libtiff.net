@@ -55,6 +55,7 @@
     <Compile Include="TiffCP\Multipage.cs" />
     <Compile Include="TiffCP\Packbits.cs" />
     <Compile Include="TiffCP\Tester.cs" />
+    <Compile Include="Transparency.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LibTiff\LibTiff2005.csproj">
