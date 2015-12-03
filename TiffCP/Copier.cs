@@ -703,12 +703,18 @@ namespace BitMiracle.TiffCP
                                 return false;
                             }
 
-                            if (sampleBits == 8)
-                                subtract8(buf, biasBuf, imagewidth);
-                            else if (sampleBits == 16)
-                                subtract16(buf, biasBuf, imagewidth);
-                            else if (sampleBits == 32)
-                                subtract32(buf, biasBuf, imagewidth);
+                            switch (sampleBits)
+                            {
+                                case 8:
+                                    subtract8(buf, biasBuf, imagewidth);
+                                    break;
+                                case 16:
+                                    subtract16(buf, biasBuf, imagewidth);
+                                    break;
+                                case 32:
+                                    subtract32(buf, biasBuf, imagewidth);
+                                    break;
+                            }
 
                             if (!outImage.WriteScanline(buf, row, 0))
                             {
@@ -1456,14 +1462,21 @@ namespace BitMiracle.TiffCP
                     result = inImage.GetField(tag);
                     if (result != null)
                     {
-                        if (count == 1)
-                            outImage.SetField(tag, result[0]);
-                        else if (count == 2)
-                            outImage.SetField(tag, result[0], result[1]);
-                        else if (count == 4)
-                            outImage.SetField(tag, result[0], result[1], result[2]);
-                        else if (count == -1)
-                            outImage.SetField(tag, result[0], result[1]);
+                        switch (count)
+                        {
+                            case 1:
+                                outImage.SetField(tag, result[0]);
+                                break;
+                            case 2:
+                                outImage.SetField(tag, result[0], result[1]);
+                                break;
+                            case 4:
+                                outImage.SetField(tag, result[0], result[1], result[2]);
+                                break;
+                            case -1:
+                                outImage.SetField(tag, result[0], result[1]);
+                                break;
+                        }
                     }
                     break;
                 case TiffType.LONG:

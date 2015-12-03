@@ -67,20 +67,26 @@ namespace BitMiracle.Tiff2Rgba
                         break;
 
                     case 'c':
-                        if (optarg == "none")
-                            c.m_compression = Compression.NONE;
-                        else if (optarg == "packbits")
-                            c.m_compression = Compression.PACKBITS;
-                        else if (optarg == "lzw")
-                            c.m_compression = Compression.LZW;
-                        else if (optarg == "jpeg")
-                            c.m_compression = Compression.JPEG;
-                        else if (optarg == "zip")
-                            c.m_compression = Compression.DEFLATE;
-                        else
+                        switch (optarg)
                         {
-                            usage();
-                            return;
+                            case "none":
+                                c.m_compression = Compression.NONE;
+                                break;
+                            case "packbits":
+                                c.m_compression = Compression.PACKBITS;
+                                break;
+                            case "lzw":
+                                c.m_compression = Compression.LZW;
+                                break;
+                            case "jpeg":
+                                c.m_compression = Compression.JPEG;
+                                break;
+                            case "zip":
+                                c.m_compression = Compression.DEFLATE;
+                                break;
+                            default:
+                                usage();
+                                return;
                         }
 
                         argn++;

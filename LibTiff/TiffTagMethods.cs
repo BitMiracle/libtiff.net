@@ -90,18 +90,24 @@ namespace BitMiracle.LibTiff.Classic
                     // decoding work in with its normal work.
                     if ((tif.m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
                     {
-                        if (td.td_bitspersample == 16)
-                            tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab16Bit;
-                        else if (td.td_bitspersample == 24)
-                            tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab24Bit;
-                        else if (td.td_bitspersample == 32)
-                            tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab32Bit;
-                        else if (td.td_bitspersample == 64)
-                            tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab64Bit;
-                        else if (td.td_bitspersample == 128)
+                        switch (td.td_bitspersample)
                         {
-                            // two 64's
-                            tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab64Bit;
+                            case 16:
+                                tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab16Bit;
+                                break;
+                            case 24:
+                                tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab24Bit;
+                                break;
+                            case 32:
+                                tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab32Bit;
+                                break;
+                            case 64:
+                                tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab64Bit;
+                                break;
+                            case 128:
+                                // two 64's
+                                tif.m_postDecodeMethod = Tiff.PostDecodeMethodType.pdmSwab64Bit;
+                                break;
                         }
                     }
                     break;
@@ -368,7 +374,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
                     break;
                 case TiffTag.YCBCRPOSITIONING:
-                    td.td_ycbcrpositioning = (YCbCrPosition)value[0].ToByte();
+                    td.td_ycbcrpositioning = (YCbCrPosition)value[0].ToShort();
                     break;
                 case TiffTag.YCBCRSUBSAMPLING:
                     td.td_ycbcrsubsampling[0] = value[0].ToShort();

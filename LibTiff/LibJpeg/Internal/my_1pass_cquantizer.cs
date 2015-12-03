@@ -551,7 +551,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     m_fserrors[ci][errorIndex + 0] = (short) bpreverr; /* unload prev err into array */
                 }
 
-                m_on_odd_row = (m_on_odd_row ? false : true);
+                m_on_odd_row = !m_on_odd_row;
             }
         }
 
