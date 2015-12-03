@@ -199,7 +199,7 @@ namespace BitMiracle.LibTiff.Classic
                 {
                     entry.tdir_count = (int)readInt(bytes, pos);
                     pos += sizeof (int);
-                    entry.tdir_offset = (ulong) readInt(bytes, pos);
+                    entry.tdir_offset = (ulong) (uint)readInt(bytes, pos);
                     pos += sizeof (int);
                 }
                 dir[i] = entry;
