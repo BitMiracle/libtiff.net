@@ -89,6 +89,23 @@ namespace UnitTests.TiffCP
             }
         }
 
+        private static string[] StripOffsetAboveMaxvalue
+        {
+            get
+            {
+                return new[]
+                {
+                    "StripoffsetsAboveShortMaxValue.tif"
+                };
+            }
+        }
+
+        [Test, TestCaseSource("StripOffsetAboveMaxvalue")]
+        public void TestStripoffsetsAboveShortMaxValue(string file)
+        {
+            Tester.PerformTest(file, new string[] { }, "_converted_without_exception", false);
+        }
+
         [Test, TestCaseSource("ContigousFiles")]
         public void TestContigousToSeparate(string file)
         {
