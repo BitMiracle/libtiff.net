@@ -1368,7 +1368,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (status)
                 {
                     for (int i = 0; i < nstrips && i < dir.tdir_count; i++)
-                        lpp[i] = dp[i];
+                        lpp[i] = (ushort)dp[i];
                 }
             }
             else if (nstrips != dir.tdir_count)
@@ -1379,13 +1379,14 @@ namespace BitMiracle.LibTiff.Classic
                 if (status)
                 {
                     for (int i = 0; i < nstrips && i < dir.tdir_count; i++)
-                        lpp[i] = dp[i];
+                        lpp[i] = (uint)dp[i];
                 }
             }
             else if(dir.tdir_type == TiffType.LONG8)
             {
                 status = fetchLong8Array(dir, lpp);
-            } else
+            }
+            else
             {
                 int[] temp = new int[lpp.Length];
                 status = fetchLongArray(dir, temp);

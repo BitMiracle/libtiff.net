@@ -1105,7 +1105,7 @@ namespace BitMiracle.LibTiff.Classic
             bool diroutoforderwarning = false;
             bool haveunknowntags = false;
 #if FIX_JPEG_IS_OJPEG
-          bool fixJpegIsOJpeg = false;
+            bool fixJpegIsOJpeg = false;
 #endif
             for (ulong i = 0; i < dircount; i++)
             {
@@ -1208,10 +1208,10 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else if (dir[i].tdir_type == TiffType.LONG)
                         {
-                            #if FIX_JPEG_IS_OJPEG
+#if FIX_JPEG_IS_OJPEG
                             int v;
                             bool isFetched = fetchPerSampleLongs(dir[i], out v);
-                            if (!isFetched) 
+                            if (!isFetched)
                                 return false;
                             fixJpegIsOJpeg = checkJpegIsOJpeg(ref v, dir, dircount);
                             if (!SetField(dir[i].tdir_tag, v))
@@ -1224,7 +1224,7 @@ namespace BitMiracle.LibTiff.Classic
                         }
                         else
                         {
-                            #if FIX_JPEG_IS_OJPEG
+#if FIX_JPEG_IS_OJPEG
                             short iv;
                             bool isFetched = fetchPerSampleShorts(dir[i], out iv);
                             if (!isFetched)
@@ -2739,7 +2739,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="ReadDirectory"/>.</remarks>
         public bool SetDirectory(short number)
         {
-          ulong nextdir = m_header.tiff_diroff;
+            ulong nextdir = m_header.tiff_diroff;
             short n;
             for (n = number; n > 0 && nextdir != 0; n--)
             {
@@ -2826,7 +2826,7 @@ namespace BitMiracle.LibTiff.Classic
             // offset of the directory that follows.
             seekFile((long)off, SeekOrigin.Begin);
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-              SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+                SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
 
 
             if (!writeIntOK((int)nextdir))
@@ -2959,7 +2959,7 @@ namespace BitMiracle.LibTiff.Classic
                 m_diroff = 0;
 
                 seekFile(TiffHeader.TIFF_MAGIC_SIZE + TiffHeader.TIFF_VERSION_SIZE, SeekOrigin.Begin);
-                if (!writeDirOffOK((long)m_header.tiff_diroff,m_header.tiff_version == TIFF_BIGTIFF_VERSION))
+                if (!writeDirOffOK((long)m_header.tiff_diroff, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                 {
                     ErrorExt(this, m_clientdata, m_name, "Error updating TIFF header");
                     return false;
@@ -2978,7 +2978,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
 
                     if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                      SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
+                        SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
 
                     seekFile((long)(dircount * (ulong)TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION)), SeekOrigin.Current);
 
@@ -3003,7 +3003,7 @@ namespace BitMiracle.LibTiff.Classic
                     }
 
                     if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-                      SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+                        SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
                 }
                 while (nextdir != m_diroff && nextdir != 0);
 
@@ -5758,26 +5758,26 @@ namespace BitMiracle.LibTiff.Classic
 
         private static void SwabBigTiffValue(ref ulong value, bool isBigTiff, bool isShort)
         {
-          if (isBigTiff)
-          {
-            SwabLong8(ref value);
-          }
-          else
-          {
-            if (isShort)
+            if (isBigTiff)
             {
-              short tempValue = (short)value;
-              SwabShort(ref tempValue);
-              value = (ulong)tempValue;
+                SwabLong8(ref value);
             }
             else
             {
+                if (isShort)
+                {
+                    short tempValue = (short)value;
+                    SwabShort(ref tempValue);
+                    value = (ulong)tempValue;
+                }
+                else
+                {
 
-              int tempValue = (int) value;
-              SwabLong(ref tempValue);
-              value = (ulong) tempValue;
+                    int tempValue = (int)value;
+                    SwabLong(ref tempValue);
+                    value = (ulong)tempValue;
+                }
             }
-          }
         }
 
         /// <summary>
@@ -6182,34 +6182,35 @@ namespace BitMiracle.LibTiff.Classic
         {
             Buffer.BlockCopy(source, srcOffset * sizeof(short), bytes, offset, srcCount * sizeof(short));
         }
+
         private static long[] IntToLong(int[] inputArray)
         {
-          long[] output = new long[inputArray.Length];
-          for (int i = 0; i < inputArray.Length; i++)
-          {
-            output[i] = (uint)inputArray[i];
-          }
-          return output;
+            long[] output = new long[inputArray.Length];
+            for (int i = 0; i < inputArray.Length; i++)
+            {
+                output[i] = (uint)inputArray[i];
+            }
+            return output;
         }
 
         private static uint[] LongToInt(ulong[] inputArray)
         {
-          uint[] output = new uint[inputArray.Length];
-          for (int i = 0; i < inputArray.Length; i++)
-          {
-            output[i] = (uint)inputArray[i];
-          }
-            return output;
-        }
-        private static int[] LongToInt(long[] inputArray)
-        {
-          int[] output = new int[inputArray.Length];
-          for (int i = 0; i < inputArray.Length; i++)
-          {
-            output[i] = (int)inputArray[i];
-          }
+            uint[] output = new uint[inputArray.Length];
+            for (int i = 0; i < inputArray.Length; i++)
+            {
+                output[i] = (uint)inputArray[i];
+            }
             return output;
         }
 
+        private static int[] LongToInt(long[] inputArray)
+        {
+            int[] output = new int[inputArray.Length];
+            for (int i = 0; i < inputArray.Length; i++)
+            {
+                output[i] = (int)inputArray[i];
+            }
+            return output;
+        }
     }
 }

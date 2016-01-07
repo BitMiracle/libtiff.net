@@ -311,12 +311,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Debug.Assert((m_flags & TiffFlags.NOREADRAW) != TiffFlags.NOREADRAW);
 
-            var stripOffset = (long)m_dir.td_stripoffset[strip];
-            if (stripOffset < 0)
-            {
-                stripOffset = (ushort)m_dir.td_stripoffset[strip];
-            }
-            if (!seekOK(stripOffset))
+            if (!seekOK((long)m_dir.td_stripoffset[strip]))
             {
                 ErrorExt(this, m_clientdata, module,
                     "{0}: Seek error at scanline {1}, strip {2}", m_name, m_row, strip);

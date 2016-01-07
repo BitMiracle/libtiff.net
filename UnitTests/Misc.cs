@@ -11,6 +11,20 @@ namespace UnitTests
     {
         private static int TagToWrite = 0;
 
+        [TestCase("StripoffsetsAboveShortMaxValue.tif")]
+        public void TestStripOffsetsArePositive(string name)
+        {
+            string fn = Path.Combine(TestCase.Folder, name);
+            using (Tiff tiff = Tiff.Open(fn, "r"))
+            {
+                FieldValue[] fieldValues = tiff.GetField(TiffTag.STRIPOFFSETS);
+                long[] offsets = fieldValues[0].TolongArray();
+                
+                foreach (long offset in offsets)
+                    Assert.GreaterOrEqual(offset, 0);
+            }
+        }
+
         [Test]
         public void TestReadUndefinedType()
         {
