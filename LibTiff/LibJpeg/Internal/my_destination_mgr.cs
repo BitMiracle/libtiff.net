@@ -1,13 +1,4 @@
-﻿/* Copyright (C) 2008-2015, Bit Miracle
- * http://www.bitmiracle.com
- * 
- * Copyright (C) 1994-1996, Thomas G. Lane.
- * This file is part of the Independent JPEG Group's software.
- * For conditions of distribution and use, see the accompanying README file.
- *
- */
-
-/*
+﻿/*
  * This file contains compression data destination routines for the case of
  * emitting JPEG data to a file (or any stdio stream).  While these routines
  * are sufficient for most applications, some will want to use a different
@@ -18,8 +9,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 namespace BitMiracle.LibJpeg.Classic.Internal

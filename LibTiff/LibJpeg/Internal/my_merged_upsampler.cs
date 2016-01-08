@@ -1,13 +1,4 @@
-﻿/* Copyright (C) 2008-2015, Bit Miracle
- * http://www.bitmiracle.com
- * 
- * Copyright (C) 1994-1996, Thomas G. Lane.
- * This file is part of the Independent JPEG Group's software.
- * For conditions of distribution and use, see the accompanying README file.
- *
- */
-
-/*
+﻿/*
  * This file contains code for merged upsampling/color conversion.
  *
  * This file combines functions from my_upsampler and jpeg_color_deconverter;
@@ -34,10 +25,6 @@
  * the only common cases.  (For uncommon cases we fall back on the more
  * general code in my_upsampler and jpeg_color_deconverter)
  */
-
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BitMiracle.LibJpeg.Classic.Internal
 {

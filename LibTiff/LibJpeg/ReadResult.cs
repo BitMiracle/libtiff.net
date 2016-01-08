@@ -1,12 +1,4 @@
-﻿/* Copyright (C) 2008-2015, Bit Miracle
- * http://www.bitmiracle.com
- */
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BitMiracle.LibJpeg.Classic
+﻿namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Describes a result of read operation.

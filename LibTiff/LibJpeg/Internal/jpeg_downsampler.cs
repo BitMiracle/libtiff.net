@@ -1,13 +1,4 @@
-﻿/* Copyright (C) 2008-2015, Bit Miracle
- * http://www.bitmiracle.com
- * 
- * Copyright (C) 1994-1996, Thomas G. Lane.
- * This file is part of the Independent JPEG Group's software.
- * For conditions of distribution and use, see the accompanying README file.
- *
- */
-
-/*
+﻿/*
  * This file contains downsampling routines.
  *
  * Downsampling input data is counted in "row groups".  A row group
@@ -47,10 +38,6 @@
  * where SF = (smoothing_factor / 1024).
  * Currently, smoothing is only supported for 2h2v sampling factors.
  */
-
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BitMiracle.LibJpeg.Classic.Internal
 {

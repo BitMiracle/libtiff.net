@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BitMiracle.LibJpeg.Classic
+﻿namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// The unit of density.

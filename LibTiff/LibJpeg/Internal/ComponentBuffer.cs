@@ -1,12 +1,4 @@
-﻿/* Copyright (C) 2008-2015, Bit Miracle
- * http://www.bitmiracle.com
- */
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BitMiracle.LibJpeg.Classic.Internal
+﻿namespace BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Encapsulates buffer of image samples for one color component
