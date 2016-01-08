@@ -59,6 +59,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
 
+                case J_COLOR_SPACE.JCS_NCHANNEL:
+                    if (cinfo.m_num_components < 1)
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
+                    break;
+
                 default:
                     /* JCS_UNKNOWN can be anything */
                     if (cinfo.m_num_components < 1)
@@ -88,23 +93,17 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 case J_COLOR_SPACE.JCS_RGB:
                     cinfo.m_out_color_components = JpegConstants.RGB_PIXELSIZE;
-                    switch (cinfo.m_jpeg_color_space)
+                    if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr)
                     {
-                        case J_COLOR_SPACE.JCS_YCbCr:
-                            m_converter = ColorConverter.ycc_rgb_converter;
-                            build_ycc_rgb_table();
-                            break;
-                        case J_COLOR_SPACE.JCS_GRAYSCALE:
-                            m_converter = ColorConverter.gray_rgb_converter;
-                            break;
-                        case J_COLOR_SPACE.JCS_RGB:
-                            m_converter = ColorConverter.null_converter;
-                            break;
-                        default:
-                            cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
-                            break;
+                        m_converter = ColorConverter.ycc_rgb_converter;
+                        build_ycc_rgb_table();
                     }
-
+                    else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_GRAYSCALE)
+                        m_converter = ColorConverter.gray_rgb_converter;
+                    else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_RGB)
+                        m_converter = ColorConverter.null_converter;
+                    else
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                     break;
 
                 case J_COLOR_SPACE.JCS_CMYK:
@@ -115,6 +114,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         build_ycc_rgb_table();
                     }
                     else if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_CMYK)
+                        m_converter = ColorConverter.null_converter;
+                    else
+                        cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+                    break;
+
+                case J_COLOR_SPACE.JCS_NCHANNEL:
+                    if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_NCHANNEL)
                         m_converter = ColorConverter.null_converter;
                     else
                         cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
@@ -223,13 +229,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
                 /* Cr=>R value is nearest int to 1.40200 * x */
                 m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.40200) * x + ONE_HALF, SCALEBITS);
-                
+
                 /* Cb=>B value is nearest int to 1.77200 * x */
                 m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.77200) * x + ONE_HALF, SCALEBITS);
-                
+
                 /* Cr=>G value is scaled-up -0.71414 * x */
                 m_Cr_g_tab[i] = (-FIX(0.71414)) * x;
-                
+
                 /* Cb=>G value is scaled-up -0.34414 * x */
                 /* We also add in ONE_HALF so that need not do it in inner loop */
                 m_Cb_g_tab[i] = (-FIX(0.34414)) * x + ONE_HALF;
@@ -297,7 +303,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     output_buf[output_row + row][columnOffset] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cr_r_tab[cr])]; /* red */
                     output_buf[output_row + row][columnOffset + 1] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS))]; /* green */
                     output_buf[output_row + row][columnOffset + 2] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cb_b_tab[cb])]; /* blue */
-                    
+
                     /* K passes through unchanged */
                     /* don't need GETJSAMPLE here */
                     output_buf[output_row + row][columnOffset + 3] = input_buf[3][input_row + component3RowOffset][col];

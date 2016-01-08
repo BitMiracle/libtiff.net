@@ -37,6 +37,11 @@
         /// <summary>
         /// YCbCrK
         /// </summary>
-        JCS_YCCK
+        JCS_YCCK,
+
+        /// <summary>
+        /// N channels
+        /// </summary>
+        JCS_NCHANNEL,
     }
 }
