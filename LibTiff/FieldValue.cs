@@ -1,9 +1,4 @@
-﻿/* 
- * Copyright (C) 2008-2015, Bit Miracle
- * http://www.bitmiracle.com
- * 
- */
-using System;
+﻿using System;
 
 namespace BitMiracle.LibTiff.Classic
 {

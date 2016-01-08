@@ -1,22 +1,10 @@
-﻿/* Copyright (C) 2008-2015, Bit Miracle
- * http://www.bitmiracle.com
- * 
- * This software is based in part on the work of the Sam Leffler, Silicon 
- * Graphics, Inc. and contributors.
- *
- * Copyright (c) 1988-1997 Sam Leffler
- * Copyright (c) 1991-1997 Silicon Graphics, Inc.
- * For conditions of distribution and use, see the accompanying README file.
- */
-
-/*
+﻿/*
  * Tile-oriented Read Support
  * Contributed by Nancy Cam (Silicon Graphics).
  */
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -36,7 +24,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
     public
 #endif
- partial class Tiff : IDisposable
+    partial class Tiff : IDisposable
     {
         /// <summary>
         /// Delegate for LibTiff.Net extender method
@@ -5885,6 +5873,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             SwabArrayOfLong(array, 0, count);
         }
+        
         /// <summary>
         /// Swaps the bytes in specified number of values in the array of 64-bit items.
         /// </summary>
@@ -5931,6 +5920,7 @@ namespace BitMiracle.LibTiff.Classic
                 array[offset] += bytes[3] << 24;
             }
         }
+        
         /// <summary>
         /// Swaps the bytes in specified number of values in the array of 64-bit items
         /// starting at specified offset.
