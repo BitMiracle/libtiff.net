@@ -36,34 +36,41 @@ namespace BitMiracle.LibJpeg.Classic
          */
         private int width_in_blocks;
         internal int height_in_blocks;
-        /* Size of a DCT block in samples.  Always DCTSIZE for compression.
-         * For decompression this is the size of the output from one DCT block,
-         * reflecting any scaling we choose to apply during the IDCT step.
-         * Values of 1,2,4,8 are likely to be supported.  Note that different
-         * components may receive different IDCT scalings.
+
+        /* Size of a DCT block in samples,
+         * reflecting any scaling we choose to apply during the DCT step.
+         * Values from 1 to 16 are supported.
+         * Note that different components may receive different DCT scalings.
          */
-        internal int DCT_scaled_size;
+        internal int DCT_h_scaled_size;
+        internal int DCT_v_scaled_size;
+
         /* The downsampled dimensions are the component's actual, unpadded number
-         * of samples at the main buffer (preprocessing/compression interface), thus
-         * downsampled_width = ceil(image_width * Hi/Hmax)
-         * and similarly for height.  For decompression, IDCT scaling is included, so
-         * downsampled_width = ceil(image_width * Hi/Hmax * DCT_scaled_size/DCTSIZE)
+         * of samples at the main buffer (preprocessing/compression interface);
+         * DCT scaling is included, so
+         * downsampled_width =
+         *   ceil(image_width * Hi/Hmax * DCT_h_scaled_size/block_size)
+         * and similarly for height.
          */
         internal int downsampled_width;    /* actual width in samples */
-    
         internal int downsampled_height; /* actual height in samples */
-        /* This flag is used only for decompression.  In cases where some of the
-         * components will be ignored (eg grayscale output from YCbCr image),
-         * we can skip most computations for the unused components.
+
+        /* For decompression, in cases where some of the components will be
+         * ignored (eg grayscale output from YCbCr image), we can skip most
+         * computations for the unused components.
+         * For compression, some of the components will need further quantization
+         * scale by factor of 2 after DCT (eg BG_YCC output from normal RGB input).
+         * The field is first set TRUE for decompression, FALSE for compression
+         * in initial_setup, and then adapted in color conversion setup.
          */
-        internal bool component_needed;  /* do we need the value of this component? */
+        internal bool component_needed;
 
         /* These values are computed before starting a scan of the component. */
         /* The decompressor output side may not use these variables. */
         internal int MCU_width;      /* number of blocks per MCU, horizontally */
         internal int MCU_height;     /* number of blocks per MCU, vertically */
         internal int MCU_blocks;     /* MCU_width * MCU_height */
-        internal int MCU_sample_width;       /* MCU width in samples, MCU_width*DCT_scaled_size */
+        internal int MCU_sample_width;       /* MCU width in samples: MCU_width * DCT_h_scaled_size */
         internal int last_col_width;     /* # of non-dummy blocks across in last MCU */
         internal int last_row_height;        /* # of non-dummy blocks down in last MCU */
 
@@ -88,7 +95,8 @@ namespace BitMiracle.LibJpeg.Classic
             ac_tbl_no = ci.ac_tbl_no;
             width_in_blocks = ci.width_in_blocks;
             height_in_blocks = ci.height_in_blocks;
-            DCT_scaled_size = ci.DCT_scaled_size;
+            DCT_h_scaled_size = ci.DCT_h_scaled_size;
+            DCT_v_scaled_size = ci.DCT_v_scaled_size;
             downsampled_width = ci.downsampled_width;
             downsampled_height = ci.downsampled_height;
             component_needed = ci.component_needed;

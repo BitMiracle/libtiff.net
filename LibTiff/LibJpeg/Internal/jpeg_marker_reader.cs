@@ -85,6 +85,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// 
         /// Returns same codes as are defined for jpeg_consume_input:
         /// JPEG_SUSPENDED, JPEG_REACHED_SOS, or JPEG_REACHED_EOI.
+        /// 
+        /// Note: This function may return a pseudo SOS marker(with zero
+        /// component number) for treat by input controller's consume_input.
+        /// consume_input itself should filter out (skip) the pseudo marker
+        /// after processing for the caller.
         /// </summary>
         public ReadResult read_markers()
         {
@@ -120,39 +125,51 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     case JPEG_MARKER.SOF0:
                         /* Baseline */
+                        if (!get_sof(true, false, false))
+                            return ReadResult.JPEG_SUSPENDED;
+                        break;
+
                     case JPEG_MARKER.SOF1:
                         /* Extended sequential, Huffman */
-                        if (!get_sof(false))
+                        if (!get_sof(false, false, false))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
                     case JPEG_MARKER.SOF2:
                         /* Progressive, Huffman */
-                        if (!get_sof(true))
+                        if (!get_sof(false, true, false))
+                            return ReadResult.JPEG_SUSPENDED;
+                        break;
+
+                    case JPEG_MARKER.SOF9:
+                        /* Extended sequential, arithmetic */
+                        if (!get_sof(false, false, true))
+                            return ReadResult.JPEG_SUSPENDED;
+                        break;
+
+                    case JPEG_MARKER.SOF10:
+                        /* Progressive, arithmetic */
+                        if (!get_sof(false, true, true))
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
                     /* Currently unsupported SOFn types */
                     case JPEG_MARKER.SOF3:
-                        /* Lossless, Huffman */
+                    /* Lossless, Huffman */
                     case JPEG_MARKER.SOF5:
-                        /* Differential sequential, Huffman */
+                    /* Differential sequential, Huffman */
                     case JPEG_MARKER.SOF6:
-                        /* Differential progressive, Huffman */
+                    /* Differential progressive, Huffman */
                     case JPEG_MARKER.SOF7:
-                        /* Differential lossless, Huffman */
-                    case JPEG_MARKER.SOF9:
-                        /* Extended sequential, arithmetic */
-                    case JPEG_MARKER.SOF10:
-                        /* Progressive, arithmetic */
+                    /* Differential lossless, Huffman */
                     case JPEG_MARKER.JPG:
-                        /* Reserved for JPEG extensions */
+                    /* Reserved for JPEG extensions */
                     case JPEG_MARKER.SOF11:
-                        /* Lossless, arithmetic */
+                    /* Lossless, arithmetic */
                     case JPEG_MARKER.SOF13:
-                        /* Differential sequential, arithmetic */
+                    /* Differential sequential, arithmetic */
                     case JPEG_MARKER.SOF14:
-                        /* Differential progressive, arithmetic */
+                    /* Differential progressive, arithmetic */
                     case JPEG_MARKER.SOF15:
                         /* Differential lossless, arithmetic */
                         m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_UNSUPPORTED, m_cinfo.m_unread_marker);
@@ -170,7 +187,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         return ReadResult.JPEG_REACHED_EOI;
 
                     case JPEG_MARKER.DAC:
-                        if (!skip_variable(m_cinfo))
+                        if (!get_dac())
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
@@ -186,6 +203,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     case JPEG_MARKER.DRI:
                         if (!get_dri())
+                            return ReadResult.JPEG_SUSPENDED;
+                        break;
+
+                    case JPEG_MARKER.JPG8:
+                        if (!get_lse())
                             return ReadResult.JPEG_SUSPENDED;
                         break;
 
@@ -303,7 +325,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         public bool next_marker()
         {
             int c;
-            for ( ; ; )
+            for (;;)
             {
                 if (!m_cinfo.m_src.GetByte(out c))
                     return false;
@@ -438,7 +460,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private static bool save_marker(jpeg_decompress_struct cinfo)
         {
             jpeg_marker_struct cur_marker = cinfo.m_marker.m_cur_marker;
-    
+
             byte[] data = null;
             int length = 0;
             int bytes_read;
@@ -464,10 +486,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     if (length < limit)
                         limit = length;
-                    
+
                     /* allocate and initialize the marker item */
                     cur_marker = new jpeg_marker_struct((byte)cinfo.m_unread_marker, length, limit);
-                    
+
                     /* data area is just beyond the jpeg_marker_struct */
                     data = cur_marker.Data;
                     cinfo.m_marker.m_cur_marker = cur_marker;
@@ -599,7 +621,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 if (!cinfo.m_src.GetByte(out temp))
                     return false;
 
-                b[i] = (byte) temp;
+                b[i] = (byte)temp;
             }
 
             length -= numtoread;
@@ -658,12 +680,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 cinfo.m_Y_density = (short)((data[10] << 8) + data[11]);
 
                 /* Check version.
-                 * Major version must be 1, anything else signals an incompatible change.
+                 * Major version must be 1 or 2, anything else signals an incompatible change.
                  * (We used to treat this as an error, but now it's a nonfatal warning,
                  * because some bozo at Hijaak couldn't read the spec.)
                  * Minor version should be 0..2, but process anyway if newer.
                  */
-                if (cinfo.m_JFIF_major_version != 1)
+                if (cinfo.m_JFIF_major_version != 1 && cinfo.m_JFIF_major_version != 2)
                     cinfo.WARNMS(J_MESSAGE_CODE.JWRN_JFIF_MAJOR, cinfo.m_JFIF_major_version, cinfo.m_JFIF_minor_version);
 
                 /* Generate trace messages */
@@ -728,7 +750,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int transform = data[11];
                 cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_ADOBE, version, flags0, flags1, transform);
                 cinfo.m_saw_Adobe_marker = true;
-                cinfo.m_Adobe_transform = (byte) transform;
+                cinfo.m_Adobe_transform = (byte)transform;
             }
             else
             {
@@ -784,6 +806,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Set initial assumptions for colorspace etc */
 
             m_cinfo.m_jpeg_color_space = J_COLOR_SPACE.JCS_UNKNOWN;
+            m_cinfo.color_transform = J_COLOR_TRANSFORM.JCT_NONE;
             m_cinfo.m_CCIR601_sampling = false; /* Assume non-CCIR sampling??? */
 
             m_cinfo.m_saw_JFIF_marker = false;
@@ -803,9 +826,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// <summary>
         /// Process a SOFn marker
         /// </summary>
-        private bool get_sof(bool is_prog)
+        private bool get_sof(bool is_baseline, bool is_prog, bool is_arith)
         {
+            m_cinfo.is_baseline = is_baseline;
             m_cinfo.m_progressive_mode = is_prog;
+            m_cinfo.arith_code = is_arith;
 
             int length;
             if (!m_cinfo.m_src.GetTwoBytes(out length))
@@ -828,8 +853,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             length -= 8;
 
-            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF, m_cinfo.m_unread_marker, m_cinfo.m_image_width, m_cinfo.m_image_height,
-                              m_cinfo.m_num_components);
+            m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF, m_cinfo.m_unread_marker,
+                m_cinfo.m_image_width, m_cinfo.m_image_height, m_cinfo.m_num_components);
 
             if (m_cinfo.m_marker.m_saw_SOF)
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_DUPLICATE);
@@ -851,30 +876,61 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                m_cinfo.Comp_info[ci].Component_index = ci;
-
-                int component_id;
-                if (!m_cinfo.m_src.GetByte(out component_id))
-                    return false;
-
-                m_cinfo.Comp_info[ci].Component_id = component_id;
+                //jpeg_component_info compptr = m_cinfo.Comp_info[ci];
 
                 int c;
                 if (!m_cinfo.m_src.GetByte(out c))
                     return false;
 
-                m_cinfo.Comp_info[ci].H_samp_factor = (c >> 4) & 15;
-                m_cinfo.Comp_info[ci].V_samp_factor = (c) & 15;
+                /* Check to see whether component id has already been seen   */
+                /* (in violation of the spec, but unfortunately seen in some */
+                /* files).  If so, create "fake" component id equal to the   */
+                /* max id seen so far + 1. */
+                int componentInfoIndex = 0;
+                jpeg_component_info compptr = null;
+                for (int i = 0; i < ci; i++, componentInfoIndex++)
+                {
+                    compptr = m_cinfo.Comp_info[componentInfoIndex];
+                    if (c == compptr.Component_id)
+                    {
+                        componentInfoIndex = 0;
+                        compptr = m_cinfo.Comp_info[componentInfoIndex];
+                        c = compptr.Component_id;
+
+                        componentInfoIndex++;
+                        compptr = m_cinfo.Comp_info[componentInfoIndex];
+
+                        for (i = 1; i < ci; i++, componentInfoIndex++)
+                        {
+                            compptr = m_cinfo.Comp_info[componentInfoIndex];
+                            if (compptr.Component_id > c)
+                                c = compptr.Component_id;
+                        }
+
+                        c++;
+                        break;
+                    }
+                }
+
+                compptr = m_cinfo.Comp_info[componentInfoIndex];
+                compptr.Component_id = c;
+                compptr.Component_index = ci;
+
+                if (!m_cinfo.m_src.GetByte(out c))
+                    return false;
+
+                compptr.H_samp_factor = (c >> 4) & 15;
+                compptr.V_samp_factor = (c) & 15;
 
                 int quant_tbl_no;
                 if (!m_cinfo.m_src.GetByte(out quant_tbl_no))
                     return false;
 
-                m_cinfo.Comp_info[ci].Quant_tbl_no = quant_tbl_no;
+                compptr.Quant_tbl_no = quant_tbl_no;
 
-                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF_COMPONENT, m_cinfo.Comp_info[ci].Component_id,
-                    m_cinfo.Comp_info[ci].H_samp_factor, m_cinfo.Comp_info[ci].V_samp_factor,
-                    m_cinfo.Comp_info[ci].Quant_tbl_no);
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOF_COMPONENT, compptr.Component_id,
+                    compptr.H_samp_factor, compptr.V_samp_factor,
+                    compptr.Quant_tbl_no);
             }
 
             m_cinfo.m_marker.m_saw_SOF = true;
@@ -887,7 +943,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private bool get_sos()
         {
             if (!m_cinfo.m_marker.m_saw_SOF)
-                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOS_NO_SOF);
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_BEFORE, "SOS");
 
             int length;
             if (!m_cinfo.m_src.GetTwoBytes(out length))
@@ -900,8 +956,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOS, n);
 
-            if (length != (n * 2 + 6) || n < 1 || n > JpegConstants.MAX_COMPS_IN_SCAN)
+            if (length != (n * 2 + 6) || n > JpegConstants.MAX_COMPS_IN_SCAN ||
+                (n == 0 && m_cinfo.m_progressive_mode))
+            {
+                /* pseudo SOS marker only allowed in progressive mode */
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
+            }
 
             m_cinfo.m_comps_in_scan = n;
 
@@ -909,19 +969,38 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             for (int i = 0; i < n; i++)
             {
-                int cc;
-                if (!m_cinfo.m_src.GetByte(out cc))
-                    return false;
-
                 int c;
                 if (!m_cinfo.m_src.GetByte(out c))
                     return false;
+
+                /* Detect the case where component id's are not unique, and, if so, */
+                /* create a fake component id using the same logic as in get_sof.   */
+                /* Note:  This also ensures that all of the SOF components are      */
+                /* referenced in the single scan case, which prevents access to     */
+                /* uninitialized memory in later decoding stages. */
+                for (int ci = 0; ci < i; ci++)
+                {
+                    jpeg_component_info componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
+                    if (c == componentInfo.Component_id)
+                    {
+                        componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[0]];
+                        c = componentInfo.Component_id;
+                        for (ci = 1; ci < i; ci++)
+                        {
+                            componentInfo = m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]];
+                            if (componentInfo.Component_id > c)
+                                c = componentInfo.Component_id;
+                        }
+                        c++;
+                        break;
+                    }
+                }
 
                 bool idFound = false;
                 int foundIndex = -1;
                 for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                 {
-                    if (cc == m_cinfo.Comp_info[ci].Component_id)
+                    if (c == m_cinfo.Comp_info[ci].Component_id)
                     {
                         foundIndex = ci;
                         idFound = true;
@@ -930,14 +1009,20 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 if (!idFound)
-                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, cc);
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_COMPONENT_ID, c);
 
                 m_cinfo.m_cur_comp_info[i] = foundIndex;
+
+                if (!m_cinfo.m_src.GetByte(out c))
+                    return false;
+
                 m_cinfo.Comp_info[foundIndex].Dc_tbl_no = (c >> 4) & 15;
                 m_cinfo.Comp_info[foundIndex].Ac_tbl_no = (c) & 15;
 
-                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOS_COMPONENT, cc,
-                    m_cinfo.Comp_info[foundIndex].Dc_tbl_no, m_cinfo.Comp_info[foundIndex].Ac_tbl_no);
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOS_COMPONENT,
+                    m_cinfo.Comp_info[foundIndex].Component_id,
+                    m_cinfo.Comp_info[foundIndex].Dc_tbl_no,
+                    m_cinfo.Comp_info[foundIndex].Ac_tbl_no);
             }
 
             /* Collect the additional scan parameters Ss, Se, Ah/Al. */
@@ -961,8 +1046,55 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Prepare to scan data & restart markers */
             m_cinfo.m_marker.m_next_restart_num = 0;
 
-            /* Count another SOS marker */
-            m_cinfo.m_input_scan_number++;
+            /* Count another (non-pseudo) SOS marker */
+            if (n != 0)
+                m_cinfo.m_input_scan_number++;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Process a DAC marker
+        /// </summary>
+        private bool get_dac()
+        {
+            int length;
+            if (!m_cinfo.m_src.GetTwoBytes(out length))
+                return false;
+
+            length -= 2;
+            while (length > 0)
+            {
+                int index;
+                if (!m_cinfo.m_src.GetByte(out index))
+                    return false;
+
+                int val;
+                if (!m_cinfo.m_src.GetByte(out val))
+                    return false;
+
+                length -= 2;
+
+                m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_DAC, index, val);
+
+                if (index < 0 || index >= (2 * JpegConstants.NUM_ARITH_TBLS))
+                    m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_DAC_INDEX, index);
+
+                if (index >= JpegConstants.NUM_ARITH_TBLS)
+                { /* define AC table */
+                    m_cinfo.arith_ac_K[index - JpegConstants.NUM_ARITH_TBLS] = (byte)val;
+                }
+                else {          /* define DC table */
+                    m_cinfo.arith_dc_L[index] = (byte)(val & 0x0F);
+                    m_cinfo.arith_dc_U[index] = (byte)(val >> 4);
+                    if (m_cinfo.arith_dc_L[index] > m_cinfo.arith_dc_U[index])
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_DAC_VALUE, val);
+                }
+            }
+
+            if (length != 0)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
+
             return true;
         }
 
@@ -995,7 +1127,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     if (!m_cinfo.m_src.GetByte(out temp))
                         return false;
 
-                    bits[i] = (byte) temp;
+                    bits[i] = (byte)temp;
                     count += bits[i];
                 }
 
@@ -1016,7 +1148,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     if (!m_cinfo.m_src.GetByte(out temp))
                         return false;
 
-                    huffval[i] = (byte) temp;
+                    huffval[i] = (byte)temp;
                 }
 
                 length -= count;
@@ -1065,6 +1197,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             length -= 2;
             while (length > 0)
             {
+                length--;
+
                 int n;
                 if (!m_cinfo.m_src.GetByte(out n))
                     return false;
@@ -1082,7 +1216,67 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 JQUANT_TBL quant_ptr = m_cinfo.m_quant_tbl_ptrs[n];
 
-                for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
+                int count;
+                if (prec != 0)
+                {
+                    if (length < JpegConstants.DCTSIZE2 * 2)
+                    {
+                        /* Initialize full table for safety. */
+                        for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
+                        {
+                            quant_ptr.quantval[i] = 1;
+                        }
+                        count = length >> 1;
+                    }
+                    else
+                    {
+                        count = JpegConstants.DCTSIZE2;
+                    }
+                }
+                else
+                {
+                    if (length < JpegConstants.DCTSIZE2)
+                    {
+                        /* Initialize full table for safety. */
+                        for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
+                        {
+                            quant_ptr.quantval[i] = 1;
+                        }
+                        count = length;
+                    }
+                    else
+                    {
+                        count = JpegConstants.DCTSIZE2;
+                    }
+                }
+
+                int[] natural_order;
+                switch (count)
+                {
+                    case (2 * 2):
+                        natural_order = JpegUtils.jpeg_natural_order2;
+                        break;
+                    case (3 * 3):
+                        natural_order = JpegUtils.jpeg_natural_order3;
+                        break;
+                    case (4 * 4):
+                        natural_order = JpegUtils.jpeg_natural_order4;
+                        break;
+                    case (5 * 5):
+                        natural_order = JpegUtils.jpeg_natural_order5;
+                        break;
+                    case (6 * 6):
+                        natural_order = JpegUtils.jpeg_natural_order6;
+                        break;
+                    case (7 * 7):
+                        natural_order = JpegUtils.jpeg_natural_order7;
+                        break;
+                    default:
+                        natural_order = JpegUtils.jpeg_natural_order;
+                        break;
+                }
+
+                for (int i = 0; i < count; i++)
                 {
                     int tmp;
                     if (prec != 0)
@@ -1103,23 +1297,23 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     }
 
                     /* We convert the zigzag-order table to natural array order. */
-                    quant_ptr.quantval[JpegUtils.jpeg_natural_order[i]] = (short) tmp;
+                    quant_ptr.quantval[natural_order[i]] = (short)tmp;
                 }
 
                 if (m_cinfo.m_err.m_trace_level >= 2)
                 {
                     for (int i = 0; i < JpegConstants.DCTSIZE2; i += 8)
                     {
-                        m_cinfo.TRACEMS(2, J_MESSAGE_CODE.JTRC_QUANTVALS, quant_ptr.quantval[i], 
-                            quant_ptr.quantval[i + 1], quant_ptr.quantval[i + 2], 
+                        m_cinfo.TRACEMS(2, J_MESSAGE_CODE.JTRC_QUANTVALS, quant_ptr.quantval[i],
+                            quant_ptr.quantval[i + 1], quant_ptr.quantval[i + 2],
                             quant_ptr.quantval[i + 3], quant_ptr.quantval[i + 4],
                             quant_ptr.quantval[i + 5], quant_ptr.quantval[i + 6], quant_ptr.quantval[i + 7]);
                     }
                 }
 
-                length -= JpegConstants.DCTSIZE2 + 1;
+                length -= count;
                 if (prec != 0)
-                    length -= JpegConstants.DCTSIZE2;
+                    length -= count;
             }
 
             if (length != 0)
@@ -1143,11 +1337,162 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int temp = 0;
             if (!m_cinfo.m_src.GetTwoBytes(out temp))
                 return false;
-            
+
             int tmp = temp;
             m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_DRI, tmp);
             m_cinfo.m_restart_interval = tmp;
 
+            return true;
+        }
+
+        /// <summary>
+        /// Process an LSE marker
+        /// </summary>
+        private bool get_lse()
+        {
+            if (!m_cinfo.m_marker.m_saw_SOF)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_SOF_BEFORE, "LSE");
+
+            if (m_cinfo.m_num_components < 3)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+
+            int length;
+            if (!m_cinfo.m_src.GetTwoBytes(out length))
+                return false;
+
+            if (length != 24)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_LENGTH);
+
+            int tmp;
+            if (!m_cinfo.m_src.GetByte(out tmp))
+                return false;
+
+            if (tmp != 0x0D)
+            {
+                /* ID inverse transform specification */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_UNKNOWN_MARKER, m_cinfo.m_unread_marker);
+            }
+
+            if (!m_cinfo.m_src.GetTwoBytes(out tmp))
+                return false;
+
+            if (tmp != JpegConstants.MAXJSAMPLE)
+            {
+                /* MAXTRANS */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetByte(out tmp))
+                return false;
+
+            if (tmp != 3)
+            {
+                /* Nt=3 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            int cid;
+            if (!m_cinfo.m_src.GetByte(out cid))
+                return false;
+
+            if (cid != m_cinfo.Comp_info[1].Component_id)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+
+            if (!m_cinfo.m_src.GetByte(out cid))
+                return false;
+
+            if (cid != m_cinfo.Comp_info[0].Component_id)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+
+            if (!m_cinfo.m_src.GetByte(out cid))
+                return false;
+
+            if (cid != m_cinfo.Comp_info[2].Component_id)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+
+            if (!m_cinfo.m_src.GetByte(out tmp))
+                return false;
+
+            if (tmp != 0x80)
+            {
+                /* F1: CENTER1=1, NORM1=0 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetTwoBytes(out tmp))
+                return false;
+
+            if (tmp != 0)
+            {
+                /* A(1,1)=0 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetTwoBytes(out tmp))
+                return false;
+
+            if (tmp != 0)
+            {
+                /* A(1,2)=0 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetByte(out tmp))
+                return false;
+
+            if (tmp != 0)
+            {
+                /* F2: CENTER2=0, NORM2=0 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetTwoBytes(out tmp))
+                return false;
+
+            if (tmp != 1)
+            {
+                /* A(2,1)=1 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetTwoBytes(out tmp))
+                return false;
+
+            if (tmp != 0)
+            {
+                /* A(2,2)=0 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetByte(out tmp))
+                return false;
+
+            if (tmp != 0)
+            {
+                /* F3: CENTER3=0, NORM3=0 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetTwoBytes(out tmp))
+                return false;
+
+            if (tmp != 1)
+            {
+                /* A(3,1)=1 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            if (!m_cinfo.m_src.GetTwoBytes(out tmp))
+                return false;
+
+            if (tmp != 0)
+            {
+                /* A(3,2)=0 */
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+            }
+
+            /* OK, valid transform that we can handle. */
+            m_cinfo.color_transform = J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN;
             return true;
         }
 

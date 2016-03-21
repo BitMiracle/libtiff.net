@@ -25,14 +25,92 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         * fake entries.
         */
         public static readonly int[] jpeg_natural_order = 
-        { 
-            0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12,
-            19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35,
-            42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51,
-            58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62,
-            63, 63, 63, 63, 63, 63, 63, 63, 63,
+        {
+             0,  1,  8, 16,  9,  2,  3, 10,
+            17, 24, 32, 25, 18, 11,  4,  5,
+            12, 19, 26, 33, 40, 48, 41, 34,
+            27, 20, 13,  6,  7, 14, 21, 28,
+            35, 42, 49, 56, 57, 50, 43, 36,
+            29, 22, 15, 23, 30, 37, 44, 51,
+            58, 59, 52, 45, 38, 31, 39, 46,
+            53, 60, 61, 54, 47, 55, 62, 63,
+            63, 63, 63, 63, 63, 63, 63, 63, 
             /* extra entries for safety in decoder */
-            63, 63, 63, 63, 63, 63, 63, 63 
+            63, 63, 63, 63, 63, 63, 63, 63
+        };
+
+        /// zz to natural order for 7x7 block
+        public static readonly int[] jpeg_natural_order7 =
+        {
+             0,  1,  8, 16,  9,  2,  3, 10,
+            17, 24, 32, 25, 18, 11,  4,  5,
+            12, 19, 26, 33, 40, 48, 41, 34,
+            27, 20, 13,  6, 14, 21, 28, 35,
+            42, 49, 50, 43, 36, 29, 22, 30,
+            37, 44, 51, 52, 45, 38, 46, 53,
+            54,
+            63, 63, 63, 63, 63, 63, 63, 63,
+            /* extra entries for safety in decoder */
+            63, 63, 63, 63, 63, 63, 63, 63
+        };
+
+        /// zz to natural order for 6x6 block
+        public static readonly int[] jpeg_natural_order6 =
+        {
+             0,  1,  8, 16,  9,  2,  3, 10,
+            17, 24, 32, 25, 18, 11,  4,  5,
+            12, 19, 26, 33, 40, 41, 34, 27,
+            20, 13, 21, 28, 35, 42, 43, 36,
+            29, 37, 44, 45,
+            63, 63, 63, 63, 63, 63, 63, 63,
+            /* extra entries for safety in decoder */
+            63, 63, 63, 63, 63, 63, 63, 63
+        };
+
+        /// zz to natural order for 5x5 block
+        public static readonly int[] jpeg_natural_order5 =
+        {
+             0,  1,  8, 16,  9,  2,  3, 10,
+            17, 24, 32, 25, 18, 11,  4, 12,
+            19, 26, 33, 34, 27, 20, 28, 35,
+            36,
+            63, 63, 63, 63, 63, 63, 63, 63,
+            /* extra entries for safety in decoder */
+            63, 63, 63, 63, 63, 63, 63, 63
+        };
+
+        /// zz to natural order for 4x4 block
+        public static readonly int[] jpeg_natural_order4 =
+        {
+             0,  1,  8, 16,  9,  2,  3, 10,
+            17, 24, 25, 18, 11, 19, 26, 27,
+            63, 63, 63, 63, 63, 63, 63, 63,
+            /* extra entries for safety in decoder */
+            63, 63, 63, 63, 63, 63, 63, 63
+        };
+
+        /// zz to natural order for 3x3 block
+        public static readonly int[] jpeg_natural_order3 =
+        {
+             0,  1,  8, 16,  9,  2, 10, 17,
+            18,
+            63, 63, 63, 63, 63, 63, 63, 63,
+            /* extra entries for safety in decoder */
+            63, 63, 63, 63, 63, 63, 63, 63
+        };
+
+        /// zz to natural order for 2x2 block
+        public static readonly int[] jpeg_natural_order2 =
+        {
+             0,  1,  8,  9,
+            63, 63, 63, 63, 63, 63, 63, 63,
+            /* extra entries for safety in decoder */
+            63, 63, 63, 63, 63, 63, 63, 63
+        };
+
+        /// Arithmetic coding probability estimation tables
+        public static readonly int[] jpeg_aritab =
+        {
         };
 
         /* We assume that right shift corresponds to signed division by 2 with
@@ -63,9 +141,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Compute a/b rounded up to next integer, ie, ceil(a/b)
         /// Assumes a >= 0, b > 0
         /// </summary>
-        public static int jdiv_round_up(int a, int b)
+        public static long jdiv_round_up(long a, long b)
         {
-            return (a + b - 1) / b;
+            return (a + b - 1L) / b;
         }
 
         /// <summary>

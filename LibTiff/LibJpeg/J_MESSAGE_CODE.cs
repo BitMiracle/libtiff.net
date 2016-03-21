@@ -21,10 +21,6 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
-        JERR_ARITH_NOTIMPL,
-        /// <summary>
-        /// 
-        /// </summary>
         JERR_BAD_BUFFER_MODE,
         /// <summary>
         /// 
@@ -33,11 +29,19 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
+        JERR_BAD_CROP_SPEC,
+        /// <summary>
+        /// 
+        /// </summary>
         JERR_BAD_DCT_COEF,
         /// <summary>
         /// 
         /// </summary>
         JERR_BAD_DCTSIZE,
+        /// <summary>
+        /// 
+        /// </summary>
+        JERR_BAD_DROP_SAMPLING,
         /// <summary>
         /// 
         /// </summary>
@@ -109,6 +113,14 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
+        JERR_DAC_INDEX,
+        /// <summary>
+        /// 
+        /// </summary>
+        JERR_DAC_VALUE,
+        /// <summary>
+        /// 
+        /// </summary>
         JERR_DHT_INDEX,
         /// <summary>
         /// 
@@ -173,6 +185,10 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// 
         /// </summary>
+        JERR_NO_ARITH_TABLE,
+        /// <summary>
+        /// 
+        /// </summary>
         JERR_NO_HUFF_TABLE,
         /// <summary>
         /// 
@@ -202,6 +218,10 @@ namespace BitMiracle.LibJpeg.Classic
         /// 
         /// </summary>
         JERR_QUANT_MANY_COLORS,
+        /// <summary>
+        /// 
+        /// </summary>
+        JERR_SOF_BEFORE,
         /// <summary>
         /// 
         /// </summary>
@@ -250,6 +270,10 @@ namespace BitMiracle.LibJpeg.Classic
         /// 
         /// </summary>
         JTRC_APP14,
+        /// <summary>
+        /// 
+        /// </summary>
+        JTRC_DAC,
         /// <summary>
         /// 
         /// </summary>
@@ -366,6 +390,10 @@ namespace BitMiracle.LibJpeg.Classic
         /// 
         /// </summary>
         JWRN_ADOBE_XFORM,
+        /// <summary>
+        /// 
+        /// </summary>
+        JWRN_ARITH_BAD_CODE,
         /// <summary>
         /// 
         /// </summary>

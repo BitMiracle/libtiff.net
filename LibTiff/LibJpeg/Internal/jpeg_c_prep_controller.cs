@@ -67,7 +67,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 {
                     m_colorBufRowsOffset = 0;
                     m_color_buf[ci] = jpeg_compress_struct.AllocJpegSamples(
-                        (cinfo.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE * cinfo.m_max_h_samp_factor) / cinfo.Component_info[ci].H_samp_factor,
+                        (cinfo.Component_info[ci].Width_in_blocks *
+                        cinfo.min_DCT_h_scaled_size * cinfo.m_max_h_samp_factor) / 
+                        cinfo.Component_info[ci].H_samp_factor,
                         cinfo.m_max_v_samp_factor);
                 }
             }
@@ -112,11 +114,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int rgroup_height = m_cinfo.m_max_v_samp_factor;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                int samplesPerRow = (m_cinfo.Component_info[ci].Width_in_blocks * JpegConstants.DCTSIZE * m_cinfo.m_max_h_samp_factor) / m_cinfo.Component_info[ci].H_samp_factor;
+                int samplesPerRow = (m_cinfo.Component_info[ci].Width_in_blocks *
+                    m_cinfo.min_DCT_h_scaled_size * m_cinfo.m_max_h_samp_factor) / 
+                    m_cinfo.Component_info[ci].H_samp_factor;
 
                 byte[][] fake_buffer = new byte[5 * rgroup_height][];
                 for (int i = 1; i < 4 * rgroup_height; i++)
-                    fake_buffer[i] = new byte [samplesPerRow];
+                    fake_buffer[i] = new byte[samplesPerRow];
 
                 /* Allocate the actual buffer space (3 row groups) for this component.
                  * We make the buffer wide enough to allow the downsampler to edge-expand
@@ -125,9 +129,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 byte[][] true_buffer = jpeg_common_struct.AllocJpegSamples(samplesPerRow, 3 * rgroup_height);
 
                 /* Copy true buffer row pointers into the middle of the fake row array */
-                for (int  i = 0; i < 3 * rgroup_height; i++)
+                for (int i = 0; i < 3 * rgroup_height; i++)
                     fake_buffer[rgroup_height + i] = true_buffer[i];
-                
+
                 /* Fill in the above and below wraparound pointers */
                 for (int i = 0; i < rgroup_height; i++)
                 {
@@ -186,9 +190,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                     {
                         jpeg_component_info componentInfo = m_cinfo.Component_info[ci];
-                        expand_bottom_edge(output_buf[ci], 0, componentInfo.Width_in_blocks * JpegConstants.DCTSIZE,
-                            out_row_group_ctr * componentInfo.V_samp_factor,
-                            out_row_groups_avail * componentInfo.V_samp_factor);
+                        numrows = (componentInfo.V_samp_factor * componentInfo.DCT_v_scaled_size) / 
+                            m_cinfo.min_DCT_v_scaled_size;
+
+                        expand_bottom_edge(output_buf[ci], 0,
+                            componentInfo.Width_in_blocks * componentInfo.DCT_h_scaled_size,
+                            out_row_group_ctr * numrows,
+                            out_row_groups_avail * numrows);
                     }
 
                     out_row_group_ctr = out_row_groups_avail;
@@ -221,7 +229,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                                 JpegUtils.jcopy_sample_rows(m_color_buf[ci], m_colorBufRowsOffset, m_color_buf[ci], m_colorBufRowsOffset - row, 1, m_cinfo.m_image_width);
                         }
                     }
-                    
+
                     in_row_ctr += numrows;
                     m_next_buf_row += numrows;
                     m_rows_to_go -= numrows;
@@ -247,17 +255,17 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 {
                     m_cinfo.m_downsample.downsample(m_color_buf, m_colorBufRowsOffset + m_this_row_group, output_buf, out_row_group_ctr);
                     out_row_group_ctr++;
-                
+
                     /* Advance pointers with wraparound as necessary. */
                     m_this_row_group += m_cinfo.m_max_v_samp_factor;
                     int buf_height = m_cinfo.m_max_v_samp_factor * 3;
 
                     if (m_this_row_group >= buf_height)
                         m_this_row_group = 0;
-                    
+
                     if (m_next_buf_row >= buf_height)
                         m_next_buf_row = 0;
-                    
+
                     m_next_buf_stop = m_next_buf_row + m_cinfo.m_max_v_samp_factor;
                 }
             }

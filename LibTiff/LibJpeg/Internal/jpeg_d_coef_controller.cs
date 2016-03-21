@@ -95,15 +95,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             else
             {
                 /* We only need a single-MCU buffer. */
-                JBLOCK[] buffer = new JBLOCK[JpegConstants.D_MAX_BLOCKS_IN_MCU];
                 for (int i = 0; i < JpegConstants.D_MAX_BLOCKS_IN_MCU; i++)
-                {
-                    buffer[i] = new JBLOCK();
-                    for (int ii = 0; ii < buffer[i].data.Length; ii++)
-                        buffer[i].data[ii] = -12851;
-
-                    m_MCU_buffer[i] = buffer[i];
-                }
+                    m_MCU_buffer[i] = new JBLOCK();
 
                 m_useDummyConsumeData = true;
                 m_decompressor = DecompressorType.OnePass;
@@ -255,8 +248,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 for (int MCU_col_num = m_MCU_ctr; MCU_col_num <= last_MCU_col; MCU_col_num++)
                 {
                     /* Try to fetch an MCU.  Entropy decoder expects buffer to be zeroed. */
-                    for (int i = 0; i < m_cinfo.m_blocks_in_MCU; i++)
-                        Array.Clear(m_MCU_buffer[i].data, 0, m_MCU_buffer[i].data.Length);
+                    if (m_cinfo.lim_Se != 0)
+                    {
+                        /* can bypass in DC only case */
+                        for (int i = 0; i < m_cinfo.m_blocks_in_MCU; i++)
+                            Array.Clear(m_MCU_buffer[i].data, 0, m_MCU_buffer[i].data.Length);
+                    }
 
                     if (!m_cinfo.m_entropy.decode_mcu(m_MCU_buffer))
                     {
@@ -284,7 +281,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         }
 
                         int useful_width = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
-                        int outputIndex = yoffset * componentInfo.DCT_scaled_size;
+                        int outputIndex = yoffset * componentInfo.DCT_v_scaled_size;
                         int start_col = MCU_col_num * componentInfo.MCU_sample_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
@@ -297,12 +294,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                                         m_MCU_buffer[blkn + xindex].data, output_buf[componentInfo.Component_index],
                                         outputIndex, output_col);
 
-                                    output_col += componentInfo.DCT_scaled_size;
+                                    output_col += componentInfo.DCT_h_scaled_size;
                                 }
                             }
 
                             blkn += componentInfo.MCU_width;
-                            outputIndex += componentInfo.DCT_scaled_size;
+                            outputIndex += componentInfo.DCT_v_scaled_size;
                         }
                     }
                 }
@@ -380,10 +377,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         m_cinfo.m_idct.inverse(componentInfo.Component_index,
                             buffer[block_row][block_num].data, output_buf[ci], rowIndex, output_col);
 
-                        output_col += componentInfo.DCT_scaled_size;
+                        output_col += componentInfo.DCT_h_scaled_size;
                     }
 
-                    rowIndex += componentInfo.DCT_scaled_size;
+                    rowIndex += componentInfo.DCT_v_scaled_size;
                 }
             }
 
@@ -653,10 +650,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         prev_block_row++;
                         next_block_row++;
 
-                        output_col += componentInfo.DCT_scaled_size;
+                        output_col += componentInfo.DCT_h_scaled_size;
                     }
 
-                    outputIndex += componentInfo.DCT_scaled_size;
+                    outputIndex += componentInfo.DCT_v_scaled_size;
                 }
             }
 

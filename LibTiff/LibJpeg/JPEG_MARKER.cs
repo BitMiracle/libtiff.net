@@ -208,6 +208,10 @@
         /// <summary>
         /// 
         /// </summary>
+        JPG8 = 0xf8,
+        /// <summary>
+        /// 
+        /// </summary>
         JPG13 = 0xfd,
         /// <summary>
         /// 

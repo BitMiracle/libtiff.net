@@ -2,7 +2,7 @@
  * This file contains upsampling routines.
  *
  * Upsampling input data is counted in "row groups".  A row group
- * is defined to be (v_samp_factor * DCT_scaled_size / min_DCT_scaled_size)
+ * is defined to be (v_samp_factor * DCT_v_scaled_size / min_DCT_v_scaled_size)
  * sample rows of each component.  Upsampling will normally produce
  * max_v_samp_factor pixel rows from each row group (but this could vary
  * if the upsampler is applying a scale factor of its own).
@@ -20,9 +20,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
             noop_upsampler,
             fullsize_upsampler,
-            h2v1_fancy_upsampler,
             h2v1_upsampler,
-            h2v2_fancy_upsampler,
             h2v2_upsampler,
             int_upsampler
         }
@@ -66,11 +64,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (cinfo.m_CCIR601_sampling)    /* this isn't supported */
                 cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CCIR601_NOTIMPL);
 
-            /* jpeg_d_main_controller doesn't support context rows when min_DCT_scaled_size = 1,
-            * so don't ask for it.
-            */
-            bool do_fancy = cinfo.m_do_fancy_upsampling && cinfo.m_min_DCT_scaled_size > 1;
-
             /* Verify we can handle the sampling factors, select per-component methods,
             * and create storage as needed.
             */
@@ -81,65 +74,55 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* Compute size of an "input group" after IDCT scaling.  This many samples
                 * are to be converted to max_h_samp_factor * max_v_samp_factor pixels.
                 */
-                int h_in_group = (componentInfo.H_samp_factor * componentInfo.DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
-                int v_in_group = (componentInfo.V_samp_factor * componentInfo.DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
+                int h_in_group = (componentInfo.H_samp_factor * componentInfo.DCT_h_scaled_size) / cinfo.min_DCT_h_scaled_size;
+                int v_in_group = (componentInfo.V_samp_factor * componentInfo.DCT_v_scaled_size) / cinfo.min_DCT_v_scaled_size;
                 int h_out_group = cinfo.m_max_h_samp_factor;
                 int v_out_group = cinfo.m_max_v_samp_factor;
 
                 /* save for use later */
                 m_rowgroup_height[ci] = v_in_group;
-                bool need_buffer = true;
+
                 if (!componentInfo.component_needed)
                 {
                     /* Don't bother to upsample an uninteresting component. */
                     m_upsampleMethods[ci] = ComponentUpsampler.noop_upsampler;
-                    need_buffer = false;
+                    continue;		/* don't need to allocate buffer */
                 }
-                else if (h_in_group == h_out_group && v_in_group == v_out_group)
+
+                if (h_in_group == h_out_group && v_in_group == v_out_group)
                 {
                     /* Fullsize components can be processed without any work. */
                     m_upsampleMethods[ci] = ComponentUpsampler.fullsize_upsampler;
-                    need_buffer = false;
+                    continue;		/* don't need to allocate buffer */
                 }
-                else if (h_in_group * 2 == h_out_group && v_in_group == v_out_group)
+
+                if (h_in_group * 2 == h_out_group && v_in_group == v_out_group)
                 {
-                    /* Special cases for 2h1v upsampling */
-                    if (do_fancy && componentInfo.downsampled_width > 2)
-                        m_upsampleMethods[ci] = ComponentUpsampler.h2v1_fancy_upsampler;
-                    else
-                        m_upsampleMethods[ci] = ComponentUpsampler.h2v1_upsampler;
+                    /* Special case for 2h1v upsampling */
+                    m_upsampleMethods[ci] = ComponentUpsampler.h2v1_upsampler;
                 }
                 else if (h_in_group * 2 == h_out_group && v_in_group * 2 == v_out_group)
                 {
-                    /* Special cases for 2h2v upsampling */
-                    if (do_fancy && componentInfo.downsampled_width > 2)
-                    {
-                        m_upsampleMethods[ci] = ComponentUpsampler.h2v2_fancy_upsampler;
-                        m_need_context_rows = true;
-                    }
-                    else
-                    {
-                        m_upsampleMethods[ci] = ComponentUpsampler.h2v2_upsampler;
-                    }
+                    /* Special case for 2h2v upsampling */
+                    m_upsampleMethods[ci] = ComponentUpsampler.h2v2_upsampler;
                 }
                 else if ((h_out_group % h_in_group) == 0 && (v_out_group % v_in_group) == 0)
                 {
                     /* Generic integral-factors upsampling method */
                     m_upsampleMethods[ci] = ComponentUpsampler.int_upsampler;
-                    m_h_expand[ci] = (byte) (h_out_group / h_in_group);
-                    m_v_expand[ci] = (byte) (v_out_group / v_in_group);
+                    m_h_expand[ci] = (byte)(h_out_group / h_in_group);
+                    m_v_expand[ci] = (byte)(v_out_group / v_in_group);
                 }
                 else
-                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FRACT_SAMPLE_NOTIMPL);
-
-                if (need_buffer)
                 {
-                    ComponentBuffer cb = new ComponentBuffer();
-                    cb.SetBuffer(jpeg_common_struct.AllocJpegSamples(JpegUtils.jround_up(cinfo.m_output_width, 
-                        cinfo.m_max_h_samp_factor), cinfo.m_max_v_samp_factor), null, 0);
-
-                    m_color_buf[ci] = cb;
+                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_FRACT_SAMPLE_NOTIMPL);
                 }
+
+                ComponentBuffer cb = new ComponentBuffer();
+                cb.SetBuffer(jpeg_common_struct.AllocJpegSamples(JpegUtils.jround_up(cinfo.m_output_width, 
+                    cinfo.m_max_h_samp_factor), cinfo.m_max_v_samp_factor), null, 0);
+
+                m_color_buf[ci] = cb;
             }
         }
 
@@ -218,14 +201,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 case ComponentUpsampler.fullsize_upsampler:
                     fullsize_upsample(ref input_data);
                     break;
-                case ComponentUpsampler.h2v1_fancy_upsampler:
-                    h2v1_fancy_upsample(m_cinfo.Comp_info[m_currentComponent].downsampled_width, ref input_data);
-                    break;
                 case ComponentUpsampler.h2v1_upsampler:
                     h2v1_upsample(ref input_data);
-                    break;
-                case ComponentUpsampler.h2v2_fancy_upsampler:
-                    h2v2_fancy_upsample(m_cinfo.Comp_info[m_currentComponent].downsampled_width, ref input_data);
                     break;
                 case ComponentUpsampler.h2v2_upsampler:
                     h2v2_upsample(ref input_data);
@@ -265,61 +242,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             m_perComponentOffsets[m_currentComponent] = m_upsampleRowOffset;
         }
 
-        /// <summary>
-        /// Fancy processing for the common case of 2:1 horizontal and 1:1 vertical.
-        /// 
-        /// The upsampling algorithm is linear interpolation between pixel centers,
-        /// also known as a "triangle filter".  This is a good compromise between
-        /// speed and visual quality.  The centers of the output pixels are 1/4 and 3/4
-        /// of the way between input pixel centers.
-        /// 
-        /// A note about the "bias" calculations: when rounding fractional values to
-        /// integer, we do not want to always round 0.5 up to the next integer.
-        /// If we did that, we'd introduce a noticeable bias towards larger values.
-        /// Instead, this code is arranged so that 0.5 will be rounded up or down at
-        /// alternate pixel locations (a simple ordered dither pattern).
-        /// </summary>
-        private void h2v1_fancy_upsample(int downsampled_width, ref ComponentBuffer input_data)
-        {
-            ComponentBuffer output_data = m_color_buf[m_currentComponent];
-
-            for (int inrow = 0; inrow < m_cinfo.m_max_v_samp_factor; inrow++)
-            {
-                int row = m_upsampleRowOffset + inrow;
-                int inIndex = 0;
-
-                int outIndex = 0;
-
-                /* Special case for first column */
-                int invalue = input_data[row][inIndex];
-                inIndex++;
-
-                output_data[inrow][outIndex] = (byte)invalue;
-                outIndex++;
-                output_data[inrow][outIndex] = (byte)((invalue * 3 + (int)input_data[row][inIndex] + 2) >> 2);
-                outIndex++;
-
-                for (int colctr = downsampled_width - 2; colctr > 0; colctr--)
-                {
-                    /* General case: 3/4 * nearer pixel + 1/4 * further pixel */
-                    invalue = (int)input_data[row][inIndex] * 3;
-                    inIndex++;
-
-                    output_data[inrow][outIndex] = (byte)((invalue + (int)input_data[row][inIndex - 2] + 1) >> 2);
-                    outIndex++;
-
-                    output_data[inrow][outIndex] = (byte)((invalue + (int)input_data[row][inIndex] + 2) >> 2);
-                    outIndex++;
-                }
-
-                /* Special case for last column */
-                invalue = input_data[row][inIndex];
-                output_data[inrow][outIndex] = (byte)((invalue * 3 + (int)input_data[row][inIndex - 1] + 1) >> 2);
-                outIndex++;
-                output_data[inrow][outIndex] = (byte)invalue;
-                outIndex++;
-            }
-        }
 
         /// <summary>
         /// Fast processing for the common case of 2:1 horizontal and 1:1 vertical.
@@ -342,91 +264,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     output_data[inrow][outIndex] = invalue;
                     outIndex++;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Fancy processing for the common case of 2:1 horizontal and 2:1 vertical.
-        /// Again a triangle filter; see comments for h2v1 case, above.
-        /// 
-        /// It is OK for us to reference the adjacent input rows because we demanded
-        /// context from the main buffer controller (see initialization code).
-        /// </summary>
-        private void h2v2_fancy_upsample(int downsampled_width, ref ComponentBuffer input_data)
-        {
-            ComponentBuffer output_data = m_color_buf[m_currentComponent];
-
-            int inrow = m_upsampleRowOffset;
-            int outrow = 0;
-            while (outrow < m_cinfo.m_max_v_samp_factor)
-            {
-                for (int v = 0; v < 2; v++)
-                {
-                    // nearest input row index
-                    int inIndex0 = 0;
-
-                    //next nearest input row index
-                    int inIndex1 = 0;
-                    int inRow1 = -1;
-                    if (v == 0)
-                    {
-                        /* next nearest is row above */
-                        inRow1 = inrow - 1;
-                    }
-                    else
-                    {
-                        /* next nearest is row below */
-                        inRow1 = inrow + 1;
-                    }
-
-                    int row = outrow;
-                    int outIndex = 0;
-                    outrow++;
-
-                    /* Special case for first column */
-                    int thiscolsum = (int)input_data[inrow][inIndex0] * 3 + (int)input_data[inRow1][inIndex1];
-                    inIndex0++;
-                    inIndex1++;
-
-                    int nextcolsum = (int)input_data[inrow][inIndex0] * 3 + (int)input_data[inRow1][inIndex1];
-                    inIndex0++;
-                    inIndex1++;
-
-                    output_data[row][outIndex] = (byte)((thiscolsum * 4 + 8) >> 4);
-                    outIndex++;
-
-                    output_data[row][outIndex] = (byte)((thiscolsum * 3 + nextcolsum + 7) >> 4);
-                    outIndex++;
-
-                    int lastcolsum = thiscolsum;
-                    thiscolsum = nextcolsum;
-
-                    for (int colctr = downsampled_width - 2; colctr > 0; colctr--)
-                    {
-                        /* General case: 3/4 * nearer pixel + 1/4 * further pixel in each */
-                        /* dimension, thus 9/16, 3/16, 3/16, 1/16 overall */
-                        nextcolsum = (int)input_data[inrow][inIndex0] * 3 + (int)input_data[inRow1][inIndex1];
-                        inIndex0++;
-                        inIndex1++;
-
-                        output_data[row][outIndex] = (byte)((thiscolsum * 3 + lastcolsum + 8) >> 4);
-                        outIndex++;
-
-                        output_data[row][outIndex] = (byte)((thiscolsum * 3 + nextcolsum + 7) >> 4);
-                        outIndex++;
-
-                        lastcolsum = thiscolsum;
-                        thiscolsum = nextcolsum;
-                    }
-
-                    /* Special case for last column */
-                    output_data[row][outIndex] = (byte)((thiscolsum * 3 + lastcolsum + 8) >> 4);
-                    outIndex++;
-                    output_data[row][outIndex] = (byte)((thiscolsum * 4 + 7) >> 4);
-                    outIndex++;
-                }
-
-                inrow++;
             }
         }
 

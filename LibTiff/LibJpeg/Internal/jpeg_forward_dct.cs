@@ -10,13 +10,18 @@ namespace BitMiracle.LibJpeg.Classic.Internal
     /// <summary>
     /// Forward DCT (also controls coefficient quantization)
     /// 
-    /// A forward DCT routine is given a pointer to a work area of type DCTELEM[];
-    /// the DCT is to be performed in-place in that buffer.  Type DCTELEM is int
-    /// for 8-bit samples, int for 12-bit samples.  (NOTE: Floating-point DCT
-    /// implementations use an array of type float, instead.)
-    /// The DCT inputs are expected to be signed (range +-CENTERJSAMPLE).
+    /// A forward DCT routine is given a pointer to an input sample array and
+    /// a pointer to a work area of type DCTELEM[]; the DCT is to be performed
+    /// in-place in that buffer.  Type DCTELEM is int for 8-bit samples, INT32
+    /// for 12-bit samples.  (NOTE: Floating-point DCT implementations use an
+    /// array of type FAST_FLOAT, instead.)
+    /// The input data is to be fetched from the sample array starting at a
+    /// specified column.  (Any row offset needed will be applied to the array
+    /// pointer before it is passed to the FDCT code.)
+    /// Note that the number of samples fetched by the FDCT routine is
+    /// DCT_h_scaled_size * DCT_v_scaled_size.
     /// The DCT outputs are returned scaled up by a factor of 8; they therefore
-    /// have a range of +-8K for 8-bit data, +-128K for 12-bit data. This
+    /// have a range of +-8K for 8-bit data, +-128K for 12-bit data.  This
     /// convention improves accuracy in integer implementations and saves some
     /// work in floating-point ones.
     /// 
@@ -75,7 +80,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private const int CONST_BITS = 14;
 
         /* precomputed values scaled up by 14 bits */
-        private static readonly short[] aanscales = { 
+        private static readonly short[] aanscales = {
             16384, 22725, 21407, 19266, 16384, 12873, 8867, 4520, 22725, 31521, 29692, 26722, 22725, 17855,
             12299, 6270, 21407, 29692, 27969, 25172, 21407, 16819, 11585,
             5906, 19266, 26722, 25172, 22654, 19266, 15137, 10426, 5315,
@@ -92,50 +97,53 @@ namespace BitMiracle.LibJpeg.Classic.Internal
          * What's actually stored is 1/divisor so that the inner loop can
          * use a multiplication rather than a division.
          */
-        private static readonly double[] aanscalefactor = { 
+        private static readonly double[] aanscalefactor = {
             1.0, 1.387039845, 1.306562965, 1.175875602, 1.0,
             0.785694958, 0.541196100, 0.275899379 };
 
         private jpeg_compress_struct m_cinfo;
-        private bool m_useSlowMethod;
-        private bool m_useFloatMethod;
 
-        /* The actual post-DCT divisors --- not identical to the quant table
-        * entries, because of scaling (especially for an unnormalized DCT).
-        * Each table is given in normal array order.
-        */
-        private int[][] m_divisors = new int [JpegConstants.NUM_QUANT_TBLS][];
+        private delegate void forward_DCT_method_ptr(int[] data, byte[][] sample_data, int start_row, int start_col);
+        private forward_DCT_method_ptr[] do_dct = new forward_DCT_method_ptr[JpegConstants.MAX_COMPONENTS];
 
         /* Same as above for the floating-point case. */
-        private float[][] m_float_divisors = new float[JpegConstants.NUM_QUANT_TBLS][];
+        private delegate void float_DCT_method_ptr(float[] data, byte[][] sample_data, int start_row, int start_col);
+        private float_DCT_method_ptr[] do_float_dct = new float_DCT_method_ptr[JpegConstants.MAX_COMPONENTS];
+
+        /// <summary>
+        /// Perform forward DCT on one or more blocks of a component.
+        /// 
+        /// The input samples are taken from the sample_data[] array starting at
+        /// position start_row/start_col, and moving to the right for any additional
+        /// blocks. The quantized coefficients are returned in coef_blocks[].
+        /// </summary>
+        public delegate void forward_DCT_ptr(jpeg_component_info compptr, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks);
+
+        /* It is useful to allow each component to have a separate FDCT method. */
+        public forward_DCT_ptr[] forward_DCT = new forward_DCT_ptr[JpegConstants.MAX_COMPONENTS];
+
+        /* The allocated post-DCT divisor tables - big enough for any supported variant and not
+           identical to the quant table entries, because of scaling (especially for an
+           unnormalized DCT) - are pointed to by dct_table in the per-component comp_info
+           structures.  Each table is given in normal array order.
+        */
+        private class divisor_table
+        {
+            public int[] int_array = new int[JpegConstants.DCTSIZE2];
+            public float[] float_array = new float[JpegConstants.DCTSIZE2];
+        };
+
+        private divisor_table[] m_dctTables;
 
         public jpeg_forward_dct(jpeg_compress_struct cinfo)
         {
             m_cinfo = cinfo;
+            m_dctTables = new divisor_table[m_cinfo.m_num_components];
 
-            switch (cinfo.m_dct_method)
+            for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
-                case J_DCT_METHOD.JDCT_ISLOW:
-                    m_useFloatMethod = false;
-                    m_useSlowMethod = true;
-                    break;
-                case J_DCT_METHOD.JDCT_IFAST:
-                    m_useFloatMethod = false;
-                    m_useSlowMethod = false;
-                    break;
-                case J_DCT_METHOD.JDCT_FLOAT:
-                    m_useFloatMethod = true;
-                    break;
-                default:
-                    cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
-                    break;
-            }
-
-            /* Mark divisor tables unallocated */
-            for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
-            {
-                m_divisors[i] = null;
-                m_float_divisors[i] = null;
+                /* Allocate a divisor table for each component */
+                m_dctTables[ci] = new divisor_table();
             }
         }
 
@@ -149,8 +157,162 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public virtual void start_pass()
         {
+            J_DCT_METHOD method = 0;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
+                /* Select the proper DCT routine for this component's scaling */
+                jpeg_component_info compptr = m_cinfo.Component_info[ci];
+                switch ((compptr.DCT_h_scaled_size << 8) + compptr.DCT_v_scaled_size)
+                {
+                    case ((1 << 8) + 1):
+                        do_dct[ci] = jpeg_fdct_1x1;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((2 << 8) + 2):
+                        do_dct[ci] = jpeg_fdct_2x2;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((3 << 8) + 3):
+                        do_dct[ci] = jpeg_fdct_3x3;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((4 << 8) + 4):
+                        do_dct[ci] = jpeg_fdct_4x4;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((5 << 8) + 5):
+                        do_dct[ci] = jpeg_fdct_5x5;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((6 << 8) + 6):
+                        do_dct[ci] = jpeg_fdct_6x6;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((7 << 8) + 7):
+                        do_dct[ci] = jpeg_fdct_7x7;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((9 << 8) + 9):
+                        do_dct[ci] = jpeg_fdct_9x9;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((10 << 8) + 10):
+                        do_dct[ci] = jpeg_fdct_10x10;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((11 << 8) + 11):
+                        do_dct[ci] = jpeg_fdct_11x11;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((12 << 8) + 12):
+                        do_dct[ci] = jpeg_fdct_12x12;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((13 << 8) + 13):
+                        do_dct[ci] = jpeg_fdct_13x13;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((14 << 8) + 14):
+                        do_dct[ci] = jpeg_fdct_14x14;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((15 << 8) + 15):
+                        do_dct[ci] = jpeg_fdct_15x15;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((16 << 8) + 16):
+                        do_dct[ci] = jpeg_fdct_16x16;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((16 << 8) + 8):
+                        do_dct[ci] = jpeg_fdct_16x8;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((14 << 8) + 7):
+                        do_dct[ci] = jpeg_fdct_14x7;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((12 << 8) + 6):
+                        do_dct[ci] = jpeg_fdct_12x6;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((10 << 8) + 5):
+                        do_dct[ci] = jpeg_fdct_10x5;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((8 << 8) + 4):
+                        do_dct[ci] = jpeg_fdct_8x4;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((6 << 8) + 3):
+                        do_dct[ci] = jpeg_fdct_6x3;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((4 << 8) + 2):
+                        do_dct[ci] = jpeg_fdct_4x2;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((2 << 8) + 1):
+                        do_dct[ci] = jpeg_fdct_2x1;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((8 << 8) + 16):
+                        do_dct[ci] = jpeg_fdct_8x16;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((7 << 8) + 14):
+                        do_dct[ci] = jpeg_fdct_7x14;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((6 << 8) + 12):
+                        do_dct[ci] = jpeg_fdct_6x12;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((5 << 8) + 10):
+                        do_dct[ci] = jpeg_fdct_5x10;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((4 << 8) + 8):
+                        do_dct[ci] = jpeg_fdct_4x8;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((3 << 8) + 6):
+                        do_dct[ci] = jpeg_fdct_3x6;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((2 << 8) + 4):
+                        do_dct[ci] = jpeg_fdct_2x4;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((1 << 8) + 2):
+                        do_dct[ci] = jpeg_fdct_1x2;
+                        method = J_DCT_METHOD.JDCT_ISLOW;    /* jfdctint uses islow-style table */
+                        break;
+                    case ((JpegConstants.DCTSIZE << 8) + JpegConstants.DCTSIZE):
+                        switch (m_cinfo.m_dct_method)
+                        {
+                            case J_DCT_METHOD.JDCT_ISLOW:
+                                do_dct[ci] = jpeg_fdct_islow;
+                                method = J_DCT_METHOD.JDCT_ISLOW;
+                                break;
+                            case J_DCT_METHOD.JDCT_IFAST:
+                                do_dct[ci] = jpeg_fdct_ifast;
+                                method = J_DCT_METHOD.JDCT_IFAST;
+                                break;
+                            case J_DCT_METHOD.JDCT_FLOAT:
+                                do_float_dct[ci] = jpeg_fdct_float;
+                                method = J_DCT_METHOD.JDCT_FLOAT;
+                                break;
+                            default:
+                                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
+                                break;
+                        }
+                        break;
+                    default:
+                        m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCTSIZE, compptr.DCT_h_scaled_size, compptr.DCT_v_scaled_size);
+                        break;
+                }
+
                 int qtblno = m_cinfo.Component_info[ci].Quant_tbl_no;
 
                 /* Make sure specified quantization table is present */
@@ -158,45 +320,43 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, qtblno);
 
                 JQUANT_TBL qtbl = m_cinfo.m_quant_tbl_ptrs[qtblno];
+                int[] dtbl;
 
-                /* Compute divisors for this quant table */
-                /* We may do this more than once for same table, but it's not a big deal */
+                /* Create divisor table from quant table */
                 int i = 0;
-                switch (m_cinfo.m_dct_method)
+                switch (method)
                 {
                     case J_DCT_METHOD.JDCT_ISLOW:
                         /* For LL&M IDCT method, divisors are equal to raw quantization
                          * coefficients multiplied by 8 (to counteract scaling).
                          */
-                        if (m_divisors[qtblno] == null)
-                            m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
-
+                        dtbl = m_dctTables[ci].int_array;
                         for (i = 0; i < JpegConstants.DCTSIZE2; i++)
-                            m_divisors[qtblno][i] = ((int)qtbl.quantval[i]) << 3;
-
+                            dtbl[i] = ((int)qtbl.quantval[i]) << (compptr.component_needed ? 4 : 3);
+                        forward_DCT[ci] = forwardDCTImpl;
                         break;
+
                     case J_DCT_METHOD.JDCT_IFAST:
-                        if (m_divisors[qtblno] == null)
-                            m_divisors[qtblno] = new int [JpegConstants.DCTSIZE2];
-
+                        dtbl = m_dctTables[ci].int_array;
                         for (i = 0; i < JpegConstants.DCTSIZE2; i++)
-                            m_divisors[qtblno][i] = JpegUtils.DESCALE((int)qtbl.quantval[i] * (int)aanscales[i], CONST_BITS - 3);
+                            dtbl[i] = JpegUtils.DESCALE((int)qtbl.quantval[i] * (int)aanscales[i], compptr.component_needed ? CONST_BITS - 4 : CONST_BITS - 3);
+                        forward_DCT[ci] = forwardDCTImpl;
                         break;
-                    case J_DCT_METHOD.JDCT_FLOAT:
-                        if (m_float_divisors[qtblno] == null)
-                            m_float_divisors[qtblno] = new float [JpegConstants.DCTSIZE2];
 
-                        float[] fdtbl = m_float_divisors[qtblno];
+                    case J_DCT_METHOD.JDCT_FLOAT:
+                        float[] fdtbl = m_dctTables[ci].float_array;
                         i = 0;
                         for (int row = 0; row < JpegConstants.DCTSIZE; row++)
                         {
                             for (int col = 0; col < JpegConstants.DCTSIZE; col++)
                             {
-                                fdtbl[i] = (float)(1.0 / (((double) qtbl.quantval[i] * aanscalefactor[row] * aanscalefactor[col] * 8.0)));
+                                fdtbl[i] = (float)(1.0 / (((double)qtbl.quantval[i] * aanscalefactor[row] * aanscalefactor[col] * (compptr.component_needed ? 16.0 : 8.0))));
                                 i++;
                             }
                         }
+                        forward_DCT[ci] = forwardDCTFloatImpl;
                         break;
+
                     default:
                         m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOT_COMPILED);
                         break;
@@ -204,49 +364,22 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             }
         }
 
-        /// <summary>
-        /// Perform forward DCT on one or more blocks of a component.
-        /// 
-        /// The input samples are taken from the sample_data[] array starting at
-        /// position start_row/start_col, and moving to the right for any additional
-        /// blocks. The quantized coefficients are returned in coef_blocks[].
-        /// </summary>
-        public virtual void forward_DCT(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
-        {
-            if (m_useFloatMethod)
-                forwardDCTFloatImpl(quant_tbl_no, sample_data, coef_blocks, start_row, start_col, num_blocks);
-            else
-                forwardDCTImpl(quant_tbl_no, sample_data, coef_blocks, start_row, start_col, num_blocks);
-        }
-
         // This version is used for integer DCT implementations.
-        private void forwardDCTImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
+        private void forwardDCTImpl(jpeg_component_info compptr, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
         {
             /* This routine is heavily used, so it's worth coding it tightly. */
-            int[] workspace = new int [JpegConstants.DCTSIZE2];    /* work area for FDCT subroutine */
-            for (int bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
+            forward_DCT_method_ptr do_dct = this.do_dct[compptr.Component_index];
+            int[] divisors = m_dctTables[compptr.Component_index].int_array;
+            int[] workspace = new int[JpegConstants.DCTSIZE2];    /* work area for FDCT subroutine */
+            for (int bi = 0; bi < num_blocks; bi++, start_col += compptr.DCT_h_scaled_size)
             {
-                /* Load data into workspace, applying unsigned->signed conversion */
-                int workspaceIndex = 0;
-                for (int elemr = 0; elemr < JpegConstants.DCTSIZE; elemr++)
-                {
-                    for (int column = 0; column < JpegConstants.DCTSIZE; column++)
-                    {
-                        workspace[workspaceIndex] = (int)sample_data[start_row + elemr][start_col + column] - JpegConstants.CENTERJSAMPLE;
-                        workspaceIndex++;
-                    }
-                }
-
                 /* Perform the DCT */
-                if (m_useSlowMethod)
-                    jpeg_fdct_islow(workspace);
-                else
-                    jpeg_fdct_ifast(workspace);
+                do_dct(workspace, sample_data, start_row, start_col);
 
                 /* Quantize/descale the coefficients, and store into coef_blocks[] */
                 for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
-                    int qval = m_divisors[quant_tbl_no][i];
+                    int qval = divisors[i];
                     int temp = workspace[i];
 
                     if (temp < 0)
@@ -271,37 +404,28 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             temp = 0;
                     }
 
-                    coef_blocks[bi][i] = (short) temp;
+                    coef_blocks[bi][i] = (short)temp;
                 }
             }
         }
 
         // This version is used for floating-point DCT implementations.
-        private void forwardDCTFloatImpl(int quant_tbl_no, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
+        private void forwardDCTFloatImpl(jpeg_component_info compptr, byte[][] sample_data, JBLOCK[] coef_blocks, int start_row, int start_col, int num_blocks)
         {
             /* This routine is heavily used, so it's worth coding it tightly. */
-            float[] workspace = new float [JpegConstants.DCTSIZE2]; /* work area for FDCT subroutine */
-            for (int bi = 0; bi < num_blocks; bi++, start_col += JpegConstants.DCTSIZE)
+            float_DCT_method_ptr do_dct = do_float_dct[compptr.Component_index];
+            float[] divisors = m_dctTables[compptr.Component_index].float_array;
+            float[] workspace = new float[JpegConstants.DCTSIZE2]; /* work area for FDCT subroutine */
+            for (int bi = 0; bi < num_blocks; bi++, start_col += compptr.DCT_h_scaled_size)
             {
-                /* Load data into workspace, applying unsigned->signed conversion */
-                int workspaceIndex = 0;
-                for (int elemr = 0; elemr < JpegConstants.DCTSIZE; elemr++)
-                {
-                    for (int column = 0; column < JpegConstants.DCTSIZE; column++)
-                    {
-                        workspace[workspaceIndex] = (float)((int)sample_data[start_row + elemr][start_col + column] - JpegConstants.CENTERJSAMPLE);
-                        workspaceIndex++;
-                    }
-                }
-
                 /* Perform the DCT */
-                jpeg_fdct_float(workspace);
+                do_dct(workspace, sample_data, start_row, start_col);
 
                 /* Quantize/descale the coefficients, and store into coef_blocks[] */
                 for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
                     /* Apply the quantization and scaling factor */
-                    float temp = workspace[i] * m_float_divisors[quant_tbl_no][i];
+                    float temp = workspace[i] * divisors[i];
 
                     /* Round to nearest integer.
                      * Since C does not specify the direction of rounding for negative
@@ -346,20 +470,24 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// scaled quantization values.  However, that problem does not arise if
         /// we use floating point arithmetic.
         /// </summary>
-        private static void jpeg_fdct_float(float[] data)
+        private static void jpeg_fdct_float(float[] data, byte[][] sample_data, int start_row, int start_col)
         {
             /* Pass 1: process rows. */
             int dataIndex = 0;
-            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = 0; ctr < JpegConstants.DCTSIZE; ctr++)
             {
-                float tmp0 = data[dataIndex + 0] + data[dataIndex + 7];
-                float tmp7 = data[dataIndex + 0] - data[dataIndex + 7];
-                float tmp1 = data[dataIndex + 1] + data[dataIndex + 6];
-                float tmp6 = data[dataIndex + 1] - data[dataIndex + 6];
-                float tmp2 = data[dataIndex + 2] + data[dataIndex + 5];
-                float tmp5 = data[dataIndex + 2] - data[dataIndex + 5];
-                float tmp3 = data[dataIndex + 3] + data[dataIndex + 4];
-                float tmp4 = data[dataIndex + 3] - data[dataIndex + 4];
+                byte[] elem = sample_data[start_row + ctr];
+                int elemIndex = start_col;
+
+                /* Load data into workspace */
+                float tmp0 = elem[elemIndex + 0] + elem[elemIndex + 7];
+                float tmp7 = elem[elemIndex + 0] - elem[elemIndex + 7];
+                float tmp1 = elem[elemIndex + 1] + elem[elemIndex + 6];
+                float tmp6 = elem[elemIndex + 1] - elem[elemIndex + 6];
+                float tmp2 = elem[elemIndex + 2] + elem[elemIndex + 5];
+                float tmp5 = elem[elemIndex + 2] - elem[elemIndex + 5];
+                float tmp3 = elem[elemIndex + 3] + elem[elemIndex + 4];
+                float tmp4 = elem[elemIndex + 3] - elem[elemIndex + 4];
 
                 /* Even part */
 
@@ -368,7 +496,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 float tmp11 = tmp1 + tmp2;
                 float tmp12 = tmp1 - tmp2;
 
-                data[dataIndex + 0] = tmp10 + tmp11; /* phase 3 */
+                /* Apply unsigned->signed conversion. */
+                data[dataIndex + 0] = tmp10 + tmp11 - 8 * JpegConstants.CENTERJSAMPLE; /* phase 3 */
                 data[dataIndex + 4] = tmp10 - tmp11;
 
                 float z1 = (tmp12 + tmp13) * ((float)0.707106781); /* c4 */
@@ -494,20 +623,24 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// machines, and may also reduce the cost of multiplication (since there
         /// are fewer one-bits in the constants).
         /// </summary>
-        private static void jpeg_fdct_ifast(int[] data)
+        private static void jpeg_fdct_ifast(int[] data, byte[][] sample_data, int start_row, int start_col)
         {
             /* Pass 1: process rows. */
             int dataIndex = 0;
-            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = 0; ctr < JpegConstants.DCTSIZE; ctr++)
             {
-                int tmp0 = data[dataIndex + 0] + data[dataIndex + 7];
-                int tmp7 = data[dataIndex + 0] - data[dataIndex + 7];
-                int tmp1 = data[dataIndex + 1] + data[dataIndex + 6];
-                int tmp6 = data[dataIndex + 1] - data[dataIndex + 6];
-                int tmp2 = data[dataIndex + 2] + data[dataIndex + 5];
-                int tmp5 = data[dataIndex + 2] - data[dataIndex + 5];
-                int tmp3 = data[dataIndex + 3] + data[dataIndex + 4];
-                int tmp4 = data[dataIndex + 3] - data[dataIndex + 4];
+                byte[] elem = sample_data[start_row + ctr];
+                int elemIndex = start_col;
+
+                /* Load data into workspace */
+                int tmp0 = elem[elemIndex + 0] + elem[elemIndex + 7];
+                int tmp7 = elem[elemIndex + 0] - elem[elemIndex + 7];
+                int tmp1 = elem[elemIndex + 1] + elem[elemIndex + 6];
+                int tmp6 = elem[elemIndex + 1] - elem[elemIndex + 6];
+                int tmp2 = elem[elemIndex + 2] + elem[elemIndex + 5];
+                int tmp5 = elem[elemIndex + 2] - elem[elemIndex + 5];
+                int tmp3 = elem[elemIndex + 3] + elem[elemIndex + 4];
+                int tmp4 = elem[elemIndex + 3] - elem[elemIndex + 4];
 
                 /* Even part */
 
@@ -516,7 +649,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int tmp11 = tmp1 + tmp2;
                 int tmp12 = tmp1 - tmp2;
 
-                data[dataIndex + 0] = tmp10 + tmp11; /* phase 3 */
+                /* Apply unsigned->signed conversion. */
+                data[dataIndex + 0] = tmp10 + tmp11 - 8 * JpegConstants.CENTERJSAMPLE; /* phase 3 */
                 data[dataIndex + 4] = tmp10 - tmp11;
 
                 int z1 = FAST_INTEGER_MULTIPLY(tmp12 + tmp13, FAST_INTEGER_FIX_0_707106781); /* c4 */
@@ -651,39 +785,46 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// have BITS_IN_JSAMPLE + SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS &lt;= 26.  Error analysis
         /// shows that the values given below are the most effective.
         /// </summary>
-        private static void jpeg_fdct_islow(int[] data)
+        private static void jpeg_fdct_islow(int[] data, byte[][] sample_data, int start_row, int start_col)
         {
             /* Pass 1: process rows. */
             /* Note results are scaled up by sqrt(8) compared to a true DCT; */
             /* furthermore, we scale the results by 2**SLOW_INTEGER_PASS1_BITS. */
             int dataIndex = 0;
-            for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
+            for (int ctr = 0; ctr < JpegConstants.DCTSIZE; ctr++)
             {
-                int tmp0 = data[dataIndex + 0] + data[dataIndex + 7];
-                int tmp7 = data[dataIndex + 0] - data[dataIndex + 7];
-                int tmp1 = data[dataIndex + 1] + data[dataIndex + 6];
-                int tmp6 = data[dataIndex + 1] - data[dataIndex + 6];
-                int tmp2 = data[dataIndex + 2] + data[dataIndex + 5];
-                int tmp5 = data[dataIndex + 2] - data[dataIndex + 5];
-                int tmp3 = data[dataIndex + 3] + data[dataIndex + 4];
-                int tmp4 = data[dataIndex + 3] - data[dataIndex + 4];
+                byte[] elem = sample_data[start_row + ctr];
+                int elemIndex = start_col;
+
+                int tmp0 = elem[elemIndex + 0] + elem[elemIndex + 7];
+                int tmp1 = elem[elemIndex + 1] + elem[elemIndex + 6];
+                int tmp2 = elem[elemIndex + 2] + elem[elemIndex + 5];
+                int tmp3 = elem[elemIndex + 3] + elem[elemIndex + 4];
 
                 /* Even part per LL&M figure 1 --- note that published figure is faulty;
                 * rotator "sqrt(2)*c1" should be "sqrt(2)*c6".
                 */
 
                 int tmp10 = tmp0 + tmp3;
-                int tmp13 = tmp0 - tmp3;
+                int tmp12 = tmp0 - tmp3;
                 int tmp11 = tmp1 + tmp2;
-                int tmp12 = tmp1 - tmp2;
+                int tmp13 = tmp1 - tmp2;
 
-                data[dataIndex + 0] = (tmp10 + tmp11) << SLOW_INTEGER_PASS1_BITS;
+                tmp0 = elem[elemIndex + 0] - elem[elemIndex + 7];
+                tmp1 = elem[elemIndex + 1] - elem[elemIndex + 6];
+                tmp2 = elem[elemIndex + 2] - elem[elemIndex + 5];
+                tmp3 = elem[elemIndex + 3] - elem[elemIndex + 4];
+
+                data[dataIndex + 0] = (tmp10 + tmp11 - 8 * JpegConstants.CENTERJSAMPLE) << SLOW_INTEGER_PASS1_BITS;
                 data[dataIndex + 4] = (tmp10 - tmp11) << SLOW_INTEGER_PASS1_BITS;
 
                 int z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_0_541196100;
-                data[dataIndex + 2] = JpegUtils.DESCALE(z1 + tmp13 * SLOW_INTEGER_FIX_0_765366865,
+                /* Add fudge factor here for final descale. */
+                z1 += 1 << (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS - 1);
+
+                data[dataIndex + 2] = JpegUtils.RIGHT_SHIFT(z1 + tmp12 * SLOW_INTEGER_FIX_0_765366865, /* c2-c6 */
                                                 SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 6] = JpegUtils.DESCALE(z1 + tmp12 * (-SLOW_INTEGER_FIX_1_847759065),
+                data[dataIndex + 6] = JpegUtils.DESCALE(z1 - tmp13 * SLOW_INTEGER_FIX_1_847759065,
                                                 SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
 
                 /* Odd part per figure 8 --- note paper omits factor of sqrt(2).
@@ -691,28 +832,34 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 * i0..i3 in the paper are tmp4..tmp7 here.
                 */
 
-                z1 = tmp4 + tmp7;
-                int z2 = tmp5 + tmp6;
-                int z3 = tmp4 + tmp6;
-                int z4 = tmp5 + tmp7;
-                int z5 = (z3 + z4) * SLOW_INTEGER_FIX_1_175875602; /* sqrt(2) * c3 */
+                tmp12 = tmp0 + tmp2;
+                tmp13 = tmp1 + tmp3;
 
-                tmp4 = tmp4 * SLOW_INTEGER_FIX_0_298631336; /* sqrt(2) * (-c1+c3+c5-c7) */
-                tmp5 = tmp5 * SLOW_INTEGER_FIX_2_053119869; /* sqrt(2) * ( c1+c3-c5+c7) */
-                tmp6 = tmp6 * SLOW_INTEGER_FIX_3_072711026; /* sqrt(2) * ( c1+c3+c5-c7) */
-                tmp7 = tmp7 * SLOW_INTEGER_FIX_1_501321110; /* sqrt(2) * ( c1+c3-c5-c7) */
-                z1 = z1 * (-SLOW_INTEGER_FIX_0_899976223); /* sqrt(2) * (c7-c3) */
-                z2 = z2 * (-SLOW_INTEGER_FIX_2_562915447); /* sqrt(2) * (-c1-c3) */
-                z3 = z3 * (-SLOW_INTEGER_FIX_1_961570560); /* sqrt(2) * (-c3-c5) */
-                z4 = z4 * (-SLOW_INTEGER_FIX_0_390180644); /* sqrt(2) * (c5-c3) */
+                z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_1_175875602; /*  c3 */
+                /* Add fudge factor here for final descale. */
+                z1 += 1 << (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS - 1);
 
-                z3 += z5;
-                z4 += z5;
+                tmp12 = tmp12 * (-SLOW_INTEGER_FIX_0_390180644);          /* -c3+c5 */
+                tmp13 = tmp13 * (-SLOW_INTEGER_FIX_1_961570560);          /* -c3-c5 */
+                tmp12 += z1;
+                tmp13 += z1;
 
-                data[dataIndex + 7] = JpegUtils.DESCALE(tmp4 + z1 + z3, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 5] = JpegUtils.DESCALE(tmp5 + z2 + z4, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 3] = JpegUtils.DESCALE(tmp6 + z2 + z3, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 1] = JpegUtils.DESCALE(tmp7 + z1 + z4, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                z1 = (tmp0 + tmp3) * (-SLOW_INTEGER_FIX_0_899976223);       /* -c3+c7 */
+                tmp0 = tmp0 * SLOW_INTEGER_FIX_1_501321110;              /*  c1+c3-c5-c7 */
+                tmp3 = tmp3 * SLOW_INTEGER_FIX_0_298631336;              /* -c1+c3+c5-c7 */
+                tmp0 += z1 + tmp12;
+                tmp3 += z1 + tmp13;
+
+                z1 = (tmp1 + tmp2) * (-SLOW_INTEGER_FIX_2_562915447);       /* -c1-c3 */
+                tmp1 = tmp1 * SLOW_INTEGER_FIX_3_072711026;              /*  c1+c3+c5-c7 */
+                tmp2 = tmp2 * SLOW_INTEGER_FIX_2_053119869;              /*  c1+c3-c5+c7 */
+                tmp1 += z1 + tmp13;
+                tmp2 += z1 + tmp12;
+
+                data[dataIndex + 1] = JpegUtils.RIGHT_SHIFT(tmp0, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 3] = JpegUtils.RIGHT_SHIFT(tmp1, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 5] = JpegUtils.RIGHT_SHIFT(tmp2, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 7] = JpegUtils.RIGHT_SHIFT(tmp3, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
 
                 dataIndex += JpegConstants.DCTSIZE;     /* advance pointer to next row */
             }
@@ -720,65 +867,77 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Pass 2: process columns.
             * We remove the SLOW_INTEGER_PASS1_BITS scaling, but leave the results scaled up
             * by an overall factor of 8.
+            * cK represents sqrt(2) * cos(K*pi/16).
             */
 
             dataIndex = 0;
             for (int ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
             {
-                int tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] + data[dataIndex + JpegConstants.DCTSIZE * 7];
-                int tmp7 = data[dataIndex + JpegConstants.DCTSIZE * 0] - data[dataIndex + JpegConstants.DCTSIZE * 7];
-                int tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] + data[dataIndex + JpegConstants.DCTSIZE * 6];
-                int tmp6 = data[dataIndex + JpegConstants.DCTSIZE * 1] - data[dataIndex + JpegConstants.DCTSIZE * 6];
-                int tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] + data[dataIndex + JpegConstants.DCTSIZE * 5];
-                int tmp5 = data[dataIndex + JpegConstants.DCTSIZE * 2] - data[dataIndex + JpegConstants.DCTSIZE * 5];
-                int tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] + data[dataIndex + JpegConstants.DCTSIZE * 4];
-                int tmp4 = data[dataIndex + JpegConstants.DCTSIZE * 3] - data[dataIndex + JpegConstants.DCTSIZE * 4];
-
                 /* Even part per LL&M figure 1 --- note that published figure is faulty;
-                * rotator "sqrt(2)*c1" should be "sqrt(2)*c6".
-                */
+                 * rotator "sqrt(2)*c1" should be "sqrt(2)*c6".
+                 */
+                int tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] + data[dataIndex + JpegConstants.DCTSIZE * 7];
+                int tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] + data[dataIndex + JpegConstants.DCTSIZE * 6];
+                int tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] + data[dataIndex + JpegConstants.DCTSIZE * 5];
+                int tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] + data[dataIndex + JpegConstants.DCTSIZE * 4];
 
-                int tmp10 = tmp0 + tmp3;
-                int tmp13 = tmp0 - tmp3;
+                /* Add fudge factor here for final descale. */
+                int tmp10 = tmp0 + tmp3 + (1 << (SLOW_INTEGER_PASS1_BITS - 1));
+                int tmp12 = tmp0 - tmp3;
                 int tmp11 = tmp1 + tmp2;
-                int tmp12 = tmp1 - tmp2;
+                int tmp13 = tmp1 - tmp2;
 
-                data[dataIndex + JpegConstants.DCTSIZE * 0] = JpegUtils.DESCALE(tmp10 + tmp11, SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 4] = JpegUtils.DESCALE(tmp10 - tmp11, SLOW_INTEGER_PASS1_BITS);
+                tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] - data[dataIndex + JpegConstants.DCTSIZE * 7];
+                tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] - data[dataIndex + JpegConstants.DCTSIZE * 6];
+                tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] - data[dataIndex + JpegConstants.DCTSIZE * 5];
+                tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] - data[dataIndex + JpegConstants.DCTSIZE * 4];
 
-                int z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_0_541196100;
-                data[dataIndex + JpegConstants.DCTSIZE * 2] = JpegUtils.DESCALE(z1 + tmp13 * SLOW_INTEGER_FIX_0_765366865,
-                                                          SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 6] = JpegUtils.DESCALE(z1 + tmp12 * (-SLOW_INTEGER_FIX_1_847759065),
-                                                          SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 0] = JpegUtils.RIGHT_SHIFT(tmp10 + tmp11, SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 4] = JpegUtils.RIGHT_SHIFT(tmp10 - tmp11, SLOW_INTEGER_PASS1_BITS);
+
+                int z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_0_541196100;       /* c6 */
+                /* Add fudge factor here for final descale. */
+                z1 += 1 << (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS - 1);
+
+                data[dataIndex + JpegConstants.DCTSIZE * 2] = JpegUtils.RIGHT_SHIFT(
+                    z1 + tmp12 * SLOW_INTEGER_FIX_0_765366865,
+                    SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 6] = JpegUtils.RIGHT_SHIFT(
+                    z1 - tmp13 * SLOW_INTEGER_FIX_1_847759065,
+                    SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
 
                 /* Odd part per figure 8 --- note paper omits factor of sqrt(2).
-                * cK represents cos(K*pi/16).
                 * i0..i3 in the paper are tmp4..tmp7 here.
                 */
 
-                z1 = tmp4 + tmp7;
-                int z2 = tmp5 + tmp6;
-                int z3 = tmp4 + tmp6;
-                int z4 = tmp5 + tmp7;
-                int z5 = (z3 + z4) * SLOW_INTEGER_FIX_1_175875602; /* sqrt(2) * c3 */
+                tmp12 = tmp0 + tmp2;
+                tmp13 = tmp1 + tmp3;
 
-                tmp4 = tmp4 * SLOW_INTEGER_FIX_0_298631336; /* sqrt(2) * (-c1+c3+c5-c7) */
-                tmp5 = tmp5 * SLOW_INTEGER_FIX_2_053119869; /* sqrt(2) * ( c1+c3-c5+c7) */
-                tmp6 = tmp6 * SLOW_INTEGER_FIX_3_072711026; /* sqrt(2) * ( c1+c3+c5-c7) */
-                tmp7 = tmp7 * SLOW_INTEGER_FIX_1_501321110; /* sqrt(2) * ( c1+c3-c5-c7) */
-                z1 = z1 * (-SLOW_INTEGER_FIX_0_899976223); /* sqrt(2) * (c7-c3) */
-                z2 = z2 * (-SLOW_INTEGER_FIX_2_562915447); /* sqrt(2) * (-c1-c3) */
-                z3 = z3 * (-SLOW_INTEGER_FIX_1_961570560); /* sqrt(2) * (-c3-c5) */
-                z4 = z4 * (-SLOW_INTEGER_FIX_0_390180644); /* sqrt(2) * (c5-c3) */
+                z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_1_175875602; /*  c3 */
+                /* Add fudge factor here for final descale. */
+                z1 += 1 << (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS - 1);
 
-                z3 += z5;
-                z4 += z5;
+                tmp12 = tmp12 * (-SLOW_INTEGER_FIX_0_390180644);          /* -c3+c5 */
+                tmp13 = tmp13 * (-SLOW_INTEGER_FIX_1_961570560);          /* -c3-c5 */
+                tmp12 += z1;
+                tmp13 += z1;
 
-                data[dataIndex + JpegConstants.DCTSIZE * 7] = JpegUtils.DESCALE(tmp4 + z1 + z3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 5] = JpegUtils.DESCALE(tmp5 + z2 + z4, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 3] = JpegUtils.DESCALE(tmp6 + z2 + z3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 1] = JpegUtils.DESCALE(tmp7 + z1 + z4, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                z1 = (tmp0 + tmp3) * (-SLOW_INTEGER_FIX_0_899976223);       /* -c3+c7 */
+                tmp0 = tmp0 * SLOW_INTEGER_FIX_1_501321110;              /*  c1+c3-c5-c7 */
+                tmp3 = tmp3 * SLOW_INTEGER_FIX_0_298631336;              /* -c1+c3+c5-c7 */
+                tmp0 += z1 + tmp12;
+                tmp3 += z1 + tmp13;
+
+                z1 = (tmp1 + tmp2) * (-SLOW_INTEGER_FIX_2_562915447);       /* -c1-c3 */
+                tmp1 = tmp1 * SLOW_INTEGER_FIX_3_072711026;              /*  c1+c3+c5-c7 */
+                tmp2 = tmp2 * SLOW_INTEGER_FIX_2_053119869;              /*  c1+c3-c5+c7 */
+                tmp1 += z1 + tmp13;
+                tmp2 += z1 + tmp12;
+
+                data[dataIndex + JpegConstants.DCTSIZE * 1] = JpegUtils.RIGHT_SHIFT(tmp0, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 3] = JpegUtils.RIGHT_SHIFT(tmp1, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 5] = JpegUtils.RIGHT_SHIFT(tmp2, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 7] = JpegUtils.RIGHT_SHIFT(tmp3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
 
                 dataIndex++;          /* advance pointer to next column */
             }
@@ -795,6 +954,375 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 #else
             return (JpegUtils.DESCALE((var) * (c), FAST_INTEGER_CONST_BITS));
 #endif
+        }
+
+        static int SLOW_INTEGER_FIX(double x)
+        {
+            return ((int)((x) * (((int)1) << SLOW_INTEGER_CONST_BITS) + 0.5));
+        }
+
+        private void jpeg_fdct_1x1(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_2x2(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_3x3(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_4x4(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_5x5(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_6x6(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_7x7(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_9x9(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_10x10(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_11x11(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_12x12(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_13x13(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_14x14(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_15x15(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        /*
+         * Perform the forward DCT on a 16x16 sample block.
+         */
+        private void jpeg_fdct_16x16(int[] data1, byte[][] sample_data, int start_row, int start_col)
+        {
+            /* Pass 1: process rows.
+             * Note results are scaled up by sqrt(8) compared to a true DCT;
+             * furthermore, we scale the results by 2**PASS1_BITS.
+             * cK represents sqrt(2) * cos(K*pi/32).
+             */
+            int[] workspace = new int[JpegConstants.DCTSIZE2];
+
+            int dataIndex = 0;
+            int[] data = data1;
+
+            int ctr = 0;
+            for (;;)
+            {
+                byte[] elem = sample_data[start_row + ctr];
+                int elemIndex = start_col;
+
+                /* Even part */
+
+                int tmp0 = elem[elemIndex + 0] + elem[elemIndex + 15];
+                int tmp1 = elem[elemIndex + 1] + elem[elemIndex + 14];
+                int tmp2 = elem[elemIndex + 2] + elem[elemIndex + 13];
+                int tmp3 = elem[elemIndex + 3] + elem[elemIndex + 12];
+                int tmp4 = elem[elemIndex + 4] + elem[elemIndex + 11];
+                int tmp5 = elem[elemIndex + 5] + elem[elemIndex + 10];
+                int tmp6 = elem[elemIndex + 6] + elem[elemIndex + 9];
+                int tmp7 = elem[elemIndex + 7] + elem[elemIndex + 8];
+
+                int tmp10 = tmp0 + tmp7;
+                int tmp14 = tmp0 - tmp7;
+                int tmp11 = tmp1 + tmp6;
+                int tmp15 = tmp1 - tmp6;
+                int tmp12 = tmp2 + tmp5;
+                int tmp16 = tmp2 - tmp5;
+                int tmp13 = tmp3 + tmp4;
+                int tmp17 = tmp3 - tmp4;
+
+                tmp0 = elem[elemIndex + 0] - elem[elemIndex + 15];
+                tmp1 = elem[elemIndex + 1] - elem[elemIndex + 14];
+                tmp2 = elem[elemIndex + 2] - elem[elemIndex + 13];
+                tmp3 = elem[elemIndex + 3] - elem[elemIndex + 12];
+                tmp4 = elem[elemIndex + 4] - elem[elemIndex + 11];
+                tmp5 = elem[elemIndex + 5] - elem[elemIndex + 10];
+                tmp6 = elem[elemIndex + 6] - elem[elemIndex + 9];
+                tmp7 = elem[elemIndex + 7] - elem[elemIndex + 8];
+
+                /* Apply unsigned->signed conversion. */
+                data[dataIndex + 0] =
+                  ((tmp10 + tmp11 + tmp12 + tmp13 - 16 * JpegConstants.CENTERJSAMPLE) << SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 4] =
+                  JpegUtils.DESCALE(
+                      (tmp10 - tmp13) * SLOW_INTEGER_FIX(1.306562965) + /* c4[16] = c2[8] */
+                      (tmp11 - tmp12) * SLOW_INTEGER_FIX_0_541196100,   /* c12[16] = c6[8] */
+                      SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+
+                tmp10 = (tmp17 - tmp15) * SLOW_INTEGER_FIX(0.275899379) +   /* c14[16] = c7[8] */
+                    (tmp14 - tmp16) * SLOW_INTEGER_FIX(1.387039845);    /* c2[16] = c1[8] */
+
+                data[dataIndex + 2] = JpegUtils.DESCALE(
+                    tmp10 + tmp15 * SLOW_INTEGER_FIX(1.451774982)   /* c6+c14 */
+                    + tmp16 * SLOW_INTEGER_FIX(2.172734804),        /* c2+c10 */
+                    SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 6] = JpegUtils.DESCALE(
+                    tmp10 - tmp14 * SLOW_INTEGER_FIX(0.211164243)   /* c2-c6 */
+                    - tmp17 * SLOW_INTEGER_FIX(1.061594338),        /* c10+c14 */
+                    SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+
+                /* Odd part */
+
+                tmp11 = (tmp0 + tmp1) * SLOW_INTEGER_FIX(1.353318001) +         /* c3 */
+                    (tmp6 - tmp7) * SLOW_INTEGER_FIX(0.410524528);          /* c13 */
+                tmp12 = (tmp0 + tmp2) * SLOW_INTEGER_FIX(1.247225013) +         /* c5 */
+                    (tmp5 + tmp7) * SLOW_INTEGER_FIX(0.666655658);          /* c11 */
+                tmp13 = (tmp0 + tmp3) * SLOW_INTEGER_FIX(1.093201867) +         /* c7 */
+                    (tmp4 - tmp7) * SLOW_INTEGER_FIX(0.897167586);          /* c9 */
+                tmp14 = (tmp1 + tmp2) * SLOW_INTEGER_FIX(0.138617169) +         /* c15 */
+                    (tmp6 - tmp5) * SLOW_INTEGER_FIX(1.407403738);          /* c1 */
+                tmp15 = (tmp1 + tmp3) * (-SLOW_INTEGER_FIX(0.666655658)) +       /* -c11 */
+                    (tmp4 + tmp6) * (-SLOW_INTEGER_FIX(1.247225013));        /* -c5 */
+                tmp16 = (tmp2 + tmp3) * (-SLOW_INTEGER_FIX(1.353318001)) +       /* -c3 */
+                    (tmp5 - tmp4) * SLOW_INTEGER_FIX(0.410524528);          /* c13 */
+                tmp10 = tmp11 + tmp12 + tmp13 -
+                    tmp0 * SLOW_INTEGER_FIX(2.286341144) +                /* c7+c5+c3-c1 */
+                    tmp7 * SLOW_INTEGER_FIX(0.779653625);                 /* c15+c13-c11+c9 */
+                tmp11 += tmp14 + tmp15 + tmp1 * SLOW_INTEGER_FIX(0.071888074) /* c9-c3-c15+c11 */
+                     - tmp6 * SLOW_INTEGER_FIX(1.663905119);              /* c7+c13+c1-c5 */
+                tmp12 += tmp14 + tmp16 - tmp2 * SLOW_INTEGER_FIX(1.125726048) /* c7+c5+c15-c3 */
+                     + tmp5 * SLOW_INTEGER_FIX(1.227391138);              /* c9-c11+c1-c13 */
+                tmp13 += tmp15 + tmp16 + tmp3 * SLOW_INTEGER_FIX(1.065388962) /* c15+c3+c11-c7 */
+                     + tmp4 * SLOW_INTEGER_FIX(2.167985692);              /* c1+c13+c5-c9 */
+
+                data[dataIndex + 1] = JpegUtils.DESCALE(tmp10, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 3] = JpegUtils.DESCALE(tmp11, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 5] = JpegUtils.DESCALE(tmp12, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 7] = JpegUtils.DESCALE(tmp13, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+
+                ctr++;
+
+                if (ctr != JpegConstants.DCTSIZE)
+                {
+                    if (ctr == JpegConstants.DCTSIZE * 2)
+                    {
+                        /* Done. */
+                        break;
+                    }
+
+                    /* advance pointer to next row */
+                    dataIndex += JpegConstants.DCTSIZE;
+                }
+                else
+                {
+                    /* switch pointer to extended workspace */
+                    data = workspace;
+                    dataIndex = 0;
+                }
+            }
+
+            /* Pass 2: process columns.
+             * We remove the PASS1_BITS scaling, but leave the results scaled up
+             * by an overall factor of 8.
+             * We must also scale the output by (8/16)**2 = 1/2**2.
+             * cK represents sqrt(2) * cos(K*pi/32).
+             */
+
+            data = data1;
+            dataIndex = 0;
+            int workspaceIndex = 0;
+            for (ctr = JpegConstants.DCTSIZE - 1; ctr >= 0; ctr--)
+            {
+                /* Even part */
+                int tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 7];
+                int tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 6];
+                int tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 5];
+                int tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 4];
+                int tmp4 = data[dataIndex + JpegConstants.DCTSIZE * 4] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 3];
+                int tmp5 = data[dataIndex + JpegConstants.DCTSIZE * 5] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 2];
+                int tmp6 = data[dataIndex + JpegConstants.DCTSIZE * 6] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 1];
+                int tmp7 = data[dataIndex + JpegConstants.DCTSIZE * 7] + workspace[workspaceIndex + JpegConstants.DCTSIZE * 0];
+
+                int tmp10 = tmp0 + tmp7;
+                int tmp14 = tmp0 - tmp7;
+                int tmp11 = tmp1 + tmp6;
+                int tmp15 = tmp1 - tmp6;
+                int tmp12 = tmp2 + tmp5;
+                int tmp16 = tmp2 - tmp5;
+                int tmp13 = tmp3 + tmp4;
+                int tmp17 = tmp3 - tmp4;
+
+                tmp0 = data[dataIndex + JpegConstants.DCTSIZE * 0] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 7];
+                tmp1 = data[dataIndex + JpegConstants.DCTSIZE * 1] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 6];
+                tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 5];
+                tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 4];
+                tmp4 = data[dataIndex + JpegConstants.DCTSIZE * 4] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 3];
+                tmp5 = data[dataIndex + JpegConstants.DCTSIZE * 5] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 2];
+                tmp6 = data[dataIndex + JpegConstants.DCTSIZE * 6] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 1];
+                tmp7 = data[dataIndex + JpegConstants.DCTSIZE * 7] - workspace[workspaceIndex + JpegConstants.DCTSIZE * 0];
+
+                data[dataIndex + JpegConstants.DCTSIZE * 0] =
+                  JpegUtils.DESCALE(tmp10 + tmp11 + tmp12 + tmp13, SLOW_INTEGER_PASS1_BITS + 2);
+                data[dataIndex + JpegConstants.DCTSIZE * 4] =
+                  JpegUtils.DESCALE((tmp10 - tmp13) * SLOW_INTEGER_FIX(1.306562965) + /* c4[16] = c2[8] */
+                      (tmp11 - tmp12) * SLOW_INTEGER_FIX_0_541196100,   /* c12[16] = c6[8] */
+                      SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS + 2);
+
+                tmp10 = (tmp17 - tmp15) * SLOW_INTEGER_FIX(0.275899379) +   /* c14[16] = c7[8] */
+                    (tmp14 - tmp16) * SLOW_INTEGER_FIX(1.387039845);    /* c2[16] = c1[8] */
+
+                data[dataIndex + JpegConstants.DCTSIZE * 2] =
+                  JpegUtils.DESCALE(tmp10 + tmp15 * SLOW_INTEGER_FIX(1.451774982)   /* c6+c14 */
+                      + tmp16 * SLOW_INTEGER_FIX(2.172734804),        /* c2+10 */
+                      SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS + 2);
+                data[dataIndex + JpegConstants.DCTSIZE * 6] =
+                  JpegUtils.DESCALE(tmp10 - tmp14 * SLOW_INTEGER_FIX(0.211164243)   /* c2-c6 */
+                      - tmp17 * SLOW_INTEGER_FIX(1.061594338),        /* c10+c14 */
+                      SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS + 2);
+
+                /* Odd part */
+
+                tmp11 = (tmp0 + tmp1) * SLOW_INTEGER_FIX(1.353318001) +         /* c3 */
+                    (tmp6 - tmp7) * SLOW_INTEGER_FIX(0.410524528);          /* c13 */
+                tmp12 = (tmp0 + tmp2) * SLOW_INTEGER_FIX(1.247225013) +         /* c5 */
+                    (tmp5 + tmp7) * SLOW_INTEGER_FIX(0.666655658);          /* c11 */
+                tmp13 = (tmp0 + tmp3) * SLOW_INTEGER_FIX(1.093201867) +         /* c7 */
+                    (tmp4 - tmp7) * SLOW_INTEGER_FIX(0.897167586);          /* c9 */
+                tmp14 = (tmp1 + tmp2) * SLOW_INTEGER_FIX(0.138617169) +         /* c15 */
+                    (tmp6 - tmp5) * SLOW_INTEGER_FIX(1.407403738);          /* c1 */
+                tmp15 = (tmp1 + tmp3) * (-SLOW_INTEGER_FIX(0.666655658)) +       /* -c11 */
+                    (tmp4 + tmp6) * (-SLOW_INTEGER_FIX(1.247225013));        /* -c5 */
+                tmp16 = (tmp2 + tmp3) * (-SLOW_INTEGER_FIX(1.353318001)) +       /* -c3 */
+                    (tmp5 - tmp4) * SLOW_INTEGER_FIX(0.410524528);          /* c13 */
+                tmp10 = tmp11 + tmp12 + tmp13 -
+                    tmp0 * SLOW_INTEGER_FIX(2.286341144) +                /* c7+c5+c3-c1 */
+                    tmp7 * SLOW_INTEGER_FIX(0.779653625);                 /* c15+c13-c11+c9 */
+                tmp11 += tmp14 + tmp15 + tmp1 * SLOW_INTEGER_FIX(0.071888074) /* c9-c3-c15+c11 */
+                     - tmp6 * SLOW_INTEGER_FIX(1.663905119);              /* c7+c13+c1-c5 */
+                tmp12 += tmp14 + tmp16 - tmp2 * SLOW_INTEGER_FIX(1.125726048) /* c7+c5+c15-c3 */
+                     + tmp5 * SLOW_INTEGER_FIX(1.227391138);              /* c9-c11+c1-c13 */
+                tmp13 += tmp15 + tmp16 + tmp3 * SLOW_INTEGER_FIX(1.065388962) /* c15+c3+c11-c7 */
+                     + tmp4 * SLOW_INTEGER_FIX(2.167985692);              /* c1+c13+c5-c9 */
+
+                data[dataIndex + JpegConstants.DCTSIZE * 1] = JpegUtils.DESCALE(tmp10, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS + 2);
+                data[dataIndex + JpegConstants.DCTSIZE * 3] = JpegUtils.DESCALE(tmp11, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS + 2);
+                data[dataIndex + JpegConstants.DCTSIZE * 5] = JpegUtils.DESCALE(tmp12, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS + 2);
+                data[dataIndex + JpegConstants.DCTSIZE * 7] = JpegUtils.DESCALE(tmp13, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS + 2);
+
+                dataIndex++;            /* advance pointer to next column */
+                workspaceIndex++;            /* advance pointer to next column */
+            }
+        }
+
+        private void jpeg_fdct_16x8(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_14x7(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_12x6(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_10x5(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_8x4(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_6x3(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_4x2(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_2x1(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_8x16(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_7x14(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_6x12(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_5x10(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_4x8(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_3x6(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_2x4(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
+        }
+
+        private void jpeg_fdct_1x2(int[] data, byte[][] sample_data, int start_row, int start_col)
+        {
+            m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
         }
     }
 }

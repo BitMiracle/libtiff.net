@@ -239,10 +239,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 for (int ci = 0; ci < scanInfo.comps_in_scan; ci++)
                     m_cinfo.m_cur_comp_info[ci] = scanInfo.component_index[ci];
 
-                m_cinfo.m_Ss = scanInfo.Ss;
-                m_cinfo.m_Se = scanInfo.Se;
-                m_cinfo.m_Ah = scanInfo.Ah;
-                m_cinfo.m_Al = scanInfo.Al;
+                if (m_cinfo.m_progressive_mode)
+                {
+                    m_cinfo.m_Ss = scanInfo.Ss;
+                    m_cinfo.m_Se = scanInfo.Se;
+                    m_cinfo.m_Ah = scanInfo.Ah;
+                    m_cinfo.m_Al = scanInfo.Al;
+                    return;
+                }
             }
             else
             {
@@ -253,12 +257,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_cinfo.m_comps_in_scan = m_cinfo.m_num_components;
                 for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
                     m_cinfo.m_cur_comp_info[ci] = ci;
-
-                m_cinfo.m_Ss = 0;
-                m_cinfo.m_Se = JpegConstants.DCTSIZE2 - 1;
-                m_cinfo.m_Ah = 0;
-                m_cinfo.m_Al = 0;
             }
+
+            m_cinfo.m_Ss = 0;
+            m_cinfo.m_Se = m_cinfo.block_size * m_cinfo.block_size - 1;
+            m_cinfo.m_Ah = 0;
+            m_cinfo.m_Al = 0;
         }
 
         /// <summary>
@@ -271,25 +275,26 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 /* Noninterleaved (single-component) scan */
                 int compIndex = m_cinfo.m_cur_comp_info[0];
+                jpeg_component_info compptr = m_cinfo.Component_info[compIndex];
 
                 /* Overall image size in MCUs */
-                m_cinfo.m_MCUs_per_row = m_cinfo.Component_info[compIndex].Width_in_blocks;
-                m_cinfo.m_MCU_rows_in_scan = m_cinfo.Component_info[compIndex].height_in_blocks;
+                m_cinfo.m_MCUs_per_row = compptr.Width_in_blocks;
+                m_cinfo.m_MCU_rows_in_scan = compptr.height_in_blocks;
 
                 /* For noninterleaved scan, always one block per MCU */
-                m_cinfo.Component_info[compIndex].MCU_width = 1;
-                m_cinfo.Component_info[compIndex].MCU_height = 1;
-                m_cinfo.Component_info[compIndex].MCU_blocks = 1;
-                m_cinfo.Component_info[compIndex].MCU_sample_width = JpegConstants.DCTSIZE;
-                m_cinfo.Component_info[compIndex].last_col_width = 1;
+                compptr.MCU_width = 1;
+                compptr.MCU_height = 1;
+                compptr.MCU_blocks = 1;
+                compptr.MCU_sample_width = compptr.DCT_h_scaled_size;
+                compptr.last_col_width = 1;
                 
                 /* For noninterleaved scans, it is convenient to define last_row_height
                 * as the number of block rows present in the last iMCU row.
                 */
-                int tmp = m_cinfo.Component_info[compIndex].height_in_blocks % m_cinfo.Component_info[compIndex].V_samp_factor;
+                int tmp = compptr.height_in_blocks % compptr.V_samp_factor;
                 if (tmp == 0)
-                    tmp = m_cinfo.Component_info[compIndex].V_samp_factor;
-                m_cinfo.Component_info[compIndex].last_row_height = tmp;
+                    tmp = compptr.V_samp_factor;
+                compptr.last_row_height = tmp;
 
                 /* Prepare array describing MCU composition */
                 m_cinfo.m_blocks_in_MCU = 1;
@@ -302,37 +307,38 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_cinfo.m_comps_in_scan, JpegConstants.MAX_COMPS_IN_SCAN);
 
                 /* Overall image size in MCUs */
-                m_cinfo.m_MCUs_per_row = JpegUtils.jdiv_round_up(
-                    m_cinfo.m_image_width, m_cinfo.m_max_h_samp_factor * JpegConstants.DCTSIZE);
+                m_cinfo.m_MCUs_per_row = (int)JpegUtils.jdiv_round_up(
+                    m_cinfo.jpeg_width, m_cinfo.m_max_h_samp_factor * m_cinfo.block_size);
 
-                m_cinfo.m_MCU_rows_in_scan = JpegUtils.jdiv_round_up(m_cinfo.m_image_height,
-                    m_cinfo.m_max_v_samp_factor * JpegConstants.DCTSIZE);
+                m_cinfo.m_MCU_rows_in_scan = (int)JpegUtils.jdiv_round_up(
+                    m_cinfo.jpeg_height, m_cinfo.m_max_v_samp_factor * m_cinfo.block_size);
 
                 m_cinfo.m_blocks_in_MCU = 0;
 
                 for (int ci = 0; ci < m_cinfo.m_comps_in_scan; ci++)
                 {
                     int compIndex = m_cinfo.m_cur_comp_info[ci];
+                    jpeg_component_info compptr = m_cinfo.Component_info[compIndex];
 
                     /* Sampling factors give # of blocks of component in each MCU */
-                    m_cinfo.Component_info[compIndex].MCU_width = m_cinfo.Component_info[compIndex].H_samp_factor;
-                    m_cinfo.Component_info[compIndex].MCU_height = m_cinfo.Component_info[compIndex].V_samp_factor;
-                    m_cinfo.Component_info[compIndex].MCU_blocks = m_cinfo.Component_info[compIndex].MCU_width * m_cinfo.Component_info[compIndex].MCU_height;
-                    m_cinfo.Component_info[compIndex].MCU_sample_width = m_cinfo.Component_info[compIndex].MCU_width * JpegConstants.DCTSIZE;
+                    compptr.MCU_width = compptr.H_samp_factor;
+                    compptr.MCU_height = compptr.V_samp_factor;
+                    compptr.MCU_blocks = compptr.MCU_width * compptr.MCU_height;
+                    compptr.MCU_sample_width = compptr.MCU_width * compptr.DCT_h_scaled_size;
                     
                     /* Figure number of non-dummy blocks in last MCU column & row */
-                    int tmp = m_cinfo.Component_info[compIndex].Width_in_blocks % m_cinfo.Component_info[compIndex].MCU_width;
+                    int tmp = compptr.Width_in_blocks % compptr.MCU_width;
                     if (tmp == 0)
-                        tmp = m_cinfo.Component_info[compIndex].MCU_width;
-                    m_cinfo.Component_info[compIndex].last_col_width = tmp;
+                        tmp = compptr.MCU_width;
+                    compptr.last_col_width = tmp;
 
-                    tmp = m_cinfo.Component_info[compIndex].height_in_blocks % m_cinfo.Component_info[compIndex].MCU_height;
+                    tmp = compptr.height_in_blocks % compptr.MCU_height;
                     if (tmp == 0)
-                        tmp = m_cinfo.Component_info[compIndex].MCU_height;
-                    m_cinfo.Component_info[compIndex].last_row_height = tmp;
+                        tmp = compptr.MCU_height;
+                    compptr.last_row_height = tmp;
                     
                     /* Prepare array describing MCU composition */
-                    int mcublks = m_cinfo.Component_info[compIndex].MCU_blocks;
+                    int mcublks = compptr.MCU_blocks;
                     if (m_cinfo.m_blocks_in_MCU + mcublks > JpegConstants.C_MAX_BLOCKS_IN_MCU)
                         m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_MCU_SIZE);
                     

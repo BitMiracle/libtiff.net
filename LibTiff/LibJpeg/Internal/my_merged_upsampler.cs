@@ -17,7 +17,7 @@
  * multiplications needed for color conversion.
  *
  * This file currently provides implementations for the following cases:
- *  YCbCr => RGB color conversion only.
+ *  YCC => RGB color conversion only (YCbCr or BG_YCC).
  *  Sampling ratios of 2h1v or 2h2v.
  *  No scaling needed at upsample time.
  *  Corner-aligned (non-CCIR601) sampling alignment.
@@ -72,7 +72,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_use_2v_upsample = false;
             }
 
-            build_ycc_rgb_table();
+            if (cinfo.m_jpeg_color_space == J_COLOR_SPACE.JCS_BG_YCC)
+                build_bg_ycc_rgb_table();
+            else
+                build_ycc_rgb_table();
         }
 
         /// <summary>
@@ -327,11 +330,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         }
 
         /// <summary>
-        /// Initialize tables for YCC->RGB colorspace conversion.
+        /// Initialize tables for YCbCr->RGB colorspace conversion.
         /// This is taken directly from jpeg_color_deconverter; see that file for more info.
         /// </summary>
         private void build_ycc_rgb_table()
         {
+            /* Normal case, sYCC */
+
             m_Cr_r_tab = new int[JpegConstants.MAXJSAMPLE + 1];
             m_Cb_b_tab = new int[JpegConstants.MAXJSAMPLE + 1];
             m_Cr_g_tab = new int[JpegConstants.MAXJSAMPLE + 1];
@@ -341,18 +346,50 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
-                /* Cr=>R value is nearest int to 1.40200 * x */
-                m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.40200) * x + ONE_HALF, SCALEBITS);
+                /* Cr=>R value is nearest int to 1.402 * x */
+                m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.402) * x + ONE_HALF, SCALEBITS);
 
-                /* Cb=>B value is nearest int to 1.77200 * x */
-                m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.77200) * x + ONE_HALF, SCALEBITS);
+                /* Cb=>B value is nearest int to 1.772 * x */
+                m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.772) * x + ONE_HALF, SCALEBITS);
 
-                /* Cr=>G value is scaled-up -0.71414 * x */
-                m_Cr_g_tab[i] = (-FIX(0.71414)) * x;
+                /* Cr=>G value is scaled-up -0.714136286 * x */
+                m_Cr_g_tab[i] = (-FIX(0.714136286)) * x;
 
-                /* Cb=>G value is scaled-up -0.34414 * x */
+                /* Cb=>G value is scaled-up -0.344136286 * x */
                 /* We also add in ONE_HALF so that need not do it in inner loop */
-                m_Cb_g_tab[i] = (-FIX(0.34414)) * x + ONE_HALF;
+                m_Cb_g_tab[i] = (-FIX(0.344136286)) * x + ONE_HALF;
+            }
+        }
+
+        /// <summary>
+        /// Initialize tables for BG_YCC->RGB colorspace conversion.
+        /// This is taken directly from jpeg_color_deconverter; see that file for more info.
+        /// </summary>
+        private void build_bg_ycc_rgb_table()
+        {
+            /* Wide gamut case, bg-sYCC */
+
+            m_Cr_r_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cb_b_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cr_g_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+            m_Cb_g_tab = new int[JpegConstants.MAXJSAMPLE + 1];
+
+            for (int i = 0, x = -JpegConstants.CENTERJSAMPLE; i <= JpegConstants.MAXJSAMPLE; i++, x++)
+            {
+                /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
+                /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
+                /* Cr=>R value is nearest int to 2.804 * x */
+                m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(2.804) * x + ONE_HALF, SCALEBITS);
+
+                /* Cb=>B value is nearest int to 3.544 * x */
+                m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(3.544) * x + ONE_HALF, SCALEBITS);
+
+                /* Cr=>G value is scaled-up -1.428272572 * x */
+                m_Cr_g_tab[i] = (-FIX(1.428272572)) * x;
+
+                /* Cb=>G value is scaled-up -0.688272572 * x */
+                /* We also add in ONE_HALF so that need not do it in inner loop */
+                m_Cb_g_tab[i] = (-FIX(0.688272572)) * x + ONE_HALF;
             }
         }
 

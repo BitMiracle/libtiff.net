@@ -140,23 +140,23 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Allocate the workspace.
             * ngroups is the number of row groups we need.
             */
-            int ngroups = cinfo.m_min_DCT_scaled_size;
+            int ngroups = cinfo.min_DCT_v_scaled_size;
             if (cinfo.m_upsample.NeedContextRows())
             {
-                if (cinfo.m_min_DCT_scaled_size < 2) /* unsupported, see comments above */
+                if (cinfo.min_DCT_v_scaled_size < 2) /* unsupported, see comments above */
                     cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
 
                 alloc_funny_pointers(); /* Alloc space for xbuffer[] lists */
-                ngroups = cinfo.m_min_DCT_scaled_size + 2;
+                ngroups = cinfo.min_DCT_v_scaled_size + 2;
             }
 
             for (int ci = 0; ci < cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (cinfo.Comp_info[ci].V_samp_factor * cinfo.Comp_info[ci].DCT_scaled_size) / cinfo.m_min_DCT_scaled_size;
+                int rgroup = (cinfo.Comp_info[ci].V_samp_factor * cinfo.Comp_info[ci].DCT_v_scaled_size) / cinfo.min_DCT_v_scaled_size;
 
                 m_buffer[ci] = jpeg_common_struct.AllocJpegSamples(
-                    cinfo.Comp_info[ci].Width_in_blocks * cinfo.Comp_info[ci].DCT_scaled_size,
+                    cinfo.Comp_info[ci].Width_in_blocks * cinfo.Comp_info[ci].DCT_h_scaled_size,
                     rgroup * ngroups);
             }
         }
@@ -244,7 +244,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             }
 
             /* There are always min_DCT_scaled_size row groups in an iMCU row. */
-            int rowgroups_avail = m_cinfo.m_min_DCT_scaled_size;
+            int rowgroups_avail = m_cinfo.min_DCT_v_scaled_size;
 
             /* Note: at the bottom of the image, we may pass extra garbage row groups
              * to the postprocessor.  The postprocessor has to check for bottom
@@ -324,7 +324,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 /* Prepare to process first M-1 row groups of this iMCU row */
                 m_rowgroup_ctr = 0;
-                m_rowgroups_avail = m_cinfo.m_min_DCT_scaled_size - 1;
+                m_rowgroups_avail = m_cinfo.min_DCT_v_scaled_size - 1;
 
                 /* Check for bottom of image: if so, tweak pointers to "duplicate"
                  * the last sample row, and adjust rowgroups_avail to ignore padding rows.
@@ -357,8 +357,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                 /* Still need to process last row group of this iMCU row, */
                 /* which is saved at index M+1 of the other xbuffer */
-                m_rowgroup_ctr = m_cinfo.m_min_DCT_scaled_size + 1;
-                m_rowgroups_avail = m_cinfo.m_min_DCT_scaled_size + 2;
+                m_rowgroup_ctr = m_cinfo.min_DCT_v_scaled_size + 1;
+                m_rowgroups_avail = m_cinfo.min_DCT_v_scaled_size + 2;
                 m_context_state = CTX_POSTPONED_ROW;
             }
         }
@@ -380,11 +380,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         private void alloc_funny_pointers()
         {
-            int M = m_cinfo.m_min_DCT_scaled_size;
+            int M = m_cinfo.min_DCT_v_scaled_size;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_v_scaled_size) / m_cinfo.min_DCT_v_scaled_size;
 
                 /* Get space for pointer lists --- M+4 row groups in each list.
                  */
@@ -403,11 +403,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         private void make_funny_pointers()
         {
-            int M = m_cinfo.m_min_DCT_scaled_size;
+            int M = m_cinfo.min_DCT_v_scaled_size;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_v_scaled_size) / m_cinfo.min_DCT_v_scaled_size;
 
                 int[] ind0 = m_funnyIndices[0][ci];
                 int[] ind1 = m_funnyIndices[1][ci];
@@ -442,11 +442,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         private void set_wraparound_pointers()
         {
-            int M = m_cinfo.m_min_DCT_scaled_size;
+            int M = m_cinfo.min_DCT_v_scaled_size;
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* height of a row group of component */
-                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size) / m_cinfo.m_min_DCT_scaled_size;
+                int rgroup = (m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_v_scaled_size) / m_cinfo.min_DCT_v_scaled_size;
 
                 int[] ind0 = m_funnyIndices[0][ci];
                 int[] ind1 = m_funnyIndices[1][ci];
@@ -472,8 +472,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int ci = 0; ci < m_cinfo.m_num_components; ci++)
             {
                 /* Count sample rows in one iMCU row and in one row group */
-                int iMCUheight = m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_scaled_size;
-                int rgroup = iMCUheight / m_cinfo.m_min_DCT_scaled_size;
+                int iMCUheight = m_cinfo.Comp_info[ci].V_samp_factor * m_cinfo.Comp_info[ci].DCT_v_scaled_size;
+                int rgroup = iMCUheight / m_cinfo.min_DCT_v_scaled_size;
 
                 /* Count nondummy sample rows remaining for this component */
                 int rows_left = m_cinfo.Comp_info[ci].downsampled_height % iMCUheight;

@@ -1,8 +1,8 @@
 ﻿/*
  * This file contains compression data destination routines for the case of
- * emitting JPEG data to a file (or any stdio stream).  While these routines
- * are sufficient for most applications, some will want to use a different
- * destination manager.
+ * emitting JPEG data to memory or to a file (or any stdio stream).
+ * While these routines are sufficient for most applications,
+ * some will want to use a different destination manager.
  * IMPORTANT: we assume that fwrite() will correctly transcribe an array of
  * bytes into 8-bit-wide elements on external storage.  If char is wider
  * than 8 bits on your machine, you may need to do some tweaking.

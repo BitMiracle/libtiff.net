@@ -124,9 +124,20 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         private void master_selection()
         {
+            /* For now, precision must match compiled-in value... */
+            if (m_cinfo.m_data_precision != JpegConstants.BITS_IN_JSAMPLE)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_PRECISION, m_cinfo.m_data_precision);
+
             /* Initialize dimensions and other stuff */
             m_cinfo.jpeg_calc_output_dimensions();
             prepare_range_limit_table();
+
+            /* Sanity check on image dimensions */
+            if (m_cinfo.m_output_height <= 0 || m_cinfo.m_output_width <= 0 ||
+                m_cinfo.m_out_color_components <= 0)
+            {
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
+            }
 
             /* Width of an output scanline must be representable as int. */
             long samplesperrow = m_cinfo.m_output_width * m_cinfo.m_out_color_components;
@@ -207,8 +218,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Inverse DCT */
             m_cinfo.m_idct = new jpeg_inverse_dct(m_cinfo);
 
-            if (m_cinfo.m_progressive_mode)
-                m_cinfo.m_entropy = new phuff_entropy_decoder(m_cinfo);
+            if (m_cinfo.arith_code)
+                m_cinfo.m_entropy = new arith_entropy_decoder(m_cinfo);
             else
                 m_cinfo.m_entropy = new huff_entropy_decoder(m_cinfo);
 
@@ -271,63 +282,42 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// These processes all use a common table prepared by the routine below.
         /// 
         /// For most steps we can mathematically guarantee that the initial value
-        /// of x is within MAXJSAMPLE + 1 of the legal range, so a table running from
-        /// -(MAXJSAMPLE + 1) to 2 * MAXJSAMPLE + 1 is sufficient.  But for the initial
-        /// limiting step (just after the IDCT), a wildly out-of-range value is 
-        /// possible if the input data is corrupt.  To avoid any chance of indexing
+        /// of x is within 2*(MAXJSAMPLE+1) of the legal range, so a table running
+        /// from -2*(MAXJSAMPLE+1) to 3*MAXJSAMPLE+2 is sufficient.But for the
+        /// initial limiting step(just after the IDCT), a wildly out-of-range value
+        /// is possible if the input data is corrupt.To avoid any chance of indexing
         /// off the end of memory and getting a bad-pointer trap, we perform the
-        /// post-IDCT limiting thus: <c>x = range_limit[x &amp; MASK];</c>
+        /// post-IDCT limiting thus:
+        ///     <c>x = (sample_range_limit - SUBSET)[(x + CENTER) &amp; MASK];</c>
         /// where MASK is 2 bits wider than legal sample data, ie 10 bits for 8-bit
         /// samples.  Under normal circumstances this is more than enough range and
         /// a correct output will be generated; with bogus input data the mask will
         /// cause wraparound, and we will safely generate a bogus-but-in-range output.
         /// For the post-IDCT step, we want to convert the data from signed to unsigned
         /// representation by adding CENTERJSAMPLE at the same time that we limit it.
-        /// So the post-IDCT limiting table ends up looking like this:
-        /// <pre>
-        ///     CENTERJSAMPLE, CENTERJSAMPLE + 1, ..., MAXJSAMPLE,
-        ///     MAXJSAMPLE (repeat 2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE times),
-        ///     0          (repeat 2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE times),
-        ///     0, 1, ..., CENTERJSAMPLE - 1
-        /// </pre>
-        /// Negative inputs select values from the upper half of the table after
-        /// masking.
-        /// 
-        /// We can save some space by overlapping the start of the post-IDCT table
-        /// with the simpler range limiting table.  The post-IDCT table begins at
-        /// sample_range_limit + CENTERJSAMPLE.
+        /// This is accomplished with SUBSET = CENTER - CENTERJSAMPLE.
         /// 
         /// Note that the table is allocated in near data space on PCs; it's small
         /// enough and used often enough to justify this.
         /// </summary>
         private void prepare_range_limit_table()
         {
-            byte[] table = new byte[5 * (JpegConstants.MAXJSAMPLE + 1) + JpegConstants.CENTERJSAMPLE];
+            byte[] table = new byte[5 * (JpegConstants.MAXJSAMPLE + 1)];
+            /* First segment of range limit table: limit[x] = 0 for x < 0 */
 
             /* allow negative subscripts of simple table */
-            int tableOffset = JpegConstants.MAXJSAMPLE + 1;
+            int tableOffset = 2 * (JpegConstants.MAXJSAMPLE + 1);
             m_cinfo.m_sample_range_limit = table;
             m_cinfo.m_sampleRangeLimitOffset = tableOffset;
 
-            /* First segment of "simple" table: limit[x] = 0 for x < 0 */
-            Array.Clear(table, 0, JpegConstants.MAXJSAMPLE + 1);
-
-            /* Main part of "simple" table: limit[x] = x */
-            for (int i = 0; i <= JpegConstants.MAXJSAMPLE; i++)
+            /* Main part of range limit table: limit[x] = x */
+            int i;
+            for (i = 0; i <= JpegConstants.MAXJSAMPLE; i++)
                 table[tableOffset + i] = (byte) i;
 
-            tableOffset += JpegConstants.CENTERJSAMPLE; /* Point to where post-IDCT table starts */
-
-            /* End of simple table, rest of first half of post-IDCT table */
-            for (int i = JpegConstants.CENTERJSAMPLE; i < 2 * (JpegConstants.MAXJSAMPLE + 1); i++)
+            /* End of range limit table: limit[x] = MAXJSAMPLE for x > MAXJSAMPLE */
+            for (; i < 3 * (JpegConstants.MAXJSAMPLE + 1); i++)
                 table[tableOffset + i] = JpegConstants.MAXJSAMPLE;
-
-            /* Second half of post-IDCT table */
-            Array.Clear(table, tableOffset + 2 * (JpegConstants.MAXJSAMPLE + 1),
-                2 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE);
-
-            Buffer.BlockCopy(m_cinfo.m_sample_range_limit, 0, table,
-                tableOffset + 4 * (JpegConstants.MAXJSAMPLE + 1) - JpegConstants.CENTERJSAMPLE, JpegConstants.CENTERJSAMPLE);
         }
     }
 }

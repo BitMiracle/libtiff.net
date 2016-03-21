@@ -18,73 +18,98 @@ namespace BitMiracle.LibJpeg.Classic
          * The spec says that the values given produce "good" quality, and
          * when divided by 2, "very good" quality.
          */
-        private static readonly int[] std_luminance_quant_tbl = { 
-            16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26,
-            58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56, 14, 17,
-            22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109,
-            103, 77, 24, 35, 55, 64, 81, 104, 113, 92, 49, 64,
-            78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112,
-            100, 103, 99 };
+        private static readonly int[] std_luminance_quant_tbl = {
+            16,  11,  10,  16,  24,  40,  51,  61,
+            12,  12,  14,  19,  26,  58,  60,  55,
+            14,  13,  16,  24,  40,  57,  69,  56,
+            14,  17,  22,  29,  51,  87,  80,  62,
+            18,  22,  37,  56,  68, 109, 103,  77,
+            24,  35,  55,  64,  81, 104, 113,  92,
+            49,  64,  78,  87, 103, 121, 120, 101,
+            72,  92,  95,  98, 112, 100, 103,  99
+        };
 
-        private static readonly int[] std_chrominance_quant_tbl = {
-            17, 18, 24, 47, 99, 99, 99, 99, 18, 21, 26, 66,
-            99, 99, 99, 99, 24, 26, 56, 99, 99, 99, 99, 99,
-            47, 66, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-            99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-            99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
-            99, 99, 99, 99 };
+        private static readonly int[] std_chrominance_quant_tbl =
+        {
+            17,  18,  24,  47,  99,  99,  99,  99,
+            18,  21,  26,  66,  99,  99,  99,  99,
+            24,  26,  56,  99,  99,  99,  99,  99,
+            47,  66,  99,  99,  99,  99,  99,  99,
+            99,  99,  99,  99,  99,  99,  99,  99,
+            99,  99,  99,  99,  99,  99,  99,  99,
+            99,  99,  99,  99,  99,  99,  99,  99,
+            99,  99,  99,  99,  99,  99,  99,  99
+        };
 
         // Standard Huffman tables (cf. JPEG standard section K.3)
         // 
         // IMPORTANT: these are only valid for 8-bit data precision!
-        private static readonly byte[] bits_dc_luminance = 
+        private static readonly byte[] bits_dc_luminance =
         { /* 0-base */ 0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 };
 
         private static readonly byte[] val_dc_luminance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
-        private static readonly byte[] bits_dc_chrominance = 
+        private static readonly byte[] bits_dc_chrominance =
         { /* 0-base */ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
 
         private static readonly byte[] val_dc_chrominance = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
-        private static readonly byte[] bits_ac_luminance = 
+        private static readonly byte[] bits_ac_luminance =
         { /* 0-base */ 0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
 
-        private static readonly byte[] val_ac_luminance = 
-            { 0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06,
-              0x13, 0x51, 0x61, 0x07, 0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
-              0x23, 0x42, 0xb1, 0xc1, 0x15, 0x52, 0xd1, 0xf0, 0x24, 0x33, 0x62, 0x72,
-              0x82, 0x09, 0x0a, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x25, 0x26, 0x27, 0x28,
-              0x29, 0x2a, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44, 0x45,
-              0x46, 0x47, 0x48, 0x49, 0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59,
-              0x5a, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x73, 0x74, 0x75,
-              0x76, 0x77, 0x78, 0x79, 0x7a, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89,
-              0x8a, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0xa2, 0xa3,
-              0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6,
-              0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9,
-              0xca, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xe1, 0xe2,
-              0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf1, 0xf2, 0xf3, 0xf4,
-              0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa };
+        private static readonly byte[] val_ac_luminance =
+        {
+            0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
+            0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
+            0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
+            0x23, 0x42, 0xb1, 0xc1, 0x15, 0x52, 0xd1, 0xf0,
+            0x24, 0x33, 0x62, 0x72, 0x82, 0x09, 0x0a, 0x16,
+            0x17, 0x18, 0x19, 0x1a, 0x25, 0x26, 0x27, 0x28,
+            0x29, 0x2a, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,
+            0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49,
+            0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59,
+            0x5a, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69,
+            0x6a, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79,
+            0x7a, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89,
+            0x8a, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98,
+            0x99, 0x9a, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7,
+            0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6,
+            0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3, 0xc4, 0xc5,
+            0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xd2, 0xd3, 0xd4,
+            0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xe1, 0xe2,
+            0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea,
+            0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
+            0xf9, 0xfa
+        };
 
-        private static readonly byte[] bits_ac_chrominance = 
+        private static readonly byte[] bits_ac_chrominance =
         { /* 0-base */ 0, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
 
-        private static readonly byte[] val_ac_chrominance = 
-            { 0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41,
-              0x51, 0x07, 0x61, 0x71, 0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
-              0xa1, 0xb1, 0xc1, 0x09, 0x23, 0x33, 0x52, 0xf0, 0x15, 0x62, 0x72, 0xd1,
-              0x0a, 0x16, 0x24, 0x34, 0xe1, 0x25, 0xf1, 0x17, 0x18, 0x19, 0x1a, 0x26,
-              0x27, 0x28, 0x29, 0x2a, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44,
-              0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
-              0x59, 0x5a, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x73, 0x74,
-              0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87,
-              0x88, 0x89, 0x8a, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a,
-              0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4,
-              0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7,
-              0xc8, 0xc9, 0xca, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda,
-              0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf2, 0xf3, 0xf4,
-              0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa };
-        
+        private static readonly byte[] val_ac_chrominance =
+        {
+            0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
+            0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
+            0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
+            0xa1, 0xb1, 0xc1, 0x09, 0x23, 0x33, 0x52, 0xf0,
+            0x15, 0x62, 0x72, 0xd1, 0x0a, 0x16, 0x24, 0x34,
+            0xe1, 0x25, 0xf1, 0x17, 0x18, 0x19, 0x1a, 0x26,
+            0x27, 0x28, 0x29, 0x2a, 0x35, 0x36, 0x37, 0x38,
+            0x39, 0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+            0x49, 0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
+            0x59, 0x5a, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+            0x69, 0x6a, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,
+            0x79, 0x7a, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87,
+            0x88, 0x89, 0x8a, 0x92, 0x93, 0x94, 0x95, 0x96,
+            0x97, 0x98, 0x99, 0x9a, 0xa2, 0xa3, 0xa4, 0xa5,
+            0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4,
+            0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3,
+            0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xd2,
+            0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda,
+            0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9,
+            0xea, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
+            0xf9, 0xfa
+        };
+
         /* Destination for compressed data */
         internal jpeg_destination_mgr m_dest;
 
@@ -92,6 +117,25 @@ namespace BitMiracle.LibJpeg.Classic
         internal int m_image_height;    /* input image height */
         internal int m_input_components;       /* # of color components in input image */
         internal J_COLOR_SPACE m_in_color_space;   /* colorspace of input image */
+
+        /// <summary>
+        /// The scale numerator
+        /// </summary>
+        public int scale_num;
+
+        /// <summary>
+        /// The scale denomenator
+        /// </summary>
+        public int scale_denom; /* fraction by which to scale image */
+
+        internal int jpeg_width;  /* scaled JPEG image width */
+        internal int jpeg_height; /* scaled JPEG image height */
+        /* Dimensions of actual JPEG image that will be written to file,
+         * derived from input dimensions by scaling factors above.
+         * These fields are computed by jpeg_start_compress().
+         * You can also use jpeg_calc_jpeg_dimensions() to determine these values
+         * in advance of calling jpeg_start_compress().
+         */
 
         internal int m_data_precision;     /* bits of precision in image data */
         internal int m_num_components;     /* # of color components in JPEG image */
@@ -102,11 +146,18 @@ namespace BitMiracle.LibJpeg.Classic
 
         /* ptrs to coefficient quantization tables, or null if not defined */
         internal JQUANT_TBL[] m_quant_tbl_ptrs = new JQUANT_TBL[JpegConstants.NUM_QUANT_TBLS];
-    
+
+        // corresponding scale factors (percentage, initialized 100).
+        public int[] q_scale_factor = new int[JpegConstants.NUM_QUANT_TBLS];
+
         /* ptrs to Huffman coding tables, or null if not defined */
         internal JHUFF_TBL[] m_dc_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
         internal JHUFF_TBL[] m_ac_huff_tbl_ptrs = new JHUFF_TBL[JpegConstants.NUM_HUFF_TBLS];
-    
+
+        internal byte[] arith_dc_L = new byte[JpegConstants.NUM_ARITH_TBLS]; /* L values for DC arith-coding tables */
+        internal byte[] arith_dc_U = new byte[JpegConstants.NUM_ARITH_TBLS]; /* U values for DC arith-coding tables */
+        internal byte[] arith_ac_K = new byte[JpegConstants.NUM_ARITH_TBLS]; /* Kx values for AC arith-coding tables */
+
         /* The default value of scan_info is null, which causes a single-scan
          * sequential JPEG file to be emitted.  To create a multi-scan file,
          * set num_scans and scan_info to point to an array of scan definitions.
@@ -117,8 +168,14 @@ namespace BitMiracle.LibJpeg.Classic
         internal jpeg_scan_info[] m_scan_info;
 
         internal bool m_raw_data_in;       /* true=caller supplies downsampled data */
+        internal bool arith_code;		   /* true=arithmetic coding, false=Huffman */
         internal bool m_optimize_coding;   /* true=optimize entropy encoding parms */
         internal bool m_CCIR601_sampling;  /* true=first samples are cosited */
+
+        /// <summary>
+        /// TRUE=apply fancy downsampling
+        /// </summary>
+        public bool do_fancy_downsampling;
         internal int m_smoothing_factor;       /* 1..100, or 0 for no input smoothing */
         internal J_DCT_METHOD m_dct_method;    /* DCT algorithm selector */
 
@@ -128,11 +185,16 @@ namespace BitMiracle.LibJpeg.Classic
         internal bool m_write_JFIF_header; /* should a JFIF marker be written? */
         internal byte m_JFIF_major_version;   /* What to write for the JFIF version number */
         internal byte m_JFIF_minor_version;
-        
+
         internal DensityUnit m_density_unit;     /* JFIF code for pixel size units */
         internal short m_X_density;       /* Horizontal pixel density */
         internal short m_Y_density;       /* Vertical pixel density */
         internal bool m_write_Adobe_marker;    /* should an Adobe marker be written? */
+
+        /// <summary>
+        /// Color transform identifier, writes LSE marker if nonzero
+        /// </summary>
+        public J_COLOR_TRANSFORM color_transform;
 
         internal int m_next_scanline;   /* 0 .. image_height-1  */
 
@@ -146,7 +208,10 @@ namespace BitMiracle.LibJpeg.Classic
         internal bool m_progressive_mode;  /* true if scan script uses progressive mode */
         internal int m_max_h_samp_factor;  /* largest h_samp_factor */
         internal int m_max_v_samp_factor;  /* largest v_samp_factor */
-        
+
+        internal int min_DCT_h_scaled_size;  /* smallest DCT_h_scaled_size of any component */
+        internal int min_DCT_v_scaled_size;	/* smallest DCT_v_scaled_size of any component */
+
         internal int m_total_iMCU_rows; /* # of iMCU rows to be input to coef ctlr */
         /* The coefficient controller receives data in units of MCU rows as defined
          * for fully interleaved scans (whether the JPEG file is interleaved or not).
@@ -175,6 +240,14 @@ namespace BitMiracle.LibJpeg.Classic
         internal int m_Se;
         internal int m_Ah;
         internal int m_Al;
+
+        /// <summary>
+        /// the basic DCT block size: 1..16
+        /// </summary>
+        public int block_size;
+
+        internal int[] natural_order;   /* natural-order position array */
+        internal int lim_Se;			/* min( Se, DCTSIZE2-1 ) */
 
         /*
          * Links to compression subobjects (methods and private variables of modules)
@@ -285,7 +358,7 @@ namespace BitMiracle.LibJpeg.Classic
          * burnt when new parameters are added.  Also note that there are several
          * helper routines to simplify changing parameters.
          */
-        
+
         // bits of precision in image data
 
 
@@ -377,7 +450,7 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_smoothing_factor; }
             set { m_smoothing_factor = value; }
         }
-        
+
         /// <summary>
         /// Gets or sets the algorithm used for the DCT step.
         /// </summary>
@@ -394,7 +467,7 @@ namespace BitMiracle.LibJpeg.Classic
          * (in which case the correct restart_interval will be figured
          * for each scan).
          */
-        
+
         /// <summary>
         /// Gets or sets the exact interval in MCU blocks.
         /// </summary>
@@ -410,7 +483,7 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_restart_interval; }
             set { m_restart_interval = value; }
         }
-        
+
         /// <summary>
         /// Gets or sets the interval in MCU rows.
         /// </summary>
@@ -430,7 +503,7 @@ namespace BitMiracle.LibJpeg.Classic
         }
 
         /* Parameters controlling emission of special markers. */
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the JFIF APP0 marker is emitted.
         /// </summary>
@@ -480,7 +553,7 @@ namespace BitMiracle.LibJpeg.Classic
         /* into the JFIF APP0 marker.  density_unit can be 0 for unknown, */
         /* 1 for dots/inch, or 2 for dots/cm.  Note that the pixel aspect */
         /* ratio is defined by X_density/Y_density even when density_unit=0. */
-        
+
         /// <summary>
         /// Gets or sets the resolution information to be written into the JFIF marker; not used otherwise.
         /// </summary>
@@ -497,7 +570,7 @@ namespace BitMiracle.LibJpeg.Classic
             get { return m_density_unit; }
             set { m_density_unit = value; }
         }
-        
+
         // Horizontal pixel density
 
         /// <summary>
@@ -825,7 +898,8 @@ namespace BitMiracle.LibJpeg.Classic
             }
 
             /* Initialize everything not dependent on the color space */
-
+            scale_num = 1;       /* 1:1 scaling */
+            scale_denom = 1;
             m_data_precision = JpegConstants.BITS_IN_JSAMPLE;
 
             /* Set up two quantization tables using default quality of 75 */
@@ -841,19 +915,23 @@ namespace BitMiracle.LibJpeg.Classic
             /* Expect normal source image, not raw downsampled data */
             m_raw_data_in = false;
 
+            /* The standard Huffman tables are only valid for 8-bit data precision.
+             * If the precision is higher, use arithmetic coding.
+             * (Alternatively, using Huffman coding would be possible with forcing
+             * optimization on so that usable tables will be computed, or by
+             * supplying default tables that are valid for the desired precision.)
+             * Otherwise, use Huffman coding by default.
+             */
+            arith_code = (m_data_precision > 8);
+
             /* By default, don't do extra passes to optimize entropy coding */
             m_optimize_coding = false;
 
-            /* The standard Huffman tables are only valid for 8-bit data precision.
-            * If the precision is higher, force optimization on so that usable
-            * tables will be computed.  This test can be removed if default tables
-            * are supplied that are valid for the desired precision.
-            */
-            if (m_data_precision > 8)
-                m_optimize_coding = true;
-
             /* By default, use the simpler non-cosited sampling alignment */
             m_CCIR601_sampling = false;
+
+            /* By default, apply fancy downsampling */
+            do_fancy_downsampling = true;
 
             /* No input smoothing */
             m_smoothing_factor = 0;
@@ -873,12 +951,18 @@ namespace BitMiracle.LibJpeg.Classic
             * JFIF_minor_version to 2.  We could probably get away with just defaulting
             * to 1.02, but there may still be some decoders in use that will complain
             * about that; saying 1.01 should minimize compatibility problems.
+            *
+            * For wide gamut colorspaces (BG_RGB and BG_YCC), the major version will be
+            * overridden by jpeg_set_colorspace and set to 2.
             */
             m_JFIF_major_version = 1; /* Default JFIF version = 1.01 */
             m_JFIF_minor_version = 1;
             m_density_unit = DensityUnit.Unknown;    /* Pixel size is unknown by default */
             m_X_density = 1;       /* Pixel aspect ratio is square by default */
             m_Y_density = 1;
+
+            /* No color transform */
+            color_transform = J_COLOR_TRANSFORM.JCT_NONE;
 
             /* Choose JPEG colorspace based on input space, set defaults accordingly */
             jpeg_default_colorspace();
@@ -916,28 +1000,45 @@ namespace BitMiracle.LibJpeg.Classic
 
             switch (colorspace)
             {
+                case J_COLOR_SPACE.JCS_UNKNOWN:
+                    m_num_components = m_input_components;
+                    if (m_num_components < 1 || m_num_components > JpegConstants.MAX_COMPONENTS)
+                        ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
+
+                    for (ci = 0; ci < m_num_components; ci++)
+                        jpeg_set_colorspace_SET_COMP(ci, ci, 1, 1, 0, 0, 0);
+
+                    break;
+
                 case J_COLOR_SPACE.JCS_GRAYSCALE:
                     m_write_JFIF_header = true; /* Write a JFIF marker */
                     m_num_components = 1;
                     /* JFIF specifies component ID 1 */
-                    jpeg_set_colorspace_SET_COMP(0, 1, 1, 1, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(0, 0x01, 1, 1, 0, 0, 0);
                     break;
+
                 case J_COLOR_SPACE.JCS_RGB:
                     m_write_Adobe_marker = true; /* write Adobe marker to flag RGB */
                     m_num_components = 3;
-                    jpeg_set_colorspace_SET_COMP(0, 0x52 /* 'R' */, 1, 1, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(0, 0x52 /* 'R' */, 1, 1, 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0);
                     jpeg_set_colorspace_SET_COMP(1, 0x47 /* 'G' */, 1, 1, 0, 0, 0);
-                    jpeg_set_colorspace_SET_COMP(2, 0x42 /* 'B' */, 1, 1, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(2, 0x42 /* 'B' */, 1, 1, 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0);
                     break;
+
                 case J_COLOR_SPACE.JCS_YCbCr:
                     m_write_JFIF_header = true; /* Write a JFIF marker */
                     m_num_components = 3;
                     /* JFIF specifies component IDs 1,2,3 */
                     /* We default to 2x2 subsamples of chrominance */
-                    jpeg_set_colorspace_SET_COMP(0, 1, 2, 2, 0, 0, 0);
-                    jpeg_set_colorspace_SET_COMP(1, 2, 1, 1, 1, 1, 1);
-                    jpeg_set_colorspace_SET_COMP(2, 3, 1, 1, 1, 1, 1);
+                    jpeg_set_colorspace_SET_COMP(0, 0x01, 2, 2, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(1, 0x02, 1, 1, 1, 1, 1);
+                    jpeg_set_colorspace_SET_COMP(2, 0x03, 1, 1, 1, 1, 1);
                     break;
+
                 case J_COLOR_SPACE.JCS_CMYK:
                     m_write_Adobe_marker = true; /* write Adobe marker to flag CMYK */
                     m_num_components = 4;
@@ -946,29 +1047,47 @@ namespace BitMiracle.LibJpeg.Classic
                     jpeg_set_colorspace_SET_COMP(2, 0x59 /* 'Y' */, 1, 1, 0, 0, 0);
                     jpeg_set_colorspace_SET_COMP(3, 0x4B /* 'K' */, 1, 1, 0, 0, 0);
                     break;
+
                 case J_COLOR_SPACE.JCS_YCCK:
                     m_write_Adobe_marker = true; /* write Adobe marker to flag YCCK */
                     m_num_components = 4;
-                    jpeg_set_colorspace_SET_COMP(0, 1, 2, 2, 0, 0, 0);
-                    jpeg_set_colorspace_SET_COMP(1, 2, 1, 1, 1, 1, 1);
-                    jpeg_set_colorspace_SET_COMP(2, 3, 1, 1, 1, 1, 1);
-                    jpeg_set_colorspace_SET_COMP(3, 4, 2, 2, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(0, 0x01, 2, 2, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(1, 0x02, 1, 1, 1, 1, 1);
+                    jpeg_set_colorspace_SET_COMP(2, 0x03, 1, 1, 1, 1, 1);
+                    jpeg_set_colorspace_SET_COMP(3, 0x04, 2, 2, 0, 0, 0);
                     break;
-                case J_COLOR_SPACE.JCS_UNKNOWN:
-                    m_num_components = m_input_components;
-                    if (m_num_components < 1 || m_num_components > JpegConstants.MAX_COMPONENTS)
-                        ERREXIT(J_MESSAGE_CODE.JERR_COMPONENT_COUNT, m_num_components, JpegConstants.MAX_COMPONENTS);
-                    for (ci = 0; ci < m_num_components; ci++)
-                    {
-                        jpeg_set_colorspace_SET_COMP(ci, ci, 1, 1, 0, 0, 0);
-                    }
+
+                case J_COLOR_SPACE.JCS_BG_RGB:
+                    m_write_JFIF_header = true; /* Write a JFIF marker */
+                    JFIF_major_version = 2;   /* Set JFIF major version = 2 */
+                    m_num_components = 3;
+                    /* Add offset 0x20 to the normal R/G/B component IDs */
+                    jpeg_set_colorspace_SET_COMP(0, 0x72 /* 'r' */, 1, 1, 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0);
+                    jpeg_set_colorspace_SET_COMP(1, 0x67 /* 'g' */, 1, 1, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(2, 0x62 /* 'b' */, 1, 1, 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0,
+                        color_transform == J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN ? 1 : 0);
                     break;
+
+                case J_COLOR_SPACE.JCS_BG_YCC:
+                    m_write_JFIF_header = true; /* Write a JFIF marker */
+                    JFIF_major_version = 2;   /* Set JFIF major version = 2 */
+                    m_num_components = 3;
+                    /* Add offset 0x20 to the normal Cb/Cr component IDs */
+                    /* We default to 2x2 subsamples of chrominance */
+                    jpeg_set_colorspace_SET_COMP(0, 0x01, 2, 2, 0, 0, 0);
+                    jpeg_set_colorspace_SET_COMP(1, 0x22, 1, 1, 1, 1, 1);
+                    jpeg_set_colorspace_SET_COMP(2, 0x23, 1, 1, 1, 1, 1);
+                    break;
+
                 default:
                     ERREXIT(J_MESSAGE_CODE.JERR_BAD_J_COLORSPACE);
                     break;
             }
         }
-        
+
         /// <summary>
         /// Select an appropriate JPEG colorspace based on <see cref="jpeg_compress_struct.In_color_space"/>,
         /// and calls <see cref="jpeg_compress_struct.jpeg_set_colorspace"/>
@@ -980,6 +1099,10 @@ namespace BitMiracle.LibJpeg.Classic
         {
             switch (m_in_color_space)
             {
+                case J_COLOR_SPACE.JCS_UNKNOWN:
+                    jpeg_set_colorspace(J_COLOR_SPACE.JCS_UNKNOWN);
+                    break;
+
                 case J_COLOR_SPACE.JCS_GRAYSCALE:
                     jpeg_set_colorspace(J_COLOR_SPACE.JCS_GRAYSCALE);
                     break;
@@ -995,8 +1118,12 @@ namespace BitMiracle.LibJpeg.Classic
                 case J_COLOR_SPACE.JCS_YCCK:
                     jpeg_set_colorspace(J_COLOR_SPACE.JCS_YCCK);
                     break;
-                case J_COLOR_SPACE.JCS_UNKNOWN:
-                    jpeg_set_colorspace(J_COLOR_SPACE.JCS_UNKNOWN);
+                case J_COLOR_SPACE.JCS_BG_RGB:
+                    /* No translation for now -- conversion to BG_YCC not yet supportet */
+                    jpeg_set_colorspace(J_COLOR_SPACE.JCS_BG_RGB);
+                    break;
+                case J_COLOR_SPACE.JCS_BG_YCC:
+                    jpeg_set_colorspace(J_COLOR_SPACE.JCS_BG_YCC);
                     break;
                 default:
                     ERREXIT(J_MESSAGE_CODE.JERR_BAD_IN_COLORSPACE);
@@ -1024,6 +1151,19 @@ namespace BitMiracle.LibJpeg.Classic
 
             /* Set up standard quality tables */
             jpeg_set_linear_quality(quality, force_baseline);
+        }
+
+        /// <summary>
+        /// Set or change the 'quality' (quantization) setting, using default tables
+        /// and straight percentage-scaling quality scales.
+        /// This entry point allows different scalings for luminance and chrominance.
+        /// </summary>
+        /// <param name="force_baseline">if set to <c>true</c> then baseline version is forced.</param>
+        public void jpeg_default_qtables(bool force_baseline)
+        {
+            /* Set up two quantization tables using the specified scaling */
+            jpeg_add_quant_table(0, std_luminance_quant_tbl, q_scale_factor[0], force_baseline);
+            jpeg_add_quant_table(1, std_chrominance_quant_tbl, q_scale_factor[1], force_baseline);
         }
 
         /// <summary>
@@ -1090,7 +1230,7 @@ namespace BitMiracle.LibJpeg.Classic
                 /* limit to baseline range if requested */
                 if (force_baseline && temp > 255)
                     temp = 255;
-                
+
                 m_quant_tbl_ptrs[which_tbl].quantval[i] = (short)temp;
             }
 
@@ -1142,9 +1282,11 @@ namespace BitMiracle.LibJpeg.Classic
 
             /* Figure space needed for script.  Calculation must match code below! */
             int nscans;
-            if (m_num_components == 3 && m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr)
+            if (m_num_components == 3 &&
+                (m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr ||
+                m_jpeg_color_space == J_COLOR_SPACE.JCS_BG_YCC))
             {
-                /* Custom script for YCbCr color images. */
+                /* Custom script for YCC color images. */
                 nscans = 10;
             }
             else
@@ -1167,7 +1309,7 @@ namespace BitMiracle.LibJpeg.Classic
             * multiple compressions without changing the settings.  To avoid a memory
             * leak if jpeg_simple_progression is called repeatedly for the same JPEG
             * object, we try to re-use previously allocated space, and we allocate
-            * enough space to handle YCbCr even if initially asked for grayscale.
+            * enough space to handle YCC even if initially asked for grayscale.
             */
             if (m_script_space == null || m_script_space_size < nscans)
             {
@@ -1181,9 +1323,11 @@ namespace BitMiracle.LibJpeg.Classic
             m_num_scans = nscans;
 
             int scanIndex = 0;
-            if (m_num_components == 3 && m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr)
+            if (m_num_components == 3 &&
+                (m_jpeg_color_space == J_COLOR_SPACE.JCS_YCbCr ||
+                m_jpeg_color_space == J_COLOR_SPACE.JCS_BG_YCC))
             {
-                /* Custom script for YCbCr color images. */
+                /* Custom script for YCC color images. */
                 /* Initial DC scan */
                 fill_dc_scans(ref scanIndex, m_num_components, 0, 1);
 
@@ -1348,7 +1492,7 @@ namespace BitMiracle.LibJpeg.Classic
                 m_master.pass_startup();
 
             /* Verify that at least one iMCU row has been passed. */
-            int lines_per_iMCU_row = m_max_v_samp_factor * JpegConstants.DCTSIZE;
+            int lines_per_iMCU_row = m_max_v_samp_factor * min_DCT_v_scaled_size;
             if (num_lines < lines_per_iMCU_row)
                 ERREXIT(J_MESSAGE_CODE.JERR_BUFFER_SIZE);
 
@@ -1396,6 +1540,161 @@ namespace BitMiracle.LibJpeg.Classic
 
         // Compression module initialization routines
 
+        /*
+         * Compute JPEG image dimensions and related values.
+         * NOTE: this is exported for possible use by application.
+         * Hence it mustn't do anything that can't be done twice.
+         */
+        /* Do computations that are needed before master selection phase */
+        private void jpeg_calc_jpeg_dimensions()
+        {
+            /* Sanity check on input image dimensions to prevent overflow in
+             * following calculation.
+             * We do check jpeg_width and jpeg_height in initial_setup below,
+             * but image_width and image_height can come from arbitrary data,
+             * and we need some space for multiplication by block_size.
+             */
+            if (((long)m_image_width >> 24) != 0 || ((long)m_image_height >> 24) != 0)
+                ERREXIT(J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (uint)JpegConstants.JPEG_MAX_DIMENSION);
+
+            /* Compute actual JPEG image dimensions and DCT scaling choices. */
+            if (scale_num >= scale_denom * block_size)
+            {
+                /* Provide block_size/1 scaling */
+                jpeg_width = m_image_width * block_size;
+                jpeg_height = m_image_height * block_size;
+                min_DCT_h_scaled_size = 1;
+                min_DCT_v_scaled_size = 1;
+            }
+            else if (scale_num * 2 >= scale_denom * block_size)
+            {
+                /* Provide block_size/2 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 2L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 2L);
+                min_DCT_h_scaled_size = 2;
+                min_DCT_v_scaled_size = 2;
+            }
+            else if (scale_num * 3 >= scale_denom * block_size)
+            {
+                /* Provide block_size/3 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 3L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 3L);
+                min_DCT_h_scaled_size = 3;
+                min_DCT_v_scaled_size = 3;
+            }
+            else if (scale_num * 4 >= scale_denom * block_size)
+            {
+                /* Provide block_size/4 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 4L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 4L);
+                min_DCT_h_scaled_size = 4;
+                min_DCT_v_scaled_size = 4;
+            }
+            else if (scale_num * 5 >= scale_denom * block_size)
+            {
+                /* Provide block_size/5 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 5L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 5L);
+                min_DCT_h_scaled_size = 5;
+                min_DCT_v_scaled_size = 5;
+            }
+            else if (scale_num * 6 >= scale_denom * block_size)
+            {
+                /* Provide block_size/6 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 6L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 6L);
+                min_DCT_h_scaled_size = 6;
+                min_DCT_v_scaled_size = 6;
+            }
+            else if (scale_num * 7 >= scale_denom * block_size)
+            {
+                /* Provide block_size/7 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 7L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 7L);
+                min_DCT_h_scaled_size = 7;
+                min_DCT_v_scaled_size = 7;
+            }
+            else if (scale_num * 8 >= scale_denom * block_size)
+            {
+                /* Provide block_size/8 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 8L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 8L);
+                min_DCT_h_scaled_size = 8;
+                min_DCT_v_scaled_size = 8;
+            }
+            else if (scale_num * 9 >= scale_denom * block_size)
+            {
+                /* Provide block_size/9 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 9L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 9L);
+                min_DCT_h_scaled_size = 9;
+                min_DCT_v_scaled_size = 9;
+            }
+            else if (scale_num * 10 >= scale_denom * block_size)
+            {
+                /* Provide block_size/10 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 10L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 10L);
+                min_DCT_h_scaled_size = 10;
+                min_DCT_v_scaled_size = 10;
+            }
+            else if (scale_num * 11 >= scale_denom * block_size)
+            {
+                /* Provide block_size/11 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 11L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 11L);
+                min_DCT_h_scaled_size = 11;
+                min_DCT_v_scaled_size = 11;
+            }
+            else if (scale_num * 12 >= scale_denom * block_size)
+            {
+                /* Provide block_size/12 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 12L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 12L);
+                min_DCT_h_scaled_size = 12;
+                min_DCT_v_scaled_size = 12;
+            }
+            else if (scale_num * 13 >= scale_denom * block_size)
+            {
+                /* Provide block_size/13 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 13L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 13L);
+                min_DCT_h_scaled_size = 13;
+                min_DCT_v_scaled_size = 13;
+            }
+            else if (scale_num * 14 >= scale_denom * block_size)
+            {
+                /* Provide block_size/14 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 14L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 14L);
+                min_DCT_h_scaled_size = 14;
+                min_DCT_v_scaled_size = 14;
+            }
+            else if (scale_num * 15 >= scale_denom * block_size)
+            {
+                /* Provide block_size/15 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 15L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 15L);
+                min_DCT_h_scaled_size = 15;
+                min_DCT_v_scaled_size = 15;
+            }
+            else {
+                /* Provide block_size/16 scaling */
+                jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 16L);
+                jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 16L);
+                min_DCT_h_scaled_size = 16;
+                min_DCT_v_scaled_size = 16;
+            }
+        }
+
+        private void jpeg_calc_trans_dimensions()
+        {
+            if (min_DCT_h_scaled_size != min_DCT_v_scaled_size)
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCTSIZE, min_DCT_h_scaled_size, min_DCT_v_scaled_size);
+
+            block_size = min_DCT_h_scaled_size;
+        }
+
         /// <summary>
         /// Initialization of a JPEG compression object
         /// </summary>
@@ -1407,13 +1706,21 @@ namespace BitMiracle.LibJpeg.Classic
             m_comp_info = null;
 
             for (int i = 0; i < JpegConstants.NUM_QUANT_TBLS; i++)
+            {
                 m_quant_tbl_ptrs[i] = null;
+                q_scale_factor[i] = 100;
+            }
 
             for (int i = 0; i < JpegConstants.NUM_HUFF_TBLS; i++)
             {
                 m_dc_huff_tbl_ptrs[i] = null;
                 m_ac_huff_tbl_ptrs[i] = null;
             }
+
+            /* Must do it here for emit_dqt in case jpeg_write_tables is used */
+            block_size = JpegConstants.DCTSIZE;
+            natural_order = JpegUtils.jpeg_natural_order;
+            lim_Se = JpegConstants.DCTSIZE2 - 1;
 
             m_script_space = null;
 
@@ -1430,6 +1737,10 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         private void jinit_compress_master()
         {
+            /* Sanity check on image dimensions */
+            if (m_image_height <= 0 || m_image_width <= 0 || m_input_components <= 0)
+                ERREXIT(J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
+
             /* Initialize master control (includes parameter checking/processing) */
             jinit_c_master_control(false /* full compression */);
 
@@ -1444,9 +1755,9 @@ namespace BitMiracle.LibJpeg.Classic
             /* Forward DCT */
             m_fdct = new jpeg_forward_dct(this);
 
-            /* Entropy encoding: only Huffman coding supported. */
-            if (m_progressive_mode)
-                m_entropy = new phuff_entropy_encoder(this);
+            /* Entropy encoding: either Huffman or arithmetic coding. */
+            if (arith_code)
+                m_entropy = new arith_entropy_encoder(this);
             else
                 m_entropy = new huff_entropy_encoder(this);
 
@@ -1468,11 +1779,13 @@ namespace BitMiracle.LibJpeg.Classic
         private void jinit_c_master_control(bool transcode_only)
         {
             /* Validate parameters, determine derived values */
-            initial_setup();
+            initial_setup(transcode_only);
 
             if (m_scan_info != null)
             {
                 validate_script();
+                if (block_size < JpegConstants.DCTSIZE)
+                    reduce_script();
             }
             else
             {
@@ -1480,8 +1793,17 @@ namespace BitMiracle.LibJpeg.Classic
                 m_num_scans = 1;
             }
 
-            if (m_progressive_mode)    /*  TEMPORARY HACK ??? */
-                m_optimize_coding = true; /* assume default tables no good for progressive mode */
+            if (m_optimize_coding)
+            {
+                arith_code = false; /* disable arithmetic coding */
+            }
+            else if (!arith_code &&
+                (m_progressive_mode || (block_size > 1 && block_size < JpegConstants.DCTSIZE)))
+            {
+                /* TEMPORARY HACK ??? */
+                /* assume default tables no good for progressive or reduced AC mode */
+                m_optimize_coding = true; /* force Huffman optimization */
+            }
 
             m_master = new jpeg_comp_master(this, transcode_only);
         }
@@ -1509,17 +1831,12 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         private void transencode_master_selection(jvirt_array<JBLOCK>[] coef_arrays)
         {
-            /* Although we don't actually use input_components for transcoding, 
-             * jcmaster.c's initial_setup will complain if input_components is 0.
-             */
-            m_input_components = 1;
-
             /* Initialize master control (includes parameter checking/processing) */
             jinit_c_master_control(true /* transcode only */);
 
-            /* Entropy encoding: only Huffman coding supported. */
-            if (m_progressive_mode)
-                m_entropy = new phuff_entropy_encoder(this);
+            /* Entropy encoding: only Huffman or arithmetic coding. */
+            if (arith_code)
+                m_entropy = new arith_entropy_encoder(this);
             else
                 m_entropy = new huff_entropy_encoder(this);
 
@@ -1537,24 +1854,66 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// Do computations that are needed before master selection phase
         /// </summary>
-        private void initial_setup()
+        private void initial_setup(bool transcode_only)
         {
+            if (transcode_only)
+                jpeg_calc_trans_dimensions();
+            else
+                jpeg_calc_jpeg_dimensions();
+
+            /* Sanity check on block_size */
+            if (block_size < 1 || block_size > 16)
+                ERREXIT(J_MESSAGE_CODE.JERR_BAD_DCTSIZE, block_size, block_size);
+
+            /* Derive natural_order from block_size */
+            switch (block_size)
+            {
+                case 2:
+                    natural_order = JpegUtils.jpeg_natural_order2;
+                    break;
+
+                case 3:
+                    natural_order = JpegUtils.jpeg_natural_order3;
+                    break;
+
+                case 4:
+                    natural_order = JpegUtils.jpeg_natural_order4;
+                    break;
+
+                case 5:
+                    natural_order = JpegUtils.jpeg_natural_order5;
+                    break;
+
+                case 6:
+                    natural_order = JpegUtils.jpeg_natural_order6;
+                    break;
+
+                case 7:
+                    natural_order = JpegUtils.jpeg_natural_order7;
+                    break;
+
+                default:
+                    natural_order = JpegUtils.jpeg_natural_order;
+                    break;
+            }
+
+            /* Derive lim_Se from block_size */
+            lim_Se = block_size < JpegConstants.DCTSIZE ?
+                block_size * block_size - 1 : JpegConstants.DCTSIZE2 - 1;
+
             /* Sanity check on image dimensions */
-            if (m_image_height <= 0 || m_image_width <= 0 || m_num_components <= 0 || m_input_components <= 0)
+            if (jpeg_height <= 0 || jpeg_width <= 0 || m_num_components <= 0)
                 ERREXIT(J_MESSAGE_CODE.JERR_EMPTY_IMAGE);
 
             /* Make sure image isn't bigger than I can handle */
-            if (m_image_height > JpegConstants.JPEG_MAX_DIMENSION || m_image_width > JpegConstants.JPEG_MAX_DIMENSION)
-                ERREXIT(J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (int) JpegConstants.JPEG_MAX_DIMENSION);
+            if (jpeg_height > JpegConstants.JPEG_MAX_DIMENSION ||
+                jpeg_width > JpegConstants.JPEG_MAX_DIMENSION)
+            {
+                ERREXIT(J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, (uint)JpegConstants.JPEG_MAX_DIMENSION);
+            }
 
-            /* Width of an input scanline must be representable as int. */
-            long samplesperrow = m_image_width * m_input_components;
-            int jd_samplesperrow = (int)samplesperrow;
-            if ((long)jd_samplesperrow != samplesperrow)
-                ERREXIT(J_MESSAGE_CODE.JERR_WIDTH_OVERFLOW);
-
-            /* For now, precision must match compiled-in value... */
-            if (m_data_precision != JpegConstants.BITS_IN_JSAMPLE)
+            /* Only 8 to 12 bits data precision are supported for DCT based JPEG */
+            if (m_data_precision < 8 || m_data_precision > 12)
                 ERREXIT(J_MESSAGE_CODE.JERR_BAD_PRECISION, m_data_precision);
 
             /* Check that number of components won't exceed internal array sizes */
@@ -1579,32 +1938,67 @@ namespace BitMiracle.LibJpeg.Classic
             /* Compute dimensions of components */
             for (int ci = 0; ci < m_num_components; ci++)
             {
+                jpeg_component_info compptr = m_comp_info[ci];
                 /* Fill in the correct component_index value; don't rely on application */
-                m_comp_info[ci].Component_index = ci;
+                compptr.Component_index = ci;
 
-                /* For compression, we never do DCT scaling. */
-                m_comp_info[ci].DCT_scaled_size = JpegConstants.DCTSIZE;
+                /* In selecting the actual DCT scaling for each component, we try to
+                 * scale down the chroma components via DCT scaling rather than downsampling.
+                 * This saves time if the downsampler gets to use 1:1 scaling.
+                 * Note this code adapts subsampling ratios which are powers of 2.
+                 */
+                int ssize = 1;
+                while (min_DCT_h_scaled_size * ssize <=
+                   (do_fancy_downsampling ? JpegConstants.DCTSIZE : JpegConstants.DCTSIZE / 2) &&
+                   (m_max_h_samp_factor % (compptr.H_samp_factor * ssize * 2)) == 0)
+                {
+                    ssize = ssize * 2;
+                }
+
+                compptr.DCT_h_scaled_size = min_DCT_h_scaled_size * ssize;
+                ssize = 1;
+                while (min_DCT_v_scaled_size * ssize <=
+                   (do_fancy_downsampling ? JpegConstants.DCTSIZE : JpegConstants.DCTSIZE / 2) &&
+                   (m_max_v_samp_factor % (compptr.V_samp_factor * ssize * 2)) == 0)
+                {
+                    ssize = ssize * 2;
+                }
+
+                compptr.DCT_v_scaled_size = min_DCT_v_scaled_size * ssize;
+
+                /* We don't support DCT ratios larger than 2. */
+                if (compptr.DCT_h_scaled_size > compptr.DCT_v_scaled_size * 2)
+                    compptr.DCT_h_scaled_size = compptr.DCT_v_scaled_size * 2;
+                else if (compptr.DCT_v_scaled_size > compptr.DCT_h_scaled_size * 2)
+                    compptr.DCT_v_scaled_size = compptr.DCT_h_scaled_size * 2;
 
                 /* Size in DCT blocks */
-                m_comp_info[ci].Width_in_blocks = JpegUtils.jdiv_round_up(
-                    m_image_width * m_comp_info[ci].H_samp_factor, m_max_h_samp_factor * JpegConstants.DCTSIZE);
-                m_comp_info[ci].height_in_blocks = JpegUtils.jdiv_round_up(
-                    m_image_height * m_comp_info[ci].V_samp_factor, m_max_v_samp_factor * JpegConstants.DCTSIZE);
+                compptr.Width_in_blocks = (int)JpegUtils.jdiv_round_up(
+                    (long)jpeg_width * compptr.H_samp_factor, (long)m_max_h_samp_factor * block_size);
+
+                compptr.height_in_blocks = (int)JpegUtils.jdiv_round_up(
+                    (long)jpeg_height * compptr.V_samp_factor, (long)m_max_v_samp_factor * block_size);
 
                 /* Size in samples */
-                m_comp_info[ci].downsampled_width = JpegUtils.jdiv_round_up(
-                    m_image_width * m_comp_info[ci].H_samp_factor, m_max_h_samp_factor);
-                m_comp_info[ci].downsampled_height = JpegUtils.jdiv_round_up(
-                    m_image_height * m_comp_info[ci].V_samp_factor, m_max_v_samp_factor);
+                compptr.downsampled_width = (int)JpegUtils.jdiv_round_up(
+                    (long)jpeg_width * compptr.H_samp_factor * compptr.DCT_h_scaled_size,
+                    (long)m_max_h_samp_factor * block_size);
 
-                /* Mark component needed (this flag isn't actually used for compression) */
-                m_comp_info[ci].component_needed = true;
+                compptr.downsampled_height = (int)JpegUtils.jdiv_round_up(
+                    (long)jpeg_height * compptr.V_samp_factor * compptr.DCT_v_scaled_size,
+                    (long)m_max_v_samp_factor * block_size);
+
+                /* Don't need quantization scale after DCT,
+                 * until color conversion says otherwise.
+                 */
+                compptr.component_needed = false;
             }
 
             /* Compute number of fully interleaved MCU rows (number of times that
-            * main controller will call coefficient controller).
-            */
-            m_total_iMCU_rows = JpegUtils.jdiv_round_up(m_image_height, m_max_v_samp_factor * JpegConstants.DCTSIZE);
+             * main controller will call coefficient controller).
+             */
+            m_total_iMCU_rows = (int)JpegUtils.jdiv_round_up(
+                jpeg_height, (long)m_max_v_samp_factor * block_size);
         }
 
         /// <summary>
@@ -1619,11 +2013,11 @@ namespace BitMiracle.LibJpeg.Classic
             /* For sequential JPEG, all scans must have Ss=0, Se=DCTSIZE2-1;
             * for progressive JPEG, no scan can have this.
             */
-            int[][] last_bitpos = new int [JpegConstants.MAX_COMPONENTS][];
+            int[][] last_bitpos = new int[JpegConstants.MAX_COMPONENTS][];
             for (int i = 0; i < JpegConstants.MAX_COMPONENTS; i++)
                 last_bitpos[i] = new int[JpegConstants.DCTSIZE2];
 
-            bool[] component_sent = new bool [JpegConstants.MAX_COMPONENTS];
+            bool[] component_sent = new bool[JpegConstants.MAX_COMPONENTS];
 
             /* -1 until that coefficient has been seen; then last Al for it */
             if (m_scan_info[0].Ss != 0 || m_scan_info[0].Se != JpegConstants.DCTSIZE2 - 1)
@@ -1693,7 +2087,7 @@ namespace BitMiracle.LibJpeg.Classic
                         if (ncomps != 1)    /* AC scans must be for only one component */
                             ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
                     }
-                    
+
                     for (int ci = 0; ci < ncomps; ci++)
                     {
                         int lastBitComponentIndex = scanInfo.component_index[ci];
@@ -1714,7 +2108,7 @@ namespace BitMiracle.LibJpeg.Classic
                                 if (Ah != last_bitpos[lastBitComponentIndex][coefi] || Al != Ah - 1)
                                     ERREXIT(J_MESSAGE_CODE.JERR_BAD_PROG_SCRIPT, scanno);
                             }
-                            
+
                             last_bitpos[lastBitComponentIndex][coefi] = Al;
                         }
                     }
@@ -1761,6 +2155,41 @@ namespace BitMiracle.LibJpeg.Classic
             }
         }
 
+        /* Adapt scan script for use with reduced block size;
+         * assume that script has been validated before.
+         */
+        private void reduce_script()
+        {
+            int idxout = 0;
+            for (int idxin = 0; idxin < m_num_scans; idxin++)
+            {
+                /* After skipping, idxout becomes smaller than idxin */
+                if (idxin != idxout)
+                {
+                    /* Copy rest of data;
+                     * note we stay in given chunk of allocated memory.
+                     */
+                    m_scan_info[idxout] = m_scan_info[idxin];
+                }
+
+                if (m_scan_info[idxout].Ss > lim_Se)
+                {
+                    /* Entire scan out of range - skip this entry */
+                    continue;
+                }
+
+                if (m_scan_info[idxout].Se > lim_Se)
+                {
+                    /* Limit scan to end of block */
+                    m_scan_info[idxout].Se = lim_Se;
+                }
+
+                idxout++;
+            }
+
+            m_num_scans = idxout;
+        }
+
         // Huffman table setup routines
 
         /// <summary>
@@ -1795,7 +2224,7 @@ namespace BitMiracle.LibJpeg.Classic
             for (int len = 1; len <= 16; len++)
                 nsymbols += bits[len];
 
-            if (nsymbols < 1 || nsymbols> 256)
+            if (nsymbols < 1 || nsymbols > 256)
                 ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
             Buffer.BlockCopy(val, 0, htblptr.Huffval, 0, nsymbols);
@@ -1842,7 +2271,7 @@ namespace BitMiracle.LibJpeg.Classic
                 fill_scans(ref scanIndex, ncomps, 0, 0, Ah, Al);
             }
         }
-        
+
         /// <summary>
         /// Support routine: generate one scan for each component
         /// </summary>

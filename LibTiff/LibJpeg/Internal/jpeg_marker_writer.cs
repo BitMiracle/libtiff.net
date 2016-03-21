@@ -21,8 +21,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Write datastream header.
         /// This consists of an SOI and optional APPn markers.
         /// We recommend use of the JFIF marker, but not the Adobe marker,
-        /// when using YCbCr or grayscale data.  The JFIF marker should NOT
-        /// be used for any other JPEG colorspace.  The Adobe marker is helpful
+        /// when using YCbCr or grayscale data. The JFIF marker is also used
+        /// for other standard JPEG colorspaces. The Adobe marker is helpful
         /// to distinguish RGB, CMYK, and YCCK colorspaces.
         /// Note that an application can write additional header markers after
         /// jpeg_start_compress returns.
@@ -42,7 +42,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
         /// <summary>
         /// Write frame header.
-        /// This consists of DQT and SOFn markers.
+        /// This consists of DQT and SOFn markers,
+        /// a conditional LSE marker and a conditional pseudo SOS marker.
         /// Note that we do not emit the SOF until we have emitted the DQT(s).
         /// This avoids compatibility problems with incorrect implementations that
         /// try to error-check the quant table numbers as soon as they see the SOF.
@@ -62,7 +63,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * Note we assume that Huffman table numbers won't be changed later.
              */
             bool is_baseline;
-            if (m_cinfo.m_progressive_mode || m_cinfo.m_data_precision != 8)
+            if (m_cinfo.arith_code || m_cinfo.m_progressive_mode ||
+                m_cinfo.m_data_precision != 8 || m_cinfo.block_size != JpegConstants.DCTSIZE)
             {
                 is_baseline = false;
             }
@@ -84,12 +86,30 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             }
 
             /* Emit the proper SOF marker */
-            if (m_cinfo.m_progressive_mode)
-                emit_sof(JPEG_MARKER.SOF2);    /* SOF code for progressive Huffman */
-            else if (is_baseline)
-                emit_sof(JPEG_MARKER.SOF0);    /* SOF code for baseline implementation */
+            if (m_cinfo.arith_code)
+            {
+                if (m_cinfo.m_progressive_mode)
+                    emit_sof(JPEG_MARKER.SOF10); /* SOF code for progressive arithmetic */
+                else
+                    emit_sof(JPEG_MARKER.SOF9);  /* SOF code for sequential arithmetic */
+            }
             else
-                emit_sof(JPEG_MARKER.SOF1);    /* SOF code for non-baseline Huffman file */
+            {
+                if (m_cinfo.m_progressive_mode)
+                    emit_sof(JPEG_MARKER.SOF2);    /* SOF code for progressive Huffman */
+                else if (is_baseline)
+                    emit_sof(JPEG_MARKER.SOF0);    /* SOF code for baseline implementation */
+                else
+                    emit_sof(JPEG_MARKER.SOF1);    /* SOF code for non-baseline Huffman file */
+            }
+
+            /* Check to emit LSE inverse color transform specification marker */
+            if (m_cinfo.color_transform != J_COLOR_TRANSFORM.JCT_NONE)
+                emit_lse_ict();
+
+            /* Check to emit pseudo SOS marker */
+            if (m_cinfo.m_progressive_mode && m_cinfo.block_size != JpegConstants.DCTSIZE)
+                emit_pseudo_sos();
         }
 
         /// <summary>
@@ -99,47 +119,43 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// </summary>
         public void write_scan_header()
         {
-            /* Emit Huffman tables.
-             * Note that emit_dht() suppresses any duplicate tables.
-             */
-            for (int i = 0; i < m_cinfo.m_comps_in_scan; i++)
+            if (m_cinfo.arith_code)
             {
-                int ac_tbl_no = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[i]].Ac_tbl_no;
-                int dc_tbl_no = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[i]].Dc_tbl_no;
-                if (m_cinfo.m_progressive_mode)
-                {
-                    /* Progressive mode: only DC or only AC tables are used in one scan */
-                    if (m_cinfo.m_Ss == 0)
-                    {
-                        if (m_cinfo.m_Ah == 0)
-                        {
-                            /* DC needs no table for refinement scan */
-                            emit_dht(dc_tbl_no, false);
-                        }
-                    }
-                    else
-                    {
-                        emit_dht(ac_tbl_no, true);
-                    }
-                }
-                else
-                {
-                    /* Sequential mode: need both DC and AC tables */
-                    emit_dht(dc_tbl_no, false);
-                    emit_dht(ac_tbl_no, true);
-                }
+                /* Emit arith conditioning info.  We may have some duplication
+                 * if the file has multiple scans, but it's so small it's hardly
+                 * worth worrying about.
+                 */
+                emit_dac();
             }
-
-            /* Emit DRI if required --- note that DRI value could change for each scan.
-             * We avoid wasting space with unnecessary DRIs, however.
-             */
-            if (m_cinfo.m_restart_interval != m_last_restart_interval)
+            else
             {
-                emit_dri();
-                m_last_restart_interval = m_cinfo.m_restart_interval;
-            }
+                /* Emit Huffman tables.
+                 * Note that emit_dht() suppresses any duplicate tables.
+                 */
+                for (int i = 0; i < m_cinfo.m_comps_in_scan; i++)
+                {
+                    jpeg_component_info compptr = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[i]];
 
-            emit_sos();
+                    /* DC needs no table for refinement scan */
+                    if (m_cinfo.m_Ss == 0 && m_cinfo.m_Ah == 0)
+                        emit_dht(compptr.Dc_tbl_no, false);
+
+                    /* AC needs no table when not present */
+                    if (m_cinfo.m_Se != 0)
+                        emit_dht(compptr.Ac_tbl_no, true);
+                }
+
+                /* Emit DRI if required --- note that DRI value could change for each scan.
+                 * We avoid wasting space with unnecessary DRIs, however.
+                 */
+                if (m_cinfo.m_restart_interval != m_last_restart_interval)
+                {
+                    emit_dri();
+                    m_last_restart_interval = m_cinfo.m_restart_interval;
+                }
+
+                emit_sos();
+            }
         }
 
         /// <summary>
@@ -223,33 +239,18 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int i = 0; i < m_cinfo.m_comps_in_scan; i++)
             {
                 int componentIndex = m_cinfo.m_cur_comp_info[i];
-                emit_byte(m_cinfo.Component_info[componentIndex].Component_id);
+                jpeg_component_info compptr = m_cinfo.Component_info[componentIndex];
+                emit_byte(compptr.Component_id);
 
-                int td = m_cinfo.Component_info[componentIndex].Dc_tbl_no;
-                int ta = m_cinfo.Component_info[componentIndex].Ac_tbl_no;
-                if (m_cinfo.m_progressive_mode)
-                {
-                    /* Progressive mode: only DC or only AC tables are used in one scan;
-                     * furthermore, Huffman coding of DC refinement uses no table at all.
-                     * We emit 0 for unused field(s); this is recommended by the P&M text
-                     * but does not seem to be specified in the standard.
-                     */
-                    if (m_cinfo.m_Ss == 0)
-                    {
-                        /* DC scan */
-                        ta = 0;
-                        if (m_cinfo.m_Ah != 0)
-                        {
-                            /* no DC table either */
-                            td = 0;
-                        }
-                    }
-                    else
-                    {
-                        /* AC scan */
-                        td = 0;
-                    }
-                }
+                /* We emit 0 for unused field(s); this is recommended by the P&M text
+                 * but does not seem to be specified in the standard.
+                 */
+
+                /* DC needs no table for refinement scan */
+                int td = (m_cinfo.m_Ss == 0 && m_cinfo.m_Ah == 0) ? compptr.Dc_tbl_no : 0;
+
+                /* AC needs no table when not present */
+                int ta = (m_cinfo.m_Se != 0) ? compptr.Ac_tbl_no : 0;
 
                 emit_byte((td << 4) + ta);
             }
@@ -258,7 +259,37 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             emit_byte(m_cinfo.m_Se);
             emit_byte((m_cinfo.m_Ah << 4) + m_cinfo.m_Al);
         }
-        
+
+        /// <summary>
+        /// Emit an LSE inverse color transform specification marker
+        /// </summary>
+        private void emit_lse_ict()
+        {
+            /* Support only 1 transform */
+            if (m_cinfo.color_transform != J_COLOR_TRANSFORM.JCT_SUBTRACT_GREEN || m_cinfo.Num_components < 3)
+                m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
+
+            emit_marker(JPEG_MARKER.JPG8);
+
+            emit_2bytes(24); /* fixed length */
+
+            emit_byte(0x0D); /* ID inverse transform specification */
+            emit_2bytes(JpegConstants.MAXJSAMPLE); /* MAXTRANS */
+            emit_byte(3);        /* Nt=3 */
+            emit_byte(m_cinfo.Component_info[1].Component_id);
+            emit_byte(m_cinfo.Component_info[0].Component_id);
+            emit_byte(m_cinfo.Component_info[2].Component_id);
+            emit_byte(0x80); /* F1: CENTER1=1, NORM1=0 */
+            emit_2bytes(0);  /* A(1,1)=0 */
+            emit_2bytes(0);  /* A(1,2)=0 */
+            emit_byte(0);    /* F2: CENTER2=0, NORM2=0 */
+            emit_2bytes(1);  /* A(2,1)=1 */
+            emit_2bytes(0);  /* A(2,2)=0 */
+            emit_byte(0);    /* F3: CENTER3=0, NORM3=0 */
+            emit_2bytes(1);  /* A(3,1)=1 */
+            emit_2bytes(0);  /* A(3,2)=0 */
+        }
+
         /// <summary>
         /// Emit a SOF marker
         /// </summary>
@@ -269,12 +300,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             emit_2bytes(3 * m_cinfo.m_num_components + 2 + 5 + 1); /* length */
 
             /* Make sure image isn't bigger than SOF field can handle */
-            if (m_cinfo.m_image_height > 65535 || m_cinfo.m_image_width > 65535)
+            if (m_cinfo.jpeg_height > 65535 || m_cinfo.jpeg_width > 65535)
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_IMAGE_TOO_BIG, 65535);
 
             emit_byte(m_cinfo.m_data_precision);
-            emit_2bytes(m_cinfo.m_image_height);
-            emit_2bytes(m_cinfo.m_image_width);
+            emit_2bytes(m_cinfo.jpeg_height);
+            emit_2bytes(m_cinfo.jpeg_width);
 
             emit_byte(m_cinfo.m_num_components);
 
@@ -394,9 +425,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_QUANT_TABLE, index);
 
             int prec = 0;
-            for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
+            for (int i = 0; i <= m_cinfo.lim_Se; i++)
             {
-                if (qtbl.quantval[i] > 255)
+                if (qtbl.quantval[m_cinfo.natural_order[i]] > 255)
                     prec = 1;
             }
 
@@ -404,14 +435,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 emit_marker(JPEG_MARKER.DQT);
 
-                emit_2bytes(prec != 0 ? JpegConstants.DCTSIZE2 * 2 + 1 + 2 : JpegConstants.DCTSIZE2 + 1 + 2);
+                emit_2bytes(prec != 0 ?
+                    m_cinfo.lim_Se * 2 + 2 + 1 + 2 : m_cinfo.lim_Se + 1 + 1 + 2);
 
                 emit_byte(index + (prec << 4));
 
-                for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
+                for (int i = 0; i <= m_cinfo.lim_Se; i++)
                 {
                     /* The table entries must be emitted in zigzag order. */
-                    int qval = qtbl.quantval[JpegUtils.jpeg_natural_order[i]];
+                    int qval = qtbl.quantval[m_cinfo.natural_order[i]];
 
                     if (prec != 0)
                         emit_byte(qval >> 8);
@@ -423,6 +455,68 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             }
 
             return prec;
+        }
+
+        /* Emit a DAC marker */
+        /* Since the useful info is so small, we want to emit all the tables in */
+        /* one DAC marker.  Therefore this routine does its own scan of the table. */
+        private void emit_dac()
+        {
+            byte[] dc_in_use = new byte[JpegConstants.NUM_ARITH_TBLS];
+            byte[] ac_in_use = new byte[JpegConstants.NUM_ARITH_TBLS];
+
+            for (int i = 0; i < m_cinfo.m_comps_in_scan; i++)
+            {
+                jpeg_component_info compptr = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[i]];
+                /* DC needs no table for refinement scan */
+                if (m_cinfo.m_Ss == 0 && m_cinfo.m_Ah == 0)
+                    dc_in_use[compptr.Dc_tbl_no] = 1;
+
+                /* AC needs no table when not present */
+                if (m_cinfo.m_Se != 0)
+                    ac_in_use[compptr.Ac_tbl_no] = 1;
+            }
+
+            int length = 0;
+            for (int i = 0; i < JpegConstants.NUM_ARITH_TBLS; i++)
+                length += dc_in_use[i] + ac_in_use[i];
+
+            if (length != 0)
+            {
+                emit_marker(JPEG_MARKER.DAC);
+
+                emit_2bytes(length * 2 + 2);
+
+                for (int i = 0; i < JpegConstants.NUM_ARITH_TBLS; i++)
+                {
+                    if (dc_in_use[i] != 0)
+                    {
+                        emit_byte(i);
+                        emit_byte(m_cinfo.arith_dc_L[i] + (m_cinfo.arith_dc_U[i] << 4));
+                    }
+                    if (ac_in_use[i] != 0)
+                    {
+                        emit_byte(i + 0x10);
+                        emit_byte(m_cinfo.arith_ac_K[i]);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Emit a pseudo SOS marker
+        /// </summary>
+        private void emit_pseudo_sos()
+        {
+            emit_marker(JPEG_MARKER.SOS);
+
+            emit_2bytes(2 + 1 + 3); /* length */
+
+            emit_byte(0); /* Ns */
+
+            emit_byte(0); /* Ss */
+            emit_byte(m_cinfo.block_size * m_cinfo.block_size - 1); /* Se */
+            emit_byte(0); /* Ah/Al */
         }
 
         /// <summary>
