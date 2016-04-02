@@ -147,7 +147,9 @@ namespace BitMiracle.LibJpeg.Classic
         /* ptrs to coefficient quantization tables, or null if not defined */
         internal JQUANT_TBL[] m_quant_tbl_ptrs = new JQUANT_TBL[JpegConstants.NUM_QUANT_TBLS];
 
-        // corresponding scale factors (percentage, initialized 100).
+        /// <summary>
+        /// corresponding scale factors (percentage, initialized 100).
+        /// </summary>
         public int[] q_scale_factor = new int[JpegConstants.NUM_QUANT_TBLS];
 
         /* ptrs to Huffman coding tables, or null if not defined */
@@ -1678,7 +1680,8 @@ namespace BitMiracle.LibJpeg.Classic
                 min_DCT_h_scaled_size = 15;
                 min_DCT_v_scaled_size = 15;
             }
-            else {
+            else
+            {
                 /* Provide block_size/16 scaling */
                 jpeg_width = (int)JpegUtils.jdiv_round_up((long)m_image_width * block_size, 16L);
                 jpeg_height = (int)JpegUtils.jdiv_round_up((long)m_image_height * block_size, 16L);

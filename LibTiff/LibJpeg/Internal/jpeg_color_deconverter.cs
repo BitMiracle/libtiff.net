@@ -169,6 +169,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             }
                             break;
 
+                        case J_COLOR_SPACE.JCS_CMYK:
+                            m_converter = cmyk_rgb_convert;
+                            break;
+
+                        case J_COLOR_SPACE.JCS_YCCK:
+                            m_converter = ycck_rgb_convert;
+                            build_ycc_rgb_table();
+                            break;
+
                         default:
                             cinfo.ERREXIT(J_MESSAGE_CODE.JERR_CONVERSION_NOTIMPL);
                             break;
@@ -631,6 +640,75 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private void grayscale_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
         {
             JpegUtils.jcopy_sample_rows(input_buf[0], input_row + m_perComponentOffsets[0], output_buf, output_row, num_rows, m_cinfo.m_output_width);
+        }
+
+        /// <summary>
+        /// Color conversion for CMYK -> RGB
+        /// </summary>
+        private void cmyk_rgb_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
+        {
+            int component0RowOffset = m_perComponentOffsets[0];
+            int component1RowOffset = m_perComponentOffsets[1];
+            int component2RowOffset = m_perComponentOffsets[2];
+            int component3RowOffset = m_perComponentOffsets[3];
+
+            for (int row = 0; row < num_rows; row++)
+            {
+                int columnOffset = 0;
+                for (int col = 0; col < m_cinfo.m_output_width; col++)
+                {
+                    int c = input_buf[0][input_row + component0RowOffset][col];
+                    int m = input_buf[1][input_row + component1RowOffset][col];
+                    int y = input_buf[2][input_row + component2RowOffset][col];
+                    int k = input_buf[3][input_row + component3RowOffset][col];
+
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = (byte)((c * k) / 255);
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = (byte)((m * k) / 255);
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = (byte)((y * k) / 255);
+                    columnOffset += JpegConstants.RGB_PIXELSIZE;
+                }
+
+                input_row++;
+            }
+        }
+
+        /// <summary>
+        /// Color conversion for YCCK -> RGB
+        /// it's just a gybrid of YCCK -> CMYK and CMYK -> RGB conversions
+        /// </summary>
+        private void ycck_rgb_convert(ComponentBuffer[] input_buf, int input_row, byte[][] output_buf, int output_row, int num_rows)
+        {
+            int component0RowOffset = m_perComponentOffsets[0];
+            int component1RowOffset = m_perComponentOffsets[1];
+            int component2RowOffset = m_perComponentOffsets[2];
+            int component3RowOffset = m_perComponentOffsets[3];
+
+            byte[] limit = m_cinfo.m_sample_range_limit;
+            int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
+
+            int num_cols = m_cinfo.m_output_width;
+            for (int row = 0; row < num_rows; row++)
+            {
+                int columnOffset = 0;
+                for (int col = 0; col < num_cols; col++)
+                {
+                    int y = input_buf[0][input_row + component0RowOffset][col];
+                    int cb = input_buf[1][input_row + component1RowOffset][col];
+                    int cr = input_buf[2][input_row + component2RowOffset][col];
+
+                    int cmyk_c = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cr_r_tab[cr])];
+                    int cmyk_m = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS))];
+                    int cmyk_y = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cb_b_tab[cb])];
+                    int cmyk_k = input_buf[3][input_row + component3RowOffset][col];
+
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = (byte)((cmyk_c * cmyk_k) / 255);
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = (byte)((cmyk_m * cmyk_k) / 255);
+                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = (byte)((cmyk_y * cmyk_k) / 255);
+                    columnOffset += JpegConstants.RGB_PIXELSIZE;
+                }
+
+                input_row++;
+            }
         }
 
         /// <summary>
