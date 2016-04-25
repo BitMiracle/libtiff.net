@@ -101,7 +101,12 @@
     <Compile Include="Enums\JpegColorMode.cs" />
     <Compile Include="Enums\JpegProc.cs" />
     <Compile Include="Enums\JpegTablesMode.cs" />
+    <Compile Include="Enums\Orientation.cs" />
+    <Compile Include="Enums\PlanarConfig.cs" />
+    <Compile Include="Enums\Predictor.cs" />
     <Compile Include="LibJpeg\DensityUnit.cs" />
+    <Compile Include="LibJpeg\Internal\arith_entropy_decoder.cs" />
+    <Compile Include="LibJpeg\Internal\arith_entropy_encoder.cs" />
     <Compile Include="LibJpeg\Internal\bitread_perm_state.cs" />
     <Compile Include="LibJpeg\Internal\bitread_working_state.cs" />
     <Compile Include="LibJpeg\Internal\ComponentBuffer.cs" />
@@ -139,8 +144,6 @@
     <Compile Include="LibJpeg\Internal\my_source_mgr.cs" />
     <Compile Include="LibJpeg\Internal\my_trans_c_coef_controller.cs" />
     <Compile Include="LibJpeg\Internal\my_upsampler.cs" />
-    <Compile Include="LibJpeg\Internal\phuff_entropy_decoder.cs" />
-    <Compile Include="LibJpeg\Internal\phuff_entropy_encoder.cs" />
     <Compile Include="LibJpeg\JBLOCK.cs" />
     <Compile Include="LibJpeg\JHUFF_TBL.cs" />
     <Compile Include="LibJpeg\JpegConstants.cs" />
@@ -157,13 +160,11 @@
     <Compile Include="LibJpeg\JQUANT_TBL.cs" />
     <Compile Include="LibJpeg\jvirt_array.cs" />
     <Compile Include="LibJpeg\J_COLOR_SPACE.cs" />
+    <Compile Include="LibJpeg\J_COLOR_TRANSFORM.cs" />
     <Compile Include="LibJpeg\J_DCT_METHOD.cs" />
     <Compile Include="LibJpeg\J_DITHER_MODE.cs" />
     <Compile Include="LibJpeg\J_MESSAGE_CODE.cs" />
     <Compile Include="LibJpeg\ReadResult.cs" />
-    <Compile Include="Enums\Orientation.cs" />
-    <Compile Include="Enums\PlanarConfig.cs" />
-    <Compile Include="Enums\Predictor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enums\ResUnit.cs" />
     <Compile Include="Enums\SampleFormat.cs" />
