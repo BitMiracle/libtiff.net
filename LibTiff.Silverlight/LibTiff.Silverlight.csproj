@@ -275,6 +275,12 @@
     <Compile Include="..\LibTiff\LibJpeg\DensityUnit.cs">
       <Link>LibJpeg\DensityUnit.cs</Link>
     </Compile>
+    <Compile Include="..\LibTiff\LibJpeg\Internal\arith_entropy_decoder.cs">
+      <Link>LibJpeg\Internal\arith_entropy_decoder.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\LibJpeg\Internal\arith_entropy_encoder.cs">
+      <Link>LibJpeg\Internal\arith_entropy_encoder.cs</Link>
+    </Compile>
     <Compile Include="..\LibTiff\LibJpeg\Internal\bitread_perm_state.cs">
       <Link>LibJpeg\Internal\bitread_perm_state.cs</Link>
     </Compile>
@@ -386,12 +392,6 @@
     <Compile Include="..\LibTiff\LibJpeg\Internal\my_upsampler.cs">
       <Link>LibJpeg\Internal\my_upsampler.cs</Link>
     </Compile>
-    <Compile Include="..\LibTiff\LibJpeg\Internal\phuff_entropy_decoder.cs">
-      <Link>LibJpeg\Internal\phuff_entropy_decoder.cs</Link>
-    </Compile>
-    <Compile Include="..\LibTiff\LibJpeg\Internal\phuff_entropy_encoder.cs">
-      <Link>LibJpeg\Internal\phuff_entropy_encoder.cs</Link>
-    </Compile>
     <Compile Include="..\LibTiff\LibJpeg\JBLOCK.cs">
       <Link>LibJpeg\JBLOCK.cs</Link>
     </Compile>
@@ -439,6 +439,9 @@
     </Compile>
     <Compile Include="..\LibTiff\LibJpeg\J_COLOR_SPACE.cs">
       <Link>LibJpeg\J_COLOR_SPACE.cs</Link>
+    </Compile>
+    <Compile Include="..\LibTiff\LibJpeg\J_COLOR_TRANSFORM.cs">
+      <Link>LibJpeg\J_COLOR_TRANSFORM.cs</Link>
     </Compile>
     <Compile Include="..\LibTiff\LibJpeg\J_DCT_METHOD.cs">
       <Link>LibJpeg\J_DCT_METHOD.cs</Link>
