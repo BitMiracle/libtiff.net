@@ -305,7 +305,7 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-                return m_marker_list.AsReadOnly();
+                return new ReadOnlyCollection<jpeg_marker_struct>(m_marker_list);
             }
         }
 

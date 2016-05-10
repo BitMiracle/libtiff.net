@@ -8,6 +8,10 @@
 using System;
 using System.Globalization;
 
+#if SILVERLIGHT
+using Console = System.Diagnostics.Debug;
+#endif
+
 namespace BitMiracle.LibJpeg.Classic
 {
     /// <summary>
