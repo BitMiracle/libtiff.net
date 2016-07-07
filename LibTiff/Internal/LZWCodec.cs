@@ -1011,7 +1011,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 if (m_dec_bitsleft < m_nbits)
                 {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                         "LZWDecode: Strip {0} not terminated with EOI code", m_tif.m_curstrip);
                     _code = CODE_EOI;
                 }
