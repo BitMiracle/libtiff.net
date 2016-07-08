@@ -569,51 +569,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             Debug.Assert(m_dec_codetab != null);
 
-            // Restart interrupted output operation.
-            if (m_dec_restart != 0)
-            {
-                int residue;
-
-                int codep = m_dec_codep;
-                residue = m_dec_codetab[codep].length - m_dec_restart;
-                if (residue > count)
-                {
-                    // Residue from previous decode is sufficient to satisfy decode request.
-                    // Skip to the start of the decoded string, place decoded values in the output
-                    // buffer, and return.
-                    m_dec_restart += count;
-                    do
-                    {
-                        codep = m_dec_codetab[codep].next;
-                    }
-                    while (--residue > count);
-
-                    int tp = count;
-                    do
-                    {
-                        --tp;
-                        buffer[offset + tp] = m_dec_codetab[codep].value;
-                        codep = m_dec_codetab[codep].next;
-                    }
-                    while (--count != 0);
-
-                    return true;
-                }
-
-                // Residue satisfies only part of the decode request.
-                offset += residue;
-                count -= residue;
-                int ttp = 0;
-                do
-                {
-                    --ttp;
-                    buffer[offset + ttp] = m_dec_codetab[codep].value;
-                    codep = m_dec_codetab[codep].next;
-                }
-                while (--residue != 0);
-
-                m_dec_restart = 0;
-            }
+            bool stopDecoding;
+            RestartInterruptedOutput(buffer, true, ref offset, ref count, out stopDecoding);
+            if (stopDecoding)
+                return true;
 
             while (count > 0)
             {
