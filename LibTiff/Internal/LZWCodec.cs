@@ -355,160 +355,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private bool LZWDecode(byte[] buffer, int offset, int count)
         {
-            Debug.Assert(m_dec_codetab != null);
-
-            bool stopDecoding;
-            RestartInterruptedOutput(buffer, false, ref offset, ref count, out stopDecoding);
-            if (stopDecoding)
-                return true;
-
-            while (count > 0)
-            {
-                short code;
-                NextCode(out code, false);
-                if (code == CODE_EOI)
-                    break;
-
-                if (code == CODE_CLEAR)
-                {
-                    m_dec_free_entp = CODE_FIRST;
-                    Array.Clear(m_dec_codetab, m_dec_free_entp, CSIZE - CODE_FIRST);
-
-                    m_nbits = BITS_MIN;
-                    m_dec_nbitsmask = CODE_MIN;
-                    m_dec_maxcodep = m_dec_nbitsmask - 1;
-                    NextCode(out code, false);
-
-                    if (code == CODE_EOI)
-                        break;
-
-                    if (code == CODE_CLEAR)
-                    {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
-                            "LZWDecode: Corrupted LZW table at scanline {0}", m_tif.m_row);
-                        return false;
-                    }
-
-                    buffer[offset] = (byte)code;
-                    offset++;
-                    count--;
-                    m_dec_oldcodep = code;
-                    continue;
-                }
-
-                int codep = code;
-
-                // Add the new entry to the code table.
-                if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
-                {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
-                        "LZWDecode: Corrupted LZW table at scanline {0}", m_tif.m_row);
-                    return false;
-                }
-
-                m_dec_codetab[m_dec_free_entp].next = m_dec_oldcodep;
-                if (m_dec_codetab[m_dec_free_entp].next < 0 || m_dec_codetab[m_dec_free_entp].next >= CSIZE)
-                {
-                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
-                        "LZWDecode: Corrupted LZW table at scanline {0}", m_tif.m_row);
-                    return false;
-                }
-
-                m_dec_codetab[m_dec_free_entp].firstchar = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].firstchar;
-                m_dec_codetab[m_dec_free_entp].length = (short)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
-                m_dec_codetab[m_dec_free_entp].value = (codep < m_dec_free_entp) ? m_dec_codetab[codep].firstchar : m_dec_codetab[m_dec_free_entp].firstchar;
-
-                if (++m_dec_free_entp > m_dec_maxcodep)
-                {
-                    if (++m_nbits > BITS_MAX)
-                    {
-                        // should not happen
-                        m_nbits = BITS_MAX;
-                    }
-
-                    m_dec_nbitsmask = MAXCODE(m_nbits);
-                    m_dec_maxcodep = m_dec_nbitsmask - 1;
-                }
-
-                m_dec_oldcodep = code;
-                if (code >= 256)
-                {
-                    // Code maps to a string, copy string value to output (written in reverse).
-                    if (m_dec_codetab[codep].length == 0)
-                    {
-                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
-                            "LZWDecode: Wrong length of decoded string: data probably corrupted at scanline {0}",
-                            m_tif.m_row);
-                        return false;
-                    }
-
-                    if (m_dec_codetab[codep].length > count)
-                    {
-                        // String is too long for decode buffer, locate portion that will fit,
-                        // copy to the decode buffer, and setup restart logic for the next
-                        // decoding call.
-                        m_dec_codep = code;
-                        do
-                        {
-                            codep = m_dec_codetab[codep].next;
-                        }
-                        while (codep != -1 && m_dec_codetab[codep].length > count);
-
-                        if (codep != -1)
-                        {
-                            m_dec_restart = count;
-                            int tp = count;
-                            do
-                            {
-                                tp--;
-                                buffer[offset + tp] = m_dec_codetab[codep].value;
-                                codep = m_dec_codetab[codep].next;
-                            }
-                            while (--count != 0 && codep != -1);
-
-                            if (codep != -1)
-                                codeLoop();
-                        }
-                        break;
-                    }
-
-                    int len = m_dec_codetab[codep].length;
-                    int ttp = len;
-                    do
-                    {
-                        --ttp;
-                        int t = m_dec_codetab[codep].value;
-                        codep = m_dec_codetab[codep].next;
-                        buffer[offset + ttp] = (byte)t;
-                    }
-                    while (codep != -1 && ttp > 0);
-
-                    if (codep != -1)
-                    {
-                        codeLoop();
-                        break;
-                    }
-
-                    offset += len;
-                    count -= len;
-                }
-                else
-                {
-                    buffer[offset] = (byte)code;
-                    offset++;
-                    count--;
-                }
-            }
-
-            if (count > 0)
-            {
-                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
-                    "LZWDecode: Not enough data at scanline {0} (short {1} bytes)",
-                    m_tif.m_row, count);
-                return false;
-            }
-
-            return true;
+            return LZWDecodeImpl(buffer, offset, count, false, "LZWDecode");
         }
 
         private bool LZWDecodeCompat(byte[] buffer, int offset, int count)
@@ -648,6 +495,164 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                     "LZWDecodeCompat: Not enough data at scanline {0} (short {1} bytes)",
+                    m_tif.m_row, count);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool LZWDecodeImpl(byte[] buffer, int offset, int count, bool compat, string callerName)
+        {
+            Debug.Assert(m_dec_codetab != null);
+
+            bool stopDecoding;
+            RestartInterruptedOutput(buffer, compat, ref offset, ref count, out stopDecoding);
+            if (stopDecoding)
+                return true;
+
+            while (count > 0)
+            {
+                short code;
+                NextCode(out code, compat);
+                if (code == CODE_EOI)
+                    break;
+
+                if (code == CODE_CLEAR)
+                {
+                    m_dec_free_entp = CODE_FIRST;
+                    Array.Clear(m_dec_codetab, m_dec_free_entp, CSIZE - CODE_FIRST);
+
+                    m_nbits = BITS_MIN;
+                    m_dec_nbitsmask = CODE_MIN;
+                    m_dec_maxcodep = m_dec_nbitsmask - (compat ? 0 : 1);
+                    NextCode(out code, compat);
+
+                    if (code == CODE_EOI)
+                        break;
+
+                    if (code == CODE_CLEAR)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                            callerName + ": Corrupted LZW table at scanline {0}", m_tif.m_row);
+                        return false;
+                    }
+
+                    buffer[offset] = (byte)code;
+                    offset++;
+                    count--;
+                    m_dec_oldcodep = code;
+                    continue;
+                }
+
+                int codep = code;
+
+                // Add the new entry to the code table.
+                if (m_dec_free_entp < 0 || m_dec_free_entp >= CSIZE)
+                {
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        callerName + ": Corrupted LZW table at scanline {0}", m_tif.m_row);
+                    return false;
+                }
+
+                m_dec_codetab[m_dec_free_entp].next = m_dec_oldcodep;
+                if (m_dec_codetab[m_dec_free_entp].next < 0 || m_dec_codetab[m_dec_free_entp].next >= CSIZE)
+                {
+                    Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        callerName + ": Corrupted LZW table at scanline {0}", m_tif.m_row);
+                    return false;
+                }
+
+                m_dec_codetab[m_dec_free_entp].firstchar = m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].firstchar;
+                m_dec_codetab[m_dec_free_entp].length = (short)(m_dec_codetab[m_dec_codetab[m_dec_free_entp].next].length + 1);
+                m_dec_codetab[m_dec_free_entp].value = (codep < m_dec_free_entp) ? m_dec_codetab[codep].firstchar : m_dec_codetab[m_dec_free_entp].firstchar;
+
+                if (++m_dec_free_entp > m_dec_maxcodep)
+                {
+                    if (++m_nbits > BITS_MAX)
+                    {
+                        // should not happen
+                        m_nbits = BITS_MAX;
+                    }
+
+                    m_dec_nbitsmask = MAXCODE(m_nbits);
+                    m_dec_maxcodep = m_dec_nbitsmask - (compat ? 0 : 1);
+                }
+
+                m_dec_oldcodep = code;
+                if (code >= 256)
+                {
+                    // Code maps to a string, copy string value to output (written in reverse).
+                    if (m_dec_codetab[codep].length == 0)
+                    {
+                        Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                            callerName + ": Wrong length of decoded string: data probably corrupted at scanline {0}",
+                            m_tif.m_row);
+                        return false;
+                    }
+
+                    if (m_dec_codetab[codep].length > count)
+                    {
+                        // String is too long for decode buffer, locate portion that will fit,
+                        // copy to the decode buffer, and setup restart logic for the next
+                        // decoding call.
+                        m_dec_codep = code;
+                        do
+                        {
+                            codep = m_dec_codetab[codep].next;
+                        }
+                        while (codep != -1 && m_dec_codetab[codep].length > count);
+
+                        if (codep != -1)
+                        {
+                            m_dec_restart = count;
+                            int tp = count;
+                            do
+                            {
+                                tp--;
+                                buffer[offset + tp] = m_dec_codetab[codep].value;
+                                codep = m_dec_codetab[codep].next;
+                            }
+                            while (--count != 0 && codep != -1);
+
+                            if (codep != -1)
+                                codeLoop();
+                        }
+                        break;
+                    }
+
+                    int len = m_dec_codetab[codep].length;
+                    int ttp = len;
+                    do
+                    {
+                        --ttp;
+                        int t = m_dec_codetab[codep].value;
+                        codep = m_dec_codetab[codep].next;
+                        buffer[offset + ttp] = (byte)t;
+                    }
+                    while (codep != -1 && ttp > 0);
+
+                    if (codep != -1)
+                    {
+                        codeLoop();
+                        break;
+                    }
+
+                    offset += len;
+                    count -= len;
+                }
+                else
+                {
+                    buffer[offset] = (byte)code;
+                    offset++;
+                    count--;
+                }
+            }
+
+            if (count > 0)
+            {
+                Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                    callerName + ": Not enough data at scanline {0} (short {1} bytes)",
                     m_tif.m_row, count);
                 return false;
             }
