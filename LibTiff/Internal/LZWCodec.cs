@@ -91,7 +91,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         /* Decoding specific data */
         private int m_dec_nbitsmask; /* lzw_nbits 1 bits, right adjusted */
         private int m_dec_restart; /* restart count */
-        private int m_dec_bitsleft; /* available bits in raw data */
+        private long m_dec_bitsleft; /* available bits in raw data */
         private bool m_oldStyleCodeFound; /* if true, old style LZW code found*/
         private int m_dec_codep; /* current recognized code */
         private int m_dec_oldcodep; /* previously recognized code */
@@ -337,7 +337,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             m_dec_restart = 0;
             m_dec_nbitsmask = CODE_MIN;
-            m_dec_bitsleft = m_tif.m_rawcc << 3;
+            m_dec_bitsleft = ((long)m_tif.m_rawcc) << 3;
             m_dec_free_entp = CODE_FIRST;
 
             /*
