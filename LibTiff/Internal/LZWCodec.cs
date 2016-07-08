@@ -227,25 +227,25 @@ namespace BitMiracle.LibTiff.Classic.Internal
         public override bool predictor_decoderow(byte[] buffer, int offset, int count, short plane)
         {
             if (m_compatDecode)
-                return LZWDecodeCompat(buffer, offset, count, plane);
+                return LZWDecodeCompat(buffer, offset, count);
 
-            return LZWDecode(buffer, offset, count, plane);
+            return LZWDecode(buffer, offset, count);
         }
 
         public override bool predictor_decodestrip(byte[] buffer, int offset, int count, short plane)
         {
             if (m_compatDecode)
-                return LZWDecodeCompat(buffer, offset, count, plane);
+                return LZWDecodeCompat(buffer, offset, count);
 
-            return LZWDecode(buffer, offset, count, plane);
+            return LZWDecode(buffer, offset, count);
         }
 
         public override bool predictor_decodetile(byte[] buffer, int offset, int count, short plane)
         {
             if (m_compatDecode)
-                return LZWDecodeCompat(buffer, offset, count, plane);
+                return LZWDecodeCompat(buffer, offset, count);
 
-            return LZWDecode(buffer, offset, count, plane);
+            return LZWDecode(buffer, offset, count);
         }
 
         public override bool predictor_setupencode()
@@ -353,7 +353,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        private bool LZWDecode(byte[] buffer, int offset, int count, short plane)
+        private bool LZWDecode(byte[] buffer, int offset, int count)
         {
             Debug.Assert(m_dec_codetab != null);
 
@@ -511,7 +511,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
-        private bool LZWDecodeCompat(byte[] buffer, int offset, int count, short plane)
+        private bool LZWDecodeCompat(byte[] buffer, int offset, int count)
         {
             Debug.Assert(m_dec_codetab != null);
 
