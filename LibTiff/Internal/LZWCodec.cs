@@ -357,54 +357,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             Debug.Assert(m_dec_codetab != null);
 
-            // Restart interrupted output operation.
-            if (m_dec_restart != 0)
-            {
-                int codep = m_dec_codep;
-                int residue = m_dec_codetab[codep].length - m_dec_restart;
-                if (residue > count)
-                {
-                    // Residue from previous decode is sufficient to satisfy decode request. Skip
-                    // to the start of the decoded string, place decoded values in the output
-                    // buffer, and return.
-                    m_dec_restart += count;
-
-                    do
-                    {
-                        codep = m_dec_codetab[codep].next;
-                    }
-                    while (--residue > count && codep != -1);
-
-                    if (codep != -1)
-                    {
-                        int tp = count;
-                        do
-                        {
-                            tp--;
-                            buffer[offset + tp] = m_dec_codetab[codep].value;
-                            codep = m_dec_codetab[codep].next;
-                        }
-                        while (--count != 0 && codep != -1);
-                    }
-
-                    return true;
-                }
-
-                // Residue satisfies only part of the decode request.
-                offset += residue;
-                count -= residue;
-                int ttp = 0;
-                do
-                {
-                    --ttp;
-                    int t = m_dec_codetab[codep].value;
-                    codep = m_dec_codetab[codep].next;
-                    buffer[offset + ttp] = (byte)t;
-                }
-                while (--residue != 0 && codep != -1);
-
-                m_dec_restart = 0;
-            }
+            bool stopDecoding;
+            RestartInterruptedOutput(buffer, false, ref offset, ref count, out stopDecoding);
+            if (stopDecoding)
+                return true;
 
             while (count > 0)
             {
@@ -422,10 +378,10 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     m_dec_nbitsmask = CODE_MIN;
                     m_dec_maxcodep = m_dec_nbitsmask - 1;
                     NextCode(out code, false);
-                    
+
                     if (code == CODE_EOI)
                         break;
-                    
+
                     if (code == CODE_CLEAR)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
@@ -555,8 +511,63 @@ namespace BitMiracle.LibTiff.Classic.Internal
             return true;
         }
 
+        private void RestartInterruptedOutput(byte[] buffer, bool compat, ref int offset, ref int count, out bool stopDecoding)
+        {
+            stopDecoding = false;
+
+            if (m_dec_restart == 0)
+                return;
+
+            int codep = m_dec_codep;
+            int residue = m_dec_codetab[codep].length - m_dec_restart;
+            if (residue > count)
+            {
+                // Residue from previous decode is sufficient to satisfy decode request.
+                // buffer, and return.
+                m_dec_restart += count;
+
+                do
+                {
+                    codep = m_dec_codetab[codep].next;
+                }
+                while (--residue > count && codep != -1);
+
+                if (compat || codep != -1)
+                {
+                    int tp = count;
+                    do
+                    {
+                        tp--;
+                        buffer[offset + tp] = m_dec_codetab[codep].value;
+                        codep = m_dec_codetab[codep].next;
+                    }
+                    while (--count != 0 && (compat || codep != -1));
+                }
+
+                stopDecoding = true;
+                return;
+            }
+
+            // Residue satisfies only part of the decode request.
+            offset += residue;
+            count -= residue;
+            int ttp = 0;
+            do
+            {
+                --ttp;
+                int t = m_dec_codetab[codep].value;
+                codep = m_dec_codetab[codep].next;
+                buffer[offset + ttp] = (byte)t;
+            }
+            while (--residue != 0 && (compat || codep != -1));
+
+            m_dec_restart = 0;
+        }
+
         private bool LZWDecodeCompat(byte[] buffer, int offset, int count, short plane)
         {
+            Debug.Assert(m_dec_codetab != null);
+
             // Restart interrupted output operation.
             if (m_dec_restart != 0)
             {
