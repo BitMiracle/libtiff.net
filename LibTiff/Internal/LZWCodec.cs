@@ -424,18 +424,22 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
                 if (code == CODE_CLEAR)
                 {
-                    m_dec_free_entp = CODE_FIRST;
-                    Array.Clear(m_dec_codetab, m_dec_free_entp, CSIZE - CODE_FIRST);
+                    do
+                    {
+                        m_dec_free_entp = CODE_FIRST;
+                        Array.Clear(m_dec_codetab, m_dec_free_entp, CSIZE - CODE_FIRST);
 
-                    m_nbits = BITS_MIN;
-                    m_dec_nbitsmask = CODE_MIN;
-                    m_dec_maxcodep = m_dec_nbitsmask - (compat ? 0 : 1);
-                    NextCode(out code, compat);
+                        m_nbits = BITS_MIN;
+                        m_dec_nbitsmask = CODE_MIN;
+                        m_dec_maxcodep = m_dec_nbitsmask - (compat ? 0 : 1);
+                        NextCode(out code, compat);
+                    }
+                    while (code == CODE_CLEAR); // consecutive CODE_CLEAR codes
 
                     if (code == CODE_EOI)
                         break;
 
-                    if (code == CODE_CLEAR)
+                    if (code > CODE_CLEAR)
                     {
                         Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                             callerName + ": Corrupted LZW table at scanline {0}", m_tif.m_row);
