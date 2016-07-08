@@ -523,6 +523,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
             if (residue > count)
             {
                 // Residue from previous decode is sufficient to satisfy decode request.
+                // Skip to the start of the decoded string, place decoded values in the output
                 // buffer, and return.
                 m_dec_restart += count;
 
