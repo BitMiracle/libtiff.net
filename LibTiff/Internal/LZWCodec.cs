@@ -700,9 +700,8 @@ namespace BitMiracle.LibTiff.Classic.Internal
             do
             {
                 --ttp;
-                int t = m_dec_codetab[codep].value;
+                buffer[offset + ttp] = m_dec_codetab[codep].value;
                 codep = m_dec_codetab[codep].next;
-                buffer[offset + ttp] = (byte)t;
             }
             while (--residue != 0 && (compat || codep != -1));
 
