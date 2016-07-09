@@ -52,13 +52,18 @@ namespace BitMiracle.LibTiff.Classic
                 else
                     stream = File.Open(fileName, fileMode, fileAccess);
             }
-            catch (Exception e)
+#if THREAD_SAFE_LIBTIFF
+            catch (Exception)
             {
-#if !THREAD_SAFE_LIBTIFF
-                Error(module, "Failed to open '{0}'. {1}", fileName, e.Message);
-#endif
                 return null;
             }
+#else
+            catch (Exception e)
+            {
+                Error(module, "Failed to open '{0}'. {1}", fileName, e.Message);
+                return null;
+            }
+#endif
 
             Tiff tif = ClientOpen(fileName, mode, stream, new TiffStream(), errorHandler, extender);
             if (tif == null)
