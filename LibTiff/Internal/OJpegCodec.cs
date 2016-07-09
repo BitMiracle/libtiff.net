@@ -729,7 +729,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private bool OJpegEncodeIsUnsupported()
         {
-            Tiff.ErrorExt(m_tif.m_clientdata, "OJPEGSetupEncode",
+            Tiff.ErrorExt(m_tif, m_tif.m_clientdata, "OJPEGSetupEncode",
                 "OJPEG encoding not supported; use new-style JPEG compression instead");
 
             return false;

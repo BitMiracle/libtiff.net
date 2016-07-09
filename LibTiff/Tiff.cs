@@ -4649,6 +4649,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
+#if THREAD_SAFE_LIBTIFF
+        [Obsolete("This method does nothing in non-thread safe build and should not be used. Use ErrorExt overload that accepts Tiff object.")]
+#endif
         public static void ErrorExt(object clientData, string method, string format, params object[] args)
         {
             ErrorExt(null, clientData, method, format, args);
@@ -4934,7 +4937,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if ((m_flags & TiffFlags.NOREADRAW) == TiffFlags.NOREADRAW)
             {
-                ErrorExt(m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
+                ErrorExt(this, m_clientdata, m_name, "Compression scheme does not support access to raw uncompressed data");
                 return -1;
             }
 

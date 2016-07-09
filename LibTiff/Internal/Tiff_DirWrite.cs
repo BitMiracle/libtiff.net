@@ -453,7 +453,7 @@ namespace BitMiracle.LibTiff.Classic
             m_header.tiff_diroff = 0;
             if ((m_flags & TiffFlags.NOBIGTIFF) == TiffFlags.NOBIGTIFF)
             {
-                ErrorExt(Clientdata(),
+                ErrorExt(this, Clientdata(),
                     "TIFFCheckBigTIFF", "File > 2^32 and NO BigTIFF specified");
                 return false;
             }
@@ -465,8 +465,7 @@ namespace BitMiracle.LibTiff.Classic
             if (!seekOK(0) ||
                 !writeHeaderOK(m_header))
             {
-                ErrorExt(Clientdata(), m_name,
-                    "Error updating TIFF header", "");
+                ErrorExt(this, Clientdata(), m_name, "Error updating TIFF header", "");
                 return (false);
             }
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
@@ -480,8 +479,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (!seekOK((long)diroff) ||
                     !readShortOK(out dircount))
                 {
-                    ErrorExt(m_clientdata, m_name,
-                        "Error reading TIFF directory");
+                    ErrorExt(this, m_clientdata, m_name, "Error reading TIFF directory");
                     return false;
                 }
                 if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
@@ -494,8 +492,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (!seekOK((long)diroff + sizeof(short)) ||
                     !readDirEntryOk(data, (ulong)dircount, false))
                 {
-                    ErrorExt(m_clientdata, m_name,
-                        "Error reading TIFF directory");
+                    ErrorExt(this, m_clientdata, m_name, "Error reading TIFF directory");
                     return false;
                 }
                 diroffB = m_dataoff;
@@ -726,8 +723,7 @@ namespace BitMiracle.LibTiff.Classic
                     !seekOK((long)diroffB + sizeof(long)) ||
                     !writeDirEntryOK(dataB, (long)dircountB, true))
                 {
-                    ErrorExt(m_clientdata, m_name,
-                        "Error writing TIFF directory!");
+                    ErrorExt(this, m_clientdata, m_name, "Error writing TIFF directory!");
                     return false;
                 }
 
@@ -748,8 +744,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (!seekOK((issubifd != 0 ? subifdlinkB++ : (long)dirlinkB)) ||
                     !writeDirOffOK((long)diroffB, true))
                 {
-                    ErrorExt(m_clientdata, m_name,
-                        "Error writing directory link!");
+                    ErrorExt(this, m_clientdata, m_name, "Error writing directory link!");
                     return false;
                 }
 
@@ -767,8 +762,7 @@ namespace BitMiracle.LibTiff.Classic
                 if (!seekOK(issubifd != 0 ? (uint)subifdlink++ : (uint)dirlink) ||
                     !readUIntOK(out diroff))
                 {
-                    ErrorExt(m_clientdata, m_name,
-                        "Error writing directory link!");
+                    ErrorExt(this, m_clientdata, m_name, "Error writing directory link!");
                     return false;
                 }
 
@@ -785,8 +779,7 @@ namespace BitMiracle.LibTiff.Classic
 
             if (!seekOK((long)dirlinkB) || !writelongOK((long)diroffB))
             {
-                ErrorExt(Clientdata(), m_name,
-                    "Error writing directory link", "");
+                ErrorExt(this, Clientdata(), m_name, "Error writing directory link", "");
                 return false;
             }
 
