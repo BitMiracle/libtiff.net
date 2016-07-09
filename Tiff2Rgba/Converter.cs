@@ -97,7 +97,7 @@ namespace BitMiracle.Tiff2Rgba
 
             if (result == null)
             {
-                Tiff.Error(inImage.FileName(), "Source image not tiled");
+                Tiff.Error(inImage, inImage.FileName(), "Source image not tiled");
                 return false;
             }
 
@@ -109,7 +109,7 @@ namespace BitMiracle.Tiff2Rgba
             int rasterByteSize = multiply(raster_size, sizeof(int));
             if (raster_size == 0 || rasterByteSize == 0)
             {
-                Tiff.Error(inImage.FileName(),
+                Tiff.Error(inImage, inImage.FileName(),
                     "Can't allocate buffer for raster of size {0}x{1}", tile_width, tile_height);
                 return false;
             }
@@ -158,7 +158,7 @@ namespace BitMiracle.Tiff2Rgba
             FieldValue[] result = inImage.GetField(TiffTag.ROWSPERSTRIP);
             if (result == null)
             {
-                Tiff.Error(inImage.FileName(), "Source image not in strips");
+                Tiff.Error(inImage, inImage.FileName(), "Source image not in strips");
                 return false;
             }
 
@@ -170,7 +170,7 @@ namespace BitMiracle.Tiff2Rgba
             int rasterByteSize = multiply(raster_size, sizeof(int));
             if (raster_size == 0 || rasterByteSize == 0)
             {
-                Tiff.Error(inImage.FileName(),
+                Tiff.Error(inImage, inImage.FileName(),
                     "Can't allocate buffer for raster of size {0}x{1}", width, m_rowsPerStrip);
                 return false;
             }
@@ -230,7 +230,7 @@ namespace BitMiracle.Tiff2Rgba
             /* XXX: Check the integer overflow. */
             if (width == 0 || height == 0 || (pixel_count / width) != height)
             {
-                Tiff.Error(inImage.FileName(),
+                Tiff.Error(inImage, inImage.FileName(),
                     "Malformed input file; can't allocate buffer for raster of {0}x{1} size",
                     width, height);
                 return false;

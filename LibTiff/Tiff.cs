@@ -4581,6 +4581,8 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
+#if THREAD_SAFE_LIBTIFF
+#endif
         public static void Error(string method, string format, params object[] args)
         {
             Error(null, method, format, args);

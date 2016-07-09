@@ -638,13 +638,13 @@ namespace BitMiracle.TiffCP
             {
                 if (!inImage.ReadScanline(buf, row, 0) && !m_ignore)
                 {
-                    Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
+                    Tiff.Error(inImage, inImage.FileName(), "Error, can't read scanline {0}", row);
                     return false;
                 }
 
                 if (!outImage.WriteScanline(buf, row, 0))
                 {
-                    Tiff.Error(outImage.FileName(), "Error, can't write scanline {0}", row);
+                    Tiff.Error(outImage, outImage.FileName(), "Error, can't write scanline {0}", row);
                     return false;
                 }
             }
@@ -682,13 +682,13 @@ namespace BitMiracle.TiffCP
                         {
                             if (!inImage.ReadScanline(buf, row, 0) && !m_ignore)
                             {
-                                Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
+                                Tiff.Error(inImage, inImage.FileName(), "Error, can't read scanline {0}", row);
                                 return false;
                             }
 
                             if (!m_bias.ReadScanline(biasBuf, row, 0) && !m_ignore)
                             {
-                                Tiff.Error(inImage.FileName(), "Error, can't read biased scanline {0}", row);
+                                Tiff.Error(inImage, inImage.FileName(), "Error, can't read biased scanline {0}", row);
                                 return false;
                             }
 
@@ -707,7 +707,7 @@ namespace BitMiracle.TiffCP
 
                             if (!outImage.WriteScanline(buf, row, 0))
                             {
-                                Tiff.Error(outImage.FileName(), "Error, can't write scanline {0}", row);
+                                Tiff.Error(outImage, outImage.FileName(), "Error, can't write scanline {0}", row);
                                 return false;
                             }
                         }
@@ -717,18 +717,18 @@ namespace BitMiracle.TiffCP
                     }
                     else
                     {
-                        Tiff.Error(inImage.FileName(), "No support for biasing {0} bit pixels\n", sampleBits);
+                        Tiff.Error(inImage, inImage.FileName(), "No support for biasing {0} bit pixels\n", sampleBits);
                         return false;
                     }
                 }
 
-                Tiff.Error(inImage.FileName(), "Bias image {0},{1}\nis not the same size as {2},{3}\n",
+                Tiff.Error(inImage, inImage.FileName(), "Bias image {0},{1}\nis not the same size as {2},{3}\n",
                     m_bias.FileName(), m_bias.CurrentDirectory(), inImage.FileName(), inImage.CurrentDirectory());
                 return false;
             }
             else
             {
-                Tiff.Error(inImage.FileName(), "Can't bias {0},{1} as it has >1 Sample/Pixel\n",
+                Tiff.Error(inImage, inImage.FileName(), "Can't bias {0},{1} as it has >1 Sample/Pixel\n",
                     inImage.FileName(), inImage.CurrentDirectory());
                 return false;
             }
@@ -748,13 +748,13 @@ namespace BitMiracle.TiffCP
                 int cc = (row + m_rowsperstrip > imagelength) ? inImage.VStripSize(imagelength - row) : stripsize;
                 if (inImage.ReadEncodedStrip(s, buf, 0, cc) < 0 && !m_ignore)
                 {
-                    Tiff.Error(inImage.FileName(), "Error, can't read strip {0}", s);
+                    Tiff.Error(inImage, inImage.FileName(), "Error, can't read strip {0}", s);
                     return false;
                 }
 
                 if (outImage.WriteEncodedStrip(s, buf, cc) < 0)
                 {
-                    Tiff.Error(outImage.FileName(), "Error, can't write strip {0}", s);
+                    Tiff.Error(outImage, outImage.FileName(), "Error, can't write strip {0}", s);
                     return false;
                 }
 
@@ -777,13 +777,13 @@ namespace BitMiracle.TiffCP
                 {
                     if (!inImage.ReadScanline(buf, row, s) && !m_ignore)
                     {
-                        Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
+                        Tiff.Error(inImage, inImage.FileName(), "Error, can't read scanline {0}", row);
                         return false;
                     }
 
                     if (!outImage.WriteScanline(buf, row, s))
                     {
-                        Tiff.Error(outImage.FileName(), "Error, can't write scanline {0}", row);
+                        Tiff.Error(outImage, outImage.FileName(), "Error, can't write scanline {0}", row);
                         return false;
                     }
                 }
@@ -807,7 +807,7 @@ namespace BitMiracle.TiffCP
                 {
                     if (!inImage.ReadScanline(inbuf, row, 0) && !m_ignore)
                     {
-                        Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
+                        Tiff.Error(inImage, inImage.FileName(), "Error, can't read scanline {0}", row);
                         return false;
                     }
 
@@ -823,7 +823,7 @@ namespace BitMiracle.TiffCP
 
                     if (!outImage.WriteScanline(outbuf, row, s))
                     {
-                        Tiff.Error(outImage.FileName(), "Error, can't write scanline {0}", row);
+                        Tiff.Error(outImage, outImage.FileName(), "Error, can't write scanline {0}", row);
                         return false;
                     }
                 }
@@ -847,7 +847,7 @@ namespace BitMiracle.TiffCP
                 {
                     if (!inImage.ReadScanline(inbuf, row, s) && !m_ignore)
                     {
-                        Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
+                        Tiff.Error(inImage, inImage.FileName(), "Error, can't read scanline {0}", row);
                         return false;
                     }
 
@@ -864,7 +864,7 @@ namespace BitMiracle.TiffCP
 
                 if (!outImage.WriteScanline(outbuf, row, 0))
                 {
-                    Tiff.Error(outImage.FileName(), "Error, can't write scanline {0}", row);
+                    Tiff.Error(outImage, outImage.FileName(), "Error, can't write scanline {0}", row);
                     return false;
                 }
             }
@@ -962,7 +962,7 @@ namespace BitMiracle.TiffCP
             }
             else
             {
-                Tiff.Error(inImage.FileName(), "Error, no space for image buffer");
+                Tiff.Error(inImage, inImage.FileName(), "Error, no space for image buffer");
             }
 
             return status;
@@ -1121,7 +1121,7 @@ namespace BitMiracle.TiffCP
             {
                 if (!inImage.ReadScanline(buffer, offset, row, 0) && !m_ignore)
                 {
-                    Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
+                    Tiff.Error(inImage, inImage.FileName(), "Error, can't read scanline {0}", row);
                     return false;
                 }
 
@@ -1146,7 +1146,7 @@ namespace BitMiracle.TiffCP
                 {
                     if (!inImage.ReadScanline(scanline, row, s) && !m_ignore)
                     {
-                        Tiff.Error(inImage.FileName(), "Error, can't read scanline {0}", row);
+                        Tiff.Error(inImage, inImage.FileName(), "Error, can't read scanline {0}", row);
                         return false;
                     }
 
@@ -1192,7 +1192,7 @@ namespace BitMiracle.TiffCP
                 {
                     if (inImage.ReadTile(tilebuf, 0, col, row, 0, 0) < 0 && !m_ignore)
                     {
-                        Tiff.Error(inImage.FileName(), "Error, can't read tile at {0} {1}", col, row);
+                        Tiff.Error(inImage, inImage.FileName(), "Error, can't read tile at {0} {1}", col, row);
                         return false;
                     }
 
@@ -1248,7 +1248,7 @@ namespace BitMiracle.TiffCP
                     {
                         if (inImage.ReadTile(tilebuf, 0, col, row, 0, s) < 0 && !m_ignore)
                         {
-                            Tiff.Error(inImage.FileName(), "Error, can't read tile at {0} {1}, sample {2}", col, row, s);
+                            Tiff.Error(inImage, inImage.FileName(), "Error, can't read tile at {0} {1}, sample {2}", col, row, s);
                             return false;
                         }
 
@@ -1289,7 +1289,7 @@ namespace BitMiracle.TiffCP
 
                 if (outImage.WriteEncodedStrip(strip++, buffer, offset, stripsize) < 0)
                 {
-                    Tiff.Error(outImage.FileName(), "Error, can't write strip {0}", strip - 1);
+                    Tiff.Error(outImage, outImage.FileName(), "Error, can't write strip {0}", strip - 1);
                     return false;
                 }
 
@@ -1319,7 +1319,7 @@ namespace BitMiracle.TiffCP
                     cpContigBufToSeparateBuf(obuf, buf, row * rowsize + s, nrows, imagewidth, 0, 0, spp, 1);
                     if (outImage.WriteEncodedStrip(strip++, obuf, stripsize) < 0)
                     {
-                        Tiff.Error(outImage.FileName(), "Error, can't write strip {0}", strip - 1);
+                        Tiff.Error(outImage, outImage.FileName(), "Error, can't write strip {0}", strip - 1);
                         return false;
                     }
                 }
@@ -1366,7 +1366,7 @@ namespace BitMiracle.TiffCP
 
                     if (outImage.WriteTile(obuf, col, row, 0, 0) < 0)
                     {
-                        Tiff.Error(outImage.FileName(), "Error, can't write tile at {0} {1}", col, row);
+                        Tiff.Error(outImage, outImage.FileName(), "Error, can't write tile at {0} {1}", col, row);
                         return false;
                     }
 
@@ -1428,7 +1428,7 @@ namespace BitMiracle.TiffCP
 
                         if (outImage.WriteTile(obuf, col, row, 0, s) < 0)
                         {
-                            Tiff.Error(outImage.FileName(), "Error, can't write tile at {0} {1} sample {2}", col, row, s);
+                            Tiff.Error(outImage, outImage.FileName(), "Error, can't write tile at {0} {1} sample {2}", col, row, s);
                             return false;
                         }
                     }
@@ -1489,7 +1489,7 @@ namespace BitMiracle.TiffCP
                         outImage.SetField(tag, result[0]);
                     break;
                 default:
-                    Tiff.Error(inImage.FileName(),
+                    Tiff.Error(inImage, inImage.FileName(),
                         "Data type {0} is not supported, tag {1} skipped.", tag, type);
                     break;
             }

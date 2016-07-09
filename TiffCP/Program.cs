@@ -272,7 +272,7 @@ namespace BitMiracle.TiffCP
 
                         if (initialDirectoryOffset != 0 && !inImage.SetSubDirectory(initialDirectoryOffset))
                         {
-                            Tiff.Error(inImage.FileName(), "Error, setting subdirectory at 0x{0:x}", initialDirectoryOffset);
+                            Tiff.Error(inImage, inImage.FileName(), "Error, setting subdirectory at 0x{0:x}", initialDirectoryOffset);
                             break;
                         }
 

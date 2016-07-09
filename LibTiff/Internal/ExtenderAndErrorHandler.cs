@@ -54,7 +54,9 @@ namespace BitMiracle.LibTiff.Classic
             }
             catch (Exception e)
             {
+#if !THREAD_SAFE_LIBTIFF
                 Error(module, "Failed to open '{0}'. {1}", fileName, e.Message);
+#endif
                 return null;
             }
 

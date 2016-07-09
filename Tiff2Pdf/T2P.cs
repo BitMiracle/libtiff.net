@@ -416,7 +416,7 @@ namespace BitMiracle.Tiff2Pdf
 
                 if (!input.SetDirectory(i))
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                         "Can't set directory {0} of input file {1}", i, input.FileName());
                     return;
                 }
@@ -580,7 +580,7 @@ namespace BitMiracle.Tiff2Pdf
             m_tiff_width = result[0].ToInt();
             if (m_tiff_width == 0)
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for {0} with zero width", input.FileName());
+                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for {0} with zero width", input.FileName());
                 m_error = true;
                 return;
             }
@@ -589,7 +589,7 @@ namespace BitMiracle.Tiff2Pdf
             m_tiff_length = result[0].ToInt();
             if (m_tiff_length == 0)
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "No support for {0} with zero length", input.FileName());
                 m_error = true;
                 return;
@@ -598,7 +598,7 @@ namespace BitMiracle.Tiff2Pdf
             result = input.GetField(TiffTag.COMPRESSION);
             if (result == null)
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "No support for {0} with no compression tag", input.FileName());
                 m_error = true;
                 return;
@@ -608,7 +608,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if (!input.IsCodecConfigured(m_tiff_compression))
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "No support for {0} with compression type {1}:  not configured", 
                     input.FileName(), m_tiff_compression);
                 m_error = true;
@@ -632,7 +632,7 @@ namespace BitMiracle.Tiff2Pdf
                     m_tiff_bitspersample = 1;
                     break;
                 default:
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                         "No support for {0} with {1} bits per sample",
                         input.FileName(), m_tiff_bitspersample);
                     m_error = true;
@@ -643,7 +643,7 @@ namespace BitMiracle.Tiff2Pdf
             m_tiff_samplesperpixel = result[0].ToShort();
             if (m_tiff_samplesperpixel > 4)
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "No support for {0} with {1} samples per pixel", input.FileName(), m_tiff_samplesperpixel);
                 m_error = true;
                 return;
@@ -668,7 +668,7 @@ namespace BitMiracle.Tiff2Pdf
                         break;
 
                     default:
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                             "No support for {0} with sample format {1}", input.FileName(), f);
                         m_error = true;
                         return;
@@ -681,7 +681,7 @@ namespace BitMiracle.Tiff2Pdf
             result = input.GetField(TiffTag.PHOTOMETRIC);
             if (result == null)
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "No support for {0} with no photometric interpretation tag", input.FileName());
                 m_error = true;
                 return;
@@ -768,7 +768,7 @@ namespace BitMiracle.Tiff2Pdf
                             }
                             else
                             {
-                                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                     "No support for RGB image {0} with {1} samples per pixel", 
                                     input.FileName(), m_tiff_samplesperpixel);
                                 m_error = true;
@@ -777,7 +777,7 @@ namespace BitMiracle.Tiff2Pdf
                         }
                         else
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "No support for RGB image {0} with {1} samples per pixel",
                                 input.FileName(), m_tiff_samplesperpixel);
                             m_error = true;
@@ -789,7 +789,7 @@ namespace BitMiracle.Tiff2Pdf
                     {
                         if (m_tiff_samplesperpixel != 1)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "No support for palletized image {0} with not one sample per pixel",
                                 input.FileName());
                             m_error = true;
@@ -802,7 +802,7 @@ namespace BitMiracle.Tiff2Pdf
                         result = input.GetField(TiffTag.COLORMAP);
                         if (result == null)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                                 "Palletized image {0} has no color map", input.FileName());
                             m_error = true;
                             return;
@@ -842,7 +842,7 @@ namespace BitMiracle.Tiff2Pdf
                         {
                             if ((InkSet)result[0].ToByte() != InkSet.CMYK)
                             {
-                                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                     "No support for {0} because its inkset is not CMYK", input.FileName());
                                 m_error = true;
                                 return;
@@ -855,7 +855,7 @@ namespace BitMiracle.Tiff2Pdf
                         }
                         else
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "No support for {0} because it has {1} samples per pixel",
                                 input.FileName(), m_tiff_samplesperpixel);
                             m_error = true;
@@ -866,7 +866,7 @@ namespace BitMiracle.Tiff2Pdf
                     {
                         if (m_tiff_samplesperpixel != 1)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "No support for palletized CMYK image {0} with not one sample per pixel",
                                 input.FileName());
                             m_error = true;
@@ -879,7 +879,7 @@ namespace BitMiracle.Tiff2Pdf
                         result = input.GetField(TiffTag.COLORMAP);
                         if (result == null)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Palletized image {0} has no color map", input.FileName());
                             m_error = true;
                             return;
@@ -948,12 +948,12 @@ namespace BitMiracle.Tiff2Pdf
 
                 case Photometric.LOGL:
                 case Photometric.LOGLUV:
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for {0} with photometric interpretation LogL/LogLuv", input.FileName());
                     m_error = true;
                     return;
                 default:
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for {0} with photometric interpretation {1}",
                         input.FileName(), m_tiff_photometric);
                     m_error = true;
@@ -979,7 +979,7 @@ namespace BitMiracle.Tiff2Pdf
                         m_pdf_sample = t2p_sample_t.T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG;
                         if (m_tiff_bitspersample != 8)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "No support for {0} with separated planar configuration and {1} bits per sample",
                                 input.FileName(), m_tiff_bitspersample);
                             m_error = true;
@@ -988,7 +988,7 @@ namespace BitMiracle.Tiff2Pdf
                         break;
                     
                     default:
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "No support for {0} with planar configuration {1}",
                             input.FileName(), m_tiff_planar);
                         m_error = true;
@@ -1079,7 +1079,7 @@ namespace BitMiracle.Tiff2Pdf
             {
                 if (m_tiff_planar == PlanarConfig.SEPARATE)
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for {0} with JPEG compression and separated planar configuration",
                         input.FileName());
                     m_error = true;
@@ -1227,7 +1227,7 @@ namespace BitMiracle.Tiff2Pdf
                     result = input.GetField(TiffTag.STRIPBYTECOUNTS);
                     if (result == null)
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Input file {0} missing field: STRIPBYTECOUNTS",
                             input.FileName());
                         m_error = true;
@@ -1369,7 +1369,7 @@ namespace BitMiracle.Tiff2Pdf
                         int striplength = input.ReadRawStrip(i, stripbuffer, 0, -1);
                         if (!process_jpeg_strip(stripbuffer, striplength, buffer, ref bufferoffset, stripcount, i, m_tiff_length))
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Can't process JPEG data in input file {0}", input.FileName());
                             m_error = true;
                             return 0;
@@ -1394,7 +1394,7 @@ namespace BitMiracle.Tiff2Pdf
                     int read = input.ReadEncodedStrip(i, buffer, bufferoffset, stripsize);
                     if (read == -1)
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Error on decoding strip {0} of {1}", i, input.FileName());
                         m_error = true;
                         return 0;
@@ -1426,7 +1426,7 @@ namespace BitMiracle.Tiff2Pdf
                             int read = input.ReadEncodedStrip(i + j * stripcount, samplebuffer, samplebufferoffset, sepstripsize);
                             if (read == -1)
                             {
-                                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                     "Error on decoding strip {0} of {1}", 
                                     i + j * stripcount, input.FileName());
                                 m_error = true;
@@ -1452,7 +1452,7 @@ namespace BitMiracle.Tiff2Pdf
                         int read = input.ReadEncodedStrip(i, buffer, bufferoffset, stripsize);
                         if (read == -1)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Error on decoding strip {0} of {1}", i, input.FileName());
                             m_error = true;
                             return 0;
@@ -1483,7 +1483,7 @@ namespace BitMiracle.Tiff2Pdf
                         int[] buffer32 = Tiff.ByteArrayToInts(buffer, 0, m_tiff_width * m_tiff_length * 4);
                         if (!input.ReadRGBAImageOriented(m_tiff_width, m_tiff_length, buffer32, Orientation.TOPLEFT, false))
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Can't use ReadRGBAImageOriented to extract RGB image from {0}",
                                 input.FileName());
                             m_error = true;
@@ -1542,7 +1542,7 @@ namespace BitMiracle.Tiff2Pdf
 
                     if (!m_output.SetField(TiffTag.COMPRESSION, Compression.JPEG))
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Unable to use JPEG compression for input {0} and output {1}",
                             input.FileName(), m_output.FileName());
                         m_error = true;
@@ -1592,7 +1592,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if (bufferoffset == -1)
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                Tiff.Error(m_output, Tiff2PdfConstants.TIFF2PDF_MODULE,
                     "Error writing encoded strip to output PDF {0}", m_output.FileName());
                 m_error = true;
                 return 0;
@@ -1681,7 +1681,7 @@ namespace BitMiracle.Tiff2Pdf
                 int read = input.ReadEncodedTile(tile, buffer, bufferoffset, m_tiff_datasize);
                 if (read == -1)
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "Error on decoding tile {0} of {1}", tile, input.FileName());
                     m_error = true;
                     return 0;
@@ -1702,7 +1702,7 @@ namespace BitMiracle.Tiff2Pdf
                         int read = input.ReadEncodedTile(tile + i * tilecount, samplebuffer, samplebufferoffset, septilesize);
                         if (read == -1)
                         {
-                            Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Error on decoding tile {0} of {1}", 
                                 tile + i * tilecount, input.FileName());
                             m_error = true;
@@ -1722,7 +1722,7 @@ namespace BitMiracle.Tiff2Pdf
                     int read = input.ReadEncodedTile(tile, buffer, bufferoffset, m_tiff_datasize);
                     if (read == -1)
                     {
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Error on decoding tile {0} of {1}",
                             tile, input.FileName());
                         m_error = true;
@@ -1738,7 +1738,7 @@ namespace BitMiracle.Tiff2Pdf
 
                 if ((m_pdf_sample & t2p_sample_t.T2P_SAMPLE_YCBCR_TO_RGB) != 0)
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                         "No support for YCbCr to RGB in tile for {0}", input.FileName());
                     m_error = true;
                     return 0;
@@ -1843,7 +1843,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if (bufferoffset == -1)
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                Tiff.Error(m_output, Tiff2PdfConstants.TIFF2PDF_MODULE,
                     "Error writing encoded tile to output PDF {0}", m_output.FileName());
                 m_error = true;
                 return 0;
@@ -1862,7 +1862,7 @@ namespace BitMiracle.Tiff2Pdf
             disable(m_output);
             if (!m_output.WriteDirectory())
             {
-                Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                Tiff.Error(m_output, Tiff2PdfConstants.TIFF2PDF_MODULE,
                     "Error writing virtual directory to output PDF {0}",
                     m_output.FileName());
                 m_error = true;

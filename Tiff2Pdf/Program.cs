@@ -354,7 +354,7 @@ namespace BitMiracle.Tiff2Pdf
 
                 if ((args.Length - 1) > argn)
                 {
-                    Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for multiple input files");
+                    Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, "No support for multiple input files");
                     tiff2pdf_usage();
                     return;
                 }
@@ -386,7 +386,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (output == null)
                     {
                         t2p.m_outputfile.Dispose();
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize output descriptor");
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, "Can't initialize output descriptor");
                         return;
                     }
 
@@ -406,7 +406,7 @@ namespace BitMiracle.Tiff2Pdf
                     if (t2p.m_error)
                     {
                         t2p.m_outputfile.Dispose();
-                        Tiff.Error(Tiff2PdfConstants.TIFF2PDF_MODULE, "An error occurred creating output PDF file");
+                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE, "An error occurred creating output PDF file");
                         return;
                     }
                 }
