@@ -4582,6 +4582,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para>
         /// </remarks>
 #if THREAD_SAFE_LIBTIFF
+        [Obsolete("This method does nothing in non-thread safe build and should not be used. Use Error overload that accepts Tiff object.")]
 #endif
         public static void Error(string method, string format, params object[] args)
         {
@@ -4709,6 +4710,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
+#if THREAD_SAFE_LIBTIFF
+        [Obsolete("This method does nothing in non-thread safe build and should not be used. Use Warning overload that accepts Tiff object.")]
+#endif
         public static void Warning(string method, string format, params object[] args)
         {
             Warning(null, method, format, args);
@@ -4775,6 +4779,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <see cref="SetErrorHandler"/> to override the default error and warning handler.
         /// </para>
         /// </remarks>
+#if THREAD_SAFE_LIBTIFF
+        [Obsolete("This method does nothing in non-thread safe build and should not be used. Use WarningExt overload that accepts Tiff object.")]
+#endif
         public static void WarningExt(object clientData, string method, string format, params object[] args)
         {
             WarningExt(null, clientData, method, format, args);

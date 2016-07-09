@@ -638,7 +638,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
         private bool OJPEGSetupDecode()
         {
-            Tiff.WarningExt(m_tif.m_clientdata, "OJPEGSetupDecode",
+            Tiff.WarningExt(m_tif, m_tif.m_clientdata, "OJPEGSetupDecode",
                 "Depreciated and troublesome old-style JPEG compression mode, please convert to new-style JPEG compression and notify vendor of writing software");
 
             return true;

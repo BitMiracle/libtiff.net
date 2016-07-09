@@ -627,7 +627,7 @@ namespace BitMiracle.Tiff2Pdf
                 case 8:
                     break;
                 case 0:
-                    Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                    Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                         "Image {0} has 0 bits per sample, assuming 1", input.FileName());
                     m_tiff_bitspersample = 1;
                     break;
@@ -651,7 +651,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_tiff_samplesperpixel == 0)
             {
-                Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                     "Image {0} has 0 samples per pixel, assuming 1", input.FileName());
                 m_tiff_samplesperpixel = 1;
             }
@@ -755,14 +755,14 @@ namespace BitMiracle.Tiff2Pdf
                                         break;
                                     }
                                     
-                                    Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                                    Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                         "RGB image {0} has 4 samples per pixel, assuming RGBA", input.FileName());
                                     break;
                                 }
 
                                 m_pdf_colorspace = t2p_cs_t.T2P_CS_CMYK;
                                 m_pdf_switchdecode ^= true;
-                                Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE, 
+                                Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE, 
                                     "RGB image {0} has 4 samples per pixel, assuming inverse CMYK", input.FileName());
                                 break;
                             }
@@ -967,7 +967,7 @@ namespace BitMiracle.Tiff2Pdf
                 switch (m_tiff_planar)
                 {
                     case 0:
-                        Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Image {0} has planar configuration 0, assuming 1", input.FileName());
                         m_tiff_planar = PlanarConfig.CONTIG;
                         break;
@@ -1001,7 +1001,7 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_tiff_orientation > Orientation.LEFTBOT)
             {
-                Tiff.Warning(Tiff2PdfConstants.TIFF2PDF_MODULE,
+                Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                     "Image {0} has orientation {1}, assuming 0", 
                     input.FileName(), m_tiff_orientation);
                 m_tiff_orientation = 0;

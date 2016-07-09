@@ -268,7 +268,7 @@ namespace BitMiracle.TiffCP
             {
                 case Orientation.BOTRIGHT:
                 case Orientation.RIGHTBOT:
-                    Tiff.Warning(inImage.FileName(), "using bottom-left orientation");
+                    Tiff.Warning(inImage, inImage.FileName(), "using bottom-left orientation");
                     m_orientation = Orientation.BOTLEFT;
                     break;
 
@@ -279,7 +279,7 @@ namespace BitMiracle.TiffCP
                 case Orientation.TOPRIGHT:
                 case Orientation.RIGHTTOP:
                 default:
-                    Tiff.Warning(inImage.FileName(), "using top-left orientation");
+                    Tiff.Warning(inImage, inImage.FileName(), "using top-left orientation");
                     m_orientation = Orientation.TOPLEFT;
                     break;
 
