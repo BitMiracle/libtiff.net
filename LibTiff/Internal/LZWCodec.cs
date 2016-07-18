@@ -415,9 +415,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_dec_restart = 0;
             }
 
+            short code = 0;
             while (count > 0)
             {
-                short code;
                 NextCode(out code, compat);
                 if (code == CODE_EOI)
                     break;
@@ -602,6 +602,15 @@ namespace BitMiracle.LibTiff.Classic.Internal
 
             if (count > 0)
             {
+                // Special processing for LZW-encoded strips that are not terminated with EOI code. Try to treat such
+                // images as successfully processed.
+                if (code == CODE_EOI)
+                {
+                    Tiff.WarningExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
+                        callerName + ": Not enough data at scanline {0} (short {1} bytes)", m_tif.m_row, count);
+                    return true;
+                }
+
                 Tiff.ErrorExt(m_tif, m_tif.m_clientdata, m_tif.m_name,
                     callerName + ": Not enough data at scanline {0} (short {1} bytes)",
                     m_tif.m_row, count);
