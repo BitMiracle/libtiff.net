@@ -79,7 +79,11 @@ namespace BitMiracle.LibTiff.Classic
         {
             get
             {
+#if !NETSTANDARD
                 Assembly assembly = Assembly.GetExecutingAssembly();
+#else
+                Assembly assembly = typeof(Tiff).GetTypeInfo().Assembly;
+#endif
                 string assemblyVersion = assembly.FullName.Split(',')[1];
                 return assemblyVersion.Split('=')[1];
             }
@@ -482,7 +486,13 @@ namespace BitMiracle.LibTiff.Classic
             m_stream.Close(m_clientdata);
 
             if (m_fileStream != null)
+            {
+#if !NETSTANDARD
                 m_fileStream.Close();
+#else
+                m_fileStream.Dispose();
+#endif
+            }
         }
 
         /// <summary>

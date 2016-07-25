@@ -67,6 +67,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The value converted to short.</returns>
         public short ToShort()
         {
+#if !NETSTANDARD
             switch (Type.GetTypeCode(m_value.GetType()))
             {
                 case TypeCode.UInt16:
@@ -75,6 +76,14 @@ namespace BitMiracle.LibTiff.Classic
                 case TypeCode.Int16:
                     return (short)m_value;
             }
+#else
+            Type valueType = m_value.GetType();
+            if (valueType == typeof(ushort))
+                return (short)((ushort)m_value);
+
+            if (valueType == typeof(short))
+                return (short)m_value;
+#endif
 
             return Convert.ToInt16(m_value);
         }
@@ -88,6 +97,7 @@ namespace BitMiracle.LibTiff.Classic
 #endif
         public ushort ToUShort()
         {
+#if !NETSTANDARD
             switch (Type.GetTypeCode(m_value.GetType()))
             {
                 case TypeCode.UInt16:
@@ -96,6 +106,14 @@ namespace BitMiracle.LibTiff.Classic
                 case TypeCode.Int16:
                     return (ushort)((short)m_value);
             }
+#else
+            Type valueType = m_value.GetType();
+            if (valueType == typeof(ushort))
+                return (ushort)m_value;
+
+            if (valueType == typeof(short))
+                return (ushort)((short)m_value);
+#endif
 
             return Convert.ToUInt16(m_value);
         }
@@ -106,13 +124,24 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The value converted to int.</returns>
         public int ToInt()
         {
+#if !NETSTANDARD
             switch (Type.GetTypeCode(m_value.GetType()))
             {
                 case TypeCode.UInt32:
                     return (int)((uint)m_value);
+
                 case TypeCode.Int32:
                     return (int)m_value;
             }
+#else
+            Type valueType = m_value.GetType();
+            if (valueType == typeof(uint))
+                return (int)((uint)m_value);
+
+            if (valueType == typeof(int))
+                return (int)m_value;
+#endif
+
             return Convert.ToInt32(m_value);
         }
 
@@ -125,6 +154,7 @@ namespace BitMiracle.LibTiff.Classic
 #endif
         public uint ToUInt()
         {
+#if !NETSTANDARD
             switch (Type.GetTypeCode(m_value.GetType()))
             {
                 case TypeCode.UInt32:
@@ -133,6 +163,14 @@ namespace BitMiracle.LibTiff.Classic
                 case TypeCode.Int32:
                     return (uint)((int)m_value);
             }
+#else
+            Type valueType = m_value.GetType();
+            if (valueType == typeof(uint))
+                return (uint)m_value;
+
+            if (valueType == typeof(int))
+                return (uint)((int)m_value);
+#endif
 
             return Convert.ToUInt32(m_value);
         }
@@ -142,15 +180,25 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The value converted to long.</returns>
         public long ToLong()
         {
-          switch (Type.GetTypeCode(m_value.GetType()))
-          {
-            case TypeCode.UInt64:
-              return (int)((uint)m_value);
+#if !NETSTANDARD
+            switch (Type.GetTypeCode(m_value.GetType()))
+            {
+                case TypeCode.UInt64:
+                    return (int)((uint)m_value);
 
-            case TypeCode.Int64:
-              return (int)m_value;
-          }
-          return Convert.ToInt64(m_value);
+                case TypeCode.Int64:
+                    return (int)m_value;
+            }
+#else
+            Type valueType = m_value.GetType();
+            if (valueType == typeof(ulong))
+                return (long)((ulong)m_value);
+
+            if (valueType == typeof(long))
+                return (long)m_value;
+#endif
+
+            return Convert.ToInt64(m_value);
         }
 
         /// <summary>

@@ -8,7 +8,7 @@
 using System;
 using System.Globalization;
 
-#if SILVERLIGHT
+#if NETSTANDARD
 using Console = System.Diagnostics.Debug;
 #endif
 

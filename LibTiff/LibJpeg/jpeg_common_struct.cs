@@ -128,7 +128,14 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-                AssemblyName assemblyName = new AssemblyName(Assembly.GetExecutingAssembly().FullName);
+#if !NETSTANDARD
+                Assembly assembly = Assembly.GetExecutingAssembly();
+#else
+                Assembly assembly = typeof(jpeg_common_struct).GetTypeInfo().Assembly;
+#endif
+
+                AssemblyName assemblyName = new AssemblyName(assembly.FullName);
+
                 Version version = assemblyName.Version;
                 string versionString = version.Major.ToString(CultureInfo.InvariantCulture) +
                     "." + version.Minor.ToString(CultureInfo.InvariantCulture);
