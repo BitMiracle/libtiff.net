@@ -174,10 +174,17 @@ namespace ComponentAce.Compression.Libs.zlib
             byte[] tmp = new byte[len];
             return ((long) SupportClass.ReadInput(BaseStream, tmp, 0, tmp.Length));
         }
-        
+
+#if !NETSTANDARD
         public override void  Close()
         {
             in_Renamed.Close();
         }
+#else
+        public void  Close()
+        {
+            in_Renamed.Dispose();
+        }
+#endif
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4982B49A-C3D7-4C2A-82D9-195CAC547CFE}"
 	ProjectSection(SolutionItems) = preProject
@@ -49,6 +49,8 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SilverlightTestApplication.
 		ProjOutputReferences = "{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}|ClientBin|false;"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff.NetStandard", "LibTiff.NetStandard\LibTiff.NetStandard.csproj", "{D5D653B2-296C-483C-80D5-6573CD30C4E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{27BFF6F3-A5AD-478C-91F4-D012B5E11850}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27BFF6F3-A5AD-478C-91F4-D012B5E11850}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{27BFF6F3-A5AD-478C-91F4-D012B5E11850}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

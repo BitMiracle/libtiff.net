@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace ComponentAce.Compression.Libs.zlib
 {
@@ -154,7 +155,7 @@ namespace ComponentAce.Compression.Libs.zlib
         /// <returns>The new array of bytes</returns>
         public static byte[] ToByteArray(System.String sourceString)
         {
-            return System.Text.UTF8Encoding.UTF8.GetBytes(sourceString);
+            return UTF8Encoding.UTF8.GetBytes(sourceString);
         }
 
         /// <summary>
@@ -164,7 +165,7 @@ namespace ComponentAce.Compression.Libs.zlib
         /// <returns>The new array of chars</returns>
         public static char[] ToCharArray(byte[] byteArray) 
         {
-            return System.Text.UTF8Encoding.UTF8.GetChars(byteArray);
+            return UTF8Encoding.UTF8.GetChars(byteArray);
         }
 
 
