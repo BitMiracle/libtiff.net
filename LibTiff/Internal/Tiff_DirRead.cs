@@ -780,7 +780,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             if (dir.tdir_count == 1)
             {
-                v[0] = (int)dir.tdir_offset;
+                v[0] = (long)dir.tdir_offset;
                 return true;
             }
 
