@@ -25,6 +25,8 @@ namespace BitMiracle.LibTiff.Classic
             0xffffffff,     // TIFF_FLOAT
             0xffffffff,     // TIFF_DOUBLE
             0xffffffff,     // TIFF_IFD
+            0,
+            0,
             0xffffffff,     // TIFF_LONG8
             0xffffffff,     // TIFF_SLONG8
             0xffffffff,     // TIFF_IFD8
@@ -46,6 +48,8 @@ namespace BitMiracle.LibTiff.Classic
             0,      // TIFF_FLOAT
             0,      // TIFF_DOUBLE
             0,      // TIFF_IFD
+            0,
+            0,
             0,      // TIFF_LONG8
             0,      // TIFF_SLONG8
             0,      // TIFF_IFD8
@@ -67,6 +71,8 @@ namespace BitMiracle.LibTiff.Classic
             0,  // TIFF_FLOAT
             0,  // TIFF_DOUBLE
             0,  // TIFF_IFD
+            0,
+            0,
             0,  // TIFF_LONG8
             0,  // TIFF_SLONG8
             0,  // TIFF_IFD8

@@ -285,6 +285,20 @@ namespace BitMiracle.LibTiff.Classic
                     Buffer.BlockCopy(temp, 0, result, 0, result.Length);
                     return result;
                 }
+                else if (m_value is long[])
+                {
+                    long[] temp = m_value as long[];
+                    byte[] result = new byte[temp.Length * sizeof(long)];
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
+                    return result;
+                }
+                else if (m_value is ulong[])
+                {
+                    ulong[] temp = m_value as ulong[];
+                    byte[] result = new byte[temp.Length * sizeof(ulong)];
+                    Buffer.BlockCopy(temp, 0, result, 0, result.Length);
+                    return result;
+                }
                 else if (m_value is float[])
                 {
                     float[] temp = m_value as float[];
