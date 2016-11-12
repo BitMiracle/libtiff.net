@@ -18,37 +18,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Rgba", "Tiff2Rgba\Tiff2Rgba.csproj", "{0609056D-F67F-463A-AE18-FD3C60FF273D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff.Silverlight", "LibTiff.Silverlight\LibTiff.Silverlight.csproj", "{36ABA74B-D395-48D7-8EBD-C6E7CA90CDF4}"
-	ProjectSection(ProjectDependencies) = postProject
-		{281EF657-40C0-432D-8AC4-E9ADDFD792B2} = {281EF657-40C0-432D-8AC4-E9ADDFD792B2}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilverlightTestApplication", "SilverlightTest\SilverlightTestApplication\SilverlightTestApplication.csproj", "{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}"
-EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SilverlightTestApplication.Web", "SilverlightTest\SilverlightTestApplication.Web\", "{27BFF6F3-A5AD-478C-91F4-D012B5E11850}"
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		Debug.AspNetCompiler.VirtualPath = "/SilverlightTestApplication.Web"
-		Debug.AspNetCompiler.PhysicalPath = "SilverlightTest\SilverlightTestApplication.Web\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\SilverlightTestApplication.Web\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/SilverlightTestApplication.Web"
-		Release.AspNetCompiler.PhysicalPath = "SilverlightTest\SilverlightTestApplication.Web\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\SilverlightTestApplication.Web\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "59385"
-		VWDDynamicPort = "false"
-		SlnRelativePath = "SilverlightTest\SilverlightTestApplication.Web\"
-		DefaultWebSiteLanguage = "Visual C#"
-		ProjOutputReferences = "{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}|ClientBin|false;"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff.NetStandard", "LibTiff.NetStandard\LibTiff.NetStandard.csproj", "{D5D653B2-296C-483C-80D5-6573CD30C4E1}"
 EndProject
 Global
@@ -77,18 +46,6 @@ Global
 		{0609056D-F67F-463A-AE18-FD3C60FF273D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0609056D-F67F-463A-AE18-FD3C60FF273D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0609056D-F67F-463A-AE18-FD3C60FF273D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{36ABA74B-D395-48D7-8EBD-C6E7CA90CDF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{36ABA74B-D395-48D7-8EBD-C6E7CA90CDF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{36ABA74B-D395-48D7-8EBD-C6E7CA90CDF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{36ABA74B-D395-48D7-8EBD-C6E7CA90CDF4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BFB2D60-19DF-4BE8-B04C-E5BA77D8F1A6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{27BFF6F3-A5AD-478C-91F4-D012B5E11850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{27BFF6F3-A5AD-478C-91F4-D012B5E11850}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{27BFF6F3-A5AD-478C-91F4-D012B5E11850}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{27BFF6F3-A5AD-478C-91F4-D012B5E11850}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
