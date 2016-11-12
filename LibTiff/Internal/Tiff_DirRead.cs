@@ -580,7 +580,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (count >= 5)
                         v[4] = (byte)((dir.tdir_offset >> 24) & 0xff);
 
-                    if (count == 4)
+                    if (count >= 4)
                         v[3] = (byte)((dir.tdir_offset >> 32) & 0xff);
 
                     if (count >= 3)
@@ -606,7 +606,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (count >= 5)
                         v[4] = (byte)((dir.tdir_offset >> 32) & 0xff);
 
-                    if (count == 4)
+                    if (count >= 4)
                         v[3] = (byte)((dir.tdir_offset >> 24) & 0xff);
 
                     if (count >= 3)

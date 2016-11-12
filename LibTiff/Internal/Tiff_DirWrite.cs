@@ -567,7 +567,7 @@ namespace BitMiracle.LibTiff.Classic
                                     if (dirB.tdir_count >= 3)
                                         dirB.tdir_offset |= ((ulong)cp[2] << 16);
 
-                                    if (dirB.tdir_count == 4)
+                                    if (dirB.tdir_count >= 4)
                                         dirB.tdir_offset |= ((ulong)cp[3] << 24);
 
                                     if (dirB.tdir_count >= 5)
@@ -576,7 +576,7 @@ namespace BitMiracle.LibTiff.Classic
                                     if (dirB.tdir_count >= 6)
                                         dirB.tdir_offset |= ((ulong)cp[5] << 40);
 
-                                    if (dirB.tdir_count == 7)
+                                    if (dirB.tdir_count >= 7)
                                         dirB.tdir_offset |= ((ulong)cp[6] << 48);
 
                                     if (dirB.tdir_count >= 8)
@@ -1311,7 +1311,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (dir.tdir_count >= 3)
                         dir.tdir_offset |= ((ulong)cp[2] << 16);
 
-                    if (dir.tdir_count == 4)
+                    if (dir.tdir_count >= 4)
                         dir.tdir_offset |= ((ulong)cp[3] << 24);
 
                     if (dir.tdir_count >= 5)
@@ -1320,7 +1320,7 @@ namespace BitMiracle.LibTiff.Classic
                     if (dir.tdir_count >= 6)
                         dir.tdir_offset |= ((ulong)cp[5] << 40);
 
-                    if (dir.tdir_count == 7)
+                    if (dir.tdir_count >= 7)
                         dir.tdir_offset |= ((ulong)cp[6] << 48);
 
                     if (dir.tdir_count >= 8)
