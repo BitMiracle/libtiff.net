@@ -89,11 +89,11 @@ Namespace BitMiracle.LibTiff.Samples
         Private Shared m_parentExtender As Tiff.TiffExtendProc
 
         Public Shared Sub TagExtender(tif As Tiff)
-            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_GDAL_METADATA, _
+            Dim info As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_GDAL_METADATA, _
               TiffFieldInfo.Variable, TiffFieldInfo.Variable, TiffType.ASCII, FieldBit.[Custom], _
               True, False, &quot;GDALMetadata&quot;)}
 
-            tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length)
+            tif.MergeFieldInfo(info, info.Length)
 
             If m_parentExtender IsNot Nothing Then
                 m_parentExtender.Invoke(tif)

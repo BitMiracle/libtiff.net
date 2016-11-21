@@ -183,7 +183,7 @@ Namespace BitMiracle.LibTiff.Samples
         Private Shared m_parentExtender As Tiff.TiffExtendProc
 
         Public Shared Sub TagExtender(ByVal tif As Tiff)
-            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_ASCIITAG, TiffFieldInfo.Variable, _
+            Dim info As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_ASCIITAG, TiffFieldInfo.Variable, _
              TiffFieldInfo.Variable, TiffType.ASCII, FieldBit.[Custom], True, False, &quot;MyTag&quot;), _
              New TiffFieldInfo(TIFFTAG_SHORTTAG, 2, 2, TiffType.[SHORT], FieldBit.[Custom], False, _
              True, &quot;ShortTag&quot;), New TiffFieldInfo(TIFFTAG_LONGTAG, 2, 2, TiffType.[LONG], FieldBit.[Custom], False, _
@@ -194,7 +194,7 @@ Namespace BitMiracle.LibTiff.Samples
              New TiffFieldInfo(TIFFTAG_BYTETAG, 2, 2, TiffType.[BYTE], FieldBit.[Custom], False, _
              True, &quot;ByteTag&quot;)}
 
-            tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length)
+            tif.MergeFieldInfo(info, info.Length)
 
             If m_parentExtender IsNot Nothing Then
                 m_parentExtender.Invoke(tif)
