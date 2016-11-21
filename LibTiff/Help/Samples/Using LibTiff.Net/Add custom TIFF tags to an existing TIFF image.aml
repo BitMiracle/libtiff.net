@@ -29,8 +29,9 @@ namespace BitMiracle.LibTiff.Samples
         {
             TiffFieldInfo[] tiffFieldInfo = 
             {
-                new TiffFieldInfo(TIFFTAG_GDAL_METADATA, -1, -1, TiffType.ASCII,
-                    FieldBit.Custom, true, false, &quot;GDALMetadata&quot;),
+                new TiffFieldInfo(TIFFTAG_GDAL_METADATA, TiffFieldInfo.Variable, 
+                    TiffFieldInfo.Variable, TiffType.ASCII, FieldBit.Custom, 
+                    true, false, &quot;GDALMetadata&quot;),
             };
 
             tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
@@ -88,8 +89,9 @@ Namespace BitMiracle.LibTiff.Samples
         Private Shared m_parentExtender As Tiff.TiffExtendProc
 
         Public Shared Sub TagExtender(tif As Tiff)
-            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_GDAL_METADATA, -1, -1, TiffType.ASCII, FieldBit.[Custom], True, _
-             False, &quot;GDALMetadata&quot;)}
+            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_GDAL_METADATA, _
+              TiffFieldInfo.Variable, TiffFieldInfo.Variable, TiffType.ASCII, FieldBit.[Custom], _
+              True, False, &quot;GDALMetadata&quot;)}
 
             tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length)
 

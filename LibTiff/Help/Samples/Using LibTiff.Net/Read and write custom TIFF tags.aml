@@ -34,7 +34,8 @@ namespace BitMiracle.LibTiff.Samples
         {
             TiffFieldInfo[] tiffFieldInfo = 
             {
-                new TiffFieldInfo(TIFFTAG_ASCIITAG, -1, -1, TiffType.ASCII, FieldBit.Custom, true, false, &quot;MyTag&quot;),
+                new TiffFieldInfo(TIFFTAG_ASCIITAG, TiffFieldInfo.Variable, TiffFieldInfo.Variable, 
+                      TiffType.ASCII, FieldBit.Custom, true, false, &quot;MyTag&quot;),
                 new TiffFieldInfo(TIFFTAG_SHORTTAG, 2, 2, TiffType.SHORT, FieldBit.Custom, false, true, &quot;ShortTag&quot;),
                 new TiffFieldInfo(TIFFTAG_LONGTAG, 2, 2, TiffType.LONG, FieldBit.Custom, false, true, &quot;LongTag&quot;),
                 new TiffFieldInfo(TIFFTAG_RATIONALTAG, 2, 2, TiffType.RATIONAL, FieldBit.Custom, false, true, &quot;RationalTag&quot;),
@@ -182,8 +183,9 @@ Namespace BitMiracle.LibTiff.Samples
         Private Shared m_parentExtender As Tiff.TiffExtendProc
 
         Public Shared Sub TagExtender(ByVal tif As Tiff)
-            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_ASCIITAG, -1, -1, TiffType.ASCII, FieldBit.[Custom], True, _
-             False, &quot;MyTag&quot;), New TiffFieldInfo(TIFFTAG_SHORTTAG, 2, 2, TiffType.[SHORT], FieldBit.[Custom], False, _
+            Dim tiffFieldInfo As TiffFieldInfo() = {New TiffFieldInfo(TIFFTAG_ASCIITAG, TiffFieldInfo.Variable, _
+             TiffFieldInfo.Variable, TiffType.ASCII, FieldBit.[Custom], True, False, &quot;MyTag&quot;), _
+             New TiffFieldInfo(TIFFTAG_SHORTTAG, 2, 2, TiffType.[SHORT], FieldBit.[Custom], False, _
              True, &quot;ShortTag&quot;), New TiffFieldInfo(TIFFTAG_LONGTAG, 2, 2, TiffType.[LONG], FieldBit.[Custom], False, _
              True, &quot;LongTag&quot;), New TiffFieldInfo(TIFFTAG_RATIONALTAG, 2, 2, TiffType.RATIONAL, FieldBit.[Custom], False, _
              True, &quot;RationalTag&quot;), New TiffFieldInfo(TIFFTAG_FLOATTAG, 2, 2, TiffType.FLOAT, FieldBit.[Custom], False, _
