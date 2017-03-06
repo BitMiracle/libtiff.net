@@ -20,6 +20,7 @@
     <DefineConstants>TRACE;DEBUG;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\BitMiracle.LibTiff.NET40.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <DefineConstants>TRACE;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\BitMiracle.LibTiff.NET40.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -498,9 +500,18 @@
     <Compile Include="..\LibTiff\zLib\ZStreamException.cs">
       <Link>zLib\ZStreamException.cs</Link>
     </Compile>
+    <Compile Include="AssemblyVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>cd "$(SolutionDir)"
+update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"
+</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>"$(SolutionDir)replace.vbs" O: Overload: "$(TargetDir)BitMiracle.LibTiff.NET.xml"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
