@@ -85,7 +85,9 @@ namespace BitMiracle.LibTiff.Classic
             if (stream == null)
                 throw new ArgumentException("Can't get underlying stream to close");
 
-#if !NETSTANDARD
+#if NETFX_CORE
+            stream.Dispose();
+#elif !NETSTANDARD
             stream.Close();
 #else
             stream.Dispose();

@@ -175,7 +175,12 @@ namespace ComponentAce.Compression.Libs.zlib
             return ((long) SupportClass.ReadInput(BaseStream, tmp, 0, tmp.Length));
         }
 
-#if !NETSTANDARD
+#if NETFX_CORE
+        public void Close()
+        {
+            in_Renamed.Dispose();
+        }
+#elif !NETSTANDARD
         public override void  Close()
         {
             in_Renamed.Close();

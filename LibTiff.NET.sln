@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiff2Rgba", "Tiff2Rgba\Tiff
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff.NetStandard", "LibTiff.NetStandard\LibTiff.NetStandard.csproj", "{D5D653B2-296C-483C-80D5-6573CD30C4E1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTiff.UWP", "LibTiff.UWP\LibTiff.UWP.csproj", "{2BCEAA4F-47E1-44EC-8C92-09C99179A721}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5D653B2-296C-483C-80D5-6573CD30C4E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BCEAA4F-47E1-44EC-8C92-09C99179A721}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BCEAA4F-47E1-44EC-8C92-09C99179A721}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BCEAA4F-47E1-44EC-8C92-09C99179A721}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BCEAA4F-47E1-44EC-8C92-09C99179A721}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

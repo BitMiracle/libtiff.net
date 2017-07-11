@@ -128,7 +128,9 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-#if !NETSTANDARD
+#if NETFX_CORE
+                Assembly assembly = typeof(jpeg_common_struct).GetTypeInfo().Assembly;
+#elif !NETSTANDARD
                 Assembly assembly = Assembly.GetExecutingAssembly();
 #else
                 Assembly assembly = typeof(jpeg_common_struct).GetTypeInfo().Assembly;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace BitMiracle.LibTiff.Classic
@@ -34,12 +35,23 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public virtual void ErrorHandler(Tiff tif, string method, string format, params object[] args)
         {
+#if NETFX_CORE
+            Debug.Write("ERROR ");
+            if (method != null)
+                Debug.Write("{0}: ", method);
+
+            Debug.Write(string.Format(format, args));
+            Debug.Write("\n");
+#else
             TextWriter stderr = Console.Error;
             if (method != null)
                 stderr.Write("{0}: ", method);
 
             stderr.Write(format, args);
             stderr.Write("\n");
+#endif
+
+
         }
 
         /// <summary>
@@ -78,6 +90,15 @@ namespace BitMiracle.LibTiff.Classic
         /// </remarks>
         public virtual void WarningHandler(Tiff tif, string method, string format, params object[] args)
         {
+#if NETFX_CORE
+            Debug.Write("WARNING ");
+            if (method != null)
+                Debug.Write("{0}: ", method);
+
+            Debug.Write(string.Format(format, args));
+            Debug.Write("\n");
+#else
+
             TextWriter stderr = Console.Error;
             if (method != null)
                 stderr.Write("{0}: ", method);
@@ -85,6 +106,7 @@ namespace BitMiracle.LibTiff.Classic
             stderr.Write("Warning, ");
             stderr.Write(format, args);
             stderr.Write("\n");
+#endif
         }
 
         /// <summary>
