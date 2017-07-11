@@ -79,7 +79,9 @@ namespace BitMiracle.LibTiff.Classic
         {
             get
             {
-#if !NETSTANDARD
+#if NETFX_CORE
+                Assembly assembly = typeof(Tiff).GetTypeInfo().Assembly;
+#elif !NETSTANDARD
                 Assembly assembly = Assembly.GetExecutingAssembly();
 #else
                 Assembly assembly = typeof(Tiff).GetTypeInfo().Assembly;
@@ -487,7 +489,9 @@ namespace BitMiracle.LibTiff.Classic
 
             if (m_fileStream != null)
             {
-#if !NETSTANDARD
+#if NETFX_CORE
+                m_fileStream.Dispose();
+#elif !NETSTANDARD
                 m_fileStream.Close();
 #else
                 m_fileStream.Dispose();
@@ -939,12 +943,12 @@ namespace BitMiracle.LibTiff.Classic
                     result[0].Set(td.td_imagedepth);
                     break;
                 case TiffTag.YCBCRCOEFFICIENTS:
-                    {
-                        // defaults are from CCIR Recommendation 601-1
-                        float[] ycbcrcoeffs = new float[3];
-                        ycbcrcoeffs[0] = 0.299f;
-                        ycbcrcoeffs[1] = 0.587f;
-                        ycbcrcoeffs[2] = 0.114f;
+                {
+                    // defaults are from CCIR Recommendation 601-1
+                    float[] ycbcrcoeffs = new float[3];
+                    ycbcrcoeffs[0] = 0.299f;
+                    ycbcrcoeffs[1] = 0.587f;
+                    ycbcrcoeffs[2] = 0.114f;
 
                         result = new FieldValue[1];
                         result[0].Set(ycbcrcoeffs);

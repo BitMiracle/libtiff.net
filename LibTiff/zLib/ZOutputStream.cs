@@ -194,8 +194,10 @@ namespace ComponentAce.Compression.Libs.zlib
             z = null;
         }
 
-#if !NETSTANDARD
-        public override void  Close()
+#if NETFX_CORE
+        public void Close()
+#elif !NETSTANDARD
+        public override void Close()
 #else
         public void Close()
 #endif
@@ -214,7 +216,9 @@ namespace ComponentAce.Compression.Libs.zlib
             {
                 end();
 
-#if !NETSTANDARD
+#if NETFX_CORE
+                out_Renamed.Dispose();
+#elif !NETSTANDARD
                 out_Renamed.Close();
 #else
                 out_Renamed.Dispose();

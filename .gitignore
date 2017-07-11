@@ -61,3 +61,4 @@ TestCase/Output.Tiff/*.tif
 LibTiff/AssemblyVersion.cs
 LibTiff.NetStandard/AssemblyVersion.cs
 LibTiff.NET40/AssemblyVersion.cs
+LibTiff.UWP/AssemblyVersion.cs

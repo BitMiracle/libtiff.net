@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 
 #if NETSTANDARD
@@ -134,8 +135,12 @@ namespace BitMiracle.LibJpeg.Classic
             // Create the message
             string buffer = format_message();
 
-            // Send it to console, adding a newline */
+#if NETFX_CORE
+            Debug.WriteLine(buffer);
+#else
+// Send it to console, adding a newline */
             Console.WriteLine(buffer);
+#endif
         }
 
         /// <summary>
