@@ -805,15 +805,32 @@ namespace BitMiracle.LibTiff.Classic
             if (fetchData(dir, l) != 0)
             {
                 int offset = 0;
-                int[] pair = new int[2];
+                if (dir.tdir_type == TiffType.SRATIONAL)
+                {
+                    int[] pair = new int[2];
+                    for (int i = 0; i < dir.tdir_count; i++)
+                    {
+                        pair[0] = readInt(l, offset);
+                        offset += sizeof(int);
+                        pair[1] = readInt(l, offset);
+                        offset += sizeof(int);
+
+                        ok = cvtRational(dir, pair[0], pair[1], out v[i]);
+                        if (!ok)
+                            break;
+                    }
+                    return ok;
+                }
+
+                uint[] pair2 = new uint[2];
                 for (int i = 0; i < dir.tdir_count; i++)
                 {
-                    pair[0] = readInt(l, offset);
-                    offset += sizeof(int);
-                    pair[1] = readInt(l, offset);
-                    offset += sizeof(int);
+                    pair2[0] = (uint)readInt(l, offset);
+                    offset += sizeof(uint);
+                    pair2[1] = (uint)readInt(l, offset);
+                    offset += sizeof(uint);
 
-                    ok = cvtRational(dir, pair[0], pair[1], out v[i]);
+                    ok = cvtRational(dir, pair2[0], pair2[1], out v[i]);
                     if (!ok)
                         break;
                 }
