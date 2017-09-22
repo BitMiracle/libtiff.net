@@ -229,8 +229,9 @@ namespace BitMiracle.LibTiff.Classic
         /// Latin1 encoding encoder.</remarks>
         public override string ToString()
         {
-            if (m_value is byte[])
-                return Tiff.Latin1Encoding.GetString(m_value as byte[]);
+            byte[] bytes = m_value as byte[];
+            if (bytes != null)
+                return Tiff.Latin1Encoding.GetString(bytes);
 
             return Convert.ToString(m_value);
         }
