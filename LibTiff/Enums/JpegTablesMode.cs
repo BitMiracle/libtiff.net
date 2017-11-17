@@ -6,6 +6,7 @@ namespace BitMiracle.LibTiff.Classic
     /// Jpeg Tables Mode.<br/>
     /// Possible values for <see cref="TiffTag"/>.JPEGTABLESMODE tag.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
     [Flags]
 #if EXPOSE_LIBTIFF
     public
