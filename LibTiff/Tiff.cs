@@ -183,7 +183,7 @@ namespace BitMiracle.LibTiff.Classic
         public void RegisterCodec(TiffCodec codec)
         {
             if (codec == null)
-                throw new ArgumentNullException("codec");
+                throw new ArgumentNullException(nameof(codec));
 
             codecList list = new codecList();
             list.codec = codec;

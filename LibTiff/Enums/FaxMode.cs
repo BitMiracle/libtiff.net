@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BitMiracle.LibTiff.Classic
 {
@@ -6,7 +7,7 @@ namespace BitMiracle.LibTiff.Classic
     /// Group 3/4 format control.<br/>
     /// Possible values for <see cref="TiffTag"/>.FAXMODE tag.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
+    [SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
     [Flags]
 #if EXPOSE_LIBTIFF
     public

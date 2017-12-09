@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BitMiracle.LibTiff.Classic
 {
@@ -56,6 +57,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to byte.
         /// </summary>
         /// <returns>The value converted to byte.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public byte ToByte()
         {
             return Convert.ToByte(m_value);
@@ -65,6 +67,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to short.
         /// </summary>
         /// <returns>The value converted to short.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public short ToShort()
         {
 #if !NETSTANDARD
@@ -95,6 +98,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
         [CLSCompliant(false)]
 #endif
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public ushort ToUShort()
         {
 #if !NETSTANDARD
@@ -122,6 +126,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to int.
         /// </summary>
         /// <returns>The value converted to int.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public int ToInt()
         {
 #if !NETSTANDARD
@@ -152,6 +157,7 @@ namespace BitMiracle.LibTiff.Classic
 #if EXPOSE_LIBTIFF
         [CLSCompliant(false)]
 #endif
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public uint ToUInt()
         {
 #if !NETSTANDARD
@@ -178,6 +184,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to long.
         /// </summary>
         /// <returns>The value converted to long.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public long ToLong()
         {
 #if !NETSTANDARD
@@ -205,6 +212,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to float.
         /// </summary>
         /// <returns>The value converted to float.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public float ToFloat()
         {
             return Convert.ToSingle(m_value);
@@ -214,6 +222,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Retrieves value converted to double.
         /// </summary>
         /// <returns>The value converted to double.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public double ToDouble()
         {
             return Convert.ToDouble(m_value);
@@ -227,6 +236,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </returns>
         /// <remarks>If value is a byte array, then it gets converted to string using
         /// Latin1 encoding encoder.</remarks>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider")]
         public override string ToString()
         {
             byte[] bytes = m_value as byte[];

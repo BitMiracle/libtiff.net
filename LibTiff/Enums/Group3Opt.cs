@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BitMiracle.LibTiff.Classic
 {
@@ -7,7 +8,7 @@ namespace BitMiracle.LibTiff.Classic
     /// Possible values for <see cref="TiffTag"/>.GROUP3OPTIONS / TiffTag.T4OPTIONS and
     /// TiffTag.GROUP4OPTIONS / TiffTag.T6OPTIONS tags.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
+    [SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
     [Flags]
 #if EXPOSE_LIBTIFF
     public
