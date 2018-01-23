@@ -410,7 +410,11 @@ namespace BitMiracle.LibTiff.Classic
         /// <item><term>h</term>
         /// <description>Read TIFF header only, do not load the first image directory. That could
         /// be useful in case of the broken first directory. We can open the file and proceed to
-        /// the other directories.</description></item></list>
+        /// the other directories.</description></item>
+        /// <item><term>4</term>
+        /// <description>ClassicTIFF for creating a file</description>
+        /// <item><term>8</term>
+        /// <description>BigTIFF for creating a file</description></item></list>
         /// <para>
         /// By default the library will create new files with the native byte-order of the CPU on
         /// which the application is run. This ensures optimal performance and is portable to any
