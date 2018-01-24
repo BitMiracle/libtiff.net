@@ -412,9 +412,9 @@ namespace BitMiracle.LibTiff.Classic
         /// be useful in case of the broken first directory. We can open the file and proceed to
         /// the other directories.</description></item>
         /// <item><term>4</term>
-        /// <description>ClassicTIFF for creating a file</description>
+        /// <description>Create classic TIFF file</description></item>
         /// <item><term>8</term>
-        /// <description>BigTIFF for creating a file</description></item></list>
+        /// <description>Create BigTIFF file</description></item></list>
         /// <para>
         /// By default the library will create new files with the native byte-order of the CPU on
         /// which the application is run. This ensures optimal performance and is portable to any
