@@ -813,7 +813,11 @@ namespace BitMiracle.LibTiff.Classic
                     pair[1] = readInt(l, offset);
                     offset += sizeof(int);
 
-                    ok = cvtRational(dir, pair[0], pair[1], out v[i]);
+                    if (dir.tdir_type == TiffType.SRATIONAL)
+                        ok = cvtRational(dir, pair[0], pair[1], out v[i]);
+                    else
+                        ok = cvtRational(dir, (uint)pair[0], (uint)pair[1], out v[i]);
+
                     if (!ok)
                         break;
                 }
