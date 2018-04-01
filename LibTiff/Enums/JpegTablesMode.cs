@@ -18,12 +18,12 @@ namespace BitMiracle.LibTiff.Classic
         /// None.
         /// </summary>
         NONE = 0,
-        
+
         /// <summary>
         /// Include quantization tables.
         /// </summary>
         QUANT = 0x0001,
-        
+
         /// <summary>
         /// Include Huffman tables.
         /// </summary>

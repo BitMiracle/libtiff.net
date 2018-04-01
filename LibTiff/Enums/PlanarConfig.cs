@@ -13,12 +13,12 @@
         /// Unknown (uninitialized).
         /// </summary>
         UNKNOWN = 0,
-        
+
         /// <summary>
         /// Single image plane.
         /// </summary>
         CONTIG = 1,
-        
+
         /// <summary>
         /// Separate planes of data.
         /// </summary>

@@ -13,7 +13,7 @@
         /// Cyan-magenta-yellow-black color.
         /// </summary>
         CMYK = 1,
-        
+
         /// <summary>
         /// Multi-ink or hi-fi color.
         /// </summary>

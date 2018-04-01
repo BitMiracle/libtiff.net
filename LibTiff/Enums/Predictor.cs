@@ -13,12 +13,12 @@
         /// No prediction scheme used.
         /// </summary>
         NONE = 1,
-        
+
         /// <summary>
         /// Horizontal differencing.
         /// </summary>
         HORIZONTAL = 2,
-        
+
         /// <summary>
         /// Floating point predictor.
         /// </summary>

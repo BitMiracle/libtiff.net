@@ -13,12 +13,12 @@
         /// Unspecified data.
         /// </summary>
         UNSPECIFIED = 0,
-        
+
         /// <summary>
         /// Associated alpha data.
         /// </summary>
         ASSOCALPHA = 1,
-        
+
         /// <summary>
         /// Unassociated alpha data.
         /// </summary>

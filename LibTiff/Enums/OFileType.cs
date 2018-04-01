@@ -18,7 +18,7 @@
         /// Reduced size image data.
         /// </summary>
         REDUCEDIMAGE = 2,
-        
+
         /// <summary>
         /// One page of many.
         /// </summary>

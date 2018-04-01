@@ -18,7 +18,7 @@
         /// Receiver regenerated lines.
         /// </summary>
         REGENERATED = 1,
-        
+
         /// <summary>
         /// Uncorrected errors exist.
         /// </summary>

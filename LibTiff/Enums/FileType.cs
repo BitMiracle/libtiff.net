@@ -18,12 +18,12 @@ namespace BitMiracle.LibTiff.Classic
         /// Reduced resolution version.
         /// </summary>
         REDUCEDIMAGE = 0x1,
-        
+
         /// <summary>
         /// One page of many.
         /// </summary>
         PAGE = 0x2,
-        
+
         /// <summary>
         /// Transparency mask.
         /// </summary>

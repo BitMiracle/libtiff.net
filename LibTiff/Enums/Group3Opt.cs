@@ -19,17 +19,17 @@ namespace BitMiracle.LibTiff.Classic
         /// Unknown (uninitialized).
         /// </summary>
         UNKNOWN = -1,
-        
+
         /// <summary>
         /// 2-dimensional coding.
         /// </summary>
         ENCODING2D = 0x1,
-        
+
         /// <summary>
         /// Data not compressed.
         /// </summary>
         UNCOMPRESSED = 0x2,
-        
+
         /// <summary>
         /// Fill to byte boundary.
         /// </summary>
