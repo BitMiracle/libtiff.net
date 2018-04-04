@@ -181,7 +181,7 @@ namespace BitMiracle.LibTiff.Classic
 
             // Read in TIFF header.
 
-            if ((tif.m_mode & O_TRUNC) != 0 || !tif.readHeaderOk(ref tif.m_header))
+            if ((tif.m_mode & O_TRUNC) != 0 || !tif.readHeaderOkWithoutExceptions(ref tif.m_header))
             {
                 if (tif.m_mode == O_RDONLY)
                 {

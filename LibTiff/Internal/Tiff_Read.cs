@@ -195,6 +195,19 @@ namespace BitMiracle.LibTiff.Classic
             }
         }
 
+        private bool readHeaderOkWithoutExceptions(ref TiffHeader header)
+        {
+            try
+            {
+                return readHeaderOk(ref header);
+            }
+            catch
+            {
+                WarningExt(this, m_clientdata, m_name, "Failed to read header");
+                return false;
+            }
+        }
+
         private bool readHeaderOk(ref TiffHeader header)
         {
             bool res = readShortOK(out header.tiff_magic);
