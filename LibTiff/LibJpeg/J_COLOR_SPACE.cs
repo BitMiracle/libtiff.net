@@ -35,7 +35,7 @@
         JCS_CMYK,
 
         /// <summary>
-        ///  Y/Cb/Cr/K 
+        ///  Y/Cb/Cr/K
         /// </summary>
         JCS_YCCK,
 

@@ -4,8 +4,8 @@
  */
 
 using System;
-using System.Reflection;
 using System.Globalization;
+using System.Reflection;
 
 namespace BitMiracle.LibJpeg.Classic
 {
@@ -54,7 +54,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         /// <seealso cref="jpeg_compress_struct"/>
         /// <seealso cref="jpeg_decompress_struct"/>
-        public jpeg_common_struct() : this(new jpeg_error_mgr())
+        protected jpeg_common_struct() : this(new jpeg_error_mgr())
         {
         }
 
@@ -64,7 +64,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <param name="errorManager">The error manager.</param>
         /// <seealso cref="jpeg_compress_struct"/>
         /// <seealso cref="jpeg_decompress_struct"/>
-        public jpeg_common_struct(jpeg_error_mgr errorManager)
+        protected jpeg_common_struct(jpeg_error_mgr errorManager)
         {
             Err = errorManager;
         }
@@ -94,7 +94,7 @@ namespace BitMiracle.LibJpeg.Classic
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 m_progress = value;
             }
@@ -114,7 +114,7 @@ namespace BitMiracle.LibJpeg.Classic
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
 
                 m_err = value;
             }
@@ -155,7 +155,7 @@ namespace BitMiracle.LibJpeg.Classic
         {
             get
             {
-                return "Copyright (C) 2008-2017, Bit Miracle";
+                return "Copyright (C) 2008-2018, Bit Miracle";
             }
         }
 

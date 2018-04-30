@@ -1,6 +1,6 @@
 ﻿/*
  * This file contains the JPEG system-independent memory management
- * routines. 
+ * routines.
  */
 
 /*
