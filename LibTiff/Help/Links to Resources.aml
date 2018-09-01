@@ -25,20 +25,20 @@
             A copy of the TIFF 6.0 specification is available from
             <externalLink>
                 <linkText>Adobe</linkText>
-                <linkUri>http://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf</linkUri>
+                <linkUri>https://web.archive.org/web/20150503034412/http://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
-            or from the
+            or from
             <externalLink>
-                <linkText>libtiff ftp site.</linkText>
-                <linkUri>ftp://ftp.remotesensing.org/pub/libtiff/doc/TIFF6.pdf</linkUri>
+                <linkText>ITU.</linkText>
+                <linkUri>https://www.itu.int/itudoc/itu-t/com16/tiff-fx/docs/tiff6.pdf</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
         </para>
         <para>
             <externalLink>
                 <linkText>Draft TIFF Technical Note #2</linkText>
-                <linkUri>http://www.remotesensing.org/libtiff/TIFFTechNote2.html</linkUri>
+                <linkUri>http://www.simplesystems.org/libtiff/TIFFTechNote2.html</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
             covers problems with the TIFF 6.0 design for embedding JPEG-compressed
@@ -48,7 +48,7 @@
         <para>
             <externalLink>
                 <linkText>TIFF Specification Supplement 1</linkText>
-                <linkUri>http://partners.adobe.com/public/developer/en/tiff/TIFFPM6.pdf</linkUri>
+                <linkUri>https://web.archive.org/web/20150503034412/http://partners.adobe.com/public/developer/en/tiff/TIFFPM6.pdf</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
         </para>
@@ -63,7 +63,7 @@
             Other Adobe information on TIFF can be retrieved
             <externalLink>
                 <linkText>from here.</linkText>
-                <linkUri>http://partners.adobe.com/public/developer/tiff/index.html</linkUri>
+                <linkUri>https://web.archive.org/web/20150503034412/http://partners.adobe.com/public/developer/tiff/index.html</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
         </para>

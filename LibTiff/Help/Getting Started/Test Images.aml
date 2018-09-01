@@ -11,8 +11,8 @@
             Also, LibTiff.Net supports test images for libtiff library. The latest archive of test
             images for libtiff is located at
             <externalLink>
-                <linkText>ftp://ftp.remotesensing.org/pub/libtiff/pics-3.8.0.tar.gz</linkText>
-                <linkUri>ftp://ftp.remotesensing.org/pub/libtiff/pics-3.8.0.tar.gz</linkUri>
+                <linkText>ftp://ftp.simplesystems.org/pub/libtiff/pics-3.8.0.tar.gz</linkText>
+                <linkUri>ftp://ftp.simplesystems.org/pub/libtiff/pics-3.8.0.tar.gz</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>.            
         </para>
