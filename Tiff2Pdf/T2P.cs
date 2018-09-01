@@ -2845,8 +2845,9 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_pdf_image_interpolate)
                 written += writeToFile("\n/Interpolate true");
-            
-            if (m_pdf_switchdecode && !(m_pdf_colorspace == t2p_cs_t.T2P_CS_BILEVEL && m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4))
+
+            bool iccBased = (m_pdf_colorspace & t2p_cs_t.T2P_CS_ICCBASED) != 0;
+            if (!iccBased && m_pdf_switchdecode && !(m_pdf_colorspace == t2p_cs_t.T2P_CS_BILEVEL && m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4))
                 written += write_pdf_xobject_decode();
 
             written += write_pdf_xobject_stream_filter(tile);
