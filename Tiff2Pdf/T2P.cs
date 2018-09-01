@@ -1394,10 +1394,11 @@ namespace BitMiracle.Tiff2Pdf
                     int read = input.ReadEncodedStrip(i, buffer, bufferoffset, stripsize);
                     if (read == -1)
                     {
-                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Error on decoding strip {0} of {1}", i, input.FileName());
-                        m_error = true;
-                        return 0;
+
+                        bufferoffset += stripsize;
+                        continue;
                     }
 
                     bufferoffset += read;
@@ -1426,11 +1427,12 @@ namespace BitMiracle.Tiff2Pdf
                             int read = input.ReadEncodedStrip(i + j * stripcount, samplebuffer, samplebufferoffset, sepstripsize);
                             if (read == -1)
                             {
-                                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
+                                Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                     "Error on decoding strip {0} of {1}", 
                                     i + j * stripcount, input.FileName());
-                                m_error = true;
-                                return 0;
+
+                                samplebufferoffset += sepstripsize;
+                                continue;
                             }
                             samplebufferoffset += read;
                         }
@@ -1452,10 +1454,11 @@ namespace BitMiracle.Tiff2Pdf
                         int read = input.ReadEncodedStrip(i, buffer, bufferoffset, stripsize);
                         if (read == -1)
                         {
-                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Error on decoding strip {0} of {1}", i, input.FileName());
-                            m_error = true;
-                            return 0;
+
+                            bufferoffset += stripsize;
+                            continue;
                         }
 
                         bufferoffset += read;
