@@ -12,7 +12,7 @@
 
    Please read the file called "TIFF Technical Note #2" if you need to be
    convinced this compression scheme is bad and breaks TIFF. That document
-   is linked to from the LibTiff site <http://www.remotesensing.org/libtiff/>
+   is linked to from the LibTiff site <http://www.simplesystems.org/libtiff/>
    and from AWare Systems' TIFF section
    <http://www.awaresystems.be/imaging/tiff.html>. It is also absorbed
    in Adobe's specification supplements, marked "draft" up to this day, but

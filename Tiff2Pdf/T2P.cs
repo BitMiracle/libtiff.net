@@ -1394,10 +1394,11 @@ namespace BitMiracle.Tiff2Pdf
                     int read = input.ReadEncodedStrip(i, buffer, bufferoffset, stripsize);
                     if (read == -1)
                     {
-                        Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
+                        Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                             "Error on decoding strip {0} of {1}", i, input.FileName());
-                        m_error = true;
-                        return 0;
+
+                        bufferoffset += stripsize;
+                        continue;
                     }
 
                     bufferoffset += read;
@@ -1426,11 +1427,12 @@ namespace BitMiracle.Tiff2Pdf
                             int read = input.ReadEncodedStrip(i + j * stripcount, samplebuffer, samplebufferoffset, sepstripsize);
                             if (read == -1)
                             {
-                                Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
+                                Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                     "Error on decoding strip {0} of {1}", 
                                     i + j * stripcount, input.FileName());
-                                m_error = true;
-                                return 0;
+
+                                samplebufferoffset += sepstripsize;
+                                continue;
                             }
                             samplebufferoffset += read;
                         }
@@ -1452,10 +1454,11 @@ namespace BitMiracle.Tiff2Pdf
                         int read = input.ReadEncodedStrip(i, buffer, bufferoffset, stripsize);
                         if (read == -1)
                         {
-                            Tiff.Error(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
+                            Tiff.Warning(input, Tiff2PdfConstants.TIFF2PDF_MODULE,
                                 "Error on decoding strip {0} of {1}", i, input.FileName());
-                            m_error = true;
-                            return 0;
+
+                            bufferoffset += stripsize;
+                            continue;
                         }
 
                         bufferoffset += read;
@@ -2842,8 +2845,9 @@ namespace BitMiracle.Tiff2Pdf
 
             if (m_pdf_image_interpolate)
                 written += writeToFile("\n/Interpolate true");
-            
-            if (m_pdf_switchdecode && !(m_pdf_colorspace == t2p_cs_t.T2P_CS_BILEVEL && m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4))
+
+            bool iccBased = (m_pdf_colorspace & t2p_cs_t.T2P_CS_ICCBASED) != 0;
+            if (!iccBased && m_pdf_switchdecode && !(m_pdf_colorspace == t2p_cs_t.T2P_CS_BILEVEL && m_pdf_compression == t2p_compress_t.T2P_COMPRESS_G4))
                 written += write_pdf_xobject_decode();
 
             written += write_pdf_xobject_stream_filter(tile);

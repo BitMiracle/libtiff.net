@@ -24,21 +24,15 @@
         <para>
             A copy of the TIFF 6.0 specification is available from
             <externalLink>
-                <linkText>Adobe</linkText>
-                <linkUri>http://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf</linkUri>
+                <linkText>AWare Systems</linkText>
+                <linkUri>https://www.awaresystems.be/imaging/tiff/specification/TIFF6.pdf</linkUri>
                 <linkTarget>_blank</linkTarget>
-            </externalLink>
-            or from the
-            <externalLink>
-                <linkText>libtiff ftp site.</linkText>
-                <linkUri>ftp://ftp.remotesensing.org/pub/libtiff/doc/TIFF6.pdf</linkUri>
-                <linkTarget>_blank</linkTarget>
-            </externalLink>
+            </externalLink>.
         </para>
         <para>
             <externalLink>
                 <linkText>Draft TIFF Technical Note #2</linkText>
-                <linkUri>http://www.remotesensing.org/libtiff/TIFFTechNote2.html</linkUri>
+                <linkUri>http://www.simplesystems.org/libtiff/TIFFTechNote2.html</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
             covers problems with the TIFF 6.0 design for embedding JPEG-compressed
@@ -48,22 +42,14 @@
         <para>
             <externalLink>
                 <linkText>TIFF Specification Supplement 1</linkText>
-                <linkUri>http://partners.adobe.com/public/developer/en/tiff/TIFFPM6.pdf</linkUri>
+                <linkUri>https://www.awaresystems.be/imaging/tiff/specification/TIFFPM6.pdf</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
         </para>
         <para>
             <externalLink>
                 <linkText>TIFF Specification Supplement 2</linkText>
-                <linkUri>http://partners.adobe.com/public/developer/en/tiff/TIFFphotoshop.pdf</linkUri>
-                <linkTarget>_blank</linkTarget>
-            </externalLink>
-        </para>
-        <para>
-            Other Adobe information on TIFF can be retrieved
-            <externalLink>
-                <linkText>from here.</linkText>
-                <linkUri>http://partners.adobe.com/public/developer/tiff/index.html</linkUri>
+                <linkUri>https://www.awaresystems.be/imaging/tiff/specification/TIFFphotoshop.pdf</linkUri>
                 <linkTarget>_blank</linkTarget>
             </externalLink>
         </para>
