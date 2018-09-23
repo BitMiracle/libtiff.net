@@ -205,7 +205,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     if (m_cinfo.m_out_color_components == 3)
                         m_quantizer = QuantizerType.quantize3_ord_dither_quantizer;
                     else
-                        m_quantizer = QuantizerType.quantize3_ord_dither_quantizer;
+                        m_quantizer = QuantizerType.quantize_ord_dither_quantizer;
 
                     /* initialize state for ordered dither */
                     m_row_index = 0;
