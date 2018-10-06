@@ -1230,7 +1230,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int l = 1; l <= 16; l++)
             {
                 int i = htbl.Bits[l];
-                if (i < 0 || p + i > 256)    /* protect against table overrun */
+                if (p + i > 256)    /* protect against table overrun */
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
                 while ((i--) != 0)
@@ -1281,7 +1281,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (p = 0; p < lastp; p++)
             {
                 int i = htbl.Huffval[p];
-                if (i < 0 || i > maxsymbol || dtbl.ehufsi[i] != 0)
+                if (i > maxsymbol || dtbl.ehufsi[i] != 0)
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_BAD_HUFF_TABLE);
 
                 dtbl.ehufco[i] = huffcode[p];
