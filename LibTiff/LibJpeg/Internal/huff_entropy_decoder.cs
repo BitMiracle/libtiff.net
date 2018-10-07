@@ -523,8 +523,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     d_derived_tbl htbl = m_dc_cur_tbls[blkn];
                     int s;
-                    if (!HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left))
-                        return false;
+                    HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
 
                     htbl = m_ac_cur_tbls[blkn];
                     int k = 1;
@@ -553,8 +552,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         /* Since zeroes are skipped, output area must be cleared beforehand */
                         for (; k < coef_limit; k++)
                         {
-                            if (!HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left))
-                                return false;
+                            HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
 
                             int r = s >> 4;
                             s &= 15;
@@ -600,8 +598,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* In this path we just discard the values */
                     for (; k < JpegConstants.DCTSIZE2; k++)
                     {
-                        if (!HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left))
-                            return false;
+                        HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
 
                         int r = s >> 4;
                         s &= 15;
@@ -673,8 +670,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     d_derived_tbl htbl = m_dc_cur_tbls[blkn];
                     int s;
-                    if (!HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left))
-                        return false;
+                    HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
 
                     htbl = m_ac_cur_tbls[blkn];
                     int k = 1;
@@ -702,8 +698,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         /* Since zeroes are skipped, output area must be cleared beforehand */
                         for (; k < coef_limit; k++)
                         {
-                            if (!HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left))
-                                return false;
+                            HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
 
                             int r = s >> 4;
                             s &= 15;
@@ -743,8 +738,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* In this path we just discard the values */
                     for (; k <= Se; k++)
                     {
-                        if (!HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left))
-                            return false;
+                        HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
 
                         int r = s >> 4;
                         s &= 15;
@@ -833,8 +827,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     int s;
-                    if (!HUFF_DECODE(out s, ref br_state, derived_tbls[m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]].Dc_tbl_no], ref get_buffer, ref bits_left))
-                        return false;
+                    HUFF_DECODE(out s, ref br_state, derived_tbls[m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]].Dc_tbl_no], ref get_buffer, ref bits_left);
 
                     if (s != 0)
                     {
@@ -908,8 +901,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
                     {
                         int s;
-                        if (!HUFF_DECODE(out s, ref br_state, ac_derived_tbl, ref get_buffer, ref bits_left))
-                            return false;
+                        HUFF_DECODE(out s, ref br_state, ac_derived_tbl, ref get_buffer, ref bits_left);
 
                         int r = s >> 4;
                         s &= 15;
@@ -1060,11 +1052,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     do
                     {
                         int s;
-                        if (!HUFF_DECODE(out s, ref br_state, ac_derived_tbl, ref get_buffer, ref bits_left))
-                        {
-                            undo_decode_mcu_AC_refine(MCU_data, newnz_pos, num_newnz);
-                            return false;
-                        }
+                        HUFF_DECODE(out s, ref br_state, ac_derived_tbl, ref get_buffer, ref bits_left);
 
                         int r = s >> 4;
                         s &= 15;
@@ -1330,7 +1318,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         *    more than HUFF_LOOKAHEAD bits long.
         * 3. jpeg_huff_decode returns -1 if forced to suspend.
         */
-        private static bool HUFF_DECODE(out int result, ref bitread_working_state state, d_derived_tbl htbl, ref int get_buffer, ref int bits_left)
+        private static void HUFF_DECODE(out int result, ref bitread_working_state state, d_derived_tbl htbl, ref int get_buffer, ref int bits_left)
         {
             int nb = 0;
             bool doSlow = false;
@@ -1355,20 +1343,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 {
                     DROP_BITS(nb, ref bits_left);
                     result = htbl.look_sym[look];
-                    return true;
+                    return;
                 }
 
                 nb = JpegConstants.HUFF_LOOKAHEAD + 1;
             }
 
             result = jpeg_huff_decode(ref state, get_buffer, bits_left, htbl, nb);
-            if (result < 0)
-                return false;
 
             get_buffer = state.get_buffer;
             bits_left = state.bits_left;
-
-            return true;
         }
 
         /* Load up the bit buffer to a depth of at least nbits */
