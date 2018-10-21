@@ -312,7 +312,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Gets or sets the width of image, in pixels.
         /// </summary>
         /// <value>The width of image.</value>
-        /// <seealso href="07136fd7-d482-48de-b88c-1a4b9658c69e.htm" target="_self">Compression details</seealso>
+        /// <seealso href="../articles/KB/compression-details.html">Compression details</seealso>
         public int Image_width
         {
             get { return m_image_width; }
@@ -323,7 +323,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Gets or sets the height of image, in pixels.
         /// </summary>
         /// <value>The height of image.</value>
-        /// <seealso href="07136fd7-d482-48de-b88c-1a4b9658c69e.htm" target="_self">Compression details</seealso>
+        /// <seealso href="../articles/KB/compression-details.html">Compression details</seealso>
         public int Image_height
         {
             get { return m_image_height; }
@@ -334,7 +334,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Gets or sets the number of color channels (components per pixel)
         /// </summary>
         /// <value>The number of color channels.</value>
-        /// <seealso href="07136fd7-d482-48de-b88c-1a4b9658c69e.htm" target="_self">Compression details</seealso>
+        /// <seealso href="../articles/KB/compression-details.html">Compression details</seealso>
         public int Input_components
         {
             get { return m_input_components; }
@@ -345,8 +345,8 @@ namespace BitMiracle.LibJpeg.Classic
         /// Gets or sets the color space of source image.
         /// </summary>
         /// <value>The color space.</value>
-        /// <seealso href="07136fd7-d482-48de-b88c-1a4b9658c69e.htm" target="_self">Compression details</seealso>
-        /// <seealso href="c90654b9-f3f4-4319-80d1-979c73d84e76.htm" target="_self">Special color spaces</seealso>
+        /// <seealso href="../articles/KB/compression-details.html">Compression details</seealso>
+        /// <seealso href="../articles/KB/special-color-spaces.html">Special color spaces</seealso>
         public LibJpeg.Classic.J_COLOR_SPACE In_color_space
         {
             get { return m_in_color_space; }
@@ -422,7 +422,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// deal of space and time. The default is <c>false</c>, which tells the compressor to use the 
         /// supplied or default Huffman tables. In most cases optimal tables save only a few 
         /// percent of file size compared to the default tables.</value>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public bool Optimize_coding
         {
             get { return m_optimize_coding; }
@@ -446,7 +446,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// If non-zero, the input image is smoothed; the value should be 1 for minimal smoothing 
         /// to 100 for maximum smoothing.</remarks>
         /// <value>The coefficient of image smoothing.</value>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public int Smoothing_factor
         {
             get { return m_smoothing_factor; }
@@ -457,7 +457,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Gets or sets the algorithm used for the DCT step.
         /// </summary>
         /// <value>The DCT algorithm.</value>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public J_DCT_METHOD Dct_method
         {
             get { return m_dct_method; }
@@ -479,7 +479,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// If you use restarts, you may want to use larger intervals in those cases.</remarks>
         /// <value>The restart interval.</value>
         /// <seealso cref="jpeg_compress_struct.Restart_in_rows"/>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public int Restart_interval
         {
             get { return m_restart_interval; }
@@ -497,7 +497,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </remarks>
         /// <value>The restart interval in MCU rows.</value>
         /// <seealso cref="jpeg_compress_struct.Restart_interval"/>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public int Restart_in_rows
         {
             get { return m_restart_in_rows; }
@@ -514,7 +514,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// if a JFIF-legal JPEG color space (i.e., YCbCr or grayscale) is selected, otherwise <c>false</c>.</remarks>
         /// <value><c>true</c> if JFIF APP0 marker is emitted; otherwise, <c>false</c>.</value>
         /// <seealso cref="jpeg_compress_struct.JFIF_major_version"/>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public bool Write_JFIF_header
         {
             get { return m_write_JFIF_header; }
@@ -566,7 +566,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <value>The density unit.</value>
         /// <seealso cref="jpeg_compress_struct.X_density"/>
         /// <seealso cref="jpeg_compress_struct.Y_density"/>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public DensityUnit Density_unit
         {
             get { return m_density_unit; }
@@ -611,7 +611,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// In fact, you probably shouldn't change the default settings at all - the default behavior ensures that the JPEG file's 
         /// color space can be recognized by the decoder.</remarks>
         /// <value>If <c>true</c> an Adobe APP14 marker is emitted; <c>false</c>, otherwise.</value>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public bool Write_Adobe_marker
         {
             get { return m_write_Adobe_marker; }
@@ -622,7 +622,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Gets the largest vertical sample factor.
         /// </summary>
         /// <value>The largest vertical sample factor.</value>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public int Max_v_samp_factor
         {
             get { return m_max_v_samp_factor; }
@@ -778,7 +778,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <see cref="JPEG_MARKER"/>.APP0 + n for APPn. (Actually, jpeg_write_marker will let you write any marker type, 
         /// but we don't recommend writing any other kinds of marker)</param>
         /// <param name="data">The data associated with the marker.</param>
-        /// <seealso href="81c88818-a5d7-4550-9ce5-024a768f7b1e.htm" target="_self">Special markers</seealso>
+        /// <seealso href="../articles/KB/special-markers.html">Special markers</seealso>
         /// <seealso cref="JPEG_MARKER"/>
         public void jpeg_write_marker(int marker, byte[] data)
         {
@@ -803,7 +803,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// you should flush its buffer after inserting any special markers.</remarks>
         /// <seealso cref="jpeg_compress_struct.jpeg_write_m_byte"/>
         /// <seealso cref="jpeg_compress_struct.jpeg_write_marker"/>
-        /// <seealso href="81c88818-a5d7-4550-9ce5-024a768f7b1e.htm" target="_self">Special markers</seealso>
+        /// <seealso href="../articles/KB/special-markers.html">Special markers</seealso>
         public void jpeg_write_m_header(int marker, int datalen)
         {
             if (m_next_scanline != 0 || (m_global_state != JpegState.CSTATE_SCANNING && m_global_state != JpegState.CSTATE_RAW_OK && m_global_state != JpegState.CSTATE_WRCOEFS))
@@ -870,7 +870,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <param name="outfile">The output stream.</param>
         /// <remarks>The caller must have already opened the stream, and is responsible
         /// for closing it after finishing compression.</remarks>
-        /// <seealso href="07136fd7-d482-48de-b88c-1a4b9658c69e.htm" target="_self">Compression details</seealso>
+        /// <seealso href="../articles/KB/compression-details.html">Compression details</seealso>
         public void jpeg_stdio_dest(Stream outfile)
         {
             m_dest = new my_destination_mgr(this, outfile);
@@ -883,7 +883,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// which must already be set in <see cref="jpeg_compress_struct"/>). Many applications will only need 
         /// to use this routine and perhaps <see cref="jpeg_compress_struct.jpeg_set_quality"/>.
         /// </remarks>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public void jpeg_set_defaults()
         {
             /* Safety check to ensure start_compress not called yet. */
@@ -977,12 +977,12 @@ namespace BitMiracle.LibJpeg.Classic
         /// and choose colorspace-dependent parameters appropriately.
         /// </summary>
         /// <param name="colorspace">The required colorspace.</param>
-        /// <remarks>See <see href="c90654b9-f3f4-4319-80d1-979c73d84e76.htm" target="_self">Special color spaces</see>, 
+        /// <remarks>See <see href="../articles/KB/special-color-spaces.html">Special color spaces</see>, 
         /// below, before using this. A large number of parameters, including all per-component parameters, 
         /// are set by this routine; if you want to twiddle individual parameters you should call 
         /// <c>jpeg_set_colorspace</c> before rather than after.</remarks>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
-        /// <seealso href="c90654b9-f3f4-4319-80d1-979c73d84e76.htm" target="_self">Special color spaces</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/special-color-spaces.html">Special color spaces</seealso>
         public void jpeg_set_colorspace(J_COLOR_SPACE colorspace)
         {
             int ci;
@@ -1096,7 +1096,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         /// <remarks>This is actually a subroutine of <see cref="jpeg_set_defaults"/>. 
         /// It's broken out in case you want to change just the colorspace-dependent JPEG parameters.</remarks>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public void jpeg_default_colorspace()
         {
             switch (m_in_color_space)
@@ -1145,7 +1145,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// but other decoders may not be.</param>
         /// <remarks>Note that the exact mapping from quality values to tables may change in future IJG releases 
         /// as more is learned about DCT quantization.</remarks>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public void jpeg_set_quality(int quality, bool force_baseline)
         {
             /* Convert user 0-100 rating to percentage scaling */
@@ -1184,7 +1184,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// useful for conforming to the Adobe PostScript DCT conventions, but we do not 
         /// recommend linear scaling as a user-visible quality scale otherwise.
         /// </remarks>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public void jpeg_set_linear_quality(int scale_factor, bool force_baseline)
         {
             /* Set up two quantization tables using the specified scaling */
@@ -1204,7 +1204,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <param name="scale_factor">Multiplier for values in <c>basic_table</c>.</param>
         /// <param name="force_baseline">Defines range of values in <c>basic_table</c>. 
         /// If <c>true</c> - 1..255, otherwise - 1..65535.</param>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public void jpeg_add_quant_table(int which_tbl, int[] basic_table, int scale_factor, bool force_baseline)
         {
             /* Safety check to ensure start_compress not called yet. */
@@ -1245,7 +1245,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// </summary>
         /// <param name="quality">The IJG-recommended quality scale. Should be 0 (terrible) to 100 (very good).</param>
         /// <returns>The linear scaling percentage.</returns>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public static int jpeg_quality_scaling(int quality)
         {
             /* Safety limit on quality factor.  Convert 0 to 1 to avoid zero divide. */
@@ -1275,7 +1275,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <remarks>This is the recommended method of creating a progressive file, unless you want 
         /// to make a custom scan sequence. You must ensure that the JPEG color space is 
         /// set correctly before calling this routine.</remarks>
-        /// <seealso href="ce3f6712-3633-4a58-af07-626a4fba9ae4.htm" target="_self">Compression parameter selection</seealso>
+        /// <seealso href="../articles/KB/compression-parameter-selection.html">Compression parameter selection</seealso>
         public void jpeg_simple_progression()
         {
             /* Safety check to ensure start_compress not called yet. */
@@ -1382,7 +1382,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// <remarks>Before calling this, all parameters and a data destination must be set up.</remarks>
         /// <seealso cref="jpeg_compress_struct.jpeg_suppress_tables"/>
         /// <seealso cref="jpeg_compress_struct.jpeg_write_tables"/>
-        /// <seealso href="07136fd7-d482-48de-b88c-1a4b9658c69e.htm" target="_self">Compression details</seealso>
+        /// <seealso href="../articles/KB/compression-details.html">Compression details</seealso>
         public void jpeg_start_compress(bool write_all_tables)
         {
             if (m_global_state != JpegState.CSTATE_START)
@@ -1422,7 +1422,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// signals an application programmer error. However, excess scanlines passed in the last 
         /// valid call are "silently" ignored, so that the application need not adjust <c>num_lines</c>
         /// for end-of-image when using a multiple-scanline buffer.</remarks>
-        /// <seealso href="07136fd7-d482-48de-b88c-1a4b9658c69e.htm" target="_self">Compression details</seealso>
+        /// <seealso href="../articles/KB/compression-details.html">Compression details</seealso>
         public int jpeg_write_scanlines(byte[][] scanlines, int num_lines)
         {
             if (m_global_state != JpegState.CSTATE_SCANNING)
