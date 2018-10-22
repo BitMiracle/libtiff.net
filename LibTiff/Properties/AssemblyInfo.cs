@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bit Miracle")]
 [assembly: AssemblyProduct("BitMiracle.LibTiff.NET")]
-[assembly: AssemblyCopyright("Copyright (C) 2008-2017, Bit Miracle")]
+[assembly: AssemblyCopyright("Copyright (C) 2008-2018, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -68,7 +68,7 @@ namespace BitMiracle.LibTiff.Classic
         public static string GetVersion()
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "LibTiff.Net, Version {0}\nCopyright (C) 2008-2015, Bit Miracle.", AssemblyVersion);
+                "LibTiff.Net, Version {0}\nCopyright (C) 2008-2018, Bit Miracle.", AssemblyVersion);
         }
 
         /// <summary>

@@ -10,7 +10,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bit Miracle")]
 [assembly: AssemblyProduct("BitMiracle.LibTiff.NetStandard")]
-[assembly: AssemblyCopyright("Copyright © 2017, Bit Miracle")]
+[assembly: AssemblyCopyright("Copyright © 2018, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
