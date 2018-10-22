@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#if !NETSTANDARD
+using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -42,7 +43,7 @@ namespace UnitTests
             try
             {
                 // Lock the managed memory
-                BitmapData bmpdata = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, format);
+                BitmapData bmpdata = bmp.LockBits(rect, ImageLockMode.ReadWrite, format);
 
                 // Declare an array to hold the bytes of the bitmap.
                 bits = new byte[bmpdata.Stride * bmpdata.Height];
@@ -325,3 +326,4 @@ namespace UnitTests
         }
     }
 }
+#endif

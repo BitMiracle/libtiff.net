@@ -20,6 +20,7 @@ x64/
 build/
 [Bb]in/
 [Oo]bj/
+/Result/
 
 # Others
 sql/
@@ -61,3 +62,4 @@ TestCase/Output.Tiff/*.tif
 LibTiff/AssemblyVersion.cs
 LibTiff.NetStandard/AssemblyVersion.cs
 LibTiff.NET40/AssemblyVersion.cs
+
