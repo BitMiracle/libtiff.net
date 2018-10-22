@@ -6,11 +6,22 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
+#if NETSTANDARD
+[assembly: AssemblyTitle("BitMiracle.LibTiff.NetStandard")]
+[assembly: AssemblyDescription(".NET Standard version of LibTiff library made by Bit Miracle")]
+[assembly: AssemblyProduct("BitMiracle.LibTiff.NetStandard")]
+#elif NET4
+[assembly: AssemblyTitle("BitMiracle.LibTiff.NET")]
+[assembly: AssemblyDescription(".NET 4.0 version of LibTiff library made by Bit Miracle")]
+[assembly: AssemblyProduct("BitMiracle.LibTiff.NET")]
+#else
 [assembly: AssemblyTitle("BitMiracle.LibTiff.NET")]
 [assembly: AssemblyDescription(".NET version of LibTiff library made by Bit Miracle")]
+[assembly: AssemblyProduct("BitMiracle.LibTiff.NET")]
+#endif
+
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bit Miracle")]
-[assembly: AssemblyProduct("BitMiracle.LibTiff.NET")]
 [assembly: AssemblyCopyright("Copyright (C) 2008-2018, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

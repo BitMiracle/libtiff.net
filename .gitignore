@@ -59,7 +59,5 @@ TestCase/Output.Pdf/*.pdf
 TestCase/Output.Tiff/*.tif
 
 # Auto-generated files
-LibTiff/AssemblyVersion.cs
-LibTiff.NetStandard/AssemblyVersion.cs
-LibTiff.NET40/AssemblyVersion.cs
+AssemblyVersion.cs
 
