@@ -1,0 +1,1 @@
+This sample shows how to convert any non-tiled TIFF image to the TIFF image which have all data written in a single strip.

@@ -1,0 +1,1 @@
+This sample shows how to create a multipage TIFF image. 

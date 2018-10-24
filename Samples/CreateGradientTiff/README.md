@@ -1,0 +1,1 @@
+This sample shows how to create simple grayscale gradient TIFF image.

@@ -1,0 +1,1 @@
+This sample shows how to convert 16-bit grayscale TIFF image to a 8-bit System.Drawing.Bitmap.
