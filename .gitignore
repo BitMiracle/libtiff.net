@@ -62,3 +62,7 @@ TestCase/Output.Tiff/*.tif
 # Auto-generated files
 AssemblyVersion.cs
 
+# Help 
+HelpSrc/bin
+HelpSrc/obj
+HelpSrc/api/*

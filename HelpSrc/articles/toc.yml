@@ -1,0 +1,12 @@
+- name: Welcome
+  href: welcome.md
+- name: License and Copyright
+  href: license.md
+- name: TIFF 6.0 specification coverage
+  href: tiff6-coverage.md
+- name: Differences between LibTiff and LibTiff.Net
+  href: differences.md
+- name: Knowledge Base
+  items:
+    - name: Getting Started
+      href: KB/getting-started.md
