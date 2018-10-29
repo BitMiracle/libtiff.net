@@ -6,6 +6,8 @@
   href: tiff6-coverage.md
 - name: Differences between LibTiff and LibTiff.Net
   href: differences.md
+- name: Links to Resources
+  href: links.md
 - name: Knowledge Base
   items:
     - name: Getting Started
