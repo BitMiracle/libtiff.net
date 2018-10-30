@@ -796,7 +796,7 @@ namespace BitMiracle.LibTiff.Classic
         /// current directory of the opened TIFF file. The tag is identified by
         /// <paramref name="tag"/>. The type and number of values returned is dependent on the
         /// tag being requested. You may want to consult
-        /// <a href = "54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// <a href = "../articles/KB/well-known-tags.html">"Well-known tags and their
         /// value(s) data types"</a> to become familiar with exact data types and calling
         /// conventions required for each tag supported by the library.
         /// </para>
@@ -832,7 +832,7 @@ namespace BitMiracle.LibTiff.Classic
         /// tag is not defined in the current directory and it has a default value(s). The tag is
         /// identified by <paramref name="tag"/>. The type and number of values returned is
         /// dependent on the tag being requested. You may want to consult
-        /// <a href="54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// <a href="../articles/KB/well-known-tags.html">"Well-known tags and their
         /// value(s) data types"</a> to become familiar with exact data types and calling
         /// conventions required for each tag supported by the library.
         /// </para>
@@ -2873,7 +2873,7 @@ namespace BitMiracle.LibTiff.Classic
         /// reading or writing. The tag is identified by <paramref name="tag"/>.
         /// The type and number of values in <paramref name="value"/> is dependent on the tag
         /// being set. You may want to consult
-        /// <a href = "54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// <a href = "../articles/KB/well-known-tags.html">"Well-known tags and their
         /// value(s) data types"</a> to become familiar with exact data types and calling
         /// conventions required for each tag supported by the library.
         /// </para><para>
@@ -3654,7 +3654,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// Once data are written to a file/stream for the current directory, the values of
         /// certain tags may not be altered; see
-        /// <a href="54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// <a href="../articles/KB/well-known-tags.html">"Well-known tags and their
         /// value(s) data types"</a> for more information.
         /// </para><para>
         /// It is not possible to write scanlines to a file/stream that uses a tiled organization.
@@ -3703,7 +3703,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// Once data are written to a file/stream for the current directory, the values of
         /// certain tags may not be altered; see
-        /// <a href="54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// <a href="../articles/KB/well-known-tags.html">"Well-known tags and their
         /// value(s) data types"</a> for more information.
         /// </para><para>
         /// It is not possible to write scanlines to a file/stream that uses a tiled organization.
@@ -3754,7 +3754,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// Once data are written to a file/stream for the current directory, the values of
         /// certain tags may not be altered; see 
-        /// <a href = "54cbd23d-dc55-44b9-921f-3a06efc2f6ce.htm">"Well-known tags and their
+        /// <a href = "../articles/KB/well-known-tags.html">"Well-known tags and their
         /// value(s) data types"</a> for more information.
         /// </para><para>
         /// It is not possible to write scanlines to a file/stream that uses a tiled organization.
