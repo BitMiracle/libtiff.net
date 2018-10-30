@@ -38,7 +38,8 @@
       {
         "files": [
           "images/**",
-          "articles/**.png"
+          "articles/**.png",
+          "articles/**.jpg"
         ]
       }
     ],
