@@ -10,7 +10,7 @@ Documentation
 =============
 
 Help pages can be found here
-https://bitmiracle.github.io/libtiff.net/#
+https://bitmiracle.github.io/libtiff.net/
 
 
 License
