@@ -25,6 +25,7 @@ Namespace BitMiracle.LibTiff.Samples
                     tif.SetField(TiffTag.SAMPLESPERPIXEL, 4)
 
                     tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG)
+                    tif.SetField(TiffTag.EXTRASAMPLES, 1, New Short() {CType(ExtraSample.UNASSALPHA, Short)})
 
                     Dim stride As Integer = raster.Length \ bmp.Height
                     convertSamples(raster, bmp.Width, bmp.Height)

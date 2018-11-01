@@ -28,6 +28,7 @@ namespace BitMiracle.LibTiff.Samples
                     tif.SetField(TiffTag.SAMPLESPERPIXEL, 4);
 
                     tif.SetField(TiffTag.PLANARCONFIG, PlanarConfig.CONTIG);
+                    tif.SetField(TiffTag.EXTRASAMPLES, 1, new short[] { (short)ExtraSample.UNASSALPHA });
 
                     int stride = raster.Length / bmp.Height;
                     convertSamples(raster, bmp.Width, bmp.Height);
