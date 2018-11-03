@@ -191,10 +191,10 @@ namespace BitMiracle.LibTiff.Classic
             switch (Type.GetTypeCode(m_value.GetType()))
             {
                 case TypeCode.UInt64:
-                    return (int)((uint)m_value);
+                    return (long)((ulong)m_value);
 
                 case TypeCode.Int64:
-                    return (int)m_value;
+                    return (long)m_value;
             }
 #else
             Type valueType = m_value.GetType();
