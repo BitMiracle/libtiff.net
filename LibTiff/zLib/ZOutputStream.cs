@@ -194,7 +194,7 @@ namespace ComponentAce.Compression.Libs.zlib
             z = null;
         }
 
-#if !NETSTANDARD
+#if (!NETSTANDARD || NETSTANDARD2)
         public override void  Close()
 #else
         public void Close()
