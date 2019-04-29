@@ -10,7 +10,7 @@
         }
       ],
       "dest": "api",
-      "properties": { "TargetFramework": "net20" },
+      "properties": { "TargetFramework": "net40" },
       "disableGitFeatures": false
     }
   ],
