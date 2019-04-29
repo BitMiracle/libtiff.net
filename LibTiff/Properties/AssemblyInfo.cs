@@ -10,10 +10,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BitMiracle.LibTiff.NetStandard")]
 [assembly: AssemblyDescription(".NET Standard version of LibTiff library made by Bit Miracle")]
 [assembly: AssemblyProduct("BitMiracle.LibTiff.NetStandard")]
-#elif NET4
-[assembly: AssemblyTitle("BitMiracle.LibTiff.NET")]
-[assembly: AssemblyDescription(".NET 4.0 version of LibTiff library made by Bit Miracle")]
-[assembly: AssemblyProduct("BitMiracle.LibTiff.NET")]
 #else
 [assembly: AssemblyTitle("BitMiracle.LibTiff.NET")]
 [assembly: AssemblyDescription(".NET version of LibTiff library made by Bit Miracle")]

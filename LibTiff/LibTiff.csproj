@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net20;net40;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
     <AssemblyName>BitMiracle.LibTiff.NET</AssemblyName>
     <RootNamespace>BitMiracle.LibTiff.Classic</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -13,25 +13,19 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
     
-    <DocumentationFile Condition="'$(TargetFramework)'=='netstandard1.3'">..\Result\netstandard1.3\BitMiracle.LibTiff.NET.xml</DocumentationFile>
     <DocumentationFile Condition="'$(TargetFramework)'=='netstandard2.0'">..\Result\netstandard2.0\BitMiracle.LibTiff.NET.xml</DocumentationFile>
-    <DocumentationFile Condition="'$(TargetFramework)'=='net20'">..\Result\net20\BitMiracle.LibTiff.NET.xml</DocumentationFile>
     <DocumentationFile Condition="'$(TargetFramework)'=='net40'">..\Result\net40\BitMiracle.LibTiff.NET.xml</DocumentationFile>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants Condition="'$(TargetFramework)'=='netstandard1.3'">TRACE;DEBUG;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">TRACE;DEBUG;NETSTANDARD2;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='net20'">TRACE;DEBUG;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE;DEBUG;NET4;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">TRACE;DEBUG;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE;DEBUG;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
     <OutputPath>..\Result\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants Condition="'$(TargetFramework)'=='netstandard1.3'">TRACE;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">TRACE;NETSTANDARD2;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='net20'">TRACE;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE;NET4;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">TRACE;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
     <OutputPath>..\Result\</OutputPath>
   </PropertyGroup>
   
