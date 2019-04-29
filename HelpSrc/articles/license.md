@@ -1,6 +1,6 @@
 **LibTiff.Net**
 
-Copyright (c) 2008-2018, Bit Miracle
+Copyright (c) 2008-2019, Bit Miracle
 
 All rights reserved.
 

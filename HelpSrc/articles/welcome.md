@@ -4,10 +4,9 @@ LibTiff.Net is the .NET  library for the Tag Image File Format (TIFF), a widely 
 
 The library does **not** rely on GDI, GDI+ or any other imaging technologies of the .NET Framework and Windows OS. 
 
-This library comes in three versions: 
-* for .NET 2 and newer
+This library comes in two versions: 
 * for .NET 4 and newer
-* for .NET Standard 1.3 and newer
+* for .NET Standard 2.0 and newer
 
 There is also a small collection of tools for doing simple manipulations of TIFF. 
 
