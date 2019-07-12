@@ -6,7 +6,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// LibJpeg.Net interface layer.
-    /// 
+    ///
     /// We handle fatal errors when they are encountered within the JPEG
     /// library.  We also direct LibJpeg.Net error and warning
     /// messages through the appropriate LibTiff.Net handlers.
@@ -30,7 +30,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
         {
             string buffer = format_message();
             Tiff.ErrorExt(m_sp.GetTiff(), m_sp.GetTiff().m_clientdata, "JPEGLib", "{0}", buffer); /* display the error message */
-            
+
             // clean up LibJpeg.Net state
             m_sp.m_common.jpeg_abort();
 

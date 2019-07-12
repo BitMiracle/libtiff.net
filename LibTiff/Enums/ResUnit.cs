@@ -13,12 +13,12 @@
         /// No meaningful units.
         /// </summary>
         NONE = 1,
-        
+
         /// <summary>
         /// English.
         /// </summary>
         INCH = 2,
-        
+
         /// <summary>
         /// Metric.
         /// </summary>

@@ -1,0 +1,1 @@
+This sample shows how to convert a System.Drawing.Bitmap to the black&white CCITT compressed TIFF image.

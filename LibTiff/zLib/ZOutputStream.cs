@@ -194,11 +194,7 @@ namespace ComponentAce.Compression.Libs.zlib
             z = null;
         }
 
-#if !NETSTANDARD
         public override void  Close()
-#else
-        public void Close()
-#endif
         {
             try
             {
@@ -214,12 +210,7 @@ namespace ComponentAce.Compression.Libs.zlib
             {
                 end();
 
-#if !NETSTANDARD
                 out_Renamed.Close();
-#else
-                out_Renamed.Dispose();
-#endif
-
                 out_Renamed = null;
             }
         }

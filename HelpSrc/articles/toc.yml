@@ -1,0 +1,40 @@
+- name: Welcome
+  href: welcome.md
+- name: License and Copyright
+  href: license.md
+- name: TIFF 6.0 specification coverage
+  href: tiff6-coverage.md
+- name: Differences between LibTiff and LibTiff.Net
+  href: differences.md
+- name: Links to Resources
+  href: links.md
+- name: Knowledge Base
+  items:
+    - name: Getting Started
+      href: KB/getting-started.md
+    - name: Using pre-built LibTiff.Net
+      href: KB/using-prebuild.md
+    - name: Building source code of LibTiff.Net
+      href: KB/building-source.md
+    - name: Basic introduction to the capabilities of the library
+      href: KB/basic-introduction.md
+    - name: Well-known tags and their value(s) data types
+      href: KB/well-known-tags.md
+    - name: Graphics programming with LibTiff.Net
+      items:
+        - name: Part1. Black-and-white imaging
+          href: KB/black-and-white.md
+        - name: Part2. Grayscale and color imaging
+          href: KB/grayscale-color.md
+    - name: Adding new (custom) tags
+      href: KB/adding-new-tags.md
+    - name: TIFF tools
+      items:
+        - name: Tiff2Pdf
+          href: KB/tiff2pdf.md
+        - name: Tiff2Rgba
+          href: KB/tiff2rgba.md
+        - name: TiffCP
+          href: KB/tiffcp.md
+    - name: Test Images
+      href: KB/test-images.md

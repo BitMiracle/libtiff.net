@@ -21,7 +21,7 @@ namespace BitMiracle.LibTiff.Classic.Internal
                     {
                         if (sp.m_stream.deflateParams(sp.m_zipquality, zlibConst.Z_DEFAULT_STRATEGY) != zlibConst.Z_OK)
                         {
-                            Tiff.ErrorExt(tif, tif.m_clientdata, module, 
+                            Tiff.ErrorExt(tif, tif.m_clientdata, module,
                                 "{0}: zlib error: {0}", tif.m_name, sp.m_stream.msg);
                             return false;
                         }

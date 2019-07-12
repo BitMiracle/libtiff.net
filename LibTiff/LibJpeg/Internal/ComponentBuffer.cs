@@ -26,13 +26,6 @@
             SetBuffer(buf, funnyIndices, funnyOffset);
         }
 
-        public void SetBuffer(byte[][] buf, int[] funnyIndices, int funnyOffset)
-        {
-            m_buffer = buf;
-            m_funnyIndices = funnyIndices;
-            m_funnyOffset = funnyOffset;
-        }
-
         public byte[] this[int i]
         {
             get
@@ -42,6 +35,13 @@
 
                 return m_buffer[m_funnyIndices[i + m_funnyOffset]];
             }
+        }
+
+        public void SetBuffer(byte[][] buf, int[] funnyIndices, int funnyOffset)
+        {
+            m_buffer = buf;
+            m_funnyIndices = funnyIndices;
+            m_funnyOffset = funnyOffset;
         }
     }
 }

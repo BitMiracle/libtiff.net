@@ -13,7 +13,7 @@
         /// Most significant -> least.
         /// </summary>
         MSB2LSB = 1,
-        
+
         /// <summary>
         /// Least significant -> most.
         /// </summary>

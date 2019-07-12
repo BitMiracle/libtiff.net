@@ -50,7 +50,7 @@ namespace BitMiracle.LibTiff.Classic
             Stream stream = clientData as Stream;
             if (stream == null)
                 throw new ArgumentException("Can't get underlying stream to write to");
-            
+
             stream.Write(buffer, offset, count);
         }
 
@@ -85,11 +85,7 @@ namespace BitMiracle.LibTiff.Classic
             if (stream == null)
                 throw new ArgumentException("Can't get underlying stream to close");
 
-#if !NETSTANDARD
             stream.Close();
-#else
-            stream.Dispose();
-#endif
         }
 
         /// <summary>

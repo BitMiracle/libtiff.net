@@ -119,8 +119,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 switch ((JPEG_MARKER)m_cinfo.m_unread_marker)
                 {
                     case JPEG_MARKER.SOI:
-                        if (!get_soi())
-                            return ReadResult.JPEG_SUSPENDED;
+                        get_soi();
                         break;
 
                     case JPEG_MARKER.SOF0:
@@ -793,7 +792,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// <summary>
         /// Process an SOI marker
         /// </summary>
-        private bool get_soi()
+        private void get_soi()
         {
             m_cinfo.TRACEMS(1, J_MESSAGE_CODE.JTRC_SOI);
 
@@ -819,8 +818,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             m_cinfo.m_Adobe_transform = 0;
 
             m_cinfo.m_marker.m_saw_SOI = true;
-
-            return true;
         }
 
         /// <summary>

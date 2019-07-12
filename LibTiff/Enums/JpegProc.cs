@@ -13,7 +13,7 @@
         /// Baseline sequential.
         /// </summary>
         BASELINE = 1,
-        
+
         /// <summary>
         /// Huffman coded lossless.
         /// </summary>

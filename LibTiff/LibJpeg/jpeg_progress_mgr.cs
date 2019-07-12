@@ -73,8 +73,9 @@ namespace BitMiracle.LibJpeg.Classic
         /// This method ensures happening of the <see cref="jpeg_progress_mgr.OnProgress">OnProgress</see> event.</remarks>
         public void Updated()
         {
-            if (OnProgress != null)
-                OnProgress(this, new EventArgs());
+            EventHandler handler = OnProgress;
+            if (handler != null)
+                handler(this, new EventArgs());
         }
     }
 }

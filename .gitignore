@@ -20,6 +20,8 @@ x64/
 build/
 [Bb]in/
 [Oo]bj/
+/Result/
+/Samples/packages/
 
 # Others
 sql/
@@ -58,6 +60,9 @@ TestCase/Output.Pdf/*.pdf
 TestCase/Output.Tiff/*.tif
 
 # Auto-generated files
-LibTiff/AssemblyVersion.cs
-LibTiff.NetStandard/AssemblyVersion.cs
-LibTiff.NET40/AssemblyVersion.cs
+AssemblyVersion.cs
+
+# Help 
+HelpSrc/bin
+HelpSrc/obj
+HelpSrc/api/*

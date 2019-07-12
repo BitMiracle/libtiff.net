@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BitMiracle.LibTiff.Classic
 {
@@ -6,6 +7,7 @@ namespace BitMiracle.LibTiff.Classic
     /// Jpeg Tables Mode.<br/>
     /// Possible values for <see cref="TiffTag"/>.JPEGTABLESMODE tag.
     /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames")]
     [Flags]
 #if EXPOSE_LIBTIFF
     public
@@ -16,12 +18,12 @@ namespace BitMiracle.LibTiff.Classic
         /// None.
         /// </summary>
         NONE = 0,
-        
+
         /// <summary>
         /// Include quantization tables.
         /// </summary>
         QUANT = 0x0001,
-        
+
         /// <summary>
         /// Include Huffman tables.
         /// </summary>

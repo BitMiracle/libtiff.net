@@ -13,7 +13,7 @@
         /// No conversion (default).
         /// </summary>
         RAW = 0x0000,
-        
+
         /// <summary>
         /// Do auto conversion.
         /// </summary>

@@ -13,12 +13,12 @@
         /// B&amp;W art scan.
         /// </summary>
         BILEVEL = 1,
-        
+
         /// <summary>
         /// Dithered scan.
         /// </summary>
         HALFTONE = 2,
-        
+
         /// <summary>
         /// Usually Floyd-Steinberg.
         /// </summary>
