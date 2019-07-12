@@ -2442,8 +2442,15 @@ namespace BitMiracle.LibTiff.Classic
             ulong nextdir = m_header.tiff_diroff;
             short n = 0;
             long dummyOff;
+            var seen = new System.Collections.Generic.Dictionary<ulong, bool>();
+            seen.Add(nextdir, true);
             while (nextdir != 0 && advanceDirectory(ref nextdir, out dummyOff))
+            {
+                if (seen.ContainsKey(nextdir))
+                    throw new InvalidDataException("Loop detected while getting number of directories");
+                seen.Add(nextdir, true);
                 n++;
+            }
 
             return n;
         }

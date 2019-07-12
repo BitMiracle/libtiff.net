@@ -91,6 +91,17 @@ namespace UnitTests
             }
         }
 
+        [Test]        
+        public void TestReadLoopedTiff()
+        {
+            string fn = Path.Combine(TestCase.Folder, "loop.tif");
+            using (Tiff tiff = Tiff.Open(fn, "r"))
+            {
+                Assert.That(() => tiff.NumberOfDirectories(),
+                    Throws.Exception.TypeOf<InvalidDataException>());
+            }
+        }
+
         [Test]
         public void TestAppendedNulls()
         {
