@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -2442,13 +2443,14 @@ namespace BitMiracle.LibTiff.Classic
             ulong nextdir = m_header.tiff_diroff;
             short n = 0;
             long dummyOff;
-            var seen = new System.Collections.Generic.Dictionary<ulong, bool>();
-            seen.Add(nextdir, true);
+            var seen = new HashSet<ulong>();
+            seen.Add(nextdir);
             while (nextdir != 0 && advanceDirectory(ref nextdir, out dummyOff))
             {
-                if (seen.ContainsKey(nextdir))
+                if (seen.Contains(nextdir))
                     throw new InvalidDataException("Loop detected while getting number of directories");
-                seen.Add(nextdir, true);
+
+                seen.Add(nextdir);
                 n++;
             }
 
