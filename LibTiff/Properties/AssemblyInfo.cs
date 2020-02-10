@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bit Miracle")]
-[assembly: AssemblyCopyright("Copyright (C) 2008-2019, Bit Miracle")]
+[assembly: AssemblyCopyright("Copyright (C) 2008-2020, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
