@@ -37,7 +37,9 @@ namespace BitMiracle.LibTiff.Classic
             {
                 m_stream.Write(m_clientdata, buffer, offset, count);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Tiff.Warning(this, "writeOK", "Failed to write {0} bytes", count);
                 return false;

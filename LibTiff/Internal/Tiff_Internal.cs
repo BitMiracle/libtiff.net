@@ -539,7 +539,7 @@ namespace BitMiracle.LibTiff.Classic
         }
 
 #if FIX_JPEG_IS_OJPEG
-        private bool checkJpegIsOJpeg(ref int v, TiffDirEntry[] dir, ulong dircount)
+        private static bool checkJpegIsOJpeg(ref int v, TiffDirEntry[] dir, ulong dircount)
         {
             // detect a bug in some older JPEG-IN-TIFF formats (emitted by (unknown) scanner software)
             // where the Compression field reports new-style JPEG (7) but the JPEG encoded data

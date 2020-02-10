@@ -2303,7 +2303,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_libjpeg_jpeg_decompress_struct = new jpeg_decompress_struct(m_libjpeg_jpeg_error_mgr);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -2318,7 +2320,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 res = m_libjpeg_jpeg_decompress_struct.jpeg_read_header(require_image);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return ReadResult.JPEG_SUSPENDED;
             }
@@ -2332,7 +2336,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_libjpeg_jpeg_decompress_struct.jpeg_start_decompress();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -2349,7 +2355,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 temp[0] = scanlines;
                 n = m_libjpeg_jpeg_decompress_struct.jpeg_read_scanlines(temp, max_lines);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return 0;
             }
@@ -2364,7 +2372,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 n = m_libjpeg_jpeg_decompress_struct.jpeg_read_raw_data(m_subsampling_convert_ycbcrimage, max_lines);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return 0;
             }

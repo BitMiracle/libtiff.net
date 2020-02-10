@@ -1150,7 +1150,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 n = m_decompression.jpeg_read_scanlines(scanlines, max_lines);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return -1;
             }
@@ -1437,7 +1439,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_compression = new jpeg_compress_struct(new JpegErrorManager(this));
                 m_common = m_compression;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1453,7 +1457,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
                 m_decompression = new jpeg_decompress_struct(new JpegErrorManager(this));
                 m_common = m_decompression;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1467,7 +1473,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_compression.jpeg_set_defaults();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1481,7 +1489,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_compression.jpeg_set_colorspace(colorspace);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1495,7 +1505,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_compression.jpeg_set_quality(quality, force_baseline);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1509,7 +1521,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_compression.jpeg_suppress_tables(suppress);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1523,7 +1537,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_compression.jpeg_start_compress(write_all_tables);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1538,7 +1554,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 n = m_compression.jpeg_write_scanlines(scanlines, num_lines);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return -1;
             }
@@ -1553,7 +1571,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 n = m_compression.jpeg_write_raw_data(data, num_lines);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return -1;
             }
@@ -1567,7 +1587,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_compression.jpeg_finish_compress();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1581,7 +1603,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_compression.jpeg_write_tables();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1596,7 +1620,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 res = m_decompression.jpeg_read_header(require_image);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return ReadResult.JPEG_SUSPENDED;
             }
@@ -1610,7 +1636,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_decompression.jpeg_start_decompress();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1625,7 +1653,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 n = m_decompression.jpeg_read_raw_data(data, max_lines);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return -1;
             }
@@ -1640,7 +1670,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 res = m_decompression.jpeg_finish_decompress();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1654,7 +1686,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_common.jpeg_abort();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }
@@ -1668,7 +1702,9 @@ namespace BitMiracle.LibTiff.Classic.Internal
             {
                 m_common.jpeg_destroy();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 return false;
             }

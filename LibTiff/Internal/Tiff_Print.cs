@@ -136,7 +136,7 @@ namespace BitMiracle.LibTiff.Classic
             fprintf(fd, "\r\n");
         }
 
-        private bool prettyPrintField(Stream fd, TiffTag tag, int value_count, object raw_data)
+        private static bool prettyPrintField(Stream fd, TiffTag tag, int value_count, object raw_data)
         {
             FieldValue value = new FieldValue(raw_data);
             short[] sdata = value.ToShortArray();
