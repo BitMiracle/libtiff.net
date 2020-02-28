@@ -128,34 +128,34 @@ namespace BitMiracle.LibTiff.Classic
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-              SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
+                SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
 
-            off = (long)seekFile((long)dircount * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION), SeekOrigin.Current);
+            off = seekFile((long)dircount * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION), SeekOrigin.Current);
 
-            
             if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
                 if (!readUlongOK(out nextdir))
-                {
-                    ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
-                    return false;
-                }
+                    issueAdvanceDirectoryWarning(module);
             }
             else
             {
                 uint temp;
                 if (!readUIntOK(out temp))
-                {
-                    ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
-                    return false;
-                }
+                    issueAdvanceDirectoryWarning(module);
+
                 nextdir = temp;
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-              SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+                SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
             
             return true;
+        }
+
+        private void issueAdvanceDirectoryWarning(string module)
+        {
+            string format = "{0}: Error reading next directory offset. Treating as no next directory.";
+            WarningExt(this, m_clientdata, module, format, m_name);
         }
 
         internal static void setString(out string cpp, string cp)
