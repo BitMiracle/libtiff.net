@@ -361,7 +361,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para>
         /// <para>
         /// If a file is opened for reading, the first TIFF directory in the file is automatically
-        /// read (see <see cref="SetDirectory"/> for reading directories other than the first). If
+        /// read (see <see cref="SetDirectory(short)"/> for reading directories other than the first). If
         /// a file is opened for writing or appending, a default directory is automatically
         /// created for writing subsequent data. This directory has all the default values
         /// specified in TIFF Revision 6.0: BitsPerSample = 1, ThreshHolding = Threshold.BILEVEL
@@ -2437,7 +2437,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <returns>The zero-based index of the current directory.</returns>
         /// <remarks>The zero-based index returned by this method is suitable for use with
-        /// the <see cref="SetDirectory"/> method.
+        /// the <see cref="SetDirectory(short)"/> method.
         /// </remarks>
         public short CurrentDirectory()
         {
@@ -2840,13 +2840,61 @@ namespace BitMiracle.LibTiff.Classic
         }
 
         /// <summary>
+        /// Sets the directory with specified number as the current directory if you already know the directory offset.
+        /// </summary>
+        /// <param name="number">The zero-based number of the directory to set as the
+        /// current directory.</param>
+        /// <param name="directoryOffset">The zero-based stream offset where the desired directory resides.</param>
+        /// <returns><c>true</c> if the specified directory was set as current successfully;
+        /// otherwise, <c>false</c></returns>
+        /// <remarks><b>SetDirectory</b> changes the current directory and reads its contents with
+        /// <see cref="ReadDirectory"/>.</remarks>
+        public bool SetDirectory(short number, long directoryOffset)
+        {
+            m_nextdiroff = (ulong)directoryOffset;
+
+            // Set curdir to the actual directory index. The -1 is because
+            // ReadDirectory will increment m_curdir after successfully reading
+            // the directory.
+            m_curdir = number;
+
+            // Reset m_dirnumber counter and start new list of seen directories.
+            // We need this to prevent IFD loops.
+            m_dirnumber = 0;
+            return ReadDirectory();
+        }
+
+        /// <summary>
+        /// Gets the number of directories in a file.
+        /// </summary>
+        /// <param name="headerLocations">Dictionary that holds IDF location info</param>
+        /// <returns>The number of directories in a file.</returns>
+        public short GetNumberOfDirectories(out Dictionary<int, long> headerLocations)
+        {
+            headerLocations = new Dictionary<int, long>();
+
+            ulong nextdir = m_header.tiff_diroff;
+            short n = 0;
+            long dummyOff;
+
+            while (nextdir != 0 && advanceDirectory(ref nextdir, out dummyOff))
+            {
+                //Mark the directory
+                headerLocations.Add(n, (long)nextdir);
+                n++;
+            }
+
+            return n;
+        }
+
+        /// <summary>
         /// Sets the directory at specified file/stream offset as the current directory.
         /// </summary>
         /// <param name="offset">The offset from the beginnig of the file/stream to the directory
         /// to set as the current directory.</param>
         /// <returns><c>true</c> if the directory at specified file offset was set as current
         /// successfully; otherwise, <c>false</c></returns>
-        /// <remarks><b>SetSubDirectory</b> acts like <see cref="SetDirectory"/>, except the
+        /// <remarks><b>SetSubDirectory</b> acts like <see cref="SetDirectory(short)"/>, except the
         /// directory is specified as a file offset instead of an index; this is required for
         /// accessing subdirectories linked through a SubIFD tag (e.g. thumbnail images).</remarks>        
         public bool SetSubDirectory(long offset)
@@ -5975,7 +6023,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             SwabArrayOfLong(array, 0, count);
         }
-        
+
         /// <summary>
         /// Swaps the bytes in specified number of values in the array of 64-bit items.
         /// </summary>
@@ -6022,7 +6070,7 @@ namespace BitMiracle.LibTiff.Classic
                 array[offset] += bytes[3] << 24;
             }
         }
-        
+
         /// <summary>
         /// Swaps the bytes in specified number of values in the array of 64-bit items
         /// starting at specified offset.
@@ -6274,6 +6322,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             Buffer.BlockCopy(source, srcOffset * sizeof(short), bytes, offset, srcCount * sizeof(short));
         }
+
 
         private static long[] IntToLong(int[] inputArray)
         {
