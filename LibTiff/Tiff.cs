@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -2456,6 +2457,81 @@ namespace BitMiracle.LibTiff.Classic
                 n++;
 
             return n;
+        }
+
+        /// <summary>
+        /// Gets the number of directories in a file.
+        /// </summary>
+        /// <returns>The number of directories in a file.</returns>
+        public short NumberOfDirectories(out Ifd[] directoryLocs)
+        {
+            List<Ifd> offsets = new List<Ifd>();
+            //First dir starts after TIFF header
+
+            ulong nextdir = m_header.tiff_diroff;
+            short dirNum = 0;
+
+            Ifd curIfd = new Ifd
+            {
+                dirNum = dirNum,
+                OffsetStart = (long)m_header.tiff_diroff
+            };
+
+            short n = 0;
+            long endOfDirectory;
+            ulong dirCount;
+
+            while (nextdir != 0 && advanceDirectory(ref nextdir, out endOfDirectory, out dirCount))
+            {
+                if (nextdir != 0)
+                {
+                    curIfd.NumDirEntries = (long)dirCount;
+
+                    offsets.Add(curIfd);
+                    dirNum++;
+
+                    curIfd = new Ifd
+                    {
+                        dirNum = dirNum,
+                        OffsetStart = (long)nextdir
+                    };
+                }
+                else
+                {
+                    offsets.Add(curIfd);
+                }
+                n++;
+            }
+
+            directoryLocs = offsets.ToArray();
+            return n;
+        }
+
+
+        /// <summary>
+        /// Image File Directory helper
+        /// </summary>
+        public class Ifd
+        {
+            /// <summary>
+            /// Offset in file of startof IFD
+            /// </summary>
+            public long OffsetStart;
+
+            /// <summary>
+            /// Number of tags in the IFD
+            /// </summary>
+            public long NumDirEntries;
+
+            /// <summary>
+            /// End of IFD in file
+            /// </summary>
+            public long OffsetEnd;
+
+            /// <summary>
+            /// Directory number
+            /// </summary>
+            public short dirNum;
         }
 
         /// <summary>

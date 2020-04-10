@@ -114,25 +114,60 @@ namespace BitMiracle.LibTiff.Classic
             m_scanlinesize = -1;
         }
 
+        /// <summary>
+        /// Advance to next tiff directory within file
+        /// </summary>
+        /// <param name="nextdir">Start location of next directory to try and advance to
+        /// This will be updated with location of next directory if found</param>
+        /// <returns>True if next directory was found and nextdir was updated</returns>
+        private bool advanceDirectory(ref ulong nextdir)
+        {
+            ulong dirCount = 0;
+            long off = 0;
+            return advanceDirectory(ref nextdir, out off, out dirCount);
+        }
+
+        /// <summary>
+        /// Advance to next tiff directory within file
+        /// </summary>
+        /// <param name="nextdir">Start location of next directory to try and advance to
+        /// This will be updated with location of next directory if found</param>
+        /// <param name="off">Offset of the end of the directory, right before the offset of the following directory is given</param>
+        /// <returns>True if next directory was found and nextdir was updated</returns>
         private bool advanceDirectory(ref ulong nextdir, out long off)
         {
+            ulong dirCount = 0;
+            return advanceDirectory(ref nextdir, out off, out dirCount);
+        }
+
+        /// <summary>
+        /// Advance to next tiff directory within file
+        /// </summary>
+        /// <param name="nextdir">Start location of next directory to try and advance to
+        /// This will be updated with location of next directory if found</param>
+        /// <param name="off">Offset of the end of the directory, right before the offset of the following directory is given</param>
+        /// <param name="dircount">Numbers of directories in this IFD</param>
+        /// <returns>True if next directory was found and nextdir was updated</returns>
+        private bool advanceDirectory(ref ulong nextdir, out long off, out ulong dircount)
+        {
             off = 0;
+            dircount = 0;
 
             const string module = "advanceDirectory";
-            ulong dircount;
-            
-            if (!seekOK((long)nextdir) || !readDirCountOK(out dircount,m_header.tiff_version == TIFF_BIGTIFF_VERSION))
+
+            //Number of directories in this header       
+            if (!seekOK((long)nextdir) || !readDirCountOK(out dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
             {
                 ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory count", m_name);
                 return false;
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-              SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
+                SwabBigTiffValue(ref dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION, true);
 
+            //The location of the end of the directory
             off = (long)seekFile((long)dircount * TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION), SeekOrigin.Current);
 
-            
             if (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
             {
                 if (!readUlongOK(out nextdir))
@@ -143,18 +178,19 @@ namespace BitMiracle.LibTiff.Classic
             }
             else
             {
-                uint temp;
-                if (!readUIntOK(out temp))
+                //Get start location of next directory
+                uint tempNextDir;
+                if (!readUIntOK(out tempNextDir))
                 {
                     ErrorExt(this, m_clientdata, module, "{0}: Error fetching directory link", m_name);
                     return false;
                 }
-                nextdir = temp;
+                nextdir = tempNextDir;
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
-              SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
-            
+                SwabBigTiffValue(ref nextdir, m_header.tiff_version == TIFF_BIGTIFF_VERSION, false);
+
             return true;
         }
 
