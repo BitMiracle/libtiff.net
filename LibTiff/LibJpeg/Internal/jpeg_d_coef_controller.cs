@@ -478,13 +478,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 {
                     int bufferIndex = bufferRowOffset + block_row;
 
-                    int prev_block_row = 0;
+                    int prev_block_row;
                     if (first_row && block_row == 0)
                         prev_block_row = bufferIndex;
                     else
                         prev_block_row = bufferIndex - 1;
 
-                    int next_block_row = 0;
+                    int next_block_row;
                     if (last_row && block_row == block_rows - 1)
                         next_block_row = bufferIndex;
                     else

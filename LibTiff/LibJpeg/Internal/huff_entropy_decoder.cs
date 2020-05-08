@@ -22,13 +22,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
     class huff_entropy_decoder : jpeg_entropy_decoder
     {
         /* Fetching the next N bits from the input stream is a time-critical operation
-        * for the Huffman decoders.  We implement it with a combination of inline
-        * macros and out-of-line subroutines.  Note that N (the number of bits
+        * for the Huffman decoders. Note that N (the number of bits
         * demanded at one time) never exceeds 15 for JPEG use.
         *
         * We read source bytes into get_buffer and dole out bits as needed.
-        * If get_buffer already contains enough bits, they are fetched in-line
-        * by the macros CHECK_BIT_BUFFER and GET_BITS.  When there aren't enough
+        * If get_buffer already contains enough bits, they are fetched in-line.
+        * When there aren't enough
         * bits, jpeg_fill_bit_buffer is called; it will attempt to fill get_buffer
         * as full as possible (not just to the number of bits needed; this
         * prefetching reduces the overhead cost of calling jpeg_fill_bit_buffer).
@@ -41,8 +40,6 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
         /*
         * Out-of-line code for bit fetching.
-        * Note: current values of get_buffer and bits_left are passed as parameters,
-        * but are returned in the corresponding fields of the state struct.
         *
         * On most machines MIN_GET_BITS should be 25 to allow the full 32-bit width
         * of get_buffer to be used.  (On machines with wider words, an even larger
@@ -134,7 +131,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             public void Assign(savable_state ss)
             {
                 EOBRUN = ss.EOBRUN;
-                Buffer.BlockCopy(ss.last_dc_val, 0, last_dc_val, 0, last_dc_val.Length * sizeof(int));
+                for (int i = 0; i < last_dc_val.Length; i++)
+                    last_dc_val[i] = ss.last_dc_val[i];
             }
         }
 
@@ -142,7 +140,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         * In case of suspension, we exit WITHOUT updating them.
         */
         private bitread_perm_state m_bitstate;    /* Bit buffer at start of MCU */
-        private savable_state m_saved = new savable_state();        /* Other state at start of MCU */
+        private readonly savable_state m_saved = new savable_state();        /* Other state at start of MCU */
 
         /* These fields are NOT loaded into local working state. */
         bool m_insufficient_data;	/* set TRUE after emitting warning */
@@ -151,26 +149,30 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /* Following two fields used only in progressive mode */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
-        private d_derived_tbl[] derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
+        private readonly d_derived_tbl[] derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
 
         private d_derived_tbl ac_derived_tbl; /* active table during an AC scan */
 
         /* Following fields used only in sequential mode */
 
         /* Pointers to derived tables (these workspaces have image lifespan) */
-        private d_derived_tbl[] m_dc_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
-        private d_derived_tbl[] m_ac_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
+        private readonly d_derived_tbl[] m_dc_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
+        private readonly d_derived_tbl[] m_ac_derived_tbls = new d_derived_tbl[JpegConstants.NUM_HUFF_TBLS];
 
         /* Precalculated info set up by start_pass for use in decode_mcu: */
 
         /* Pointers to derived tables to be used for each block within an MCU */
-        private d_derived_tbl[] m_dc_cur_tbls = new d_derived_tbl[JpegConstants.D_MAX_BLOCKS_IN_MCU];
-        private d_derived_tbl[] m_ac_cur_tbls = new d_derived_tbl[JpegConstants.D_MAX_BLOCKS_IN_MCU];
+        private readonly d_derived_tbl[] m_dc_cur_tbls = new d_derived_tbl[JpegConstants.D_MAX_BLOCKS_IN_MCU];
+        private readonly d_derived_tbl[] m_ac_cur_tbls = new d_derived_tbl[JpegConstants.D_MAX_BLOCKS_IN_MCU];
 
         /* Whether we care about the DC and AC coefficient values for each block */
-        private int[] coef_limit = new int[JpegConstants.D_MAX_BLOCKS_IN_MCU];
+        private readonly int[] coef_limit = new int[JpegConstants.D_MAX_BLOCKS_IN_MCU];
 
-        private jpeg_decompress_struct m_cinfo;
+        private readonly jpeg_decompress_struct m_cinfo;
+
+        // Working bit buffer state
+        private int get_buffer;
+        private int bits_left;
 
         public huff_entropy_decoder(jpeg_decompress_struct cinfo)
         {
@@ -233,12 +235,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         bad = true;
                 }
 
-                if (m_cinfo.m_Ah != 0)
-                {
-                    /* Successive approximation refinement scan: must have Al = Ah-1. */
-                    if (m_cinfo.m_Ah - 1 != m_cinfo.m_Al)
-                        bad = true;
-                }
+                /* Successive approximation refinement scan: must have Al = Ah-1. */
+                if (m_cinfo.m_Ah != 0 && m_cinfo.m_Ah - 1 != m_cinfo.m_Al)
+                    bad = true;
 
                 if (m_cinfo.m_Al > 13)
                 {
@@ -492,14 +491,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private bool decode_mcu_full(JBLOCK[] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval != 0)
-            {
-                if (m_restarts_to_go == 0)
-                {
-                    if (!process_restart())
-                        return false;
-                }
-            }
+            if (m_cinfo.m_restart_interval != 0 && m_restarts_to_go == 0 && !process_restart())
+                return false;
 
             /* If we've run out of data, just leave the MCU set to zeroes.
              * This way, we return uniform gray for the remainder of the segment.
@@ -507,10 +500,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (!m_insufficient_data)
             {
                 /* Load up working state */
-                int get_buffer;
-                int bits_left;
-                bitread_working_state br_state = new bitread_working_state();
-                BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
+                BITREAD_LOAD_STATE();
                 savable_state state = new savable_state();
                 state.Assign(m_saved);
 
@@ -522,23 +512,23 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     d_derived_tbl htbl = m_dc_cur_tbls[blkn];
-                    int s;
-                    HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
+                    int s = HUFF_DECODE(htbl);
 
                     htbl = m_ac_cur_tbls[blkn];
                     int k = 1;
-                    int coef_limit = this.coef_limit[blkn];
+                    int thisBlockCoeffLimit = coef_limit[blkn];
                     bool endThisBlock = false;
 
-                    if (coef_limit != 0)
+                    if (thisBlockCoeffLimit != 0)
                     {
                         /* Convert DC difference to actual value, update last_dc_val */
                         if (s != 0)
                         {
-                            CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
+                            CHECK_BIT_BUFFER(s);
 
-                            int r = GET_BITS(s, get_buffer, ref bits_left);
-                            s = HUFF_EXTEND(r, s);
+                            bits_left -= s;
+                            int r = get_buffer >> bits_left & bmask[s];
+                            s = (r <= bmask[s - 1]) ? r - bmask[s] : r;
                         }
 
                         int ci = m_cinfo.m_MCU_membership[blkn];
@@ -546,13 +536,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         state.last_dc_val[ci] = s;
 
                         /* Output the DC coefficient */
-                        MCU_data[blkn][0] = (short)s;
+                        var mcuDataBlock = MCU_data[blkn].data;
+                        mcuDataBlock[0] = (short)s;
 
                         /* Section F.2.2.2: decode the AC coefficients */
                         /* Since zeroes are skipped, output area must be cleared beforehand */
-                        for (; k < coef_limit; k++)
+                        for (; k < thisBlockCoeffLimit; k++)
                         {
-                            HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
+                            s = HUFF_DECODE(htbl);
 
                             int r = s >> 4;
                             s &= 15;
@@ -560,15 +551,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             if (s != 0)
                             {
                                 k += r;
-                                CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
-                                r = GET_BITS(s, get_buffer, ref bits_left);
-                                s = HUFF_EXTEND(r, s);
+                                CHECK_BIT_BUFFER(s);
+                                bits_left -= s;
+                                r = get_buffer >> bits_left & bmask[s];
+                                s = (r <= bmask[s - 1]) ? r - bmask[s] : r;
 
                                 /* Output coefficient in natural (dezigzagged) order.
                                  * Note: the extra entries in jpeg_natural_order[] will save us
                                  * if k >= DCTSIZE2, which could happen if the data is corrupted.
                                  */
-                                MCU_data[blkn][JpegUtils.jpeg_natural_order[k]] = (short)s;
+                                mcuDataBlock[JpegUtils.jpeg_natural_order[k]] = (short)s;
                             }
                             else
                             {
@@ -586,8 +578,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     {
                         if (s != 0)
                         {
-                            CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
-                            DROP_BITS(s, ref bits_left);
+                            CHECK_BIT_BUFFER(s);
+                            bits_left -= s;
                         }
                     }
 
@@ -598,7 +590,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* In this path we just discard the values */
                     for (; k < JpegConstants.DCTSIZE2; k++)
                     {
-                        HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
+                        s = HUFF_DECODE(htbl);
 
                         int r = s >> 4;
                         s &= 15;
@@ -606,8 +598,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         if (s != 0)
                         {
                             k += r;
-                            CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
-                            DROP_BITS(s, ref bits_left);
+                            CHECK_BIT_BUFFER(s);
+                            bits_left -= s;
                         }
                         else
                         {
@@ -620,7 +612,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(ref m_bitstate, get_buffer, bits_left);
+                BITREAD_SAVE_STATE();
                 m_saved.Assign(state);
             }
 
@@ -636,14 +628,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private bool decode_mcu_sub(JBLOCK[] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval != 0)
-            {
-                if (m_restarts_to_go == 0)
-                {
-                    if (!process_restart())
-                        return false;
-                }
-            }
+            if (m_cinfo.m_restart_interval != 0 && m_restarts_to_go == 0 && !process_restart())
+                return false;
 
             /* If we've run out of data, just leave the MCU set to zeroes.
              * This way, we return uniform gray for the remainder of the segment.
@@ -654,10 +640,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int Se = m_cinfo.m_Se;
 
                 /* Load up working state */
-                int get_buffer;
-                int bits_left;
-                bitread_working_state br_state = new bitread_working_state();
-                BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
+                BITREAD_LOAD_STATE();
                 savable_state state = new savable_state();
                 state.Assign(m_saved);
 
@@ -669,22 +652,20 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
                     d_derived_tbl htbl = m_dc_cur_tbls[blkn];
-                    int s;
-                    HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
+                    int s = HUFF_DECODE(htbl);
 
                     htbl = m_ac_cur_tbls[blkn];
                     int k = 1;
-                    int coef_limit = this.coef_limit[blkn];
-
-                    if (coef_limit != 0)
+                    int thisBlockCoeffLimit = coef_limit[blkn];
+                    if (thisBlockCoeffLimit != 0)
                     {
                         /* Convert DC difference to actual value, update last_dc_val */
                         if (s != 0)
                         {
-                            CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
-
-                            int r = GET_BITS(s, get_buffer, ref bits_left);
-                            s = HUFF_EXTEND(r, s);
+                            CHECK_BIT_BUFFER(s);
+                            bits_left -= s;
+                            int r = get_buffer >> bits_left & bmask[s];
+                            s = (r <= bmask[s - 1]) ? r - bmask[s] : r;
                         }
 
                         int ci = m_cinfo.m_MCU_membership[blkn];
@@ -692,13 +673,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         state.last_dc_val[ci] = s;
 
                         /* Output the DC coefficient */
-                        MCU_data[blkn][0] = (short)s;
+                        var mcuDataBlock = MCU_data[blkn].data;
+                        mcuDataBlock[0] = (short)s;
 
                         /* Section F.2.2.2: decode the AC coefficients */
                         /* Since zeroes are skipped, output area must be cleared beforehand */
-                        for (; k < coef_limit; k++)
+                        for (; k < thisBlockCoeffLimit; k++)
                         {
-                            HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
+                            s = HUFF_DECODE(htbl);
 
                             int r = s >> 4;
                             s &= 15;
@@ -706,15 +688,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             if (s != 0)
                             {
                                 k += r;
-                                CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
-                                r = GET_BITS(s, get_buffer, ref bits_left);
-                                s = HUFF_EXTEND(r, s);
+                                CHECK_BIT_BUFFER(s);
+                                bits_left -= s;
+                                r = get_buffer >> bits_left & bmask[s];
+                                s = (r <= bmask[s - 1]) ? r - bmask[s] : r;
 
                                 /* Output coefficient in natural (dezigzagged) order.
                                  * Note: the extra entries in natural_order[] will save us
                                  * if k >= Se, which could happen if the data is corrupted.
                                  */
-                                MCU_data[blkn][natural_order[k]] = (short)s;
+                                mcuDataBlock[natural_order[k]] = (short)s;
                             }
                             else
                             {
@@ -729,8 +712,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     {
                         if (s != 0)
                         {
-                            CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
-                            DROP_BITS(s, ref bits_left);
+                            CHECK_BIT_BUFFER(s);
+                            bits_left -= s;
                         }
                     }
 
@@ -738,7 +721,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* In this path we just discard the values */
                     for (; k <= Se; k++)
                     {
-                        HUFF_DECODE(out s, ref br_state, htbl, ref get_buffer, ref bits_left);
+                        s = HUFF_DECODE(htbl);
 
                         int r = s >> 4;
                         s &= 15;
@@ -746,9 +729,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         if (s != 0)
                         {
                             k += r;
-                            CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
-
-                            DROP_BITS(s, ref bits_left);
+                            CHECK_BIT_BUFFER(s);
+                            bits_left -= s;
                         }
                         else
                         {
@@ -761,7 +743,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(ref m_bitstate, get_buffer, bits_left);
+                BITREAD_SAVE_STATE();
                 m_saved.Assign(state);
             }
 
@@ -796,14 +778,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private bool decode_mcu_DC_first(JBLOCK[] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval != 0)
-            {
-                if (m_restarts_to_go == 0)
-                {
-                    if (!process_restart())
-                        return false;
-                }
-            }
+            if (m_cinfo.m_restart_interval != 0 && m_restarts_to_go == 0 && !process_restart())
+                return false;
 
             /* If we've run out of data, just leave the MCU set to zeroes.
              * This way, we return uniform gray for the remainder of the segment.
@@ -811,10 +787,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             if (!m_insufficient_data)
             {
                 /* Load up working state */
-                int get_buffer;
-                int bits_left;
-                bitread_working_state br_state = new bitread_working_state();
-                BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
+                BITREAD_LOAD_STATE();
                 savable_state state = new savable_state();
                 state.Assign(m_saved);
 
@@ -826,15 +799,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* Decode a single block's worth of coefficients */
 
                     /* Section F.2.2.1: decode the DC coefficient difference */
-                    int s;
-                    HUFF_DECODE(out s, ref br_state, derived_tbls[m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]].Dc_tbl_no], ref get_buffer, ref bits_left);
+                    int s = HUFF_DECODE(derived_tbls[m_cinfo.Comp_info[m_cinfo.m_cur_comp_info[ci]].Dc_tbl_no]);
 
                     if (s != 0)
                     {
-                        CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
+                        CHECK_BIT_BUFFER(s);
 
-                        int r = GET_BITS(s, get_buffer, ref bits_left);
-                        s = HUFF_EXTEND(r, s);
+                        bits_left -= s;
+                        int r = get_buffer >> bits_left & bmask[s];
+                        s = (r <= bmask[s - 1]) ? r - bmask[s] : r;
                     }
 
                     /* Convert DC difference to actual value, update last_dc_val */
@@ -846,7 +819,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(ref m_bitstate, get_buffer, bits_left);
+                BITREAD_SAVE_STATE();
                 m_saved.Assign(state);
             }
 
@@ -863,14 +836,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private bool decode_mcu_AC_first(JBLOCK[] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval != 0)
-            {
-                if (m_restarts_to_go == 0)
-                {
-                    if (!process_restart())
-                        return false;
-                }
-            }
+            if (m_cinfo.m_restart_interval != 0 && m_restarts_to_go == 0 && !process_restart())
+                return false;
 
             /* If we've run out of data, just leave the MCU set to zeroes.
              * This way, we return uniform gray for the remainder of the segment.
@@ -893,15 +860,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
                 else
                 {
-                    int get_buffer;
-                    int bits_left;
-                    bitread_working_state br_state = new bitread_working_state();
-                    BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
+                    BITREAD_LOAD_STATE();
 
+                    var mcuDataBlock = MCU_data[0].data;
                     for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
                     {
-                        int s;
-                        HUFF_DECODE(out s, ref br_state, ac_derived_tbl, ref get_buffer, ref bits_left);
+                        int s = HUFF_DECODE(ac_derived_tbl);
 
                         int r = s >> 4;
                         s &= 15;
@@ -909,13 +873,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         {
                             k += r;
 
-                            CHECK_BIT_BUFFER(ref br_state, s, ref get_buffer, ref bits_left);
+                            CHECK_BIT_BUFFER(s);
 
-                            r = GET_BITS(s, get_buffer, ref bits_left);
-                            s = HUFF_EXTEND(r, s);
+                            bits_left -= s;
+                            r = get_buffer >> bits_left & bmask[s];
+                            s = (r <= bmask[s - 1]) ? r - bmask[s] : r;
 
                             /* Scale and output coefficient in natural (dezigzagged) order */
-                            MCU_data[0][natural_order[k]] = (short)(s << m_cinfo.m_Al);
+                            mcuDataBlock[natural_order[k]] = (short)(s << m_cinfo.m_Al);
                         }
                         else
                         {
@@ -927,9 +892,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                                     /* EOBr, r > 0 */
                                     EOBRUN = (uint)(1 << r);
 
-                                    CHECK_BIT_BUFFER(ref br_state, r, ref get_buffer, ref bits_left);
+                                    CHECK_BIT_BUFFER(r);
 
-                                    r = GET_BITS(r, get_buffer, ref bits_left);
+                                    bits_left -= r;
+                                    r = get_buffer >> bits_left & bmask[r];
                                     EOBRUN += (uint)r;
                                     EOBRUN--;		/* this band is processed at this moment */
                                 }
@@ -940,7 +906,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         }
                     }
 
-                    BITREAD_SAVE_STATE(ref m_bitstate, get_buffer, bits_left);
+                    BITREAD_SAVE_STATE();
                 }
 
                 /* Completed MCU, so update state */
@@ -961,24 +927,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private bool decode_mcu_DC_refine(JBLOCK[] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval != 0)
-            {
-                if (m_restarts_to_go == 0)
-                {
-                    if (!process_restart())
-                        return false;
-                }
-            }
+            if (m_cinfo.m_restart_interval != 0 && m_restarts_to_go == 0 && !process_restart())
+                return false;
 
             /* Not worth the cycles to check insufficient_data here,
              * since we will not change the data anyway if we read zeroes.
              */
 
             /* Load up working state */
-            int get_buffer;
-            int bits_left;
-            bitread_working_state br_state = new bitread_working_state();
-            BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
+            BITREAD_LOAD_STATE();
 
             int p1 = 1 << m_cinfo.m_Al;
 
@@ -987,19 +944,22 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int blkn = 0; blkn < m_cinfo.m_blocks_in_MCU; blkn++)
             {
                 /* Encoded data is simply the next bit of the two's-complement DC value */
-                CHECK_BIT_BUFFER(ref br_state, 1, ref get_buffer, ref bits_left);
+                CHECK_BIT_BUFFER(1);
 
-                if (GET_BITS(1, get_buffer, ref bits_left) != 0)
+                bits_left -= 1;
+                int r = get_buffer >> bits_left & bmask[1];
+                if (r != 0)
                 {
                     /* 1 in the bit position being coded */
-                    MCU_data[blkn][0] = (short)((ushort)MCU_data[blkn][0] | p1);
+                    var mcuDataBlock = MCU_data[blkn].data;
+                    mcuDataBlock[0] = (short)((ushort)mcuDataBlock[0] | p1);
                 }
 
                 /* Note: since we use |=, repeating the assignment later is safe */
             }
 
             /* Completed MCU, so update state */
-            BITREAD_SAVE_STATE(ref m_bitstate, get_buffer, bits_left);
+            BITREAD_SAVE_STATE();
 
             /* Account for restart interval (no-op if not using restarts) */
             m_restarts_to_go--;
@@ -1011,14 +971,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private bool decode_mcu_AC_refine(JBLOCK[] MCU_data)
         {
             /* Process restart marker if needed; may have to suspend */
-            if (m_cinfo.m_restart_interval != 0)
-            {
-                if (m_restarts_to_go == 0)
-                {
-                    if (!process_restart())
-                        return false;
-                }
-            }
+            if (m_cinfo.m_restart_interval != 0 && m_restarts_to_go == 0 && !process_restart())
+                return false;
 
             /* If we've run out of data, don't modify the MCU.
              */
@@ -1029,30 +983,18 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int[] natural_order = m_cinfo.natural_order;
 
                 /* Load up working state */
-                int get_buffer;
-                int bits_left;
-                bitread_working_state br_state = new bitread_working_state();
-                BITREAD_LOAD_STATE(m_bitstate, out get_buffer, out bits_left, ref br_state);
+                BITREAD_LOAD_STATE();
                 uint EOBRUN = m_saved.EOBRUN; /* only part of saved state we need */
-
-                /* If we are forced to suspend, we must undo the assignments to any newly
-                 * nonzero coefficients in the block, because otherwise we'd get confused
-                 * next time about which coefficients were already nonzero.
-                 * But we need not undo addition of bits to already-nonzero coefficients;
-                 * instead, we can test the current bit to see if we already did it.
-                 */
-                int num_newnz = 0;
-                int[] newnz_pos = new int[JpegConstants.DCTSIZE2];
 
                 /* initialize coefficient loop counter to start of band */
                 int k = m_cinfo.m_Ss;
 
+                var mcuDataBlock = MCU_data[0].data;
                 if (EOBRUN == 0)
                 {
                     do
                     {
-                        int s;
-                        HUFF_DECODE(out s, ref br_state, ac_derived_tbl, ref get_buffer, ref bits_left);
+                        int s = HUFF_DECODE(ac_derived_tbl);
 
                         int r = s >> 4;
                         s &= 15;
@@ -1064,9 +1006,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                                 m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
                             }
 
-                            CHECK_BIT_BUFFER(ref br_state, 1, ref get_buffer, ref bits_left);
+                            CHECK_BIT_BUFFER(1);
 
-                            if (GET_BITS(1, get_buffer, ref bits_left) != 0)
+                            bits_left -= 1;
+                            int bits = get_buffer >> bits_left & bmask[1];
+                            if (bits != 0)
                             {
                                 /* newly nonzero coef is positive */
                                 s = p1;
@@ -1084,9 +1028,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                                 EOBRUN = (uint)(1 << r);    /* EOBr, run length is 2^r + appended bits */
                                 if (r != 0)
                                 {
-                                    CHECK_BIT_BUFFER(ref br_state, r, ref get_buffer, ref bits_left);
+                                    CHECK_BIT_BUFFER(r);
 
-                                    r = GET_BITS(r, get_buffer, ref bits_left);
+                                    bits_left -= r;
+                                    r = get_buffer >> bits_left & bmask[r];
                                     EOBRUN += (uint)r;
                                 }
                                 break;      /* rest of block is handled by EOB logic */
@@ -1100,21 +1045,20 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         do
                         {
                             int blockIndex = natural_order[k];
-                            short thiscoef = MCU_data[0][blockIndex];
+                            short thiscoef = mcuDataBlock[blockIndex];
                             if (thiscoef != 0)
                             {
-                                CHECK_BIT_BUFFER(ref br_state, 1, ref get_buffer, ref bits_left);
+                                CHECK_BIT_BUFFER(1);
 
-                                if (GET_BITS(1, get_buffer, ref bits_left) != 0)
+                                bits_left -= 1;
+                                int bits = get_buffer >> bits_left & bmask[1];
+                                if (bits != 0 && (thiscoef & p1) == 0)
                                 {
-                                    if ((thiscoef & p1) == 0)
-                                    {
-                                        /* do nothing if already set it */
-                                        if (thiscoef >= 0)
-                                            MCU_data[0][blockIndex] += (short)p1;
-                                        else
-                                            MCU_data[0][blockIndex] += (short)m1;
-                                    }
+                                    /* do nothing if already set it */
+                                    if (thiscoef >= 0)
+                                        mcuDataBlock[blockIndex] += (short)p1;
+                                    else
+                                        mcuDataBlock[blockIndex] += (short)m1;
                                 }
                             }
                             else
@@ -1132,10 +1076,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             int pos = natural_order[k];
 
                             /* Output newly nonzero coefficient */
-                            MCU_data[0][pos] = (short)s;
-
-                            /* Remember its position in case we have to suspend */
-                            newnz_pos[num_newnz++] = pos;
+                            mcuDataBlock[pos] = (short)s;
                         }
 
                         k++;
@@ -1152,21 +1093,20 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     do
                     {
                         int blockIndex = natural_order[k];
-                        short thiscoef = MCU_data[0][blockIndex];
+                        short thiscoef = mcuDataBlock[blockIndex];
                         if (thiscoef != 0)
                         {
-                            CHECK_BIT_BUFFER(ref br_state, 1, ref get_buffer, ref bits_left);
+                            CHECK_BIT_BUFFER(1);
 
-                            if (GET_BITS(1, get_buffer, ref bits_left) != 0)
+                            bits_left -= 1;
+                            int bits = get_buffer >> bits_left & bmask[1];
+                            if (bits != 0 && (thiscoef & p1) == 0)
                             {
-                                if ((thiscoef & p1) == 0)
-                                {
-                                    /* do nothing if already changed it */
-                                    if (thiscoef >= 0)
-                                        MCU_data[0][blockIndex] += (short)p1;
-                                    else
-                                        MCU_data[0][blockIndex] += (short)m1;
-                                }
+                                /* do nothing if already changed it */
+                                if (thiscoef >= 0)
+                                    mcuDataBlock[blockIndex] += (short)p1;
+                                else
+                                    mcuDataBlock[blockIndex] += (short)m1;
                             }
                         }
 
@@ -1178,7 +1118,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 /* Completed MCU, so update state */
-                BITREAD_SAVE_STATE(ref m_bitstate, get_buffer, bits_left);
+                BITREAD_SAVE_STATE();
                 m_saved.EOBRUN = EOBRUN; /* only part of saved state we need */
             }
 
@@ -1188,22 +1128,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             return true;
         }
 
-        /// <summary>
-        /// MCU decoding for AC successive approximation refinement scan.
-        /// </summary>
-        private static void undo_decode_mcu_AC_refine(JBLOCK[] block, int[] newnz_pos, int num_newnz)
-        {
-            /* Re-zero any output coefficients that we made newly nonzero */
-            while (num_newnz > 0)
-                block[0][newnz_pos[--num_newnz]] = 0;
-        }
-
         /*
          * Finish up at the end of a Huffman-compressed scan.
          */
         public void finish_pass_huff()
         {
-            /* Throw away any unused bits remaining in bit buffer; */
+            /* Throw away any unused bits remaining in bit buffer. */
             /* include any full bytes in next_marker's count of discarded bytes */
             m_cinfo.m_marker.SkipBytes(m_bitstate.bits_left / 8);
             m_bitstate.bits_left = 0;
@@ -1242,64 +1172,28 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             return true;
         }
 
-        private static int HUFF_EXTEND(int x, int s)
+        private void BITREAD_LOAD_STATE()
         {
-            return (x <= bmask[s - 1] ? x - bmask[s] : x);
+            get_buffer = m_bitstate.get_buffer;
+            bits_left = m_bitstate.bits_left;
         }
 
-        private void BITREAD_LOAD_STATE(bitread_perm_state bitstate, out int get_buffer, out int bits_left, ref bitread_working_state br_state)
+        private void BITREAD_SAVE_STATE()
         {
-            br_state.cinfo = m_cinfo;
-            get_buffer = bitstate.get_buffer;
-            bits_left = bitstate.bits_left;
-        }
-
-        private static void BITREAD_SAVE_STATE(ref bitread_perm_state bitstate, int get_buffer, int bits_left)
-        {
-            bitstate.get_buffer = get_buffer;
-            bitstate.bits_left = bits_left;
+            m_bitstate.get_buffer = get_buffer;
+            m_bitstate.bits_left = bits_left;
         }
 
         /*
         * These methods provide the in-line portion of bit fetching.
-        * Use CHECK_BIT_BUFFER to ensure there are N bits in get_buffer
-        * before using GET_BITS, PEEK_BITS, or DROP_BITS.
+        * Use CHECK_BIT_BUFFER to ensure there are N bits in get_buffer before using the bits.
         * The variables get_buffer and bits_left are assumed to be locals,
         * but the state struct might not be (jpeg_huff_decode needs this).
-        *  CHECK_BIT_BUFFER(state,n,action);
-        *      Ensure there are N bits in get_buffer; if suspend, take action.
-        *      val = GET_BITS(n);
-        *      Fetch next N bits.
-        *      val = PEEK_BITS(n);
-        *      Fetch next N bits without removing them from the buffer.
-        *  DROP_BITS(n);
-        *      Discard next N bits.
-        * The value N should be a simple variable, not an expression, because it
-        * is evaluated multiple times.
         */
-        private static void CHECK_BIT_BUFFER(ref bitread_working_state state, int nbits, ref int get_buffer, ref int bits_left)
+        private void CHECK_BIT_BUFFER(int nbits)
         {
             if (bits_left < nbits)
-            {
-                jpeg_fill_bit_buffer(ref state, get_buffer, bits_left, nbits);
-                get_buffer = state.get_buffer;
-                bits_left = state.bits_left;
-            }
-        }
-
-        private static int GET_BITS(int nbits, int get_buffer, ref int bits_left)
-        {
-            return (((int)(get_buffer >> (bits_left -= nbits))) & bmask[nbits]);
-        }
-
-        private static int PEEK_BITS(int nbits, int get_buffer, int bits_left)
-        {
-            return (((int)(get_buffer >> (bits_left - nbits))) & bmask[nbits]);
-        }
-
-        private static void DROP_BITS(int nbits, ref int bits_left)
-        {
-            bits_left -= nbits;
+                jpeg_fill_bit_buffer(nbits);
         }
 
         /*
@@ -1318,17 +1212,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         *    more than HUFF_LOOKAHEAD bits long.
         * 3. jpeg_huff_decode returns -1 if forced to suspend.
         */
-        private static void HUFF_DECODE(out int result, ref bitread_working_state state, d_derived_tbl htbl, ref int get_buffer, ref int bits_left)
+        private int HUFF_DECODE(d_derived_tbl htbl)
         {
             int nb = 0;
             bool doSlow = false;
 
             if (bits_left < JpegConstants.HUFF_LOOKAHEAD)
             {
-                jpeg_fill_bit_buffer(ref state, get_buffer, bits_left, 0);
+                jpeg_fill_bit_buffer(0);
 
-                get_buffer = state.get_buffer;
-                bits_left = state.bits_left;
                 if (bits_left < JpegConstants.HUFF_LOOKAHEAD)
                 {
                     nb = 1;
@@ -1338,25 +1230,21 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             if (!doSlow)
             {
-                int look = PEEK_BITS(JpegConstants.HUFF_LOOKAHEAD, get_buffer, bits_left);
+                int look = get_buffer >> (bits_left - JpegConstants.HUFF_LOOKAHEAD) & bmask[JpegConstants.HUFF_LOOKAHEAD];
                 if ((nb = htbl.look_nbits[look]) != 0)
                 {
-                    DROP_BITS(nb, ref bits_left);
-                    result = htbl.look_sym[look];
-                    return;
+                    bits_left -= nb;
+                    return htbl.look_sym[look];
                 }
 
                 nb = JpegConstants.HUFF_LOOKAHEAD + 1;
             }
 
-            result = jpeg_huff_decode(ref state, get_buffer, bits_left, htbl, nb);
-
-            get_buffer = state.get_buffer;
-            bits_left = state.bits_left;
+            return jpeg_huff_decode(htbl, nb);
         }
 
         /* Load up the bit buffer to a depth of at least nbits */
-        private static void jpeg_fill_bit_buffer(ref bitread_working_state state, int get_buffer, int bits_left, int nbits)
+        private void jpeg_fill_bit_buffer(int nbits)
         {
             /* Attempt to load at least MIN_GET_BITS bits into get_buffer. */
             /* (It is assumed that no request will be for more than that many bits.) */
@@ -1364,13 +1252,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             bool noMoreBytes = false;
 
-            if (state.cinfo.m_unread_marker == 0)
+            if (m_cinfo.m_unread_marker == 0)
             {
-                /* cannot advance past a marker */
                 while (bits_left < MIN_GET_BITS)
                 {
-                    int c;
-                    state.cinfo.m_src.GetByte(out c);
+                    m_cinfo.m_src.GetByte(out int c);
 
                     /* If it's 0xFF, check and discard stuffed zero byte */
                     if (c == 0xFF)
@@ -1382,7 +1268,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         */
                         do
                         {
-                            state.cinfo.m_src.GetByte(out c);
+                            m_cinfo.m_src.GetByte(out c);
                         }
                         while (c == 0xFF);
 
@@ -1401,7 +1287,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             * current MCU, because we will read no more bytes from the data
                             * source.  So it is OK to update permanent state right away.
                             */
-                            state.cinfo.m_unread_marker = c;
+                            m_cinfo.m_unread_marker = c;
                             /* See if we need to insert some fake zero bits. */
                             noMoreBytes = true;
                             break;
@@ -1414,37 +1300,33 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 } /* end while */
             }
             else
-                noMoreBytes = true;
-
-            if (noMoreBytes)
             {
+                /* cannot advance past a marker */
                 /* We get here if we've read the marker that terminates the compressed
                 * data segment.  There should be enough bits in the buffer register
                 * to satisfy the request; if so, no problem.
                 */
-                if (nbits > bits_left)
-                {
-                    /* Uh-oh.  Report corrupted data to user and stuff zeroes into
-                    * the data stream, so that we can produce some kind of image.
-                    * We use a nonvolatile flag to ensure that only one warning message
-                    * appears per data segment.
-                    */
-                    huff_entropy_decoder entropy = (huff_entropy_decoder)state.cinfo.m_entropy;
-                    if (!entropy.m_insufficient_data)
-                    {
-                        state.cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HIT_MARKER);
-                        entropy.m_insufficient_data = true;
-                    }
-
-                    /* Fill the buffer with zero bits */
-                    get_buffer <<= MIN_GET_BITS - bits_left;
-                    bits_left = MIN_GET_BITS;
-                }
+                noMoreBytes = true;
             }
 
-            /* Unload the local registers */
-            state.get_buffer = get_buffer;
-            state.bits_left = bits_left;
+            if (noMoreBytes && nbits > bits_left)
+            {
+                /* Uh-oh.  Report corrupted data to user and stuff zeroes into
+                * the data stream, so that we can produce some kind of image.
+                * We use a nonvolatile flag to ensure that only one warning message
+                * appears per data segment.
+                */
+                huff_entropy_decoder entropy = (huff_entropy_decoder)m_cinfo.m_entropy;
+                if (!entropy.m_insufficient_data)
+                {
+                    m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HIT_MARKER);
+                    entropy.m_insufficient_data = true;
+                }
+
+                /* Fill the buffer with zero bits */
+                get_buffer <<= MIN_GET_BITS - bits_left;
+                bits_left = MIN_GET_BITS;
+            }
         }
 
         /// <summary>
@@ -1463,7 +1345,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
             JHUFF_TBL htbl = isDC ? m_cinfo.m_dc_huff_tbl_ptrs[tblno] : m_cinfo.m_ac_huff_tbl_ptrs[tblno];
             if (htbl == null)
+            {
                 m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NO_HUFF_TABLE, tblno);
+                return;
+            }
 
             /* Allocate a workspace if we haven't already done so. */
             if (dtbl == null)
@@ -1534,7 +1419,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             dtbl.maxcode[17] = 0xFFFFF; /* ensures jpeg_huff_decode terminates */
 
             /* Compute lookahead tables to speed up decoding.
-            * First we set all the table entries to 0, indicating "too long";
+            * First we set all the table entries to 0, indicating "too long".
             * then we iterate through the Huffman codes that are short enough and
             * fill in all the entries that correspond to bit sequences starting
             * with that code.
@@ -1576,36 +1461,34 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         }
 
         /* Out-of-line case for Huffman code fetching */
-        protected static int jpeg_huff_decode(ref bitread_working_state state, int get_buffer, int bits_left, d_derived_tbl htbl, int min_bits)
+        protected int jpeg_huff_decode(d_derived_tbl htbl, int min_bits)
         {
             /* HUFF_DECODE has determined that the code is at least min_bits */
             /* bits long, so fetch that many bits in one swoop. */
             int l = min_bits;
-            CHECK_BIT_BUFFER(ref state, l, ref get_buffer, ref bits_left);
+            CHECK_BIT_BUFFER(l);
 
-            int code = GET_BITS(l, get_buffer, ref bits_left);
-
+            bits_left -= l;
+            int code = get_buffer >> bits_left & bmask[l];
+            
             /* Collect the rest of the Huffman code one bit at a time. */
             /* This is per Figure F.16 in the JPEG spec. */
 
             while (code > htbl.maxcode[l])
             {
                 code <<= 1;
-                CHECK_BIT_BUFFER(ref state, 1, ref get_buffer, ref bits_left);
+                CHECK_BIT_BUFFER(1);
 
-                code |= GET_BITS(1, get_buffer, ref bits_left);
+                bits_left -= 1;
+                code |= get_buffer >> bits_left & bmask[1];
                 l++;
             }
-
-            /* Unload the local registers */
-            state.get_buffer = get_buffer;
-            state.bits_left = bits_left;
 
             /* With garbage input we may reach the sentinel value l = 17. */
 
             if (l > 16)
             {
-                state.cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
+                m_cinfo.WARNMS(J_MESSAGE_CODE.JWRN_HUFF_BAD_CODE);
                 /* fake a zero as the safest result */
                 return 0;
             }

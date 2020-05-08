@@ -119,8 +119,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 ComponentBuffer cb = new ComponentBuffer();
-                cb.SetBuffer(jpeg_common_struct.AllocJpegSamples(JpegUtils.jround_up(cinfo.m_output_width, 
-                    cinfo.m_max_h_samp_factor), cinfo.m_max_v_samp_factor), null, 0);
+                cb.SetBuffer(jpeg_common_struct.AllocJpegSamples(
+                    JpegUtils.jround_up(cinfo.m_output_width, 
+                    cinfo.m_max_h_samp_factor), cinfo.m_max_v_samp_factor));
 
                 m_color_buf[ci] = cb;
             }
@@ -157,7 +158,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     /* Invoke per-component upsample method.*/
                     m_currentComponent = ci;
                     m_upsampleRowOffset = in_row_group_ctr * m_rowgroup_height[ci];
-                    upsampleComponent(ref input_buf[ci]);
+                    upsampleComponent(input_buf[ci]);
                 }
 
                 m_next_row_out = 0;
@@ -191,7 +192,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 in_row_group_ctr++;
         }
 
-        private void upsampleComponent(ref ComponentBuffer input_data)
+        private void upsampleComponent(ComponentBuffer input_data)
         {
             switch (m_upsampleMethods[m_currentComponent])
             {
@@ -199,16 +200,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     noop_upsample();
                     break;
                 case ComponentUpsampler.fullsize_upsampler:
-                    fullsize_upsample(ref input_data);
+                    fullsize_upsample(input_data);
                     break;
                 case ComponentUpsampler.h2v1_upsampler:
-                    h2v1_upsample(ref input_data);
+                    h2v1_upsample(input_data);
                     break;
                 case ComponentUpsampler.h2v2_upsampler:
-                    h2v2_upsample(ref input_data);
+                    h2v2_upsample(input_data);
                     break;
                 case ComponentUpsampler.int_upsampler:
-                    int_upsample(ref input_data);
+                    int_upsample(input_data);
                     break;
                 default:
                     m_cinfo.ERREXIT(J_MESSAGE_CODE.JERR_NOTIMPL);
@@ -236,7 +237,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// safe only because sep_upsample doesn't declare the input row group
         /// "consumed" until we are done color converting and emitting it.
         /// </summary>
-        private void fullsize_upsample(ref ComponentBuffer input_data)
+        private void fullsize_upsample(ComponentBuffer input_data)
         {
             m_color_buf[m_currentComponent] = input_data;
             m_perComponentOffsets[m_currentComponent] = m_upsampleRowOffset;
@@ -247,7 +248,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Fast processing for the common case of 2:1 horizontal and 1:1 vertical.
         /// It's still a box filter.
         /// </summary>
-        private void h2v1_upsample(ref ComponentBuffer input_data)
+        private void h2v1_upsample(ComponentBuffer input_data)
         {
             ComponentBuffer output_data = m_color_buf[m_currentComponent];
 
@@ -256,13 +257,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int row = m_upsampleRowOffset + inrow;
                 int outIndex = 0;
 
+                var inputBuffer = input_data[row];
+                var outputBuffer = output_data[inrow];
                 for (int col = 0; outIndex < m_cinfo.m_output_width; col++)
                 {
-                    byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
-                    output_data[inrow][outIndex] = invalue;
-                    outIndex++;
-                    output_data[inrow][outIndex] = invalue;
-                    outIndex++;
+                    byte invalue = inputBuffer[col]; /* don't need GETJSAMPLE() here */
+                    outputBuffer[outIndex++] = invalue;
+                    outputBuffer[outIndex++] = invalue;
                 }
             }
         }
@@ -271,7 +272,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// Fast processing for the common case of 2:1 horizontal and 2:1 vertical.
         /// It's still a box filter.
         /// </summary>
-        private void h2v2_upsample(ref ComponentBuffer input_data)
+        private void h2v2_upsample(ComponentBuffer input_data)
         {
             ComponentBuffer output_data = m_color_buf[m_currentComponent];
 
@@ -282,13 +283,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 int row = m_upsampleRowOffset + inrow;
                 int outIndex = 0;
 
+                var inputBuffer = input_data[row];
+                var outputBuffer = output_data[outrow];
                 for (int col = 0; outIndex < m_cinfo.m_output_width; col++)
                 {
-                    byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
-                    output_data[outrow][outIndex] = invalue;
-                    outIndex++;
-                    output_data[outrow][outIndex] = invalue;
-                    outIndex++;
+                    byte invalue = inputBuffer[col]; /* don't need GETJSAMPLE() here */
+                    outputBuffer[outIndex++] = invalue;
+                    outputBuffer[outIndex++] = invalue;
                 }
 
                 JpegUtils.jcopy_sample_rows(output_data, outrow, output_data, outrow + 1, 1, m_cinfo.m_output_width);
@@ -307,7 +308,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         /// so if you are actually going to use 3:1 or 4:1 sampling ratios
         /// you would be well advised to improve this code.
         /// </summary>
-        private void int_upsample(ref ComponentBuffer input_data)
+        private void int_upsample(ComponentBuffer input_data)
         {
             ComponentBuffer output_data = m_color_buf[m_currentComponent];
             int h_expand = m_h_expand[m_currentComponent];
@@ -319,15 +320,14 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 /* Generate one output row with proper horizontal expansion */
                 int row = m_upsampleRowOffset + inrow;
+                var inputBuffer = input_data[row];
+                var outputBuffer = output_data[outrow];
                 for (int col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    byte invalue = input_data[row][col]; /* don't need GETJSAMPLE() here */
+                    byte invalue = inputBuffer[col]; /* don't need GETJSAMPLE() here */
                     int outIndex = 0;
                     for (int h = h_expand; h > 0; h--)
-                    {
-                        output_data[outrow][outIndex] = invalue;
-                        outIndex++;
-                    }
+                        outputBuffer[outIndex++] = invalue;
                 }
                 
                 /* Generate any additional output rows by duplicating the first one */

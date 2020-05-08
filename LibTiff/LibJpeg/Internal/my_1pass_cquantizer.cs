@@ -458,9 +458,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
 
                     int outIndex = 0;
                     int outRow = out_row + row;
-
-                    int errorIndex = 0;
                     int dir;            /* 1 for left-to-right, -1 for right-to-left */
+
+                    int errorIndex;
                     if (m_on_odd_row)
                     {
                         /* work right to left in this row */
@@ -493,7 +493,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                          * for either sign of the error value.
                          * Note: errorIndex is for *previous* column's array entry.
                          */
-                        cur = JpegUtils.RIGHT_SHIFT(cur + m_fserrors[ci][errorIndex + dir] + 8, 4);
+                        cur = (cur + m_fserrors[ci][errorIndex + dir] + 8) >> 4;
 
                         /* Form pixel value + error, and range-limit to 0..MAXJSAMPLE.
                          * The maximum error is +- MAXJSAMPLE; this sets the required size
@@ -627,7 +627,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 /* fill in colorindex entries for i'th color component */
                 int nci = m_Ncolors[i]; /* # of distinct values for this color */
-                blksize = blksize / nci;
+                blksize /= nci;
 
                 /* adjust colorindex pointers to provide padding at negative indexes. */
                 if (pad != 0)
@@ -723,7 +723,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private static int largest_input_value(int j, int maxj)
         {
             /* Breakpoints are halfway between values returned by output_value */
-            return (int)(((2 * j + 1) * JpegConstants.MAXJSAMPLE + maxj) / (2 * maxj));
+            return ((2 * j + 1) * JpegConstants.MAXJSAMPLE + maxj) / (2 * maxj);
         }
 
         /// <summary>
@@ -737,7 +737,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * (Forcing the upper and lower values to the limits ensures that
              * dithering can't produce a color outside the selected gamut.)
              */
-            return (int)((j * JpegConstants.MAXJSAMPLE + maxj / 2) / maxj);
+            return (j * JpegConstants.MAXJSAMPLE + maxj / 2) / maxj;
         }
 
         /// <summary>
@@ -753,7 +753,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* We can allocate at least the nc'th root of max_colors per component. */
             /* Compute floor(nc'th root of max_colors). */
             int iroot = 1;
-            long temp = 0;
+            long temp;
             do
             {
                 iroot++;
@@ -784,7 +784,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
              * (Example: for 16 colors, we start at 2*2*2, go to 3*2*2, then 4*2*2.)
              * In RGB colorspace, try to increment G first, then R, then B.
              */
-            bool changed = false;
+            bool changed;
             do
             {
                 changed = false;
@@ -828,7 +828,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 for (int k = 0; k < ODITHER_SIZE; k++)
                 {
-                    int num = ((int)(ODITHER_CELLS - 1 - 2 * ((int)base_dither_matrix[j][k]))) * JpegConstants.MAXJSAMPLE;
+                    int num = (ODITHER_CELLS - 1 - 2 * ((int)base_dither_matrix[j][k])) * JpegConstants.MAXJSAMPLE;
 
                     /* Ensure round towards zero despite C's lack of consistency
                      * about rounding negative values in integer division...

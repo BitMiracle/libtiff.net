@@ -247,7 +247,8 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 int ci = m_cinfo.m_MCU_membership[blkn];
                 jpeg_component_info compptr = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
-                if (!encode_one_block(state, MCU_data[blkn][0].data, state.last_dc_val[ci],
+                var mcuDataBlock = MCU_data[blkn][0].data;
+                if (!encode_one_block(state, mcuDataBlock, state.last_dc_val[ci],
                     m_dc_derived_tbls[compptr.Dc_tbl_no],
                     m_ac_derived_tbls[compptr.Ac_tbl_no]))
                 {
@@ -255,7 +256,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 }
 
                 /* Update last_dc_val */
-                state.last_dc_val[ci] = MCU_data[blkn][0][0];
+                state.last_dc_val[ci] = mcuDataBlock[0];
             }
 
             /* Completed MCU, so update state */
@@ -329,10 +330,11 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 int ci = m_cinfo.m_MCU_membership[blkn];
                 jpeg_component_info compptr = m_cinfo.Component_info[m_cinfo.m_cur_comp_info[ci]];
-                htest_one_block(MCU_data[blkn][0].data, m_saved.last_dc_val[ci],
+                var mcuDataBlock = MCU_data[blkn][0].data;
+                htest_one_block(mcuDataBlock, m_saved.last_dc_val[ci],
                     m_dc_count_ptrs[compptr.Dc_tbl_no],
                     m_ac_count_ptrs[compptr.Ac_tbl_no]);
-                m_saved.last_dc_val[ci] = MCU_data[blkn][0][0];
+                m_saved.last_dc_val[ci] = mcuDataBlock[0];
             }
 
             return true;
@@ -944,9 +946,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* Encode the AC coefficients per section G.1.2.2, fig. G.3 */
             /* r = run length of zeros */
             int r = 0;
+            var mcuDataBlock = MCU_data[0][0].data;
             for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
             {
-                int temp = MCU_data[0][0][natural_order[k]];
+                int temp = mcuDataBlock[natural_order[k]];
                 if (temp == 0)
                 {
                     r++;
@@ -1089,9 +1092,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int EOB = 0;
             int[] natural_order = m_cinfo.natural_order;
             int[] absvalues = new int[JpegConstants.DCTSIZE2];
+            var mcuDataBlock = MCU_data[0][0].data;
             for (int k = m_cinfo.m_Ss; k <= m_cinfo.m_Se; k++)
             {
-                int temp = MCU_data[0][0][natural_order[k]];
+                int temp = mcuDataBlock[natural_order[k]];
 
                 /* We must apply the point transform by Al.  For AC coefficients this
                  * is an integer division with rounding towards 0.  To do this portably
@@ -1161,7 +1165,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 emit_ac_symbol(ac_tbl_no, (r << 4) + 1);
 
                 /* Emit output bit for newly-nonzero coef */
-                temp = (MCU_data[0][0][natural_order[k]] < 0) ? 0 : 1;
+                temp = (mcuDataBlock[natural_order[k]] < 0) ? 0 : 1;
                 emit_bits_e(temp, 1);
 
                 /* Emit buffered correction bits that must be associated with this code */

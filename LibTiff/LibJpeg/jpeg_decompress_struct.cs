@@ -1124,7 +1124,7 @@ namespace BitMiracle.LibJpeg.Classic
             for (int i = 0; i < componentCount; i++)
             {
                 cb[i] = new ComponentBuffer();
-                cb[i].SetBuffer(data[i], null, 0);
+                cb[i].SetBuffer(data[i]);
             }
 
             /* Decompress directly into user's buffer. */

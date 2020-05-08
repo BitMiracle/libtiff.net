@@ -103,7 +103,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                         int blockcnt = (MCU_col_num < last_MCU_col) ? componentInfo.MCU_width : componentInfo.last_col_width;
                         for (int yindex = 0; yindex < componentInfo.MCU_height; yindex++)
                         {
-                            int xindex = 0;
+                            int xindex;
                             if (m_iMCU_row_num < last_iMCU_row || yindex + yoffset < componentInfo.last_row_height)
                             {
                                 /* Fill in pointers to real blocks in this row */

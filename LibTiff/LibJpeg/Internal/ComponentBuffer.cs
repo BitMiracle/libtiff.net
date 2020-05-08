@@ -17,15 +17,6 @@
         // see for example my_upsampler.h2v2_fancy_upsample
         private int m_funnyOffset;
 
-        public ComponentBuffer()
-        {
-        }
-
-        public ComponentBuffer(byte[][] buf, int[] funnyIndices, int funnyOffset)
-        {
-            SetBuffer(buf, funnyIndices, funnyOffset);
-        }
-
         public byte[] this[int i]
         {
             get
@@ -37,7 +28,7 @@
             }
         }
 
-        public void SetBuffer(byte[][] buf, int[] funnyIndices, int funnyOffset)
+        public void SetBuffer(byte[][] buf, int[] funnyIndices = null, int funnyOffset = 0)
         {
             m_buffer = buf;
             m_funnyIndices = funnyIndices;
