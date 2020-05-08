@@ -125,11 +125,10 @@
         {
             /* Always put up a warning. */
             cinfo.WARNMS(J_MESSAGE_CODE.JWRN_MUST_RESYNC, cinfo.m_unread_marker, desired);
-
-            /* Outer loop handles repeated decision after scanning forward. */
-            int action = 1;
-            for ( ; ; )
+            for (; ; )
             {
+                /* Outer loop handles repeated decision after scanning forward. */
+                int action;
                 if (cinfo.m_unread_marker < (int)JPEG_MARKER.SOF0)
                 {
                     /* invalid marker */
@@ -208,15 +207,13 @@
             }
 
             m_bytes_in_buffer--;
-            V = m_next_input_byte[m_position] << 8;
-            m_position++;
+            V = m_next_input_byte[m_position++] << 8;
 
             if (!MakeByteAvailable())
                 return false;
 
             m_bytes_in_buffer--;
-            V += m_next_input_byte[m_position];
-            m_position++;
+            V += m_next_input_byte[m_position++];
             return true;
         }
 
@@ -228,15 +225,14 @@
         /// <returns><c>true</c> if operation succeed; otherwise, <c>false</c></returns>
         public virtual bool GetByte(out int V)
         {
-            if (!MakeByteAvailable())
+            if (m_bytes_in_buffer == 0 && !fill_input_buffer())
             {
                 V = 0;
                 return false;
             }
 
             m_bytes_in_buffer--;
-            V = m_next_input_byte[m_position];
-            m_position++;
+            V = m_next_input_byte[m_position++];
             return true;
         }
 
@@ -271,11 +267,8 @@
         /// suitable place to restart if a suspension occurs.</remarks>
         public virtual bool MakeByteAvailable()
         {
-            if (m_bytes_in_buffer == 0)
-            {
-                if (!fill_input_buffer())
-                    return false;
-            }
+            if (m_bytes_in_buffer == 0 && !fill_input_buffer())
+                return false;
 
             return true;
         }
