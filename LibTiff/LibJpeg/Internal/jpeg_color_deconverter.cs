@@ -344,10 +344,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
                 /* Cr=>R value is nearest int to 1.402 * x */
-                m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.402) * x + ONE_HALF, SCALEBITS);
+                m_Cr_r_tab[i] = (FIX(1.402) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cb=>B value is nearest int to 1.772 * x */
-                m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.772) * x + ONE_HALF, SCALEBITS);
+                m_Cb_b_tab[i] = (FIX(1.772) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cr=>G value is scaled-up -0.714136286 * x */
                 m_Cr_g_tab[i] = (-FIX(0.714136286)) * x;
@@ -374,10 +374,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
                 /* Cr=>R value is nearest int to 2.804 * x */
-                m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(2.804) * x + ONE_HALF, SCALEBITS);
+                m_Cr_r_tab[i] = (FIX(2.804) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cb=>B value is nearest int to 3.544 * x */
-                m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(3.544) * x + ONE_HALF, SCALEBITS);
+                m_Cb_b_tab[i] = (FIX(3.544) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cr=>G value is scaled-up -1.428272572 * x */
                 m_Cr_g_tab[i] = (-FIX(1.428272572)) * x;
@@ -397,22 +397,28 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             byte[] limit = m_cinfo.m_sample_range_limit;
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
+            var component0 = input_buf[0];
+            var component1 = input_buf[1];
+            var component2 = input_buf[2];
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = component0[input_row + component0RowOffset];
+                var inputBuffer1 = component1[input_row + component1RowOffset];
+                var inputBuffer2 = component2[input_row + component2RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    int y = input_buf[0][input_row + component0RowOffset][col];
-                    int cb = input_buf[1][input_row + component1RowOffset][col];
-                    int cr = input_buf[2][input_row + component2RowOffset][col];
+                    int yPlusOffset = inputBuffer0[col] + limitOffset;
+                    int cb = inputBuffer1[col];
+                    int cr = inputBuffer2[col];
 
                     /* Range-limiting is essential due to noise introduced by DCT losses.
                      * for extended gamut (sYCC) and wide gamut (bg-sYCC) encodings.
                      */
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = limit[limitOffset + y + m_Cr_r_tab[cr]];
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = limit[limitOffset + y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS)];
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = limit[limitOffset + y + m_Cb_b_tab[cb]];
-                    columnOffset += JpegConstants.RGB_PIXELSIZE;
+                    outputBuffer[columnOffset++] = limit[yPlusOffset + m_Cr_r_tab[cr]];
+                    outputBuffer[columnOffset++] = limit[yPlusOffset + ((m_Cb_g_tab[cb] + m_Cr_g_tab[cr]) >> SCALEBITS)];
+                    outputBuffer[columnOffset++] = limit[yPlusOffset + m_Cb_b_tab[cb]];
                 }
 
                 input_row++;
@@ -451,15 +457,21 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = input_buf[0][input_row + component0RowOffset];
+                var inputBuffer1 = input_buf[1][input_row + component1RowOffset];
+                var inputBuffer2 = input_buf[2][input_row + component2RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < num_cols; col++)
                 {
-                    int r = input_buf[0][input_row + component0RowOffset][col];
-                    int g = input_buf[1][input_row + component1RowOffset][col];
-                    int b = input_buf[2][input_row + component2RowOffset][col];
+                    int r = inputBuffer0[col];
+                    int g = inputBuffer1[col];
+                    int b = inputBuffer2[col];
 
                     /* Y */
-                    output_buf[output_row + row][columnOffset++] = (byte)((rgb_y_tab[r + R_Y_OFF] + rgb_y_tab[g + G_Y_OFF] + rgb_y_tab[b + B_Y_OFF]) >> SCALEBITS);
+                    outputBuffer[columnOffset++] = (byte)((rgb_y_tab[r + R_Y_OFF] + rgb_y_tab[g + G_Y_OFF] + rgb_y_tab[b + B_Y_OFF]) >> SCALEBITS);
                 }
+
+                input_row++;
             }
         }
 
@@ -481,20 +493,26 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = input_buf[0][input_row + component0RowOffset];
+                var inputBuffer1 = input_buf[1][input_row + component1RowOffset];
+                var inputBuffer2 = input_buf[2][input_row + component2RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < num_cols; col++)
                 {
-                    int r = input_buf[0][input_row + component0RowOffset][col];
-                    int g = input_buf[1][input_row + component1RowOffset][col];
-                    int b = input_buf[2][input_row + component2RowOffset][col];
+                    int r = inputBuffer0[col];
+                    int g = inputBuffer1[col];
+                    int b = inputBuffer2[col];
 
                     /* Assume that MAXJSAMPLE+1 is a power of 2, so that the MOD
                      * (modulo) operator is equivalent to the bitmask operator AND.
                      */
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = (byte)((r + g - JpegConstants.CENTERJSAMPLE) & JpegConstants.MAXJSAMPLE);
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = (byte)g;
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = (byte)((b + g - JpegConstants.CENTERJSAMPLE) & JpegConstants.MAXJSAMPLE);
+                    outputBuffer[columnOffset + JpegConstants.RGB_RED] = (byte)((r + g - JpegConstants.CENTERJSAMPLE) & JpegConstants.MAXJSAMPLE);
+                    outputBuffer[columnOffset + JpegConstants.RGB_GREEN] = (byte)g;
+                    outputBuffer[columnOffset + JpegConstants.RGB_BLUE] = (byte)((b + g - JpegConstants.CENTERJSAMPLE) & JpegConstants.MAXJSAMPLE);
                     columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
+
+                input_row++;
             }
         }
 
@@ -513,11 +531,15 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = input_buf[0][input_row + component0RowOffset];
+                var inputBuffer1 = input_buf[1][input_row + component1RowOffset];
+                var inputBuffer2 = input_buf[2][input_row + component2RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < num_cols; col++)
                 {
-                    int r = input_buf[0][input_row + component0RowOffset][col];
-                    int g = input_buf[1][input_row + component1RowOffset][col];
-                    int b = input_buf[2][input_row + component2RowOffset][col];
+                    int r = inputBuffer0[col];
+                    int g = inputBuffer1[col];
+                    int b = inputBuffer2[col];
 
                     /* Assume that MAXJSAMPLE+1 is a power of 2, so that the MOD
                      * (modulo) operator is equivalent to the bitmask operator AND.
@@ -526,8 +548,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     b = (b + g - JpegConstants.CENTERJSAMPLE) & JpegConstants.MAXJSAMPLE;
 
                     /* Y */
-                    output_buf[output_row + row][columnOffset++] = (byte)((rgb_y_tab[r + R_Y_OFF] + rgb_y_tab[g + G_Y_OFF] + rgb_y_tab[b + B_Y_OFF]) >> SCALEBITS);
+                    outputBuffer[columnOffset++] = (byte)((rgb_y_tab[r + R_Y_OFF] + rgb_y_tab[g + G_Y_OFF] + rgb_y_tab[b + B_Y_OFF]) >> SCALEBITS);
                 }
+
+                input_row++;
             }
         }
 
@@ -546,18 +570,24 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = input_buf[0][input_row + component0RowOffset];
+                var inputBuffer1 = input_buf[1][input_row + component1RowOffset];
+                var inputBuffer2 = input_buf[2][input_row + component2RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < num_cols; col++)
                 {
-                    int r = input_buf[0][input_row + component0RowOffset][col];
-                    int g = input_buf[1][input_row + component1RowOffset][col];
-                    int b = input_buf[2][input_row + component2RowOffset][col];
+                    int r = inputBuffer0[col];
+                    int g = inputBuffer1[col];
+                    int b = inputBuffer2[col];
 
                     /* We can dispense with GETJSAMPLE() here */
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = (byte)r;
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = (byte)g;
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = (byte)b;
+                    outputBuffer[columnOffset + JpegConstants.RGB_RED] = (byte)r;
+                    outputBuffer[columnOffset + JpegConstants.RGB_GREEN] = (byte)g;
+                    outputBuffer[columnOffset + JpegConstants.RGB_BLUE] = (byte)b;
                     columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
+
+                input_row++;
             }
         }
 
@@ -578,26 +608,34 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             int num_cols = m_cinfo.m_output_width;
+            var component0 = input_buf[0];
+            var component1 = input_buf[1];
+            var component2 = input_buf[2];
+            var component3 = input_buf[3];
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = component0[input_row + component0RowOffset];
+                var inputBuffer1 = component1[input_row + component1RowOffset];
+                var inputBuffer2 = component2[input_row + component2RowOffset];
+                var inputBuffer3 = component3[input_row + component3RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < num_cols; col++)
                 {
-                    int y = input_buf[0][input_row + component0RowOffset][col];
-                    int cb = input_buf[1][input_row + component1RowOffset][col];
-                    int cr = input_buf[2][input_row + component2RowOffset][col];
+                    int yAdjusted = limitOffset + JpegConstants.MAXJSAMPLE - inputBuffer0[col];
+                    int cb = inputBuffer1[col];
+                    int cr = inputBuffer2[col];
 
                     /* Range-limiting is essential due to noise introduced by DCT losses,
                      * and for extended gamut encodings (sYCC).
                      */
-                    output_buf[output_row + row][columnOffset] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cr_r_tab[cr])]; /* red */
-                    output_buf[output_row + row][columnOffset + 1] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS))]; /* green */
-                    output_buf[output_row + row][columnOffset + 2] = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cb_b_tab[cb])]; /* blue */
+                    outputBuffer[columnOffset++] = limit[yAdjusted - m_Cr_r_tab[cr]]; /* red */
+                    outputBuffer[columnOffset++] = limit[yAdjusted - ((m_Cb_g_tab[cb] + m_Cr_g_tab[cr]) >> SCALEBITS)]; /* green */
+                    outputBuffer[columnOffset++] = limit[yAdjusted - m_Cb_b_tab[cb]]; /* blue */
 
                     /* K passes through unchanged */
                     /* don't need GETJSAMPLE here */
-                    output_buf[output_row + row][columnOffset + 3] = input_buf[3][input_row + component3RowOffset][col];
-                    columnOffset += 4;
+                    outputBuffer[columnOffset++] = inputBuffer3[col];
                 }
 
                 input_row++;
@@ -619,12 +657,16 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = input_buf[0][input_row + component0RowOffset];
+                var inputBuffer1 = input_buf[0][input_row + component1RowOffset];
+                var inputBuffer2 = input_buf[0][input_row + component2RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < num_cols; col++)
                 {
                     /* We can dispense with GETJSAMPLE() here */
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = input_buf[0][input_row + component0RowOffset][col];
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = input_buf[0][input_row + component1RowOffset][col];
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = input_buf[0][input_row + component2RowOffset][col];
+                    outputBuffer[columnOffset + JpegConstants.RGB_RED] = inputBuffer0[col];
+                    outputBuffer[columnOffset + JpegConstants.RGB_GREEN] = inputBuffer1[col];
+                    outputBuffer[columnOffset + JpegConstants.RGB_BLUE] = inputBuffer2[col];
                     columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
 
@@ -655,16 +697,21 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = input_buf[0][input_row + component0RowOffset];
+                var inputBuffer1 = input_buf[1][input_row + component1RowOffset];
+                var inputBuffer2 = input_buf[2][input_row + component2RowOffset];
+                var inputBuffer3 = input_buf[3][input_row + component3RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < m_cinfo.m_output_width; col++)
                 {
-                    int c = input_buf[0][input_row + component0RowOffset][col];
-                    int m = input_buf[1][input_row + component1RowOffset][col];
-                    int y = input_buf[2][input_row + component2RowOffset][col];
-                    int k = input_buf[3][input_row + component3RowOffset][col];
+                    int c = inputBuffer0[col];
+                    int m = inputBuffer1[col];
+                    int y = inputBuffer2[col];
+                    int k = inputBuffer3[col];
 
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = (byte)((c * k) / 255);
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = (byte)((m * k) / 255);
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = (byte)((y * k) / 255);
+                    outputBuffer[columnOffset + JpegConstants.RGB_RED] = (byte)((c * k) / 255);
+                    outputBuffer[columnOffset + JpegConstants.RGB_GREEN] = (byte)((m * k) / 255);
+                    outputBuffer[columnOffset + JpegConstants.RGB_BLUE] = (byte)((y * k) / 255);
                     columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
 
@@ -690,20 +737,25 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int row = 0; row < num_rows; row++)
             {
                 int columnOffset = 0;
+                var inputBuffer0 = input_buf[0][input_row + component0RowOffset];
+                var inputBuffer1 = input_buf[1][input_row + component1RowOffset];
+                var inputBuffer2 = input_buf[2][input_row + component2RowOffset];
+                var inputBuffer3 = input_buf[3][input_row + component3RowOffset];
+                var outputBuffer = output_buf[output_row + row];
                 for (int col = 0; col < num_cols; col++)
                 {
-                    int y = input_buf[0][input_row + component0RowOffset][col];
-                    int cb = input_buf[1][input_row + component1RowOffset][col];
-                    int cr = input_buf[2][input_row + component2RowOffset][col];
+                    int y = inputBuffer0[col];
+                    int cb = inputBuffer1[col];
+                    int cr = inputBuffer2[col];
 
                     int cmyk_c = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cr_r_tab[cr])];
-                    int cmyk_m = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS))];
+                    int cmyk_m = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + ((m_Cb_g_tab[cb] + m_Cr_g_tab[cr]) >> SCALEBITS))];
                     int cmyk_y = limit[limitOffset + JpegConstants.MAXJSAMPLE - (y + m_Cb_b_tab[cb])];
-                    int cmyk_k = input_buf[3][input_row + component3RowOffset][col];
+                    int cmyk_k = inputBuffer3[col];
 
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_RED] = (byte)((cmyk_c * cmyk_k) / 255);
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_GREEN] = (byte)((cmyk_m * cmyk_k) / 255);
-                    output_buf[output_row + row][columnOffset + JpegConstants.RGB_BLUE] = (byte)((cmyk_y * cmyk_k) / 255);
+                    outputBuffer[columnOffset + JpegConstants.RGB_RED] = (byte)((cmyk_c * cmyk_k) / 255);
+                    outputBuffer[columnOffset + JpegConstants.RGB_GREEN] = (byte)((cmyk_m * cmyk_k) / 255);
+                    outputBuffer[columnOffset + JpegConstants.RGB_BLUE] = (byte)((cmyk_y * cmyk_k) / 255);
                     columnOffset += JpegConstants.RGB_PIXELSIZE;
                 }
 
@@ -724,11 +776,12 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                     int columnIndex = 0;
                     int componentOffset = 0;
                     int perComponentOffset = m_perComponentOffsets[ci];
-
+                    var inputBuffer = input_buf[ci][input_row + perComponentOffset];
+                    var outputBuffer = output_buf[output_row + row];
                     for (int col = 0; col < m_cinfo.m_output_width; col++)
                     {
                         /* needn't bother with GETJSAMPLE() here */
-                        output_buf[output_row + row][ci + componentOffset] = input_buf[ci][input_row + perComponentOffset][columnIndex];
+                        outputBuffer[ci + componentOffset] = inputBuffer[columnIndex];
                         componentOffset += m_cinfo.m_num_components;
                         columnIndex++;
                     }

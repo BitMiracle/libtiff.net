@@ -113,25 +113,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         {
         };
 
-        /* We assume that right shift corresponds to signed division by 2 with
-        * rounding towards minus infinity.  This is correct for typical "arithmetic
-        * shift" instructions that shift in copies of the sign bit.
-        * RIGHT_SHIFT provides a proper signed right shift of an int quantity.
-        * It is only applied with constant shift counts.  SHIFT_TEMPS must be
-        * included in the variables of any routine using RIGHT_SHIFT.
-        */
-        public static int RIGHT_SHIFT(int x, int shft)
-        {
-            return (x >> shft);
-        }
-        
         /* Descale and correctly round an int value that's scaled by N bits.
-        * We assume RIGHT_SHIFT rounds towards minus infinity, so adding
+        * We assume right shift rounds towards minus infinity, so adding
         * the fudge factor is correct for either sign of X.
         */
         public static int DESCALE(int x, int n)
         {
-            return RIGHT_SHIFT(x + (1 << (n - 1)), n);
+            return (x + (1 << (n - 1))) >> n;
         }
 
         //////////////////////////////////////////////////////////////////////////

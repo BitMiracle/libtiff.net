@@ -377,6 +377,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 do_dct(workspace, sample_data, start_row, start_col);
 
                 /* Quantize/descale the coefficients, and store into coef_blocks[] */
+                var coeffBlock = coef_blocks[bi].data;
                 for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
                     int qval = divisors[i];
@@ -404,7 +405,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                             temp = 0;
                     }
 
-                    coef_blocks[bi][i] = (short)temp;
+                    coeffBlock[i] = (short)temp;
                 }
             }
         }
@@ -422,6 +423,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 do_dct(workspace, sample_data, start_row, start_col);
 
                 /* Quantize/descale the coefficients, and store into coef_blocks[] */
+                var coeffBlock = coef_blocks[bi].data;
                 for (int i = 0; i < JpegConstants.DCTSIZE2; i++)
                 {
                     /* Apply the quantization and scaling factor */
@@ -433,7 +435,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                      * The maximum coefficient size is +-16K (for 12-bit data), so this
                      * code should work for either 16-bit or 32-bit ints.
                      */
-                    coef_blocks[bi][i] = (short)((int)(temp + (float)16384.5) - 16384);
+                    coeffBlock[i] = (short)((int)(temp + (float)16384.5) - 16384);
                 }
             }
         }
@@ -822,8 +824,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* Add fudge factor here for final descale. */
                 z1 += 1 << (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS - 1);
 
-                data[dataIndex + 2] = JpegUtils.RIGHT_SHIFT(z1 + tmp12 * SLOW_INTEGER_FIX_0_765366865, /* c2-c6 */
-                                                SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                /* c2-c6 */
+                data[dataIndex + 2] = 
+                    (z1 + tmp12 * SLOW_INTEGER_FIX_0_765366865) >> (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
                 data[dataIndex + 6] = JpegUtils.DESCALE(z1 - tmp13 * SLOW_INTEGER_FIX_1_847759065,
                                                 SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
 
@@ -856,10 +859,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 tmp1 += z1 + tmp13;
                 tmp2 += z1 + tmp12;
 
-                data[dataIndex + 1] = JpegUtils.RIGHT_SHIFT(tmp0, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 3] = JpegUtils.RIGHT_SHIFT(tmp1, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 5] = JpegUtils.RIGHT_SHIFT(tmp2, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + 7] = JpegUtils.RIGHT_SHIFT(tmp3, SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 1] = tmp0 >> (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 3] = tmp1 >> (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 5] = tmp2 >> (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + 7] = tmp3 >> (SLOW_INTEGER_CONST_BITS - SLOW_INTEGER_PASS1_BITS);
 
                 dataIndex += JpegConstants.DCTSIZE;     /* advance pointer to next row */
             }
@@ -892,19 +895,17 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 tmp2 = data[dataIndex + JpegConstants.DCTSIZE * 2] - data[dataIndex + JpegConstants.DCTSIZE * 5];
                 tmp3 = data[dataIndex + JpegConstants.DCTSIZE * 3] - data[dataIndex + JpegConstants.DCTSIZE * 4];
 
-                data[dataIndex + JpegConstants.DCTSIZE * 0] = JpegUtils.RIGHT_SHIFT(tmp10 + tmp11, SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 4] = JpegUtils.RIGHT_SHIFT(tmp10 - tmp11, SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 0] = (tmp10 + tmp11) >> SLOW_INTEGER_PASS1_BITS;
+                data[dataIndex + JpegConstants.DCTSIZE * 4] = (tmp10 - tmp11) >> SLOW_INTEGER_PASS1_BITS;
 
                 int z1 = (tmp12 + tmp13) * SLOW_INTEGER_FIX_0_541196100;       /* c6 */
                 /* Add fudge factor here for final descale. */
                 z1 += 1 << (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS - 1);
 
-                data[dataIndex + JpegConstants.DCTSIZE * 2] = JpegUtils.RIGHT_SHIFT(
-                    z1 + tmp12 * SLOW_INTEGER_FIX_0_765366865,
-                    SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 6] = JpegUtils.RIGHT_SHIFT(
-                    z1 - tmp13 * SLOW_INTEGER_FIX_1_847759065,
-                    SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 2] = 
+                    (z1 + tmp12 * SLOW_INTEGER_FIX_0_765366865) >> (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 6] = 
+                    (z1 - tmp13 * SLOW_INTEGER_FIX_1_847759065) >> (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
 
                 /* Odd part per figure 8 --- note paper omits factor of sqrt(2).
                 * i0..i3 in the paper are tmp4..tmp7 here.
@@ -934,10 +935,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 tmp1 += z1 + tmp13;
                 tmp2 += z1 + tmp12;
 
-                data[dataIndex + JpegConstants.DCTSIZE * 1] = JpegUtils.RIGHT_SHIFT(tmp0, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 3] = JpegUtils.RIGHT_SHIFT(tmp1, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 5] = JpegUtils.RIGHT_SHIFT(tmp2, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
-                data[dataIndex + JpegConstants.DCTSIZE * 7] = JpegUtils.RIGHT_SHIFT(tmp3, SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 1] = tmp0 >> (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 3] = tmp1 >> (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 5] = tmp2 >> (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
+                data[dataIndex + JpegConstants.DCTSIZE * 7] = tmp3 >> (SLOW_INTEGER_CONST_BITS + SLOW_INTEGER_PASS1_BITS);
 
                 dataIndex++;          /* advance pointer to next column */
             }
@@ -950,7 +951,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
         private static int FAST_INTEGER_MULTIPLY(int var, int c)
         {
 #if !USE_ACCURATE_ROUNDING
-            return (JpegUtils.RIGHT_SHIFT((var) * (c), FAST_INTEGER_CONST_BITS));
+            return (var * c) >> FAST_INTEGER_CONST_BITS;
 #else
             return (JpegUtils.DESCALE((var) * (c), FAST_INTEGER_CONST_BITS));
 #endif

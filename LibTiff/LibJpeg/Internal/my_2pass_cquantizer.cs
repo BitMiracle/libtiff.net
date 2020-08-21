@@ -386,9 +386,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             {
                 int inputPixelIndex = 0;
                 int outputPixelIndex = 0;
-                int errorIndex = 0;
                 int dir;            /* +1 or -1 depending on direction */
                 int dir3;           /* 3*dir, for advancing inputIndex & errorIndex */
+                int errorIndex;
                 if (m_on_odd_row)
                 {
                     /* work right to left in this row */
@@ -433,9 +433,9 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                      * for either sign of the error value.
                      * Note: errorIndex is for *previous* column's array entry.
                      */
-                    cur0 = JpegUtils.RIGHT_SHIFT(cur0 + m_fserrors[errorIndex + dir3] + 8, 4);
-                    cur1 = JpegUtils.RIGHT_SHIFT(cur1 + m_fserrors[errorIndex + dir3 + 1] + 8, 4);
-                    cur2 = JpegUtils.RIGHT_SHIFT(cur2 + m_fserrors[errorIndex + dir3 + 2] + 8, 4);
+                    cur0 = (cur0 + m_fserrors[errorIndex + dir3] + 8) >> 4;
+                    cur1 = (cur1 + m_fserrors[errorIndex + dir3 + 1] + 8) >> 4;
+                    cur2 = (cur2 + m_fserrors[errorIndex + dir3 + 2] + 8) >> 4;
 
                     /* Limit the error using transfer function set by init_error_limit.
                      * See comments with init_error_limit for rationale.

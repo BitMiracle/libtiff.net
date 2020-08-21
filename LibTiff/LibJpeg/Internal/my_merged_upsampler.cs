@@ -193,30 +193,28 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             /* Loop for each pair of output pixels */
+            var inputBuffer0 = input_buf[0][in_row_group_ctr];
+            var inputBuffer1 = input_buf[1][in_row_group_ctr];
+            var inputBuffer2 = input_buf[2][in_row_group_ctr];
             for (int col = m_cinfo.m_output_width >> 1; col > 0; col--)
             {
                 /* Do the chroma part of the calculation */
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
-                inputIndex1++;
-
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
-                inputIndex2++;
+                int cb = inputBuffer1[inputIndex1++];
+                int cr = inputBuffer2[inputIndex2++];
 
                 int cred = m_Cr_r_tab[cr];
-                int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
+                int cgreen = (m_Cb_g_tab[cb] + m_Cr_g_tab[cr]) >> SCALEBITS;
                 int cblue = m_Cb_b_tab[cb];
 
                 /* Fetch 2 Y values and emit 2 pixels */
-                int y = input_buf[0][in_row_group_ctr][inputIndex0];
-                inputIndex0++;
+                int y = inputBuffer0[inputIndex0++];
 
                 output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
                 outputIndex += JpegConstants.RGB_PIXELSIZE;
                 
-                y = input_buf[0][in_row_group_ctr][inputIndex0];
-                inputIndex0++;
+                y = inputBuffer0[inputIndex0++];
 
                 output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
@@ -227,13 +225,13 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* If image width is odd, do the last output column separately */
             if ((m_cinfo.m_output_width & 1) != 0)
             {
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
+                int cb = inputBuffer1[inputIndex1];
+                int cr = inputBuffer2[inputIndex2];
                 int cred = m_Cr_r_tab[cr];
-                int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
+                int cgreen = (m_Cb_g_tab[cb] + m_Cr_g_tab[cr]) >> SCALEBITS;
                 int cblue = m_Cb_b_tab[cb];
                 
-                int y = input_buf[0][in_row_group_ctr][inputIndex0];
+                int y = inputBuffer0[inputIndex0];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[outRow][outputIndex + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
@@ -261,46 +259,43 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             int limitOffset = m_cinfo.m_sampleRangeLimitOffset;
 
             /* Loop for each group of output pixels */
+            var inputBuffer00 = input_buf[0][inputRow00];
+            var inputBuffer01 = input_buf[0][inputRow01];
+            var inputBuffer1 = input_buf[1][in_row_group_ctr];
+            var inputBuffer2 = input_buf[2][in_row_group_ctr];
             for (int col = m_cinfo.m_output_width >> 1; col > 0; col--)
             {
                 /* Do the chroma part of the calculation */
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
-                inputIndex1++;
-
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
-                inputIndex2++;
+                int cb = inputBuffer1[inputIndex1++];
+                int cr = inputBuffer2[inputIndex2++];
 
                 int cred = m_Cr_r_tab[cr];
-                int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
+                int cgreen = (m_Cb_g_tab[cb] + m_Cr_g_tab[cr]) >> SCALEBITS;
                 int cblue = m_Cb_b_tab[cb];
 
                 /* Fetch 4 Y values and emit 4 pixels */
-                int y = input_buf[0][inputRow00][inputIndex00];
-                inputIndex00++;
+                int y = inputBuffer00[inputIndex00++];
 
                 output_buf[0][outIndex0 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[0][outIndex0 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[0][outIndex0 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
                 outIndex0 += JpegConstants.RGB_PIXELSIZE;
                 
-                y = input_buf[0][inputRow00][inputIndex00];
-                inputIndex00++;
+                y = inputBuffer00[inputIndex00++];
 
                 output_buf[0][outIndex0 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[0][outIndex0 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[0][outIndex0 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
                 outIndex0 += JpegConstants.RGB_PIXELSIZE;
                 
-                y = input_buf[0][inputRow01][inputIndex01];
-                inputIndex01++;
+                y = inputBuffer01[inputIndex01++];
 
                 output_buf[1][outIndex1 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[1][outIndex1 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[1][outIndex1 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
                 outIndex1 += JpegConstants.RGB_PIXELSIZE;
                 
-                y = input_buf[0][inputRow01][inputIndex01];
-                inputIndex01++;
+                y = inputBuffer01[inputIndex01++];
 
                 output_buf[1][outIndex1 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[1][outIndex1 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
@@ -311,18 +306,18 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             /* If image width is odd, do the last output column separately */
             if ((m_cinfo.m_output_width & 1) != 0)
             {
-                int cb = input_buf[1][in_row_group_ctr][inputIndex1];
-                int cr = input_buf[2][in_row_group_ctr][inputIndex2];
+                int cb = inputBuffer1[inputIndex1];
+                int cr = inputBuffer2[inputIndex2];
                 int cred = m_Cr_r_tab[cr];
-                int cgreen = JpegUtils.RIGHT_SHIFT(m_Cb_g_tab[cb] + m_Cr_g_tab[cr], SCALEBITS);
+                int cgreen = (m_Cb_g_tab[cb] + m_Cr_g_tab[cr]) >> SCALEBITS;
                 int cblue = m_Cb_b_tab[cb];
 
-                int y = input_buf[0][inputRow00][inputIndex00];
+                int y = inputBuffer00[inputIndex00];
                 output_buf[0][outIndex0 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[0][outIndex0 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[0][outIndex0 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
                 
-                y = input_buf[0][inputRow01][inputIndex01];
+                y = inputBuffer01[inputIndex01];
                 output_buf[1][outIndex1 + JpegConstants.RGB_RED] = limit[limitOffset + y + cred];
                 output_buf[1][outIndex1 + JpegConstants.RGB_GREEN] = limit[limitOffset + y + cgreen];
                 output_buf[1][outIndex1 + JpegConstants.RGB_BLUE] = limit[limitOffset + y + cblue];
@@ -347,10 +342,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
                 /* Cr=>R value is nearest int to 1.402 * x */
-                m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.402) * x + ONE_HALF, SCALEBITS);
+                m_Cr_r_tab[i] = (FIX(1.402) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cb=>B value is nearest int to 1.772 * x */
-                m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(1.772) * x + ONE_HALF, SCALEBITS);
+                m_Cb_b_tab[i] = (FIX(1.772) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cr=>G value is scaled-up -0.714136286 * x */
                 m_Cr_g_tab[i] = (-FIX(0.714136286)) * x;
@@ -379,10 +374,10 @@ namespace BitMiracle.LibJpeg.Classic.Internal
                 /* i is the actual input pixel value, in the range 0..MAXJSAMPLE */
                 /* The Cb or Cr value we are thinking of is x = i - CENTERJSAMPLE */
                 /* Cr=>R value is nearest int to 2.804 * x */
-                m_Cr_r_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(2.804) * x + ONE_HALF, SCALEBITS);
+                m_Cr_r_tab[i] = (FIX(2.804) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cb=>B value is nearest int to 3.544 * x */
-                m_Cb_b_tab[i] = JpegUtils.RIGHT_SHIFT(FIX(3.544) * x + ONE_HALF, SCALEBITS);
+                m_Cb_b_tab[i] = (FIX(3.544) * x + ONE_HALF) >> SCALEBITS;
 
                 /* Cr=>G value is scaled-up -1.428272572 * x */
                 m_Cr_g_tab[i] = (-FIX(1.428272572)) * x;

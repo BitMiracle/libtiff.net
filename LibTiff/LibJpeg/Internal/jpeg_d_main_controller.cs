@@ -227,7 +227,7 @@ namespace BitMiracle.LibJpeg.Classic.Internal
             for (int i = 0; i < JpegConstants.MAX_COMPONENTS; i++)
             {
                 cb[i] = new ComponentBuffer();
-                cb[i].SetBuffer(m_buffer[i], null, 0);
+                cb[i].SetBuffer(m_buffer[i]);
             }
 
             /* Read input data if we haven't filled the main buffer yet */
