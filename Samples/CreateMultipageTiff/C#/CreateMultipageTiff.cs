@@ -30,6 +30,7 @@ namespace BitMiracle.LibTiff.Samples
                 for (int page = 0; page < numberOfPages; ++page)
                 {
                     output.SetField(TiffTag.IMAGEWIDTH, width / samplesPerPixel);
+                    output.SetField(TiffTag.IMAGELENGTH, height);
                     output.SetField(TiffTag.SAMPLESPERPIXEL, samplesPerPixel);
                     output.SetField(TiffTag.BITSPERSAMPLE, bitsPerSample);
                     output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT);

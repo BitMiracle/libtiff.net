@@ -28,6 +28,7 @@ Namespace BitMiracle.LibTiff.Samples
             Using output As Tiff = Tiff.Open(fileName, "w")
                 For page As Integer = 0 To numberOfPages - 1
                     output.SetField(TiffTag.IMAGEWIDTH, width / samplesPerPixel)
+                    output.SetField(TiffTag.IMAGELENGTH, height)
                     output.SetField(TiffTag.SAMPLESPERPIXEL, samplesPerPixel)
                     output.SetField(TiffTag.BITSPERSAMPLE, bitsPerSample)
                     output.SetField(TiffTag.ORIENTATION, Orientation.TOPLEFT)
