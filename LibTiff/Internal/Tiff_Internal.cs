@@ -326,6 +326,10 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns><c>true</c> if succeeded; otherwise, <c>false</c></returns>
         private bool WriteCustomDirectory(out long pdiroff)
         {
+            //WriteCustomDirectory is private and never called (currently)
+            //however it has the potential to mess with the IFD chain
+            //so we invalidate the directory linked list shortcut 
+            LinkDirectoryPenultimateOffsetShortcutClear();
             pdiroff = -1;
 
             if (m_mode == O_RDONLY)
