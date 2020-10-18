@@ -2703,7 +2703,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Creates a new directory within file/stream.
         /// </summary>
         /// <remarks>The newly created directory will not exist on the file/stream till
-        /// <see cref="WriteDirectory"/>, <see cref="CheckpointDirectory"/>, <see cref="Flush"/>
+        /// <see cref="WriteDirectory()"/>, <see cref="CheckpointDirectory()"/>, <see cref="Flush"/>
         /// or <see cref="Close"/> is called.</remarks>
         public void CreateDirectory()
         {
@@ -2792,6 +2792,11 @@ namespace BitMiracle.LibTiff.Classic
         public bool UnlinkDirectory(short number)
         {
             const string module = "UnlinkDirectory";
+            // Unlinking a directory changes the linked list 
+            // while we could handle this, 
+            // the simple choice is to invalidate the stored shortcut for LinkDirectory()
+            // here 
+            LinkDirectoryPenultimateOffsetShortcutClear();
 
             if (m_mode == O_RDONLY)
             {
@@ -2901,30 +2906,74 @@ namespace BitMiracle.LibTiff.Classic
         /// file is open for writing.</remarks>
         public bool WriteDirectory()
         {
-            return writeDirectory(true);
+            // Default behaviour in LinkDirectory()
+            // Behavior of existing code is unaffected
+            // The shortcut behavior is "Opt-In" by calling Tiff.WriteDirectory(bool useFastShortcut) 
+
+            return writeDirectory(true, useShortcutToPenultimateDirectory: false);
+        }
+
+        /// <summary>
+        /// Writes the contents of the current directory to the file and setup to create a new
+        /// subfile (page) in the same file.
+        /// </summary>
+        /// <param name="useFastShortcut">faster for Tiffs with thousands of pages</param>
+        /// <returns><c>true</c> if the current directory was written successfully;
+        /// otherwise, <c>false</c></returns>
+        /// <remarks>Applications only need to call <b>WriteDirectory</b> when writing multiple
+        /// subfiles (pages) to a single TIFF file. <b>WriteDirectory</b> is automatically called
+        /// by <see cref="Close"/> and <see cref="Flush"/> to write a modified directory if the
+        /// file is open for writing.</remarks>
+        public bool WriteDirectory(bool useFastShortcut)
+        {
+            // useFastShortcut Controls IFD linked list behaviour in LinkDirectory()
+
+            return writeDirectory(true, useFastShortcut);
         }
 
         /// <summary>
         /// Writes the current state of the TIFF directory into the file to make what is currently
         /// in the file/stream readable.
         /// </summary>
+        /// <param name="useFastShortcut">faster for Tiffs with thousands of pages</param>
         /// <returns><c>true</c> if the current directory was rewritten successfully;
         /// otherwise, <c>false</c></returns>
-        /// <remarks>Unlike <see cref="WriteDirectory"/>, <b>CheckpointDirectory</b> does not free
+        /// <remarks>Unlike <see cref="WriteDirectory()"/>, <b>CheckpointDirectory</b> does not free
         /// up the directory data structures in memory, so they can be updated (as strips/tiles
         /// are written) and written again. Reading such a partial file you will at worst get a
         /// TIFF read error for the first strip/tile encountered that is incomplete, but you will
         /// at least get all the valid data in the file before that. When the file is complete,
-        /// just use <see cref="WriteDirectory"/> as usual to finish it off cleanly.</remarks>
-        public bool CheckpointDirectory()
+        /// just use <see cref="WriteDirectory()"/> as usual to finish it off cleanly.</remarks>
+        public bool CheckpointDirectory(bool useFastShortcut)
         {
+            // useFastShortcut Controls IFD linked list behaviour in LinkDirectory()
             // Setup the strips arrays, if they haven't already been.
             if (m_dir.td_stripoffset == null)
                 SetupStrips();
 
-            bool rc = writeDirectory(false);
+            bool rc = writeDirectory(false, useFastShortcut);
             SetWriteOffset(seekFile(0, SeekOrigin.End));
             return rc;
+        }
+        /// <summary>
+        /// Writes the current state of the TIFF directory into the file to make what is currently
+        /// in the file/stream readable.
+        /// </summary>
+        /// <returns><c>true</c> if the current directory was rewritten successfully;
+        /// otherwise, <c>false</c></returns>
+        /// <remarks>Unlike <see cref="WriteDirectory()"/>, <b>CheckpointDirectory</b> does not free
+        /// up the directory data structures in memory, so they can be updated (as strips/tiles
+        /// are written) and written again. Reading such a partial file you will at worst get a
+        /// TIFF read error for the first strip/tile encountered that is incomplete, but you will
+        /// at least get all the valid data in the file before that. When the file is complete,
+        /// just use <see cref="WriteDirectory()"/> as usual to finish it off cleanly.</remarks>
+        public bool CheckpointDirectory()
+        {
+            // Default behaviour in LinkDirectory()
+            // Behavior of existing code is unaffected
+            // The shortcut behavior is "Opt-In" by calling Tiff.CheckpointDirectory(bool useFastShortcut)
+
+            return CheckpointDirectory(useFastShortcut: false);
         }
 
         /// <summary>
@@ -2933,10 +2982,10 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>        
         /// <returns><c>true</c> if the current directory was rewritten successfully;
         /// otherwise, <c>false</c></returns>
-        /// <remarks>The <b>RewriteDirectory</b> operates similarly to <see cref="WriteDirectory"/>,
+        /// <remarks>The <b>RewriteDirectory</b> operates similarly to <see cref="WriteDirectory()"/>,
         /// but can be called with directories previously read or written that already have an
         /// established location in the file. It will rewrite the directory, but instead of place
-        /// it at it's old location (as <see cref="WriteDirectory"/> would) it will place them at
+        /// it at it's old location (as <see cref="WriteDirectory()"/> would) it will place them at
         /// the end of the file, correcting the pointer from the preceeding directory or file
         /// header to point to it's new location. This is particularly important in cases where
         /// the size of the directory and pointed to data has grown, so it won’t fit in the space
@@ -2949,6 +2998,11 @@ namespace BitMiracle.LibTiff.Classic
             // We don't need to do anything special if it hasn't been written.
             if (m_diroff == 0)
                 return WriteDirectory();
+            // Otherwise RewriteDirectory() changes the IFD linked list 
+            // while we could handle this, 
+            // the simple choice is to invalidate the stored shortcut for LinkDirectory()
+            // here 
+            LinkDirectoryPenultimateOffsetShortcutClear();
 
             // Find and zero the pointer to this directory, so that linkDirectory will cause it to
             // be added after this directories current pre-link.
@@ -5898,7 +5952,7 @@ namespace BitMiracle.LibTiff.Classic
         {
             SwabArrayOfLong(array, 0, count);
         }
-        
+
         /// <summary>
         /// Swaps the bytes in specified number of values in the array of 64-bit items.
         /// </summary>
@@ -5945,7 +5999,7 @@ namespace BitMiracle.LibTiff.Classic
                 array[offset] += bytes[3] << 24;
             }
         }
-        
+
         /// <summary>
         /// Swaps the bytes in specified number of values in the array of 64-bit items
         /// starting at specified offset.

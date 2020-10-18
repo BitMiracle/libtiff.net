@@ -50,6 +50,8 @@ namespace BitMiracle.LibTiff.Classic
 
         private bool writeHeaderOK(TiffHeader header)
         {
+            //If we are here the cached image directory shortcut jump is invalid
+            LinkDirectoryPenultimateOffsetShortcutClear();
             bool res = writeShortOK(header.tiff_magic);
             if (res)
                 res = writeShortOK(header.tiff_version);

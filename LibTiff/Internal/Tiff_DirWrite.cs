@@ -61,13 +61,16 @@ namespace BitMiracle.LibTiff.Classic
         /// <summary>
         /// Writes the contents of the current directory to the specified file.
         /// </summary>
+        /// <param name="done">call PostEncode() first, and FreeDirectory() after writing</param>
+        /// <param name="useShortcutToPenultimateDirectory">determines if LinkDirectory() uses the stored jump to the end of the IFD chain</param>
         /// <remarks>This routine doesn't handle overwriting a directory with
         /// auxiliary storage that's been changed.</remarks>
-        private bool writeDirectory(bool done)
+        private bool writeDirectory(bool done, bool useShortcutToPenultimateDirectory)
+        //Should LinkDirectory use the shortcut to the end of the IFD chain or start at the first directory ?
+        //By default use existing behaviour: useShortcutToPenultimateDirectory = false by default
         {
             if (m_mode == O_RDONLY)
                 return true;
-
             // Clear write state so that subsequent images with different
             // characteristics get the right buffers setup for them.
             if (done)
@@ -109,7 +112,7 @@ namespace BitMiracle.LibTiff.Classic
             {
                 // Directory hasn't been placed yet, put it at the end of the file
                 // and link it into the existing directory structure.
-                if (m_diroff == 0 && !linkDirectory())
+                if (m_diroff == 0 && !linkDirectory(useShortcutToPenultimateDirectory))
                     return false;
                 // Size the directory so that we can calculate offsets for the data
                 // items that aren't kept in-place in each field.
@@ -310,7 +313,7 @@ namespace BitMiracle.LibTiff.Classic
                                 {
                                     if ((m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF)
                                     {
-                                        m_subifdoff = m_diroff + sizeof(long) + 
+                                        m_subifdoff = m_diroff + sizeof(long) +
                                             (ulong)dir * (ulong)TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION) +
                                             sizeof(short) * 2 + sizeof(long);
                                     }
@@ -1726,10 +1729,46 @@ namespace BitMiracle.LibTiff.Classic
             return writeData(ref dir, bytes, count * sizeof(double));
         }
 
+        // 
+        // When appending an image directory to the linked list of IFDs in a tiff byte stream writeDirectory() calls linkDirectory()
+        // LinkDirectory() needs to find the end of the directory chain to append the new image directory
+        // The original LinkDirectory() code does this by a linear search starting from m_header.tiff_diroff
+        // that is safe, but takes time proportional to the number of IFDs
+
+        // For exisiting code useShortcutToPenultimateDirectory will be false
+        // Behavior of existing code calling WriteDirectory(), CheckpointDirectory() is unaffected when (useShortcutToPenultimateDirectory == false)
+        // The shortcut behavior is "Opt-In" by calling Tiff.WriteDirectory(bool useFastShortcut) and Tiff.CheckpointDirectory(bool useFastShortcut)
+
+        // The following edit implements a minimal otimization by storing the penultimate directory reached in the linear search
+        // The next time LinkDirectory() is called, it can take a shortcut almost to the end of the chain of IFDs
+
+        // The optimization is rather simple, a three line change in LinkDirectory()
+        // However, our user may call functions which invalidate the directory chain inbetween calls to WriteDirectory()
+        // Luckily that is not hard to fix, by invalidating the shortcut (and falling back to the original)
+        //
+        // we invalidate the stored shortcut by calling LinkDirectoryPenultimateOffsetShortCutClear()
+        // in the following:
+        //  writeHeaderOK()//Called if converting to BigTiff
+        //  UnlinkDirectory()
+        //  WriteCustomDirectory()
+        //  RewriteDirectory()
+        // (Considered building state machine around writeDirEntryOK() but decided on the above)
+
+        // We limit the scope to the WriteDirectory/ CheckpointDirectory() cases
+        // While this could be extended to RewriteDirectory() etc, 
+        // the crucial use case is WriteDirectory()
+        //
+        private ulong LinkDirectoryPenultimateOffsetShortcut { get; set; } = 0;
+        void LinkDirectoryPenultimateOffsetShortcutClear()
+        {
+            LinkDirectoryPenultimateOffsetShortcut = 0;
+        }
+
         /// <summary>
         /// Link the current directory into the directory chain for the file.
         /// </summary>
-        private bool linkDirectory()
+        /// <param name="useShortcutToPenultimateDirectory">determines if LinkDirectory() uses the stored jump to the end of the IFD chain</param>
+        private bool linkDirectory(bool useShortcutToPenultimateDirectory)
         {
             const string module = "linkDirectory";
 
@@ -1799,9 +1838,27 @@ namespace BitMiracle.LibTiff.Classic
 
             // Not the first directory, search to the last and append.
 
+            //this is the point at which the original code walking the linked list of IFDs is quadratically slow
+            //we can jump over the linear search by saving a "shortcut" to an IFD near the end
+            //
+            //the shortcut is the directory reached by the previous scan before adding anything
+            //therefore "penultimate"
+            //
             ulong nextdir = m_header.tiff_diroff;
+            // For exisiting code useShortcutToPenultimateDirectory will be false
+            // Behavior of existing code calling WriteDirectory(), CheckpointDirectory() is unaffected when (useShortcutToPenultimateDirectory == false)
+            if (useShortcutToPenultimateDirectory)
+            {
+                // if Shortcut is zero 
+                // then use the value from the orignial code = m_header.tiff_diroff
+                nextdir = Math.Max((ulong)LinkDirectoryPenultimateOffsetShortcut, m_header.tiff_diroff);
+            }
             do
             {
+                //
+                //code to update the shortcut jump to the furthest image directory reached so far
+                //
+                LinkDirectoryPenultimateOffsetShortcut = nextdir;
                 ulong dircount;
                 if (!seekOK((long)nextdir) || !readDirCountOK(out dircount, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                 {
