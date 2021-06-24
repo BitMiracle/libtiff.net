@@ -556,9 +556,10 @@ namespace BitMiracle.LibTiff.Classic
                                 dirB.tdir_offset = dir.tdir_offset;
                             else if (dir.tdir_count <= sizeof(long))
                             {
-                                buffer = new byte[dir.tdir_count];
+                                int bufferSize = dir.tdir_count * sizeof(int);
+                                buffer = new byte[bufferSize];
                                 seekFile((long)dir.tdir_offset, SeekOrigin.Begin);
-                                readFile(buffer, 0, dir.tdir_count * sizeof(int));
+                                readFile(buffer, 0, bufferSize);
                                 byte[] cp = buffer;
                                 if (m_header.tiff_magic == TIFF_BIGENDIAN)
                                 {
