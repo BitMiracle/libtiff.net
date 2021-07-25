@@ -1414,5 +1414,20 @@
         /// This tag is optionally provided for defining exact affine transformations between raster and model space. Used in interchangeable GeoTIFF files.
         /// </summary>
         GEOTIFF_MODELTRANSFORMATIONTAG = 34264,
+
+        /// <summary>
+        /// This tag may be used to store the GeoKey Directory, which defines and references the "GeoKeys". Used in interchangeable GeoTIFF files.
+        /// </summary>
+        GEOTIFF_GEOKEYDIRECTORYTAG = 34735,
+
+        /// <summary>
+        /// This tag is used to store all of the DOUBLE valued GeoKeys, referenced by the GeoKeyDirectoryTag. Used in interchangeable GeoTIFF files.
+        /// </summary>
+        GEOTIFF_GEODOUBLEPARAMSTAG = 34736,
+
+        /// <summary>
+        /// This tag is used to store all of the ASCII valued GeoKeys, referenced by the GeoKeyDirectoryTag. Used in interchangeable GeoTIFF files.
+        /// </summary>
+        GEOTIFF_GEOASCIIPARAMSTAG = 34737,
     }
 }
