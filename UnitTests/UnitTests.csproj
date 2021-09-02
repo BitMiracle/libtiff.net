@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net40;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net40;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>UnitTests</AssemblyName>
     <RootNamespace>UnitTests</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -14,13 +14,13 @@
   </PropertyGroup>  
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants Condition="'$(TargetFramework)'=='netcoreapp2.0'">TRACE;DEBUG;NETSTANDARD</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='netcoreapp3.1'">TRACE;DEBUG;NETSTANDARD</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE;DEBUG</DefineConstants>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants Condition="'$(TargetFramework)'=='netcoreapp2.0'">TRACE;NETSTANDARD</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='netcoreapp3.1'">TRACE;NETSTANDARD</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE</DefineConstants>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
