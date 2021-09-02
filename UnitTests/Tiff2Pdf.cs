@@ -79,6 +79,7 @@ namespace UnitTests
                     "dscf0013.tif",
                     "fax2d.tif",
                     "FLAG_T24.TIF",
+                    "G3 Premature EOL.TIF",
                     "G31D.TIF",
                     "G31DS.TIF",
                     "G32D.TIF",

@@ -331,11 +331,26 @@ namespace BitMiracle.LibTiff.Classic.Internal
             switch (m_decoder)
             {
                 case Decoder.useFax3_1DDecoder:
-                    return Fax3Decode1D(buffer, offset, count);
+                    {
+                        // Some TIFF images are marked as encoded with G3 1D but contain RLE-encoded data.
+                        // Examples:
+                        // https://gitlab.com/libtiff/libtiff/-/issues/54
+                        // https://github.com/haraldk/TwelveMonkeys/issues/535#issuecomment-615180792
+                        //
+                        // We switch to RLE decoding when unable to find any EOL marker (0000 0000 0001)
+                        // in the encoded data.
+                        if (findEol())
+                            return Fax3Decode1D(buffer, offset, count);
+
+                        return Fax3DecodeRLE(buffer, offset, count);
+                    }
+
                 case Decoder.useFax3_2DDecoder:
                     return Fax3Decode2D(buffer, offset, count);
+
                 case Decoder.useFax4Decoder:
                     return Fax4Decode(buffer, offset, count);
+
                 case Decoder.useFax3RLEDecoder:
                     return Fax3DecodeRLE(buffer, offset, count);
             }
@@ -1189,6 +1204,26 @@ namespace BitMiracle.LibTiff.Classic.Internal
             m_EOLcnt = 0; /* reset EOL counter/flag */
 
             return true;
+        }
+
+        private bool findEol()
+        {
+            int dataBefore = m_data;
+            int bitBefore = m_bit;
+            int eolcntBefore = m_EOLcnt;
+            int rawcpBefore = m_tif.m_rawcp;
+
+            try
+            {
+                return SYNC_EOL();
+            }
+            finally
+            {
+                m_data = dataBefore;
+                m_bit = bitBefore;
+                m_EOLcnt = eolcntBefore;
+                m_tif.m_rawcp = rawcpBefore;
+            }
         }
 
         /*
