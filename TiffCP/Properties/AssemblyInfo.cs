@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TiffCP")]
-[assembly: AssemblyCopyright("Copyright (C) 2008-2020, Bit Miracle")]
+[assembly: AssemblyCopyright("Copyright (C) 2008-2022, Bit Miracle")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
