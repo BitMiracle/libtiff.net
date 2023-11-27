@@ -238,8 +238,8 @@ namespace BitMiracle.LibTiff.Classic
             }
             else
             {
-                int tempInt = 0;
-                readIntOK(out tempInt);
+                uint tempInt = 0;
+                readUIntOK(out tempInt);
                 nextdiroff = (ulong)tempInt;
             }
 
