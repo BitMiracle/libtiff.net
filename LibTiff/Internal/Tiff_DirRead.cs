@@ -238,9 +238,9 @@ namespace BitMiracle.LibTiff.Classic
             }
             else
             {
-                uint tempInt = 0;
-                readUIntOK(out tempInt);
-                nextdiroff = (ulong)tempInt;
+                uint tempUInt = 0;
+                readUIntOK(out tempUInt);
+                nextdiroff = (ulong)tempUInt;
             }
 
             if ((m_flags & TiffFlags.SWAB) == TiffFlags.SWAB)
