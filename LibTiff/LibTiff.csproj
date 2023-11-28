@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>BitMiracle.LibTiff.NET</AssemblyName>
     <RootNamespace>BitMiracle.LibTiff.Classic</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -12,27 +12,23 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    
-    <DocumentationFile Condition="'$(TargetFramework)'=='netstandard2.0'">..\Result\netstandard2.0\BitMiracle.LibTiff.NET.xml</DocumentationFile>
-    <DocumentationFile Condition="'$(TargetFramework)'=='net40'">..\Result\net40\BitMiracle.LibTiff.NET.xml</DocumentationFile>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">TRACE;DEBUG;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE;DEBUG;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
+
     <OutputPath>..\Result\</OutputPath>
+    <DocumentationFile>..\Result\netstandard2.0\BitMiracle.LibTiff.NET.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0'">TRACE;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)'=='net40'">TRACE;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
-    <OutputPath>..\Result\</OutputPath>
+    <DefineConstants>TRACE;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <Compile Include="..\AssemblyVersion.cs" Link="Properties\AssemblyVersion.cs" />
   </ItemGroup>
-  
+
   <PropertyGroup>
     <PreBuildEvent>cd "$(SolutionDir)"
 update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
