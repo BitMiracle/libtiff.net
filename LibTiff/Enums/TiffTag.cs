@@ -1429,5 +1429,10 @@
         /// This tag is used to store all of the ASCII valued GeoKeys, referenced by the GeoKeyDirectoryTag. Used in interchangeable GeoTIFF files.
         /// </summary>
         GEOTIFF_GEOASCIIPARAMSTAG = 34737,
+
+        /// <summary>
+        /// This tag is used to store the band nodata value. Used in interchangeable GeoTIFF files.
+        /// </summary>
+        GDAL_NODATA = 42113,
     }
 }
