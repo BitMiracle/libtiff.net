@@ -39,6 +39,10 @@ namespace BitMiracle.LibTiff.Classic
         // extended to RewriteDirectory() etc.
         private ulong PenultimateDirectoryOffset { get; set; }
 
+        private ulong m_subifdArrayOffset = 0; // Dateioffset des SubIFD-Offsets-Arrays
+        private int m_subifdElemSize = 0; // 4 (Classic TIFF) oder 8 (BigTIFF)
+        private int m_subifdWriteIndex = 0; // 0 .. (td_nsubifd - 1)
+
         private ulong insertData(TiffType type, int v)
         {
             int t = (int)type;
@@ -137,7 +141,7 @@ namespace BitMiracle.LibTiff.Classic
                 // and link it into the existing directory structure.
                 if (m_diroff == 0 && !linkDirectory())
                     return false;
-                
+
                 // Size the directory so that we can calculate offsets for the data
                 // items that aren't kept in-place in each field.
                 nfields = 0;
@@ -164,6 +168,28 @@ namespace BitMiracle.LibTiff.Classic
                 seekFile((long)m_dataoff, SeekOrigin.Begin);
                 m_curdir++;
                 int dir = 0;
+
+                if (m_dir.td_nsubifd > 0)
+                {
+                    m_subifdElemSize = (m_header.tiff_version == TIFF_BIGTIFF_VERSION) ? 8 : 4;
+                    m_subifdWriteIndex = 0;
+                    m_subifdArrayOffset = m_dataoff;
+
+                    ulong total = (ulong)m_dir.td_nsubifd * (ulong)m_subifdElemSize;
+                    if (total > 0)
+                    {
+                        byte[] zeros = new byte[total];
+                        seekFile((long)m_subifdArrayOffset, SeekOrigin.Begin);
+                        if (!writeOK(zeros, 0, (int)total))
+                        {
+                            ErrorExt(this, m_clientdata, m_name, "Error reserving SubIFD offset array");
+                            return false;
+                        }
+
+                        m_dataoff += (ulong)((total + 1UL) & ~1UL); // 2-Byte Alignment
+                        seekFile((long)m_dataoff, SeekOrigin.Begin);
+                    }
+                }
 
                 // Setup external form of directory entries and write data items.
                 int[] fields = new int[FieldBit.SetLongs];
@@ -317,51 +343,18 @@ namespace BitMiracle.LibTiff.Classic
                             break;
                         case FieldBit.SubIFD:
                             data[dir].tdir_tag = fip.Tag;
-                            data[dir].tdir_count = (int)m_dir.td_nsubifd;
+                            data[dir].tdir_count = m_dir.td_nsubifd;
+                            data[dir].tdir_type = (m_header.tiff_version == TIFF_BIGTIFF_VERSION)
+                                                   ? TiffType.IFD8
+                                                   : TiffType.LONG;
+                            data[dir].tdir_offset = m_subifdArrayOffset;
 
-                            // Total hack: if this directory includes a SubIFD
-                            // tag then force the next <n> directories to be
-                            // written as "sub directories" of this one.  This
-                            // is used to write things like thumbnails and
-                            // image masks that one wants to keep out of the
-                            // normal directory linkage access mechanism.
                             if (data[dir].tdir_count > 0)
                             {
                                 m_flags |= TiffFlags.INSUBIFD;
                                 m_nsubifd = (short)data[dir].tdir_count;
-                                if (data[dir].tdir_count > 1)
-                                {
-                                    m_subifdoff = data[dir].tdir_offset;
-                                }
-                                else
-                                {
-                                    if ((m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF)
-                                    {
-                                        m_subifdoff = m_diroff + sizeof(long) +
-                                            (ulong)dir * (ulong)TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION) +
-                                            sizeof(short) * 2 + sizeof(long);
-                                    }
-                                    else
-                                    {
-                                        m_subifdoff = m_diroff + sizeof(short) +
-                                            (ulong)dir * (ulong)TiffDirEntry.SizeInBytes(m_header.tiff_version == TIFF_BIGTIFF_VERSION) +
-                                            sizeof(short) * 2 + sizeof(int);
-                                    }
-                                }
                             }
 
-                            if ((m_flags & TiffFlags.ISBIGTIFF) == TiffFlags.ISBIGTIFF)
-                            {
-                                data[dir].tdir_type = TiffType.IFD8;
-                                if (!writeLong8Array(ref data[dir], m_dir.td_subifd))
-                                    return false;
-                            }
-                            else
-                            {
-                                data[dir].tdir_type = TiffType.LONG;
-                                if (!writeLongArray(ref data[dir], LongToInt(m_dir.td_subifd)))
-                                    return false;
-                            }
                             break;
                         default:
                             // XXX: Should be fixed and removed.
@@ -1783,7 +1776,8 @@ namespace BitMiracle.LibTiff.Classic
 
             if ((m_flags & TiffFlags.INSUBIFD) == TiffFlags.INSUBIFD)
             {
-                seekFile((long)m_subifdoff, SeekOrigin.Begin);
+                ulong target = m_subifdArrayOffset + (ulong)(m_subifdWriteIndex * m_subifdElemSize);
+                seekFile((long)target, SeekOrigin.Begin);
                 if (!writeDirOffOK((long)diroff, m_header.tiff_version == TIFF_BIGTIFF_VERSION))
                 {
                     ErrorExt(this, m_clientdata, module,
@@ -1791,13 +1785,12 @@ namespace BitMiracle.LibTiff.Classic
                     return false;
                 }
 
-                // Advance to the next SubIFD or, if this is the last one
-                // configured, revert back to the normal directory linkage.
+                // Advance to the next SubIFD slot or, if this is the last one,
+                // revert back to the normal directory linkage.
+                m_subifdWriteIndex++;
                 --m_nsubifd;
 
-                if (m_nsubifd != 0)
-                    m_subifdoff += sizeof(int);
-                else
+                if (m_nsubifd == 0)
                     m_flags &= ~TiffFlags.INSUBIFD;
 
                 return true;
