@@ -1958,7 +1958,7 @@ namespace BitMiracle.LibJpeg.Classic
                     ssize = ssize * 2;
                 }
 
-                compptr.DCT_h_scaled_size = min_DCT_h_scaled_size * ssize;
+                compptr.DCT_h_scaled_size = Math.Min(min_DCT_h_scaled_size * ssize, JpegConstants.DCTSIZE);
                 ssize = 1;
                 while (min_DCT_v_scaled_size * ssize <=
                    (do_fancy_downsampling ? JpegConstants.DCTSIZE : JpegConstants.DCTSIZE / 2) &&
@@ -1967,7 +1967,7 @@ namespace BitMiracle.LibJpeg.Classic
                     ssize = ssize * 2;
                 }
 
-                compptr.DCT_v_scaled_size = min_DCT_v_scaled_size * ssize;
+                compptr.DCT_v_scaled_size = Math.Min(min_DCT_v_scaled_size * ssize, JpegConstants.DCTSIZE);
 
                 /* We don't support DCT ratios larger than 2. */
                 if (compptr.DCT_h_scaled_size > compptr.DCT_v_scaled_size * 2)
