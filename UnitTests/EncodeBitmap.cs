@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-using BitMiracle.LibTiff.Classic;
+using Efflux.BitMiracle.LibTiff.Classic;
 using NUnit.Framework;
 
 namespace UnitTests

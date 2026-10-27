@@ -2,7 +2,7 @@
  * This file defines the error and message codes for the JPEG library.
  */
 
-namespace BitMiracle.LibJpeg.Classic
+namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Message codes used in code to signal errors, warning and trace messages.

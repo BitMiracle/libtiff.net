@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibJpeg.Classic.Internal
+﻿namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Encapsulates buffer of image samples for one color component

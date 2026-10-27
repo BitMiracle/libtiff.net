@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// Convert color value from the YCbCr space to CIE XYZ.

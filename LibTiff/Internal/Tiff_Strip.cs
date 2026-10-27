@@ -2,7 +2,7 @@
  * Strip-organized Image Support Routines.
  */
 
-namespace BitMiracle.LibTiff.Classic
+namespace Efflux.BitMiracle.LibTiff.Classic
 {
 #if EXPOSE_LIBTIFF
     public

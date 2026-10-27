@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibJpeg.Classic.Internal
+﻿namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// The script for encoding a multiple-scan file is an array of these:

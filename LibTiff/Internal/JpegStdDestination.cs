@@ -1,6 +1,6 @@
-﻿using BitMiracle.LibJpeg.Classic;
+﻿using Efflux.BitMiracle.LibJpeg.Classic;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// JPEG library destination data manager.

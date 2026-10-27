@@ -39,7 +39,7 @@
  * Currently, smoothing is only supported for 2h2v sampling factors.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Downsampling

@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibTiff.Classic
+﻿namespace Efflux.BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Base class for all codecs within the library.

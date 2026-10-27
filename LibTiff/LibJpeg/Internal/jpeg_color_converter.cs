@@ -2,7 +2,7 @@
  * This file contains input colorspace conversion routines.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Colorspace conversion

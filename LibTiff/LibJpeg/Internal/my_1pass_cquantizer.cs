@@ -6,7 +6,7 @@
 
 using System;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// The main purpose of 1-pass quantization is to provide a fast, if not very

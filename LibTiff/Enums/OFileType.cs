@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibTiff.Classic
+﻿namespace Efflux.BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Kind of data in subfile.<br/>

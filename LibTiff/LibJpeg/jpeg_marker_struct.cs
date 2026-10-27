@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibJpeg.Classic
+﻿namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Representation of special JPEG marker.

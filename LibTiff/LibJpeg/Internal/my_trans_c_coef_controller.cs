@@ -3,7 +3,7 @@
  * that is, writing raw DCT coefficient arrays to an output JPEG file.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// This is a special implementation of the coefficient

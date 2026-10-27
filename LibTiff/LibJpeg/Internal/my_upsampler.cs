@@ -12,7 +12,7 @@
  *   Pub. by IEEE Computer Society Press, Los Alamitos, CA. ISBN 0-8186-8944-7.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     class my_upsampler : jpeg_upsampler
     {

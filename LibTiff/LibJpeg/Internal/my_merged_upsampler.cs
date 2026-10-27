@@ -26,7 +26,7 @@
  * general code in my_upsampler and jpeg_color_deconverter)
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     class my_merged_upsampler : jpeg_upsampler
     {

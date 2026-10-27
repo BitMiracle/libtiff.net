@@ -1,8 +1,8 @@
 ﻿using System;
 
-using BitMiracle.LibJpeg.Classic;
+using Efflux.BitMiracle.LibJpeg.Classic;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     class OJpegErrorManager : jpeg_error_mgr
     {

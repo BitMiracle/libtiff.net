@@ -21,7 +21,7 @@ using System.Diagnostics;
 
 using ComponentAce.Compression.Libs.zlib;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     class DeflateCodec : CodecWithPredictor
     {

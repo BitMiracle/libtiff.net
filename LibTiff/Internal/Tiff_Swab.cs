@@ -4,7 +4,7 @@
  * XXX We assume short = 16-bits and long = 32-bits XXX
  */
 
-namespace BitMiracle.LibTiff.Classic
+namespace Efflux.BitMiracle.LibTiff.Classic
 {
 #if EXPOSE_LIBTIFF
     public

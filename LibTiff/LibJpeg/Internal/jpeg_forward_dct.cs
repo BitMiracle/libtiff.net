@@ -5,7 +5,7 @@
  * quantization.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Forward DCT (also controls coefficient quantization)

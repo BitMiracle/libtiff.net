@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Globalization;
 
-using BitMiracle.LibTiff.Classic.Internal;
+using Efflux.BitMiracle.LibTiff.Classic.Internal;
 
-namespace BitMiracle.LibTiff.Classic
+namespace Efflux.BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// RGBA-style image support. Provides methods for decoding images into RGBA (or other) format.
@@ -17,7 +17,7 @@ namespace BitMiracle.LibTiff.Classic
     /// manipulate image data according to application requirements.
     /// </para><para>
     /// The default usage for this class: check if an image can be processed using
-    /// <see cref="BitMiracle.LibTiff.Classic.Tiff.RGBAImageOK"/>, construct an instance of
+    /// <see cref="Efflux.BitMiracle.LibTiff.Classic.Tiff.RGBAImageOK"/>, construct an instance of
     /// <b>TiffRgbaImage</b> using <see cref="Create"/> and then read and decode an image into a
     /// target raster using <see cref="GetRaster"/>. <see cref="GetRaster"/> can be called
     /// multiple times to decode an image using different state parameters. If multiple images
@@ -287,7 +287,7 @@ namespace BitMiracle.LibTiff.Classic
         /// Creates new instance of the <see cref="TiffRgbaImage"/> class.
         /// </summary>
         /// <param name="tif">
-        /// The instance of the <see cref="BitMiracle.LibTiff.Classic"/> class used to retrieve
+        /// The instance of the <see cref="Efflux.BitMiracle.LibTiff.Classic"/> class used to retrieve
         /// image data.
         /// </param>
         /// <param name="stopOnError">

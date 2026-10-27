@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibJpeg.Classic.Internal
+﻿namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Operating modes for buffer controllers

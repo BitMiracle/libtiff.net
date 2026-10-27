@@ -7,13 +7,13 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 #if NETSTANDARD
-[assembly: AssemblyTitle("BitMiracle.LibTiff.NetStandard")]
+[assembly: AssemblyTitle("Efflux.BitMiracle.LibTiff.NetStandard")]
 [assembly: AssemblyDescription(".NET Standard version of LibTiff library made by Bit Miracle")]
-[assembly: AssemblyProduct("BitMiracle.LibTiff.NetStandard")]
+[assembly: AssemblyProduct("Efflux.BitMiracle.LibTiff.NetStandard")]
 #else
-[assembly: AssemblyTitle("BitMiracle.LibTiff.NET")]
+[assembly: AssemblyTitle("Efflux.BitMiracle.LibTiff.NET")]
 [assembly: AssemblyDescription(".NET version of LibTiff library made by Bit Miracle")]
-[assembly: AssemblyProduct("BitMiracle.LibTiff.NET")]
+[assembly: AssemblyProduct("Efflux.BitMiracle.LibTiff.NET")]
 #endif
 
 [assembly: AssemblyConfiguration("")]

@@ -12,7 +12,7 @@
 
 using System;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     class my_c_coef_controller : jpeg_c_coef_controller
     {

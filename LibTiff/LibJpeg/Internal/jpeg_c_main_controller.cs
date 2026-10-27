@@ -4,7 +4,7 @@
  * compressor proper; it holds downsampled data in the JPEG colorspace.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Main buffer control (downsampled-data buffer)

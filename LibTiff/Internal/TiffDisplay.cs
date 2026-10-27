@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibTiff.Classic.Internal
+﻿namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// Structure for holding information about a display device.

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace BitMiracle.LibTiff.Classic
+namespace Efflux.BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Default error handler implementation.

@@ -11,7 +11,7 @@
 using System;
 using System.IO;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Expanded data destination object for output to Stream

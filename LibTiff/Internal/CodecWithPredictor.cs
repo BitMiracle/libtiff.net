@@ -5,7 +5,7 @@
 using System;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// Codecs that want to support the Predictor tag should inherit from 

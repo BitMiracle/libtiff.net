@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitMiracle.LibJpeg.Classic
+namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// The progress monitor object.

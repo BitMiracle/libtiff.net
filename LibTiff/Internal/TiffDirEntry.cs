@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// TIFF Image File Directories are comprised of a table of field

@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AssemblyName>BitMiracle.LibTiff.NET</AssemblyName>
-    <RootNamespace>BitMiracle.LibTiff.Classic</RootNamespace>
+    <AssemblyName>Efflux.BitMiracle.LibTiff.NET</AssemblyName>
+    <RootNamespace>Efflux.BitMiracle.LibTiff.Classic</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Debug;Release</Configurations>
     <SignAssembly>false</SignAssembly>
@@ -14,7 +14,7 @@
     <WarningsAsErrors />
 
     <OutputPath>..\Result\</OutputPath>
-    <DocumentationFile>..\Result\netstandard2.0\BitMiracle.LibTiff.NET.xml</DocumentationFile>
+    <DocumentationFile>..\Result\netstandard2.0\Efflux.BitMiracle.LibTiff.NET.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -34,7 +34,7 @@
 update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)replace.vbs" O: Overload: "$(TargetDir)BitMiracle.LibTiff.NET.xml"</PostBuildEvent>
+    <PostBuildEvent>"$(SolutionDir)replace.vbs" O: Overload: "$(TargetDir)Efflux.BitMiracle.LibTiff.NET.xml"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <Optimize>true</Optimize>

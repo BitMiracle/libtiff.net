@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     class JpegCodecTagMethods : TiffTagMethods
     {

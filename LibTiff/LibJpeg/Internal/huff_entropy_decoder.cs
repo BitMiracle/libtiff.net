@@ -11,7 +11,7 @@
 
 using System;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Expanded entropy decoder object for Huffman decoding.

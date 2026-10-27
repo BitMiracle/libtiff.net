@@ -12,7 +12,7 @@ using System.Globalization;
 using Console = System.Diagnostics.Debug;
 #endif
 
-namespace BitMiracle.LibJpeg.Classic
+namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Contains simple error-reporting and trace-message routines.

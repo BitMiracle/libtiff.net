@@ -2,9 +2,9 @@
 using System.IO;
 using System.Text;
 
-using BitMiracle.LibTiff.Classic.Internal;
+using Efflux.BitMiracle.LibTiff.Classic.Internal;
 
-namespace BitMiracle.LibTiff.Classic
+namespace Efflux.BitMiracle.LibTiff.Classic
 {
 #if EXPOSE_LIBTIFF
     public

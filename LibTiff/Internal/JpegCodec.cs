@@ -12,9 +12,9 @@
 using System;
 using System.Diagnostics;
 
-using BitMiracle.LibJpeg.Classic;
+using Efflux.BitMiracle.LibJpeg.Classic;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     class JpegCodec : TiffCodec
     {

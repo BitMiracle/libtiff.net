@@ -6,7 +6,7 @@
 
 using System;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     /// <summary>
     /// CIE Lab 1976->RGB support

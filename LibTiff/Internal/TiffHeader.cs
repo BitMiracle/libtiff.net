@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibTiff.Classic.Internal
+﻿namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     struct TiffHeader
     {

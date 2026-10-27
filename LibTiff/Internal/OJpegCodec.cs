@@ -130,9 +130,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-using BitMiracle.LibJpeg.Classic;
+using Efflux.BitMiracle.LibJpeg.Classic;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     class OJpegCodec : TiffCodec
     {

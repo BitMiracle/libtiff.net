@@ -7,7 +7,7 @@
  * supplies the equivalent of the main buffer in that case.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Main buffer control (downsampled-data buffer)

@@ -11,9 +11,9 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 
-using BitMiracle.LibTiff.Classic.Internal;
+using Efflux.BitMiracle.LibTiff.Classic.Internal;
 
-namespace BitMiracle.LibTiff.Classic
+namespace Efflux.BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Tag Image File Format (TIFF)
@@ -88,7 +88,7 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Gets the R component from ABGR value returned by 
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR value.</param>
         /// <returns>The R component from ABGR value.</returns>
@@ -99,7 +99,7 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Gets the G component from ABGR value returned by 
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR value.</param>
         /// <returns>The G component from ABGR value.</returns>
@@ -110,7 +110,7 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Gets the B component from ABGR value returned by 
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR value.</param>
         /// <returns>The B component from ABGR value.</returns>
@@ -121,7 +121,7 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Gets the A component from ABGR value returned by 
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage">ReadRGBAImage</see>.
         /// </summary>
         /// <param name="abgr">The ABGR value.</param>
         /// <returns>The A component from ABGR value.</returns>
@@ -475,7 +475,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </summary>
         /// <remarks>
         /// This method closes a file or stream that was previously opened with <see cref="Open(string, string)"/>
-        /// or <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>.
+        /// or <see cref="ClientOpen(string, string, object, Efflux.BitMiracle.LibTiff.Classic.TiffStream)"/>.
         /// Any buffered data are flushed to the file/stream,
         /// including the contents of the current directory (if modified); and all resources
         /// are reclaimed.
@@ -1004,7 +1004,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <para>Applications only need to call <see cref="ReadDirectory"/> to read multiple
         /// subfiles in a single TIFF file/stream - the first directory in a file/stream is
         /// automatically read when <see cref="Open(string, string)"/> or
-        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/> is called.
+        /// <see cref="ClientOpen(string, string, object, Efflux.BitMiracle.LibTiff.Classic.TiffStream)"/> is called.
         /// </para><para>
         /// The images that have a single uncompressed strip or tile of data are automatically
         /// treated as if they were made up of multiple strips or tiles of approximately 8
@@ -1850,8 +1850,8 @@ namespace BitMiracle.LibTiff.Classic
 
         /// <summary>
         /// Calculates the size in bytes of a row of data as it would be returned in a call to
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadScanline"/>, or as it would be
-        /// expected in a call to <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/>.
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadScanline"/>, or as it would be
+        /// expected in a call to <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/>.
         /// </summary>
         /// <returns>The size in bytes of a row of data.</returns>
         /// <remarks><b>ScanlineSize</b> calculates size for one sample plane only. Please use
@@ -1938,7 +1938,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <para>
         /// <b>StripSize</b> returns the equivalent size for a strip of data as it would be
         /// returned in a call to <see cref="ReadEncodedStrip"/> or as it would be expected in a
-        /// call to <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteEncodedStrip"/>.
+        /// call to <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteEncodedStrip"/>.
         /// </para><para>
         /// If the value of the field corresponding to <see cref="TiffTag.ROWSPERSTRIP"/> is
         /// larger than the recorded <see cref="TiffTag.IMAGELENGTH"/>, then the strip size is
@@ -2081,7 +2081,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <returns>The number of bytes in a row-aligned tile.</returns>
         /// <remarks><b>TileSize</b> returns the equivalent size for a tile of data as it would be
         /// returned in a call to <see cref="ReadTile"/> or as it would be expected in a
-        /// call to <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteTile"/>.
+        /// call to <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteTile"/>.
         /// </remarks>
         public int TileSize()
         {
@@ -2353,7 +2353,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <remarks><para>
         /// Note that <see cref="ReadTile"/>, <see cref="ReadEncodedTile"/>,
         /// <see cref="ReadEncodedStrip"/> and
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadScanline"/> methods already
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadScanline"/> methods already
         /// normally perform byte swapping to local host order if needed.
         /// </para><para>
         /// Also note that <see cref="ReadRawTile"/> and <see cref="ReadRawStrip"/> do not
@@ -2871,7 +2871,7 @@ namespace BitMiracle.LibTiff.Classic
         /// <b>SetField</b> sets the value of a tag or pseudo-tag in the current directory
         /// associated with the open TIFF file/stream. To set the value of a field the file/stream
         /// must have been previously opened for writing with <see cref="Open(string, string)"/> or
-        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>;
+        /// <see cref="ClientOpen(string, string, object, Efflux.BitMiracle.LibTiff.Classic.TiffStream)"/>;
         /// pseudo-tags can be set whether the file was opened for
         /// reading or writing. The tag is identified by <paramref name="tag"/>.
         /// The type and number of values in <paramref name="value"/> is dependent on the tag
@@ -3918,7 +3918,7 @@ namespace BitMiracle.LibTiff.Classic
         /// part of the raster. Note that the raster is assumed to be organized such that the
         /// pixel at location (x, y) is <paramref name="raster"/>[y * width + x]; with the raster
         /// origin in the lower-left hand corner. Please use
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/> if you
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/> if you
         /// want to specify another raster origin.
         /// </para><para>
         /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
@@ -3941,7 +3941,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// All error messages are directed to the current error handler.
         /// </para></remarks>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
         /// <seealso cref="ReadRGBAStrip"/>
         /// <seealso cref="ReadRGBATile"/>
         /// <seealso cref="RGBAImageOK"/>
@@ -3974,7 +3974,7 @@ namespace BitMiracle.LibTiff.Classic
         /// part of the raster. Note that the raster is assumed to be organized such that the
         /// pixel at location (x, y) is <paramref name="raster"/>[y * width + x]; with the raster
         /// origin in the lower-left hand corner. Please use
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/> if you
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/> if you
         /// want to specify another raster origin.
         /// </para><para>
         /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
@@ -3997,7 +3997,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// All error messages are directed to the current error handler.
         /// </para></remarks>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
         /// <seealso cref="ReadRGBAStrip"/>
         /// <seealso cref="ReadRGBATile"/>
         /// <seealso cref="RGBAImageOK"/>
@@ -4034,7 +4034,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// When <b>ReadRGBAImageOriented</b> is used with <see cref="Orientation"/>.BOTLEFT for
         /// the <paramref name="orientation"/> the produced result is the same as retuned by
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>.
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>.
         /// </para><para>
         /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
         /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
@@ -4057,7 +4057,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// All error messages are directed to the current error handler.
         /// </para></remarks>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
         /// <seealso cref="ReadRGBAStrip"/>
         /// <seealso cref="ReadRGBATile"/>
         /// <seealso cref="RGBAImageOK"/>
@@ -4094,7 +4094,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// When <b>ReadRGBAImageOriented</b> is used with <see cref="Orientation"/>.BOTLEFT for
         /// the <paramref name="orientation"/> the produced result is the same as retuned by
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>.
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>.
         /// </para><para>
         /// Raster pixels are 8-bit packed red, green, blue, alpha samples. The
         /// <see cref="Tiff.GetR"/>, <see cref="Tiff.GetG"/>, <see cref="Tiff.GetB"/>, and
@@ -4117,7 +4117,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// All error messages are directed to the current error handler.
         /// </para></remarks>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
         /// <seealso cref="ReadRGBAStrip"/>
         /// <seealso cref="ReadRGBATile"/>
         /// <seealso cref="RGBAImageOK"/>
@@ -4185,7 +4185,7 @@ namespace BitMiracle.LibTiff.Classic
         /// automatically scaled to 16-bits.
         /// </para><para>
         /// <b>ReadRGBAStrip</b>'s main advantage over the similar
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> function is that for
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> function is that for
         /// large images a single buffer capable of holding the whole image doesn't need to be
         /// allocated, only enough for one strip. The <see cref="ReadRGBATile"/> function does a
         /// similar operation for tiled images.
@@ -4195,8 +4195,8 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// All error messages are directed to the current error handler.
         /// </para></remarks>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
         /// <seealso cref="ReadRGBATile"/>
         /// <seealso cref="RGBAImageOK"/>
         public bool ReadRGBAStrip(int row, int[] raster)
@@ -4280,7 +4280,7 @@ namespace BitMiracle.LibTiff.Classic
         /// automatically scaled to 16-bits.
         /// </para><para>
         /// <b>ReadRGBATile</b>'s main advantage over the similar
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> function is that for
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/> function is that for
         /// large images a single buffer capable of holding the whole image doesn't need to be
         /// allocated, only enough for one tile. The <see cref="ReadRGBAStrip"/> function does a
         /// similar operation for stripped images.
@@ -4290,8 +4290,8 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// All error messages are directed to the current error handler.
         /// </para></remarks>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
-        /// <seealso cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>
+        /// <seealso cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>
         /// <seealso cref="ReadRGBAStrip"/>
         /// <seealso cref="RGBAImageOK"/>
         public bool ReadRGBATile(int col, int row, int[] raster)
@@ -4373,8 +4373,8 @@ namespace BitMiracle.LibTiff.Classic
         /// is being rejected.</returns>
         /// <remarks><para>
         /// To convert the image to RGBA format please use
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>,
-        /// <see cref="O:BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>,
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImage"/>,
+        /// <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.ReadRGBAImageOriented"/>,
         /// <see cref="ReadRGBAStrip"/> or <see cref="ReadRGBATile"/>
         /// </para><para>
         /// Convertible images should follow this rules: samples must be either 1, 2, 4, 8, or
@@ -4527,9 +4527,9 @@ namespace BitMiracle.LibTiff.Classic
         /// <remarks>If this <see cref="Tiff"/> was created using <see cref="Open(string, string)"/> method then
         /// value of fileName parameter of <see cref="Open(string, string)"/> method is returned. If this
         /// <see cref="Tiff"/> was created using
-        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>
+        /// <see cref="ClientOpen(string, string, object, Efflux.BitMiracle.LibTiff.Classic.TiffStream)"/>
         /// then value of name parameter of
-        /// <see cref="ClientOpen(string, string, object, BitMiracle.LibTiff.Classic.TiffStream)"/>
+        /// <see cref="ClientOpen(string, string, object, Efflux.BitMiracle.LibTiff.Classic.TiffStream)"/>
         /// method is returned.</remarks>
         public string FileName()
         {
@@ -5007,7 +5007,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
         /// writing; <b>WriteTile</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// each write (as <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
         /// </para></remarks>
         public int WriteTile(byte[] buffer, int x, int y, int z, short plane)
         {
@@ -5042,7 +5042,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
         /// writing; <b>WriteTile</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// each write (as <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
         /// </para></remarks>
         public int WriteTile(byte[] buffer, int offset, int x, int y, int z, short plane)
         {
@@ -5448,7 +5448,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
         /// writing; <b>WriteEncodedTile</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// each write (as <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
         /// </para><para>
         /// The library writes encoded data using the native machine byte order. Correctly
         /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
@@ -5486,7 +5486,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
         /// writing; <b>WriteEncodedTile</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// each write (as <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
         /// </para><para>
         /// The library writes encoded data using the native machine byte order. Correctly
         /// implemented TIFF readers are expected to do any necessary byte-swapping to correctly
@@ -5590,7 +5590,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
         /// writing; <b>WriteRawTile</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// each write (as <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
         /// </para></remarks>
         public int WriteRawTile(int tile, byte[] buffer, int count)
         {
@@ -5623,7 +5623,7 @@ namespace BitMiracle.LibTiff.Classic
         /// </para><para>
         /// A correct value for the <see cref="TiffTag.IMAGELENGTH"/> tag must be setup before
         /// writing; <b>WriteRawTile</b> does not support automatically growing the image on
-        /// each write (as <see cref="O:BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
+        /// each write (as <see cref="O:Efflux.BitMiracle.LibTiff.Classic.Tiff.WriteScanline"/> does).
         /// </para></remarks>
         public int WriteRawTile(int tile, byte[] buffer, int offset, int count)
         {

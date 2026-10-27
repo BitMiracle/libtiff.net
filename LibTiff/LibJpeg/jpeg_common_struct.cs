@@ -7,7 +7,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 
-namespace BitMiracle.LibJpeg.Classic
+namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>Base class for both JPEG compressor and decompresor.</summary>
     /// <remarks>

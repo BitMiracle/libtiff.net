@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     class arith_entropy_decoder : jpeg_entropy_decoder
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     internal class TagCompare : IComparer
     {

@@ -16,7 +16,7 @@
 using System;
 using System.Diagnostics;
 
-namespace BitMiracle.LibJpeg.Classic
+namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// JPEG virtual array.
@@ -58,7 +58,7 @@ namespace BitMiracle.LibJpeg.Classic
         /// Default value: <c>null</c>
         /// </value>
         /// <remarks>Uses only for calling 
-        /// <see cref="M:BitMiracle.LibJpeg.Classic.jpeg_common_struct.ERREXIT(BitMiracle.LibJpeg.Classic.J_MESSAGE_CODE)">jpeg_common_struct.ERREXIT</see>
+        /// <see cref="M:Efflux.BitMiracle.LibJpeg.Classic.jpeg_common_struct.ERREXIT(Efflux.BitMiracle.LibJpeg.Classic.J_MESSAGE_CODE)">jpeg_common_struct.ERREXIT</see>
         /// on error.</remarks>
         public jpeg_common_struct ErrorProcessor
         {

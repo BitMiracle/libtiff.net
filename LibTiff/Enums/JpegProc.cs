@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibTiff.Classic
+﻿namespace Efflux.BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// JPEG processing algorithm.<br/>

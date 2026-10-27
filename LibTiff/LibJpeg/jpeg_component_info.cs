@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitMiracle.LibJpeg.Classic
+namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Basic info about one component (color channel).

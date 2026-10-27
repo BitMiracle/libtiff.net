@@ -2,7 +2,7 @@
  * This file contains routines to write JPEG datastream markers.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Marker writing

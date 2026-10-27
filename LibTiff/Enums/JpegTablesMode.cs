@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace BitMiracle.LibTiff.Classic
+namespace Efflux.BitMiracle.LibTiff.Classic
 {
     /// <summary>
     /// Jpeg Tables Mode.<br/>

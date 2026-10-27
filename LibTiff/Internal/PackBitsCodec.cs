@@ -4,7 +4,7 @@
 
 using System;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     class PackBitsCodec : TiffCodec
     {

@@ -12,7 +12,7 @@
 using System;
 using System.Diagnostics;
 
-namespace BitMiracle.LibTiff.Classic.Internal
+namespace Efflux.BitMiracle.LibTiff.Classic.Internal
 {
     partial class CCITTCodec : TiffCodec
     {

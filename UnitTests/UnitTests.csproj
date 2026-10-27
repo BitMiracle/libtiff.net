@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net7.0</TargetFrameworks>
@@ -28,6 +28,7 @@
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
   </ItemGroup>
 
   <ItemGroup>

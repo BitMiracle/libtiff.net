@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 
-using BitMiracle.LibJpeg.Classic.Internal;
+using Efflux.BitMiracle.LibJpeg.Classic.Internal;
 
-namespace BitMiracle.LibJpeg.Classic
+namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// JPEG compression routine.
@@ -559,10 +559,10 @@ namespace BitMiracle.LibJpeg.Classic
         /// <summary>
         /// Gets or sets the resolution information to be written into the JFIF marker; not used otherwise.
         /// </summary>
-        /// <remarks>Default value: <see cref="F:BitMiracle.LibJpeg.Classic.DensityUnit.Unknown"/><br/>
+        /// <remarks>Default value: <see cref="F:Efflux.BitMiracle.LibJpeg.Classic.DensityUnit.Unknown"/><br/>
         /// The pixel aspect ratio is defined by 
         /// <see cref="jpeg_compress_struct.X_density"/>/<see cref="jpeg_compress_struct.Y_density"/> 
-        /// even when Density_unit is <see cref="F:BitMiracle.LibJpeg.Classic.DensityUnit.Unknown">Unknown</see>.</remarks>
+        /// even when Density_unit is <see cref="F:Efflux.BitMiracle.LibJpeg.Classic.DensityUnit.Unknown">Unknown</see>.</remarks>
         /// <value>The density unit.</value>
         /// <seealso cref="jpeg_compress_struct.X_density"/>
         /// <seealso cref="jpeg_compress_struct.Y_density"/>

@@ -1,4 +1,4 @@
-﻿namespace BitMiracle.LibJpeg.Classic
+﻿namespace Efflux.BitMiracle.LibJpeg.Classic
 {
     /// <summary>
     /// Describes a result of read operation.

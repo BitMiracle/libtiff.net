@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 
-using BitMiracle.LibTiff.Classic;
+using Efflux.BitMiracle.LibTiff.Classic;
 
 namespace BitMiracle.TiffCP
 {

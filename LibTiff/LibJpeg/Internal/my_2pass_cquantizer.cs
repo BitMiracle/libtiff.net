@@ -13,7 +13,7 @@
 
 using System;
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// This module implements the well-known Heckbert paradigm for color

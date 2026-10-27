@@ -10,7 +10,7 @@
  * entirely.
  */
 
-namespace BitMiracle.LibJpeg.Classic.Internal
+namespace Efflux.BitMiracle.LibJpeg.Classic.Internal
 {
     /// <summary>
     /// Decompression postprocessing (color quantization buffer control)

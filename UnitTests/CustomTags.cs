@@ -1,4 +1,4 @@
-﻿using BitMiracle.LibTiff.Classic;
+﻿using Efflux.BitMiracle.LibTiff.Classic;
 using NUnit.Framework;
 
 namespace UnitTests
