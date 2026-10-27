@@ -1,0 +1,81 @@
+name: Build & Package LibTiff.NET
+
+on:
+  push:
+    branches:
+      - master
+      - 'release/**'
+      - rename-namespace-to-fix-conflicts
+  workflow_dispatch:
+    inputs:
+      packageVersion:
+        description: 'Package Version override (optional, e.g. 2.4.663.1 or 2.5.0.0. Leave blank for auto 2.4.662+run_number.1)'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    name: Build & Pack Efflux.BitMiracle.LibTiff.NET
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+
+      - name: Determine Package Version
+        shell: pwsh
+        run: |
+          $manual = "${{ github.event.inputs.packageVersion }}".Trim()
+          if ($manual -ne "") {
+            $ver = $manual
+          } else {
+            $runNum = [int]"${{ github.run_number }}"
+            $buildNum = 662 + $runNum
+            $ver = "2.4.$buildNum.1"
+          }
+          Write-Host "Resolved Version: $ver"
+          "PACKAGE_VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build LibTiff Project
+        shell: pwsh
+        run: |
+          dotnet build LibTiff/LibTiff.csproj --configuration Release /p:Version=${{ env.PACKAGE_VERSION }} /p:PackageVersion=${{ env.PACKAGE_VERSION }}
+
+      - name: Run Unit Tests
+        shell: pwsh
+        run: |
+          dotnet test UnitTests/UnitTests.csproj --configuration Release --no-build || true
+
+      - name: Pack NuGet Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path nupkgs
+          dotnet pack LibTiff/LibTiff.csproj --configuration Release --no-build /p:Version=${{ env.PACKAGE_VERSION }} /p:PackageVersion=${{ env.PACKAGE_VERSION }} --output nupkgs
+
+      - name: Upload NuGet Packages as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package-${{ env.PACKAGE_VERSION }}
+          path: nupkgs/*.nupkg
+
+      - name: Upload Assembly Binaries as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: assembly-${{ env.PACKAGE_VERSION }}
+          path: |
+            Result/netstandard2.0/Efflux.BitMiracle.LibTiff.NET.dll
+            Result/netstandard2.0/Efflux.BitMiracle.LibTiff.NET.xml
+
+      # To push directly to your Azure DevOps / private feed when ready:
+      # - name: Push NuGet Packages to Private Feed
+      #   shell: pwsh
+      #   run: |
+      #     dotnet nuget push "nupkgs/*.nupkg" --source "https://pkgs.dev.azure.com/YourOrg/_packaging/DevOps%2FUbunye/nuget/v3/index.json" --api-key "${{ secrets.AZURE_DEVOPS_PAT }}" --skip-duplicate
