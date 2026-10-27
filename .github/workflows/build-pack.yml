@@ -60,19 +60,17 @@ jobs:
           New-Item -ItemType Directory -Force -Path nupkgs
           dotnet pack LibTiff/LibTiff.csproj --configuration Release --no-build /p:Version=${{ env.PACKAGE_VERSION }} /p:PackageVersion=${{ env.PACKAGE_VERSION }} --output nupkgs
 
-      - name: Upload NuGet Packages as Artifacts
+      - name: Upload NuGet Package as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-package-${{ env.PACKAGE_VERSION }}
+          name: Efflux.BitMiracle.LibTiff.NET.${{ env.PACKAGE_VERSION }}.nupkg
           path: nupkgs/*.nupkg
 
-      - name: Upload Assembly Binaries as Artifacts
+      - name: Upload Assembly Binary as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: assembly-${{ env.PACKAGE_VERSION }}
-          path: |
-            Result/netstandard2.0/Efflux.BitMiracle.LibTiff.NET.dll
-            Result/netstandard2.0/Efflux.BitMiracle.LibTiff.NET.xml
+          name: Efflux.BitMiracle.LibTiff.NET.dll
+          path: Result/netstandard2.0/Efflux.BitMiracle.LibTiff.NET.dll
 
       # To push directly to your Azure DevOps / private feed when ready:
       # - name: Push NuGet Packages to Private Feed
