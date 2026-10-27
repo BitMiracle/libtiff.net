@@ -1,12 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>Efflux.BitMiracle.LibTiff.NET</AssemblyName>
     <RootNamespace>Efflux.BitMiracle.LibTiff.Classic</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Debug;Release</Configurations>
     <SignAssembly>false</SignAssembly>
+
+    <!-- Versioning: default is 2.4.662.1, or overridden via /p:Version=x.x.x.x -->
+    <Version Condition="'$(Version)' == ''">2.4.662.1</Version>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <PackageVersion>$(Version)</PackageVersion>
+
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,14 +37,6 @@
     <DefineConstants>TRACE;NETSTANDARD;EXPOSE_LIBTIFF;FIX_JPEG_IS_OJPEG</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\AssemblyVersion.cs" Link="Properties\AssemblyVersion.cs" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <PreBuildEvent>cd "$(SolutionDir)"
-update_version_info.bat "$(ProjectDir)AssemblyVersion.cs"</PreBuildEvent>
-  </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)replace.vbs" O: Overload: "$(TargetDir)Efflux.BitMiracle.LibTiff.NET.xml"</PostBuildEvent>
   </PropertyGroup>
