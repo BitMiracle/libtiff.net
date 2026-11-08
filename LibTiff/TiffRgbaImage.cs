@@ -1775,6 +1775,8 @@ namespace BitMiracle.LibTiff.Classic
             int[][] PALmap = img.PALmap;
             int samplesperpixel = img.samplesperpixel;
 
+            bufferShift *= samplesperpixel;
+
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
@@ -1927,6 +1929,8 @@ namespace BitMiracle.LibTiff.Classic
             int samplesperpixel = img.samplesperpixel;
             int[][] BWmap = img.BWmap;
 
+            bufferShift *= samplesperpixel;
+
             while (height-- > 0)
             {
                 for (x = width; x-- > 0; )
@@ -1950,6 +1954,8 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             int[][] BWmap = img.BWmap;
+
+            bufferShift *= samplesperpixel;
 
             while (height-- > 0)
             {
@@ -1975,6 +1981,8 @@ namespace BitMiracle.LibTiff.Classic
         {
             int samplesperpixel = img.samplesperpixel;
             int[][] BWmap = img.BWmap;
+
+            bufferShift *= 2 * samplesperpixel;
 
             while (height-- > 0)
             {
